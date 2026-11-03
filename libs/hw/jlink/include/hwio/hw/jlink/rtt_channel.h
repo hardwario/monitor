@@ -9,6 +9,9 @@
 //   means a stale control block: RTT stop, wait staleRetryDelay, search again. So does a count
 //   above kMaxRttBuffers in either direction (an invalid block). The logger buffer
 //   is awaited at most loggerWait, then the channel continues without logs.
+//   HIL H6 (2026-11-03): after RTT stop the library keeps the control block it found and never
+//   searches again (right after a reset that is the bootloader's, stale once the application
+//   runs), so each new search first sets the search range again (`searchRange`, the target RAM).
 // read(): up to the given buffer (the caller reads up to the up-buffer size per cycle).
 // write(): in chunks of the down-buffer size; a 0-byte write is retried every writeRetryInterval
 //   up to writeTimeout (counted from the start of the write) -> target.rtt_write_timeout.
@@ -18,6 +21,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
+#include "hwio/firmware/firmware_image.h"
 #include "hwio/hw/jlink/clock.h"
 #include "hwio/hw/jlink/jlink_api.h"
 
@@ -109,9 +113,12 @@ public:
     // cancelled (stop requested; RTT is stopped again).
     // `blockAddress` (M6, plan/features/0013): the control block address passed to RTT start
     // (rttt's sticky --address); nullopt = the library searches for it.
+    // `searchRange` (HIL H6): the RAM the library searches; set again before every new search
+    // (unused with a `blockAddress`); nullopt = the library's default range, set only once.
     [[nodiscard]] Result<RttLayout>
     attach(const RttNames& names, const std::stop_token& stopToken,
-           std::optional<std::uint32_t> blockAddress = std::nullopt);
+           std::optional<std::uint32_t> blockAddress = std::nullopt,
+           std::optional<firmware::AddressRange> searchRange = std::nullopt);
 
     // Bytes read into `buffer`. Errors: target.rtt_read_failed.
     [[nodiscard]] Result<std::size_t> read(int index, std::span<std::byte> buffer);
@@ -142,6 +149,10 @@ private:
     [[nodiscard]] std::string libraryDetail(std::string detail);
     // Steps of attach(): each returns `cancelled` (RTT stopped again) on a stop request.
     [[nodiscard]] Result<RttLayout> cancelAttach();
+    // HIL H6: sets the search range again before a new search (no-op without a range or with a
+    // fixed block address).
+    void rearmSearch(const std::optional<firmware::AddressRange>& range,
+                     std::optional<std::uint32_t> blockAddress);
     // The buffer counts once the control block is found; nullopt at the deadline.
     [[nodiscard]] Result<std::optional<BufferCounts>> pollCounts(Clock::TimePoint deadline,
                                                                  const std::stop_token& stopToken);

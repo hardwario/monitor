@@ -352,6 +352,10 @@ This plan contributes the **Console** section of the Settings page (`ConsoleSect
 - **Sanitizers:** ASan+UBSan and TSan run the ViewModel tests and the scripted console smoke test (offscreen).
 - **HIL (CHESTER + J-Link):** console in two tabs while one streams heavily; device reset from the shell →
   re-attach; batch of 40 commands; history survives a restart and a parallel `hio chester app console`.
+  - HIL run 2026-11-03 (`v2-dev` a1c295d, Linux, one J-Link probe, CHESTER-M with Clime IAQ v4.0.1):
+    `ConsoleHil.CommandsBatchHistoryAndReset` **PASS** (11 s); CLI `hwio chester app console` piped: commands,
+    `kernel reboot cold` → re-attach with the boot log, console file `0600`. Not run (GUI driven by the user, later):
+    two tabs with heavy streaming, the 40-command batch in the GUI, history across a restart and a parallel CLI.
 - **Manual on Linux, Windows, macOS (by the user, before Done):** the console mockup scenarios, keyboard-only
   walkthrough, screen reader spot check, live language switching.
 
@@ -384,7 +388,8 @@ the user" and "Review round 1 fixes"). Bullets changed by the review round 1 fix
 - **ADR-0112:** the new icons are SVG text (no LFS); nothing binary was added.
 - **`probe.io_failed`, `TargetProfile::displayName`:** no console-specific handling needed (errors arrive as
   `hio::Error` and are shown as they are; the tab title is the shell's).
-- **H6** (stale bootloader RTT control block right after a reset): seen once in five HIL runs (see HIL below).
+- **H6** (stale bootloader RTT control block right after a reset): seen once in five HIL runs (see HIL below);
+  fixed 2026-11-03 (plan 0002, G1 run 3: the search range is set again before every new search).
 - **Plan 0007** (`ensureSession(bool connectTarget = true)`): the console calls `ensureSession()` with no argument,
   which stays valid with a defaulted parameter.
 

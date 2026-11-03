@@ -525,6 +525,16 @@ with `linux-debug` build + `ctest`, `clang-format` and `linux-tidy` clean.
       the Flash page and reconnecting on real hardware; physically swapping two CHESTERs on one probe; Windows rename
       while the log is open in another program (D11); native save dialogs on Linux GTK/portal, Windows and macOS; F3
       on the reporter's OS/scaling.
+      HIL run 2026-11-03 (CLI only, `v2-dev` a1c295d, Linux, one J-Link probe, CHESTER-M with Clime IAQ v4.0.1):
+      the CLI console file is named after the identity (`chester-app-clime-iaq-v4.0.1-<date>-<time>-<J-Link SN>.log`)
+      with the marker `@ Firmware: CHESTER Clime IAQ v4.0.1` about 0.4 s after `@ connected`; after
+      `kernel reboot cold` no second marker (same firmware). **D10 record** — the boot banner CHESTER prints:
+      `*** Booting My Application v4.0.1-a317b690-a317b69058ac ***` then
+      `*** Using nRF Connect SDK v3.4.1-rc1-c71d2df033c9 ***`. "My Application" is the Zephyr/NCS placeholder,
+      not the app name, and `identityFromBanner()` (deny-list: Zephyr OS, nRF Connect SDK, MCUboot) would accept
+      it as "My Application v4.0.1-a317b690-…" for a firmware without `info show`. Proposed fix: add
+      "My Application" to the deny-list (+ a unit test). CLI `chester app console` piped works; interactive and
+      the GUI checks (rename, flash another app from the Flash page, swap CHESTERs, BLE) not run.
 
 ## Review round 1 (2026-11-02)
 
