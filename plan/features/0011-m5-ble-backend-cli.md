@@ -512,6 +512,42 @@ covered by `bluetoothctl` + the combined message.
 **F1 (Linux) result:** done except the out-of-range case (skipped) and H10 (low; fixed 2026-10-20, not yet
 re-checked on hardware).
 
+### HIL re-run 2026-11-03 (CLI, `main` 8e650a6)
+
+Setup: Linux (Ubuntu, GNOME 50 Wayland, BlueZ 5.85, system Qt 6), `linux-debug` (clang 21), one CHESTER-M CGLS R3.4
+with CHESTER Clime IAQ v4.0.1 (Bluetooth shell, passkey set in the PIB, not the default), a J-Link probe on the APP
+connector of the same board for resets; busy office with 12–21 advertising CHESTERs. Pairing tests: host bond removed
+with `bluetoothctl remove`, a scripted `bluetoothctl` (`agent KeyboardOnly`, `default-agent`) as the pairing agent
+that enters the passkey, a wrong one, or nothing. Adapter and bond restored afterwards. Run by Claude with the
+user's OK to use the device freely.
+
+Passed:
+- [x] `ble scan` (12–15 CHESTERs, 5 s), `--json scan`, `doctor` Bluetooth row ("Adapter ready")
+- [x] `ble command` human and `--json` (no empty first line, H5 holds); `--name` no match → `ble.device_not_found`;
+  `--name` matching several → list + "Use --address"
+- [x] Interactive `ble console` (driven through a pty): commands, multi-line output, Ctrl+C and Ctrl+D both end with a
+  newline before "Console file: …" (**H10 confirmed fixed**); console file redacts `claim token` / `ble passkey`
+- [x] `--auto-reconnect` across a J-Link reset: `-- disconnected: … was lost. --` 4 s after the reset,
+  `-- connected --` 15 s later, uptime restarted (also in the GUI, see 0012)
+- [x] F4 reconnect (3/3 reached `connected` or a reported failure; see H12)
+- [x] `ble pair` with an agent that enters the passkey: "Paired." in 21 s, `--json` `{"id":…,"paired":true}`;
+  then `ble command` works without a prompt
+- [x] `ble pair` with no answer (25 s) and with a wrong passkey (20 s): the combined `ble.pairing_failed` text
+  (H1 rework) — correct and readable; the device logs `auth_pairing_failed`
+- [x] 10 back-to-back `ble command` runs: 9 OK (connect 15–25 s), 1 failed (H12)
+
+| # | Sev. | Finding |
+|---|---|---|
+| H11 | high | **A fresh (unbonded) connect never shows the pairing state.** This firmware needs encryption already for *reading* the NUS CCCD, which Qt does in `QLowEnergyService::discoverDetails()` (default `FullDiscovery`, `qt_ble_api.cpp:613`); the read blocks while BlueZ asks the agent (log: `Cannot read descriptor … 6e400003… NoReply`). `NusLink` never reaches the CCCD write, so there is no `PairingPrompt` (CLI never prints "Pairing: enter the passkey…", GUI never shows "Waiting for pairing"), the 30 s connect deadline applies instead of the 60 s pairing wait, and the result is `ble.connect_failed` "The signal is weak…" instead of `ble.not_paired`. Repro: `bluetoothctl remove <id>`, `hwio ble scan`, `hwio ble command -a <id> "kernel uptime"` with an agent that does not answer → exit 6 after 31 s, "Could not connect … Details: not connected within 30000 ms". If the agent answers in time the connect pairs and succeeds. **Proposed fix:** `discoverDetails(QLowEnergyService::SkipValueDiscovery)` (Qt ≥ 6.2; descriptor values are not needed), so pairing starts on the CCCD write where H1/Q6 detection already works; GTest with the fake API unchanged, HIL re-check. |
+| H12 | med | **A connect fails 3 s before its deadline.** BlueZ's D-Bus `Connect` gives up after 25 s (`NoReply`), the 2 s busy retry fails at once (`InProgress`), the next back-off (4 s) no longer fits into 30 s, so `NusLink::attemptFailed` reports `ble.connect_failed` at 27 s although BlueZ completes the pending connect a few seconds later (the next run connected in 2 s; with F4 1 of 3 runs). The orphaned BlueZ link then keeps the CHESTER connected (not advertising) after the process exits. **Proposed fix:** clamp the busy back-off to the remaining deadline (a last attempt just before it) instead of giving up early; optionally raise the connect deadline to 45 s. |
+| H13 | med | **BlueZ not knowing the device is reported as a weak signal.** With `-a`, a device BlueZ has no object for (bond just removed, unbonded device whose cache entry expired, mistyped or absent address) fails with Qt `UnknownRemoteDeviceError` in 2–7 ms, retried 4×, then `ble.connect_failed` "The signal is weak…" (`qt_ble_api.cpp:91` maps it like a radio error). `-a nonsense` (not an address) gives the same text. **Proposed fix:** on `UnknownRemoteDeviceError` run a bounded scan for the id (≤ 10 s) and connect when seen, else `ble.device_not_found`; validate the `-a` format on Linux/Windows (`usage.invalid_argument`). |
+| H14 | med | **Scan RSSI 0 overwrites a known RSSI and sorts first.** BlueZ/Qt report cached devices (and some updates) with RSSI 0; `BleScanner::add` stores it (`ble_scanner.cpp:124`) and the sort puts 0 above every real value (`ble_scanner.cpp:139,163`). Seen in `hwio ble scan` (first entries `0` while another client scans), `--json` and in the GUI picker (RSSI of one device sampled every 5 s: −58, −58, −63, 0, −57, 0). **Proposed fix:** keep the last non-zero RSSI when an advertisement reports 0; sort unknown RSSI last. |
+| H15 | med (security) | **Device secrets in the application log.** `ShellQuery` logs every line of the silent `info show` at debug level (`shell_query.cpp:67`), so `claim token: …` and `ble passkey: …` are written in clear text to `logs/cli-*.log` / `gui-*.log` (files 0664, folder 0775) on every connect (J-Link and BLE), although ADR-0186 keeps them out of console files and the diag report redacts them. **Proposed fix:** redact the profile's `sensitiveOutputKeys` in that debug line (reuse the console-file redaction) and create log files owner-only like history/console files. |
+| H16 | low | `hwio chester app halt` (J-Link, not BLE) does not keep the CPU halted: `chester app status` right after reports "running" (J-Link 9.84 resumes the core on close). Either document "halts only while the session lasts" or keep it halted on close for this command. Found while trying to simulate a powered-off device. |
+
+Not run: real out-of-range / power-off (the halt of H16 does not persist; the board is not battery-switchable here)
+— the disconnect → reconnect path is covered by the J-Link reset. macOS / Windows (F2) still open.
+
 ## Implementation steps
 
 Phase A — BLE library

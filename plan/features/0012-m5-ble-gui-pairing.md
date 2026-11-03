@@ -304,6 +304,44 @@ get `internal.session_limit`).
 - **Manual (by the user, before Done):** Linux, Windows 10/11, macOS 13.3+: permission prompt on first Bluetooth
   view (macOS), denied permission → [Open Privacy settings], adapter off, screen-reader announcement.
 
+## HIL results (Linux, 2026-11-03, `main` 8e650a6)
+
+Setup as in [0011](0011-m5-ble-backend-cli.md) "HIL re-run 2026-11-03" (GNOME 50 Wayland, BlueZ 5.85, CHESTER Clime
+IAQ v4.0.1, J-Link on the same board). The GUI ran with its own settings/app-data folders, first under XWayland
+(dark theme; synthetic input is blocked on GNOME Wayland, so it was driven through AT-SPI and screenshots), then on
+Qt's `vnc` platform (light theme, mouse and keyboard through a small RFB client). UI language Czech (system locale).
+Run by Claude; the user allowed free use of the device.
+
+Passed:
+- [x] Choose device → Bluetooth: list of nearby CHESTERs (filter field, "Show all devices", "not seen recently"
+  rows dimmed), "Scanning for Bluetooth devices…"; the new tab opens in the last transport
+- [x] Pick from the list and connect: `Connected · MTU 23`, marker "— connected (Bluetooth) —", log pane hidden,
+  Reset hidden, tab title `CHESTER · CHESTER <serial>` with the Bluetooth icon; connect 3–30 s
+- [x] Console: commands and output, suggestions from the device's command tree, ↑ history; `info show` silent query
+- [x] ⋯ popover shows only "Auto-reconnect" and "Save console to log file"
+- [x] Disconnect / Connect; with Auto-reconnect a J-Link reset gives "— disconnected: connection lost —" and
+  "— connected (Bluetooth) —" 15 s later (uptime restarted)
+- [x] Flash rail item dimmed; click → toast "Flashing needs a J-Link. Open a J-Link tab to flash this device."
+- [x] "In use (tab 1)" badge in a second tab's picker
+- [x] One J-Link tab and one Bluetooth tab to the same CHESTER at once (RTT log + BLE shell both live)
+- [x] Tab restore after closing the window: the Bluetooth tab comes back Disconnected (`transport: ble` saved);
+  closing the window releases the link (BlueZ `Connected: no`)
+- [x] Pairing on connect with an agent that enters the passkey: the reconnect pairs and connects
+- [x] Czech texts throughout (device-supplied help such as "Kernel commands" stays English)
+
+| # | Sev. | Finding |
+|---|---|---|
+| G-H1 | high | **[Pair] is unreachable and the pairing state never shows** on this firmware: 0011 H11 (the NUS CCCD read in `discoverDetails()` needs encryption). A fresh connect without the passkey ends after 30–64 s with `ble.connect_failed` ("Signal is weak…", primary [Reconnect]) instead of "Waiting for pairing — enter the passkey…" and `ble.not_paired` with [Pair]. Fix: 0011 H11. |
+| G-H2 | med | **Signal strength flickers and the picker order jumps**: 0011 H14 — rows alternate between "−58 dBm" and no value / `signal_0`, rows without RSSI (including "not seen recently") sort above all others. Fix: 0011 H14. |
+| G-H3 | med | **A restored tab whose device is not around gives "Signal is weak", not `ble.device_not_found` with [Choose another device]** (0011 H13; repro: saved tab with an address that does not exist → Connect). Same message right after the bond was removed in the system. Fix: 0011 H13. |
+| G-H4 | med | **SIGTERM ends the GUI without closing sessions** (no handler): the BlueZ link stays up (the CHESTER stops advertising), the GUI log loses its buffered tail. A desktop logout sends SIGTERM. Fix: a self-pipe `QSocketNotifier` for SIGTERM/SIGINT/SIGHUP that calls the normal quit path (the CLI likewise, if not yet). |
+| G-H5 | low | **Preselection in a busy place:** "exactly one connectable match → preselected" fires on the first advertisement, so whichever CHESTER advertises first stays selected (kept by id) when 20 more appear. Fix: preselect only after the first 10 s scan, or drop an automatic selection the user did not make when a second match appears. |
+| G-H6 | low | The GUI log flushes only on warnings, so `gui-*.log` lags minutes behind (and loses the tail on SIGTERM, G-H4); consider flushing info lines with a short timer. |
+| G-H7 | note | Setting the command field's text through AT-SPI (`EditableText.SetTextContents`) does not reach `field.text`; Send then sends an empty line. Probably a Qt Quick accessibility limitation; screen readers type keys, so no action unless reported. |
+
+Not run: [Pair] on each OS (blocked by G-H1 on Linux; Windows / macOS manual checks still open), real out of range
+(see 0011), screen-reader announcement, adapter off / permission prompts (manual list above).
+
 ## Risks and open points
 
 - **Windows pairing UI** may not show a passkey dialog for app-initiated pairing (0011 risk); the ErrorPanel then
