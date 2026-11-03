@@ -269,3 +269,14 @@ Marked Done by the user with these checks open: CHESTER shell echo redaction in 
 with a backspace correction), the `usb.world_accessible` doctor warning against a real SEGGER `99-jlink.rules`, the
 `.deb` `uaccess` rule with a seated and a non-seated user, a real-terminal OSC/C1 check of `hwio console`, the GUI
 `<img>` fw-name check, and Windows/macOS CI for the hardening flags and checks.
+
+HIL run 2026-11-03 (`v2-dev` a1c295d, Linux, one J-Link probe, CHESTER-M with Clime IAQ v4.0.1):
+- [x] CHESTER shell echo redaction in console files: piped `hwio chester app console` with `info show` and
+  `ble config passkey` → the console file has `> claim token: <redacted>`, `> ble passkey: <redacted>`,
+  `< ble config passkey <redacted>` and the echo `> ble config passkey <redacted>`; file mode `0600`. The terminal
+  itself shows the values (by design). Not tested: an echo with a backspace correction (needs an interactive TTY).
+- [x] `usb.world_accessible` against the real SEGGER `99-jlink.rules` (`MODE="0666"`): `hwio doctor` and
+  `diag report` show the warning with the rule path and what to do.
+- `hwio diag report`: no claim token, passkey or home path in the zip.
+- Still open: `.deb` `uaccess` rule with a seated / non-seated user, real-terminal OSC/C1 check, GUI `<img>` check,
+  Windows/macOS.

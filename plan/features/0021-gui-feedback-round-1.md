@@ -357,6 +357,12 @@ reads both; `--no-suggestions` overrides for one run). The H chip is not persist
 - **HIL (CHESTER + J-Link):** designated LTE firmware download + flash (step 1/2 modem, 2/2 application); catalog ID
   shows name/version and flashes; "In the device" before and after; `help` learning and completion on real firmware;
   hexdump hidden with the default chips; wheel scrolling on Linux, macOS (touchpad) and Windows.
+  - HIL run 2026-11-03 (backend and CLI only, `v2-dev` a1c295d, Linux, one J-Link probe on the application
+    connector of an LTE CHESTER-M with Clime IAQ v4.0.1): `Hil.InfoShowAndCommandTreeThroughSilentQueries`
+    **PASS**; `hwio chester app info` shows the `info show` fields; `chester app catalog-info 5dc54c61…` shows
+    hio-chester-clime-iaq v4.0.1 with upload time and SHA-256; flash by catalog ID downloads (then cached) and
+    flashes. Not run: the GUI checks (by the user, later) and the designated LTE firmware (needs the probe on the
+    LTE connector).
 
 ## Risks and open points
 

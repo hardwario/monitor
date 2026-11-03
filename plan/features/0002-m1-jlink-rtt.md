@@ -604,6 +604,14 @@ Phase G — hardware and docs
     `SetRTTSearchRanges` with the profile's RAM range) or reload the library copy. Also seen once as a failure of
     `Hil.ConsoleAttachesWithoutResetAndAnswersVersion` when it runs right after `HilFlash.FlashByFile…` in one
     `hio_hil_tests` run.
+  - Run 3 (2026-11-03, `v2-dev` at a1c295d, `linux-debug`; Linux, J-Link Software 9.84, one J-Link probe on the
+    application connector of a CHESTER-M CGLS R3.4 with CHESTER Clime IAQ v4.0.1; `HWIO_HIL=1 HWIO_HIL_SN=<J-Link SN>
+    ctest --preset linux-debug -L hil -R "^(Hil\.|ConsoleHil\.)"`): `ProbesAreListed`,
+    `ConsoleAttachesWithoutResetAndAnswersVersion`, `ResetReattaches`, `RebootFromTheShellIsReattachedAutomatically`,
+    `InfoShowAndCommandTreeThroughSilentQueries` and `ConsoleHil.CommandsBatchHistoryAndReset` **PASS**;
+    `TwoChestersWithTwoProbesInOneProcess` skipped (one probe). H6 not seen in this run (about 25 attaches, several
+    right after a flash). Clime IAQ v4.0.1 has no `version` shell command ("version: command not found"); the
+    attach test still passes because it only waits for any shell output.
 - [ ] G2 Manual checks on Linux, Windows, macOS; record the lowest tested J-Link version (ADR-0029); on Windows
   also: `hio chester app console --json` reading from the console (not a pipe) ends promptly on Ctrl+C / when the
   session ends (review R17, `CancelSynchronousIo`); `hio jlink list` shows "in use" for a probe held by another

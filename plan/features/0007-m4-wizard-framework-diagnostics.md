@@ -541,6 +541,15 @@ Phase C — GUI framework (after 0004)
   report dialog
 
 - [ ] HIL (CHESTER + J-Link) and manual checks on Linux, Windows, macOS (by the user, see below)
+  - CLI part on Linux, 2026-11-03 (`v2-dev` a1c295d, J-Link Software 9.84, nRF Util 8.2.1, one J-Link probe on
+    the application connector of an LTE CHESTER-M): `hwio doctor` all ✓ except the expected warning
+    `usb.world_accessible` (SEGGER `99-jlink.rules` with `MODE="0666"`), "J-Link firmware: Not known" (this probe
+    returns -1 from `GetEmbeddedFWString`); `hwio chester app check` all 6 checks ✓ (2.99 V, nRF52840 not
+    protected, RTT Terminal + Logger); `hwio chester lte check` with the cable on the application connector →
+    ✗ "Expected the LTE MCU (nRF9151) but found nRF52840", cause/what-to-do correct, exit code 6; `hwio diag
+    report -o FILE` writes summary.txt/json, recent logs and settings.ini, home folder redacted, no claim token or
+    BLE passkey in the zip. Minor: the zip entries carry the date `1980-00-00` (DOS date with month 0; `unzip -l`
+    shows it as is) — should be 1980-01-01. GUI wizards: not run (wizard dialogs not implemented on `v2-dev`).
 
 ## Tests and verification
 

@@ -532,6 +532,32 @@ Phase G — hardware and docs
   - Run 2026-10-16 (nRF52840 only, setup as in 0.1): `HilFlash.FlashByFileVerifiesAndKeepsThePib` **PASS** (flash of an
     identical image 1392 ms); `HilFlash.EraseCodeKeepsThePibAndPibDecodes` **PASS** (release gate met for the
     nRF52840; the LTE MCU is pending). Not run: `FlashByCatalogId`, `EraseAllAndRecoverApp`, the LTE tests.
+  - Run 2026-11-03 (`v2-dev` at a1c295d; Linux, J-Link Software 9.84, nRF Util 8.2.1; one J-Link probe on the
+    application connector of a CHESTER-M CGLS R3.4 (LTE variant) with CHESTER Clime IAQ v4.0.1; non-destructive by
+    the user's decision: no `HWIO_HIL_DESTRUCTIVE`, no LTE probe; `HWIO_HIL_APP_HEX` = the catalog HEX of Clime IAQ
+    v4.0.1, `HWIO_HIL_FIRMWARE_ID=5dc54c6153974e879f5499d2483433c9`, so the board ends with its own firmware):
+    - `FlashByFileVerifiesAndKeepsThePib` **PASS** and `FlashByCatalogId` **PASS** — but both only exercise the
+      "contents already match" path (J-Link skips the bank), so they do not prove a real write.
+    - `EraseCodeKeepsThePibAndPibDecodes` **PASS** in the first run (43 s), **FAIL** when re-run alone on the
+      running board: `JLINKARM_EndDownload returned -4; J-Link: Verification failed @ address 0x00000000`
+      (Erase 13 s). The re-flash in the same test then hung after "Programming 675738 bytes" until the ctest
+      timeout (300 s) killed the process (H7 below). **Release gate (R5) not met.**
+    - `EraseAllAndRecoverApp`, `LteResetEraseAndRecover`, `LteBundle` skipped (not allowed / no probe on the LTE
+      connector).
+    - CLI: `hwio chester app erase` fails 4 of 4 on the running board (auto speed and `--jlink-speed 2000`, after
+      `chester app halt` and after `chester app reset --halt` — each CLI process resumes the CPU on open), either
+      with "Verification failed @ address 0x00000000" (15 s) or "Timeout while erasing sectors @0x00000000, RAMCode
+      did not respond in time!" (6 s); the PIB stays unchanged and the next flash works. `hwio chester app flash ID`
+      after the failed erase: real write, 22–23 s, verify OK, PIB byte-for-byte unchanged; `flash FILE` of the same
+      image 1.6 s (skipped bank). `pib read`, `catalog-info`, `status`, `reset` OK.
+    - H7 (open; cause found, fix not yet tried in hwio): `runErase()` (`libs/device/src/flash_workflows.cpp`) never resets/halts the target
+      before `eraseCode()`, while `runFlash()` does `reset(Halt)` first. The running firmware leaves the flash in a
+      state the J-Link RAMCode cannot erase at 0x0 (most likely the bootloader's flash protection, cleared only by a
+      reset). J-Link Commander's `loadbin` of the same 1 MiB 0xFF image does an implicit reset & halt and then
+      erases cleanly (verify OK, 0x0 = 0xFFFFFFFF). Proposed fix: `context.programmer->reset(jlink::ResetMode::Halt)`
+      in `runErase()` before the PIB read (as in `runFlash()` and `eraseAll()`), a fake-J-Link test that the erase
+      halts first, and HIL `EraseCode…` started on a running board; separately, why the in-session flash after a
+      failed `EndDownload` hangs past `programTimeout` (the deadline cannot fire while the library call blocks).
 - [ ] G2 Manual checks on Linux, Windows, macOS (incl. nRF Util discovery on each)
 - [ ] G3 Update `plan/0006-cli.md` statuses, `plan/0002-legacy-inventory.md` parity rows, roadmap M2 → Done
 

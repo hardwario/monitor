@@ -352,6 +352,10 @@ This plan contributes the **Console** section of the Settings page (`ConsoleSect
 - **Sanitizers:** ASan+UBSan and TSan run the ViewModel tests and the scripted console smoke test (offscreen).
 - **HIL (CHESTER + J-Link):** console in two tabs while one streams heavily; device reset from the shell →
   re-attach; batch of 40 commands; history survives a restart and a parallel `hio chester app console`.
+  - HIL run 2026-11-03 (`v2-dev` a1c295d, Linux, one J-Link probe, CHESTER-M with Clime IAQ v4.0.1):
+    `ConsoleHil.CommandsBatchHistoryAndReset` **PASS** (11 s); CLI `hwio chester app console` piped: commands,
+    `kernel reboot cold` → re-attach with the boot log, console file `0600`. Not run (GUI driven by the user, later):
+    two tabs with heavy streaming, the 40-command batch in the GUI, history across a restart and a parallel CLI.
 - **Manual on Linux, Windows, macOS (by the user, before Done):** the console mockup scenarios, keyboard-only
   walkthrough, screen reader spot check, live language switching.
 
