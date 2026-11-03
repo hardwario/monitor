@@ -18,6 +18,8 @@
 
 #include "hwio/core/settings.h"
 #include "hwio/device/session_registry.h"
+#include "hwio/hw/ble/ble_api.h"
+#include "hwio/hw/ble/ble_host.h"
 #include "hwio/hw/jlink/library_locator.h"
 #include "settings_store.h"
 #include "update_service.h"
@@ -32,6 +34,7 @@
 #include "wizard/wizard_launcher.h"
 #include "wizard/wizard_registry.h"
 #include "wizard/wizard_view_model.h"
+#include "workers/ble_service.h"
 #include "workers/diag_worker.h"
 #include "workers/probe_scanner.h"
 
@@ -74,6 +77,10 @@ struct AppOptions {
     // Plan 0015 B3 (ADR-0123): the crash directory (hwio::crash::defaultDirectory() in main();
     // empty: no crash notice).
     std::filesystem::path crashDirectory;
+    // Plan 0012 (ADR-0225): Bluetooth. Off: no BleService (no Bluetooth view, BLE tabs are not
+    // restored). The factory creates the BLE API on the BLE thread (tests: the fake BLE API).
+    bool bluetooth = true;
+    ble::BleHost::ApiFactory bleApiFactory = ble::createBleApi;
 };
 
 class AppViewModel : public QObject {
@@ -183,6 +190,8 @@ public:
     [[nodiscard]] PageRegistry& pageRegistry() { return m_pages; }
     [[nodiscard]] device::SessionRegistry& sessionRegistry() { return *m_registry; }
     [[nodiscard]] ProbeScanner& probeScanner() { return *m_scanner; }
+    // Plan 0012: nullptr when AppOptions::bluetooth is off.
+    [[nodiscard]] BleService* bleService() { return m_ble.get(); }
     // M4: the wizard plans (0008-0010) register their wizards here (registerExtensions).
     [[nodiscard]] WizardRegistry& wizardRegistry() { return m_wizardRegistry; }
     [[nodiscard]] DiagWorker& diagWorker() { return *m_diagWorker; }
@@ -290,6 +299,9 @@ private:
     void expireToast(std::uint64_t id);
     void checkQuit();
     [[nodiscard]] int tabUsingProbe(std::uint32_t serial, const DeviceTabViewModel* self) const;
+    [[nodiscard]] int tabUsingBleDevice(const QString& deviceId,
+                                        const DeviceTabViewModel* self) const;
+    [[nodiscard]] QString bleOtherProgram(const QString& deviceId) const;
     // A wizard's hand-off (plan/features/0007): "open-console", "open-flash-page",
     // "open-settings[:<section>]".
     void onHandOff(const QString& action, DeviceTabViewModel* tab);
@@ -304,6 +316,9 @@ private:
     // worker is joined before the registry goes away.
     std::unique_ptr<device::SessionRegistry> m_registry;
     std::unique_ptr<ProbeScanner> m_scanner;
+    // Plan 0012: the Bluetooth host and scan (lazy, ADR-0225); destroyed after the tabs, before the
+    // registry (its BleHost joins the BLE thread).
+    std::unique_ptr<BleService> m_ble;
     // M4: filled by registerExtensions; the worker is joined before the registry goes away.
     WizardRegistry m_wizardRegistry;
     std::unique_ptr<DiagWorker> m_diagWorker;

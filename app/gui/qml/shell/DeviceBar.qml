@@ -1,6 +1,7 @@
 // Device bar of a tab (ADR-0043, ADR-0052, ADR-0053): probe, target (disabled while a session
 // exists), state text ("Connected", "Connecting…", "Reconnecting… (target not powered)", the busy
-// page's text), Connect / Cancel / Disconnect and the ⋯ Advanced popover.
+// page's text), Connect / Cancel / Disconnect and the ⋯ Advanced popover. Plan 0012: a Bluetooth tab
+// shows the device chip (name · RSSI) with the Bluetooth icon and no target picker.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -51,7 +52,8 @@ Rectangle {
             color: Theme.bg
             border.color: Theme.border
             Accessible.role: Accessible.StaticText
-            Accessible.name: qsTr("Probe %1").arg(bar.connection.probeLabel)
+            Accessible.name: bar.connection.isBle ? qsTr("Bluetooth device %1").arg(bar.connection.probeLabel)
+                                                  : qsTr("Probe %1").arg(bar.connection.probeLabel)
 
             RowLayout {
                 id: probeRow
@@ -62,8 +64,16 @@ Rectangle {
                 spacing: Theme.spacingS
 
                 Label {
+                    visible: !bar.connection.isBle
                     text: qsTr("Probe")
                     color: Theme.textMuted
+                }
+
+                Icon {
+                    visible: bar.connection.isBle
+                    symbol: "bluetooth"
+                    color: Theme.textMuted
+                    size: 18
                 }
 
                 Label {
@@ -81,7 +91,7 @@ Rectangle {
             id: targetBox
 
             objectName: "targetBox"
-            visible: !bar.choosing
+            visible: !bar.choosing && !bar.connection.isBle
             implicitHeight: 30
             Layout.maximumWidth: 260
             model: bar.connection.targets
@@ -159,9 +169,11 @@ Rectangle {
                 Accessible.role: Accessible.StatusBar
                 Accessible.name: stateLabel.text
                 onTextChanged: if (bar.tab === AppViewModel.currentTabViewModel) Accessible.announce(stateLabel.text)
+                Accessible.description: bar.connection.pairingPending ? bar.connection.passkeyHint : ""
                 HToolTip {
-                    visible: stateHover.hovered && stateLabel.truncated
-                    text: stateLabel.text
+                    // Plan 0012: while the system asks for the passkey, the profile's hint.
+                    visible: stateHover.hovered && (stateLabel.truncated || bar.connection.pairingPending)
+                    text: bar.connection.pairingPending ? stateLabel.text + "\n" + bar.connection.passkeyHint : stateLabel.text
                 }
 
                 HoverHandler {
@@ -178,7 +190,7 @@ Rectangle {
         HButton {
             objectName: "chooseAnotherProbe"
             visible: !bar.choosing && bar.connection.canChooseAnotherProbe
-            text: qsTr("Choose another probe")
+            text: bar.connection.isBle ? qsTr("Choose another device") : qsTr("Choose another probe")
             onClicked: bar.connection.chooseAnotherProbe()
         }
 

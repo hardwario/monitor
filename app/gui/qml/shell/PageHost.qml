@@ -25,8 +25,11 @@ Item {
             visible: !host.choosing && host.tab.connection.error.valid
             error: host.tab.connection.error
             compact: Window.window !== null && Window.window.height < 700
-            secondaryActionText: host.tab.connection.canChooseAnotherProbe ? qsTr("Choose another probe") : ""
-            onSecondaryActionTriggered: host.tab.connection.chooseAnotherProbe()
+            secondaryActionText: host.tab.connection.secondaryActionText
+            customActionText: host.tab.connection.customActionText
+            note: host.tab.connection.pairingHelp
+            onSecondaryActionTriggered: host.tab.connection.triggerSecondaryAction()
+            onCustomActionTriggered: host.tab.connection.triggerCustomAction()
             onActionTriggered: action => action === ErrorAction.OpenSettings ? AppViewModel.openSettings(host.tab.connection.error.settingsSection)
                                                                                : host.tab.connection.triggerErrorAction(action)
         }
@@ -47,6 +50,7 @@ Item {
             ChooseDevicePage {
                 anchors.fill: parent
                 visible: host.choosing
+                tab: host.tab
                 picker: host.tab.picker
                 active: host.choosing && host.tab === AppViewModel.currentTabViewModel
                         && AppViewModel.globalPage === ""

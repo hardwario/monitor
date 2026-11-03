@@ -244,19 +244,47 @@ get `internal.session_limit`).
 
 ## Implementation steps
 
-- [ ] G0 Prerequisite check: 0011 phases A–E done; 0004, 0005, 0021, 0028 implemented (otherwise stop and report)
-- [ ] G1 `BleService`, `BlePickerViewModel` (+ selection stability, stale rows, filter, show all, in-use badges,
+- [x] G0 Prerequisite check: 0011 phases A–E done; 0004, 0005, 0021, 0028 implemented (otherwise stop and report)
+- [x] G1 `BleService`, `BlePickerViewModel` (+ selection stability, stale rows, filter, show all, in-use badges,
   announcements, adapter error) + GTest with the fake BLE API
-- [ ] G2 `DeviceTabViewModel` transport + `consoleSession()` + `configureBle` + BLE session lifecycle and markers;
+- [x] G2 `DeviceTabViewModel` transport + `consoleSession()` + `configureBle` + BLE session lifecycle and markers;
   `ConsoleViewModel` on `ConsoleSession`; `ConnectionViewModel` BLE fields and option memory; pairing actions;
   `needsOperations` / Flash disabled reason; tab restore with `transport` + GTest
-- [ ] G3 QML: transport switch, `BleDeviceList`, BLE device bar and popover, rail disabled reason, console log pane
+- [x] G3 QML: transport switch, `BleDeviceList`, BLE device bar and popover, rail disabled reason, console log pane
   hidden while empty; icons (ADR-0060 subset additions)
-- [ ] G6 Mockups (`gui/mockups/index.html`: BLE picker, BLE tab) and design-system component entries
-- [ ] G7 Accessibility, Czech translation (0 unfinished), `.ts` fresh; Qt Quick tests with the fake BLE scenario;
+- [x] G6 Mockups (`gui/mockups/index.html`: BLE picker, BLE tab) and design-system component entries
+- [x] G7 Accessibility, Czech translation (0 unfinished), `.ts` fresh; Qt Quick tests with the fake BLE scenario;
   screenshots (light/dark, EN/CS, 960 × 600)
 
 (G4, G5 → plan 0031.)
+
+## Implementation notes (2026-11-03, decided by the implementing agent; for review)
+
+- **Pairing from the ErrorPanel** goes through `BleService::pair()` (a `PairDevice` host command with its own
+  subscription, as `hwio ble pair`), not `BleSession::pair()`: after `ble.not_paired` the session is Stopped and
+  released, and a new session would keep connecting unpaired while the system pairs. On success the tab connects.
+- **Device-bar pairing text** is "Waiting for pairing — enter the passkey in the system dialog"; the profile's passkey
+  hint ("The passkey is 123456 unless …") is its tooltip and accessible description and the ErrorPanel note, rather
+  than "(default 123456)" in the bar (the default is the profile's, not the GUI's).
+- **ErrorPanel** gained two generic properties: `customActionText` (replaces the primary action, used for [Pair])
+  and `note` (a line below the suggestion, used for the pairing help). macOS keeps the primary [Reconnect].
+- **Flash in a Bluetooth tab** is dimmed but stays focusable/clickable, so its tooltip ("Flashing needs a J-Link …")
+  works with mouse and keyboard; a click shows the reason as a toast and the page does not change
+  (`AppViewModel::showPage`, `DeviceTabViewModel::setCurrentPage` refuse it). A tab that becomes a Bluetooth tab
+  while on Flash switches to Console.
+- **Markers in a Bluetooth tab** go to the shell channel only, so the log pane stays hidden (ADR-0082).
+- **RSSI in the device bar** comes from `BleSession::rssi()`, i.e. the auto-reconnect background scan; without it
+  the chip shows the name only.
+- **Adapter ErrorPanel** in the picker: primary [Retry] (re-reads the adapter at once); macOS
+  `ble.permission_denied` adds [Open Privacy settings].
+- **`AppOptions::bluetooth` / `bleApiFactory`**: tests and builds can switch Bluetooth off or inject the API;
+  the default is on with `ble::createBleApi` (the fake BLE API with `HWIO_FAKE_BLE_SCENARIO` in test builds).
+- **Icons** (ADR-0060 subset): `bluetooth.svg`, `signal_0..4.svg` (Material Symbols `bluetooth`,
+  `signal_cellular_N_bar`, pinned commit; `assets/icons/README.md`).
+- **Screenshots**: `plan/features/0012-screenshots/` (Git LFS; `tst_screenshots_ble.qml`, 1280 × 800 and 960 × 600,
+  light/dark, EN/CS).
+- New fake scenario `tests/ble_scenarios/pair_then_connect.json` (first connect `ble.not_paired`, pairing ok).
+- Not done here: HIL with a real CHESTER over BLE, manual checks on Windows / macOS (see Tests and verification).
 
 ## Tests and verification
 

@@ -4,27 +4,34 @@
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/result.h"
+#include "hwio/device/ble_session.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
+#include "hwio/device/console_session.h"
 #include "hwio/device/device_info.h"
 #include "hwio/device/device_info_watcher.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
 #include "hwio/device/shell_query.h"
+#include "hwio/hw/ble/types.h"
 #include "hwio/hw/jlink/library_locator.h"
 #include "hwio/hw/nrfutil/nrfutil.h"
 #include "settings_store.h"
+#include "viewmodels/ble_picker_view_model.h"
 #include "viewmodels/connection_view_model.h"
 #include "viewmodels/page_registry.h"
 #include "viewmodels/probe_picker_view_model.h"
+#include "workers/ble_service.h"
 
+#include <QDesktopServices>
 #include <QLoggingCategory>
 #include <QMetaObject>
 #include <QObject>
 #include <QPointer>
 #include <QString>
 #include <QStringLiteral>
+#include <QUrl>
 #include <QVariantMap>
 #include <QtContainerFwd>
 #include <QtCore/qnamespace.h>
@@ -39,6 +46,12 @@
 #include <utility>
 
 namespace hwio::gui {
+
+namespace {
+
+const QString lastTransportKey = QStringLiteral("ui/lastTransport");
+
+} // namespace
 
 DeviceTabViewModel::DeviceTabViewModel(TabContext context, QObject* parent)
     : QObject(parent), m_context(std::move(context)),
@@ -71,6 +84,14 @@ DeviceTabViewModel::DeviceTabViewModel(TabContext context, QObject* parent)
                     connectDevice();
                 }
             });
+    createBlePicker();
+    // ADR-0081: a new tab opens in the last transport.
+    m_transport = jlinkTransport();
+    if (m_context.settings != nullptr && m_context.settings->isRegistered(lastTransportKey) &&
+        m_context.settings->value(lastTransportKey).toString() == bleTransport() &&
+        m_context.ble != nullptr) {
+        m_transport = bleTransport();
+    }
     m_connection = new ConnectionViewModel( // NOLINT(cppcoreguidelines-owning-memory)
         this, m_context.settings);
     // A dismissed error clears the tab's red dot too (S10).
@@ -95,6 +116,32 @@ DeviceTabViewModel::DeviceTabViewModel(TabContext context, QObject* parent)
     }
 }
 
+// Plan 0012: the Bluetooth view of the Choose-device page (a child, Qt parent ownership).
+void DeviceTabViewModel::createBlePicker() {
+    m_blePicker = new BlePickerViewModel( // NOLINT(cppcoreguidelines-owning-memory)
+        m_context.ble,
+        BlePickerViewModel::Hooks{
+            .tabUsingDevice =
+                [this](const QString& id) {
+                    return m_context.tabUsingBleDevice ? m_context.tabUsingBleDevice(id, this) : -1;
+                },
+            .otherProgram =
+                [this](const QString& id) {
+                    return m_context.bleOtherProgram ? m_context.bleOtherProgram(id) : QString();
+                },
+            .now = {},
+            .openUrl = [this](const QUrl& url) { openExternalUrl(url); }},
+        this);
+    connect(m_blePicker, &BlePickerViewModel::tabActivationRequested, this,
+            &DeviceTabViewModel::tabActivationRequested);
+    connect(m_blePicker, &BlePickerViewModel::connectRequested, this,
+            [this](const QString& id, const QString& name, const QString& profileId) {
+                if (configureBle(profileId, id, name)) {
+                    connectDevice();
+                }
+            });
+}
+
 DeviceTabViewModel::~DeviceTabViewModel() { shutdown(); }
 
 DeviceTabViewModel::State DeviceTabViewModel::state() const { return m_state; }
@@ -102,15 +149,49 @@ DeviceTabViewModel::State DeviceTabViewModel::state() const { return m_state; }
 bool DeviceTabViewModel::hasError() const { return m_hasError; }
 
 QString DeviceTabViewModel::title() const {
+    const QString name = m_profile != nullptr ? toQString(m_profile->displayName) : QString();
+    if (!m_choosing && isBle() && !m_bleId.isEmpty()) {
+        // ADR-0081: "CHESTER · CHESTER-ABC123".
+        return QStringLiteral("%1 · %2").arg(name, m_bleName.isEmpty() ? m_bleId : m_bleName);
+    }
     if (m_choosing || !m_serial) {
         return tr("New device");
     }
-    const QString name = m_profile != nullptr ? toQString(m_profile->displayName) : QString();
     return QStringLiteral("%1 %2 · %3").arg(name, m_targetId).arg(*m_serial);
 }
 
+void DeviceTabViewModel::setTransport(const QString& transport) {
+    if (transport == m_transport || !m_choosing ||
+        (transport != jlinkTransport() && transport != bleTransport()) ||
+        (transport == bleTransport() && m_context.ble == nullptr)) {
+        return;
+    }
+    m_transport = transport;
+    if (m_context.settings != nullptr && !m_context.settings->readOnly() &&
+        m_context.settings->isRegistered(lastTransportKey)) {
+        if (const Status stored = m_context.settings->setValue(lastTransportKey, transport);
+            !stored) {
+            qCWarning(lcGui) << "Could not store" << lastTransportKey;
+        }
+    }
+    transportChanged(); // signal
+}
+
+QString DeviceTabViewModel::pageDisabledReason(const QString& pageId) const {
+    if (!isBle() || m_context.pages == nullptr) {
+        return {};
+    }
+    const PageDescriptor* page = m_context.pages->find(pageId);
+    if (page == nullptr || !page->needsOperations) {
+        return {};
+    }
+    // ADR-0226.
+    return tr("Flashing needs a J-Link. Open a J-Link tab to flash this device.");
+}
+
 void DeviceTabViewModel::setCurrentPage(const QString& pageId) {
-    if (pageId == m_currentPage || !m_pageIds.contains(pageId)) {
+    if (pageId == m_currentPage || !m_pageIds.contains(pageId) ||
+        !pageDisabledReason(pageId).isEmpty()) {
         return;
     }
     m_currentPage = pageId;
@@ -132,6 +213,15 @@ QObject* DeviceTabViewModel::pageViewModel(const QString& pageId) const {
 
 device::DeviceSession* DeviceTabViewModel::session() const { return m_session.get(); }
 
+device::BleSession* DeviceTabViewModel::bleSession() const { return m_bleSession.get(); }
+
+device::ConsoleSession* DeviceTabViewModel::consoleSession() const {
+    if (m_session) {
+        return m_session.get();
+    }
+    return m_bleSession.get();
+}
+
 const device::DeviceProfile& DeviceTabViewModel::profile() const { return *m_profile; }
 
 QString DeviceTabViewModel::profileId() const {
@@ -152,18 +242,68 @@ bool DeviceTabViewModel::configure(const QString& profileId, const QString& targ
         qCWarning(lcGui) << "Tab: unknown configuration" << profileId << targetId << serial;
         return false;
     }
-    if (m_session && m_serial != serial) {
+    if ((m_session && m_serial != serial) || m_bleSession) {
         releaseSession();
     }
     m_profile = profile;
     m_targetId = targetId;
     m_serial = serial;
     m_product = product;
+    m_bleId.clear();
+    m_bleName.clear();
+    if (m_transport != jlinkTransport()) {
+        m_transport = jlinkTransport();
+        transportChanged(); // signal
+    }
     m_choosing = false;
     m_connection->setProduct(product);
     m_connection->setOpenError(std::nullopt);
     m_connection->loadOptions(m_serial, *device::findTarget(*profile, toStdString(targetId)));
     m_picker->setActive(false);
+    m_blePicker->setActive(false);
+    titleChanged();         // signal
+    configurationChanged(); // signal
+    updateState();
+    return true;
+}
+
+bool DeviceTabViewModel::configureBle(const QString& profileId, const QString& deviceId,
+                                      const QString& name) {
+    const device::DeviceProfile* profile = device::ProfileRegistry::find(toStdString(profileId));
+    const QString id = toQString(ble::canonicalDeviceId(toStdString(deviceId)));
+    if (profile == nullptr || !profile->ble || id.isEmpty() ||
+        device::findTarget(*profile, profile->ble->consoleTargetId) == nullptr) {
+        qCWarning(lcGui) << "Tab: unknown Bluetooth configuration" << profileId << deviceId;
+        return false;
+    }
+    if (m_session || (m_bleSession && !ble::sameDeviceId(toStdString(m_bleId), toStdString(id)))) {
+        releaseSession();
+    }
+    m_profile = profile;
+    m_targetId = toQString(profile->ble->consoleTargetId);
+    m_serial.reset();
+    m_product.clear();
+    m_bleId = id;
+    m_bleName = name;
+    if (m_transport != bleTransport()) {
+        m_transport = bleTransport();
+        transportChanged(); // signal
+    }
+    m_choosing = false;
+    if (!pageDisabledReason(m_currentPage).isEmpty() && !m_pageIds.isEmpty()) {
+        // Plan 0012: e.g. Flash: the first page this tab can use (Console).
+        for (const QString& pageId : m_pageIds) {
+            if (pageDisabledReason(pageId).isEmpty()) {
+                m_currentPage = pageId;
+                currentPageChanged(); // signal
+                break;
+            }
+        }
+    }
+    m_connection->setOpenError(std::nullopt);
+    m_connection->loadBleOptions(m_bleId, m_bleName);
+    m_picker->setActive(false);
+    m_blePicker->setActive(false);
     titleChanged();         // signal
     configurationChanged(); // signal
     updateState();
@@ -191,11 +331,16 @@ void DeviceTabViewModel::setConsoleTarget(const QString& targetId) {
 bool DeviceTabViewModel::sessionFailed() const {
     // Stopped with an error = a fatal error (dead). Stopped without one is a deliberate suspend()
     // and still a working session (review S18).
-    return m_session && m_session->connection().state == device::ConnectionState::Stopped &&
-           m_session->connection().error.has_value();
+    const device::ConsoleSession* session = consoleSession();
+    return session != nullptr && session->connection().state == device::ConnectionState::Stopped &&
+           session->connection().error.has_value();
 }
 
 Status DeviceTabViewModel::ensureSession(bool connectTarget) {
+    if (isBle()) {
+        return std::unexpected(
+            makeError(ErrorCode::UsageInvalidArgument, "operations need a J-Link (Bluetooth tab)"));
+    }
     if (m_busy) {
         return std::unexpected(makeError(ErrorCode::InternalBusy, "the tab is busy"));
     }
@@ -225,6 +370,9 @@ void DeviceTabViewModel::openWizard(const QString& wizardId) {
 }
 
 Status DeviceTabViewModel::openSession(bool connectTarget) {
+    if (isBle()) {
+        return openBleSession();
+    }
     if (m_choosing || !m_serial || m_profile == nullptr) {
         return std::unexpected(makeError(ErrorCode::UsageInvalidArgument, "no probe chosen"));
     }
@@ -275,43 +423,86 @@ Status DeviceTabViewModel::openSession(bool connectTarget) {
         return std::unexpected(std::move(opened).error());
     }
     m_session = std::move(*opened);
-    m_queries->setSession(m_session.get());
+    m_connection->touchRememberedProbe();
+    adoptSession(*m_session);
+    return {};
+}
+
+Status DeviceTabViewModel::openBleSession() {
+    if (m_choosing || m_bleId.isEmpty() || m_profile == nullptr || !m_profile->ble) {
+        return std::unexpected(makeError(ErrorCode::UsageInvalidArgument, "no device chosen"));
+    }
+    if (m_context.registry == nullptr || m_context.ble == nullptr) {
+        return std::unexpected(makeError(ErrorCode::InternalUnexpected, "no Bluetooth service"));
+    }
+    const ConnectionOptions& options = m_connection->options();
+    device::BleSessionOptions sessionOptions{.profile = m_profile,
+                                             .deviceId = toStdString(m_bleId),
+                                             .deviceName = toStdString(m_bleName),
+                                             .autoReconnect = options.autoReconnect,
+                                             .consoleFile = std::nullopt,
+                                             .consoleLog = m_consoleLog};
+    if (!options.logToFile) {
+        sessionOptions.consoleFile = std::filesystem::path(); // none
+    }
+    auto opened = device::BleSession::open(*m_context.registry, m_context.ble->host(),
+                                           std::move(sessionOptions));
+    if (!opened) {
+        return std::unexpected(std::move(opened).error());
+    }
+    m_bleSession = std::move(*opened);
+    m_connection->touchRememberedBleDevice();
+    connect(m_bleSession.get(), &device::BleSession::pairingPrompt, this,
+            [this] { m_connection->setPairingPending(true); });
+    connect(m_bleSession.get(), &device::BleSession::pairingFinished, this,
+            [this](const Status&) { m_connection->setPairingPending(false); });
+    adoptSession(*m_bleSession);
+    return {};
+}
+
+void DeviceTabViewModel::adoptSession(device::ConsoleSession& session) {
+    m_queries->setSession(&session);
     // Plan 0028 (D7): `info show` on every Connected (0021 ADR-0166), the console file name.
-    m_infoWatcher = std::make_unique<device::DeviceInfoWatcher>(*m_session, *m_queries);
+    m_infoWatcher = std::make_unique<device::DeviceInfoWatcher>(session, *m_queries);
     connect(m_infoWatcher.get(), &device::DeviceInfoWatcher::infoChanged, this,
             &DeviceTabViewModel::deviceInfoChanged);
     connect(m_infoWatcher.get(), &device::DeviceInfoWatcher::answered, this,
             &DeviceTabViewModel::deviceInfoQueried);
     // Review round 1 (R6): the identity the session adopted (`info show` or the boot banner).
-    connect(m_session.get(), &device::ConsoleSession::firmwareIdentityAdopted, this, [this] {
-        if (m_session) {
-            m_lastIdentity = m_session->adoptedIdentity();
+    connect(&session, &device::ConsoleSession::firmwareIdentityAdopted, this, [this] {
+        if (const device::ConsoleSession* current = consoleSession()) {
+            m_lastIdentity = current->adoptedIdentity();
         }
     });
-    connect(m_session.get(), &device::DeviceSession::connectionChanged, this,
+    connect(&session, &device::ConsoleSession::connectionChanged, this,
             &DeviceTabViewModel::onConnectionChanged);
-    connect(m_session.get(), &device::DeviceSession::warning, this,
+    connect(&session, &device::ConsoleSession::warning, this,
             [this](const Error& warning) { m_connection->setWarning(warning); });
-    m_connection->touchRememberedProbe();
     m_connection->setOpenError(std::nullopt);
-    m_connection->setConnection(m_session->connection());
+    m_connection->setConnection(session.connection());
     sessionChanged(); // signal
     updateState();
-    return {};
 }
 
 void DeviceTabViewModel::releaseSession() {
-    if (!m_session) {
+    std::unique_ptr<device::ConsoleSession> session;
+    if (m_session) {
+        session = std::move(m_session);
+    } else if (m_bleSession) {
+        session = std::move(m_bleSession);
+    } else {
         return;
     }
-    m_session->disconnect(this);
+    session->disconnect(this);
     m_queries->setSession(nullptr);
     resetInfoWatcher();
-    // Joins the worker, releases the probe lock and the registry slot. The worker unloads its
-    // library copy under the process-wide load lock (ADR-0093): this can wait for a library load
-    // of the probe scanner in progress (review S19, see probe_scanner.h).
-    m_session->close();
-    m_retiredSessions.push_back(std::move(m_session));
+    m_connection->setPairingPending(false);
+    // J-Link: joins the worker, releases the probe lock and the registry slot. The worker unloads
+    // its library copy under the process-wide load lock (ADR-0093): this can wait for a library
+    // load of the probe scanner in progress (review S19, see probe_scanner.h). Bluetooth: returns
+    // at once, the BLE thread closes the link (BleSession).
+    session->close();
+    m_retiredSessions.push_back(std::move(session));
     QMetaObject::invokeMethod(this, [this] { m_retiredSessions.clear(); }, Qt::QueuedConnection);
     m_connection->setConnection(std::nullopt);
     sessionChanged(); // signal
@@ -322,13 +513,13 @@ void DeviceTabViewModel::connectDevice() {
     if (m_choosing || isBusy()) {
         return;
     }
-    if (m_session) {
-        const device::ConnectionState current = m_session->connection().state;
+    if (device::ConsoleSession* session = consoleSession()) {
+        const device::ConnectionState current = session->connection().state;
         if (current == device::ConnectionState::Connected ||
             current == device::ConnectionState::Connecting) {
             return;
         }
-        if (current == device::ConnectionState::ProbeOpen) {
+        if (current == device::ConnectionState::ProbeOpen && m_session) {
             // M4 (ADR-0069): promote the probe-only session; the probe lock stays held.
             Status promoted = promoteSession();
             if (promoted) {
@@ -359,7 +550,7 @@ void DeviceTabViewModel::disconnectDevice() {
     if (isBusy()) {
         return;
     }
-    const bool hadSession = static_cast<bool>(m_session);
+    const bool hadSession = consoleSession() != nullptr;
     releaseSession();
     m_connection->setOpenError(std::nullopt);
     if (hadSession) {
@@ -372,13 +563,11 @@ void DeviceTabViewModel::reconnect() {
     if (isBusy() || m_choosing) {
         return;
     }
-    if (m_session && m_session->connection().state == device::ConnectionState::Disconnected) {
-        if (const Status status = m_session->reconnect(); status) {
-            return;
-        }
-    }
-    if (m_session && m_session->connection().state == device::ConnectionState::Connected) {
-        if (const Status status = m_session->reconnect(); status) {
+    device::ConsoleSession* session = consoleSession();
+    if (session != nullptr &&
+        (session->connection().state == device::ConnectionState::Disconnected ||
+         session->connection().state == device::ConnectionState::Connected)) {
+        if (const Status status = session->reconnect(); status) {
             return;
         }
     }
@@ -392,6 +581,7 @@ void DeviceTabViewModel::chooseAnotherProbe() {
     releaseSession();
     m_lastIdentity.reset(); // plan 0028 (D14): another device
     m_connection->setOpenError(std::nullopt);
+    m_pairing = false;
     m_choosing = true;
     titleChanged();         // signal
     configurationChanged(); // signal
@@ -403,7 +593,8 @@ void DeviceTabViewModel::onConnectionChanged(const device::ConnectionEvent& even
     m_connection->setConnection(event);
     switch (event.state) {
     case device::ConnectionState::Connected:
-        addMarker(tr("— connected —"));
+        m_connection->setPairingPending(false);
+        addMarker(isBle() ? tr("— connected (Bluetooth) —") : tr("— connected —"));
         consoleAttached(); // signal (`info show`: m_infoWatcher, plan 0028)
         break;
     case device::ConnectionState::Disconnected:
@@ -422,16 +613,52 @@ void DeviceTabViewModel::onConnectionChanged(const device::ConnectionEvent& even
         // A fatally stopped session is released on the next event-loop turn (never inside its own
         // signal): the probe lock, the library copy and the registry slot are freed, so another
         // program (hwio) can use the probe. Its error stays in the ConnectionViewModel (S18).
-        const QPointer<device::DeviceSession> failed(m_session.get());
+        const QPointer<device::ConsoleSession> failed(consoleSession());
         QMetaObject::invokeMethod(
             this,
             [this, failed] {
-                if (failed && m_session.get() == failed.data() && sessionFailed()) {
+                if (failed && consoleSession() == failed.data() && sessionFailed()) {
                     releaseSession();
                 }
             },
             Qt::QueuedConnection);
     }
+}
+
+// ---- plan 0012: pairing (ADR-0224) -----------------------------------------------------------
+
+void DeviceTabViewModel::pairDevice() {
+    if (!isBle() || m_choosing || m_pairing || isBusy() || m_context.ble == nullptr) {
+        return;
+    }
+    // A session would keep connecting (and fail unpaired) while the system pairs: none meanwhile.
+    releaseSession();
+    m_connection->setOpenError(std::nullopt);
+    const QPointer<DeviceTabViewModel> self(this);
+    const Status started = m_context.ble->pair(
+        toStdString(m_bleId), this, [this, self](const Status& status, bool alreadyPaired) {
+            if (!self) {
+                return;
+            }
+            m_pairing = false;
+            m_connection->setPairing(false);
+            if (!status) {
+                qCInfo(lcGui) << "Pairing failed:" << toQString(idOf(status.error().code));
+                m_connection->setOpenError(status.error());
+                updateState();
+                return;
+            }
+            qCInfo(lcGui) << (alreadyPaired ? "Already paired" : "Paired");
+            connectDevice();
+        });
+    if (!started) {
+        m_connection->setOpenError(started.error());
+        updateState();
+        return;
+    }
+    m_pairing = true;
+    m_connection->setPairing(true);
+    updateState();
 }
 
 // ---- 0021: the firmware in the device (ADR-0166)
@@ -474,7 +701,11 @@ void DeviceTabViewModel::resetInfoWatcher() {
 
 void DeviceTabViewModel::addMarker(const QString& text) {
     m_consoleLog->appendMarker(device::Channel::Shell, toStdString(text));
-    m_consoleLog->appendMarker(device::Channel::Log, toStdString(text));
+    // Plan 0012 (ADR-0082): a Bluetooth console has no log channel; its pane stays hidden while
+    // the channel is empty, so the markers go to the shell only.
+    if (!isBle()) {
+        m_consoleLog->appendMarker(device::Channel::Log, toStdString(text));
+    }
 }
 
 void DeviceTabViewModel::setBusy(const QString& pageId, QString busyText, QString confirmText,
@@ -540,6 +771,15 @@ void DeviceTabViewModel::showToast(QString text) {
 }
 
 // NOLINTNEXTLINE(readability-make-member-function-const): page contract (plan 0004)
+void DeviceTabViewModel::openExternalUrl(const QUrl& url) {
+    if (m_context.openUrl) {
+        m_context.openUrl(url);
+    } else {
+        QDesktopServices::openUrl(url);
+    }
+}
+
+// NOLINTNEXTLINE(readability-make-member-function-const): page contract (plan 0004)
 void DeviceTabViewModel::copyToClipboard(const QString& text, const QString& toast) {
     if (m_context.copyToClipboard) {
         m_context.copyToClipboard(text, toast);
@@ -550,9 +790,17 @@ void DeviceTabViewModel::shutdown() {
     if (m_picker != nullptr) {
         m_picker->setActive(false);
     }
-    if (m_session) {
+    if (m_blePicker != nullptr) {
+        m_blePicker->setActive(false);
+    }
+    if (m_session || m_bleSession) {
         // Pages drop their pointers on sessionChanged (contract), before the session is deleted.
-        std::unique_ptr<device::DeviceSession> session = std::move(m_session);
+        std::unique_ptr<device::ConsoleSession> session;
+        if (m_session) {
+            session = std::move(m_session);
+        } else {
+            session = std::move(m_bleSession);
+        }
         session->disconnect(this);
         m_queries->setSession(nullptr);
         resetInfoWatcher();
@@ -566,6 +814,7 @@ void DeviceTabViewModel::retranslate() {
     titleChanged(); // signal
     m_connection->refresh();
     m_picker->retranslate();
+    m_blePicker->retranslate();
 }
 
 void DeviceTabViewModel::updateState() {
@@ -575,8 +824,8 @@ void DeviceTabViewModel::updateState() {
         state = ChoosingDevice;
     } else if (m_busy) {
         state = Busy;
-    } else if (m_session) {
-        switch (m_session->connection().state) {
+    } else if (const device::ConsoleSession* session = consoleSession()) {
+        switch (session->connection().state) {
         case device::ConnectionState::Connecting:
         case device::ConnectionState::Disconnected: // auto-reconnecting
             state = Connecting;

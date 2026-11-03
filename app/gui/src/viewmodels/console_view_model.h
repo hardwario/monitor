@@ -59,6 +59,7 @@
 
 namespace hwio::device {
 class ConsoleLog;
+class ConsoleSession;
 class DeviceSession;
 struct ConnectionEvent;
 struct OperationResult;
@@ -93,6 +94,12 @@ class ConsoleViewModel : public QObject {
     // Not connected and no lines: the "Not connected" empty state with [Connect].
     Q_PROPERTY(bool showConnectState READ showConnectState NOTIFY stateChanged)
     Q_PROPERTY(bool canReset READ canReset NOTIFY stateChanged)
+    // Plan 0012 (ADR-0079, ADR-0081): the transport can reset the device (not Bluetooth): the
+    // Reset action is shown.
+    Q_PROPERTY(bool hasReset READ hasReset NOTIFY stateChanged)
+    // Plan 0012 (ADR-0082): the log pane is shown (J-Link, or a Bluetooth tab with log lines);
+    // otherwise the shell takes the whole page.
+    Q_PROPERTY(bool showLogPane READ showLogPane NOTIFY stateChanged)
     Q_PROPERTY(bool canReconnect READ canReconnect NOTIFY stateChanged)
     Q_PROPERTY(bool canRunBatch READ canRunBatch NOTIFY stateChanged)
     Q_PROPERTY(quint64 droppedLines READ droppedLines NOTIFY droppedLinesChanged)
@@ -136,6 +143,8 @@ public:
     [[nodiscard]] bool deviceActive() const;
     [[nodiscard]] bool showConnectState() const;
     [[nodiscard]] bool canReset() const;
+    [[nodiscard]] bool hasReset() const;
+    [[nodiscard]] bool showLogPane() const;
     [[nodiscard]] bool canReconnect() const;
     [[nodiscard]] bool canRunBatch() const;
     [[nodiscard]] quint64 droppedLines() const noexcept { return m_droppedLines; }
@@ -249,7 +258,9 @@ private:
     ConsoleLineModel* m_shell = nullptr; // child
     ConsoleLineModel* m_log = nullptr;   // child
     BatchRunner* m_batch = nullptr;      // child
-    QPointer<device::DeviceSession> m_session;
+    // Plan 0012: the tab's console (J-Link or Bluetooth) and, for Reset, the J-Link session.
+    QPointer<device::ConsoleSession> m_session;
+    QPointer<device::DeviceSession> m_operations;
     QTimer m_refreshTimer;
     QTimer m_pollTimer;
     QTimer m_announceTimer;
@@ -273,7 +284,8 @@ private:
     std::uint64_t m_historyRevision = noRevision;
     QString m_historyDraft;
     std::filesystem::path m_lastConsoleFile; // of the previous session (Open log file)
-    bool m_hasLines = false;                 // the log has lines (showConnectState)
+    bool m_showLogPane = true;
+    bool m_hasLines = false; // the log has lines (showConnectState)
     bool m_swapPanes = false;
     int m_pageWidth = 1280;
 };

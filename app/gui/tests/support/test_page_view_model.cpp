@@ -51,6 +51,7 @@ void registerTestPage(AppViewModel& app, const QUrl& qml) {
                        .qml = qml,
                        .order = 30,
                        .global = false,
+                       .needsOperations = false,
                        .createViewModel = [](DeviceTabViewModel* tab) -> QObject* {
                            // Qt parent ownership: the tab.
                            // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)

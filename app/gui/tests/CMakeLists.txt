@@ -68,6 +68,7 @@ endforeach()
 
 add_executable(hwio_gui_tests
     viewmodels/app_view_model_test.cpp
+    viewmodels/ble_gui_test.cpp
     viewmodels/connection_view_model_test.cpp
     viewmodels/console_line_model_test.cpp
     viewmodels/console_view_model_test.cpp
@@ -99,7 +100,8 @@ target_link_libraries(hwio_gui_tests PRIVATE hwio_gui hwio::miniz Qt6::Test GTes
 target_compile_definitions(hwio_gui_tests PRIVATE
     "HWIO_FAKE_JLINK_LIBRARY=\"$<TARGET_FILE:hwio_fake_jlink>\""
     "HWIO_FAKE_JLINK_INCOMPLETE_LIBRARY=\"$<TARGET_FILE:hwio_fake_jlink_incomplete>\""
-    "HWIO_FAKE_NRFUTIL=\"$<TARGET_FILE:hwio_fake_nrfutil>\"")
+    "HWIO_FAKE_NRFUTIL=\"$<TARGET_FILE:hwio_fake_nrfutil>\""
+    "HWIO_BLE_SCENARIOS_DIR=\"${PROJECT_SOURCE_DIR}/tests/ble_scenarios\"")
 # HWIO_CATALOG_URL is honoured only with HWIO_TEST_OVERRIDES (not in Release builds).
 target_compile_definitions(hwio_gui_tests PRIVATE ${HWIO_TEST_OVERRIDES_DEFINE})
 set_target_properties(hwio_gui_tests PROPERTIES AUTOMOC ON)

@@ -31,8 +31,10 @@ Popup {
             color: Theme.text
         }
 
+        // Plan 0012: a Bluetooth tab has only auto-reconnect and the log file.
         Switch {
             objectName: "autoSpeedSwitch"
+            visible: !popover.connection.isBle
             Layout.fillWidth: true
             text: qsTr("Automatic speed")
             checked: popover.connection.autoSpeed
@@ -40,6 +42,7 @@ Popup {
         }
 
         GridLayout {
+            visible: !popover.connection.isBle
             Layout.fillWidth: true
             columns: 2
             columnSpacing: Theme.spacingM
@@ -110,6 +113,7 @@ Popup {
 
         Switch {
             objectName: "resetOnOpenSwitch"
+            visible: !popover.connection.isBle
             Layout.fillWidth: true
             text: qsTr("Reset on connect")
             checked: popover.connection.resetOnOpen
