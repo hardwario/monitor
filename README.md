@@ -25,9 +25,10 @@ HARDWARIO Monitor connects to a CHESTER over a SEGGER J-Link probe and:
 - erases, resets and recovers the application and LTE MCUs, and keeps the device's Product Information Block safe;
 - explains every error: what happened, why, and what to do.
 
+The console also works over **Bluetooth LE**, without a J-Link.
+
 It runs on Windows, macOS and Linux. `hwio`, its command-line sibling, does the same in a terminal and in scripts,
-and adds the console over **Bluetooth LE**, an **MCP server** for AI assistants, low-level target commands and JSON
-output. `hwio` keeps the commands of py-hardwario's `hardwario`, so existing scripts keep working.
+and adds an **MCP server** for AI assistants, low-level target commands and JSON output. `hwio` keeps the commands of py-hardwario's `hardwario`, so existing scripts keep working.
 
 HARDWARIO Monitor 2 is a complete rewrite of the earlier HARDWARIO Monitor.
 
@@ -109,8 +110,8 @@ to PATH**). The installer is signed by HARDWARIO a.s.; while a new release is st
 <summary><b>macOS</b></summary>
 
 Open the DMG and drag **HARDWARIO Monitor** to Applications. The app is signed and notarized. `hwio` is inside the app;
-**Settings → About → Command line** shows the command that links it to `/usr/local/bin/hwio`. The first `hwio ble`
-command asks for Bluetooth access for your terminal.
+**Settings → About → Command line** shows the command that links it to `/usr/local/bin/hwio`. macOS asks for Bluetooth
+access the first time you use Bluetooth in the app or with `hwio ble` (then for your terminal).
 
 </details>
 

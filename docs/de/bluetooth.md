@@ -2,13 +2,41 @@
 
 [Dokumentation](index.md) › Bluetooth LE
 
-CHESTER bietet seine Befehls-Shell über Bluetooth LE an (den Nordic UART Service). HARDWARIO Monitor erreicht sie auf
-der Kommandozeile mit `hwio ble`; dafür sind weder J-Link noch Kabel nötig. Die Desktop-App hat noch kein Bluetooth.
+CHESTER bietet seine Befehls-Shell über Bluetooth LE an (den Nordic UART Service). HARDWARIO Monitor erreicht sie in der
+Desktop-App und auf der Kommandozeile mit `hwio ble`; dafür sind weder J-Link noch Kabel nötig.
 
 Die Shell über Bluetooth funktioniert wie die Konsole über den J-Link: Sie senden Befehle und lesen ihre Antworten,
 und Log-Meldungen, die die Firmware sendet, erscheinen als Log-Zeilen.
 
-## Gerät finden
+## In der Desktop-App
+
+1. Öffnen Sie einen neuen Tab (<kbd>Ctrl</kbd>+<kbd>T</kbd>) und stellen Sie **Connect via** (Verbinden über) auf
+   **Bluetooth** um. Die App merkt sich die Wahl für den nächsten Tab.
+2. Die Liste zeigt die CHESTER-Geräte in der Nähe, das stärkste Signal zuerst, und aktualisiert sich selbst. Filtern
+   Sie sie nach Namen, oder setzen Sie das Häkchen bei **Show all devices** (alle Geräte anzeigen), um jedes
+   Bluetooth-Gerät zu sehen. Ein Gerät, das ein anderer Tab verwendet, ist mit **In use (tab N)** (in Verwendung,
+   Tab N) markiert; wenn Sie es wählen, wechseln Sie zu diesem Tab. Ein Gerät, das ein anderes Programm verwendet, ist
+   mit **In use by another program** (von einem anderen Programm verwendet) markiert und kann nicht gewählt werden.
+3. Wählen Sie das Gerät und drücken Sie **Connect** (Verbinden), oder doppelklicken Sie es, oder drücken Sie
+   <kbd>Enter</kbd>.
+
+Der Tab funktioniert wie ein J-Link-Tab: die Konsole mit Vorschlägen, Verlauf, Suche, Batch-Dateien und
+Konsolendateien ([Konsole](console.md)). Der Log-Bereich erscheint nur, wenn das Gerät Log-Meldungen sendet. Was sich
+unterscheidet:
+
+- Flashen braucht einen J-Link: **Flash** (Flashen) ist in einem Bluetooth-Tab deaktiviert. Öffnen Sie einen
+  J-Link-Tab, um das Gerät zu flashen.
+- **Auto-reconnect** (automatisch neu verbinden) befindet sich im Menü **⋯** der Geräteleiste und ist standardmäßig
+  aus; die App merkt es sich pro Gerät.
+- Das erste Verbinden mit einem Gerät, das noch nicht gekoppelt ist, zeigt **Waiting for pairing — enter the passkey
+  in the system dialog** (warte auf Kopplung — geben Sie den Passkey im Systemdialog ein) und bei Bedarf **Pair**
+  (Koppeln; Linux, Windows). Siehe [Kopplung](#kopplung).
+- Wird das Gerät nicht gefunden, kehrt **Choose another device** (anderes Gerät wählen) zur Liste zurück.
+
+Bluetooth-Tabs kommen nach einem Neustart getrennt zurück; drücken Sie **Connect**. Die App startet Bluetooth erst,
+wenn Sie die Bluetooth-Ansicht zum ersten Mal öffnen, daher fragt macOS erst dann nach dem Bluetooth-Zugriff.
+
+## Gerät finden (Kommandozeile)
 
 ```sh
 hwio ble scan
@@ -22,7 +50,7 @@ Jedes Gerät hat eine **ID**:
 - Linux und Windows: seine Bluetooth-Adresse, zum Beispiel `F1:22:33:44:55:66`.
 - macOS: eine UUID, die macOS dem Gerät zuweist. Sie ist nicht die Bluetooth-Adresse und gilt nur auf diesem Mac.
 
-## Verbinden
+## Verbinden (Kommandozeile)
 
 Wählen Sie das Gerät über seine ID (`-a`) oder über einen Teil seines Namens (`--name`, ohne Beachtung der
 Groß-/Kleinschreibung; genau ein Gerät, das ein 5-Sekunden-Scan findet, muss passen):
@@ -52,9 +80,9 @@ den Passkey nie und gibt ihn nie für Sie ein: Das Betriebssystem fragt danach.
 
 | System | Wie |
 |---|---|
-| Linux | Beim ersten Verbinden oder mit `hwio ble pair -a ID`. Die Bluetooth-Einstellungen des Desktops fragen nach dem Passkey. |
-| Windows | Beim ersten Verbinden oder mit `hwio ble pair -a ID`. Windows fragt nach dem Passkey. |
-| macOS | Nur beim ersten Verbinden; macOS fragt nach dem Passkey. `hwio ble pair` ist unter macOS nicht verfügbar. |
+| Linux | Beim ersten Verbinden, mit **Pair** in der App oder mit `hwio ble pair -a ID`. Die Bluetooth-Einstellungen des Desktops fragen nach dem Passkey. |
+| Windows | Beim ersten Verbinden, mit **Pair** in der App oder mit `hwio ble pair -a ID`. Windows fragt nach dem Passkey. |
+| macOS | Nur beim ersten Verbinden; macOS fragt nach dem Passkey. `hwio ble pair` und **Pair** sind unter macOS nicht verfügbar. |
 
 Wartet das Gerät auf den Passkey, wartet die Verbindung bis zu 60 Sekunden.
 
@@ -77,9 +105,10 @@ Bluetooth-Einstellungen des Systems und koppeln Sie es erneut
 ## Berechtigungen und Adapter
 
 - **Linux:** Bluetooth verwendet BlueZ. Wenn es nicht läuft, starten Sie es mit `sudo systemctl start bluetooth`.
-- **macOS:** Beim ersten Scan fragt macOS nach dem Bluetooth-Zugriff für die App, aus der Sie `hwio` starten (meist
-  Terminal). Wenn Sie abgelehnt haben, erlauben Sie es in **System Settings → Privacy & Security → Bluetooth**
-  (Systemeinstellungen → Datenschutz & Sicherheit → Bluetooth).
+- **macOS:** Beim ersten Scan fragt macOS nach dem Bluetooth-Zugriff: in der App für HARDWARIO Monitor, auf der
+  Kommandozeile für die App, aus der Sie `hwio` starten (meist Terminal). Wenn Sie abgelehnt haben, erlauben Sie es in
+  **System Settings → Privacy & Security → Bluetooth** (Systemeinstellungen → Datenschutz & Sicherheit → Bluetooth);
+  in der App bietet der Fehler **Open Privacy settings** (Datenschutz-Einstellungen öffnen) an.
 - **Alle Systeme:** Schalten Sie den Bluetooth-Adapter ein. `hwio doctor` zeigt, ob er bereit ist.
 
 ## JSON

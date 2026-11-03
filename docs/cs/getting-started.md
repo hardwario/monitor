@@ -3,8 +3,8 @@
 [Dokumentace](index.md) › Začínáme
 
 HARDWARIO Monitor zobrazuje konzoli a log zařízení HARDWARIO CHESTER a flashuje jejich firmware přes sondu SEGGER
-J-Link. Bluetooth LE a server MCP pro asistenty AI jsou k dispozici v příkazové řádce (`hwio`, viz
-[Bluetooth LE](bluetooth.md) a [Server MCP](../en/mcp.md)).
+J-Link. Konzole funguje také přes Bluetooth LE ([Bluetooth LE](bluetooth.md)). Server MCP pro asistenty AI je
+k dispozici v příkazové řádce (`hwio`, viz [Server MCP](../en/mcp.md)).
 
 Než začnete, nainstalujte aplikaci a SEGGER J-Link Software ([Instalace](install.md)).
 

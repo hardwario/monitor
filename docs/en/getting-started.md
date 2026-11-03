@@ -3,8 +3,8 @@
 [Documentation](index.md) › Getting started
 
 HARDWARIO Monitor shows the console and the log of HARDWARIO CHESTER devices and flashes their firmware, over a
-SEGGER J-Link probe. Bluetooth LE and the MCP server for AI assistants are available in the command line
-(`hwio`, see [Bluetooth LE](bluetooth.md) and [MCP server](mcp.md)).
+SEGGER J-Link probe. The console also works over Bluetooth LE ([Bluetooth LE](bluetooth.md)). The MCP server for AI
+assistants is available in the command line (`hwio`, see [MCP server](mcp.md)).
 
 Before you start, install the app and the SEGGER J-Link Software ([Installing](install.md)).
 

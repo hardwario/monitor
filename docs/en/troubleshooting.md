@@ -87,9 +87,7 @@ Error codes: [`dependency.nrfutil_not_found`](#dependency.nrfutil_not_found), [`
 
 ### Bluetooth device not found or pairing fails
 
-Bluetooth is available only in the CLI (`hwio ble ...`).
-
-- Turn Bluetooth on and run `hwio ble scan`. Only devices whose name contains `CHESTER` are shown; `--all` shows every device.
+- Turn Bluetooth on and open the Bluetooth view of the app, or run `hwio ble scan`. Only devices whose name contains `CHESTER` are shown; **Show all devices** in the app and `--all` show every device.
 - Bring the device closer and disconnect it from other phones or computers.
 - If pairing fails, remove the device in the system Bluetooth settings and pair again. On Linux a pairing agent must run to ask for the passkey. See [Pairing](bluetooth.md#pairing).
 
@@ -191,7 +189,7 @@ The message may name the version, as in "nRF Util `<version>` is too old."
 - **Probably:** The computer has no Bluetooth or it is disabled in the system.
 - **What to do:** Enable Bluetooth or connect a USB Bluetooth adapter.
 
-Bluetooth is available only in the CLI (`hwio ble ...`). `hwio doctor` also reports it as a warning. See [Bluetooth](bluetooth.md).
+In the app the error replaces the Bluetooth device list until the adapter is ready. `hwio doctor` also reports it as a warning. See [Bluetooth](bluetooth.md).
 
 <a id="ble.adapter_off"></a>
 #### `ble.adapter_off`
@@ -201,7 +199,7 @@ Bluetooth is available only in the CLI (`hwio ble ...`). `hwio doctor` also repo
 - **Probably:** Bluetooth is turned off in the system settings or with a hardware switch.
 - **What to do:** Turn Bluetooth on in the system settings.
 
-Bluetooth is available only in the CLI (`hwio ble ...`).
+In the app the error replaces the Bluetooth device list until Bluetooth is on.
 
 <a id="ble.permission_denied"></a>
 #### `ble.permission_denied`
@@ -497,7 +495,7 @@ The Product Information Block holds the serial number and hardware version. The 
 - **Probably:** The device is out of range, turned off or its Bluetooth is disabled.
 - **What to do:** Bring the device closer and make sure its Bluetooth is on.
 
-From `hwio ble console` or `hwio ble command` with `--name` or `-a`. Run `hwio ble scan` to see the devices in range. See [Bluetooth](bluetooth.md).
+In the app, **Choose another device** goes back to the device list. On the command line it comes from `hwio ble console` or `hwio ble command` with `--name` or `-a`; run `hwio ble scan` to see the devices in range. See [Bluetooth](bluetooth.md).
 
 <a id="ble.connect_failed"></a>
 #### `ble.connect_failed`
@@ -527,7 +525,7 @@ The device is not running CHESTER firmware with a Bluetooth console.
 - **Probably:** Pairing was cancelled, failed or was removed on one side.
 - **What to do:** Pair the device: enter its passkey when the system asks.
 
-Run `hwio ble pair` (Linux and Windows); on macOS the system asks for the passkey when you connect. See [Pairing](bluetooth.md#pairing).
+Press **Pair** in the app or run `hwio ble pair` (Linux and Windows); on macOS the system asks for the passkey when you connect. See [Pairing](bluetooth.md#pairing).
 
 <a id="ble.pairing_failed"></a>
 #### `ble.pairing_failed`

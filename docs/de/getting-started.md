@@ -3,8 +3,8 @@
 [Dokumentation](index.md) › Erste Schritte
 
 HARDWARIO Monitor zeigt die Konsole und das Log von HARDWARIO-CHESTER-Geräten und flasht ihre Firmware, über eine
-SEGGER-J-Link-Probe. Bluetooth LE und der MCP-Server für KI-Assistenten sind auf der Kommandozeile verfügbar
-(`hwio`, siehe [Bluetooth LE](bluetooth.md) und [MCP-Server](../en/mcp.md)).
+SEGGER-J-Link-Probe. Die Konsole funktioniert auch über Bluetooth LE ([Bluetooth LE](bluetooth.md)). Der MCP-Server
+für KI-Assistenten ist auf der Kommandozeile verfügbar (`hwio`, siehe [MCP-Server](../en/mcp.md)).
 
 Installieren Sie vor dem Start die App und die SEGGER J-Link Software ([Installation](install.md)).
 

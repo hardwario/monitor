@@ -87,9 +87,7 @@ Fehlercodes: [`dependency.nrfutil_not_found`](#dependency.nrfutil_not_found), [`
 
 ### Bluetooth-Gerät nicht gefunden oder Kopplung schlägt fehl
 
-Bluetooth ist nur in der CLI verfügbar (`hwio ble ...`).
-
-- Schalten Sie Bluetooth ein und führen Sie `hwio ble scan` aus. Es werden nur Geräte angezeigt, deren Name `CHESTER` enthält; `--all` zeigt jedes Gerät.
+- Schalten Sie Bluetooth ein und öffnen Sie die Bluetooth-Ansicht der App, oder führen Sie `hwio ble scan` aus. Es werden nur Geräte angezeigt, deren Name `CHESTER` enthält; **Show all devices** (alle Geräte anzeigen) in der App und `--all` zeigen jedes Gerät.
 - Bringen Sie das Gerät näher und trennen Sie es von anderen Telefonen oder Computern.
 - Schlägt die Kopplung fehl, entfernen Sie das Gerät in den Bluetooth-Einstellungen des Systems und koppeln Sie erneut. Unter Linux muss ein Pairing-Agent laufen, der nach dem Passkey fragt. Siehe [Kopplung](bluetooth.md#kopplung).
 
@@ -191,7 +189,7 @@ Die Meldung kann die Version nennen, etwa „nRF Util `<version>` is too old.“
 - **Probably:** The computer has no Bluetooth or it is disabled in the system.
 - **What to do:** Enable Bluetooth or connect a USB Bluetooth adapter.
 
-Bluetooth ist nur in der CLI verfügbar (`hwio ble ...`). `hwio doctor` meldet es ebenfalls als Warnung. Siehe [Bluetooth](bluetooth.md).
+In der App ersetzt der Fehler die Liste der Bluetooth-Geräte, bis der Adapter bereit ist. `hwio doctor` meldet es ebenfalls als Warnung. Siehe [Bluetooth](bluetooth.md).
 
 <a id="ble.adapter_off"></a>
 #### `ble.adapter_off`
@@ -201,7 +199,7 @@ Bluetooth ist nur in der CLI verfügbar (`hwio ble ...`). `hwio doctor` meldet e
 - **Probably:** Bluetooth is turned off in the system settings or with a hardware switch.
 - **What to do:** Turn Bluetooth on in the system settings.
 
-Bluetooth ist nur in der CLI verfügbar (`hwio ble ...`).
+In der App ersetzt der Fehler die Liste der Bluetooth-Geräte, bis Bluetooth eingeschaltet ist.
 
 <a id="ble.permission_denied"></a>
 #### `ble.permission_denied`
@@ -497,7 +495,7 @@ Der Product Information Block enthält die Seriennummer und die Hardware-Version
 - **Probably:** The device is out of range, turned off or its Bluetooth is disabled.
 - **What to do:** Bring the device closer and make sure its Bluetooth is on.
 
-Kommt von `hwio ble console` oder `hwio ble command` mit `--name` oder `-a`. Führen Sie `hwio ble scan` aus, um die Geräte in Reichweite zu sehen. Siehe [Bluetooth](bluetooth.md).
+In der App kehrt **Choose another device** (anderes Gerät wählen) zur Geräteliste zurück. Auf der Kommandozeile kommt er von `hwio ble console` oder `hwio ble command` mit `--name` oder `-a`; führen Sie `hwio ble scan` aus, um die Geräte in Reichweite zu sehen. Siehe [Bluetooth](bluetooth.md).
 
 <a id="ble.connect_failed"></a>
 #### `ble.connect_failed`
@@ -527,7 +525,7 @@ Auf dem Gerät läuft keine CHESTER-Firmware mit Bluetooth-Konsole.
 - **Probably:** Pairing was cancelled, failed or was removed on one side.
 - **What to do:** Pair the device: enter its passkey when the system asks.
 
-Führen Sie `hwio ble pair` aus (Linux und Windows); unter macOS fragt das System beim Verbinden nach dem Passkey. Siehe [Kopplung](bluetooth.md#kopplung).
+Drücken Sie **Pair** (Koppeln) in der App oder führen Sie `hwio ble pair` aus (Linux und Windows); unter macOS fragt das System beim Verbinden nach dem Passkey. Siehe [Kopplung](bluetooth.md#kopplung).
 
 <a id="ble.pairing_failed"></a>
 #### `ble.pairing_failed`

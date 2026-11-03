@@ -87,9 +87,7 @@ Kódy chyb: [`dependency.nrfutil_not_found`](#dependency.nrfutil_not_found), [`d
 
 ### Zařízení Bluetooth nenalezeno nebo párování selhává
 
-Bluetooth je k dispozici jen v CLI (`hwio ble ...`).
-
-- Zapněte Bluetooth a spusťte `hwio ble scan`. Zobrazí se jen zařízení, jejichž název obsahuje `CHESTER`; `--all` ukáže všechna zařízení.
+- Zapněte Bluetooth a otevřete zobrazení Bluetooth v aplikaci, nebo spusťte `hwio ble scan`. Zobrazí se jen zařízení, jejichž název obsahuje `CHESTER`; **Zobrazit všechna zařízení** v aplikaci a `--all` ukážou všechna zařízení.
 - Přibližte zařízení a odpojte ho od jiných telefonů nebo počítačů.
 - Pokud párování selže, odeberte zařízení v systémovém nastavení Bluetooth a spárujte ho znovu. V Linuxu musí běžet párovací agent, který se zeptá na přístupový klíč. Viz [Párování](bluetooth.md#párování).
 
@@ -191,7 +189,7 @@ Zpráva může uvádět verzi, například „nRF Util `<version>` je příliš 
 - **Pravděpodobně:** Počítač nemá Bluetooth nebo je v systému zakázané.
 - **Co dělat:** Povolte Bluetooth nebo připojte USB adaptér Bluetooth.
 
-Bluetooth je k dispozici jen v CLI (`hwio ble ...`). `hwio doctor` to hlásí také jako varování. Viz [Bluetooth](bluetooth.md).
+V aplikaci chyba nahradí seznam zařízení Bluetooth, dokud není adaptér připravený. `hwio doctor` to hlásí také jako varování. Viz [Bluetooth](bluetooth.md).
 
 <a id="ble.adapter_off"></a>
 #### `ble.adapter_off`
@@ -201,7 +199,7 @@ Bluetooth je k dispozici jen v CLI (`hwio ble ...`). `hwio doctor` to hlásí ta
 - **Pravděpodobně:** Bluetooth je vypnuté v nastavení systému nebo hardwarovým vypínačem.
 - **Co dělat:** Zapněte Bluetooth v nastavení systému.
 
-Bluetooth je k dispozici jen v CLI (`hwio ble ...`).
+V aplikaci chyba nahradí seznam zařízení Bluetooth, dokud není Bluetooth zapnuté.
 
 <a id="ble.permission_denied"></a>
 #### `ble.permission_denied`
@@ -497,7 +495,7 @@ Blok informací o produktu obsahuje sériové číslo a verzi hardwaru. Zpráva 
 - **Pravděpodobně:** Zařízení je mimo dosah, vypnuté nebo má vypnuté Bluetooth.
 - **Co dělat:** Přibližte zařízení a ověřte, že má zapnuté Bluetooth.
 
-Pochází z `hwio ble console` nebo `hwio ble command` s `--name` nebo `-a`. Zařízení v dosahu zobrazíte příkazem `hwio ble scan`. Viz [Bluetooth](bluetooth.md).
+V aplikaci **Vybrat jiné zařízení** vás vrátí do seznamu zařízení. V příkazové řádce pochází z `hwio ble console` nebo `hwio ble command` s `--name` nebo `-a`; zařízení v dosahu zobrazíte příkazem `hwio ble scan`. Viz [Bluetooth](bluetooth.md).
 
 <a id="ble.connect_failed"></a>
 #### `ble.connect_failed`
@@ -527,7 +525,7 @@ V zařízení neběží firmware CHESTER s konzolí přes Bluetooth.
 - **Pravděpodobně:** Párování bylo zrušeno, selhalo nebo bylo na jedné straně odstraněno.
 - **Co dělat:** Spárujte zařízení: zadejte jeho přístupový klíč, až se systém zeptá.
 
-Spusťte `hwio ble pair` (Linux a Windows); v macOS se systém na přístupový klíč zeptá při připojení. Viz [Párování](bluetooth.md#párování).
+Stiskněte **Spárovat** v aplikaci nebo spusťte `hwio ble pair` (Linux a Windows); v macOS se systém na přístupový klíč zeptá při připojení. Viz [Párování](bluetooth.md#párování).
 
 <a id="ble.pairing_failed"></a>
 #### `ble.pairing_failed`

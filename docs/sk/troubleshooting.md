@@ -87,9 +87,7 @@ Kódy chýb: [`dependency.nrfutil_not_found`](#dependency.nrfutil_not_found), [`
 
 ### Zariadenie Bluetooth sa nenašlo alebo párovanie zlyhá
 
-Bluetooth je dostupný len v CLI (`hwio ble ...`).
-
-- Zapnite Bluetooth a spustite `hwio ble scan`. Zobrazia sa len zariadenia, ktorých názov obsahuje `CHESTER`; `--all` zobrazí všetky zariadenia.
+- Zapnite Bluetooth a otvorte zobrazenie Bluetooth v aplikácii alebo spustite `hwio ble scan`. Zobrazia sa len zariadenia, ktorých názov obsahuje `CHESTER`; **Show all devices** v aplikácii a `--all` zobrazia všetky zariadenia.
 - Priblížte zariadenie a odpojte ho od iných telefónov alebo počítačov.
 - Ak párovanie zlyhá, odstráňte zariadenie v systémových nastaveniach Bluetooth a spárujte ho znova. V Linuxe musí bežať párovací agent, ktorý sa spýta na prístupový kľúč (passkey). Pozrite si [Párovanie](bluetooth.md#párovanie).
 
@@ -191,7 +189,7 @@ Správa môže uvádzať verziu, napríklad "nRF Util `<version>` is too old."
 - **Probably:** The computer has no Bluetooth or it is disabled in the system.
 - **What to do:** Enable Bluetooth or connect a USB Bluetooth adapter.
 
-Bluetooth je dostupný len v CLI (`hwio ble ...`). `hwio doctor` to hlási aj ako varovanie. Pozrite si [Bluetooth](bluetooth.md).
+V aplikácii chyba nahradí zoznam zariadení Bluetooth, kým adaptér nie je pripravený. `hwio doctor` to hlási aj ako varovanie. Pozrite si [Bluetooth](bluetooth.md).
 
 <a id="ble.adapter_off"></a>
 #### `ble.adapter_off`
@@ -201,7 +199,7 @@ Bluetooth je dostupný len v CLI (`hwio ble ...`). `hwio doctor` to hlási aj ak
 - **Probably:** Bluetooth is turned off in the system settings or with a hardware switch.
 - **What to do:** Turn Bluetooth on in the system settings.
 
-Bluetooth je dostupný len v CLI (`hwio ble ...`).
+V aplikácii chyba nahradí zoznam zariadení Bluetooth, kým nie je Bluetooth zapnutý.
 
 <a id="ble.permission_denied"></a>
 #### `ble.permission_denied`
@@ -497,7 +495,7 @@ Blok informácií o produkte obsahuje sériové číslo a verziu hardvéru. Spr�
 - **Probably:** The device is out of range, turned off or its Bluetooth is disabled.
 - **What to do:** Bring the device closer and make sure its Bluetooth is on.
 
-Z príkazov `hwio ble console` alebo `hwio ble command` s `--name` alebo `-a`. Spustite `hwio ble scan` a pozrite si zariadenia v dosahu. Pozrite si [Bluetooth](bluetooth.md).
+V aplikácii vás **Choose another device** vráti do zoznamu zariadení. V príkazovom riadku pochádza z príkazov `hwio ble console` alebo `hwio ble command` s `--name` alebo `-a`; spustite `hwio ble scan` a pozrite si zariadenia v dosahu. Pozrite si [Bluetooth](bluetooth.md).
 
 <a id="ble.connect_failed"></a>
 #### `ble.connect_failed`
@@ -527,7 +525,7 @@ V zariadení nebeží firmvér CHESTER s konzolou cez Bluetooth.
 - **Probably:** Pairing was cancelled, failed or was removed on one side.
 - **What to do:** Pair the device: enter its passkey when the system asks.
 
-Spustite `hwio ble pair` (Linux a Windows); v macOS sa systém spýta na prístupový kľúč pri pripojení. Pozrite si [Párovanie](bluetooth.md#párovanie).
+Stlačte **Pair** v aplikácii alebo spustite `hwio ble pair` (Linux a Windows); v macOS sa systém spýta na prístupový kľúč pri pripojení. Pozrite si [Párovanie](bluetooth.md#párovanie).
 
 <a id="ble.pairing_failed"></a>
 #### `ble.pairing_failed`
