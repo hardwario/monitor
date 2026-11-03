@@ -3,6 +3,7 @@
 
 #include "fake_clock.h"
 #include "hwio/core/error.h"
+#include "hwio/firmware/firmware_image.h"
 #include "hwio/hw/jlink/rtt_channel.h"
 #include "hwio/hw/jlink/types.h"
 #include "mock_jlink_api.h"
@@ -19,6 +20,7 @@
 #include <span>
 #include <stop_token>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -157,6 +159,45 @@ TEST_F(Rtt, TerminalNotYetRegisteredRestartsTheSearch) {
     ASSERT_TRUE(layout);
     EXPECT_EQ(layout->terminalUp.index, 1);
     EXPECT_EQ(starts, 2);
+}
+
+// HIL H6: the library keeps the control block it found across RTT stop/start (CHESTER's
+// bootloader block right after a reset), so every new search sets the search range again first.
+TEST_F(Rtt, EverySearchAfterTheFirstSetsTheSearchRangeAgain) {
+    target().up = {{.name = "Logger", .size = 1024}};
+    int starts = 0;
+    ON_CALL(api(), rttStart(_)).WillByDefault([&] {
+        if (++starts == 3) {
+            target().up.push_back({.name = "Terminal", .size = 1024});
+        }
+        return 0;
+    });
+    EXPECT_CALL(api(), execCommand(std::string_view("SetRTTSearchRanges 0x20000000 0x40000")))
+        .Times(2)
+        .WillRepeatedly(Return(std::string()));
+    const auto layout =
+        rtt().attach(chesterNames, {}, std::nullopt,
+                     hwio::firmware::AddressRange{.start = 0x20000000, .end = 0x20040000});
+    ASSERT_TRUE(layout);
+    EXPECT_EQ(starts, 3);
+}
+
+// Without a range, or with a fixed control block address, the search range is not touched.
+TEST_F(Rtt, NoSearchRangeOrAFixedBlockAddressLeavesTheSearchRange) {
+    target().up = {{.name = "Logger", .size = 1024}};
+    int starts = 0;
+    ON_CALL(api(), rttStart(_)).WillByDefault([&] {
+        if (++starts % 2 == 0) {
+            target().up.push_back({.name = "Terminal", .size = 1024});
+        }
+        return 0;
+    });
+    EXPECT_CALL(api(), execCommand(_)).Times(0);
+    ASSERT_TRUE(rtt().attach(chesterNames, {}));
+    target().up = {{.name = "Logger", .size = 1024}};
+    ASSERT_TRUE(rtt().attach(chesterNames, {}, 0x20001000U,
+                             hwio::firmware::AddressRange{.start = 0x20000000, .end = 0x20040000}));
+    EXPECT_EQ(starts, 4);
 }
 
 TEST_F(Rtt, LoggerRegisteredLateIsAwaited) {

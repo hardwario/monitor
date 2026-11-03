@@ -396,7 +396,7 @@ private:
     [[nodiscard]] Status attachRtt(const std::stop_token& stop) {
         const jlink::RttNames names{.terminal = std::string(m_config.target->rttTerminal),
                                     .logger = std::string(m_config.target->rttLogger)};
-        auto layout = m_rtt->attach(names, stop, m_config.rttAddress);
+        auto layout = m_rtt->attach(names, stop, m_config.rttAddress, m_config.target->ram);
         if (!layout) {
             return std::unexpected(std::move(layout).error());
         }
@@ -1577,7 +1577,7 @@ private:
             jlink::RttChannel channel(*m_api, clock(), timing, m_config.speedKhz);
             const jlink::RttNames names{.terminal = std::string(target.rttTerminal),
                                         .logger = std::string(target.rttLogger)};
-            auto attached = channel.attach(names, run.stop, m_config.rttAddress);
+            auto attached = channel.attach(names, run.stop, m_config.rttAddress, target.ram);
             channel.stop();
             if (!attached) {
                 Error error = std::move(attached).error();

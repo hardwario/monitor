@@ -388,7 +388,8 @@ the user" and "Review round 1 fixes"). Bullets changed by the review round 1 fix
 - **ADR-0112:** the new icons are SVG text (no LFS); nothing binary was added.
 - **`probe.io_failed`, `TargetProfile::displayName`:** no console-specific handling needed (errors arrive as
   `hio::Error` and are shown as they are; the tab title is the shell's).
-- **H6** (stale bootloader RTT control block right after a reset): seen once in five HIL runs (see HIL below).
+- **H6** (stale bootloader RTT control block right after a reset): seen once in five HIL runs (see HIL below);
+  fixed 2026-11-03 (plan 0002, G1 run 3: the search range is set again before every new search).
 - **Plan 0007** (`ensureSession(bool connectTarget = true)`): the console calls `ensureSession()` with no argument,
   which stays valid with a defaulted parameter.
 

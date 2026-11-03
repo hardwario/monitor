@@ -4,6 +4,7 @@
 #include "hwio/core/json.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
+#include "hwio/firmware/firmware_image.h"
 #include "hwio/hw/jlink/clock.h"
 #include "hwio/hw/jlink/jlink_api.h"
 #include "hwio/hw/jlink/types.h"
@@ -100,7 +101,8 @@ std::string RttChannel::libraryDetail(std::string detail) {
 }
 
 Result<RttLayout> RttChannel::attach(const RttNames& names, const std::stop_token& stopToken,
-                                     std::optional<std::uint32_t> blockAddress) {
+                                     std::optional<std::uint32_t> blockAddress,
+                                     std::optional<firmware::AddressRange> searchRange) {
     stop();
     m_terminalName = names.terminal;
     AttachState state{.deadline = m_clock.now() + m_timing.attachDeadline,
@@ -155,6 +157,21 @@ Result<RttLayout> RttChannel::attach(const RttNames& names, const std::stop_toke
         if (!m_clock.sleepFor(m_timing.staleRetryDelay, stopToken)) {
             return cancelAttach();
         }
+        rearmSearch(searchRange, blockAddress);
+    }
+}
+
+void RttChannel::rearmSearch(const std::optional<firmware::AddressRange>& range,
+                             std::optional<std::uint32_t> blockAddress) {
+    if (!range || range->empty() || blockAddress) {
+        return; // the library's default range, or no search at all
+    }
+    // HIL H6: without this the next RTT start polls the control block found before (seen with
+    // CHESTER's bootloader block at 0x20000410 right after a reset, 10 of 10 attaches).
+    const std::string error = m_api.execCommand(
+        std::format("SetRTTSearchRanges 0x{:08X} 0x{:X}", range->start, range->size()));
+    if (!error.empty()) {
+        qCInfo(log::lcJLink).noquote() << "SetRTTSearchRanges:" << toQString(error);
     }
 }
 

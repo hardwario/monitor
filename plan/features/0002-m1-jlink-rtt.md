@@ -616,6 +616,15 @@ Phase G — hardware and docs
     Terminal not registered yet" until the 15 s deadline; the next run passed. So the stale block is in target RAM
     (a new library copy finds it too), which favours restricting the search range (`SetRTTSearchRanges` from the
     application's RAM, or skipping a block whose Terminal buffer never registers) over reloading the library.
+  - H6 fixed (2026-11-03, with the user's OK). Reliable reproduction: `hwio chester app reset` followed at once by
+    `hwio chester app command "kernel uptime"` failed 10 of 10 (`--log-level debug`: the library logs "RTT CB
+    auto-detected @ 0x20000410" once and never searches again despite 73 RTT stop/start retries). Cause: the
+    library keeps the control block found before across RTT stop/start. Fix: `RttChannel::attach()` takes the
+    target's RAM range (`TargetProfile::ram`, passed by the session worker for the console and Diagnose) and sends
+    `SetRTTSearchRanges <start> <size>` before every new search after the first (not with a fixed block address);
+    GTest `Rtt.EverySearchAfterTheFirstSetsTheSearchRangeAgain`, `Rtt.NoSearchRangeOrAFixedBlockAddressLeavesTheSearchRange`.
+    Re-verified: the same loop 10 of 10 (the bootloader block first, then the application's at `0x2000CB30` after
+    one retry, about 2.7 s per command); the whole `-L hil` suite twice, 13 of 13 pass or skip as designed.
     Clime IAQ v4.0.1 has no `version` shell command ("version: command not found"); the
     attach test still passes because it only waits for any shell output.
 - [ ] G2 Manual checks on Linux, Windows, macOS; record the lowest tested J-Link version (ADR-0029); on Windows
