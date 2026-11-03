@@ -1,6 +1,6 @@
 # ADR-0103 — MCP texts are English in the GUI and the CLI (amends ADR-0027)
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0240: backend error texts reach the AI in the GUI language)
 - **Date:** 2026-10-16
 - **Decided by:** Matej Strnad (M6 planning session)
 
