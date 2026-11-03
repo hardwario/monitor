@@ -89,6 +89,7 @@ make_dmg() {
     # create-dmg (pinned, installed by the workflow): window with the app, an Applications link and
     # the background. --skip-jenkins leaves out the Finder (AppleScript) layout step when no
     # Finder session is available (HWIO_DMG_NO_FINDER=1).
+    # macOS bash 3.2 with set -u: an empty array is "unbound", hence ${finder[@]+...} below.
     local finder=()
     if [ -n "${HWIO_DMG_NO_FINDER:-}" ]; then finder=(--skip-jenkins); fi
     create-dmg \
@@ -97,7 +98,7 @@ make_dmg() {
         --window-pos 200 120 --window-size 660 400 --icon-size 128 \
         --icon "$(basename "$app")" 165 190 --hide-extension "$(basename "$app")" \
         --app-drop-link 495 190 \
-        --no-internet-enable "${finder[@]}" \
+        --no-internet-enable ${finder[@]+"${finder[@]}"} \
         "$dmg" "$staging"
     rm -rf "$staging"
     if [ "$identity" != "-" ]; then
