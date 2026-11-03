@@ -51,9 +51,20 @@
     </message>
 </context>
 <context>
+    <name>hwio::gui::BlePickerViewModel</name>
+    <message numerus="yes">
+        <location filename="../../../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="453"/>
+        <source>%n device(s) found</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="750"/>
+        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="769"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation type="unfinished">
             <numerusform></numerusform>

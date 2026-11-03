@@ -74,6 +74,7 @@ void registerFlashAndSettingsPages(AppViewModel& app) {
                              .qml = qmlUrl("pages/FlashPage.qml"),
                              .order = 20,
                              .global = false,
+                             .needsOperations = true,
                              .createViewModel = [services](DeviceTabViewModel* tab) -> QObject* {
                                  // Qt parent ownership: the tab.
                                  // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
@@ -85,6 +86,7 @@ void registerFlashAndSettingsPages(AppViewModel& app) {
                              .qml = qmlUrl("pages/SettingsPage.qml"),
                              .order = 100,
                              .global = true,
+                             .needsOperations = false,
                              .createViewModel = [&app, services](DeviceTabViewModel*) -> QObject* {
                                  // Qt parent ownership: AppViewModel (contract).
                                  // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)

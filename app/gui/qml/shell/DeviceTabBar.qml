@@ -105,6 +105,17 @@ Rectangle {
                               ? "idle" : tabButton.stableTab.connection.stateKind
                     }
 
+                    // Plan 0012 (ADR-0081): a Bluetooth tab.
+                    Icon {
+                        objectName: "tabBluetooth"
+                        visible: !tabButton.settingsTab && tabButton.stableTab !== null
+                                 && tabButton.stableTab.transport === "ble"
+                                 && tabButton.stableTab.state !== DeviceTabViewModel.ChoosingDevice
+                        symbol: "bluetooth"
+                        size: 16
+                        color: tabButton.selected ? Theme.text : Theme.textMuted
+                    }
+
                     Icon {
                         visible: tabButton.settingsTab
                         symbol: "settings"

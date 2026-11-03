@@ -12,6 +12,7 @@
 #include "hwio/device/completer.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
+#include "hwio/device/console_session.h"
 #include "hwio/device/device_info.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/firmware_identity.h"
@@ -167,9 +168,12 @@ ConsoleViewModel::~ConsoleViewModel() = default;
 // ---- session ------------------------------------------------------------------------------------
 
 void ConsoleViewModel::attachSession() {
-    device::DeviceSession* session = m_tab->session();
+    device::ConsoleSession* session = m_tab->consoleSession();
     if (session == m_session.data()) {
         return;
+    }
+    if (!m_operations.isNull()) {
+        m_operations->disconnect(this);
     }
     if (!m_session.isNull()) {
         // Open log file keeps working after Disconnect (the old session is deleted after this).
@@ -183,14 +187,17 @@ void ConsoleViewModel::attachSession() {
     m_learner->reset(); // learned again after the next attach's `info show`
     m_learningStarted = false;
     m_session = session;
+    m_operations = m_tab->session();
     if (!m_session.isNull()) {
-        connect(m_session, &device::DeviceSession::linesReceived, this,
+        connect(m_session, &device::ConsoleSession::linesReceived, this,
                 &ConsoleViewModel::scheduleRefresh);
-        connect(m_session, &device::DeviceSession::connectionChanged, this,
+        connect(m_session, &device::ConsoleSession::connectionChanged, this,
                 &ConsoleViewModel::onConnectionChanged);
-        connect(m_session, &device::DeviceSession::linesDropped, this,
+        connect(m_session, &device::ConsoleSession::linesDropped, this,
                 &ConsoleViewModel::addDroppedLines);
-        connect(m_session, &device::DeviceSession::operationFinished, this,
+    }
+    if (!m_operations.isNull()) {
+        connect(m_operations, &device::DeviceSession::operationFinished, this,
                 &ConsoleViewModel::onOperationFinished);
     }
     stateChanged(); // signal
@@ -251,9 +258,11 @@ void ConsoleViewModel::refresh() {
     m_log->refresh();
     const bool hasLines = m_consoleLog->size(device::Channel::Shell) > 0 ||
                           m_consoleLog->size(device::Channel::Log) > 0;
-    if (hasLines != m_hasLines) {
+    const bool logPane = showLogPane();
+    if (hasLines != m_hasLines || logPane != m_showLogPane) {
         m_hasLines = hasLines;
-        stateChanged(); // signal: showConnectState
+        m_showLogPane = logPane;
+        stateChanged(); // signal: showConnectState, showLogPane
     }
 }
 
@@ -291,6 +300,9 @@ void ConsoleViewModel::announceNewest() {
 bool ConsoleViewModel::busy() const { return m_tab->isBusy(); }
 
 bool ConsoleViewModel::targetHasConsole() const {
+    if (m_tab->isBle()) {
+        return true; // the NUS shell (ADR-0082)
+    }
     const device::TargetProfile* target =
         device::findTarget(m_tab->profile(), toStdString(m_tab->consoleTargetId()));
     return target != nullptr && !target->rttTerminal.empty();
@@ -316,7 +328,8 @@ QString ConsoleViewModel::inputDisabledReason() const {
         return tr("This target has no console");
     }
     if (m_tab->state() == DeviceTabViewModel::Connecting) {
-        return tr("Connecting…");
+        return m_tab->connection()->pairingPending() ? tr("Waiting for pairing…")
+                                                     : tr("Connecting…");
     }
     return tr("Not connected");
 }
@@ -334,7 +347,13 @@ bool ConsoleViewModel::showConnectState() const {
 }
 
 bool ConsoleViewModel::canReset() const {
-    return !busy() && !m_tab->choosing() && !m_resetOperation;
+    return hasReset() && !busy() && !m_tab->choosing() && !m_resetOperation;
+}
+
+bool ConsoleViewModel::hasReset() const { return !m_tab->isBle(); }
+
+bool ConsoleViewModel::showLogPane() const {
+    return !m_tab->isBle() || m_consoleLog->size(device::Channel::Log) > 0;
 }
 
 bool ConsoleViewModel::canReconnect() const { return !busy() && !m_tab->choosing(); }
@@ -783,18 +802,18 @@ void ConsoleViewModel::reset(bool halt) {
     if (!canReset()) {
         return;
     }
-    if (m_session.isNull()) {
+    if (m_operations.isNull()) {
         if (const Status opened = m_tab->ensureSession(); !opened) {
             setError(opened.error());
             return;
         }
         attachSession();
-        if (m_session.isNull()) {
+        if (m_operations.isNull()) {
             return;
         }
     }
-    auto started = m_session->reset(toStdString(m_tab->consoleTargetId()),
-                                    halt ? device::ResetMode::Halt : device::ResetMode::Go);
+    auto started = m_operations->reset(toStdString(m_tab->consoleTargetId()),
+                                       halt ? device::ResetMode::Halt : device::ResetMode::Go);
     if (!started) {
         setError(std::move(started).error());
         return;

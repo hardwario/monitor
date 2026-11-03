@@ -16,6 +16,12 @@
 // automatic; 0, a missing key or a value outside minSpeedKhz..maxSpeedKhz means automatic (for
 // jlink/speedKhz: the profile's default, automatic for every profile since ADR-0090).
 //
+// Plan 0012 (ADR-0224, ADR-0226): in a Bluetooth tab the bar shows the device name and RSSI, the
+// MTU when connected and "Waiting for pairing" while the system asks for the passkey; the options
+// are auto-reconnect (default off, ble/autoReconnect) and the log file, remembered per device
+// (ble/<sanitised id>/..., the 32 most recently changed devices, ble/recent). The ErrorPanel of
+// ble.not_paired / ble.pairing_failed offers [Pair] (Linux, Windows) or [Connect] (macOS).
+//
 // The connection itself is run by the owning DeviceTabViewModel; this object forwards the actions
 // and presents its state.
 //
@@ -91,6 +97,32 @@ class ConnectionViewModel : public QObject {
     Q_PROPERTY(hwio::gui::ErrorInfo error READ error NOTIFY errorChanged) // invalid when none
     Q_PROPERTY(hwio::gui::ErrorInfo warning READ warning NOTIFY warningChanged)
     Q_PROPERTY(bool canChooseAnotherProbe READ canChooseAnotherProbe NOTIFY errorChanged)
+    // ---- plan 0012: Bluetooth ----
+    Q_PROPERTY(bool isBle READ isBle NOTIFY probeChanged)
+    Q_PROPERTY(QString deviceName READ deviceName NOTIFY probeChanged) // name or id
+    Q_PROPERTY(QString deviceId READ deviceId NOTIFY probeChanged)
+    Q_PROPERTY(int rssi READ rssi NOTIFY stateChanged) // dBm, 0 = unknown
+    Q_PROPERTY(int mtu READ mtu NOTIFY stateChanged)   // 0 until connected
+    // The system asks for the passkey now (BleSession::pairingPrompt).
+    Q_PROPERTY(bool pairingPending READ pairingPending NOTIFY stateChanged)
+    // App-initiated pairing runs (DeviceTabViewModel::pairDevice).
+    Q_PROPERTY(bool pairing READ pairing NOTIFY stateChanged)
+    // The profile's passkey hint ("The passkey is 123456 unless ...", translated).
+    Q_PROPERTY(QString passkeyHint READ passkeyHint NOTIFY probeChanged)
+    // The error is a pairing problem: the ErrorPanel shows pairingHelp and the pairing actions.
+    Q_PROPERTY(bool pairingError READ pairingError NOTIFY errorChanged)
+    Q_PROPERTY(QString pairingHelp READ pairingHelp NOTIFY errorChanged)
+    // [Pair] is offered (Linux, Windows); macOS pairs when connecting (ADR-0084).
+    Q_PROPERTY(bool canPair READ canPair CONSTANT)
+    // [Open Bluetooth settings] (Windows, ms-settings:bluetooth).
+    Q_PROPERTY(bool canOpenBluetoothSettings READ canOpenBluetoothSettings CONSTANT)
+    // [Open Privacy settings] for ble.permission_denied (macOS).
+    Q_PROPERTY(bool canOpenPrivacySettings READ canOpenPrivacySettings CONSTANT)
+    // The ErrorPanel's actions besides the primary one (ADR-0224): [Pair] replaces it for a pairing
+    // error where supported; the secondary one is "Choose another probe / device", "Open Bluetooth
+    // settings" or "Open Privacy settings" ("" = none).
+    Q_PROPERTY(QString customActionText READ customActionText NOTIFY errorChanged)
+    Q_PROPERTY(QString secondaryActionText READ secondaryActionText NOTIFY errorChanged)
 
     Q_PROPERTY(bool autoSpeed READ autoSpeed WRITE setAutoSpeed NOTIFY optionsChanged)
     Q_PROPERTY(int speedKhz READ speedKhz WRITE setSpeedKhz NOTIFY optionsChanged)
@@ -125,6 +157,21 @@ public:
     [[nodiscard]] ErrorInfo error() const { return m_errorInfo; }
     [[nodiscard]] ErrorInfo warning() const { return m_warning; }
     [[nodiscard]] bool canChooseAnotherProbe() const;
+    [[nodiscard]] bool isBle() const;
+    [[nodiscard]] QString deviceName() const;
+    [[nodiscard]] QString deviceId() const { return m_bleId; }
+    [[nodiscard]] int rssi() const;
+    [[nodiscard]] int mtu() const;
+    [[nodiscard]] bool pairingPending() const noexcept { return m_pairingPending; }
+    [[nodiscard]] bool pairing() const noexcept { return m_pairing; }
+    [[nodiscard]] QString passkeyHint() const;
+    [[nodiscard]] bool pairingError() const;
+    [[nodiscard]] QString pairingHelp() const;
+    [[nodiscard]] static bool canPair();
+    [[nodiscard]] static bool canOpenBluetoothSettings();
+    [[nodiscard]] static bool canOpenPrivacySettings();
+    [[nodiscard]] QString customActionText() const;
+    [[nodiscard]] QString secondaryActionText() const;
 
     [[nodiscard]] bool autoSpeed() const noexcept { return m_options.autoSpeed; }
     void setAutoSpeed(bool value);
@@ -155,6 +202,12 @@ public:
     Q_INVOKABLE void dismissError();
     Q_INVOKABLE void dismissWarning();
     Q_INVOKABLE void chooseAnotherProbe();
+    // Plan 0012 (ADR-0224): the pairing actions of the ErrorPanel.
+    Q_INVOKABLE void pairDevice();
+    Q_INVOKABLE void openBluetoothSettings();
+    Q_INVOKABLE void openPrivacySettings();
+    Q_INVOKABLE void triggerCustomAction();
+    Q_INVOKABLE void triggerSecondaryAction();
 
     // ---- driven by the DeviceTabViewModel ----
     [[nodiscard]] const ConnectionOptions& options() const noexcept { return m_options; }
@@ -162,6 +215,11 @@ public:
     void loadOptions(std::optional<std::uint32_t> serial, const device::TargetProfile& target);
     // Marks the probe as recently used (LRU) when its options are remembered.
     void touchRememberedProbe();
+    // Plan 0012: the options of a Bluetooth device (remembered or the defaults).
+    void loadBleOptions(const QString& deviceId, const QString& name);
+    void touchRememberedBleDevice();
+    void setPairingPending(bool pending);
+    void setPairing(bool pairing);
     void setProduct(const QString& product);
     // The state of the tab's session (nullopt = no session).
     void setConnection(std::optional<device::ConnectionEvent> event);
@@ -184,13 +242,18 @@ signals:
 
 private:
     void rememberOptions();
+    void rememberBleOptions();
     void setError(std::optional<Error> error);
 
     DeviceTabViewModel* m_tab; // the parent
     SettingsStore* m_settings; // non-owning, owned by AppViewModel (outlives the tabs)
     ConnectionOptions m_options;
     std::optional<std::uint32_t> m_serial;
-    bool m_remembered = false; // the probe has stored options
+    bool m_remembered = false; // the probe (or Bluetooth device) has stored options
+    QString m_bleId;           // plan 0012: the device of a Bluetooth tab ("" = J-Link)
+    QString m_bleName;
+    bool m_pairingPending = false;
+    bool m_pairing = false;
     QString m_product;
     std::optional<device::ConnectionEvent> m_connection;
     std::optional<Error> m_error;

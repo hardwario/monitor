@@ -237,6 +237,8 @@ Item {
                             iconName: "reset"
                             text: qsTr("Reset")
                             compact: page.compact
+                            // Plan 0012: not over Bluetooth (no Reset capability).
+                            visible: page.vm.hasReset
                             enabled: page.vm.canReset
                             Accessible.description: qsTr("Opens the reset menu")
                             onClicked: resetMenu.popup(resetButton, 0, resetButton.height)
@@ -491,6 +493,8 @@ Item {
                         id: split
 
                         readonly property bool stacked: page.vm.stackedLayout
+                        // Plan 0012 (ADR-0082): a Bluetooth console without log lines: the shell only.
+                        readonly property bool single: !page.vm.showLogPane
                         readonly property int handleSize: 6
                         property real dragRatio: -1
                         readonly property real ratio: (split.dragRatio >= 0 ? split.dragRatio : page.vm.settings.splitRatio) / 100
@@ -500,12 +504,14 @@ Item {
                         objectName: "consoleSplit"
                         anchors.fill: parent
                         visible: !page.vm.showConnectState
+                        onSingleChanged: if (split.single) page.focusedChannel = 0
+                        Component.onCompleted: if (split.single) page.focusedChannel = 0
 
                         Item {
                             id: firstSlot
 
-                            width: split.stacked ? split.width : split.firstExtent
-                            height: split.stacked ? split.firstExtent : split.height
+                            width: split.single || split.stacked ? split.width : split.firstExtent
+                            height: split.single ? split.height : split.stacked ? split.firstExtent : split.height
                         }
 
                         Item {
@@ -521,6 +527,7 @@ Item {
                             id: handle
 
                             objectName: "splitHandle"
+                            visible: !split.single
                             x: split.stacked ? 0 : split.firstExtent
                             y: split.stacked ? split.firstExtent : 0
                             width: split.stacked ? split.width : split.handleSize
@@ -572,7 +579,7 @@ Item {
                             id: shellPane
 
                             objectName: "shellPane"
-                            parent: page.vm.swapPanes ? secondSlot : firstSlot
+                            parent: page.vm.swapPanes && !split.single ? secondSlot : firstSlot
                             anchors.fill: parent
                             onActiveFocusChanged: if (activeFocus) page.focusedChannel = 0
 
@@ -628,6 +635,7 @@ Item {
                             id: logPane
 
                             objectName: "logPane"
+                            visible: !split.single
                             parent: page.vm.swapPanes ? firstSlot : secondSlot
                             anchors.fill: parent
                             onActiveFocusChanged: if (activeFocus) page.focusedChannel = 1

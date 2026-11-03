@@ -119,10 +119,11 @@ TEST_F(AppViewModelTest, TabsAreSavedAndRestoredWithoutConnecting) {
         app->setCurrentTab(1);
         app->saveState();
     }
-    EXPECT_EQ(
-        readRaw(QStringLiteral("ui/tabs")),
-        QStringLiteral(R"({"current":1,"tabs":[{"profile":"chester","sn":801000001,)"
-                       R"("target":"app"},{"profile":"chester","sn":801000002,"target":"lte"}]})"));
+    EXPECT_EQ(readRaw(QStringLiteral("ui/tabs")),
+              // Plan 0012: every entry names its transport.
+              QStringLiteral(R"({"current":1,"tabs":[{"profile":"chester","sn":801000001,)"
+                             R"("target":"app","transport":"jlink"},{"profile":"chester",)"
+                             R"("sn":801000002,"target":"lte","transport":"jlink"}]})"));
     const auto app = makeApp();
     ASSERT_EQ(app->tabs()->count(), 2);
     EXPECT_EQ(app->currentTab(), 1);

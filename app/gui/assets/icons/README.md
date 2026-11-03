@@ -19,6 +19,7 @@ these files. SVG is text and is not stored in Git LFS. The icons are compiled in
 |---|---|---|---|
 | `add.svg` | `add` | new device tab | `e9532de2b9be01ce951e899e98ee673bb97acd574f0db118feb72fe074a1c376` |
 | `batch.svg` | `playlist_play` | Batch… (console) | `64dcbd388d4b67ffc9c9deb5b11b4b1fdfd34bf80fdf75158b18c5941bd7ca4e` |
+| `bluetooth.svg` | `bluetooth` | Bluetooth transport, Bluetooth tabs (0012) | `1c34c68ee9a4c8f8bfea7894c6466a64344fa28d2ee6b792188589b03888204c` |
 | `check.svg` | `check` | done phase (PhaseStepper) | `01edd53418816632be08e9565b8ca40d9028c230a8a67baaf4b8a1de20db00e6` |
 | `clear.svg` | `delete_sweep` | Clear (console) | `2dd920f38f138003e2c6d180143e9ef5bfec1f0219523f70b5b185392d4d485e` |
 | `close.svg` | `close` | close tab, dismiss | `a82592b0faa0b104a4d4b0530bb05c6a4bfed5728f5aad03ae8e7a19f32b5511` |
@@ -46,6 +47,11 @@ these files. SVG is text and is not stored in Git LFS. The icons are compiled in
 | `resume.svg` | `play_arrow` | paused console view | `56b40dffbc6830b7b506f42e6f6e230189d52924bca018ae8ac8f99c4110cd85` |
 | `save.svg` | `save` | Save view… (console) | `3d34bab9e571f0fc0f840662d178377237f5906e87e8ff295dd04e07b8ceea35` |
 | `settings.svg` | `settings` | Settings page | `6aebb4a88b40a5bf1ce378ca532e4a885aedc402a0574562c6ed4ded03360fd2` |
+| `signal_0.svg` | `signal_cellular_0_bar` | Bluetooth signal level 0 (0 = unknown, 0012) | `0ae47ea10ab4546e2a6d854fb3a7986b4b4ba6a5c891d8b4aea0b856c1548720` |
+| `signal_1.svg` | `signal_cellular_1_bar` | Bluetooth signal level 1 (0 = unknown, 0012) | `53530300b9b7c248f8becdb0fae7cb1bf36c9c960c784bf06e311f8fe65b446d` |
+| `signal_2.svg` | `signal_cellular_2_bar` | Bluetooth signal level 2 (0 = unknown, 0012) | `70d120b077bad173f142276d19f1aa104965118df7959fb2fce1ab7d2492e1f3` |
+| `signal_3.svg` | `signal_cellular_3_bar` | Bluetooth signal level 3 (0 = unknown, 0012) | `dbc7ff251ce6521e6c905ffcde392c98e2e4bb9c333e1f9ddba0edb97331651b` |
+| `signal_4.svg` | `signal_cellular_4_bar` | Bluetooth signal level 4 (0 = unknown, 0012) | `f6c3b191ea3fde4aa39963973b640c895a81009b40557f030bb15f743d8c69ee` |
 | `stop.svg` | `stop` | stop the batch | `34b51c2ec96ced6f87cd63fef4adb93bfe0add1d08846a2e9cea787678f6e356` |
 | `success.svg` | `check_circle` | passed check | `42bf0950bc12ecf7952a8c3be86e0131f225095a7dc6c824a659a13df442e373` |
 | `up.svg` | `keyboard_arrow_up` | previous match | `b607540fa7d3fb3d1d051a62da7108b7b6f8af9c7d1d9270d9b8e2b3a3c0bd25` |

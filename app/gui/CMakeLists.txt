@@ -61,6 +61,7 @@ set(HWIO_GUI_QML_FILES
     qml/settings/NrfUtilSection.qml
     qml/settings/SettingsRow.qml
     qml/shell/AdvancedPopover.qml
+    qml/shell/BleDeviceList.qml
     qml/shell/CrashNoticeBanner.qml
     qml/shell/UpdateBanner.qml
     qml/shell/DeviceBar.qml
@@ -118,6 +119,8 @@ qt_add_qml_module(hwio_gui
         src/update_service.h
         src/viewmodels/app_view_model.cpp
         src/viewmodels/app_view_model.h
+        src/viewmodels/ble_picker_view_model.cpp
+        src/viewmodels/ble_picker_view_model.h
         src/viewmodels/connection_view_model.cpp
         src/viewmodels/connection_view_model.h
         src/viewmodels/console_line_model.cpp
@@ -172,6 +175,8 @@ qt_add_qml_module(hwio_gui
         src/wizard/wizard_view_model.h
         src/workers/batch_runner.cpp
         src/workers/batch_runner.h
+        src/workers/ble_service.cpp
+        src/workers/ble_service.h
         src/workers/diag_worker.cpp
         src/workers/diag_worker.h
         src/workers/firmware_loader.cpp
