@@ -1,6 +1,6 @@
 # ADR-0119 — HARDWARIO licence with an LGPLv3 §4 exception for Qt
 
-- **Status:** Superseded by ADR-0206 (the licence; its Qt notices and replaceability still apply)
+- **Status:** Superseded by ADR-0206 (the licence; its Qt notices and replaceability still apply; the written offer superseded by ADR-0230)
 - **Date:** 2026-10-19
 - **Decided by:** Matej Strnad (M7 planning session)
 

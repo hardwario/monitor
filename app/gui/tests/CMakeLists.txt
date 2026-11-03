@@ -54,7 +54,9 @@ foreach(_test IN LISTS _hwio_gui_qml_tests)
     endif()
     # tst_update needs HWIO_UPDATE_URL, honoured only with HWIO_TEST_OVERRIDES (not in Release
     # builds); without it the check would ask the real GitHub API.
-    if(NOT HWIO_TEST_OVERRIDES AND _name STREQUAL "tst_update")
+    # tst_ble (plan 0012) needs the fake BLE API, also a HWIO_TEST_OVERRIDES-only switch (ADR-0087);
+    # without it the shell talks to the runner's real Bluetooth stack.
+    if(NOT HWIO_TEST_OVERRIDES AND _name MATCHES "^tst_(update|ble)$")
         continue()
     endif()
     add_test(NAME "tst_gui.${_name}"
