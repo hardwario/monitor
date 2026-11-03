@@ -1,144 +1,123 @@
-# 0012 — M5 BLE GUI: Bluetooth in the device tab, BlePairing wizard, setup Bluetooth step
+# 0012 — M5 BLE GUI: Bluetooth in Choose device and the device tab
 
-- **Status:** Draft
+- **Status:** In progress (revised 2026-11-03 against the code of `main` c29ffc8; scope split by ADR-0224; approved 2026-11-03 by Matej Strnad; implementation started 2026-11-03 on `strnad/ble-gui-0012-1facc7`)
 - **Milestone:** M5 (plan 2 of 2, ADR-0078)
-- **Author:** Matej Strnad (with Claude), 2026-10-10
-- **Related ADRs:** ADR-0043, ADR-0050, ADR-0052, ADR-0058, ADR-0059, ADR-0061, ADR-0063, ADR-0066, ADR-0067,
-  ADR-0071, ADR-0076, ADR-0077, ADR-0079–ADR-0084, ADR-0086, ADR-0088, ADR-0089
-- **Depends on:** [0011](0011-m5-ble-backend-cli.md) (BLE backend, `ConsoleSession`), [0004](0004-m3-gui-shell.md)
-  (shell, picker, device bar, tab restore), [0005](0005-m3-console.md) (console page),
-  [0007](0007-m4-wizard-framework-diagnostics.md) (wizard contract), [0008](0008-m4-first-run-setup.md) (setup
-  wizard), [0009](0009-m4-connect-and-troubleshooting.md) (topic table)
+- **Author:** Matej Strnad (with Claude), 2026-10-10; revision 2026-11-03
+- **Related ADRs:** ADR-0043, ADR-0050, ADR-0052, ADR-0058, ADR-0059, ADR-0061, ADR-0063, ADR-0079–ADR-0084,
+  ADR-0086, ADR-0089, ADR-0128, ADR-0166, ADR-0181, ADR-0200, ADR-0224, ADR-0225, ADR-0226
+- **Depends on:** [0011](0011-m5-ble-backend-cli.md) (BLE backend, `ConsoleSession`, `BleSession`, `BleScanner`,
+  fake BLE API; phases A–E done), [0004](0004-m3-gui-shell.md) (shell, picker, device bar, tab restore),
+  [0005](0005-m3-console.md) (console page), [0021](0021-gui-feedback-round-1.md) / [0028](0028-gui-feedback-round-2.md)
+  (device info, console file names, flash bar, toasts)
+- **Moved out (ADR-0224):** the BlePairing wizard, the setup-wizard Bluetooth step, the wizard illustrations and
+  the passkey read from the PIB → [0031](0031-ble-pairing-wizard-setup-step.md) (Draft, after 0008 / 0009)
 - **Design system:** [plan/gui/design-system.md](../gui/design-system.md) · **Mockups:** [plan/gui/mockups/](../gui/mockups/index.html)
+
+## Revision 2026-11-03 (what changed against the 2026-10-10 draft)
+
+- Prefix `hio` → `hwio` everywhere (ADR-0181): `hwio::gui`, `hwio ble …`, `hwio chester app pib write`.
+- **Scope split (ADR-0224):** the GUI has the wizard framework (0007) but no registered wizard; 0008 (first-run
+  setup) and 0009 (connect / troubleshooting) are approved and not implemented. G4 (BlePairing wizard) and G5
+  (setup Bluetooth step) depend on them and moved to plan 0031 together with the wizard illustration slots and the
+  PIB passkey read. Until then pairing help lives in the ErrorPanel and the device bar (ADR-0224).
+- **View-model structure (ADR-0225):** no `ChooseDeviceViewModel`; each tab gets a `BlePickerViewModel` next to its
+  `ProbePickerViewModel` and a `transport` property. One `BleHost` + `BleScanner` in `AppViewModel`, created lazily.
+- **Minor defaults confirmed (ADR-0226).**
+- Later GUI plans are respected: device info / `info show` (0021, ADR-0166) and console file names from the
+  firmware identity (0028, ADR-0200) work on any `ConsoleSession` (`DeviceInfoWatcher`, `ShellQueryQueue` already
+  take a `ConsoleSession`); the Flash bar (0028) is part of the Flash page, which a BLE tab disables; toasts and
+  "Copy" (0028, ADR-0202) unchanged.
 
 ## Context
 
 After 0011 the backend and the CLI speak BLE, but the GUI only knows J-Link tabs. The old app had a separate
-Bluetooth page (welcome text, SCAN and CONNECT buttons in the right tool panel, a device list with a name filter,
-RSSI colour and signal icon, a shell without a log pane, a pairing warning "If the pairing window does not appear
-when you connect, try pairing the CHESTER device using the bluetooth system tool", and toasts such as "Bluetooth is
-turned off"). Its pain points: the selection jumped to the top whenever a device appeared, scanning needed a click
-every 5 s, failures were all reported as "probably unpaired", and there was no help beyond the warning text.
-
-Decisions: Bluetooth is a connection type of a device tab with a continuously scanning list (ADR-0081); pairing help
-is a wizard with app-initiated pairing where supported (ADR-0084); the macOS permission and adapter state get a
-setup-wizard step (ADR-0088).
+Bluetooth page (SCAN / CONNECT buttons, a device list with a name filter, RSSI colour, a shell without a log pane,
+the warning "If the pairing window does not appear when you connect, try pairing the CHESTER device using the
+bluetooth system tool", toasts such as "Bluetooth is turned off"). Its pain points: the selection jumped to the top
+whenever a device appeared, scanning needed a click every 5 s, every failure was reported as "probably unpaired",
+and there was no help beyond the warning text. BLE in the GUI is a gap for the first release candidate.
 
 ## Goals / Non-goals
 
-**Goals**
+**Goals (this plan)**
 - Choose-device page: **J-Link | Bluetooth** switch; BLE device list with continuous scan (ADR-0081); Connect.
 - BLE tabs: title, device bar (BLE fields), Console page bound through `ConsoleSession` (ADR-0079), log pane hidden
   while empty, Reset hidden, Flash disabled with a reason, auto-reconnect option, tab restore (ADR-0083).
-- `ble-pairing` wizard (`WizardId::BlePairing`) for every error naming it, and Help → "Pair a Bluetooth device…".
-- Troubleshooting coverage: every `ble.*` code with a wizard is handled by the BlePairing wizard (topic table
-  coverage test extended).
-- Setup wizard: optional **Bluetooth** step (ADR-0088), entry for `ble.permission_denied`.
-- Illustration slots for BLE (ADR-0076), mockups, EN + CS texts, accessibility.
+- Pairing help without a wizard (ADR-0224): device-bar pairing state, ErrorPanel actions [Pair] / [Open Bluetooth
+  settings] / [Open Privacy settings], passkey hint from the profile.
+- Fake-BLE end-to-end path for view-model and Qt Quick tests (`HWIO_FAKE_BLE_SCENARIO`, 0011 / ADR-0087).
+- EN + CS texts, accessibility, mockup entries for the picker and the BLE tab.
 
 **Non-goals**
+- BlePairing wizard, setup-wizard Bluetooth step, wizard illustrations, PIB passkey read → plan 0031.
 - Backend changes (0011). If the GUI needs one, stop and amend 0011.
-- Firmware update over BLE, BLE settings of the device (passkey change) — the passkey is changed with
-  `hio chester app pib write` (later, open question 11).
-- MCP (M6).
+- Firmware update over BLE, BLE settings of the device (passkey change: `hwio chester app pib write`).
+- MCP access to BLE tabs (0014).
 
 ## User experience
 
 ### Choose device (amends ADR-0050 / 0004)
 
 ```
-┌ Choose device ─────────────────────────────────────────────────────────┐
-│  Connect via  [ J-Link | Bluetooth ]          Device [CHESTER ▾]       │
-│                                                                        │
-│  🔍 Filter by name…                          ☐ Show all devices        │
-│  ▂▄▆█  CHESTER-ABC123   F1:22:33:44:55:66   −58 dBm                    │
-│  ▂▄▆_  CHESTER-XYZ789   C0:11:22:33:44:55   −81 dBm  In use (tab 2)    │
-│  ▂___  CHESTER-OLD001   …                   not seen recently (dimmed) │
-│  Scanning…  (spinner)                                       [Connect]  │
+┌ Choose a device to connect ────────────────────────────────────────────┐
+│  Connect via  [ J-Link | Bluetooth ]                                   │
+│ ┌ Device ─────────────────────────────────────────────────────────────┐│
+│ │ 🔍 Filter by name…                           ☐ Show all devices      ││
+│ │ ▂▄▆█  CHESTER-ABC123   F1:22:33:44:55:66   −58 dBm                   ││
+│ │ ▂▄▆_  CHESTER-XYZ789   C0:11:22:33:44:55   −81 dBm  In use (tab 2)   ││
+│ │ ▂___  CHESTER-OLD001   …                   not seen recently (dimmed)││
+│ │ ◌ Scanning for Bluetooth devices…                                   ││
+│ └─────────────────────────────────────────────────────────────────────┘│
+│ ┌ Device type ─ [CHESTER ▾] ───────────────────────────── [Connect] ──┐│
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-- The switch remembers the last choice (`ui/lastTransport`, default `jlink`). The J-Link view is unchanged.
+- The switch remembers the last choice (`ui/lastTransport`, default `jlink`). The J-Link view is unchanged; a new
+  tab opens in the last transport.
 - **Bluetooth view:**
-  - Scans while visible (ADR-0081): restart every 10 s; rows sorted by RSSI but **the selected row keeps its
-    selection and keyboard focus** when the order changes (legacy bug); new rows are announced to screen readers
-    at most once per 5 s ("3 devices found").
-  - Row: signal icon (4 levels: ≥ −55, ≥ −67, ≥ −80, below; RSSI 0 = unknown → no number), name, id (hidden on macOS,
-    where the id is a UUID — shown in the tooltip instead), RSSI, badges "In use (tab N)" (selecting switches to the
-    tab) or "In use by another program (hio, PID 1234)" (row disabled), "not seen recently" (dimmed after 15 s,
-    removed after 60 s).
-  - Filter field (substring, case-insensitive), "Show all devices" (rows without a profile show "Unknown device"
-    and cannot be connected unless a profile is picked in Device).
+  - Scans while visible (ADR-0081): one `BleScanner` scan restarted every 10 s; rows sorted by RSSI, but **the
+    selected row keeps its selection and keyboard focus** when the order changes (legacy bug); new rows are
+    announced to screen readers at most once per 5 s ("3 devices found").
+  - Row: signal icon (4 levels: ≥ −55, ≥ −67, ≥ −80, below; RSSI 0 = unknown → no number), name, id (hidden on
+    macOS, where the id is a UUID — shown in the tooltip instead), RSSI, badges "In use (tab N)" (choosing it
+    switches to the tab) or "In use by another program (hwio, PID 1234)" (row disabled), "not seen recently"
+    (dimmed after 15 s without an advertisement, removed after 60 s).
+  - Filter field (substring of the name or id, case-insensitive), "Show all devices" (rows without a profile show
+    "Unknown device" in the type column and can be connected only with the device type picked below).
   - Exactly one connectable match → preselected. Enter / double-click = Connect.
-  - **Empty state** after the first scan: "No CHESTER found nearby — Make sure the device is powered and its
-    Bluetooth is on." [Pair a device…] (BlePairing wizard) · link "Show all devices".
+  - **Empty state** after the first 10 s scan: "No CHESTER found nearby — Make sure the device is powered and its
+    Bluetooth is on." with the profile's power hint and [Show all devices].
   - **Adapter / permission problems** replace the list with an ErrorPanel (`ble.adapter_not_found`,
-    `ble.adapter_off`, `ble.stack_unavailable`, `ble.permission_denied`) with "Help me fix this"; the panel
-    re-checks every 2 s and disappears when the adapter becomes ready.
+    `ble.adapter_off`, `ble.stack_unavailable`, `ble.permission_denied`); the panel re-checks every 2 s
+    (non-blocking, see Data flow) and disappears when the
+    adapter becomes ready. `ble.permission_denied` on macOS has [Open Privacy settings]
+    (`x-apple.systempreferences:com.apple.preference.security?Privacy_Bluetooth`). "Help me fix this" appears by
+    itself once plan 0031 registers the wizards (ErrorPanel rule of 0007).
 
 ### BLE tab
 
-- **Tab title** `CHESTER · CHESTER-ABC123` with a Bluetooth icon instead of the probe icon; state dot as 0004.
+- **Tab title** `CHESTER · CHESTER-ABC123` (ADR-0081) with the Bluetooth icon instead of the probe icon; state dot
+  as 0004.
 - **Device bar:** `[ᛒ CHESTER-ABC123 · −58 dBm] State text … [Connect | Disconnect | Cancel] [⋯]`
-  - States as 0004, with BLE texts: *Connecting…* → *Waiting for pairing — enter the passkey in the system dialog
-    (default 123456)* (after `pairingPrompt`) → *Connected · MTU 247*; *Reconnecting… (device not in range)*.
-  - ⋯ popover for BLE: Auto-reconnect, "Save console to log file". J-Link fields are not shown. Per-device memory
-    `ble/<id>/autoReconnect` (LRU 32, as ADR-0052).
-  - No target picker (BLE console target is the profile's `consoleTargetId`).
+  - States as 0004 with BLE texts: *Connecting…* → *Waiting for pairing — enter the passkey in the system dialog
+    (default 123456)* (after `pairingPrompt`; the passkey part is the profile's hint) → *Connected · MTU 247*;
+    *Reconnecting… (device not in range)*.
+  - ⋯ popover for BLE: Auto-reconnect, "Save console to log file". J-Link fields (speed, latency, reset on open,
+    target picker) are not shown. Per-device memory `ble/<id>/…` (LRU 32, as ADR-0052).
 - **Rail:** Console; Flash disabled with the tooltip "Flashing needs a J-Link. Open a J-Link tab to flash this
-  device." 
+  device." (ADR-0226).
 - **Console page:** unchanged UI, bound to the tab's `ConsoleSession`. The log pane is hidden while the Log channel
-  is empty (ADR-0082); the shell pane takes the full width; the "Reset ▾" action is hidden (capability `Reset`
-  missing); markers "— connected (Bluetooth) —", "— disconnected: out of range —".
-- **Errors:** ErrorPanel per 0004; primary action for `ble.*` Target codes = Reconnect; `ble.not_paired` and
-  `ble.pairing_failed` primary action = [Pair…] (opens the wizard at its Pair step).
-- **Restore:** BLE tabs are restored Disconnected (ADR-0083). Missing device → `ble.device_not_found` with
-  [Choose another device].
-
-### BlePairing wizard (`ble-pairing`, per tab; ADR-0084)
-
-Steps (ADR-0067 kinds). Step list: Bluetooth · Device · Pair · Test · Done.
-
-1. **Bluetooth** [Checks: `bluetooth`] — adapter present, on, permission (macOS). Not ok → the error's suggestion;
-   on macOS with permission not yet decided: [Allow Bluetooth access] (as the setup step, ADR-0088); denied →
-   [Open Privacy settings] (`x-apple.systempreferences:com.apple.preference.security?Privacy_Bluetooth`). Skipped
-   automatically when Ok and the wizard was opened from a device error.
-2. **Device** [Info, slot `ble-enable`, + Embedded `ble-picker`] — "Make sure the device is powered and its Bluetooth
-   is on." (profile `pairingGuide`); the BLE list of the picker (read-only selection, no Connect). Preselects the
-   tab's device.
-3. **Pair** [Info + Commands, slot `ble-pair-os`] — per OS:
-   - **Linux:** "Click Pair. Your desktop shows a dialog asking for the passkey." [Pair] (default; calls
-     `BleSession::pair()` / a short-lived session). Headless hint with commands in a `CommandBlock`:
-     `bluetoothctl`, `pair <id>`, `trust <id>`.
-   - **Windows:** [Pair] as Linux; secondary [Open Bluetooth settings] (`ms-settings:bluetooth`) with "Add device →
-     Bluetooth → choose the device".
-   - **macOS:** "macOS asks for the passkey when HARDWARIO Monitor connects. Click Connect and enter the passkey."
-     [Connect] (default).
-   - Passkey hint box: the profile's `passkeyHintSourceText` ("The passkey is 123456 unless it was changed when
-     the device was configured."). When another tab has a connected J-Link session to a CHESTER:
-     [Read passkey from that device] → PIB read (M2 `readMemory` + PIB parser) → shows the passkey in the box,
-     never stored, never logged.
-   - "Already paired but it does not work?" → Manual: "Remove CHESTER from the system Bluetooth settings, and on
-     the device clear its bonds (see the CHESTER documentation), then pair again." (`ble.pairing_failed` starts
-     here.)
-4. **Test** [Checks] — connects (or reconnects) the tab's BLE session and shows rows "Connected", "Console
-   service found", "Paired (encrypted)", "Shell answers" (sends an empty line, waits ≤ 3 s for the prompt).
-   [Check again].
-5. **Done** — hand-off [Open console] (default) · [Close].
-
-Start step by error: `ble.adapter_*`, `ble.stack_unavailable` → 1; `ble.device_not_found`, `ble.connect_failed`,
-`ble.disconnected` → 2; `ble.not_paired`, `ble.pairing_failed` → 3; `ble.service_not_found`, `ble.write_failed`,
-`ble.write_timeout` → 4 (with a Manual note: "The firmware may not have the Bluetooth console. Flash firmware with
-it enabled." [Flash firmware…] when 0010 is registered). Help menu: "Pair a Bluetooth device…" opens it at 1 on
-the current tab (or a new Choose-device tab if the current tab is J-Link connected).
-
-### Setup wizard Bluetooth step (amends 0008, ADR-0088)
-
-After nRF Util: **Bluetooth (optional)** [Checks: `bluetooth`]. Body: "Needed only to use the console over
-Bluetooth." Ok / Warning texts from the check; macOS `notDetermined` → [Allow Bluetooth access] (1 s scan to trigger
-the prompt, then re-check); denied → [Open Privacy settings]. [Skip] is the default when not Ok. Done's summary
-gains "Bluetooth ✓ / – skipped". `ble.permission_denied` ("Help me fix this") starts the setup wizard at this
-step.
+  is empty (ADR-0082) and the shell pane takes the full width; the "Reset ▾" action is hidden (no `Reset`
+  capability); markers "— connected (Bluetooth) —", "— disconnected: out of range —". Batch, history, find,
+  suggestions and `info show` (0021) work as on J-Link.
+- **Errors:** ErrorPanel per 0004; primary action for `ble.*` codes = Reconnect, except:
+  - `ble.not_paired`, `ble.pairing_failed` (ADR-0224): primary [Pair] on Linux / Windows (`BleSession::pair()`,
+    then reconnect on success), [Connect] on macOS (pairing happens on connect); secondary [Open Bluetooth
+    settings] on Windows (`ms-settings:bluetooth`); the body adds the passkey hint and "Already paired but it does
+    not work? Remove the device in the system Bluetooth settings and pair it again."
+  - `ble.device_not_found`: [Choose another device].
+- **Restore:** BLE tabs are restored Disconnected (ADR-0083); a missing device gives `ble.device_not_found` on
+  Connect.
 
 ### Shortcuts
 
@@ -150,7 +129,7 @@ English source texts as above. Czech is translated in Qt Linguist as part of don
 
 ## CLI
 
-None new (0011 has `hio ble …`).
+None new (0011 has `hwio ble scan | console | command | pair`).
 
 ## Design
 
@@ -158,95 +137,96 @@ None new (0011 has `hio ble …`).
 
 ```
 app/gui/src/
-  viewmodels/ble_picker_view_model.*     BLE list model over BleScanner (roles below)
-  viewmodels/choose_device_view_model.*  transport switch; owns ProbePickerViewModel + BlePickerViewModel
-  viewmodels/device_tab_view_model.*     + transport, consoleSession(), openBle()
-  viewmodels/connection_view_model.*     + BLE fields
-  viewmodels/console_view_model.*        binds ConsoleSession (amends 0005)
-  wizard/ble_pairing_wizard.*            BlePairingWizard : Wizard ("ble-pairing", per tab)
-  wizard/setup_wizard.*                  + Bluetooth step (amends 0008)
-  workers/                               BleHost owned by AppViewModel (0011 type; no new worker)
-qml/pages/ChooseDevicePage.qml (+ TransportSwitch), qml/shell/BleDeviceList.qml, DeviceBar.qml (BLE variant)
-assets/wizard/ ble-enable.svg ble-pair-os.svg (placeholders, LFS)  assets/icons/bluetooth*.svg, signal_cellular_*.svg
-tests/ viewmodels/ble_picker_test.cpp, wizard/ble_pairing_wizard_test.cpp, tst_ble_picker.qml, tst_ble_tab.qml
+  viewmodels/ble_picker_view_model.*     BLE list model over the shared BleScanner (roles below) — new
+  workers/ble_service.*                  owns BleHost + BleScanner (lazy), scan refcount, adapter polling — new
+  viewmodels/device_tab_view_model.*     + transport, blePicker, consoleSession(), configureBle(), BleSession
+  viewmodels/connection_view_model.*     + BLE fields and BLE option memory
+  viewmodels/console_view_model.*        binds ConsoleSession; operations only through DeviceSession
+  viewmodels/app_view_model.*            BleService, ui/lastTransport, tab restore with transport, BLE in-use
+  viewmodels/page_registry.h             PageDescriptor::needsOperations (Flash)
+qml/pages/ChooseDevicePage.qml (+ TransportSwitch), qml/shell/BleDeviceList.qml, DeviceBar.qml / AdvancedPopover.qml
+  (BLE variant), NavRail.qml (disabled reason), ConsolePage.qml (log pane hidden while empty)
+assets/icons/bluetooth.svg, signal_0..signal_4.svg (ADR-0060 subset additions, LFS rules unchanged: SVG is text)
+tests/ viewmodels/ble_picker_test.cpp, viewmodels/ble_tab_test.cpp, tst_ble.qml (fake BLE scenarios)
 ```
 
-### View models (sketch, `hio::gui`)
+### View models (`hwio::gui`)
 
 ```cpp
-class BlePickerViewModel : public QAbstractListModel {     // parent = ChooseDeviceViewModel
-    enum Roles { IdRole = Qt::UserRole + 1, NameRole, RssiRole, SignalLevelRole /*0–4*/, ProfileRole /*id or ""*/,
-                 InUseTabRole /*-1*/, InUseOtherRole /*"hio, PID 1234" or ""*/, StaleRole, ConnectableRole };
-    Q_PROPERTY(QString filterText ...) Q_PROPERTY(bool showAll ...) Q_PROPERTY(QString selectedId ...)
-    Q_PROPERTY(bool scanning ...) Q_PROPERTY(hio::gui::ErrorInfo adapterError ...) Q_PROPERTY(bool hidesIds ...)
-    Q_INVOKABLE void connectSelected();
-    void setVisible(bool);                                  // starts/stops the BleScanner (visibility count)
+// Owned by AppViewModel; GUI thread. BleHost created on the first acquire() (ADR-0225).
+class BleService : public QObject {
+    void acquireScan(); void releaseScan();                  // refcount; scan runs while > 0, restart 10 s
+    [[nodiscard]] const std::vector<ble::BleDeviceInfo>& devices() const;
+    [[nodiscard]] std::optional<Error> adapterError() const;  // polled every 2 s while scanning or failing
+    [[nodiscard]] ble::BleHost& host();                       // creates it
+    signals: void devicesChanged(); void adapterChanged();
 };
 
-class ChooseDeviceViewModel : public QObject {
-    Q_PROPERTY(QString transport READ transport WRITE setTransport NOTIFY transportChanged)   // "jlink" | "ble"
-    Q_PROPERTY(ProbePickerViewModel* probes ...) Q_PROPERTY(BlePickerViewModel* ble ...)
+class BlePickerViewModel : public QAbstractListModel {      // child of DeviceTabViewModel
+    enum Roles { IdRole = Qt::UserRole + 1, NameRole, RssiRole, SignalLevelRole /*0–4*/, ProfileRole /*id or ""*/,
+                 InUseTabRole /*-1*/, InUseOtherRole /*"hwio, PID 1234" or ""*/, StaleRole, ConnectableRole };
+    Q_PROPERTY(bool active ...) Q_PROPERTY(QString filterText ...) Q_PROPERTY(bool showAll ...)
+    Q_PROPERTY(int selectedRow ...) Q_PROPERTY(bool canConnect ...) Q_PROPERTY(bool scanning ...)
+    Q_PROPERTY(bool scanned ...) Q_PROPERTY(hwio::gui::ErrorInfo adapterError ...) Q_PROPERTY(bool hidesIds ...)
+    Q_PROPERTY(QString profileId ...) Q_PROPERTY(QString announcement ...)   // a11y, ≤ 1 per 5 s
+    Q_INVOKABLE void choose(int row); Q_INVOKABLE void connectSelected();
+    signals: void connectRequested(QString id, QString name, QString profileId);
 };
 
 // DeviceTabViewModel (0004) amendment
-Q_PROPERTY(QString transport READ transport NOTIFY sessionChanged)              // "jlink" | "ble" | ""
-[[nodiscard]] hio::device::ConsoleSession* consoleSession() const;              // J-Link or BLE, nullptr if none
-// session() stays: the J-Link DeviceSession*, nullptr for BLE tabs (Flash page and Diagnose use it)
-[[nodiscard]] Status openBle(const hio::ble::BleDeviceId&, const std::string& name);  // BleSession::open with the tab's log
-[[nodiscard]] hio::device::BleSession* bleSession() const;                      // wizard Pair / Test
+Q_PROPERTY(QString transport READ transport WRITE setTransport NOTIFY transportChanged) // "jlink" | "ble"
+Q_PROPERTY(hwio::gui::BlePickerViewModel* blePicker READ blePicker CONSTANT)
+[[nodiscard]] device::ConsoleSession* consoleSession() const;   // J-Link or BLE, nullptr if none
+// session() stays: the J-Link DeviceSession*, nullptr for BLE tabs (Flash page, Diagnose, Reset use it)
+[[nodiscard]] device::BleSession* bleSession() const;           // pairing action
+bool configureBle(const QString& profileId, const QString& deviceId, const QString& name);
+Q_INVOKABLE QString pageDisabledReason(const QString& pageId) const;  // "" = enabled
 ```
 
-- `ConsoleViewModel` (0005) connects to `tab.consoleSession()` on `sessionChanged`; `reset()` is not exposed when
-  `capabilities()` lacks `Reset`; `inputDisabledReason` texts gain "Waiting for pairing…".
-- Flash page (0006) `enabled = tab.transport != "ble"` with the reason text above.
-- `ConnectionViewModel`: `transport`, `deviceName`, `rssi`, `mtu`, `pairingPending`; J-Link fields hidden for BLE.
-- Tab restore (0004, ADR-0083): `ui/tabs` entries `{transport, profile, …}`; reading an entry without `transport`
-  = `jlink`; schema bump with no-op migration.
-
-### Wizard registration and coverage
-
-- `WizardRegistry::add({WizardId::BlePairing, perTab = true, …})`. The `bluetooth` check and the Test step use
-  `DiagWorker` (environment check) and the tab's `BleSession` (test).
-- 0009's coverage test is extended: every error code whose wizard is BlePairing maps to a BlePairing start step
-  (table above); `ble.permission_denied` maps to the setup wizard's Bluetooth step.
-- New Embedded step name `ble-picker` (0007 contract: one more allowed value of `WizardStep::embedded`).
+- `ConsoleViewModel` (0005) follows `tab.consoleSession()` on `sessionChanged`; Reset uses `tab.session()` and
+  `canReset` is false without the `Reset` capability; `hasLogChannel` (capability `LogChannel`) drives the log
+  pane; `inputDisabledReason` gains "Waiting for pairing…".
+- `ConnectionViewModel`: `transport`, `deviceName`, `rssi`, `mtu`, `pairingPending`; BLE options autoReconnect
+  (default false, ADR-0226) and logToFile remembered per device id (`ble/<sanitised id>/…`, `ble/recent`, LRU 32).
+- Tab restore (0004, ADR-0083): `ui/tabs` entries gain `transport`; BLE entries `{transport: "ble", profile, id,
+  name}`; an entry without `transport` is `jlink` (no schema bump needed: the reader accepts both).
+- `PageDescriptor::needsOperations` (Flash = true); the rail disables such a page for a tab without the
+  `Operations` capability / with transport `ble` and shows `pageDisabledReason` as the tooltip.
 
 ### Data flow and threading
 
-- GUI thread: all view models, `BleScanner` and `BleSession` façades. The `BleHost` (0011) is owned by
-  `AppViewModel`, created lazily on the first Bluetooth use (so users who never use BLE never start the thread or
-  trigger the macOS prompt), stopped on quit after all tabs closed their sessions.
-- One `BleScanner` for the app; pickers and the wizard register visibility; scanning stops when no picker is
-  visible and no BLE session is reconnecting.
+- GUI thread: all view models, `BleScanner` and `BleSession` façades. `BleService` (owned by `AppViewModel`)
+  creates the `BleHost` (0011) on the first Bluetooth use (Bluetooth view shown, BLE tab connects), so users who
+  never use BLE never start the thread or trigger the macOS prompt; it is stopped on quit after all tabs closed
+  their sessions (`BleHost::stop`, ADR-0130).
+- One `BleScanner` for the app; pickers hold a scan reference while active; scanning stops when no Bluetooth picker
+  is visible. `BleSession` auto-reconnect scans by itself (0011).
+- The adapter state is read without blocking the GUI thread: every 2 s while a Bluetooth picker is visible,
+  `BleService` posts `QueryAdapter{reply}` (0011 command) and reads the reply queue on the next tick (a reply older
+  than one tick is dropped); `BleHost::queryAdapter` (blocking) is not used in the GUI.
 
 ### Error cases (GUI-originated)
 
-| Situation | Code | Shown as | Wizard |
-|---|---|---|---|
-| Device chosen without a profile ("Show all") | `usage.invalid_argument` | inline: "Choose a device type first." | — |
-| Restored BLE tab, device gone | `ble.device_not_found` (0011) | ErrorPanel + [Choose another device] | BlePairing |
-| PIB read for the passkey failed | the M2 error | inline in the passkey box | — |
+| Situation | Code | Shown as |
+|---|---|---|
+| Device chosen without a profile ("Show all") | `usage.invalid_argument` | inline: "Choose a device type first." |
+| Restored BLE tab, device gone | `ble.device_not_found` (0011) | ErrorPanel + [Choose another device] |
+| [Pair] on macOS | `ble.pairing_not_supported` (0011) | not offered (macOS gets [Connect]) |
 
 ### Settings keys added (ADR-0025)
 
 | Key | Type | Default |
 |---|---|---|
 | `ui/lastTransport` | string `jlink`\|`ble` | `jlink` |
-| `ui/tabs` | (0004) entries gain `transport`, BLE entries `{transport, profile, id, name}` | — |
+| `ui/tabs` | (0004) entries gain `transport`; BLE entries `{transport, profile, id, name}` | — |
 | `ble/autoReconnect` | bool | `false` |
-| `ble/<id>/autoReconnect` | per device, LRU 32 | — |
-
-### Illustration slots (ADR-0076)
-
-| Slot | Shows | Caption source text |
-|---|---|---|
-| `ble-enable` | CHESTER powered, Bluetooth enabled, laptop nearby | from the profile `pairingGuide` |
-| `ble-pair-os` | a system passkey dialog next to CHESTER | from the profile `pairingGuide` |
+| `ble/<sanitised id>/autoReconnect`, `…/logToFile`; `ble/recent` | per device, LRU 32 | — |
 
 ### Limits
 
 Scan restart 10 s, stale 15 s, removal 60 s, list ≤ 256 (backend), screen-reader announcements ≤ 1 per 5 s,
-adapter re-check 2 s, Test step prompt wait 3 s, remembered BLE devices 32.
+adapter re-check 2 s, remembered BLE devices 32, BleHost links ≤ 8 (backend; BLE tabs beyond that
+get `internal.session_limit`).
 
 ## Decisions requiring user confirmation
 
@@ -254,46 +234,50 @@ adapter re-check 2 s, Test step prompt wait 3 s, remembered BLE devices 32.
 |---|---|---|---|
 | Where BLE lives in the GUI | connection type in tab / BLE rail page / global page | connection type in the device tab | ADR-0081 |
 | Scan in the GUI | continuous while visible / manual button | continuous while visible | ADR-0081 |
-| Pairing help | OS + wizard + app-initiated pairing | as decided | ADR-0084 |
-| Passkey hint | default 123456 / label / PIB only | default 123456, optional PIB read | ADR-0084 |
-| Bluetooth step in setup | setup step / pairing wizard only | setup step (optional) + doctor | ADR-0088 |
+| Pairing help | OS + wizard + app-initiated pairing | as decided; wizard part moved to 0031 | ADR-0084, ADR-0224 |
+| Passkey hint | default 123456 / label / PIB only | default 123456; PIB read in 0031 | ADR-0084, ADR-0224 |
 | Tab restore for BLE | restore / no | restore Disconnected | ADR-0083 |
-| Minor defaults: signal thresholds (−55 / −67 / −80 dBm, from the old app), hide ids on macOS, `ui/lastTransport`, lazy `BleHost`, Flash disabled text, wizard steps and start mapping above | accept / change | _pending_ | — |
+| Split (2026-11-03) | phase 1 now + G4/G5 to a new plan / phase 2 in 0012 / wait for 0008/0009 | phase 1 now, G4/G5 → 0031 | ADR-0224 |
+| Pairing help until the wizard (2026-11-03) | ErrorPanel actions / text only | ErrorPanel actions ([Pair], settings links, hint) | ADR-0224 |
+| View-model structure (2026-11-03) | BlePickerViewModel per tab / ChooseDeviceViewModel | BlePickerViewModel per tab, lazy BleService | ADR-0225 |
+| Minor defaults (2026-11-03): thresholds −55/−67/−80 dBm, macOS ids hidden, `ui/lastTransport` = jlink, scan restart 10 s, stale 15 s / removed 60 s, Flash text, BLE auto-reconnect off | accept / change | accepted | ADR-0226 |
 
 ## Implementation steps
 
-- [ ] G0 Prerequisite check: 0011 phases A–C done; 0004, 0005, 0007 (phase C), 0008, 0009 done (otherwise stop and
-  report)
-- [ ] G1 `ChooseDeviceViewModel`, `BlePickerViewModel` (+ selection stability, stale rows, announcements) + GTest
-- [ ] G2 `DeviceTabViewModel` transport + `consoleSession()` + `openBle`; `ConsoleViewModel` on `ConsoleSession`;
-  Flash page disabled reason; tab restore schema + migration + GTest
-- [ ] G3 QML: transport switch, `BleDeviceList`, BLE device bar, popover; icons (ADR-0060 subset additions)
-- [ ] G4 `BlePairingWizard` (steps, OS variants, start mapping, PIB passkey read) + coverage test + GTest
-- [ ] G5 Setup wizard Bluetooth step (0008 amendment) + GTest
-- [ ] G6 Illustration placeholders (LFS), mockups (`gui/mockups/index.html`: BLE picker, BLE tab, pairing wizard),
-  design-system component entries
-- [ ] G7 Accessibility, Czech translation, `.ts` fresh; screenshots (light/dark, EN/CS, 960 × 600)
+- [ ] G0 Prerequisite check: 0011 phases A–E done; 0004, 0005, 0021, 0028 implemented (otherwise stop and report)
+- [ ] G1 `BleService`, `BlePickerViewModel` (+ selection stability, stale rows, filter, show all, in-use badges,
+  announcements, adapter error) + GTest with the fake BLE API
+- [ ] G2 `DeviceTabViewModel` transport + `consoleSession()` + `configureBle` + BLE session lifecycle and markers;
+  `ConsoleViewModel` on `ConsoleSession`; `ConnectionViewModel` BLE fields and option memory; pairing actions;
+  `needsOperations` / Flash disabled reason; tab restore with `transport` + GTest
+- [ ] G3 QML: transport switch, `BleDeviceList`, BLE device bar and popover, rail disabled reason, console log pane
+  hidden while empty; icons (ADR-0060 subset additions)
+- [ ] G6 Mockups (`gui/mockups/index.html`: BLE picker, BLE tab) and design-system component entries
+- [ ] G7 Accessibility, Czech translation (0 unfinished), `.ts` fresh; Qt Quick tests with the fake BLE scenario;
+  screenshots (light/dark, EN/CS, 960 × 600)
+
+(G4, G5 → plan 0031.)
 
 ## Tests and verification
 
-- **GTest (fake BLE scenarios from 0011):** picker filtering, `showAll`, in-use badges (other tab, other process
-  via a held `BleLock`), selection kept while RSSI reorders, stale/removal timing (fake clock), adapter error
-  appears/disappears; BLE tab lifecycle (connect, pairing prompt state, reconnect, close), the tab's `ConsoleLog`
-  survives a BLE reconnect; restore with and without `transport`; BlePairing start step for every BLE code; Pair on
-  a "macOS" scenario shows the macOS step; setup step on all adapter states.
+- **GTest (fake BLE scenarios from 0011, `tests/ble_scenarios/`):** picker filtering, `showAll`, in-use badges
+  (other tab, other process via a held `BleLock`), selection kept while RSSI reorders, stale/removal timing (fake
+  clock), adapter error appears/disappears (`adapter_off`, `permission_denied`, `no_adapter`); BLE tab lifecycle
+  (connect, pairing prompt state, reconnect, disconnect, close), the tab's `ConsoleLog` survives a BLE reconnect;
+  `info show` on Connected; Reset hidden, log pane flag; [Pair] on `not_paired`; restore with and without
+  `transport`; Flash page disabled reason.
 - **Qt Quick Tests:** picker and BLE tab in light/dark; 960 × 600 in Czech (geometry); keyboard-only connect;
-  Flash rail item disabled with tooltip; log pane hidden while empty; wizard steps.
-- **`qmllint`** clean; no logic in QML.
-- **Sanitizers:** ASan+UBSan and TSan run the view-model tests with the fake BLE backend.
-- **HIL (CHESTER with Bluetooth shell):** pick from the list and connect; pairing from a fresh bond through the
-  wizard on each OS; one J-Link tab and one BLE tab to the same CHESTER; out of range → reconnect.
-- **Manual (by the user, before Done):** Linux, Windows 10/11, macOS 13.3+: first-run Bluetooth step (macOS prompt),
-  denied permission → wizard, adapter off, screen reader announcement of new devices.
+  Flash rail item disabled with tooltip; log pane hidden while empty.
+- **`qmllint`** clean; no logic in QML; `linux-tidy` zero findings; clang-format; `check_translations`.
+- **Sanitizers:** ASan+UBSan and TSan run the view-model tests with the fake BLE backend (CI).
+- **HIL (CHESTER with Bluetooth shell, not run by the implementing agent):** pick from the list and connect;
+  pairing from a fresh bond via [Pair] on each OS; one J-Link tab and one BLE tab to the same CHESTER; out of range
+  → reconnect.
+- **Manual (by the user, before Done):** Linux, Windows 10/11, macOS 13.3+: permission prompt on first Bluetooth
+  view (macOS), denied permission → [Open Privacy settings], adapter off, screen-reader announcement.
 
 ## Risks and open points
 
-- **Windows pairing UI** may not show a passkey dialog for app-initiated pairing (0011 risk); the wizard then
-  falls back to "Open Bluetooth settings".
+- **Windows pairing UI** may not show a passkey dialog for app-initiated pairing (0011 risk); the ErrorPanel then
+  offers "Open Bluetooth settings".
 - **Many advertising devices** (offices, fairs) make the "Show all" list long; bounded to 256 and filterable.
-- **Illustrations** are placeholders until the HARDWARIO content task (open question 22) also covers BLE.
-- **Passkey read from PIB** requires a J-Link tab; most BLE users will not have one, so the default hint matters.
