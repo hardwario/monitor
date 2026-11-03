@@ -18,6 +18,8 @@
 //     "id": "F1:22:33:44:55:66", "name": "CHESTER-ABC123", "rssi": -58,
 //     "nus": true,                    advertises the NUS service UUID
 //     "advertise": true,              seen by scans
+//     "rssiZeroEvery": 0,             > 0: every n-th advertisement reports RSSI 0 (unknown), as
+//                                     BlueZ does for cached devices (HIL 2026-11-03 H14)
 //     "paired": true,                 IBleApi::isPaired
 //     "pairing": "ok" | "fail" | "noAgent" | "never",   result of requestPairing (after 100 ms;
 //                                     noAgent = ble.no_pairing_agent, HIL H1)
@@ -78,6 +80,8 @@ struct FakeDevice {
     int rssi = -60;
     bool nus = true;
     bool advertise = true;
+    int rssiZeroEvery = 0;
+    int advertisements = 0; // reported so far (rssiZeroEvery)
     bool paired = true;
     std::string pairing = "ok";
     int connectDelayMs = 20;

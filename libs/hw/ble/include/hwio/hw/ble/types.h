@@ -81,6 +81,9 @@ inline constexpr std::uint16_t attWriteHeader = 3;
 // QBluetoothAddress), a UUID (macOS) in QUuid's form without braces ("6a0b3f1c-..."); anything else
 // trimmed and unchanged. Scan rows use the same form (QtBleApi).
 [[nodiscard]] BleDeviceId canonicalDeviceId(std::string_view id);
+// A Bluetooth address or a UUID (HIL 2026-11-03 H13: `-a nonsense` is a usage error, not a
+// connect that fails as "weak signal").
+[[nodiscard]] bool isDeviceId(std::string_view id);
 // Device ids compared without regard to ASCII case.
 [[nodiscard]] bool sameDeviceId(std::string_view a, std::string_view b);
 

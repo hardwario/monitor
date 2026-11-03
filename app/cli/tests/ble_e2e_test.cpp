@@ -460,6 +460,16 @@ TEST_F(FakeBleCli, InteractiveQuitEndsThePromptLine) {
 #endif
 }
 
+// HIL 2026-11-03 H13: not an address or UUID is a usage error, not a failed connect.
+TEST_F(FakeBleCli, MalformedAddressIsAUsageError) {
+    const RunResult result =
+        hwio("chester.json",
+             {QStringLiteral("--json"), QStringLiteral("ble"), QStringLiteral("command"),
+              QStringLiteral("version"), QStringLiteral("-a"), QStringLiteral("nonsense")});
+    EXPECT_EQ(result.exitCode, 2);
+    EXPECT_EQ(errorCode(result), QStringLiteral("usage.invalid_argument"));
+}
+
 TEST_F(FakeBleCli, DeviceIsRequired) {
     const RunResult result = hwio("chester.json", {QStringLiteral("ble"), QStringLiteral("command"),
                                                    QStringLiteral("version")});

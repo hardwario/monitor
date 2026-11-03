@@ -8,6 +8,7 @@
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/device_session.h"
+#include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
 
 #include <QEventLoop>
@@ -24,7 +25,9 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace hwio::device {
@@ -53,18 +56,27 @@ Result<std::unique_ptr<ShellQuery>> ShellQuery::start(ConsoleSession& session, s
     if (!capture) {
         return std::unexpected(std::move(capture).error());
     }
-    return std::make_unique<ShellQuery>(Passkey{}, std::move(command), std::move(*capture));
+    return std::make_unique<ShellQuery>(
+        Passkey{}, std::move(command), std::move(*capture),
+        sensitiveOutputKeysOf(session.profile().id, session.consoleTargetId()));
 }
 
 ShellQuery::ShellQuery(Passkey /*key*/, std::string command,
-                       std::unique_ptr<CommandCapture> capture)
-    : m_command(std::move(command)), m_capture(std::move(capture)) {
+                       std::unique_ptr<CommandCapture> capture,
+                       std::span<const std::string_view> sensitiveOutput)
+    : m_command(std::move(command)), m_capture(std::move(capture)),
+      m_sensitiveOutput(sensitiveOutput) {
     connect(m_capture.get(), &CommandCapture::finished, this, [this] {
         const CaptureResult& captured = m_capture->result().value_or(CaptureResult{});
         ShellQueryResult result{.lines = {}, .end = captured.end, .truncated = captured.truncated};
         result.lines.reserve(captured.lines.size());
         for (const ConsoleLine& line : captured.lines) {
-            qCDebug(log::lcDevice).noquote() << "  " << toQString(line.text);
+            // HIL 2026-11-03 H15: `info show` prints the claim token and the BLE passkey.
+            if (const auto key = matchSensitiveOutput(line.text, m_sensitiveOutput)) {
+                qCDebug(log::lcDevice).noquote() << "  " << toQString(*key + ": <redacted>");
+            } else {
+                qCDebug(log::lcDevice).noquote() << "  " << toQString(line.text);
+            }
             result.lines.push_back(line.text);
         }
         qCDebug(log::lcDevice).noquote()

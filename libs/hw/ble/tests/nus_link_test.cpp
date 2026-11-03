@@ -343,7 +343,8 @@ TEST_F(NusLinkTest, ConnectRetriesRunOutAtTheDeadline) {
                                     .connectRetryDelay = 20ms,
                                     .connectBusyAttempt = 20s,
                                     .connectImmediateFailure = 0ms, // H6 only, no H8 backoff
-                                    .connectBusyRetryDelay = 2s});
+                                    .connectBusyRetryDelay = 2s,
+                                    .connectLastAttemptLead = 0ms});
     const auto started = std::chrono::steady_clock::now();
     link->connect(false);
     ASSERT_TRUE(runUntil([&] { return link->state() == NusLink::State::Down; }));
@@ -370,16 +371,73 @@ TEST_F(NusLinkTest, ImmediateConnectFailuresBackOff) {
                                     .connectRetryDelay = 5ms, // not used for these
                                     .connectBusyAttempt = 20s,
                                     .connectImmediateFailure = 1s,
-                                    .connectBusyRetryDelay = 50ms});
+                                    .connectBusyRetryDelay = 50ms,
+                                    .connectLastAttemptLead = 100ms});
     link->connect(false);
     ASSERT_TRUE(runUntil([&] { return link->state() == NusLink::State::Down; }));
-    // 0, 50, 150, 350, 750 ms; the next (1550 ms) would be past the deadline.
-    EXPECT_EQ(attempts.size(), 5U);
-    for (std::size_t i = 1; i < attempts.size(); ++i) {
+    // 0, 50, 150, 350, 750 ms; the next (1550 ms) would be past the deadline, so one last
+    // attempt at 900 ms (H12) and no further one.
+    ASSERT_EQ(attempts.size(), 6U);
+    for (std::size_t i = 1; i < 5; ++i) {
         // Coarse QTimers may fire up to 5 % early.
         EXPECT_GE(attempts.at(i) - attempts.at(i - 1), 45ms * (1 << (i - 1)));
     }
+    EXPECT_GE(attempts.at(5) - attempts.at(0), 850ms);
+    EXPECT_LT(attempts.at(5) - attempts.at(0), 1000ms);
     EXPECT_EQ(log().events, (std::vector<std::string>{"connecting", "down ble.connect_failed"}));
+}
+
+// HIL 2026-11-03 H12: BlueZ gave up its D-Bus call (NoReply), the busy retry failed at once
+// (InProgress) and the next back-off no longer fits: one last attempt shortly before the deadline
+// instead of failing early - BlueZ has usually completed its pending connect by then.
+TEST_F(NusLinkTest, BackOffPastTheDeadlineBecomesOneLastAttempt) {
+    std::vector<std::chrono::steady_clock::time_point> attempts;
+    EXPECT_CALL(api(), connect(_, _)).WillRepeatedly([&attempts](auto&&...) {
+        attempts.push_back(std::chrono::steady_clock::now());
+        return attempts.size() < 3 ? hwio::Result<LinkId>(hwio::fail(ErrorCode::BleConnectFailed))
+                                   : hwio::Result<LinkId>(7);
+    });
+    auto link = makeLink(LinkTiming{.connectDeadline = 400ms,
+                                    .pairingDeadline = 60s,
+                                    .pairingPromptDelay = 2s,
+                                    .writeTimeout = 2s,
+                                    .flushInterval = 250ms,
+                                    .connectRetryDelay = 5ms,
+                                    .connectBusyAttempt = 20s,
+                                    .connectImmediateFailure = 1s,
+                                    .connectBusyRetryDelay = 200ms,
+                                    .connectLastAttemptLead = 100ms});
+    link->connect(false);
+    // 0 ms, 200 ms; the next delay (400 ms) would pass the deadline: last attempt at 300 ms.
+    ASSERT_TRUE(runUntil([&] { return link->link() == LinkId{7}; }));
+    ASSERT_EQ(attempts.size(), 3U);
+    EXPECT_GE(attempts.at(2) - attempts.at(0), 280ms);
+    link->onLinkReady(LinkReady{.mtu = 23, .writeMode = WriteMode::WithResponse});
+    EXPECT_EQ(log().events, (std::vector<std::string>{"connecting", "ready 23"}));
+}
+
+TEST_F(NusLinkTest, FailedLastAttemptEndsTheConnect) {
+    int attempts = 0;
+    EXPECT_CALL(api(), connect(_, _)).WillRepeatedly([&attempts](auto&&...) {
+        ++attempts;
+        return hwio::Result<LinkId>(hwio::fail(ErrorCode::BleConnectFailed));
+    });
+    auto link = makeLink(LinkTiming{.connectDeadline = 400ms,
+                                    .pairingDeadline = 60s,
+                                    .pairingPromptDelay = 2s,
+                                    .writeTimeout = 2s,
+                                    .flushInterval = 250ms,
+                                    .connectRetryDelay = 5ms,
+                                    .connectBusyAttempt = 20s,
+                                    .connectImmediateFailure = 1s,
+                                    .connectBusyRetryDelay = 200ms,
+                                    .connectLastAttemptLead = 100ms});
+    link->connect(false);
+    ASSERT_TRUE(runUntil([&] { return link->state() == NusLink::State::Down; }));
+    EXPECT_EQ(attempts, 3);
+    EXPECT_EQ(log().events, (std::vector<std::string>{"connecting", "down ble.connect_failed"}));
+    runFor(150ms);
+    EXPECT_EQ(attempts, 3);
 }
 
 // HIL H8: an attempt that ran into BlueZ's D-Bus timeout is followed by the busy delay, not 1 s.
