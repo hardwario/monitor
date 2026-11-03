@@ -317,7 +317,8 @@ jobs:
             & signtool verify /pa /v $file
             if ($LASTEXITCODE -ne 0) { throw "signtool verify failed: $file" }
           }
-          wix msi validate $msi
+          # ICE38/43/57: per-user checks, not for this perMachine MSI (as in ci.yml).
+          wix msi validate -sice ICE38 -sice ICE43 -sice ICE57 $msi
       - name: Symbols (.pdb, ADR-0123)
         shell: pwsh
         run: |

@@ -630,7 +630,9 @@ jobs:
         shell: pwsh
         run: |
           $msi = Get-ChildItem build/packages -Filter *.msi | Select-Object -First 1
-          wix msi validate $msi.FullName
+          # ICE38/43/57 assume a per-user install (shortcut KeyPath under HKCU); this MSI is
+          # perMachine (ALLUSERS=1, cpack-wix.cmake), so the HKLM KeyPath is the right one.
+          wix msi validate -sice ICE38 -sice ICE43 -sice ICE57 $msi.FullName
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: package-windows
