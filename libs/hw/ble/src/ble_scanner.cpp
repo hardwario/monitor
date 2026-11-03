@@ -33,6 +33,14 @@ template <class... Ts> struct Overloaded : Ts... {
     using Ts::operator()...;
 };
 
+// The strongest signal first; RSSI 0 (unknown) after every measured value (HIL 2026-11-03 H14).
+bool strongerFirst(const BleDeviceInfo& a, const BleDeviceInfo& b) {
+    if ((a.rssi == 0) != (b.rssi == 0)) {
+        return b.rssi == 0;
+    }
+    return a.rssi > b.rssi;
+}
+
 } // namespace
 
 std::string truncateUtf8(std::string text, std::size_t maxBytes) {
@@ -121,7 +129,11 @@ void BleScanner::add(const Advertisement& advertisement) {
         // ADR-0183 (review L-19): the advertised name is device data; sanitised once here.
         it->name = truncateUtf8(sanitizeDeviceText(advertisement.name), maxNameBytes);
     }
-    it->rssi = advertisement.rssi;
+    // HIL 2026-11-03 H14: BlueZ reports cached devices (and some updates) with RSSI 0 = unknown;
+    // it must not replace a measured value.
+    if (advertisement.rssi != 0) {
+        it->rssi = advertisement.rssi;
+    }
     it->nusAdvertised = it->nusAdvertised || nus;
     if (!profileId.empty()) {
         it->profileId = profileId;
@@ -135,8 +147,7 @@ void BleScanner::publish() {
         return;
     }
     m_dirty = false;
-    std::ranges::stable_sort(
-        m_devices, [](const BleDeviceInfo& a, const BleDeviceInfo& b) { return a.rssi > b.rssi; });
+    std::ranges::stable_sort(m_devices, strongerFirst);
     emit devicesChanged(QList<BleDeviceInfo>(m_devices.begin(), m_devices.end()));
 }
 
@@ -158,10 +169,7 @@ void BleScanner::drainEvents() {
                            m_signalTimer.stop();
                            // Sorted before the result even when nothing changed since the last
                            // signal.
-                           std::ranges::stable_sort(
-                               m_devices, [](const BleDeviceInfo& a, const BleDeviceInfo& b) {
-                                   return a.rssi > b.rssi;
-                               });
+                           std::ranges::stable_sort(m_devices, strongerFirst);
                            publish();
                            if (done.error) {
                                qCWarning(log::lcBle).noquote()

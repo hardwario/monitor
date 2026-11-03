@@ -9,7 +9,9 @@
 //    attempt must finish within connectDeadline (ble.connect_failed); an attempt that fails with
 //    ble.connect_failed before the CCCD write is tried again after connectRetryDelay while the
 //    deadline allows it, and only the final failure is reported (HIL H6); after an attempt that
-//    suggests BlueZ is still busy with an earlier one (H8) the delay grows (2 s, 4 s, ...); once
+//    suggests BlueZ is still busy with an earlier one (H8) the delay grows (2 s, 4 s, ...), but a
+//    delay that would pass the deadline becomes one last attempt connectLastAttemptLead before it
+//    (H12, 2026-11-03); once
 //    the CCCD write is pending (an unbonded link pairs) the deadline becomes pairingDeadline from
 //    then (ble.not_paired when it passes, Q6) and onPairingPrompt() follows after
 //    pairingPromptDelay.
@@ -61,6 +63,10 @@ struct LinkTiming {
     std::chrono::milliseconds connectBusyAttempt{20000};
     std::chrono::milliseconds connectImmediateFailure{1000};
     std::chrono::milliseconds connectBusyRetryDelay{2000};
+    // HIL 2026-11-03 H12: when the next delay does not fit into the connect deadline any more,
+    // one last attempt starts this long before the deadline instead of giving up early (BlueZ
+    // often completes its pending connect then; a reused link is ready within ~50 ms).
+    std::chrono::milliseconds connectLastAttemptLead{1000};
 };
 
 class NusLink {
@@ -145,6 +151,7 @@ private:
     int m_attempts = 0;
     std::chrono::steady_clock::time_point m_attemptStarted; // H8
     int m_busyRetries = 0;                                  // H8: backoff exponent
+    bool m_lastAttempt = false; // H12: the attempt before the deadline runs, no further one
 };
 
 } // namespace hwio::ble

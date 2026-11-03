@@ -81,6 +81,8 @@ FakeDevice deviceOf(const QJsonObject& object) {
     device.rssi = object.value(QStringLiteral("rssi")).toInt(device.rssi);
     device.nus = object.value(QStringLiteral("nus")).toBool(device.nus);
     device.advertise = object.value(QStringLiteral("advertise")).toBool(device.advertise);
+    device.rssiZeroEvery =
+        object.value(QStringLiteral("rssiZeroEvery")).toInt(device.rssiZeroEvery);
     device.paired = object.value(QStringLiteral("paired")).toBool(device.paired);
     device.pairing =
         object.value(QStringLiteral("pairing")).toString(QStringLiteral("ok")).toStdString();
@@ -238,12 +240,18 @@ void FakeBleApi::advertise() {
         return;
     }
     const auto now = std::chrono::steady_clock::now();
-    for (const FakeDevice& item : m_scenario.devices) {
+    for (FakeDevice& item : m_scenario.devices) {
         if (!item.advertise) {
             continue;
         }
-        Advertisement advertisement{
-            .id = item.id, .name = item.name, .rssi = item.rssi, .serviceUuids = {}, .seen = now};
+        ++item.advertisements;
+        const bool unknown =
+            item.rssiZeroEvery > 0 && item.advertisements % item.rssiZeroEvery == 0;
+        Advertisement advertisement{.id = item.id,
+                                    .name = item.name,
+                                    .rssi = unknown ? 0 : item.rssi,
+                                    .serviceUuids = {},
+                                    .seen = now};
         if (item.nus) {
             advertisement.serviceUuids.emplace_back(nusServiceUuid);
         }

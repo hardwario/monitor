@@ -194,6 +194,15 @@ private:
         m_currentFile = m_dir / name;
         m_file.open(m_currentFile, std::ios::out | std::ios::trunc | std::ios::binary);
         m_fileBytes = 0;
+#ifndef _WIN32
+        // HIL 2026-11-03 H15 (ADR-0186): device output reaches the log; owner-only like history
+        // and console files, before the first write (Windows: the per-user AppData ACL).
+        if (m_file.is_open()) {
+            std::error_code ec;
+            fs::permissions(m_currentFile, fs::perms::owner_read | fs::perms::owner_write,
+                            fs::perm_options::replace, ec); // failure: the umask's mode stays
+        }
+#endif
         return m_file.is_open();
     }
 

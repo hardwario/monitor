@@ -548,6 +548,36 @@ Passed:
 Not run: real out-of-range / power-off (the halt of H16 does not persist; the board is not battery-switchable here)
 — the disconnect → reconnect path is covered by the J-Link reset. macOS / Windows (F2) still open.
 
+User decision 2026-11-03 (Matej Strnad): fix H11–H15 (and 0012 G-H4) as proposed; H16 stays open.
+
+Fixes (2026-11-03, same branch; all 1587 non-HIL tests pass, clang-tidy and clang-format clean on the changed
+files):
+- **H11** `QtBleApi::servicesDiscovered`: `discoverDetails(QLowEnergyService::SkipValueDiscovery)`. HIL then showed
+  the next step: with no passkey BlueZ fails the CCCD write after ~25 s (`QLowEnergyService error 3`), which was
+  the H2 "device refused the console" text. Added: a CCCD-write failure while pairing and the system has **no bond**
+  is `ble.not_paired` (`QtLinkError::bonded`, `detail::mapLinkError`; bonded devices keep the H2 text).
+  **Re-check passed:** "Pairing: enter the passkey…" appears; no answer → `ble.not_paired` (exit 6, 49 s); agent
+  answers → paired on connect and the command runs (25 s).
+- **H12** `NusLink::attemptFailed`: a back-off that would pass the deadline becomes one last attempt
+  `LinkTiming::connectLastAttemptLead` (1 s) before it; no further attempt after that one. GTest
+  `BackOffPastTheDeadlineBecomesOneLastAttempt`, `FailedLastAttemptEndsTheConnect`; the H8 back-off test now
+  expects the last attempt. HIL: 10/10 back-to-back `ble command` OK (11–29 s); one BlueZ `NoReply` after 25 s recovered by the busy
+  retry at 27 s; the last-attempt path itself did not occur (covered by the GTests).
+- **H13** `QtBleApi`: `UnknownRemoteDeviceError` while connecting → one scan for the id (≤ `resolveTimeout` 10 s,
+  the shared discovery agent; a running scan is reused), then the controller starts with the found device;
+  not seen → `ble.device_not_found` ("not seen by a 10000 ms scan"). CLI: `-a` must be an address or a UUID
+  (`ble::isDeviceId`, `usage.invalid_argument`, exit 2; e2e `MalformedAddressIsAUsageError`).
+  **Re-check passed:** bond removed → "The system does not know … scanning", found after 4 s, connected; absent
+  address → `ble.device_not_found` after 10 s; `-a nonsense` → exit 2.
+- **H14** `BleScanner::add` keeps the last non-zero RSSI; sorting puts RSSI 0 last (`strongerFirst`). Fake scenario
+  field `rssiZeroEvery`, `tests/ble_scenarios/rssi_unknown.json`, GTest
+  `UnknownRssiKeepsTheLastValueAndSortsLast`. **Re-check passed:** `ble scan` / `--json scan` while
+  `bluetoothctl scan le` runs: measured values first, zeros last (2 runs).
+- **H15** `ShellQuery` logs `<key>: <redacted>` for the profile's `sensitiveOutputKeys` (GTest
+  `DebugLogRedactsSensitiveOutput`); `Logging` creates its files 0600 on Unix (`FilesAreOwnerOnly`).
+  **Re-check passed:** a BLE console's log shows `claim token: <redacted>`, `ble passkey: <redacted>`, mode 600.
+  Logs written before the fix keep their content until the log retention removes them.
+
 ## Implementation steps
 
 Phase A — BLE library

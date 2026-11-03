@@ -342,6 +342,22 @@ Passed:
 Not run: [Pair] on each OS (blocked by G-H1 on Linux; Windows / macOS manual checks still open), real out of range
 (see 0011), screen-reader announcement, adapter off / permission prompts (manual list above).
 
+User decision 2026-11-03 (Matej Strnad): fix 0011 H11–H15 and G-H4 now; G-H5–G-H7 and H16 stay open.
+
+Fixes (2026-11-03, same branch) and GUI re-check on the same hardware (`vnc` platform, Czech):
+- G-H1 → 0011 H11 (+ unbonded CCCD-write failure = `ble.not_paired`). **Re-check passed:** bond removed, agent
+  silent → device bar "Waiting for pairing — enter the passkey in the system dialog", after ~25 s ErrorPanel
+  "The device is not paired with this computer." with the passkey note and **[Pair]**; [Pair] with the agent
+  answering → paired, the tab connects ("— connected (Bluetooth) —").
+- G-H2 → 0011 H14. **Re-check passed:** every row shows dBm, sorted, the in-use device (not advertising, no RSSI)
+  last; two screenshots 9 s apart show no row without a value.
+- G-H3 → 0011 H13. **Re-check passed:** the restored tab with an absent address → "The Bluetooth device was not
+  found." with [Choose another device] (device bar and ErrorPanel) after the 10 s scan.
+- G-H4 → `QuitSignals` (`app/gui/src/quit_signals.{h,cpp}`, created in `main()` before `exec()`): SIGTERM / SIGINT
+  / SIGHUP poll-flag → `QCoreApplication::quit()`; a second signal kills (SA_RESETHAND); no-op on Windows.
+  **Re-check passed:** `kill -TERM` of a connected GUI → log "Quitting on signal 15", "Session closed", BlueZ
+  `Connected: no`, tabs saved.
+
 ## Risks and open points
 
 - **Windows pairing UI** may not show a passkey dialog for app-initiated pairing (0011 risk); the ErrorPanel then

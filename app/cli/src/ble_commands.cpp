@@ -235,6 +235,13 @@ Result<ResolvedDevice> resolveDevice(const Context& context, ble::BleHost& host,
                                      const DeviceOptions& options,
                                      const device::DeviceProfile& profile) {
     if (!options.address.empty()) {
+        if (!ble::isDeviceId(options.address)) { // HIL 2026-11-03 H13
+            return std::unexpected(usage(
+                std::format("\"{}\" is not a Bluetooth address (such as F1:22:33:44:55:66) or a "
+                            "device UUID.",
+                            options.address),
+                options.address));
+        }
         return ResolvedDevice{.id = ble::canonicalDeviceId(options.address), .name = {}}; // B6
     }
     if (context.mode == OutputMode::Human) {

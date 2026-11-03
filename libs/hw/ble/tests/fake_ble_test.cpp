@@ -108,6 +108,19 @@ TEST(BleScanner, ProfileMatchesSortedByRssi) {
     EXPECT_GE(result.signalCount, 1);
 }
 
+// HIL 2026-11-03 H14: an advertisement with RSSI 0 (unknown) keeps the measured value, and
+// devices without one sort after all others.
+TEST(BleScanner, UnknownRssiKeepsTheLastValueAndSortsLast) {
+    const ScanResult result = scan("rssi_unknown.json", false);
+    ASSERT_EQ(result.devices.size(), 3U);
+    EXPECT_EQ(result.devices[0].name, "CHESTER-NEAR");
+    EXPECT_EQ(result.devices[0].rssi, -50);
+    EXPECT_EQ(result.devices[1].name, "CHESTER-FLICKER");
+    EXPECT_EQ(result.devices[1].rssi, -60);
+    EXPECT_EQ(result.devices[2].name, "CHESTER-UNKNOWN");
+    EXPECT_EQ(result.devices[2].rssi, 0);
+}
+
 TEST(BleScanner, AllKeepsDevicesWithoutAProfile) {
     const ScanResult result = scan("chester.json", true);
     ASSERT_EQ(result.devices.size(), 4U);

@@ -50,6 +50,7 @@
 #include <string>
 #include <system_error>
 #include <utility>
+#include <vector>
 
 namespace hwio::ble {
 
@@ -103,6 +104,11 @@ Error mapLinkError(const QtLinkError& error) {
         enumName(static_cast<int>(error.service.value_or(QLowEnergyService::UnknownError)));
     if (ready) {
         return makeError(ErrorCode::BleWriteFailed, detail);
+    }
+    if (error.phase == LinkPhase::PairingPending && !error.bonded) {
+        // HIL 2026-11-03 H11: the pairing of an unbonded link did not complete (no passkey, a
+        // wrong one, or the dialog was cancelled): BlueZ fails the CCCD write.
+        return makeError(ErrorCode::BleNotPaired, "pairing not completed: " + detail);
     }
     Error failed = makeError(ErrorCode::BleConnectFailed, detail);
     if (error.phase == LinkPhase::PairingPending) {
@@ -346,6 +352,20 @@ void QtBleApi::advertisement(const QBluetoothDeviceInfo& info) {
         return;
     }
     remember(info);
+    const BleDeviceId seen = deviceIdOf(info);
+    std::vector<LinkId> found; // started after the loop: a start may erase links (lost())
+    for (auto& [id, link] : m_links) {
+        if (link.resolving && sameDeviceId(link.device, seen)) {
+            link.resolving = false;
+            link.info = info;
+            found.push_back(id);
+        }
+    }
+    for (const LinkId id : found) {
+        qCInfo(log::lcBle) << "Found" << toQString(seen) << "- connecting";
+        m_closer.whenClosed(seen, [this, id] { startController(id); });
+    }
+    stopResolveScan();
     if (m_listener == nullptr) {
         return;
     }
@@ -360,32 +380,42 @@ void QtBleApi::advertisement(const QBluetoothDeviceInfo& info) {
     m_listener->onAdvertisement(advertisement);
 }
 
+void QtBleApi::ensureAgent() {
+    if (m_agent) {
+        return;
+    }
+    m_agent = std::make_unique<QBluetoothDeviceDiscoveryAgent>();
+    QObject::connect(m_agent.get(), &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this,
+                     [this](const QBluetoothDeviceInfo& info) { advertisement(info); });
+    QObject::connect(m_agent.get(), &QBluetoothDeviceDiscoveryAgent::deviceUpdated, this,
+                     [this](const QBluetoothDeviceInfo& info,
+                            QBluetoothDeviceInfo::Fields /*fields*/) { advertisement(info); });
+    QObject::connect(m_agent.get(), &QBluetoothDeviceDiscoveryAgent::finished, this, [this] {
+        m_resolveScan = false; // resolving links end by their own timeout
+        if (m_scanning && m_listener != nullptr) {
+            m_scanning = false;
+            m_listener->onScanFinished(std::nullopt);
+        }
+    });
+    QObject::connect(m_agent.get(), &QBluetoothDeviceDiscoveryAgent::errorOccurred, this,
+                     [this](QBluetoothDeviceDiscoveryAgent::Error error) {
+                         m_resolveScan = false;
+                         // Only the agent itself is used here (legacy null-dereference bug).
+                         const Error mapped = mapDiscoveryError(error, m_agent->errorString());
+                         if (m_scanning && m_listener != nullptr) {
+                             m_scanning = false;
+                             m_listener->onScanFinished(mapped);
+                         }
+                     });
+}
+
 Status QtBleApi::startScan(std::chrono::milliseconds duration) {
     if (auto problem = adapterError(adapter())) {
         return std::unexpected(std::move(*problem));
     }
-    if (!m_agent) {
-        m_agent = std::make_unique<QBluetoothDeviceDiscoveryAgent>();
-        QObject::connect(m_agent.get(), &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this,
-                         [this](const QBluetoothDeviceInfo& info) { advertisement(info); });
-        QObject::connect(m_agent.get(), &QBluetoothDeviceDiscoveryAgent::deviceUpdated, this,
-                         [this](const QBluetoothDeviceInfo& info,
-                                QBluetoothDeviceInfo::Fields /*fields*/) { advertisement(info); });
-        QObject::connect(m_agent.get(), &QBluetoothDeviceDiscoveryAgent::finished, this, [this] {
-            if (m_scanning && m_listener != nullptr) {
-                m_scanning = false;
-                m_listener->onScanFinished(std::nullopt);
-            }
-        });
-        QObject::connect(m_agent.get(), &QBluetoothDeviceDiscoveryAgent::errorOccurred, this,
-                         [this](QBluetoothDeviceDiscoveryAgent::Error error) {
-                             // Only the agent itself is used here (legacy null-dereference bug).
-                             const Error mapped = mapDiscoveryError(error, m_agent->errorString());
-                             if (m_scanning && m_listener != nullptr) {
-                                 m_scanning = false;
-                                 m_listener->onScanFinished(mapped);
-                             }
-                         });
+    ensureAgent();
+    if (m_agent->isActive()) {
+        m_agent->stop(); // a resolve scan (H13) continues as this scan
     }
     m_agent->setLowEnergyDiscoveryTimeout(static_cast<int>(duration.count()));
     m_scanning = true;
@@ -395,6 +425,16 @@ Status QtBleApi::startScan(std::chrono::milliseconds duration) {
 
 void QtBleApi::stopScan() {
     m_scanning = false;
+    m_resolveScan = true; // keeps running while a link resolves (H13), stopped after that
+    stopResolveScan();
+}
+
+void QtBleApi::stopResolveScan() {
+    if (!m_resolveScan || m_scanning ||
+        std::ranges::any_of(m_links, [](const auto& entry) { return entry.second.resolving; })) {
+        return;
+    }
+    m_resolveScan = false;
     if (m_agent && m_agent->isActive()) {
         m_agent->stop();
     }
@@ -511,11 +551,18 @@ void QtBleApi::startController(LinkId id) {
                      [this, id] { servicesDiscovered(id); });
     QObject::connect(controller, &QLowEnergyController::errorOccurred, this,
                      [this, id](QLowEnergyController::Error error) {
-                         if (Link* link = find(id)) {
-                             lost(id, mapLinkError(QtLinkError{.controller = error,
-                                                               .service = std::nullopt,
-                                                               .phase = phaseOf(*link)}));
+                         Link* link = find(id);
+                         if (link == nullptr) {
+                             return;
                          }
+                         if (error == QLowEnergyController::UnknownRemoteDeviceError &&
+                             !link->resolved && phaseOf(*link) == LinkPhase::Connecting) {
+                             resolve(id); // H13
+                             return;
+                         }
+                         lost(id, mapLinkError(QtLinkError{.controller = error,
+                                                           .service = std::nullopt,
+                                                           .phase = phaseOf(*link)}));
                      });
     QObject::connect(controller, &QLowEnergyController::disconnected, this, [this, id] {
         if (Link* link = find(id)) {
@@ -526,6 +573,42 @@ void QtBleApi::startController(LinkId id) {
     });
     qCInfo(log::lcBle) << "Connecting to" << toQString(device);
     controller->connectToDevice();
+}
+
+// HIL 2026-11-03 H13: the system has no object for the device (BlueZ: bond just removed, an
+// unbonded device's cache entry expired, or the device is absent), which Qt reports at once as
+// UnknownRemoteDeviceError. Scan for it (bounded) and connect when it is seen; otherwise the device
+// is not around: ble.device_not_found instead of a "weak signal".
+void QtBleApi::resolve(LinkId id) {
+    Link* link = find(id);
+    if (link == nullptr) {
+        return;
+    }
+    release(*link);
+    link->resolving = true;
+    link->resolved = true;
+    if (auto problem = adapterError(adapter())) {
+        lost(id, std::move(*problem));
+        return;
+    }
+    qCInfo(log::lcBle) << "The system does not know" << toQString(link->device)
+                       << "- scanning for it up to" << resolveTimeout.count() << "ms";
+    ensureAgent();
+    if (!m_agent->isActive()) {
+        m_agent->setLowEnergyDiscoveryTimeout(static_cast<int>(resolveTimeout.count()));
+        m_agent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+    }
+    m_resolveScan = true;
+    QTimer::singleShot(resolveTimeout, this, [this, id] {
+        Link* item = find(id);
+        if (item == nullptr || !item->resolving) {
+            return;
+        }
+        item->resolving = false;
+        lost(id, makeError(ErrorCode::BleDeviceNotFound,
+                           std::format("not seen by a {} ms scan", resolveTimeout.count())));
+        stopResolveScan();
+    });
 }
 
 void QtBleApi::servicesDiscovered(LinkId id) {
@@ -552,14 +635,9 @@ void QtBleApi::servicesDiscovered(LinkId id) {
                              detailsDiscovered(id);
                          }
                      });
-    QObject::connect(service, &QLowEnergyService::errorOccurred, this,
-                     [this, id](QLowEnergyService::ServiceError error) {
-                         if (Link* item = find(id)) {
-                             lost(id, mapLinkError(QtLinkError{.controller = std::nullopt,
-                                                               .service = error,
-                                                               .phase = phaseOf(*item)}));
-                         }
-                     });
+    QObject::connect(
+        service, &QLowEnergyService::errorOccurred, this,
+        [this, id](QLowEnergyService::ServiceError error) { serviceError(id, error); });
     QObject::connect(
         service, &QLowEnergyService::characteristicChanged, this,
         [this, id](const QLowEnergyCharacteristic& characteristic, const QByteArray& value) {
@@ -610,7 +688,23 @@ void QtBleApi::servicesDiscovered(LinkId id) {
                 m_listener->onLinkReady(id, ready);
             }
         });
-    service->discoverDetails();
+    // HIL 2026-11-03 H11: handles only. A full discovery also reads the descriptor values, and a
+    // CHESTER that requires encryption for the NUS CCCD then pairs inside this read, invisible to
+    // NusLink (no pairing prompt, the connect deadline instead of the pairing wait). Without the
+    // read, pairing starts on the CCCD write in detailsDiscovered(), where it is detected.
+    service->discoverDetails(QLowEnergyService::SkipValueDiscovery);
+}
+
+void QtBleApi::serviceError(LinkId id, QLowEnergyService::ServiceError error) {
+    Link* link = find(id);
+    if (link == nullptr) {
+        return;
+    }
+    const LinkPhase phase = phaseOf(*link);
+    // H11: whether the system has a bond decides between not_paired and the H2 text.
+    const bool bonded = phase != LinkPhase::PairingPending || isPaired(link->device);
+    lost(id, mapLinkError(QtLinkError{
+                 .controller = std::nullopt, .service = error, .phase = phase, .bonded = bonded}));
 }
 
 void QtBleApi::detailsDiscovered(LinkId id) {
@@ -673,6 +767,7 @@ void QtBleApi::disconnect(LinkId id) {
     if (Link* link = find(id)) {
         release(*link);
         m_links.erase(id);
+        stopResolveScan();
     }
 }
 

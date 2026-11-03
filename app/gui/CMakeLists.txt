@@ -109,6 +109,8 @@ qt_add_qml_module(hwio_gui
         src/pages/placeholder_view_model.cpp
         src/pages/placeholder_view_model.h
         src/platform.h
+        src/quit_signals.cpp
+        src/quit_signals.h
         src/settings_store.cpp
         src/settings_store.h
         src/single_instance.cpp
