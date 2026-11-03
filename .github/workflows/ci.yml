@@ -136,19 +136,12 @@ jobs:
         shell: bash
         run: |
           # Plan 0028 (R5): the translation lint (Python 3) must run, never be skipped.
-          cmake --preset linux-${{ matrix.preset }} -DHWIO_REQUIRE_PYTHON=ON 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          cmake --preset linux-${{ matrix.preset }} -DHWIO_REQUIRE_PYTHON=ON
       - name: Build
         shell: bash
-        run: cmake --build --preset linux-${{ matrix.preset }} 2>&1 | tee "$RUNNER_TEMP/build.log"
+        run: cmake --build --preset linux-${{ matrix.preset }}
       - name: Test
         run: ctest --preset linux-${{ matrix.preset }} --output-on-failure
-      - name: TEMPORARY failure notes (plan 0023)
-        if: failure()
-        shell: bash
-        run: |
-          py=$(command -v python3 || command -v python)
-          "$py" .github/ci-failure-notes.py "build/linux-${{ matrix.preset }}" \
-            "$RUNNER_TEMP/configure.log" "$RUNNER_TEMP/build.log" "$RUNNER_TEMP/coverage.log"
       - name: QML lint
         if: matrix.preset == 'debug'
         run: cmake --build --preset linux-debug --target all_qmllint
@@ -156,7 +149,6 @@ jobs:
         if: matrix.preset == 'coverage'
         shell: bash
         run: |
-          exec > >(tee "$RUNNER_TEMP/coverage.log") 2>&1
           build_dir=build/linux-coverage
           llvm-profdata-${LLVM_MAJOR} merge -sparse "${build_dir}"/profiles/*.profraw \
             -o "${build_dir}/coverage.profdata"
@@ -181,10 +173,6 @@ jobs:
           path: |
             build/linux-coverage/coverage-html
             build/linux-coverage/coverage.lcov
-      - name: TEMPORARY coverage failure notes (plan 0023)
-        if: failure() && matrix.preset == 'coverage'
-        shell: bash
-        run: python3 .github/ci-failure-notes.py build/none "$RUNNER_TEMP/coverage.log"
 
   fuzz:
     # ADR-0152: libFuzzer smoke run of the MCP HTTP parser and JSON-RPC handling, 60 s per target;
@@ -294,19 +282,12 @@ jobs:
       - name: Configure
         shell: bash
         run: |
-          cmake --preset macos-${{ matrix.preset }} 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          cmake --preset macos-${{ matrix.preset }}
       - name: Build
         shell: bash
-        run: cmake --build --preset macos-${{ matrix.preset }} 2>&1 | tee "$RUNNER_TEMP/build.log"
+        run: cmake --build --preset macos-${{ matrix.preset }}
       - name: Test
         run: ctest --preset macos-${{ matrix.preset }} --output-on-failure
-      - name: TEMPORARY failure notes (plan 0023)
-        if: failure()
-        shell: bash
-        run: |
-          py=$(command -v python3 || command -v python)
-          "$py" .github/ci-failure-notes.py "build/macos-${{ matrix.preset }}" \
-            "$RUNNER_TEMP/configure.log" "$RUNNER_TEMP/build.log" "$RUNNER_TEMP/coverage.log"
 
   windows:
     name: windows-${{ matrix.preset }}
@@ -363,34 +344,12 @@ jobs:
         shell: bash
         run: |
           clang-cl --version
-          cmake --preset windows-${{ matrix.preset }} 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          cmake --preset windows-${{ matrix.preset }}
       - name: Build
         shell: bash
-        run: cmake --build --preset windows-${{ matrix.preset }} 2>&1 | tee "$RUNNER_TEMP/build.log"
+        run: cmake --build --preset windows-${{ matrix.preset }}
       - name: Test
         run: ctest --preset windows-${{ matrix.preset }} --output-on-failure
-      - name: TEMPORARY failure notes (plan 0023)
-        if: failure()
-        shell: bash
-        run: |
-          py=$(command -v python3 || command -v python)
-          "$py" .github/ci-failure-notes.py "build/windows-${{ matrix.preset }}" \
-            "$RUNNER_TEMP/configure.log" "$RUNNER_TEMP/build.log" "$RUNNER_TEMP/coverage.log"
-      - name: TEMPORARY tst_console probe (plan 0023)
-        # ctest showed no output of tst_gui.tst_console on Windows: run it alone with its exit code.
-        if: failure()
-        shell: bash
-        run: |
-          exe=$(find "build/windows-${{ matrix.preset }}" -name tst_gui.exe | head -n 1)
-          status=0
-          QT_QPA_PLATFORM=offscreen QT_IM_MODULE=none QT_IM_MODULES=none /usr/bin/timeout 120 \
-            "$exe" -input app/gui/tests/tst_console.qml -o "$RUNNER_TEMP/console-qt.txt,txt" \
-            > "$RUNNER_TEMP/console.log" 2>&1 || status=$?
-          echo "exit $status" >> "$RUNNER_TEMP/console.log"
-          cat "$RUNNER_TEMP/console-qt.txt" >> "$RUNNER_TEMP/console.log" || true
-          cat "$RUNNER_TEMP/console.log"
-          py=$(command -v python3 || command -v python)
-          "$py" .github/ci-failure-notes.py build/none "$RUNNER_TEMP/console.log"
 
   # ---- Packages (plan/features/0015 F1, ADR-0125): unsigned, 7-day artifacts ----------------------
 

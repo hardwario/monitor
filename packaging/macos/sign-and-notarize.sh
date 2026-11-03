@@ -155,20 +155,31 @@ print(d.get("id") or "-", d.get("status") or "-")' <<<"$result")
     rm -f "$key"
 }
 
+# stapler staple/validate fetch the ticket from Apple's CloudKit; a dropped connection fails them
+# (error 68, v2.0.0-rc.2). Up to 5 attempts, 20 s apart; a missing ticket still fails every time.
+stapler() {
+    local attempt
+    for attempt in 1 2 3 4 5; do
+        if xcrun stapler "$@"; then return 0; fi
+        if [ "$attempt" -lt 5 ]; then echo "stapler $1 failed (attempt $attempt of 5), retrying in 20 s" >&2; sleep 20; fi
+    done
+    return 1
+}
+
 notarize_app() {
     local app="$1"
     ditto -c -k --keepParent "$app" "$scratch/app.zip"
     submit_for_notarization "$scratch/app.zip"
     rm -f "$scratch/app.zip"
-    xcrun stapler staple "$app"
-    xcrun stapler validate "$app"
+    stapler staple "$app"
+    stapler validate "$app"
     spctl -a -t exec -vv "$app"
 }
 
 notarize_dmg() {
     local dmg="$1"
     submit_for_notarization "$dmg"
-    xcrun stapler staple "$dmg"
+    stapler staple "$dmg"
     spctl -a -t open --context context:primary-signature -v "$dmg"
 }
 
@@ -178,7 +189,7 @@ verify_dmg() {
     local dmg="$1"
     local mount="$scratch/mnt" app details
     codesign --verify --strict --verbose=2 "$dmg"
-    xcrun stapler validate "$dmg"
+    stapler validate "$dmg"
     spctl -a -t open --context context:primary-signature -v "$dmg"
     mkdir -p "$mount"
     hdiutil attach -readonly -nobrowse -mountpoint "$mount" "$dmg" >/dev/null
@@ -190,7 +201,7 @@ verify_dmg() {
     grep -E "^(Authority|TeamIdentifier|Timestamp)=" <<<"$details"
     grep -q "^Authority=Developer ID Application" <<<"$details" || { echo "Not signed with a Developer ID: $app" >&2; exit 1; }
     grep -q "^Timestamp=" <<<"$details" || { echo "No secure timestamp: $app" >&2; exit 1; }
-    xcrun stapler validate "$app"
+    stapler validate "$app"
     spctl -a -t exec -vv "$app"
     echo "DMG and app signed, notarized and stapled: $dmg"
 }

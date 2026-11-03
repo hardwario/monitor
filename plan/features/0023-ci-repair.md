@@ -1,6 +1,6 @@
 # 0023 — CI repair: all `ci.yml` jobs green
 
-- **Status:** In progress (approved 2026-10-26)
+- **Status:** Done (approved 2026-10-26, done 2026-11-03)
 - **Milestone:** maintenance (blocks M7 packaging jobs, plan 0015)
 - **Author:** Matej Strnad (with Claude), 2026-10-26
 - **Related ADRs:** ADR-0179 (macOS 13.3, amends ADR-0012), ADR-0180 (Apple clang `-fexperimental-library`), ADR-0177, ADR-0001, ADR-0002, ADR-0010, ADR-0023
@@ -108,15 +108,20 @@ annotations), removed before the merge together with the push trigger.
 ## Implementation steps
 
 - [x] A. ADR-0179, presets to 13.3, docs/plans updated
-- [ ] B. Qt 6.8.3 tidy: generated sources excluded, Qt includes added; zero findings on 6.8.3 and 6.10
+- [x] B. Qt 6.8.3 tidy: generated sources excluded, Qt includes added; zero findings on 6.8.3 and 6.10
 - [x] C. `cs_CZ.UTF-8` generated in the Linux CI jobs
-- [ ] D. TSan `tst_gui` failures reproduced, cause fixed (documented)
-- [ ] E. Windows: cherry-picks + remaining compile and test fixes
-- [ ] F. macOS: build and tests pass on `macos-15`
-- [ ] G. All `ci.yml` jobs green on the branch; temporary trigger (if any) removed
+- [x] D. TSan `tst_gui` failures reproduced, cause fixed (documented)
+- [x] E. Windows: cherry-picks + remaining compile and test fixes
+- [x] F. macOS: build and tests pass on `macos-15`
+- [x] G. All `ci.yml` jobs green on the branch; temporary trigger (if any) removed
   - 2026-11-02: merged into `v2-dev` together with the M7, 0021, 0022, 0024, 0025 and 0028 work (prefix
     renamed to `hwio`); the push trigger is `v2-dev` only; `LSMinimumSystemVersion` 13.3. The TEMPORARY
     failure-notes steps stay until G holds on `v2-dev`, then they are removed.
+  - 2026-11-03: in `hardwario/monitor` (ADR-0223) every `ci.yml` job is green on Linux, macOS and Windows, incl.
+    the package jobs (`main` 0c021ce, https://github.com/hardwario/monitor/actions/runs/41670615759), and the
+    release `v2.0.0-rc.2` passed the full matrix (https://github.com/hardwario/monitor/actions/runs/41684668499).
+    The TEMPORARY failure-notes steps, the `tst_console` probe, their log files and
+    `.github/ci-failure-notes.py` are removed; GitHub serves job logs again.
 
 ## Tests and verification
 
