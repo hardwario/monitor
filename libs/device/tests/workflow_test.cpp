@@ -435,6 +435,24 @@ TEST_F(Workflow, RecoverNeedsTheExpectedFamily) {
     EXPECT_TRUE(hwio::device::detail::runRecover(ctx, [] { return Status{}; }));
 }
 
+// HIL H7: the code-only erase resets and halts the target before it erases (the running firmware
+// made the loader's erase fail at 0x0); a failed reset stops it.
+TEST_F(Workflow, CodeEraseResetsAndHaltsFirst) {
+    {
+        InSequence order;
+        EXPECT_CALL(programmer(), reset(ResetMode::Halt));
+        EXPECT_CALL(programmer(), eraseCode(_, _, _));
+    }
+    auto ctx = context();
+    ASSERT_TRUE(hwio::device::detail::runErase(ctx, EraseScope::Code));
+    EXPECT_CALL(programmer(), reset(ResetMode::Halt))
+        .WillOnce(Return(Status(std::unexpected(hwio::makeError(ErrorCode::TargetConnectFailed)))));
+    EXPECT_CALL(programmer(), eraseCode(_, _, _)).Times(0);
+    const auto failed = hwio::device::detail::runErase(ctx, EraseScope::Code);
+    ASSERT_FALSE(failed);
+    EXPECT_EQ(failed.error().code, ErrorCode::TargetConnectFailed);
+}
+
 // Review R5: a code-only erase that changes the PIB fails loudly.
 TEST_F(Workflow, CodeEraseThatChangesThePibFails) {
     const std::vector<std::byte> pib(128, std::byte{0xBA});

@@ -558,6 +558,12 @@ Phase G — hardware and docs
       in `runErase()` before the PIB read (as in `runFlash()` and `eraseAll()`), a fake-J-Link test that the erase
       halts first, and HIL `EraseCode…` started on a running board; separately, why the in-session flash after a
       failed `EndDownload` hangs past `programTimeout` (the deadline cannot fire while the library call blocks).
+    - H7 fixed (2026-11-03, with the user's OK): `runErase()` resets and halts the target before a code-only erase
+      (a failed reset stops it); GTest `Workflow.CodeEraseResetsAndHaltsFirst`. Re-verified on the same board:
+      `hwio chester app erase` on the running board succeeds (16 s, PIB unchanged; the following `flash ID` was a real
+      23 s write), `HilFlash.EraseCodeKeepsThePibAndPibDecodes` **PASS** 3 of 3 on a running board (39 s each).
+      **Release gate R5 met for the nRF52840**; the LTE MCU is still pending. The in-session hang after a failed
+      `EndDownload` stays open (not reproduced now that the erase succeeds).
 - [ ] G2 Manual checks on Linux, Windows, macOS (incl. nRF Util discovery on each)
 - [ ] G3 Update `plan/0006-cli.md` statuses, `plan/0002-legacy-inventory.md` parity rows, roadmap M2 → Done
 

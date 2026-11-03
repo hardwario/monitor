@@ -340,6 +340,12 @@ Result<jlink::ChipInfo> runErase(WorkflowContext& context, EraseScope scope) {
     context.cpuHalted = true; // the erase halts the CPU; nothing runs afterwards
     Status erased;
     if (scope == EraseScope::Code) {
+        // HIL H7 (2026-11-03): on a running CHESTER the loader's erase failed at 0x0 ("Verification
+        // failed", "RAMCode did not respond in time"); reset and halt first, as runFlash() does and
+        // as J-Link Commander's loadbin does implicitly. eraseAll() resets itself.
+        if (Status halted = context.programmer->reset(jlink::ResetMode::Halt); !halted) {
+            return std::unexpected(forTarget(std::move(halted).error(), profile, target));
+        }
         // Review R5: the PIB must survive a code-only erase. Phase 0.3 confirms the loader keeps
         // UICR; until then (and afterwards, as a guard) the PIB is compared before and after.
         const firmware::AddressRange pib = pibRange(target);
