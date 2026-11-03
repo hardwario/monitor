@@ -4,6 +4,8 @@
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/result.h"
+#include "hwio/device/ble_lock.h"
+#include "hwio/device/ble_session.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
@@ -13,16 +15,19 @@
 #include "viewmodels/probe_picker_view_model.h"
 
 #include <QChar>
+#include <QLocale>
 #include <QLoggingCategory>
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
+#include <QUrl>
 #include <QVariant>
 #include <QVariantList>
 #include <QVariantMap>
 #include <QtContainerFwd>
 #include <QtCore/qnamespace.h>
+#include <QtCore/qsystemdetection.h>
 #include <QtTypes>
 
 #include <cmath>
@@ -37,16 +42,23 @@ namespace hwio::gui {
 namespace {
 
 const QString recentKey = QStringLiteral("probes/recent");
+const QString bleRecentKey = QStringLiteral("ble/recent");
 
 QString probeKey(std::uint32_t serial, const char* name) {
     return QStringLiteral("probes/%1/%2").arg(serial).arg(QString::fromLatin1(name));
 }
 
-QStringList recentProbes(const SettingsStore* settings) {
+QStringList recentProbes(const SettingsStore* settings, const QString& key = recentKey) {
     if (settings == nullptr) {
         return {};
     }
-    return settings->value(recentKey).toString().split(QLatin1Char(','), Qt::SkipEmptyParts);
+    return settings->value(key).toString().split(QLatin1Char(','), Qt::SkipEmptyParts);
+}
+
+// Plan 0012: ble/<sanitised id>/<name> (the id in file-name form, as the BleLock).
+QString bleKey(const QString& id, const char* name) {
+    return QStringLiteral("ble/%1/%2")
+        .arg(toQString(device::sanitisedBleId(toStdString(id))), QString::fromLatin1(name));
 }
 
 void logFailure(const char* what, const Status& status) {
@@ -83,11 +95,128 @@ ConnectionViewModel::ConnectionViewModel(DeviceTabViewModel* tab, SettingsStore*
     : QObject(tab), m_tab(tab), m_settings(settings) {}
 
 QString ConnectionViewModel::probeLabel() const {
+    if (isBle()) {
+        // Plan 0012: "CHESTER-ABC123 · −58 dBm".
+        const int dbm = rssi();
+        return dbm == 0 ? deviceName()
+                        : tr("%1 · %2 dBm").arg(deviceName(), QLocale().toString(dbm));
+    }
     if (!m_serial) {
         return {};
     }
     const QString product = m_product.isEmpty() ? QStringLiteral("J-Link") : m_product;
     return QStringLiteral("%1 · %2").arg(product).arg(*m_serial);
+}
+
+bool ConnectionViewModel::isBle() const { return !m_bleId.isEmpty(); }
+
+QString ConnectionViewModel::deviceName() const {
+    return m_bleName.isEmpty() ? m_bleId : m_bleName;
+}
+
+int ConnectionViewModel::rssi() const {
+    const device::BleSession* session = m_tab->bleSession();
+    const std::optional<int> value = session != nullptr ? session->rssi() : std::nullopt;
+    return value.value_or(0);
+}
+
+int ConnectionViewModel::mtu() const {
+    const device::BleSession* session = m_tab->bleSession();
+    return session != nullptr ? session->mtu() : 0;
+}
+
+QString ConnectionViewModel::passkeyHint() const {
+    return isBle() ? device::passkeyHint(m_tab->profile()) : QString();
+}
+
+bool ConnectionViewModel::pairingError() const {
+    return isBle() && m_error &&
+           (m_error->code == ErrorCode::BleNotPaired ||
+            m_error->code == ErrorCode::BlePairingFailed);
+}
+
+QString ConnectionViewModel::pairingHelp() const {
+    if (!pairingError()) {
+        return {};
+    }
+    // ADR-0227.
+    const QString how = canPair()
+                            ? tr("Click Pair and enter the passkey in the system dialog.")
+                            : tr("Click Connect and enter the passkey when macOS asks for it.");
+    return QStringLiteral("%1 %2 %3")
+        .arg(how, passkeyHint(),
+             tr("Already paired but it does not work? Remove the device in the system Bluetooth "
+                "settings and pair it again."));
+}
+
+bool ConnectionViewModel::canPair() {
+#ifdef Q_OS_MACOS
+    return false; // ADR-0084: macOS pairs when connecting
+#else
+    return true;
+#endif
+}
+
+bool ConnectionViewModel::canOpenBluetoothSettings() {
+#ifdef Q_OS_WIN
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool ConnectionViewModel::canOpenPrivacySettings() {
+#ifdef Q_OS_MACOS
+    return true;
+#else
+    return false;
+#endif
+}
+
+void ConnectionViewModel::pairDevice() { m_tab->pairDevice(); }
+
+QString ConnectionViewModel::customActionText() const {
+    return pairingError() && canPair() ? tr("Pair") : QString();
+}
+
+QString ConnectionViewModel::secondaryActionText() const {
+    if (canChooseAnotherProbe()) {
+        return isBle() ? tr("Choose another device") : tr("Choose another probe");
+    }
+    if (pairingError() && canOpenBluetoothSettings()) {
+        return tr("Open Bluetooth settings");
+    }
+    if (isBle() && m_error && m_error->code == ErrorCode::BlePermissionDenied &&
+        canOpenPrivacySettings()) {
+        return tr("Open Privacy settings");
+    }
+    return {};
+}
+
+void ConnectionViewModel::triggerCustomAction() {
+    if (pairingError() && canPair()) {
+        pairDevice();
+    }
+}
+
+void ConnectionViewModel::triggerSecondaryAction() {
+    if (canChooseAnotherProbe()) {
+        chooseAnotherProbe();
+    } else if (pairingError() && canOpenBluetoothSettings()) {
+        openBluetoothSettings();
+    } else if (isBle() && m_error && m_error->code == ErrorCode::BlePermissionDenied &&
+               canOpenPrivacySettings()) {
+        openPrivacySettings();
+    }
+}
+
+void ConnectionViewModel::openBluetoothSettings() {
+    m_tab->openExternalUrl(QUrl(QStringLiteral("ms-settings:bluetooth")));
+}
+
+void ConnectionViewModel::openPrivacySettings() {
+    m_tab->openExternalUrl(QUrl(QStringLiteral(
+        "x-apple.systempreferences:com.apple.preference.security?Privacy_Bluetooth")));
 }
 
 QString ConnectionViewModel::serial() const {
@@ -133,6 +262,9 @@ QString ConnectionViewModel::stateKind() const {
     if (m_tab->isBusy()) {
         return QStringLiteral("busy");
     }
+    if (m_pairing) {
+        return QStringLiteral("connecting");
+    }
     if (!m_connection) {
         return m_error ? QStringLiteral("error") : QStringLiteral("idle");
     }
@@ -155,6 +287,17 @@ QString ConnectionViewModel::stateKind() const {
 QString ConnectionViewModel::stateText() const {
     if (m_tab->isBusy()) {
         return m_tab->busyText();
+    }
+    if (m_pairing) {
+        return tr("Pairing — confirm the passkey in the system dialog…");
+    }
+    if (m_pairingPending && m_connection &&
+        m_connection->state == device::ConnectionState::Connecting) {
+        return tr("Waiting for pairing — enter the passkey in the system dialog");
+    }
+    if (isBle() && m_connection && m_connection->state == device::ConnectionState::Connected) {
+        const int value = mtu();
+        return value > 0 ? tr("Connected · MTU %1").arg(value) : tr("Connected");
     }
     if (!m_connection) {
         return m_error ? tr("Disconnected — %1").arg(shortCause(*m_error)) : tr("Disconnected");
@@ -179,6 +322,9 @@ QString ConnectionViewModel::stateText() const {
 }
 
 QString ConnectionViewModel::action() const {
+    if (m_pairing) {
+        return QStringLiteral("connect"); // disabled (actionEnabled) until the result
+    }
     if (!m_connection || m_connection->state == device::ConnectionState::Stopped ||
         m_connection->state == device::ConnectionState::ProbeOpen) {
         return QStringLiteral("connect");
@@ -189,7 +335,9 @@ QString ConnectionViewModel::action() const {
     return QStringLiteral("disconnect");
 }
 
-bool ConnectionViewModel::actionEnabled() const { return !m_tab->isBusy() && m_serial; }
+bool ConnectionViewModel::actionEnabled() const {
+    return !m_tab->isBusy() && !m_pairing && (m_serial || isBle());
+}
 
 double ConnectionViewModel::targetVolts() const {
     // ADR-0091: the voltage of the last connection event; shown only while connected.
@@ -201,7 +349,8 @@ double ConnectionViewModel::targetVolts() const {
 }
 
 bool ConnectionViewModel::canChooseAnotherProbe() const {
-    return m_error && m_error->code == ErrorCode::ProbeNotFound;
+    return m_error && (m_error->code == ErrorCode::ProbeNotFound ||
+                       (isBle() && m_error->code == ErrorCode::BleDeviceNotFound));
 }
 
 int ConnectionViewModel::minSpeedKhz() { return device::minSpeedKhz; }
@@ -246,6 +395,11 @@ void ConnectionViewModel::setAutoReconnect(bool value) {
         return;
     }
     m_options.autoReconnect = value;
+    if (isBle()) {
+        rememberBleOptions();
+        optionsChanged(); // signal
+        return;
+    }
     rememberOptions();
     optionsChanged(); // signal
 }
@@ -263,8 +417,12 @@ void ConnectionViewModel::setLogToFile(bool value) {
     if (value == m_options.logToFile) {
         return;
     }
-    // Per tab only: the default is the console/logToFile setting (plan 0005).
+    // Per tab only: the default is the console/logToFile setting (plan 0005); a Bluetooth device
+    // remembers it (plan 0012).
     m_options.logToFile = value;
+    if (isBle()) {
+        rememberBleOptions();
+    }
     optionsChanged(); // signal
 }
 
@@ -321,8 +479,10 @@ void ConnectionViewModel::chooseAnotherProbe() { m_tab->chooseAnotherProbe(); }
 
 void ConnectionViewModel::loadOptions(std::optional<std::uint32_t> serial,
                                       const device::TargetProfile& target) {
-    if (serial != m_serial) {
+    if (serial != m_serial || !m_bleId.isEmpty()) {
         m_serial = serial;
+        m_bleId.clear();
+        m_bleName.clear();
         probeChanged(); // signal
     }
     ConnectionOptions options;
@@ -381,6 +541,77 @@ void ConnectionViewModel::rememberOptions() {
                m_settings->setValue(probeKey(serial, "resetOnOpen"), m_options.resetOnOpen));
     m_remembered = true;
     touchRememberedProbe();
+}
+
+void ConnectionViewModel::loadBleOptions(const QString& deviceId, const QString& name) {
+    m_serial.reset();
+    m_bleId = deviceId;
+    m_bleName = name;
+    m_product.clear();
+    ConnectionOptions options;
+    options.autoReconnect = false; // ADR-0229
+    if (m_settings != nullptr) {
+        options.autoReconnect = m_settings->value(QStringLiteral("ble/autoReconnect")).toBool();
+        const QString logKey = QStringLiteral("console/logToFile");
+        options.logToFile = !m_settings->isRegistered(logKey) || m_settings->value(logKey).toBool();
+        m_remembered = recentProbes(m_settings, bleRecentKey)
+                           .contains(toQString(device::sanitisedBleId(toStdString(m_bleId))));
+        if (m_remembered) {
+            options.autoReconnect = m_settings->value(bleKey(m_bleId, "autoReconnect")).toBool();
+            options.logToFile = m_settings->value(bleKey(m_bleId, "logToFile")).toBool();
+        }
+    } else {
+        m_remembered = false;
+    }
+    m_options = options;
+    probeChanged();   // signal
+    optionsChanged(); // signal
+    targetChanged();  // signal
+}
+
+void ConnectionViewModel::rememberBleOptions() {
+    if (m_bleId.isEmpty() || m_settings == nullptr || m_settings->readOnly()) {
+        return;
+    }
+    logFailure("ble autoReconnect",
+               m_settings->setValue(bleKey(m_bleId, "autoReconnect"), m_options.autoReconnect));
+    logFailure("ble logToFile",
+               m_settings->setValue(bleKey(m_bleId, "logToFile"), m_options.logToFile));
+    m_remembered = true;
+    touchRememberedBleDevice();
+}
+
+void ConnectionViewModel::touchRememberedBleDevice() {
+    if (!m_remembered || m_bleId.isEmpty() || m_settings == nullptr || m_settings->readOnly()) {
+        return;
+    }
+    // As the probes (ADR-0052, ADR-0092): most recently used first, at most
+    // maxRememberedProbes; the group of a dropped device is removed.
+    const QString id = toQString(device::sanitisedBleId(toStdString(m_bleId)));
+    QStringList recent = recentProbes(m_settings, bleRecentKey);
+    recent.removeAll(id);
+    recent.prepend(id);
+    while (recent.size() > static_cast<qsizetype>(maxRememberedProbes)) {
+        logFailure("an evicted Bluetooth device",
+                   m_settings->removeGroup(QStringLiteral("ble/") + recent.takeLast()));
+    }
+    logFailure("ble/recent", m_settings->setValue(bleRecentKey, recent.join(QLatin1Char(','))));
+}
+
+void ConnectionViewModel::setPairingPending(bool pending) {
+    if (pending == m_pairingPending) {
+        return;
+    }
+    m_pairingPending = pending;
+    stateChanged(); // signal
+}
+
+void ConnectionViewModel::setPairing(bool pairing) {
+    if (pairing == m_pairing) {
+        return;
+    }
+    m_pairing = pairing;
+    stateChanged(); // signal
 }
 
 void ConnectionViewModel::touchRememberedProbe() {
@@ -480,6 +711,15 @@ QString ConnectionViewModel::shortCause(const Error& error) {
     case ErrorCode::TargetRttWriteFailed:
     case ErrorCode::TargetRttWriteTimeout:
         return tr("connection lost");
+    case ErrorCode::BleDeviceNotFound:
+        return tr("out of range");
+    case ErrorCode::BleDisconnected:
+        return tr("connection lost");
+    case ErrorCode::BleNotPaired:
+    case ErrorCode::BlePairingFailed:
+        return tr("not paired");
+    case ErrorCode::BleAdapterOff:
+        return tr("Bluetooth is off");
     case ErrorCode::DependencyJLinkNotFound:
     case ErrorCode::DependencyJLinkLoadFailed:
     case ErrorCode::DependencyJLinkTooOld:

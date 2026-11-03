@@ -435,7 +435,8 @@ jobs:
             if ($sig.SignerCertificate.Subject -notlike '*O=HARDWARIO a.s.*') { throw "${file}: signed by $($sig.SignerCertificate.Subject)" }
             if (-not $sig.TimeStamperCertificate) { throw "${file}: no timestamp" }
           }
-          wix msi validate $msi
+          # ICE38/43/57: per-user checks, not for this perMachine MSI (as in ci.yml).
+          wix msi validate -sice ICE38 -sice ICE43 -sice ICE57 $msi
           if ($LASTEXITCODE -ne 0) { throw "wix msi validate failed: $msi" }
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

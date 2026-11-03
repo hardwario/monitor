@@ -131,6 +131,12 @@ public:
                                                 static_cast<std::uint32_t>(serial), product);
     }
 
+    // Plan 0012: a Bluetooth tab (as restored: Disconnected).
+    Q_INVOKABLE bool configureBleTab(int index, const QString& id, const QString& name) {
+        hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);
+        return tab != nullptr && tab->configureBle(QStringLiteral("chester"), id, name);
+    }
+
     // Keeps one Choose device tab (busy pages are finished first).
     Q_INVOKABLE void resetTabs() {
         while (m_app->tabs()->count() > 1) {

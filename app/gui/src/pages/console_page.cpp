@@ -112,6 +112,7 @@ void registerConsolePage(AppViewModel& app) {
         .qml = QUrl(QStringLiteral("qrc:/qt/qml/HardwarioMonitor/qml/pages/ConsolePage.qml")),
         .order = 10,
         .global = false,
+        .needsOperations = false,
         .createViewModel = [settings, history,
                             appModel = &app](DeviceTabViewModel* tab) -> QObject* {
             // Qt parent ownership: the tab.

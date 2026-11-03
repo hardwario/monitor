@@ -2,7 +2,8 @@
 // "Probably:" cause, "What to do:" suggestion, the primary action of the error category (a page
 // may override `primaryAction`), an optional secondary action, "Help me fix this" when the error's
 // wizard is registered (plan/features/0007: it opens the wizard with the error as context) and a
-// Details expander (code, detail, Copy).
+// Details expander (code, detail, Copy). Plan 0012: a page may replace the primary action by its own
+// (`customActionText`, e.g. [Pair]) and add a `note` below the suggestion.
 // `compact` (window height < 700 px) collapses it to the headline, the primary action and an
 // expand chevron.
 pragma ComponentBehavior: Bound
@@ -18,6 +19,9 @@ Rectangle {
     property errorInfo error
     property int primaryAction: panel.error.primaryAction
     property string secondaryActionText: ""
+    // Plan 0012: replaces the primary action (customActionTriggered instead of actionTriggered).
+    property string customActionText: ""
+    property string note: ""
     property bool compact: false
     // The tab whose wizard "Help me fix this" opens (-1 = the current tab).
     property int tabIndex: -1
@@ -29,6 +33,7 @@ Rectangle {
 
     signal actionTriggered(int action)
     signal secondaryActionTriggered
+    signal customActionTriggered
 
     visible: panel.error.valid
     implicitHeight: content.implicitHeight + 2 * Theme.spacingM
@@ -38,7 +43,7 @@ Rectangle {
     border.color: Theme.border
     Accessible.role: Accessible.AlertMessage
     Accessible.name: panel.error.message
-    Accessible.description: panel.error.cause + " " + panel.error.suggestion
+    Accessible.description: panel.error.cause + " " + panel.error.suggestion + (panel.note !== "" ? " " + panel.note : "")
 
     Rectangle {
         width: 4
@@ -87,8 +92,8 @@ Rectangle {
                     objectName: "errorPrimaryCompact"
                     visible: panel.collapsed
                     kind: "primary"
-                    text: panel.actionTexts[panel.primaryAction]
-                    onClicked: panel.actionTriggered(panel.primaryAction)
+                    text: panel.customActionText !== "" ? panel.customActionText : panel.actionTexts[panel.primaryAction]
+                    onClicked: panel.customActionText !== "" ? panel.customActionTriggered() : panel.actionTriggered(panel.primaryAction)
                 }
 
                 HToolButton {
@@ -120,6 +125,16 @@ Rectangle {
                 wrapMode: Text.Wrap
             }
 
+            Label {
+                textFormat: Text.PlainText
+                objectName: "errorNote"
+                Layout.fillWidth: true
+                visible: !panel.collapsed && panel.note !== ""
+                text: panel.note
+                color: Theme.textMuted
+                wrapMode: Text.Wrap
+            }
+
             Flow {
                 Layout.fillWidth: true
                 Layout.topMargin: Theme.spacingS
@@ -129,8 +144,8 @@ Rectangle {
                 HButton {
                     objectName: "errorPrimary"
                     kind: "primary"
-                    text: panel.actionTexts[panel.primaryAction]
-                    onClicked: panel.actionTriggered(panel.primaryAction)
+                    text: panel.customActionText !== "" ? panel.customActionText : panel.actionTexts[panel.primaryAction]
+                    onClicked: panel.customActionText !== "" ? panel.customActionTriggered() : panel.actionTriggered(panel.primaryAction)
                 }
 
                 HButton {

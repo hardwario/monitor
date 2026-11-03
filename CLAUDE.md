@@ -115,6 +115,7 @@ build/linux-debug/app/cli/hwio --help           # CLI; GUI: build/linux-debug/ap
 build/linux-debug/app/cli/hwio ble scan         # nearby CHESTERs (--all: every device); then pick one by -a ID or --name N:
 build/linux-debug/app/cli/hwio ble console -a F1:22:33:44:55:66   # also `ble command CMD`, `ble pair` (Linux/Windows)
 HWIO_FAKE_BLE_SCENARIO=tests/ble_scenarios/chester.json build/linux-debug/app/cli/hwio ble scan   # fake BLE (test builds)
+HWIO_FAKE_BLE_SCENARIO=tests/ble_scenarios/chester.json build/linux-debug/app/gui/hwio-monitor   # GUI: Connect via Bluetooth
 build/linux-debug/app/cli/hwio jlink list       # probes (J-Link Software 8.x: auto-discovered, or
                                                 # --jlink-library PATH / $HWIO_JLINK_LIBRARY)
 build/linux-debug/app/cli/hwio chester app console   # RTT console; `chester app command version`

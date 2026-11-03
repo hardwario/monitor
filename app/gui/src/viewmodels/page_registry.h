@@ -32,6 +32,9 @@ struct PageDescriptor {
     QUrl qml;                         // page root component; gets `tab` and `vm` properties
     int order = 0;                    // rail order (ascending)
     bool global = false;              // one instance for the app, shown at the rail bottom
+    // Plan 0012: the page runs operations (flash, erase, ...): disabled in a tab whose transport
+    // has none (Bluetooth), with DeviceTabViewModel::pageDisabledReason as the tooltip.
+    bool needsOperations = false;
     // Creates the page view model; parent = the tab (or AppViewModel for global pages): Qt parent
     // ownership. May be empty (a page without a view model).
     std::function<QObject*(DeviceTabViewModel* tab /* nullptr for global pages */)> createViewModel;

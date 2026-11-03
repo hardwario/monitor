@@ -104,39 +104,39 @@
         <translation>Pokročilé</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="37"/>
+        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="39"/>
         <source>Automatic speed</source>
         <translation>Automatická rychlost</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="50"/>
-        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="65"/>
+        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="53"/>
+        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="68"/>
         <source>J-Link speed (kHz)</source>
         <translation>Rychlost J-Link (kHz)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="84"/>
-        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="97"/>
+        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="87"/>
+        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="100"/>
         <source>RTT latency (ms)</source>
         <translation>Latence RTT (ms)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="106"/>
+        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="109"/>
         <source>Auto-reconnect</source>
         <translation>Automaticky znovu připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="114"/>
+        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="118"/>
         <source>Reset on connect</source>
         <translation>Reset při připojení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="122"/>
+        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="126"/>
         <source>Save console to log file</source>
         <translation>Ukládat konzoli do souboru</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="129"/>
+        <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="133"/>
         <source>Changes apply on the next connect.</source>
         <translation>Změny se projeví při dalším připojení.</translation>
     </message>
@@ -191,6 +191,101 @@
     </message>
 </context>
 <context>
+    <name>BleDeviceList</name>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="52"/>
+        <source>Choose a device to connect</source>
+        <translation>Vyberte zařízení k připojení</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="60"/>
+        <source>Bluetooth devices nearby. The list refreshes automatically.</source>
+        <translation>Zařízení Bluetooth v okolí. Seznam se obnovuje automaticky.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="71"/>
+        <source>Open Privacy settings</source>
+        <translation>Otevřít nastavení soukromí</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="102"/>
+        <source>Filter by name…</source>
+        <translation>Filtrovat podle názvu…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="105"/>
+        <source>Filter by name</source>
+        <translation>Filtrovat podle názvu</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="113"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="128"/>
+        <source>Show all devices</source>
+        <translation>Zobrazit všechna zařízení</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="125"/>
+        <source>No %1 found nearby</source>
+        <translation>V okolí nebylo nalezeno žádné zařízení %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="126"/>
+        <source>Make sure the device is powered and its Bluetooth is on.</source>
+        <translation>Ověřte, že je zařízení napájené a má zapnuté Bluetooth.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="165"/>
+        <source>(no name)</source>
+        <translation>(bez názvu)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="269"/>
+        <source>%1 dBm</source>
+        <translation>%1 dBm</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="291"/>
+        <source>not seen recently</source>
+        <translation>nedávno neviděno</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="302"/>
+        <source>In use by another program (%1)</source>
+        <translation>Používá jiný program (%1)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="303"/>
+        <source>In use (tab %1)</source>
+        <translation>Používá se (karta %1)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="334"/>
+        <source>Scanning for Bluetooth devices…</source>
+        <translation>Hledají se zařízení Bluetooth…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="358"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="372"/>
+        <source>Device type</source>
+        <translation>Typ zařízení</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="373"/>
+        <source>Used for devices of an unknown type</source>
+        <translation>Použije se pro zařízení neznámého typu</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="385"/>
+        <source>Choose a free device in the list above.</source>
+        <translation>Vyberte volné zařízení v seznamu výše.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="399"/>
+        <source>Connect</source>
+        <translation>Připojit</translation>
+    </message>
+</context>
+<context>
     <name>CheckList</name>
     <message>
         <location filename="../app/gui/qml/components/CheckList.qml" line="18"/>
@@ -211,100 +306,116 @@
 <context>
     <name>ChooseDevicePage</name>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="32"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="55"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="63"/>
+        <source>Connect via</source>
+        <translation>Připojit přes</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="69"/>
+        <source>J-Link</source>
+        <translation>J-Link</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="80"/>
+        <source>Bluetooth</source>
+        <translation>Bluetooth</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="120"/>
         <source>No J-Link probe found</source>
         <translation>Nenalezen žádný programátor J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="33"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="121"/>
         <source>Connect the J-Link to USB and to the device.</source>
         <translation>Připojte J-Link do USB a k zařízení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="34"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="171"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="122"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="259"/>
         <source>Refresh</source>
         <translation>Obnovit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="50"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="138"/>
         <source>J-Link Software found (%1)</source>
         <translation>Software J-Link nalezen (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="51"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="139"/>
         <source>J-Link Software not found</source>
         <translation>Software J-Link nenalezen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="66"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="154"/>
         <source>Is the USB cable connected?</source>
         <translation>Je připojen USB kabel?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="82"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="170"/>
         <source>Help me fix this</source>
         <translation>Pomozte mi to vyřešit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="83"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="92"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="171"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="180"/>
         <source>Coming soon</source>
         <translation>Připravujeme</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="120"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="208"/>
         <source>Choose a device to connect</source>
         <translation>Vyberte zařízení k připojení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="128"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="216"/>
         <source>J-Link probes connected to this computer. The list refreshes automatically.</source>
         <translation>Programátory J-Link připojené k tomuto počítači. Seznam se obnovuje automaticky.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="163"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="251"/>
         <source>Probe</source>
         <translation>Programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="187"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="275"/>
         <source>Looking for J-Link probes…</source>
         <translation>Hledání programátorů J-Link…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="292"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="380"/>
         <source>FW %1</source>
         <translation>FW %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="307"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="395"/>
         <source>In use by another program (%1)</source>
         <translation>Používá jiný program (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="308"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="396"/>
         <source>In use (tab %1)</source>
         <translation>Používá se (karta %1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="346"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="364"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="434"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="452"/>
         <source>Device</source>
         <translation>Zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="377"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="465"/>
         <source>Target</source>
         <translation>Cíl</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="406"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="494"/>
         <source>Choose a free probe in the list above.</source>
         <translation>Vyberte v seznamu výše volný programátor.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="419"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="507"/>
         <source>Connect</source>
         <translation>Připojit</translation>
     </message>
@@ -395,139 +506,139 @@
     </message>
     <message>
         <location filename="../app/gui/qml/pages/ConsolePage.qml" line="238"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="249"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="251"/>
         <source>Reset</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="241"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="243"/>
         <source>Opens the reset menu</source>
         <translation>Otevře nabídku resetu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="255"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="257"/>
         <source>Reset and halt</source>
         <translation>Reset a zastavit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="264"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="266"/>
         <source>Reconnect</source>
         <translation>Znovu připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="274"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="276"/>
         <source>Batch…</source>
         <translation>Dávka…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="286"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="288"/>
         <source>Batch files — documentation</source>
         <translation>Dávkové soubory — dokumentace</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="296"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="298"/>
         <source>Clear</source>
         <translation>Vymazat</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="299"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="301"/>
         <source>Opens the clear menu</source>
         <translation>Otevře nabídku mazání</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="306"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="591"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="308"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="598"/>
         <source>Shell</source>
         <translation>Shell</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="311"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="647"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="313"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="655"/>
         <source>Log</source>
         <translation>Log</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="316"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="318"/>
         <source>Both</source>
         <translation>Obojí</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="325"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="327"/>
         <source>Save view…</source>
         <translation>Uložit výpis…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="348"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="350"/>
         <source>Batch %1 / %2</source>
         <translation>Dávka %1 / %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="356"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="358"/>
         <source>Stop the batch</source>
         <translation>Zastavit dávku</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="370"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="372"/>
         <source>Follow</source>
         <translation>Sledovat</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="382"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="384"/>
         <source>Pause</source>
         <translation>Pozastavit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="396"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="398"/>
         <source>More</source>
         <translation>Další</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="404"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="406"/>
         <source>Open log file</source>
         <translation>Otevřít soubor s logem</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="409"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="411"/>
         <source>Open log folder</source>
         <translation>Otevřít složku s logy</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="416"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="418"/>
         <source>Show timestamps</source>
         <translation>Zobrazit časové značky</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="423"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="425"/>
         <source>Wrap lines</source>
         <translation>Zalamovat řádky</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="430"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="432"/>
         <source>Swap panes</source>
         <translation>Prohodit panely</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="437"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="439"/>
         <source>Stacked layout</source>
         <translation>Panely pod sebou</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="483"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="485"/>
         <source>Not connected</source>
         <translation>Nepřipojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="484"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="486"/>
         <source>Connect to see the device console.</source>
         <translation>Připojte se a uvidíte konzoli zařízení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="485"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="487"/>
         <source>Connect</source>
         <translation>Připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="531"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="538"/>
         <source>Resize the shell and the log</source>
         <translation>Změnit velikost shellu a logu</translation>
     </message>
@@ -779,57 +890,67 @@
 <context>
     <name>DeviceBar</name>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="38"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="39"/>
         <source>Choose device</source>
         <translation>Vyberte zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="54"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="55"/>
+        <source>Bluetooth device %1</source>
+        <translation>Zařízení Bluetooth %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="56"/>
         <source>Probe %1</source>
         <translation>Programátor %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="65"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="68"/>
         <source>Probe</source>
         <translation>Programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="94"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="104"/>
         <source>Target: %1</source>
         <translation>Cíl: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="95"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="105"/>
         <source>Target</source>
         <translation>Cíl</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="119"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="129"/>
         <source>Disconnect to change the target</source>
         <translation>Pro změnu cíle se odpojte</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="181"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="193"/>
         <source>Choose another probe</source>
         <translation>Vybrat jiný programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="190"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="193"/>
+        <source>Choose another device</source>
+        <translation>Vybrat jiné zařízení</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="202"/>
         <source>Connect</source>
         <translation>Připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="191"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="203"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="191"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="203"/>
         <source>Disconnect</source>
         <translation>Odpojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="202"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="214"/>
         <source>Advanced</source>
         <translation>Pokročilé</translation>
     </message>
@@ -842,17 +963,17 @@
         <translation>Karty zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="134"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="145"/>
         <source>Close tab</source>
         <translation>Zavřít kartu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="157"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="168"/>
         <source>New device</source>
         <translation>Nové zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="173"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="184"/>
         <source>At most %1 devices can be open.</source>
         <translation>Otevřít lze nejvýše %1 zařízení.</translation>
     </message>
@@ -860,77 +981,77 @@
 <context>
     <name>ErrorPanel</name>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="27"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="31"/>
         <source>Reconnect</source>
         <translation>Znovu připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="27"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="31"/>
         <source>Choose another file</source>
         <translation>Vybrat jiný soubor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="28"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="32"/>
         <source>Open Settings</source>
         <translation>Otevřít nastavení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="28"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="32"/>
         <source>Retry</source>
         <translation>Zkusit znovu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="28"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="32"/>
         <source>Dismiss</source>
         <translation>Zavřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="97"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="102"/>
         <source>Show less</source>
         <translation>Zobrazit méně</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="97"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="102"/>
         <source>Show more</source>
         <translation>Zobrazit více</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="108"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="113"/>
         <source>Probably: %1</source>
         <translation>Pravděpodobně: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="118"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="123"/>
         <source>What to do: %1</source>
         <translation>Co dělat: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="147"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="162"/>
         <source>Help me fix this</source>
         <translation>Pomozte mi to vyřešit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="154"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="169"/>
         <source>Details</source>
         <translation>Podrobnosti</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="156"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="171"/>
         <source>Expanded</source>
         <translation>Rozbaleno</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="156"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="171"/>
         <source>Collapsed</source>
         <translation>Sbaleno</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="186"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="201"/>
         <source>Error details</source>
         <translation>Podrobnosti chyby</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="192"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="207"/>
         <source>Copy</source>
         <translation>Kopírovat</translation>
     </message>
@@ -1223,17 +1344,17 @@
 <context>
     <name>NavRail</name>
     <message>
-        <location filename="../app/gui/qml/shell/NavRail.qml" line="21"/>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="23"/>
         <source>Pages</source>
         <translation>Stránky</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/NavRail.qml" line="47"/>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="50"/>
         <source>Busy</source>
         <translation>Probíhá operace</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/NavRail.qml" line="157"/>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="163"/>
         <source>Help</source>
         <translation>Nápověda</translation>
     </message>
@@ -1316,18 +1437,10 @@
     </message>
 </context>
 <context>
-    <name>PageHost</name>
-    <message>
-        <location filename="../app/gui/qml/shell/PageHost.qml" line="28"/>
-        <source>Choose another probe</source>
-        <translation>Vybrat jiný programátor</translation>
-    </message>
-</context>
-<context>
     <name>Pages</name>
     <message>
         <location filename="../app/gui/src/pages/console_page.cpp" line="110"/>
-        <location filename="../app/gui/src/pages/console_page.cpp" line="124"/>
+        <location filename="../app/gui/src/pages/console_page.cpp" line="125"/>
         <source>Console</source>
         <translation>Konzole</translation>
     </message>
@@ -1337,28 +1450,28 @@
         <translation>Nahrát FW</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="83"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="84"/>
         <location filename="../app/gui/src/viewmodels/device_tab_list_model.cpp" line="34"/>
         <source>Settings</source>
         <translation>Nastavení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="97"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="99"/>
         <source>General</source>
         <translation>Obecné</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="102"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="104"/>
         <source>J-Link</source>
         <translation>J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="107"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="109"/>
         <source>nRF Util</source>
         <translation>nRF Util</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="112"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="114"/>
         <source>About</source>
         <translation>O aplikaci</translation>
     </message>
@@ -1579,45 +1692,45 @@
 <context>
     <name>Shortcuts</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="342"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="368"/>
         <source>New device tab</source>
         <translation>Nová karta zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="345"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="371"/>
         <source>Close the device tab</source>
         <translation>Zavřít kartu zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="348"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="351"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="374"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="377"/>
         <source>Next tab</source>
         <translation>Další karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="354"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="357"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="380"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="383"/>
         <source>Previous tab</source>
         <translation>Předchozí karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="360"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="386"/>
         <source>Settings</source>
         <translation>Nastavení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="363"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="389"/>
         <source>Connect or disconnect</source>
         <translation>Připojit nebo odpojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="366"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="392"/>
         <source>Reconnect</source>
         <translation>Znovu připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="369"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="372"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="395"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="398"/>
         <source>Keyboard shortcuts</source>
         <translation>Klávesové zkratky</translation>
     </message>
@@ -1632,12 +1745,12 @@
         <translation>Obecné</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="121"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="123"/>
         <source>Flash</source>
         <translation>Nahrát firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="125"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="127"/>
         <source>Choose a firmware file</source>
         <translation>Vybrat soubor s firmwarem</translation>
     </message>
@@ -4177,7 +4290,7 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1001"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1105"/>
         <source>Copied to clipboard.</source>
         <translation>Zkopírováno do schránky.</translation>
     </message>
@@ -4236,92 +4349,186 @@
     </message>
 </context>
 <context>
+    <name>hwio::gui::BlePickerViewModel</name>
+    <message>
+        <location filename="../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="104"/>
+        <source>Unknown device</source>
+        <translation>Neznámé zařízení</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="453"/>
+        <source>%n device(s) found</source>
+        <translation>
+            <numerusform>Nalezeno %n zařízení</numerusform>
+            <numerusform>Nalezena %n zařízení</numerusform>
+            <numerusform>Nalezeno %n zařízení</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>hwio::gui::ConnectionViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="160"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="176"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="299"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="315"/>
         <source>Disconnected — %1</source>
         <translation>Odpojeno — %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="160"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="176"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="178"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="299"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="315"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="317"/>
         <source>Disconnected</source>
         <translation>Odpojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="164"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="303"/>
         <source>Connecting…</source>
         <translation>Připojování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="166"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="305"/>
         <source>J-Link open, device not connected</source>
         <translation>J-Link otevřen, zařízení nepřipojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="169"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="296"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
         <source>Connected</source>
         <translation>Připojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="170"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="102"/>
+        <source>%1 · %2 dBm</source>
+        <translation>%1 · %2 dBm</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="140"/>
+        <source>Click Pair and enter the passkey in the system dialog.</source>
+        <translation>Klikněte na Spárovat a zadejte přístupový klíč v dialogu systému.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="141"/>
+        <source>Click Connect and enter the passkey when macOS asks for it.</source>
+        <translation>Klikněte na Připojit a zadejte přístupový klíč, až si o něj macOS řekne.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="144"/>
+        <source>Already paired but it does not work? Remove the device in the system Bluetooth settings and pair it again.</source>
+        <translation>Zařízení je spárované, ale nefunguje? Odeberte ho v systémovém nastavení Bluetooth a spárujte ho znovu.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="175"/>
+        <source>Pair</source>
+        <translation>Spárovat</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="180"/>
+        <source>Choose another device</source>
+        <translation>Vybrat jiné zařízení</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="180"/>
+        <source>Choose another probe</source>
+        <translation>Vybrat jiný programátor</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="183"/>
+        <source>Open Bluetooth settings</source>
+        <translation>Otevřít nastavení Bluetooth</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="187"/>
+        <source>Open Privacy settings</source>
+        <translation>Otevřít nastavení soukromí</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="288"/>
+        <source>Pairing — confirm the passkey in the system dialog…</source>
+        <translation>Párování — potvrďte přístupový klíč v dialogu systému…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
+        <source>Waiting for pairing — enter the passkey in the system dialog</source>
+        <translation>Čeká se na spárování — zadejte přístupový klíč v dialogu systému</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="296"/>
+        <source>Connected · MTU %1</source>
+        <translation>Připojeno · MTU %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="309"/>
         <source>Connected · %1 V</source>
         <translation>Připojeno · %1 V</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="173"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="312"/>
         <source>Reconnecting… (%1)</source>
         <translation>Opětovné připojování… (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="174"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="313"/>
         <source>Reconnecting…</source>
         <translation>Opětovné připojování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="449"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="676"/>
         <source>The console log file could not be written; logging to file is off for this session.</source>
         <translation>Soubor s výpisem konzole nelze zapsat; ukládání do souboru je pro tuto relaci vypnuté.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="467"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="694"/>
         <source>target not powered</source>
         <translation>zařízení není napájené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="469"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="696"/>
         <source>J-Link not found</source>
         <translation>J-Link nenalezen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="471"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="698"/>
         <source>J-Link used by another program</source>
         <translation>J-Link používá jiný program</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="473"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="700"/>
         <source>J-Link could not be opened</source>
         <translation>J-Link nelze otevřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="475"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="702"/>
         <source>target does not respond</source>
         <translation>zařízení neodpovídá</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="478"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="705"/>
         <source>no RTT console found</source>
         <translation>konzole RTT nenalezena</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="482"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="709"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="713"/>
         <source>connection lost</source>
         <translation>spojení ztraceno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="486"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="711"/>
+        <source>out of range</source>
+        <translation>mimo dosah</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="716"/>
+        <source>not paired</source>
+        <translation>nespárováno</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="718"/>
+        <source>Bluetooth is off</source>
+        <translation>Bluetooth je vypnuté</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="722"/>
         <source>J-Link Software missing</source>
         <translation>chybí software J-Link</translation>
     </message>
@@ -4329,87 +4536,92 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="145"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="146"/>
         <source>another operation started on the device.</source>
         <translation>na zařízení byla spuštěna jiná operace.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="146"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="147"/>
         <source>Run the batch file again when it has finished.</source>
         <translation>Po jejím dokončení spusťte dávkový soubor znovu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="207"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="214"/>
         <source>the device disconnected.</source>
         <translation>zařízení se odpojilo.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="208"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="215"/>
         <source>Reconnect and run the batch file again.</source>
         <translation>Znovu se připojte a spusťte dávkový soubor znovu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="222"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="229"/>
         <source>The batch stopped after %1 of %2 commands.</source>
         <translation>Dávka se zastavila po %1 z %2 příkazů.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="235"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="242"/>
         <source>The device was reset and halted.</source>
         <translation>Zařízení bylo resetováno a zastaveno.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="236"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="243"/>
         <source>The device was reset.</source>
         <translation>Zařízení bylo resetováno.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="313"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="325"/>
         <source>%1 — the console resumes automatically</source>
         <translation>%1 — konzole se obnoví automaticky</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="316"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="328"/>
         <source>This target has no console</source>
         <translation>Tento cíl nemá konzoli</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="319"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="331"/>
+        <source>Waiting for pairing…</source>
+        <translation>Čeká se na spárování…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="332"/>
         <source>Connecting…</source>
         <translation>Připojování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="321"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="334"/>
         <source>Not connected</source>
         <translation>Nepřipojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="672"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="691"/>
         <source>The file could not be saved.</source>
         <translation>Soubor se nepodařilo uložit.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="673"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="692"/>
         <source>the folder is not writable or the disk is full.</source>
         <translation>do složky nelze zapisovat nebo je disk plný.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="674"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="693"/>
         <source>Choose another folder.</source>
         <translation>Vyberte jinou složku.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="694"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="713"/>
         <source>The view was saved to %1.</source>
         <translation>Výpis byl uložen do %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="723"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="742"/>
         <source>Sends each line of a UTF-8 text file to the device as a shell command, one line every %1 ms. Empty lines and lines starting with # are skipped. At most %2 commands, %3 MiB per file and %4 bytes per line.</source>
         <translation>Odešle každý řádek textového souboru v UTF-8 do zařízení jako příkaz shellu, jeden řádek každých %1 ms. Prázdné řádky a řádky začínající znakem # se přeskočí. Nejvýše %2 příkazů, %3 MiB na soubor a %4 bajtů na řádek.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="750"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="769"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Do schránky byl zkopírován první %n řádek (limit kopírování).</numerusform>
@@ -4418,7 +4630,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="765"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="784"/>
         <source>There is no console log file for this device yet.</source>
         <translation>Pro toto zařízení zatím neexistuje soubor s logem konzole.</translation>
     </message>
@@ -4454,34 +4666,44 @@
 <context>
     <name>hwio::gui::DeviceTabViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="106"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="154"/>
         <source>New device</source>
         <translation>Nové zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="352"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="413"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="185"/>
+        <source>Flashing needs a J-Link. Open a J-Link tab to flash this device.</source>
+        <translation>Nahrávání firmwaru vyžaduje J-Link. Pro nahrání do tohoto zařízení otevřete kartu s J-Linkem.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="539"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="600"/>
         <source>— disconnected: %1 —</source>
         <translation>— odpojeno: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="366"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="414"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="553"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="601"/>
         <source>— disconnected —</source>
         <translation>— odpojeno —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="406"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="593"/>
         <source>— connected —</source>
         <translation>— připojeno —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="494"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="593"/>
+        <source>— connected (Bluetooth) —</source>
+        <translation>— připojeno (Bluetooth) —</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="721"/>
         <source>— paused: %1 —</source>
         <translation>— pozastaveno: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="507"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="734"/>
         <source>— resumed —</source>
         <translation>— obnoveno —</translation>
     </message>
