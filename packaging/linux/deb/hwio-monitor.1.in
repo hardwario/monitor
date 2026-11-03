@@ -13,4 +13,4 @@ front.
 SEGGER J-Link Software 8.00 or newer must be installed separately.
 .SH SEE ALSO
 .BR hwio (1),
-https://github.com/hardwario/hio-monitor
+https://github.com/hardwario/monitor

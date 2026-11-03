@@ -275,7 +275,7 @@ function(_hwio_configure_cpack)
     set(CPACK_PACKAGE_VERSION "${HWIO_VERSION_NUMERIC}")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
         "Console, log and flashing tool for HARDWARIO devices")
-    set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/hardwario/hio-monitor")
+    set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/hardwario/monitor")
     set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
     set(CPACK_PACKAGE_DIRECTORY "${PROJECT_BINARY_DIR}/packages")
     set(CPACK_STRIP_FILES OFF) # symbols are split by the release workflow (ADR-0123)

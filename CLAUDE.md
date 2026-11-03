@@ -2,7 +2,7 @@
 
 HARDWARIO Monitor v2 is a complete rewrite of the HARDWARIO Monitor desktop application
 (console / log / flashing tool for HARDWARIO devices, primarily CHESTER). It replaces the
-old Qt app (branch `main`) entirely. The product is expected to stay in production for many
+old Qt app (repository `hardwario/hio-monitor`, branch `main`) entirely. The product is expected to stay in production for many
 years: **stability, user-friendliness, memory safety and maintainability beat feature speed.**
 
 All design documentation lives in [`plan/`](plan/README.md). Read `plan/README.md`,
@@ -49,7 +49,7 @@ All design documentation lives in [`plan/`](plan/README.md). Read `plan/README.m
 | Backend | May use QtCore, QtNetwork, QtBluetooth; **never QtGui / QtQuick / QtWidgets** — ADR-0004 |
 | Hardware | **SEGGER JLinkARM library only** (≥ 8.00) for RTT and programming (flash/erase/reset/recover/UICR), runtime-loaded from own declarations, one library copy per session, behind interfaces; py-hardwario / rttt 1.9.2 are the behavioural reference. Optional **nRF Util** subprocess only for nRF91 modem firmware. No nrfjprog — ADR-0015, ADR-0016, ADR-0006, ADR-0028–0030, ADR-0034 |
 | Localization | **English + Czech** via Qt Linguist (English source text), extensible; every user-visible string translatable; backend translates at creation; CLI English only — ADR-0027 |
-| Naming | Project prefix **`hwio` / `HWio` / `HWIO_`**: namespace `hwio::`, includes `<hwio/...>`, CLI `hwio`, GUI `hwio-monitor`; product name "HARDWARIO Monitor", `com.hardwario.monitor` and the repository `hardwario/hio-monitor` unchanged — ADR-0181 |
+| Naming | Project prefix **`hwio` / `HWio` / `HWIO_`**: namespace `hwio::`, includes `<hwio/...>`, CLI `hwio`, GUI `hwio-monitor`; product name "HARDWARIO Monitor", `com.hardwario.monitor` and the repository `hardwario/monitor` unchanged — ADR-0181 |
 | Errors | `std::expected<T, hwio::Error>`; no exceptions crossing module, thread or C-callback boundaries — ADR-0007 |
 | Build | CMake + `CMakePresets.json`; third-party deps via **CPM / FetchContent pinned to exact tags + hashes** (no Conan, no vcpkg) — ADR-0010 |
 | Tests | **GoogleTest + GMock** for C++, Qt Quick Test for QML — ADR-0010 |
@@ -89,7 +89,8 @@ All design documentation lives in [`plan/`](plan/README.md). Read `plan/README.m
 
 ## Reference material
 
-- Old app: branch `main` of this repository (feature inventory: `plan/0002-legacy-inventory.md`).
+- Old app: branch `main` of `hardwario/hio-monitor` (feature inventory: `plan/0002-legacy-inventory.md`); v2 moved to
+  `hardwario/monitor` on 2026-11-03 (history rewritten so that every commit carries the MIT `LICENSE`, ADR-0206).
 - `../py-hardwario` — the reference implementation of flashing / RTT / PIB behaviour.
   The C++ backend reproduces its logic natively; Python is never used at runtime.
 

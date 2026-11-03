@@ -457,7 +457,7 @@ QString SettingsViewModel::catalogUrl() const {
 }
 
 QString SettingsViewModel::sourceUrl() {
-    return QStringLiteral("https://github.com/hardwario/hio-monitor");
+    return QStringLiteral("https://github.com/hardwario/monitor");
 }
 
 QString SettingsViewModel::nrfUtilInstallUrl() {

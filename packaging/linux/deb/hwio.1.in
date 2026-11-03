@@ -25,4 +25,4 @@ Print the version and exit.
 Machine-readable output: one JSON envelope per line on stdout.
 .SH SEE ALSO
 .BR hwio-monitor (1),
-https://github.com/hardwario/hio-monitor
+https://github.com/hardwario/monitor

@@ -20,7 +20,7 @@ set(CPACK_DEBIAN_FILE_NAME "hardwario-monitor_${HWIO_VERSION_FILE_NAME}_amd64.de
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "HARDWARIO a.s. <support-email-pending@hardwario.invalid>")
 set(CPACK_DEBIAN_PACKAGE_SECTION "electronics")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/hardwario/hio-monitor")
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/hardwario/monitor")
 # The synopsis is CPACK_PACKAGE_DESCRIPTION_SUMMARY; this is the extended description.
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
 "HARDWARIO Monitor connects to HARDWARIO devices such as CHESTER through a
@@ -54,7 +54,7 @@ file(WRITE "${_hwio_deb_doc}/changelog"
 "hardwario-monitor (${_hwio_deb_version}) unstable; urgency=medium
 
   * HARDWARIO Monitor ${HWIO_VERSION}, see
-    https://github.com/hardwario/hio-monitor/releases
+    https://github.com/hardwario/monitor/releases
 
  -- ${CPACK_DEBIAN_PACKAGE_MAINTAINER}  ${_hwio_deb_date}
 ")

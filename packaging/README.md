@@ -107,7 +107,7 @@ after CPack; `signtool verify /pa` checks all three.
 
 ## CI (ADR-0125)
 
-- `ci.yml` (pull requests, `v2-dev`): `package-linux`, `package-macos`, `package-windows` build unsigned packages
+- `ci.yml` (pull requests, `main`): `package-linux`, `package-macos`, `package-windows` build unsigned packages
   after the normal jobs, run the checks above and upload them as artifacts for 7 days.
 - `release.yml` (tags `v2.*.*`): gate (version = tag, 0 unfinished Czech translations, `HWIO_TEST_OVERRIDES=OFF`,
   the whole `ci.yml` through `workflow_call`), signed builds, symbol archives, `SHA256SUMS`, build provenance

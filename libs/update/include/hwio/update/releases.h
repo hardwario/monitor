@@ -1,10 +1,10 @@
 #pragma once
 
-// The GitHub release list of hardwario/hio-monitor, filtered to v2 releases (plan/features/0016,
+// The GitHub release list of hardwario/monitor, filtered to v2 releases (plan/features/0016,
 // ADR-0116, ADR-0125).
 //
 // pickLatest() is pure and bounded: it reads at most maxReleases entries of the JSON array
-// returned by GET /repos/hardwario/hio-monitor/releases?per_page=30, drops drafts, tags that do
+// returned by GET /repos/hardwario/monitor/releases?per_page=30, drops drafts, tags that do
 // not start with "v2." (v1 releases share the repository), tags that are not semantic versions,
 // and - unless `includePrerelease` - pre-releases (GitHub's "prerelease" flag or a SemVer
 // pre-release tag), and returns the highest remaining version (nullopt when none is left).
@@ -28,9 +28,9 @@ inline constexpr std::size_t maxReleases = 30;
 
 // The default release list (ADR-0116); the CLI and GUI use releasesUrl().
 inline constexpr const char* defaultReleasesUrl =
-    "https://api.github.com/repos/hardwario/hio-monitor/releases?per_page=30";
+    "https://api.github.com/repos/hardwario/monitor/releases?per_page=30";
 // The page users are sent to when no release-specific page is known.
-inline constexpr const char* releasesPageUrl = "https://github.com/hardwario/hio-monitor/releases";
+inline constexpr const char* releasesPageUrl = "https://github.com/hardwario/monitor/releases";
 
 struct ReleaseInfo {
     SemVer version;

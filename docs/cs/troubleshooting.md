@@ -721,7 +721,7 @@ Pochází z kontroly aktualizací. GitHub omezuje počet požadavků z jedné s�
 **Informace o aktualizacích z GitHubu se nepodařilo přečíst.**
 
 - **Pravděpodobně:** GitHub poslal neočekávanou odpověď, nebo ji změnila proxy.
-- **Co dělat:** Zkuste to později; pokud problém trvá, podívejte se na stránku vydání: https://github.com/hardwario/hio-monitor/releases
+- **Co dělat:** Zkuste to později; pokud problém trvá, podívejte se na stránku vydání: https://github.com/hardwario/monitor/releases
 
 Pochází z kontroly aktualizací.
 
@@ -731,7 +731,7 @@ Pochází z kontroly aktualizací.
 **Informace o aktualizacích z GitHubu se nepodařilo přečíst.**
 
 - **Pravděpodobně:** GitHub poslal neočekávanou odpověď, nebo ji změnila proxy.
-- **Co dělat:** Zkuste to později; pokud problém trvá, podívejte se na stránku vydání: https://github.com/hardwario/hio-monitor/releases
+- **Co dělat:** Zkuste to později; pokud problém trvá, podívejte se na stránku vydání: https://github.com/hardwario/monitor/releases
 
 Pochází z kontroly aktualizací, když je odpověď z GitHubu větší, než je povoleno. Používá stejné texty jako `update.bad_response`.
 

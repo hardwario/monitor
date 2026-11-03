@@ -1,10 +1,10 @@
 [
   {
-    "url": "https://api.github.com/repos/hardwario/hio-monitor/releases/300",
-    "html_url": "https://github.com/hardwario/hio-monitor/releases/tag/v2.2.0-rc.1",
+    "url": "https://api.github.com/repos/hardwario/monitor/releases/300",
+    "html_url": "https://github.com/hardwario/monitor/releases/tag/v2.2.0-rc.1",
     "id": 300,
     "tag_name": "v2.2.0-rc.1",
-    "target_commitish": "v2-dev",
+    "target_commitish": "main",
     "name": "HARDWARIO Monitor 2.2.0-rc.1",
     "draft": false,
     "prerelease": true,
@@ -14,11 +14,11 @@
     "body": "Release candidate."
   },
   {
-    "url": "https://api.github.com/repos/hardwario/hio-monitor/releases/299",
-    "html_url": "https://github.com/hardwario/hio-monitor/releases/tag/v2.3.0",
+    "url": "https://api.github.com/repos/hardwario/monitor/releases/299",
+    "html_url": "https://github.com/hardwario/monitor/releases/tag/v2.3.0",
     "id": 299,
     "tag_name": "v2.3.0",
-    "target_commitish": "v2-dev",
+    "target_commitish": "main",
     "name": "HARDWARIO Monitor 2.3.0 (draft)",
     "draft": true,
     "prerelease": false,
@@ -28,8 +28,8 @@
     "body": "Draft."
   },
   {
-    "url": "https://api.github.com/repos/hardwario/hio-monitor/releases/298",
-    "html_url": "https://github.com/hardwario/hio-monitor/releases/tag/v1.9.9",
+    "url": "https://api.github.com/repos/hardwario/monitor/releases/298",
+    "html_url": "https://github.com/hardwario/monitor/releases/tag/v1.9.9",
     "id": 298,
     "tag_name": "v1.9.9",
     "target_commitish": "main",
@@ -42,11 +42,11 @@
     "body": "v1 hotfix."
   },
   {
-    "url": "https://api.github.com/repos/hardwario/hio-monitor/releases/297",
-    "html_url": "https://github.com/hardwario/hio-monitor/releases/tag/v2.1.0",
+    "url": "https://api.github.com/repos/hardwario/monitor/releases/297",
+    "html_url": "https://github.com/hardwario/monitor/releases/tag/v2.1.0",
     "id": 297,
     "tag_name": "v2.1.0",
-    "target_commitish": "v2-dev",
+    "target_commitish": "main",
     "name": "HARDWARIO Monitor 2.1.0",
     "draft": false,
     "prerelease": false,
@@ -56,11 +56,11 @@
     "body": "Stable."
   },
   {
-    "url": "https://api.github.com/repos/hardwario/hio-monitor/releases/296",
-    "html_url": "https://github.com/hardwario/hio-monitor/releases/tag/v2.not-a-version",
+    "url": "https://api.github.com/repos/hardwario/monitor/releases/296",
+    "html_url": "https://github.com/hardwario/monitor/releases/tag/v2.not-a-version",
     "id": 296,
     "tag_name": "v2.not-a-version",
-    "target_commitish": "v2-dev",
+    "target_commitish": "main",
     "name": "broken tag",
     "draft": false,
     "prerelease": false,
@@ -70,11 +70,11 @@
     "body": ""
   },
   {
-    "url": "https://api.github.com/repos/hardwario/hio-monitor/releases/295",
-    "html_url": "https://github.com/hardwario/hio-monitor/releases/tag/v2.0.3",
+    "url": "https://api.github.com/repos/hardwario/monitor/releases/295",
+    "html_url": "https://github.com/hardwario/monitor/releases/tag/v2.0.3",
     "id": 295,
     "tag_name": "v2.0.3",
-    "target_commitish": "v2-dev",
+    "target_commitish": "main",
     "name": "HARDWARIO Monitor 2.0.3",
     "draft": false,
     "prerelease": false,
@@ -84,8 +84,8 @@
     "body": ""
   },
   {
-    "url": "https://api.github.com/repos/hardwario/hio-monitor/releases/100",
-    "html_url": "https://github.com/hardwario/hio-monitor/releases/tag/v1.10.0",
+    "url": "https://api.github.com/repos/hardwario/monitor/releases/100",
+    "html_url": "https://github.com/hardwario/monitor/releases/tag/v1.10.0",
     "id": 100,
     "tag_name": "v1.10.0",
     "target_commitish": "main",

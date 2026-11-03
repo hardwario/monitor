@@ -10,7 +10,7 @@ it. Nothing in this repository creates tags or publishes releases by itself.
 - [ ] Tag protection (repository rule): only maintainers may create tags matching `v2.*`.
 - [ ] Azure Trusted Signing: HARDWARIO a.s. identity validation done (can take weeks; fallback: a cloud-HSM OV
       certificate through a new ADR, ADR-0120), certificate profile created, federated credential for
-      `repo:hardwario/hio-monitor:environment:release`.
+      `repo:hardwario/monitor:environment:release`.
 - [ ] Apple: Developer ID Application certificate and an App Store Connect API key (role Developer) for notarytool.
 
 ## Release gates (all must hold before tagging)
@@ -20,7 +20,7 @@ it. Nothing in this repository creates tags or publishes releases by itself.
 - [ ] **.deb maintainer e-mail:** `CPACK_DEBIAN_PACKAGE_MAINTAINER` in `packaging/linux/deb/cpack-deb.cmake` is
       still the placeholder `support-email-pending@hardwario.invalid` — HARDWARIO supplies the support address.
 - [ ] `check_translations`: 0 unfinished Czech entries (ADR-0027; the gate job fails otherwise).
-- [ ] CI is green on the commit to be tagged (`v2-dev` or the release branch), including the three
+- [ ] CI is green on the commit to be tagged (`main` or the release branch), including the three
       `package-<os>` jobs.
 - [ ] Manual verification matrix of plan 0015 (F4) on the release candidate: Ubuntu 22.04 AppImage, Ubuntu
       24.04 / Debian 13 .deb, Fedora AppImage, macOS 13.3 Intel and macOS 15 Apple silicon DMG, Windows 10 22H2 and
@@ -41,7 +41,7 @@ it. Nothing in this repository creates tags or publishes releases by itself.
    `hwio-monitor-<v>-macos-universal.dmg`, `hwio-monitor-<v>-windows-x64.msi`, `SHA256SUMS`,
    `hwio-monitor-<v>-symbols-{linux,macos,windows}.zip`), the generated notes, the pre-release flag
    (set automatically for tags with a `-`).
-4. Spot checks: `sha256sum -c SHA256SUMS`; `gh attestation verify <file> --repo hardwario/hio-monitor`;
+4. Spot checks: `sha256sum -c SHA256SUMS`; `gh attestation verify <file> --repo hardwario/monitor`;
    macOS `spctl -a -t open --context context:primary-signature -v <dmg>`; Windows `signtool verify /pa <msi>`.
 5. Publish the release. The update check (plan 0016) announces it to users within 24 h (v2 releases only;
    pre-releases only to users who opted in).

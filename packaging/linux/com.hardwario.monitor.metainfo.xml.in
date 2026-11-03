@@ -24,8 +24,8 @@
     <name>HARDWARIO a.s.</name>
   </developer>
   <url type="homepage">https://www.hardwario.com/</url>
-  <url type="bugtracker">https://github.com/hardwario/hio-monitor/issues</url>
-  <url type="help">https://github.com/hardwario/hio-monitor</url>
+  <url type="bugtracker">https://github.com/hardwario/monitor/issues</url>
+  <url type="help">https://github.com/hardwario/monitor</url>
   <launchable type="desktop-id">com.hardwario.monitor.desktop</launchable>
   <provides>
     <binary>hwio-monitor</binary>
@@ -44,7 +44,7 @@
   <screenshots>
     <screenshot type="default">
       <caption>The main window</caption>
-      <image>https://github.com/hardwario/hio-monitor/raw/v2-dev/packaging/linux/screenshots/main-window.png</image>
+      <image>https://github.com/hardwario/monitor/raw/main/packaging/linux/screenshots/main-window.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1"/>

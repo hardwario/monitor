@@ -721,7 +721,7 @@ From the update check. GitHub limits the number of requests per network address.
 **The update information from GitHub could not be read.**
 
 - **Probably:** GitHub sent an unexpected answer, or a proxy changed it.
-- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/hio-monitor/releases
+- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/monitor/releases
 
 From the update check.
 
@@ -731,7 +731,7 @@ From the update check.
 **The update information from GitHub could not be read.**
 
 - **Probably:** GitHub sent an unexpected answer, or a proxy changed it.
-- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/hio-monitor/releases
+- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/monitor/releases
 
 From the update check, when the answer from GitHub is larger than allowed. It uses the same texts as `update.bad_response`.
 

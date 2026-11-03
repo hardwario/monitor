@@ -8,7 +8,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [v2-dev]
+    branches: [main]
   # release.yml runs the whole matrix as its gate (plan/features/0015 F2, ADR-0125).
   workflow_call:
 

@@ -1160,7 +1160,7 @@ constexpr std::array defaultTexts{
         .suggestion =
             QT_TRANSLATE_NOOP3("hwio::core",
                                "Try again later; if it persists, check the releases page: "
-                               "https://github.com/hardwario/hio-monitor/releases",
+                               "https://github.com/hardwario/monitor/releases",
                                "update.bad_response suggestion"),
         .wizard = std::nullopt,
     },
@@ -1177,7 +1177,7 @@ constexpr std::array defaultTexts{
         .suggestion =
             QT_TRANSLATE_NOOP3("hwio::core",
                                "Try again later; if it persists, check the releases page: "
-                               "https://github.com/hardwario/hio-monitor/releases",
+                               "https://github.com/hardwario/monitor/releases",
                                "update.bad_response suggestion"),
         .wizard = std::nullopt,
     },

@@ -721,7 +721,7 @@ Z kontroly aktualizácií. GitHub obmedzuje počet požiadaviek z jednej sieťov
 **The update information from GitHub could not be read.**
 
 - **Probably:** GitHub sent an unexpected answer, or a proxy changed it.
-- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/hio-monitor/releases
+- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/monitor/releases
 
 Z kontroly aktualizácií.
 
@@ -731,7 +731,7 @@ Z kontroly aktualizácií.
 **The update information from GitHub could not be read.**
 
 - **Probably:** GitHub sent an unexpected answer, or a proxy changed it.
-- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/hio-monitor/releases
+- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/monitor/releases
 
 Z kontroly aktualizácií, keď je odpoveď z GitHubu väčšia, ako je povolené. Používa rovnaké texty ako `update.bad_response`.
 

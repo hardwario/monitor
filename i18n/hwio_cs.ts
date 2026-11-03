@@ -3448,9 +3448,9 @@
     <message>
         <location filename="../libs/core/src/error.cpp" line="1161"/>
         <location filename="../libs/core/src/error.cpp" line="1178"/>
-        <source>Try again later; if it persists, check the releases page: https://github.com/hardwario/hio-monitor/releases</source>
+        <source>Try again later; if it persists, check the releases page: https://github.com/hardwario/monitor/releases</source>
         <comment>update.bad_response suggestion</comment>
-        <translation>Zkuste to později; pokud problém trvá, podívejte se na stránku vydání: https://github.com/hardwario/hio-monitor/releases</translation>
+        <translation>Zkuste to později; pokud problém trvá, podívejte se na stránku vydání: https://github.com/hardwario/monitor/releases</translation>
     </message>
     <message>
         <location filename="../libs/core/src/error.cpp" line="1188"/>
@@ -3849,22 +3849,22 @@
         <translation>Typ MCU %1 nelze přečíst.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="368"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="374"/>
         <source>The Product Information Block of the %1 MCU could not be checked after the erase.</source>
         <translation>Blok informací o produktu (PIB) MCU %1 nelze po smazání zkontrolovat.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="375"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="381"/>
         <source>Do not erase again. Run `hwio %1 %2 pib read` and compare it with the bytes in the log (see Details); if they differ, contact HARDWARIO support.</source>
         <translation>Nemažte znovu. Spusťte `hwio %1 %2 pib read` a porovnejte výsledek s bajty v protokolu (viz Podrobnosti); pokud se liší, kontaktujte podporu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="390"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="396"/>
         <source>Erasing the code flash of the %1 MCU also changed its Product Information Block.</source>
         <translation>Mazání paměti programu MCU %1 změnilo také jeho blok informací o produktu (PIB).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="396"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="402"/>
         <source>Do not erase again; report this with the log file to HARDWARIO support.</source>
         <translation>Nemažte znovu; nahlaste to podpoře HARDWARIO a přiložte soubor protokolu.</translation>
     </message>
@@ -5233,7 +5233,7 @@
         <translation>K MCU %1 zařízení se nepodařilo připojit.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/rtt_channel.cpp" line="57"/>
+        <location filename="../libs/hw/jlink/src/rtt_channel.cpp" line="58"/>
         <source>RTT buffer &quot;%1&quot; not found.</source>
         <translation>Vyrovnávací paměť RTT &quot;%1&quot; nebyla nalezena.</translation>
     </message>

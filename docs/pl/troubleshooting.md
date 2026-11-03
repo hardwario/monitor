@@ -721,7 +721,7 @@ Pochodzi ze sprawdzania aktualizacji. GitHub ogranicza liczbę żądań z jedneg
 **The update information from GitHub could not be read.**
 
 - **Probably:** GitHub sent an unexpected answer, or a proxy changed it.
-- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/hio-monitor/releases
+- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/monitor/releases
 
 Pochodzi ze sprawdzania aktualizacji.
 
@@ -731,7 +731,7 @@ Pochodzi ze sprawdzania aktualizacji.
 **The update information from GitHub could not be read.**
 
 - **Probably:** GitHub sent an unexpected answer, or a proxy changed it.
-- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/hio-monitor/releases
+- **What to do:** Try again later; if it persists, check the releases page: https://github.com/hardwario/monitor/releases
 
 Pochodzi ze sprawdzania aktualizacji, gdy odpowiedź z GitHub jest większa niż dozwolona. Używa tych samych tekstów co `update.bad_response`.
 

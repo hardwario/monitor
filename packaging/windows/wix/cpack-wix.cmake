@@ -31,7 +31,7 @@ set(CPACK_WIX_UI_REF "WixUI_FeatureTree")
 set(CPACK_WIX_TEMPLATE "${PROJECT_SOURCE_DIR}/packaging/windows/wix/WIX.template.in")
 set(CPACK_WIX_EXTRA_SOURCES "${PROJECT_SOURCE_DIR}/packaging/windows/wix/features.wxs")
 set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT "https://www.hardwario.com/")
-set(CPACK_WIX_PROPERTY_ARPHELPLINK "https://github.com/hardwario/hio-monitor")
+set(CPACK_WIX_PROPERTY_ARPHELPLINK "https://github.com/hardwario/monitor")
 set(CPACK_WIX_PROPERTY_ARPCONTACT "HARDWARIO a.s.")
 # The licence as RTF: CPack converts a .txt licence (LICENSE has no extension).
 configure_file("${PROJECT_SOURCE_DIR}/LICENSE" "${PROJECT_BINARY_DIR}/packaging/LICENSE.txt" COPYONLY)

@@ -36,11 +36,11 @@ using hwio::gui::UpdateService;
 using hwio::gui::UpdateViewModel;
 using hwio::gui::test::waitFor;
 
-const QString releasesPath = QStringLiteral("/repos/hardwario/hio-monitor/releases");
+const QString releasesPath = QStringLiteral("/repos/hardwario/monitor/releases");
 
 const QByteArray releases = R"([
   {"tag_name":"v2.1.0","draft":false,"prerelease":false,
-   "html_url":"https://github.com/hardwario/hio-monitor/releases/tag/v2.1.0",
+   "html_url":"https://github.com/hardwario/monitor/releases/tag/v2.1.0",
    "published_at":"2026-12-01T10:00:00Z"},
   {"tag_name":"v2.0.3","draft":false,"prerelease":false}
 ])";
@@ -121,7 +121,7 @@ TEST_F(UpdateTest, AutomaticCheckShowsTheBannerAndStoresTheResult) {
     EXPECT_EQ(vm.bannerText(),
               QStringLiteral("HARDWARIO Monitor 2.1.0 is available (you have 2.0.3)."));
     EXPECT_EQ(vm.downloadUrl(),
-              QUrl(QStringLiteral("https://github.com/hardwario/hio-monitor/releases/tag/v2.1.0")));
+              QUrl(QStringLiteral("https://github.com/hardwario/monitor/releases/tag/v2.1.0")));
     EXPECT_EQ(store().value(QStringLiteral("update/lastCheck")).toString(),
               now().toString(Qt::ISODate));
     EXPECT_EQ(store().value(QStringLiteral("update/lastResult")).toString(),

@@ -30,7 +30,7 @@ using hwio::update::ReleaseInfo;
 using hwio::update::SemVer;
 using hwio::update::UpdateCheck;
 
-const QString releasesPath = QStringLiteral("/repos/hardwario/hio-monitor/releases");
+const QString releasesPath = QStringLiteral("/repos/hardwario/monitor/releases");
 
 QByteArray fixture() {
     QFile file(QStringLiteral(HWIO_UPDATE_TEST_DATA "/releases.json"));

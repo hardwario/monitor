@@ -414,11 +414,11 @@ public slots:
         const QByteArray releases =
             R"([{"tag_name":"v2.999.1-rc.1","draft":false,"prerelease":true},)"
             R"({"tag_name":"v2.999.0","draft":false,"prerelease":false,)"
-            R"("html_url":"https://github.com/hardwario/hio-monitor/releases/tag/v2.999.0"}])";
-        m_lteFirmware->set(QStringLiteral("/repos/hardwario/hio-monitor/releases"),
+            R"("html_url":"https://github.com/hardwario/monitor/releases/tag/v2.999.0"}])";
+        m_lteFirmware->set(QStringLiteral("/repos/hardwario/monitor/releases"),
                            hwio::firmware::test::HttpFixture::Response::ok(releases));
         qputenv("HWIO_UPDATE_URL",
-                (m_lteFirmware->origin() + QStringLiteral("/repos/hardwario/hio-monitor/releases"))
+                (m_lteFirmware->origin() + QStringLiteral("/repos/hardwario/monitor/releases"))
                     .toUtf8());
     }
 

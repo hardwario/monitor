@@ -29,18 +29,18 @@ using hwio::cli::test::CliProcess;
 using hwio::cli::test::RunResult;
 using hwio::firmware::test::HttpFixture;
 
-const QString releasesPath = QStringLiteral("/repos/hardwario/hio-monitor/releases");
+const QString releasesPath = QStringLiteral("/repos/hardwario/monitor/releases");
 
 // A v2 release far ahead of any build of this source tree, a v1 release and a pre-release above it.
 const QByteArray releases = R"([
   {"tag_name":"v2.999.0-rc.1","draft":false,"prerelease":true,
-   "html_url":"https://github.com/hardwario/hio-monitor/releases/tag/v2.999.0-rc.1",
+   "html_url":"https://github.com/hardwario/monitor/releases/tag/v2.999.0-rc.1",
    "published_at":"2027-02-01T10:00:00Z"},
   {"tag_name":"v2.998.0","draft":false,"prerelease":false,
-   "html_url":"https://github.com/hardwario/hio-monitor/releases/tag/v2.998.0",
+   "html_url":"https://github.com/hardwario/monitor/releases/tag/v2.998.0",
    "published_at":"2027-01-01T10:00:00Z"},
   {"tag_name":"v1.9.0","draft":false,"prerelease":false,
-   "html_url":"https://github.com/hardwario/hio-monitor/releases/tag/v1.9.0",
+   "html_url":"https://github.com/hardwario/monitor/releases/tag/v1.9.0",
    "published_at":"2026-01-01T10:00:00Z"}
 ])";
 
@@ -104,7 +104,7 @@ TEST_F(UpdateCli, NewerVersionHumanAndJson) {
     ASSERT_EQ(human.exitCode, 0) << human.out << human.err;
     EXPECT_NE(human.out.find("a newer version is available: 2.998.0"), std::string::npos)
         << human.out;
-    EXPECT_NE(human.out.find("Download: https://github.com/hardwario/hio-monitor/releases/tag/"
+    EXPECT_NE(human.out.find("Download: https://github.com/hardwario/monitor/releases/tag/"
                              "v2.998.0"),
               std::string::npos)
         << human.out;
@@ -119,7 +119,7 @@ TEST_F(UpdateCli, NewerVersionHumanAndJson) {
     EXPECT_TRUE(data.value(QStringLiteral("update_available")).toBool());
     EXPECT_FALSE(data.value(QStringLiteral("prerelease")).toBool());
     EXPECT_EQ(data.value(QStringLiteral("url")).toString(),
-              QStringLiteral("https://github.com/hardwario/hio-monitor/releases/tag/v2.998.0"));
+              QStringLiteral("https://github.com/hardwario/monitor/releases/tag/v2.998.0"));
     EXPECT_EQ(data.value(QStringLiteral("published_at")).toString(),
               QStringLiteral("2027-01-01T10:00:00Z"));
     EXPECT_FALSE(data.value(QStringLiteral("current")).toString().isEmpty());

@@ -47,7 +47,7 @@ TEST(PickLatest, StableIgnoresV1DraftsPrereleasesAndBadTags) {
     EXPECT_EQ(release.version, v("2.1.0"));
     EXPECT_EQ(release.tag, QStringLiteral("v2.1.0"));
     EXPECT_EQ(release.htmlUrl,
-              QUrl(QStringLiteral("https://github.com/hardwario/hio-monitor/releases/tag/v2.1.0")));
+              QUrl(QStringLiteral("https://github.com/hardwario/monitor/releases/tag/v2.1.0")));
     EXPECT_EQ(release.publishedAt,
               QDateTime::fromString(QStringLiteral("2026-12-01T10:00:00Z"), Qt::ISODate));
     EXPECT_FALSE(release.prerelease);
@@ -62,14 +62,14 @@ TEST(PickLatest, PrereleaseOptIn) {
 
 TEST(PickLatest, PrereleaseTagWithoutGitHubFlagIsAPrerelease) {
     const QByteArray json = R"([{"tag_name":"v2.5.0-beta.1","draft":false,"prerelease":false,
-        "html_url":"https://github.com/hardwario/hio-monitor/releases/tag/v2.5.0-beta.1"},
+        "html_url":"https://github.com/hardwario/monitor/releases/tag/v2.5.0-beta.1"},
         {"tag_name":"v2.4.0","draft":false,"prerelease":false}])";
     const auto stable = pickLatest(json, false);
     ASSERT_TRUE(stable.has_value() && stable->has_value());
     EXPECT_EQ(releaseOf(stable).version, v("2.4.0"));
     // Missing html_url: the release page by tag.
     EXPECT_EQ(releaseOf(stable).htmlUrl,
-              QUrl(QStringLiteral("https://github.com/hardwario/hio-monitor/releases/tag/v2.4.0")));
+              QUrl(QStringLiteral("https://github.com/hardwario/monitor/releases/tag/v2.4.0")));
     EXPECT_FALSE(releaseOf(stable).publishedAt.isValid());
     const auto pre = pickLatest(json, true);
     ASSERT_TRUE(pre.has_value() && pre->has_value());
@@ -83,7 +83,7 @@ TEST(PickLatest, ReleasePageIsBuiltFromTheTagNotFromHtmlUrl) {
     const auto latest = pickLatest(json, false);
     ASSERT_TRUE(latest.has_value() && latest->has_value());
     EXPECT_EQ(releaseOf(latest).htmlUrl,
-              QUrl(QStringLiteral("https://github.com/hardwario/hio-monitor/releases/tag/v2.4.0")));
+              QUrl(QStringLiteral("https://github.com/hardwario/monitor/releases/tag/v2.4.0")));
     EXPECT_EQ(releaseOf(latest).htmlUrl.host(), QStringLiteral("github.com"));
 }
 
