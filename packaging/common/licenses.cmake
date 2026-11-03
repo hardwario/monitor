@@ -4,8 +4,8 @@
 # installed tree):
 #   LICENSE                     MIT licence of HARDWARIO Monitor (ADR-0206)
 #   Qt-LGPL-3.0.txt GPL-3.0.txt Qt's licence (LGPL-3.0) and the GPL-3.0 it references
-#   Qt-SOURCE.txt               generated: the Qt version, the URL of its exact source archive and the
-#                               written offer
+#   Qt-SOURCE.txt               generated: the Qt version and the URL of its exact source archive
+#                               (ADR-0230)
 #   Inter-LICENSE.txt JetBrainsMono-OFL.txt   bundled fonts, OFL-1.1 (ADR-0048)
 #   MaterialSymbols-Apache-2.0.txt            icons, Apache-2.0 (ADR-0060)
 #   CLI11-BSD-3-Clause.txt replxx-LICENSE.md miniz-MIT.txt
@@ -67,23 +67,18 @@ function(hwio_install_licenses destination)
     set(_out "${PROJECT_BINARY_DIR}/licenses")
     file(MAKE_DIRECTORY "${_out}")
 
-    # Qt-SOURCE.txt: the exact Qt version this build uses (written offer, ADR-0119).
+    # Qt-SOURCE.txt: the exact Qt version this build uses and its sources (ADR-0119, ADR-0230).
     set(_qt "${Qt6_VERSION}")
     string(REGEX MATCH "^[0-9]+\\.[0-9]+" _qt_minor "${_qt}")
     file(WRITE "${_out}/Qt-SOURCE.txt"
 "HARDWARIO Monitor uses the Qt libraries, version ${_qt}, under the GNU Lesser General Public
 License version 3 (Qt-LGPL-3.0.txt; it refers to GPL-3.0.txt). Qt is linked dynamically: the Qt
 libraries are separate files in this installation and can be replaced by a modified version
-(see LICENSE for the rights the LGPL gives you).
+(Qt-LGPL-3.0.txt describes these rights). HARDWARIO Monitor uses Qt unmodified.
 
 The complete corresponding source code of this Qt version is available at
   https://download.qt.io/archive/qt/${_qt_minor}/${_qt}/single/qt-everywhere-src-${_qt}.tar.xz
   (all Qt ${_qt} sources: https://download.qt.io/archive/qt/${_qt_minor}/${_qt}/submodules/)
-
-Written offer: for at least three years after HARDWARIO a.s. last distributes this version of
-HARDWARIO Monitor, HARDWARIO a.s. will give anyone who asks a copy of that source code on a common
-data carrier for no more than the cost of making and sending the copy. Contact: HARDWARIO a.s.,
-https://www.hardwario.com/.
 ")
 
     # THIRD-PARTY-NOTICES.txt: the index of the shipped components.
