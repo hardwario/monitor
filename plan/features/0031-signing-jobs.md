@@ -62,7 +62,8 @@ bundle → app notarized and stapled → DMG → DMG signed, notarized, stapled 
 - [x] Federated credential `github-monitor-signing` for `repo:hardwario@28539912/monitor@1444229107:environment:signing`
       (2026-11-03)
 - [x] `release.yml`, `ci.yml`, `build-msi.ps1`, `sign.ps1`, `sign-and-notarize.sh`, documentation
-- [ ] Apple secrets `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_API_KEY_P8` in the environment
+- [x] Apple secrets `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_API_KEY_P8` in the environment
+      (2026-11-03)
 - [ ] Tag protection for `v2.*` (repository rule)
 - [ ] First release tag: both sign jobs green, draft checked (below); status → Done
 

@@ -13,9 +13,9 @@ it. Nothing in this repository creates tags or publishes releases by itself.
       `repo:hardwario@28539912/monitor@1444229107:environment:signing` (2026-11-03).
 - [x] Apple: Developer ID Application certificate (valid until 2027-11-18) and an App Store Connect API key for
       notarytool exist.
-- [ ] The three Apple secrets in the environment `signing` (`APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`,
+- [x] The three Apple secrets in the environment `signing` (`APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`,
       `APPLE_API_KEY_P8`, commands in [README.md](README.md#signing-environment-signing-adr-0120-adr-0224)); check
-      with `gh secret list --env signing --repo hardwario/monitor`.
+      with `gh secret list --env signing --repo hardwario/monitor` (2026-11-03).
 - [ ] Tag protection (repository rule): only maintainers may create tags matching `v2.*`. Until it exists, anyone
       with write access can push a tag and have the commit signed.
 - [ ] Optional: required reviewers on the environment `signing` (every release then waits for an approval of the
