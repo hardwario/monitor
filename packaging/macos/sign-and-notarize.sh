@@ -85,6 +85,10 @@ make_dmg() {
     local staging
     staging="$(mktemp -d)"
     cp -R "$app" "$staging/"
+    # An existing folder and an absolute path: create-dmg writes a relative DMG path with a
+    # missing folder into the current directory instead.
+    mkdir -p "$(dirname "$dmg")"
+    dmg="$(cd "$(dirname "$dmg")" && pwd)/$(basename "$dmg")"
     rm -f "$dmg"
     # create-dmg (pinned, installed by the workflow): window with the app, an Applications link and
     # the background. --skip-jenkins leaves out the Finder (AppleScript) layout step when no
