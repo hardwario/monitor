@@ -1,5 +1,5 @@
 # HARDWARIO Monitor v2 - release (plan/features/0015 F2, plan/features/0031, ADR-0125, ADR-0120,
-# ADR-0123, ADR-0224).
+# ADR-0123, ADR-0224, ADR-0231).
 #
 # A pushed tag v2.X.Y (or v2.X.Y-<pre-release>) builds, signs and checksums the packages and
 # creates a DRAFT GitHub release with generated notes; a maintainer reviews and publishes it
@@ -7,7 +7,8 @@
 #
 #   gate          the version computed from the tag equals the tag, 0 unfinished Czech translations,
 #                 HWIO_TEST_OVERRIDES=OFF in the package configuration, and the full CI matrix
-#                 (ci.yml through workflow_call, incl. the unsigned package jobs)
+#                 (ci.yml through workflow_call, incl. the unsigned package jobs); the build and
+#                 sign jobs run in parallel with it, publish waits for it (ADR-0231)
 #   linux         Ubuntu 22.04 container: .deb + AppImage, checks, split DWARF symbols
 #   macos         universal bundle, unsigned (artifact unsigned-macos), .dSYM symbols
 #   windows       installed tree, unsigned (artifact unsigned-windows), .pdb symbols
@@ -105,7 +106,7 @@ jobs:
 
   linux:
     name: linux (.deb, AppImage)
-    needs: [gate, tests]
+    needs: gate
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
@@ -144,7 +145,7 @@ jobs:
 
   macos:
     name: macos (universal bundle, unsigned)
-    needs: [gate, tests]
+    needs: gate
     runs-on: macos-15
     timeout-minutes: 120
     steps:
@@ -191,7 +192,7 @@ jobs:
 
   windows:
     name: windows (installed tree, unsigned)
-    needs: [gate, tests]
+    needs: gate
     runs-on: windows-2022
     timeout-minutes: 120
     steps:
@@ -260,8 +261,8 @@ jobs:
     permissions:
       contents: read
     env:
-      APPLE_API_KEY: ${{ vars.APPLE_API_KEY }}
-      APPLE_API_ISSUER: ${{ vars.APPLE_API_ISSUER }}
+      APPLE_API_KEY: ${{ vars.APPLE_API_KEY || secrets.APPLE_API_KEY }}
+      APPLE_API_ISSUER: ${{ vars.APPLE_API_ISSUER || secrets.APPLE_API_ISSUER }}
       APP: build/macos-install/HARDWARIO Monitor.app
       DMG: build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-macos-universal.dmg
     steps:
@@ -361,9 +362,9 @@ jobs:
           path: build
       - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
       # Our two executables in the installed tree, before the MSI is built from it. Qt DLLs and the
       # MSVC runtime are third-party files and keep their own signatures (ADR-0120).
       - name: Sign the executables
@@ -446,7 +447,7 @@ jobs:
 
   publish:
     name: publish (checksums, attestations, draft release)
-    needs: [gate, linux, macos, windows, sign-macos, sign-windows]
+    needs: [gate, tests, linux, macos, windows, sign-macos, sign-windows]
     if: github.ref_type == 'tag'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
