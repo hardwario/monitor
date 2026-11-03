@@ -139,7 +139,7 @@ QString ConnectionViewModel::pairingHelp() const {
     if (!pairingError()) {
         return {};
     }
-    // ADR-0224.
+    // ADR-0227.
     const QString how = canPair()
                             ? tr("Click Pair and enter the passkey in the system dialog.")
                             : tr("Click Connect and enter the passkey when macOS asks for it.");
@@ -549,7 +549,7 @@ void ConnectionViewModel::loadBleOptions(const QString& deviceId, const QString&
     m_bleName = name;
     m_product.clear();
     ConnectionOptions options;
-    options.autoReconnect = false; // ADR-0226
+    options.autoReconnect = false; // ADR-0229
     if (m_settings != nullptr) {
         options.autoReconnect = m_settings->value(QStringLiteral("ble/autoReconnect")).toBool();
         const QString logKey = QStringLiteral("console/logToFile");

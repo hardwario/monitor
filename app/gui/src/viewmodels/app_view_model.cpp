@@ -328,7 +328,7 @@ void AppViewModel::registerShellKeys(SettingsStore& store) {
                    .type = QMetaType::QString,
                    .defaultValue = QString(),
                    .validator = validators::maxLength(512)},
-        // Plan 0012 (ADR-0081, ADR-0226): the transport of a new tab, the Bluetooth defaults and
+        // Plan 0012 (ADR-0081, ADR-0229): the transport of a new tab, the Bluetooth defaults and
         // the options remembered per device (ble/<sanitised id>/..., ≤ 32, ble/recent).
         SettingKey{.path = lastTransportKey,
                    .type = QMetaType::QString,

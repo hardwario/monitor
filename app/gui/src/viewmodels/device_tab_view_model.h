@@ -22,7 +22,7 @@
 // "— disconnected —", "— disconnected: <cause> —" on connection changes, "— paused: <busy text> —"
 // on setBusy and "— resumed —" when the busy page clears; pages never add these markers.
 //
-// Plan 0012 (ADR-0081, ADR-0225): a tab has a transport, "jlink" or "ble". A Bluetooth tab owns at
+// Plan 0012 (ADR-0081, ADR-0228): a tab has a transport, "jlink" or "ble". A Bluetooth tab owns at
 // most one BleSession instead of the DeviceSession (consoleSession() is either; session() stays the
 // J-Link DeviceSession, nullptr in a Bluetooth tab, for operations). Its pages that need operations
 // (PageDescriptor::needsOperations) are disabled with pageDisabledReason().
@@ -212,7 +212,7 @@ public:
     bool configureBle(const QString& profileId, const QString& deviceId, const QString& name);
     [[nodiscard]] QString bleDeviceId() const { return m_bleId; }
     [[nodiscard]] QString bleDeviceName() const { return m_bleName; }
-    // Plan 0012 (ADR-0224): app-initiated pairing of the tab's Bluetooth device (Linux, Windows);
+    // Plan 0012 (ADR-0227): app-initiated pairing of the tab's Bluetooth device (Linux, Windows);
     // reconnects when it succeeded, shows the error otherwise.
     void pairDevice();
     [[nodiscard]] bool pairing() const noexcept { return m_pairing; }

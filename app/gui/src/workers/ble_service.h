@@ -1,7 +1,7 @@
 #pragma once
 
 // BleService - the application's Bluetooth access for the GUI
-// (plan/features/0012-m5-ble-gui-pairing.md, ADR-0080, ADR-0081, ADR-0225).
+// (plan/features/0012-m5-ble-gui-pairing.md, ADR-0080, ADR-0081, ADR-0228).
 //
 // Owns the BleHost (0011) and the one BleScanner of the application. The host - and with it the BLE
 // thread - is created on the first use (a Bluetooth picker became visible, a BLE tab connects), so
@@ -43,7 +43,7 @@ class BleService : public QObject {
     Q_OBJECT
 
 public:
-    static constexpr std::chrono::milliseconds scanPeriod{10000};         // ADR-0226
+    static constexpr std::chrono::milliseconds scanPeriod{10000};         // ADR-0229
     static constexpr std::chrono::milliseconds adapterPollInterval{2000}; // plan 0012
     static constexpr std::chrono::milliseconds replyCheckInterval{50};
     static constexpr std::chrono::milliseconds replyTimeout{3000};
@@ -82,7 +82,7 @@ public:
     [[nodiscard]] ble::BleHost& host();
     [[nodiscard]] bool hostCreated() const noexcept { return static_cast<bool>(m_host); }
 
-    // App-initiated pairing (ADR-0084, ADR-0224): `done` is called on this thread with the result
+    // App-initiated pairing (ADR-0084, ADR-0227): `done` is called on this thread with the result
     // (and whether the system had a bond already), or ble.pairing_failed "no result" after
     // pairTimeout; never when `context` was destroyed first. At most maxPendingPairings at a time.
     // Errors (returned, `done` not called): internal.queue_full, cancelled (stopped).

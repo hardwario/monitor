@@ -1,7 +1,7 @@
 // Plan 0012: Bluetooth in the GUI against the fake BLE API (HWIO_FAKE_BLE_SCENARIO, ADR-0087):
 // the BlePickerViewModel (profile filter, Show all, name filter, selection by id, stale and removed
 // rows, in-use badges, adapter errors), the Bluetooth tab (connect, console over ConsoleSession,
-// markers, log pane, Reset, Flash disabled), pairing from the ErrorPanel (ADR-0224), the per-device
+// markers, log pane, Reset, Flash disabled), pairing from the ErrorPanel (ADR-0227), the per-device
 // options and the tab restore with `transport` (ADR-0083).
 
 #include "gui_test_support.h"
@@ -269,7 +269,7 @@ TEST_F(BleGuiTest, AdapterOffShowsTheError) {
 
 TEST_F(BleGuiTest, NoBluetoothHostWithoutBluetoothUse) {
     ASSERT_NE(app().bleService(), nullptr);
-    EXPECT_FALSE(app().bleService()->hostCreated()); // ADR-0225: lazy
+    EXPECT_FALSE(app().bleService()->hostCreated()); // ADR-0228: lazy
     tab().setTransport(DeviceTabViewModel::bleTransport());
     EXPECT_FALSE(app().bleService()->hostCreated()); // the view is not visible yet
     tab().blePicker()->setActive(true);
@@ -383,7 +383,7 @@ TEST_F(BleGuiTest, OptionsAreRememberedPerDevice) {
                                    QStringLiteral("CHESTER-ABC123")));
     EXPECT_EQ(tab().bleDeviceId(), QStringLiteral("F1:22:33:44:55:66")); // canonical (B6)
     hwio::gui::ConnectionViewModel& connection = *tab().connection();
-    EXPECT_FALSE(connection.autoReconnect()); // ADR-0226
+    EXPECT_FALSE(connection.autoReconnect()); // ADR-0229
     connection.setAutoReconnect(true);
     connection.setLogToFile(false);
 

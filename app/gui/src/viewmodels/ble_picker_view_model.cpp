@@ -243,7 +243,7 @@ void BlePickerViewModel::openPrivacySettings() const {
 }
 
 int BlePickerViewModel::signalLevel(int rssi) {
-    // ADR-0226: the thresholds of the old app; 0 = unknown.
+    // ADR-0229: the thresholds of the old app; 0 = unknown.
     constexpr int excellent = -55;
     constexpr int good = -67;
     constexpr int fair = -80;

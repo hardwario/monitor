@@ -1,6 +1,6 @@
-# ADR-0224 — BLE GUI in two plans; pairing help in the ErrorPanel until the wizard exists
+# ADR-0227 — BLE GUI in two plans; pairing help in the ErrorPanel until the wizard exists
 
-- **Status:** Accepted (amends ADR-0084 for the time until plan 0031 is implemented)
+- **Status:** Accepted (amends ADR-0084 for the time until plan 0032 is implemented)
 - **Date:** 2026-11-03
 - **Decided by:** Matej Strnad
 
@@ -15,7 +15,7 @@ is a gap for the first release candidate.
 
 Split:
 1. **Phase 1 now (picker, tab, console, restore, a11y, Czech); G4/G5, the wizard illustrations and the PIB passkey
-   read move to a new Draft plan 0031 that depends on 0008/0009 (chosen).**
+   read move to a new Draft plan 0032 that depends on 0008/0009 (chosen).**
 2. Phase 1 now, G4/G5 stay in 0012 as a blocked phase 2.
 3. Implement 0008/0009 first, then all of 0012.
 
@@ -25,18 +25,18 @@ Pairing help until the wizard:
 
 ## Decision
 
-- 0012 covers the picker and the BLE tab; plan 0031 covers the BlePairing wizard, the setup Bluetooth step, the
+- 0012 covers the picker and the BLE tab; plan 0032 covers the BlePairing wizard, the setup Bluetooth step, the
   `ble-enable` / `ble-pair-os` illustrations and the PIB passkey read.
-- Until 0031: for `ble.not_paired` and `ble.pairing_failed` the ErrorPanel's primary action is **[Pair]**
+- Until 0032: for `ble.not_paired` and `ble.pairing_failed` the ErrorPanel's primary action is **[Pair]**
   (`BleSession::pair()`, then reconnect) on Linux and Windows and **[Connect]** on macOS; Windows has a secondary
   **[Open Bluetooth settings]** (`ms-settings:bluetooth`); the body shows the profile's passkey hint (default
   123456) and "Already paired but it does not work? Remove the device in the system Bluetooth settings and pair it
   again." The device bar shows "Waiting for pairing — enter the passkey in the system dialog" after
   `pairingPrompt`. `ble.permission_denied` on macOS has [Open Privacy settings].
-- "Help me fix this" for `ble.*` errors appears automatically once 0031 registers the wizards (0007 rule).
+- "Help me fix this" for `ble.*` errors appears automatically once 0032 registers the wizards (0007 rule).
 
 ## Consequences
 
 - 0012 can reach Done without 0008/0009; BLE is usable in the GUI for the release candidate.
-- Headless Linux users without a pairing agent get no `bluetoothctl` guidance in the GUI until 0031 (the CLI
+- Headless Linux users without a pairing agent get no `bluetoothctl` guidance in the GUI until 0032 (the CLI
   `hwio ble pair` and the docs cover it).

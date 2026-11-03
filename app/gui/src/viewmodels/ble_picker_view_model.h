@@ -1,7 +1,7 @@
 #pragma once
 
 // BlePickerViewModel - the Bluetooth view of a tab's "Choose device" page
-// (plan/features/0012-m5-ble-gui-pairing.md; ADR-0081, ADR-0083, ADR-0225, ADR-0226).
+// (plan/features/0012-m5-ble-gui-pairing.md; ADR-0081, ADR-0083, ADR-0228, ADR-0229).
 //
 // A list model over the devices of the application's BleService scan. Rows are the devices of a
 // profile with Bluetooth ("Show all devices": every device; rows without a profile are "Unknown
@@ -61,7 +61,7 @@ class BlePickerViewModel : public QAbstractListModel {
     // The device type for rows without a profile (profiles with Bluetooth only).
     Q_PROPERTY(QString profileId READ profileId WRITE setProfileId NOTIFY profileIdChanged)
     Q_PROPERTY(QVariantList profiles READ profiles CONSTANT) // [{id, name}]
-    // macOS: ids are CoreBluetooth UUIDs, shown only in the tooltip (ADR-0226).
+    // macOS: ids are CoreBluetooth UUIDs, shown only in the tooltip (ADR-0229).
     Q_PROPERTY(bool hidesIds READ hidesIds CONSTANT)
     // The profile's power hint for the empty state ("" = none).
     Q_PROPERTY(QString powerHint READ powerHint NOTIFY profileIdChanged)
@@ -70,8 +70,8 @@ class BlePickerViewModel : public QAbstractListModel {
     Q_PROPERTY(bool canOpenPrivacySettings READ canOpenPrivacySettings NOTIFY scanChanged)
 
 public:
-    static constexpr std::chrono::milliseconds staleAfter{15000};  // ADR-0226
-    static constexpr std::chrono::milliseconds removeAfter{60000}; // ADR-0226
+    static constexpr std::chrono::milliseconds staleAfter{15000};  // ADR-0229
+    static constexpr std::chrono::milliseconds removeAfter{60000}; // ADR-0229
     static constexpr std::chrono::milliseconds announceInterval{5000};
     static constexpr std::chrono::milliseconds ageCheckInterval{1000};
     static constexpr std::chrono::milliseconds ownerRefreshInterval{2000};
@@ -144,7 +144,7 @@ public:
     // Reads the adapter again at once (the ErrorPanel's Retry).
     Q_INVOKABLE void refresh();
     Q_INVOKABLE void openPrivacySettings() const;
-    // ADR-0226: the signal level of an RSSI (0 = unknown, 1..4).
+    // ADR-0229: the signal level of an RSSI (0 = unknown, 1..4).
     [[nodiscard]] static int signalLevel(int rssi);
 
     // Re-reads the service's devices (also after another tab changed its device).

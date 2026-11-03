@@ -1,9 +1,9 @@
-# 0031 — BlePairing wizard and the setup-wizard Bluetooth step
+# 0032 — BlePairing wizard and the setup-wizard Bluetooth step
 
-- **Status:** Draft (split out of 0012 on 2026-11-03, ADR-0224; content = the 2026-10-10 text of 0012 G4–G6)
+- **Status:** Draft (split out of 0012 on 2026-11-03, ADR-0227; content = the 2026-10-10 text of 0012 G4–G6)
 - **Milestone:** M5 follow-up
 - **Author:** Matej Strnad (with Claude), 2026-11-03
-- **Related ADRs:** ADR-0067, ADR-0076, ADR-0077, ADR-0084, ADR-0086, ADR-0088, ADR-0224
+- **Related ADRs:** ADR-0067, ADR-0076, ADR-0077, ADR-0084, ADR-0086, ADR-0088, ADR-0227
 - **Depends on:** [0012](0012-m5-ble-gui-pairing.md) (BLE picker and tab), [0008](0008-m4-first-run-setup.md) (setup
   wizard), [0009](0009-m4-connect-and-troubleshooting.md) (topic table, coverage test) — both Approved, not
   implemented on 2026-11-03
@@ -11,7 +11,7 @@
 ## Context
 
 0012 brings Bluetooth into the Choose-device page and the device tab with pairing help in the ErrorPanel
-(ADR-0224). The guided parts decided in ADR-0084 and ADR-0088 need the concrete wizards of 0008 / 0009 and are
+(ADR-0227). The guided parts decided in ADR-0084 and ADR-0088 need the concrete wizards of 0008 / 0009 and are
 collected here. Revise this plan against the code once 0008 and 0009 are done.
 
 ## Scope (from the 2026-10-10 text of 0012)

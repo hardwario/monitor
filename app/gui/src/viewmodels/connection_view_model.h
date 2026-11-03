@@ -16,7 +16,7 @@
 // automatic; 0, a missing key or a value outside minSpeedKhz..maxSpeedKhz means automatic (for
 // jlink/speedKhz: the profile's default, automatic for every profile since ADR-0090).
 //
-// Plan 0012 (ADR-0224, ADR-0226): in a Bluetooth tab the bar shows the device name and RSSI, the
+// Plan 0012 (ADR-0227, ADR-0229): in a Bluetooth tab the bar shows the device name and RSSI, the
 // MTU when connected and "Waiting for pairing" while the system asks for the passkey; the options
 // are auto-reconnect (default off, ble/autoReconnect) and the log file, remembered per device
 // (ble/<sanitised id>/..., the 32 most recently changed devices, ble/recent). The ErrorPanel of
@@ -118,7 +118,7 @@ class ConnectionViewModel : public QObject {
     Q_PROPERTY(bool canOpenBluetoothSettings READ canOpenBluetoothSettings CONSTANT)
     // [Open Privacy settings] for ble.permission_denied (macOS).
     Q_PROPERTY(bool canOpenPrivacySettings READ canOpenPrivacySettings CONSTANT)
-    // The ErrorPanel's actions besides the primary one (ADR-0224): [Pair] replaces it for a pairing
+    // The ErrorPanel's actions besides the primary one (ADR-0227): [Pair] replaces it for a pairing
     // error where supported; the secondary one is "Choose another probe / device", "Open Bluetooth
     // settings" or "Open Privacy settings" ("" = none).
     Q_PROPERTY(QString customActionText READ customActionText NOTIFY errorChanged)
@@ -202,7 +202,7 @@ public:
     Q_INVOKABLE void dismissError();
     Q_INVOKABLE void dismissWarning();
     Q_INVOKABLE void chooseAnotherProbe();
-    // Plan 0012 (ADR-0224): the pairing actions of the ErrorPanel.
+    // Plan 0012 (ADR-0227): the pairing actions of the ErrorPanel.
     Q_INVOKABLE void pairDevice();
     Q_INVOKABLE void openBluetoothSettings();
     Q_INVOKABLE void openPrivacySettings();

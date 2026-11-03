@@ -204,7 +204,7 @@ void BleService::onScanFinished(const std::optional<Error>& error) {
         m_errorFromScan = true;
         setAdapterError(error);
     } else if (m_references > 0 && !m_stopped) {
-        startScanPeriod(); // ADR-0226: restarted every scanPeriod while visible
+        startScanPeriod(); // ADR-0229: restarted every scanPeriod while visible
     }
     if (firstResult || error) {
         stateChanged(); // signal

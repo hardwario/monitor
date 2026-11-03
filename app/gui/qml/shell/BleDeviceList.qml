@@ -1,5 +1,5 @@
 // The Bluetooth view of the "Choose device" page (plan/features/0012-m5-ble-gui-pairing.md,
-// ADR-0081, ADR-0226): nearby devices of a profile with Bluetooth from a continuous scan, a name
+// ADR-0081, ADR-0229): nearby devices of a profile with Bluetooth from a continuous scan, a name
 // filter, "Show all devices", the device type for unknown devices and Connect. An ErrorPanel replaces
 // the list while the adapter cannot be used; an empty state after the first scan finds nothing.
 pragma ComponentBehavior: Bound
@@ -188,7 +188,7 @@ Item {
                                         view.picker.connectSelected();
                                     }
                                     HToolTip {
-                                        // macOS: the id (a UUID) only here (ADR-0226).
+                                        // macOS: the id (a UUID) only here (ADR-0229).
                                         visible: row.hovered && view.picker.hidesIds
                                         text: row.deviceId
                                         delay: 600
@@ -213,7 +213,7 @@ Item {
 
                                     contentItem: RowLayout {
                                         spacing: Theme.spacingM
-                                        // "not seen recently": dimmed (ADR-0226).
+                                        // "not seen recently": dimmed (ADR-0229).
                                         opacity: !row.enabled ? 0.6 : row.stale ? 0.5 : 1
 
                                         Rectangle {

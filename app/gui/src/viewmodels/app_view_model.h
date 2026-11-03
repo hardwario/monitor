@@ -77,7 +77,7 @@ struct AppOptions {
     // Plan 0015 B3 (ADR-0123): the crash directory (hwio::crash::defaultDirectory() in main();
     // empty: no crash notice).
     std::filesystem::path crashDirectory;
-    // Plan 0012 (ADR-0225): Bluetooth. Off: no BleService (no Bluetooth view, BLE tabs are not
+    // Plan 0012 (ADR-0228): Bluetooth. Off: no BleService (no Bluetooth view, BLE tabs are not
     // restored). The factory creates the BLE API on the BLE thread (tests: the fake BLE API).
     bool bluetooth = true;
     ble::BleHost::ApiFactory bleApiFactory = ble::createBleApi;
@@ -316,7 +316,7 @@ private:
     // worker is joined before the registry goes away.
     std::unique_ptr<device::SessionRegistry> m_registry;
     std::unique_ptr<ProbeScanner> m_scanner;
-    // Plan 0012: the Bluetooth host and scan (lazy, ADR-0225); destroyed after the tabs, before the
+    // Plan 0012: the Bluetooth host and scan (lazy, ADR-0228); destroyed after the tabs, before the
     // registry (its BleHost joins the BLE thread).
     std::unique_ptr<BleService> m_ble;
     // M4: filled by registerExtensions; the worker is joined before the registry goes away.

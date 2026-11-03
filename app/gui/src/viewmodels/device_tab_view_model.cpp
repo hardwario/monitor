@@ -185,7 +185,7 @@ QString DeviceTabViewModel::pageDisabledReason(const QString& pageId) const {
     if (page == nullptr || !page->needsOperations) {
         return {};
     }
-    // ADR-0226.
+    // ADR-0229.
     return tr("Flashing needs a J-Link. Open a J-Link tab to flash this device.");
 }
 
@@ -625,7 +625,7 @@ void DeviceTabViewModel::onConnectionChanged(const device::ConnectionEvent& even
     }
 }
 
-// ---- plan 0012: pairing (ADR-0224) -----------------------------------------------------------
+// ---- plan 0012: pairing (ADR-0227) -----------------------------------------------------------
 
 void DeviceTabViewModel::pairDevice() {
     if (!isBle() || m_choosing || m_pairing || isBusy() || m_context.ble == nullptr) {

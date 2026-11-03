@@ -1,4 +1,4 @@
-# ADR-0225 — BlePickerViewModel per tab; one lazily created BleService
+# ADR-0228 — BlePickerViewModel per tab; one lazily created BleService
 
 - **Status:** Accepted (amends the 0012 design sketch of 2026-10-10)
 - **Date:** 2026-11-03
@@ -28,4 +28,4 @@ list comes from one shared `ProbeScanner` in `AppViewModel`.
 ## Consequences
 
 - The existing Choose-device page and its tests keep working; the Bluetooth view is an addition.
-- The BLE list is reusable by the 0031 wizard (Embedded `ble-picker`) through the same view model.
+- The BLE list is reusable by the 0032 wizard (Embedded `ble-picker`) through the same view model.

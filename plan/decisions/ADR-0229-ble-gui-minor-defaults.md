@@ -1,4 +1,4 @@
-# ADR-0226 — BLE GUI minor defaults
+# ADR-0229 — BLE GUI minor defaults
 
 - **Status:** Accepted
 - **Date:** 2026-11-03
@@ -24,7 +24,7 @@ Accepted as proposed:
 - Flash rail item in a BLE tab: disabled, tooltip "Flashing needs a J-Link. Open a J-Link tab to flash this
   device."
 - BLE auto-reconnect default **off** (`ble/autoReconnect` = false; J-Link stays on); remembered per device (LRU 32).
-- `BleHost` created lazily (ADR-0225).
+- `BleHost` created lazily (ADR-0228).
 
 ## Consequences
 
