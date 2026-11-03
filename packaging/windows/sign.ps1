@@ -1,16 +1,19 @@
-# Signs Windows files with Azure Trusted Signing (plan/features/0015 E2, ADR-0120).
+# Signs Windows files with Azure Artifact Signing, formerly Trusted Signing (plan/features/0015 E2,
+# ADR-0120, ADR-0224).
 #
 #   packaging/windows/sign.ps1 -Files <file>... [-DryRun]
 #
-# The release workflow signs with the Trusted Signing GitHub action (pinned by SHA, OIDC login
-# through azure/login); this script is the same step for local dry runs and manual signing. It uses
-# the TrustedSigning PowerShell module (Invoke-TrustedSigning) with the Azure login of the session
-# (az login / azure/login), SHA-256 file digest and an RFC 3161 timestamp, then checks the result
-# with `signtool verify /pa`. Configuration (environment, see packaging/README.md):
-#   TRUSTED_SIGNING_ENDPOINT   e.g. https://weu.codesigning.azure.net/
-#   TRUSTED_SIGNING_ACCOUNT    the Trusted Signing account name
-#   TRUSTED_SIGNING_PROFILE    the certificate profile name
-# -DryRun prints what would be signed and needs no secrets (PR CI runs it).
+# The release workflow signs with the Artifact Signing GitHub action (pinned by SHA, OIDC login
+# through azure/login, job sign-windows); this script is the same step for local dry runs and manual
+# signing. It uses the TrustedSigning PowerShell module (Invoke-TrustedSigning) with the Azure login
+# of the session (az login with a user that has the "Artifact Signing Certificate Profile Signer"
+# role), SHA-256 file digest and an RFC 3161 timestamp, then checks the result with
+# `signtool verify /pa`. HARDWARIO's account is the default (packaging/README.md); the environment
+# can override it:
+#   TRUSTED_SIGNING_ENDPOINT   default https://weu.codesigning.azure.net/
+#   TRUSTED_SIGNING_ACCOUNT    default hardwario
+#   TRUSTED_SIGNING_PROFILE    default hardwario
+# -DryRun prints what would be signed and needs no Azure login (PR CI runs it).
 param(
     [Parameter(Mandatory = $true)][string[]]$Files,
     [switch]$DryRun
@@ -30,16 +33,16 @@ if ($DryRun) {
     exit 0
 }
 
-foreach ($name in 'TRUSTED_SIGNING_ENDPOINT', 'TRUSTED_SIGNING_ACCOUNT', 'TRUSTED_SIGNING_PROFILE') {
-    if (-not [Environment]::GetEnvironmentVariable($name)) { throw "$name is not set" }
-}
+$endpoint = if ($env:TRUSTED_SIGNING_ENDPOINT) { $env:TRUSTED_SIGNING_ENDPOINT } else { 'https://weu.codesigning.azure.net/' }
+$account = if ($env:TRUSTED_SIGNING_ACCOUNT) { $env:TRUSTED_SIGNING_ACCOUNT } else { 'hardwario' }
+$profileName = if ($env:TRUSTED_SIGNING_PROFILE) { $env:TRUSTED_SIGNING_PROFILE } else { 'hardwario' }
 if (-not (Get-Module -ListAvailable -Name TrustedSigning)) {
     Install-Module -Name TrustedSigning -RequiredVersion 0.5.0 -Force -Scope CurrentUser
 }
 Invoke-TrustedSigning `
-    -Endpoint $env:TRUSTED_SIGNING_ENDPOINT `
-    -CodeSigningAccountName $env:TRUSTED_SIGNING_ACCOUNT `
-    -CertificateProfileName $env:TRUSTED_SIGNING_PROFILE `
+    -Endpoint $endpoint `
+    -CodeSigningAccountName $account `
+    -CertificateProfileName $profileName `
     -Files ($Files -join ',') `
     -FileDigest SHA256 `
     -TimestampRfc3161 'http://timestamp.acs.microsoft.com' `
