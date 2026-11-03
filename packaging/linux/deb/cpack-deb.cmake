@@ -16,8 +16,8 @@ set(CPACK_DEBIAN_PACKAGE_RELEASE "")
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
 # ADR-0125 artifact name: hardwario-monitor_<version>_amd64.deb (<version> as the tag, without "v").
 set(CPACK_DEBIAN_FILE_NAME "hardwario-monitor_${HWIO_VERSION_FILE_NAME}_amd64.deb")
-# PLACEHOLDER (packaging/RELEASE.md release gate): HARDWARIO supplies the support e-mail address.
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "HARDWARIO a.s. <support-email-pending@hardwario.invalid>")
+# The company contact, not a person (decided by the user, 2026-11-03).
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "HARDWARIO a.s. <ask@hardwario.com>")
 set(CPACK_DEBIAN_PACKAGE_SECTION "electronics")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/hardwario/monitor")

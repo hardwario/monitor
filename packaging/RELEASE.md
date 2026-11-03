@@ -15,8 +15,6 @@ it. Nothing in this repository creates tags or publishes releases by itself.
 
 ## Release gates (all must hold before tagging)
 
-- [ ] **.deb maintainer e-mail:** `CPACK_DEBIAN_PACKAGE_MAINTAINER` in `packaging/linux/deb/cpack-deb.cmake` is
-      still the placeholder `support-email-pending@hardwario.invalid` — HARDWARIO supplies the support address.
 - [ ] `check_translations`: 0 unfinished Czech entries (ADR-0027; the gate job fails otherwise).
 - [ ] CI is green on the commit to be tagged (`main` or the release branch), including the three
       `package-<os>` jobs.
