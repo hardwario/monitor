@@ -73,6 +73,7 @@ J-Link ([Konsola](console.md#pliki-konsoli)).
 Z urządzeniem może być połączony tylko jeden program. Jeśli połączony jest z nim inny `hwio`, pojawi się błąd
 [ble.in_use_by_other_process](troubleshooting.md#ble.in_use_by_other_process).
 
+<a id="pairing"></a>
 ## Parowanie
 
 CHESTER chroni swoją powłokę Bluetooth kluczem dostępu (passkey), więc komputer musi się z nim jednorazowo sparować

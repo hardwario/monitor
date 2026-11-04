@@ -69,6 +69,7 @@ device is in range. The console writes a console file and keeps a command histor
 Only one program can be connected to a device. If another `hwio` is connected to it, you get
 [ble.in_use_by_other_process](troubleshooting.md#ble.in_use_by_other_process).
 
+<a id="pairing"></a>
 ## Pairing
 
 CHESTER protects its Bluetooth shell with a passkey, so the computer has to pair with it (bond) once. The passkey is 123456 unless it was changed when

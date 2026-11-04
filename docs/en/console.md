@@ -90,6 +90,7 @@ are copied at once.
 on. The name is prefilled, for example `chester-app-clime-v3.2.0-20261103-101500-log.txt`, and the folder is the one
 you used last (Documents the first time).
 
+<a id="batch-files"></a>
 ## Batch files
 
 A batch file is a UTF-8 text file with one shell command per line. **Batch…** (<kbd>Ctrl</kbd>+<kbd>B</kbd>) sends

@@ -8,7 +8,7 @@ This page helps you when something does not work. It starts with the most common
 
 Every error has a short message, a probable cause and a suggestion.
 
-- **Desktop app (`hwio-monitor`):** the error panel shows the message, **Probably:** (the cause) and **What to do:** (the suggestion), with a button for the next step, such as **Reconnect**, **Open Settings** or **Retry**. **Details** shows the error code (for example `probe.not_found`) and technical details; **Copy** copies them.
+- **Desktop app (`hwio-monitor`):** the error panel shows the message, **Probably:** (the cause) and **What to do:** (the suggestion), with a button for the next step, such as **Reconnect**, **Open Settings** or **Retry**. **Details** shows the error code (for example `probe.not_found`) and technical details; **Copy** copies them. **Learn more ↗** opens the entry of the error code on this page.
 - **CLI (`hwio`):** the error is written to stderr:
 
   ```text
@@ -30,6 +30,7 @@ Each error code below has an anchor equal to the code, so you can link to it dir
 
 ## Common problems
 
+<a id="no-j-link-found"></a>
 ### No J-Link found
 
 - Check the USB cable between the J-Link and the computer. Try another USB port or cable.
@@ -50,12 +51,14 @@ On Linux your user account needs access to the J-Link over USB. The `.deb` packa
 
 Error codes: [`usb.access_denied`](#usb.access_denied), [`usb.world_accessible`](#usb.world_accessible).
 
+<a id="the-j-link-is-used-by-another-program"></a>
 ### The J-Link is used by another program
 
 Only one program can use a J-Link at a time. Close the other HARDWARIO Monitor window, the other `hwio` command, or other debugging tools (for example the SEGGER tools). In the desktop app, a probe used by another program is marked **In use by another program** on the device list. `hwio doctor` lists programs that may hold the probe.
 
 Error codes: [`probe.in_use_by_other_process`](#probe.in_use_by_other_process), [`probe.held_by_program`](#probe.held_by_program), [`probe.open_failed`](#probe.open_failed).
 
+<a id="the-device-has-no-power-or-does-not-respond"></a>
 ### The device has no power or does not respond
 
 - CHESTER must have its own power: batteries or the USB-C power input.
@@ -64,12 +67,14 @@ Error codes: [`probe.in_use_by_other_process`](#probe.in_use_by_other_process), 
 
 Error codes: [`target.no_power`](#target.no_power), [`target.connect_failed`](#target.connect_failed), [`target.wrong_family`](#target.wrong_family).
 
+<a id="no-console-rtt-found"></a>
 ### No console (RTT) found
 
 The console needs firmware with an RTT console. Reset the device, or flash such firmware. A very low J-Link speed can also cause it: use **Automatic speed**. The LTE MCU of CHESTER has no console; use the app MCU. See [Console](console.md).
 
 Error codes: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_buffer_not_found`](#target.rtt_buffer_not_found), [`target.rtt_write_timeout`](#target.rtt_write_timeout), [`target.not_connected`](#target.not_connected).
 
+<a id="flashing-fails-or-the-mcu-is-protected"></a>
 ### Flashing fails or the MCU is protected
 
 - Check the cables and the power, then flash again.
@@ -79,6 +84,7 @@ Error codes: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_buffe
 
 Error codes: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed).
 
+<a id="the-j-link-is-on-the-lte-connector"></a>
 ### The J-Link is on the LTE connector
 
 A tab works with the application MCU. When the J-Link answers from the LTE MCU, the tab shows **The J-Link is
@@ -88,12 +94,14 @@ update](flashing.md#lte-firmware-update).
 
 Error code: [`target.other_connector`](#target.other_connector).
 
+<a id="lte-modem-firmware-needs-nrf-util"></a>
 ### LTE modem firmware needs nRF Util
 
 Updating the LTE modem firmware uses Nordic nRF Util with its `device` command. Nothing else needs it. Install it as described in [Nordic nRF Util](install.md#nordic-nrf-util-lte-modem-firmware-only), or set its path in **Settings** › **nRF Util**, or with `--nrfutil PATH` in the CLI.
 
 Error codes: [`dependency.nrfutil_not_found`](#dependency.nrfutil_not_found), [`dependency.nrfutil_device_missing`](#dependency.nrfutil_device_missing), [`dependency.nrfutil_too_old`](#dependency.nrfutil_too_old), [`firmware.modem_update_failed`](#firmware.modem_update_failed).
 
+<a id="bluetooth-device-not-found-or-pairing-fails"></a>
 ### Bluetooth device not found or pairing fails
 
 - Turn Bluetooth on and open the Bluetooth view of the app, or run `hwio ble scan`. Only devices whose name contains `CHESTER` are shown; **Show all devices** in the app and `--all` show every device.

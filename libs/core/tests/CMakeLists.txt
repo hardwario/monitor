@@ -3,6 +3,7 @@
 add_executable(hwio_core_tests
     bounded_queue_test.cpp
     crash_handler_test.cpp
+    docs_anchors_test.cpp
     docs_urls_test.cpp
     error_test.cpp
     i18n_test.cpp
@@ -26,7 +27,9 @@ if(WIN32)
 endif()
 add_dependencies(hwio_core_tests hwio_crash_child)
 target_compile_definitions(hwio_core_tests PRIVATE
-    "HWIO_CRASH_CHILD=\"$<TARGET_FILE:hwio_crash_child>\"")
+    "HWIO_CRASH_CHILD=\"$<TARGET_FILE:hwio_crash_child>\""
+    # Plan 0037 L3: the docs anchor test reads the source tree's docs/ (no network).
+    "HWIO_DOCS_DIR=\"${PROJECT_SOURCE_DIR}/docs\"")
 
 # A small test catalog for hwio::i18n::tr (context "hwio::test"); the project catalogs are added
 # to this target by cmake/HWioTranslations.cmake (resource prefix /i18n).

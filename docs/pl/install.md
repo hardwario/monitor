@@ -98,6 +98,7 @@ Bez FUSE (w niektórych kontenerach i minimalnych systemach) dodaj `--appimage-e
 `APPIMAGE_EXTRACT_AND_RUN=1`. AppImage nie aktualizuje się samoczynnie i nie instaluje reguły udev: zobacz następną
 sekcję.
 
+<a id="usb-access-to-the-j-link"></a>
 ### Dostęp USB do J-Link
 
 Pakiet .deb instaluje tę regułę. W przypadku AppImage zainstaluj ją jednorazowo:
@@ -120,6 +121,7 @@ Bluetooth korzysta z BlueZ. Jeśli usługa nie działa: `sudo systemctl start bl
 który zapyta o klucz dostępu (passkey) – agenta parowania; zwykle są to ustawienia Bluetooth środowiska graficznego.
 Zobacz [Bluetooth LE](bluetooth.md#parowanie).
 
+<a id="segger-j-link-software"></a>
 ## SEGGER J-Link Software
 
 Zainstaluj **J-Link Software and Documentation Pack 8.00 lub nowszy** ze strony SEGGER. HARDWARIO Monitor znajdzie
@@ -137,6 +139,7 @@ Gdy zainstalowanych jest kilka wersji, używana jest najnowsza. Aby użyć innej
 potem domyślne lokalizacje. Ścieżka, która nie istnieje, jest błędem; HARDWARIO Monitor nie wraca wtedy do
 domyślnych lokalizacji.
 
+<a id="nordic-nrf-util-lte-modem-firmware-only"></a>
 ## Nordic nRF Util (tylko firmware modemu LTE)
 
 nRF Util aktualizuje firmware modemu w MCU LTE. Wszystko inne działa bez niego. Zainstaluj `nrfutil` od Nordic

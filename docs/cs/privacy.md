@@ -33,6 +33,7 @@ neinstaluje.
 
 Příkazová řádka kontroluje, jen když o to požádáte: `hwio update check` (`--prerelease` zahrne předběžné verze).
 
+<a id="diagnostic-report"></a>
 ## Diagnostická zpráva
 
 Když potřebujete pomoc od podpory HARDWARIO, vytvořte diagnostickou zprávu: v aplikaci **Nápověda → Vytvořit

@@ -94,6 +94,7 @@ Kliknij wiersz, aby go zaznaczyć, <kbd>Shift</kbd>+kliknięcie lub przeciągni�
 czasu, jeśli są włączone. Nazwa jest wstępnie wypełniona, na przykład
 `chester-app-clime-v3.2.0-20261103-101500-log.txt`, a folderem jest ostatnio używany (za pierwszym razem Dokumenty).
 
+<a id="batch-files"></a>
 ## Pliki wsadowe
 
 Plik wsadowy to plik tekstowy UTF-8 z jednym poleceniem powłoki w każdym wierszu. **Batch…**

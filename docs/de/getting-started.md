@@ -95,10 +95,12 @@ Es läuft jeweils nur ein Fenster der App. Ein erneuter Start holt das geöffnet
 - **Keyboard shortcuts (F1)**: alle Tastenkürzel der App (auch <kbd>Ctrl</kbd>+<kbd>/</kbd>).
 - **Create diagnostic report…**: eine ZIP-Datei für den HARDWARIO-Support
   ([Datenschutz](privacy.md#diagnosebericht)).
-- **Documentation ↗**: die Seite zu HARDWARIO Monitor auf docs.hardwario.com.
+- **Documentation ↗**: diese Seiten auf GitHub, passend zur installierten Version der App und in der Sprache der App
+  (Englisch, wenn eine Seite nicht übersetzt ist).
 
 Wenn etwas fehlschlägt, zeigt die App, was passiert ist, die wahrscheinliche Ursache (**Probably:**) und was zu tun
 ist (**What to do:**). **Details** zeigt den Fehlercode; [Fehlerbehebung](troubleshooting.md) listet alle Codes auf.
+**Learn more ↗** öffnet den Eintrag des Fehlercodes auf dieser Seite im Browser.
 
 ## Kommandozeile
 

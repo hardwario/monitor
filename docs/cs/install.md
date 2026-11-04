@@ -95,6 +95,7 @@ ln -s "$PWD/hwio-monitor-<version>-x86_64.AppImage" ~/.local/bin/hwio
 Bez FUSE (některé kontejnery a minimální systémy) přidejte `--appimage-extract-and-run` nebo nastavte
 `APPIMAGE_EXTRACT_AND_RUN=1`. AppImage se sám neaktualizuje a neinstaluje pravidlo udev: viz další oddíl.
 
+<a id="usb-access-to-the-j-link"></a>
 ### Přístup k J-Linku přes USB
 
 Balíček .deb toto pravidlo instaluje. U AppImage ho nainstalujte jednou ručně:
@@ -117,6 +118,7 @@ Bluetooth používá BlueZ. Pokud neběží: `sudo systemctl start bluetooth`. P
 na přístupový klíč (párovací agent), obvykle nastavení Bluetooth v desktopovém prostředí. Viz
 [Bluetooth LE](bluetooth.md#párování).
 
+<a id="segger-j-link-software"></a>
 ## SEGGER J-Link Software
 
 Z webu SEGGER nainstalujte **J-Link Software and Documentation Pack 8.00 nebo novější**. HARDWARIO Monitor ho najde
@@ -133,6 +135,7 @@ Je-li nainstalováno více verzí, použije se nejnovější. Chcete-li použít
 `HWIO_JLINK_LIBRARY`. Pořadí je: `--jlink-library`, potom `HWIO_JLINK_LIBRARY`, potom nastavení a nakonec výchozí
 umístění. Cesta, která neexistuje, je chyba; HARDWARIO Monitor se pak k výchozím umístěním nevrací.
 
+<a id="nordic-nrf-util-lte-modem-firmware-only"></a>
 ## Nordic nRF Util (jen firmware modemu LTE)
 
 nRF Util aktualizuje firmware modemu v LTE MCU. Vše ostatní funguje bez něj. Nainstalujte `nrfutil` od Nordic

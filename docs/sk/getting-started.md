@@ -91,10 +91,12 @@ Zmeny sa uplatnia okamžite.
 
 - **Keyboard shortcuts (F1)**: všetky klávesové skratky aplikácie (aj <kbd>Ctrl</kbd>+<kbd>/</kbd>).
 - **Create diagnostic report…**: súbor zip pre podporu HARDWARIO ([Súkromie](privacy.md#diagnostická-správa)).
-- **Documentation ↗**: stránka HARDWARIO Monitor na docs.hardwario.com.
+- **Documentation ↗**: tieto stránky na GitHube, pre nainštalovanú verziu aplikácie a v jazyku aplikácie (anglicky,
+  ak stránka nie je preložená).
 
 Keď niečo zlyhá, aplikácia ukáže, čo sa stalo, pravdepodobnú príčinu (**Probably:**) a čo robiť (**What to do:**).
 **Details** zobrazí kód chyby; [Riešenie problémov](troubleshooting.md) uvádza všetky kódy.
+**Learn more ↗** otvorí v prehliadači opis kódu chyby na tejto stránke.
 
 ## Príkazový riadok
 

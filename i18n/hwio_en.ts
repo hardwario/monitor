@@ -64,7 +64,7 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="769"/>
+        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="770"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation type="unfinished">
             <numerusform></numerusform>

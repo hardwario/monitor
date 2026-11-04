@@ -817,7 +817,18 @@ TestCase {
         verify(info !== null);
         mouseClick(info);
         tryCompare(testSupport.openedUrls(), "length", 1);
-        verify(testSupport.openedUrls()[0].startsWith("https://docs.hardwario.com/"));
+        // Plan 0037: GitHub docs in the language in use (not the "system" setting).
+        verify(testSupport.openedUrls()[0].startsWith("https://github.com/hardwario/monitor/blob/"),
+               testSupport.openedUrls()[0]);
+        verify(testSupport.openedUrls()[0].endsWith("/docs/en/console.md#batch-files"), testSupport.openedUrls()[0]);
+        AppViewModel.setLanguage("cs");
+        try {
+            mouseClick(one("batchHelpButton"));
+            tryCompare(testSupport.openedUrls(), "length", 2);
+            verify(testSupport.openedUrls()[1].endsWith("/docs/cs/console.md#batch-files"), testSupport.openedUrls()[1]);
+        } finally {
+            AppViewModel.setLanguage("en");
+        }
     }
 
     function test_settingsSection() {

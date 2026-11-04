@@ -95,6 +95,7 @@ Without FUSE (some containers and minimal systems), add `--appimage-extract-and-
 `APPIMAGE_EXTRACT_AND_RUN=1`. The AppImage does not update itself and does not install the udev rule: see the next
 section.
 
+<a id="usb-access-to-the-j-link"></a>
 ### USB access to the J-Link
 
 The .deb installs this rule. With the AppImage, install it once:
@@ -116,6 +117,7 @@ Remove that rule, or its `MODE`, if you do not want that; a J-Link Software upda
 Bluetooth uses BlueZ. If it is not running: `sudo systemctl start bluetooth`. Pairing needs a program that asks for
 the passkey (a pairing agent), usually the desktop's Bluetooth settings. See [Bluetooth LE](bluetooth.md#pairing).
 
+<a id="segger-j-link-software"></a>
 ## SEGGER J-Link Software
 
 Install **J-Link Software and Documentation Pack 8.00 or newer** from the SEGGER website. HARDWARIO Monitor finds it
@@ -132,6 +134,7 @@ When several versions are installed, the newest is used. To use another copy, ch
 The order is: `--jlink-library`, then `HWIO_JLINK_LIBRARY`, then the setting, then the default locations. A path
 that does not exist is an error; HARDWARIO Monitor then does not fall back to the default locations.
 
+<a id="nordic-nrf-util-lte-modem-firmware-only"></a>
 ## Nordic nRF Util (LTE modem firmware only)
 
 nRF Util updates the modem firmware of the LTE MCU. Everything else works without it. Install `nrfutil` from

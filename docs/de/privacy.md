@@ -33,6 +33,7 @@ Version überspringen). Die App lädt nie selbst etwas herunter oder installiert
 
 Die Kommandozeile prüft nur, wenn Sie es verlangen: `hwio update check` (`--prerelease` bezieht Vorabversionen ein).
 
+<a id="diagnostic-report"></a>
 ## Diagnosebericht
 
 Wenn Sie Hilfe vom HARDWARIO-Support benötigen, erstellen Sie einen Diagnosebericht: **Help → Create diagnostic
