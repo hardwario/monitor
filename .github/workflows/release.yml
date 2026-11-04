@@ -131,14 +131,14 @@ jobs:
             for exe in app/gui/hwio-monitor app/cli/hwio; do
               llvm-objcopy-21 --only-keep-debug "build/linux-package/$exe" "symbols/$(basename $exe).debug"
             done'
-          (cd symbols && zip -9 "../build/packages/hwio-monitor-${version}-symbols-linux.zip" *.debug)
+          (cd symbols && zip -9 "../build/packages/hwio-monitor-${version}-debug-symbols-linux.zip" *.debug)
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-linux
           path: |
             build/packages/*.deb
             build/packages/*.AppImage
-            build/packages/*-symbols-linux.zip
+            build/packages/*-debug-symbols-linux.zip
 
   macos:
     name: macos (universal bundle, unsigned)
@@ -171,7 +171,7 @@ jobs:
           mkdir -p symbols build/packages
           dsymutil build/macos-package/app/gui/hwio-monitor.app/Contents/MacOS/hwio-monitor -o symbols/hwio-monitor.dSYM
           dsymutil build/macos-package/app/cli/hwio -o symbols/hwio.dSYM
-          (cd symbols && zip -9 -r "../build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-symbols-macos.zip" .)
+          (cd symbols && zip -9 -r "../build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-debug-symbols-macos.zip" .)
       # ditto keeps the bundle's symlinks, modes and extended attributes; a plain artifact upload
       # loses them.
       - name: Bundle for the sign job
@@ -183,8 +183,8 @@ jobs:
           if-no-files-found: error
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: release-symbols-macos
-          path: build/packages/*-symbols-macos.zip
+          name: release-debug-symbols-macos
+          path: build/packages/*-debug-symbols-macos.zip
           if-no-files-found: error
 
   windows:
@@ -230,7 +230,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force symbols, build/packages | Out-Null
           Copy-Item build/windows-package/hwio-monitor.pdb, build/windows-package/hwio.pdb symbols/
-          Compress-Archive -Path symbols/* -DestinationPath "build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-symbols-windows.zip"
+          Compress-Archive -Path symbols/* -DestinationPath "build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-debug-symbols-windows.zip"
       # The installed tree and what CPack needs to build the MSI from it in sign-windows
       # (packaging/windows/build-msi.ps1). The paths keep their place under build/.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -243,8 +243,8 @@ jobs:
           if-no-files-found: error
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: release-symbols-windows
-          path: build/packages/*-symbols-windows.zip
+          name: release-debug-symbols-windows
+          path: build/packages/*-debug-symbols-windows.zip
           if-no-files-found: error
 
   # Signing jobs (ADR-0224): environment `signing`, tags only, no compiler, no dependency code.
@@ -458,7 +458,7 @@ jobs:
           pattern: release-*
           path: dist
           merge-multiple: true
-      - name: Every package and symbol archive
+      - name: Every package and debug symbol archive
         run: |
           v="${{ needs.gate.outputs.version }}"
           cd dist
@@ -466,8 +466,8 @@ jobs:
           missing=0
           for f in "hwio-monitor-$v-x86_64.AppImage" "hardwario-monitor_${v}_amd64.deb" \
                    "hwio-monitor-$v-macos-universal.dmg" "hwio-monitor-$v-windows-x64.msi" \
-                   "hwio-monitor-$v-symbols-linux.zip" "hwio-monitor-$v-symbols-macos.zip" \
-                   "hwio-monitor-$v-symbols-windows.zip"; do
+                   "hwio-monitor-$v-debug-symbols-linux.zip" "hwio-monitor-$v-debug-symbols-macos.zip" \
+                   "hwio-monitor-$v-debug-symbols-windows.zip"; do
             if [ ! -f "$f" ]; then echo "::error::missing $f"; missing=1; fi
           done
           exit $missing

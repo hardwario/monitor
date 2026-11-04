@@ -44,7 +44,7 @@ it. Nothing in this repository creates tags or publishes releases by itself.
    failed sign job: fix the cause and `gh run rerun <run id> --failed`.
 3. Review the draft: assets (`hwio-monitor-<v>-x86_64.AppImage`, `hardwario-monitor_<v>_amd64.deb`,
    `hwio-monitor-<v>-macos-universal.dmg`, `hwio-monitor-<v>-windows-x64.msi`, `SHA256SUMS`,
-   `hwio-monitor-<v>-symbols-{linux,macos,windows}.zip`), the generated notes, the pre-release flag
+   `hwio-monitor-<v>-debug-symbols-{linux,macos,windows}.zip`, ADR-0232), the generated notes, the pre-release flag
    (set automatically for tags with a `-`).
 4. Spot checks: `sha256sum -c SHA256SUMS`; `gh attestation verify <file> --repo hardwario/monitor`;
    macOS `packaging/macos/sign-and-notarize.sh verify-dmg <dmg>` (the DMG and the app inside it: signature,
