@@ -697,6 +697,13 @@ TEST_F(Session, OutdatedProbeFirmwareIsOneWarning) {
     EXPECT_EQ(warnings, 1);
     EXPECT_EQ(target().get([](ScriptedTarget& t) { return t.firmware; }),
               "J-Link V1 compiled Oct  1 2024 10:00:00"); // never updated automatically
+    // Plan 0036: the warning carries the status and both firmware strings.
+    EXPECT_TRUE(session->probeFirmwareNotice().has_value());
+    const auto notice =
+        session->probeFirmwareNotice().value_or(hwio::device::ProbeFirmwareNotice{});
+    EXPECT_EQ(notice.status, hwio::jlink::FirmwareStatus::Outdated);
+    EXPECT_EQ(notice.probeFirmware, "J-Link V1 compiled Oct  1 2024 10:00:00");
+    EXPECT_EQ(notice.libraryFirmware, "J-Link V1 compiled Oct  1 2025 10:00:00");
 }
 
 TEST_F(Session, MissingLoggerIsAWarningAndTheConsoleWorks) {

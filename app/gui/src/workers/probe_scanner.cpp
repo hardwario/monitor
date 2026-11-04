@@ -68,28 +68,80 @@ void ProbeScanner::scanNow() {
     m_wake.notify_all();
 }
 
+ScanSuspension ProbeScanner::suspend() {
+    {
+        const std::scoped_lock lock(m_mutex);
+        ++m_suspensions;
+    }
+    return ScanSuspension(*this);
+}
+
+bool ProbeScanner::suspended() const {
+    const std::scoped_lock lock(m_mutex);
+    return m_suspensions > 0;
+}
+
+void ProbeScanner::resume() noexcept {
+    {
+        const std::scoped_lock lock(m_mutex);
+        if (m_suspensions > 0) {
+            --m_suspensions;
+            if (m_suspensions == 0) {
+                m_scanRequested = true; // the probes may have changed meanwhile
+            }
+        }
+    }
+    m_wake.notify_all();
+}
+
+ScanSuspension::ScanSuspension(ScanSuspension&& other) noexcept
+    : m_scanner(std::exchange(other.m_scanner, nullptr)) {}
+
+ScanSuspension& ScanSuspension::operator=(ScanSuspension&& other) noexcept {
+    if (this != &other) {
+        reset();
+        m_scanner = std::exchange(other.m_scanner, nullptr);
+    }
+    return *this;
+}
+
+void ScanSuspension::reset() noexcept {
+    if (m_scanner != nullptr) {
+        std::exchange(m_scanner, nullptr)->resume();
+    }
+}
+
 void ProbeScanner::run(const std::stop_token& stop) {
     // ADR-0093: one library copy, owned by this thread, kept while a picker is visible.
     std::optional<jlink::ProbeEnumerator> enumerator;
     while (!stop.stop_requested()) {
         jlink::LocatorOptions options;
         bool requested = false;
+        bool suspended = false;
         {
             std::unique_lock lock(m_mutex);
-            const bool woken = m_wake.wait_for(
-                lock, stop, m_interval, [this] { return m_scanRequested || m_activityChanged; });
+            const bool woken = m_wake.wait_for(lock, stop, m_interval, [this] {
+                return (m_scanRequested && m_suspensions == 0) || m_activityChanged;
+            });
             if (stop.stop_requested()) {
                 break;
             }
             m_activityChanged = false;
-            requested = woken && m_scanRequested;
-            m_scanRequested = false;
+            suspended = m_suspensions > 0;
+            // Plan 0036: a request made while suspended is kept for resume().
+            requested = !suspended && woken && m_scanRequested;
+            if (!suspended) {
+                m_scanRequested = false;
+            }
             options = m_options;
         }
         if (!requested && m_active.load() == 0) {
             enumerator.reset(); // periodic scans only while a picker is visible
             m_libraryLoaded.store(false);
             continue;
+        }
+        if (suspended) {
+            continue; // plan 0036: no scan; the copy is kept for the pickers
         }
         ProbeScan result = scan(options, enumerator, requested);
         if (m_active.load() == 0) {

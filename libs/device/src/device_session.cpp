@@ -880,6 +880,7 @@ void DeviceSession::drainEvents() {
                 },
                 [&](const Warning& item) {
                     flushBatch();
+                    m_probeFirmware = item.probeFirmware;
                     emit warning(item.error);
                 },
                 [&](detail::ProbeIdentified& identified) { m_probe = std::move(identified.probe); },

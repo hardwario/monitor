@@ -307,7 +307,18 @@ Result<FirmwareStatus> JLinkProbe::updateFirmware() {
     // sync_firmware() reopens right after the update, too.
     close();
     if (auto reopened = open(serial, OpenMode::Normal); !reopened) {
-        return std::unexpected(std::move(reopened).error());
+        // ADR-0132 / plan 0036: a probe that does not come back after the update was started
+        // (unplugged, lost power) is a failed update; the cause is kept in the detail.
+        return std::unexpected(makeError(
+            ErrorCode::ProbeFirmwareUpdateFailed,
+            libraryDetail(std::format("J-Link {}: not found again after the update ({}: {})",
+                                      serial, idOf(reopened.error().code),
+                                      reopened.error().detail))));
+    }
+    if (before == FirmwareStatus::Unknown) {
+        // ADR-0261: the status cannot be compared, so neither can the result; the vendor call's
+        // return value decides (0 = the library had nothing to write: nothing was done).
+        return checksum == 0 ? FirmwareStatus::Current : FirmwareStatus::Unknown;
     }
     const FirmwareStatus after = firmwareStatus();
     if (after != FirmwareStatus::Current) {

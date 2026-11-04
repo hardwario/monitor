@@ -66,6 +66,7 @@ public:
         InUseTabRole,                  // 1-based tab number, -1 = none
         InUseOtherRole,                // "hwio, PID 1234" or ""
         SelectableRole,                // false when used by another program
+        UpdatingFirmwareRole,          // plan 0036: reserved for a J-Link firmware update
     };
     Q_ENUM(Roles)
 
@@ -105,6 +106,10 @@ public:
     // Emits connectRequested for the selected row (when it can connect).
     Q_INVOKABLE void connectSelected();
 
+    // Plan 0036: `reserved(sn)` is true while the probe is reserved for a J-Link firmware update
+    // (SessionRegistry::reserved): the row is not selectable ("Updating firmware…").
+    void setReservedCheck(std::function<bool(std::uint32_t)> reserved);
+
     // Re-reads the scanner's latest result (also after another tab changed its probe).
     void updateFromScanner();
     void retranslate();
@@ -132,6 +137,7 @@ private:
         QString firmware;
         int inUseTab = -1; // 0-based
         QString inUseOther;
+        bool updating = false; // plan 0036
 
         [[nodiscard]] bool operator==(const Row& other) const = default;
     };
@@ -144,6 +150,7 @@ private:
 
     ProbeScanner* m_scanner; // non-owning, owned by AppViewModel (outlives the tabs)
     std::function<int(std::uint32_t)> m_tabUsingProbe;
+    std::function<bool(std::uint32_t)> m_reserved; // plan 0036; may be empty
     std::vector<Row> m_rows;
     std::optional<std::uint32_t> m_selectedSerial;
     int m_selectedRow = -1;

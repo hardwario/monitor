@@ -161,6 +161,9 @@ ApplicationWindow {
 
     ReportDialog {}
 
+    // Plan 0036: the J-Link firmware update.
+    ProbeFirmwareDialog {}
+
     Shortcuts {}
 
     ConfirmDialog {

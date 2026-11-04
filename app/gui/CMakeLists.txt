@@ -41,6 +41,7 @@ set(HWIO_GUI_QML_FILES
     qml/console/HistoryPopup.qml
     qml/console/ShellInput.qml
     qml/console/SuggestionList.qml
+    qml/dialogs/ProbeFirmwareDialog.qml
     qml/dialogs/ReportDialog.qml
     qml/flash/FlashBar.qml
     qml/flash/FlashCard.qml
@@ -155,6 +156,8 @@ qt_add_qml_module(hwio_gui
         src/viewmodels/page_list_model.h
         src/viewmodels/page_registry.cpp
         src/viewmodels/page_registry.h
+        src/viewmodels/probe_firmware_view_model.cpp
+        src/viewmodels/probe_firmware_view_model.h
         src/viewmodels/probe_picker_view_model.cpp
         src/viewmodels/probe_picker_view_model.h
         src/viewmodels/recent_sources_model.cpp
@@ -187,6 +190,8 @@ qt_add_qml_module(hwio_gui
         src/workers/diag_worker.h
         src/workers/firmware_loader.cpp
         src/workers/firmware_loader.h
+        src/workers/probe_firmware_worker.cpp
+        src/workers/probe_firmware_worker.h
         src/workers/probe_scanner.cpp
         src/workers/probe_scanner.h
     OUTPUT_TARGETS _hwio_gui_qml_targets)

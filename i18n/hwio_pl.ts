@@ -398,33 +398,38 @@
         <translation>Wyszukiwanie programatorów J-Link…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="380"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="381"/>
         <source>FW %1</source>
         <translation>FW %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="395"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="397"/>
+        <source>Updating firmware…</source>
+        <translation>Aktualizacja firmware…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="398"/>
         <source>In use by another program (%1)</source>
         <translation>Używany przez inny program (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="396"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="399"/>
         <source>In use (tab %1)</source>
         <translation>W użyciu (karta %1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="434"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="453"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="437"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="456"/>
         <source>Device</source>
         <translation>Urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="480"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="483"/>
         <source>Choose a free probe in the list above.</source>
         <translation>Wybierz wolny programator z powyższej listy.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="493"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="496"/>
         <source>Connect</source>
         <translation>Połącz</translation>
     </message>
@@ -1319,28 +1324,28 @@
         <translation>HARDWARIO Monitor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="174"/>
+        <location filename="../app/gui/qml/Main.qml" line="177"/>
         <source>Close the tab?</source>
         <translation>Zamknąć kartę?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="175"/>
+        <location filename="../app/gui/qml/Main.qml" line="178"/>
         <source>Cancel and close</source>
         <translation>Anuluj i zamknij</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="176"/>
-        <location filename="../app/gui/qml/Main.qml" line="186"/>
+        <location filename="../app/gui/qml/Main.qml" line="179"/>
+        <location filename="../app/gui/qml/Main.qml" line="189"/>
         <source>Keep running</source>
         <translation>Kontynuuj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="184"/>
+        <location filename="../app/gui/qml/Main.qml" line="187"/>
         <source>Quit HARDWARIO Monitor?</source>
         <translation>Zakończyć HARDWARIO Monitor?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="185"/>
+        <location filename="../app/gui/qml/Main.qml" line="188"/>
         <source>Cancel and quit</source>
         <translation>Anuluj i zakończ</translation>
     </message>
@@ -1500,6 +1505,16 @@
         <source>Retry</source>
         <translation>Spróbuj ponownie</translation>
     </message>
+    <message>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="120"/>
+        <source>Disconnect and update…</source>
+        <translation>Rozłącz i zaktualizuj…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="138"/>
+        <source>Not now</source>
+        <translation>Nie teraz</translation>
+    </message>
 </context>
 <context>
     <name>Pages</name>
@@ -1614,6 +1629,80 @@
         <location filename="../app/gui/qml/pages/PlaceholderPage.qml" line="129"/>
         <source>Version</source>
         <translation>Wersja</translation>
+    </message>
+</context>
+<context>
+    <name>ProbeFirmwareDialog</name>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="33"/>
+        <source>Update J-Link firmware?</source>
+        <translation>Zaktualizować firmware J-Linka?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="33"/>
+        <source>J-Link firmware update</source>
+        <translation>Aktualizacja firmware J-Linka</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="70"/>
+        <source>%1 · SN %2</source>
+        <translation>%1 · SN %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="71"/>
+        <source>SN %1</source>
+        <translation>SN %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="90"/>
+        <source>Updating J-Link firmware…</source>
+        <translation>Aktualizowanie firmware J-Linka…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="91"/>
+        <source>Reading the J-Link…</source>
+        <translation>Odczytywanie J-Linka…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="109"/>
+        <source>Current:</source>
+        <translation>Obecne:</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="125"/>
+        <source>New:</source>
+        <translation>Nowe:</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="146"/>
+        <source>The J-Link firmware status could not be determined. Update anyway?</source>
+        <translation>Nie udało się ustalić stanu firmware J-Linka. Zaktualizować mimo to?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="156"/>
+        <source>Do not unplug the J-Link during the update (about 10–30 s).</source>
+        <translation>Nie odłączaj J-Linka podczas aktualizacji (ok. 10–30 s).</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="167"/>
+        <source>HARDWARIO Monitor quits when the update has finished.</source>
+        <translation>HARDWARIO Monitor zamknie się po zakończeniu aktualizacji.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="178"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="179"/>
+        <source>Close</source>
+        <translation>Zamknij</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="201"/>
+        <source>Cancel</source>
+        <translation>Anuluj</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="210"/>
+        <source>Update</source>
+        <translation>Aktualizuj</translation>
     </message>
 </context>
 <context>
@@ -1844,45 +1933,45 @@
         <translation>Wybierz plik firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="370"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="406"/>
         <source>New device tab</source>
         <translation>Nowa karta urządzenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="373"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="409"/>
         <source>Close the device tab</source>
         <translation>Zamknij kartę urządzenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="376"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="379"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="412"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="415"/>
         <source>Next tab</source>
         <translation>Następna karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="382"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="385"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="418"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="421"/>
         <source>Previous tab</source>
         <translation>Poprzednia karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="388"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="424"/>
         <source>Settings</source>
         <translation>Ustawienia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="391"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="427"/>
         <source>Connect or disconnect</source>
         <translation>Połącz lub rozłącz</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="394"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="430"/>
         <source>Reconnect</source>
         <translation>Połącz ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="397"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="400"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="433"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="436"/>
         <source>Keyboard shortcuts</source>
         <translation>Skróty klawiszowe</translation>
     </message>
@@ -3745,7 +3834,7 @@
     </message>
     <message>
         <location filename="../libs/device/src/ble_session.cpp" line="288"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="689"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="694"/>
         <source>Wait for the console to reconnect.</source>
         <translation>Poczekaj, aż konsola ponownie się połączy.</translation>
     </message>
@@ -4001,7 +4090,7 @@
     </message>
     <message>
         <location filename="../libs/device/src/probe_lock.cpp" line="104"/>
-        <location filename="../libs/device/src/session_registry.cpp" line="137"/>
+        <location filename="../libs/device/src/session_registry.cpp" line="148"/>
         <source>The J-Link %1 is already used by this application.</source>
         <translation>J-Link %1 jest już używany przez tę aplikację.</translation>
     </message>
@@ -4098,92 +4187,97 @@
     </message>
     <message>
         <location filename="../libs/device/src/session_worker.cpp" line="363"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1418"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1423"/>
         <location filename="../libs/diag/src/environment.cpp" line="298"/>
         <source>The J-Link firmware is newer than the J-Link library.</source>
         <translation>Firmware J-Linka jest nowszy niż biblioteka J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="408"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1702"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="413"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1707"/>
         <source>RTT buffer &quot;%1&quot; not found; the device log is not shown.</source>
         <translation>Nie znaleziono bufora RTT &quot;%1&quot;; dziennik urządzenia nie jest wyświetlany.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="671"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1438"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="676"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1443"/>
         <source>The device has no power (%1 mV).</source>
         <translation>Urządzenie nie ma zasilania (%1 mV).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1316"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1396"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1499"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1503"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1597"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1668"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1321"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1401"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1504"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1508"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1602"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1673"/>
         <source>Cancelled</source>
         <translation>Anulowano</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1321"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1326"/>
         <source>Not checked</source>
         <translation>Nie sprawdzono</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1334"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1339"/>
         <source>Not checked: the time for the checks ran out</source>
         <translation>Nie sprawdzono: skończył się czas na sprawdzenie</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1493"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1498"/>
         <source>Not measured by this J-Link</source>
         <translation>Ten J-Link nie mierzy napięcia</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1520"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1525"/>
         <source>Only the debug port answers</source>
         <translation>Odpowiada tylko port debugowania</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1531"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1536"/>
         <source>Connected (SWD %1 kHz)</source>
         <translation>Połączono (SWD %1 kHz)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1533"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1538"/>
         <source>Connected (SWD, automatic speed)</source>
         <translation>Połączono (SWD, prędkość automatyczna)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1611"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1616"/>
         <source>%1, not protected</source>
         <translation>%1, niezabezpieczony</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1633"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1638"/>
         <source>This MCU has no console</source>
         <translation>Ten MCU nie ma konsoli</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1637"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1642"/>
         <source>Not checked: the MCU is protected</source>
         <translation>Nie sprawdzono: MCU jest zabezpieczony</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1684"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1689"/>
         <source>Found</source>
         <translation>Znaleziono</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1958"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1963"/>
         <source>Another program opened the J-Link after it was released.</source>
         <translation>Po zwolnieniu J-Linka otworzył go inny program.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1962"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1967"/>
         <source>Close the other program, then reacquire the J-Link.</source>
         <translation>Zamknij inny program, a następnie ponownie przejmij J-Link.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/session_registry.cpp" line="138"/>
+        <source>The firmware of the J-Link %1 is being updated.</source>
+        <translation>Firmware J-Linka %1 jest właśnie aktualizowane.</translation>
     </message>
 </context>
 <context>
@@ -4252,7 +4346,7 @@
 <context>
     <name>hwio::diag</name>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1358"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1363"/>
         <location filename="../libs/diag/src/check.cpp" line="233"/>
         <location filename="../libs/diag/src/environment.cpp" line="203"/>
         <source>The check &quot;%1&quot; did not finish in time.</source>
@@ -4466,7 +4560,7 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1120"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1167"/>
         <source>Copied to clipboard.</source>
         <translation>Skopiowano do schowka.</translation>
     </message>
@@ -4544,167 +4638,172 @@
 <context>
     <name>hwio::gui::ConnectionViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="274"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="290"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
         <source>Disconnected — %1</source>
         <translation>Rozłączono — %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="274"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="290"/>
         <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="310"/>
         <source>Disconnected</source>
         <translation>Rozłączono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="278"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="296"/>
         <source>Connecting…</source>
         <translation>Łączenie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="280"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="298"/>
         <source>J-Link open, device not connected</source>
         <translation>J-Link otwarty, urządzenie niepołączone</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="271"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="283"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="301"/>
         <source>Connected</source>
         <translation>Połączono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="102"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="120"/>
         <source>%1 · %2 dBm</source>
         <translation>%1 · %2 dBm</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="144"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="162"/>
         <source>Click Pair and enter the passkey in the system dialog.</source>
         <translation>Kliknij Sparuj i wpisz klucz dostępu w oknie systemowym.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="145"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="163"/>
         <source>Click Connect and enter the passkey when macOS asks for it.</source>
         <translation>Kliknij Połącz i wpisz klucz dostępu, gdy macOS o niego poprosi.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="148"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="166"/>
         <source>Already paired but it does not work? Remove the device in the system Bluetooth settings and pair it again.</source>
         <translation>Urządzenie jest sparowane, ale nie działa? Usuń je w systemowych ustawieniach Bluetooth i sparuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="179"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="197"/>
         <source>Pair</source>
         <translation>Sparuj</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="184"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
         <source>Choose another device</source>
         <translation>Wybierz inne urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="184"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
         <source>Choose another probe</source>
         <translation>Wybierz inny programator</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="187"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="205"/>
         <source>Open Bluetooth settings</source>
         <translation>Otwórz ustawienia Bluetooth</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="191"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="209"/>
         <source>Open Privacy settings</source>
         <translation>Otwórz ustawienia prywatności</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="263"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="281"/>
         <source>Pairing — confirm the passkey in the system dialog…</source>
         <translation>Parowanie — potwierdź klucz dostępu w oknie systemowym…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="267"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="285"/>
         <source>Waiting for pairing — enter the passkey in the system dialog</source>
         <translation>Oczekiwanie na sparowanie — wpisz klucz dostępu w oknie systemowym</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="271"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
         <source>Connected · MTU %1</source>
         <translation>Połączono · MTU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="284"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="302"/>
         <source>Connected · %1 V</source>
         <translation>Połączono · %1 V</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="287"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="305"/>
         <source>Reconnecting… (%1)</source>
         <translation>Ponowne łączenie… (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="288"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="306"/>
         <source>Reconnecting…</source>
         <translation>Ponowne łączenie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="673"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="507"/>
+        <source>The J-Link firmware is outdated (%1, available: %2).</source>
+        <translation>Firmware J-Linka jest nieaktualne (%1, dostępne: %2).</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="755"/>
         <source>The console log file could not be written; logging to file is off for this session.</source>
         <translation>Nie można zapisać pliku dziennika konsoli; zapis do pliku jest wyłączony w tej sesji.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="691"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="773"/>
         <source>target not powered</source>
         <translation>urządzenie nie jest zasilane</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="693"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="775"/>
         <source>J-Link not found</source>
         <translation>nie znaleziono J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="695"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="777"/>
         <source>J-Link used by another program</source>
         <translation>J-Link używany przez inny program</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="697"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="779"/>
         <source>J-Link could not be opened</source>
         <translation>nie można otworzyć J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="699"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="781"/>
         <source>target does not respond</source>
         <translation>urządzenie nie odpowiada</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="702"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="784"/>
         <source>no RTT console found</source>
         <translation>nie znaleziono konsoli RTT</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="706"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="710"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="788"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="792"/>
         <source>connection lost</source>
         <translation>utracono połączenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="708"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="790"/>
         <source>out of range</source>
         <translation>poza zasięgiem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="713"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="795"/>
         <source>not paired</source>
         <translation>niesparowane</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="715"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="797"/>
         <source>Bluetooth is off</source>
         <translation>Bluetooth jest wyłączony</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="719"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="801"/>
         <source>J-Link Software missing</source>
         <translation>brak J-Link Software</translation>
     </message>
@@ -4842,44 +4941,44 @@
 <context>
     <name>hwio::gui::DeviceTabViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="159"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="168"/>
         <source>New device</source>
         <translation>Nowe urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="190"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="199"/>
         <source>Flashing needs a J-Link. Open a J-Link tab to flash this device.</source>
         <translation>Wgrywanie firmware wymaga J-Linka. Aby wgrać firmware do tego urządzenia, otwórz kartę z J-Linkiem.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="532"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="593"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="541"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="602"/>
         <source>— disconnected: %1 —</source>
         <translation>— rozłączono: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="546"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="594"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="555"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="603"/>
         <source>— disconnected —</source>
         <translation>— rozłączono —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="586"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="595"/>
         <source>— connected —</source>
         <translation>— połączono —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="586"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="595"/>
         <source>— connected (Bluetooth) —</source>
         <translation>— połączono (Bluetooth) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="714"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="723"/>
         <source>— paused: %1 —</source>
         <translation>— wstrzymano: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="727"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="736"/>
         <source>— resumed —</source>
         <translation>— wznowiono —</translation>
     </message>
@@ -5630,24 +5729,63 @@
     </message>
 </context>
 <context>
+    <name>hwio::gui::ProbeFirmwareViewModel</name>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="54"/>
+        <source>Another J-Link update is running.</source>
+        <translation>Trwa inna aktualizacja J-Linka.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="57"/>
+        <source>Used by an AI assistant</source>
+        <translation>Używany przez asystenta AI</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="67"/>
+        <source>Wait for the current operation to finish.</source>
+        <translation>Poczekaj na zakończenie bieżącej operacji.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="70"/>
+        <source>Disconnect tab %1 first.</source>
+        <translation>Najpierw rozłącz kartę %1.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="223"/>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="249"/>
+        <source>The J-Link firmware is already up to date.</source>
+        <translation>Firmware J-Linka jest już aktualne.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="227"/>
+        <source>The J-Link firmware is newer than the J-Link library.</source>
+        <translation>Firmware J-Linka jest nowsze niż biblioteka J-Link.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="253"/>
+        <source>J-Link firmware updated.</source>
+        <translation>Zaktualizowano firmware J-Linka.</translation>
+    </message>
+</context>
+<context>
     <name>hwio::gui::ProbePickerViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="149"/>
+        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="155"/>
         <source>Application MCU</source>
         <translation>MCU aplikacji</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="150"/>
+        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="156"/>
         <source>Application MCU (%1)</source>
         <translation>MCU aplikacji (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="153"/>
+        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="159"/>
         <source>LTE MCU</source>
         <translation>MCU LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="153"/>
+        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="159"/>
         <source>LTE MCU (%1)</source>
         <translation>MCU LTE (%1)</translation>
     </message>

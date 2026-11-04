@@ -193,6 +193,106 @@ TEST_F(FakeLibrarySession, ProbeToolsInspectAndUpdateFirmware) {
     EXPECT_EQ(missing.error().code, ErrorCode::ProbeNotFound);
 }
 
+// Plan 0036 (ADR-0257): the registry-free overloads behave as the registry versions; a failure
+// after the vendor update call is probe.firmware_update_failed.
+TEST_F(FakeLibrarySession, RegistryFreeProbeToolsInspectAndUpdate) {
+    useScenario(R"({"probes": [{"serialNumber": 5,
+        "firmware": "J-Link V11 compiled Sep 21 2023 10:38:43",
+        "libraryFirmware": "J-Link V11 compiled Oct  1 2024 09:00:00"}]})");
+    const hwio::device::RegistryOptions& options = registry().options();
+    const auto details = hwio::device::inspectProbe(options, location(), 5U);
+    ASSERT_TRUE(details) << details.error().detail;
+    EXPECT_EQ(details->probe.serialNumber, 5U);
+    EXPECT_EQ(details->firmwareStatus, hwio::jlink::FirmwareStatus::Outdated);
+    EXPECT_EQ(details->probe.firmware, "J-Link V11 compiled Sep 21 2023 10:38:43");
+    EXPECT_EQ(details->libraryFirmware, "J-Link V11 compiled Oct  1 2024 09:00:00");
+    EXPECT_FALSE(hwio::device::ProbeLock::owner(5, root() / "locks").has_value());
+
+    const auto update = hwio::device::updateProbeFirmware(options, location(), 5U);
+    ASSERT_TRUE(update) << update.error().detail;
+    EXPECT_EQ(update->serialNumber, 5U);
+    EXPECT_EQ(update->before, hwio::jlink::FirmwareStatus::Outdated);
+    EXPECT_FALSE(hwio::device::ProbeLock::owner(5, root() / "locks").has_value());
+
+    const auto missing = hwio::device::updateProbeFirmware(options, location(), 6U);
+    ASSERT_FALSE(missing);
+    EXPECT_EQ(missing.error().code, ErrorCode::ProbeNotFound);
+}
+
+TEST_F(FakeLibrarySession, FailedAndInterruptedFirmwareUpdates) {
+    useScenario(R"({"probes": [
+        {"serialNumber": 5, "updateResult": "unchanged",
+         "firmware": "J-Link V11 compiled Sep 21 2023 10:38:43",
+         "libraryFirmware": "J-Link V11 compiled Oct  1 2024 09:00:00"},
+        {"serialNumber": 6, "updateResult": "unplugged",
+         "firmware": "J-Link V11 compiled Sep 21 2023 10:38:43",
+         "libraryFirmware": "J-Link V11 compiled Oct  1 2024 09:00:00"},
+        {"serialNumber": 7, "openError": "Cannot connect to J-Link."}]})");
+    const hwio::device::RegistryOptions& options = registry().options();
+    const auto unchanged = hwio::device::updateProbeFirmware(options, location(), 5U);
+    ASSERT_FALSE(unchanged);
+    EXPECT_EQ(unchanged.error().code, ErrorCode::ProbeFirmwareUpdateFailed);
+    const auto unplugged = hwio::device::updateProbeFirmware(options, location(), 6U);
+    ASSERT_FALSE(unplugged);
+    EXPECT_EQ(unplugged.error().code, ErrorCode::ProbeFirmwareUpdateFailed);
+    // Not opened before the update: the open error, not a failed update.
+    const auto notOpened = hwio::device::updateProbeFirmware(options, location(), 7U);
+    ASSERT_FALSE(notOpened);
+    EXPECT_NE(notOpened.error().code, ErrorCode::ProbeFirmwareUpdateFailed);
+    EXPECT_FALSE(hwio::device::ProbeLock::owner(6, root() / "locks").has_value());
+}
+
+// ADR-0261: an Unknown status (firmware strings without a date) is judged by the vendor call's
+// return value, never by comparing the (still uncomparable) status after the update.
+TEST_F(FakeLibrarySession, UnknownFirmwareStatusIsJudgedByTheVendorCall) {
+    useScenario(R"({"probes": [
+        {"serialNumber": 5, "firmware": "J-Link V11 custom A", "libraryFirmware": "J-Link V11 custom B"},
+        {"serialNumber": 6, "firmware": "J-Link V11 custom A", "libraryFirmware": "J-Link V11 custom B",
+         "updateResult": "unchanged"}]})");
+    const hwio::device::RegistryOptions& options = registry().options();
+    const auto details = hwio::device::inspectProbe(options, location(), 5U);
+    ASSERT_TRUE(details) << details.error().detail;
+    EXPECT_EQ(details->firmwareStatus, hwio::jlink::FirmwareStatus::Unknown);
+    const auto updated = hwio::device::updateProbeFirmware(options, location(), 5U);
+    ASSERT_TRUE(updated) << updated.error().detail;
+    EXPECT_EQ(updated->before, hwio::jlink::FirmwareStatus::Unknown); // something was written
+    const auto unchanged = hwio::device::updateProbeFirmware(options, location(), 6U);
+    ASSERT_TRUE(unchanged) << unchanged.error().detail;
+    EXPECT_EQ(unchanged->before, hwio::jlink::FirmwareStatus::Current); // nothing was done
+}
+
+// Plan 0036 (ADR-0257): a reserved serial number is refused by checkAvailable (so by
+// DeviceSession::open and the registry probe tools) and cannot be reserved twice.
+TEST_F(FakeLibrarySession, ReservationBlocksConnectAndASecondReservation) {
+    {
+        hwio::device::ProbeReservation reservation = registry().reserve(801000001);
+        ASSERT_TRUE(reservation.valid());
+        EXPECT_EQ(reservation.serialNumber(), 801000001U);
+        EXPECT_TRUE(registry().reserved(801000001));
+        const auto available = registry().checkAvailable(std::optional<std::uint32_t>(801000001));
+        ASSERT_FALSE(available);
+        EXPECT_EQ(available.error().code, ErrorCode::ProbeOpenFailed);
+        EXPECT_FALSE(registry().reserve(801000001).valid());
+        EXPECT_TRUE(registry().checkAvailable(std::optional<std::uint32_t>(801000002)));
+
+        const auto refused = DeviceSession::open(registry(), location(), options(801000001));
+        ASSERT_FALSE(refused);
+        EXPECT_EQ(refused.error().code, ErrorCode::ProbeOpenFailed);
+        const auto tool = hwio::device::updateProbeFirmware(registry(), location(), 801000001U);
+        ASSERT_FALSE(tool);
+        EXPECT_EQ(tool.error().code, ErrorCode::ProbeOpenFailed);
+
+        hwio::device::ProbeReservation moved = std::move(reservation);
+        EXPECT_FALSE(reservation.valid()); // NOLINT(bugprone-use-after-move,clang-analyzer-*)
+        EXPECT_TRUE(moved.valid());
+        EXPECT_TRUE(registry().reserved(801000001));
+    }
+    EXPECT_FALSE(registry().reserved(801000001));
+    auto session = DeviceSession::open(registry(), location(), options(801000001));
+    ASSERT_TRUE(session) << session.error().message;
+    (*session)->close();
+}
+
 TEST_F(FakeLibrarySession, OpenDoesNotWaitForASlowConnect) {
     useScenario(R"({"probes": [{"serialNumber": 9, "connectDelayMs": 1000}]})");
     const auto start = std::chrono::steady_clock::now();

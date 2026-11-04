@@ -100,6 +100,12 @@ class ConnectionViewModel : public QObject {
     // ErrorPanel; the session does not reconnect by itself.
     Q_PROPERTY(bool otherConnector READ otherConnector NOTIFY errorChanged)
     Q_PROPERTY(QString otherConnectorText READ otherConnectorText NOTIFY errorChanged)
+    // Plan 0036 (ADR-0132, ADR-0246): the session reported probe.firmware_outdated with status
+    // Outdated: PageHost shows the banner with [Disconnect and update…] [Not now] instead of the
+    // plain warning; the button is disabled with firmwareBlockedReason as its tooltip.
+    Q_PROPERTY(bool firmwareOutdated READ firmwareOutdated NOTIFY firmwareChanged)
+    Q_PROPERTY(QString firmwareOutdatedText READ firmwareOutdatedText NOTIFY firmwareChanged)
+    Q_PROPERTY(QString firmwareBlockedReason READ firmwareBlockedReason NOTIFY firmwareChanged)
     // ---- plan 0012: Bluetooth ----
     Q_PROPERTY(bool isBle READ isBle NOTIFY probeChanged)
     Q_PROPERTY(QString deviceName READ deviceName NOTIFY probeChanged) // name or id
@@ -205,6 +211,15 @@ public:
     // [Update LTE firmware…] of the banner: the LTE update wizard on this tab.
     Q_INVOKABLE void updateLteFirmware();
     Q_INVOKABLE void dismissWarning();
+    // Plan 0036: the J-Link firmware banner.
+    // Only for the session that reported it and the tab's current probe (review M1).
+    [[nodiscard]] bool firmwareOutdated() const;
+    [[nodiscard]] QString firmwareOutdatedText() const;
+    [[nodiscard]] QString firmwareBlockedReason() const;
+    // [Disconnect and update…]: ProbeFirmwareViewModel::requestFromTab (ignored while blocked).
+    Q_INVOKABLE void updateProbeFirmware();
+    // [Not now]: hides the banner for this probe until the application ends.
+    Q_INVOKABLE void notNowProbeFirmware();
     Q_INVOKABLE void chooseAnotherProbe();
     // Plan 0012 (ADR-0227): the pairing actions of the ErrorPanel.
     Q_INVOKABLE void pairDevice();
@@ -243,6 +258,7 @@ signals:
     void errorChanged();
     void warningChanged();
     void optionsChanged();
+    void firmwareChanged(); // plan 0036
 
 private:
     void rememberOptions();
@@ -263,6 +279,13 @@ private:
     std::optional<Error> m_error;
     ErrorInfo m_errorInfo;
     ErrorInfo m_warning;
+    // Plan 0036: the Outdated notice of the session's probe.firmware_outdated warning.
+    struct FirmwareOutdated {
+        Error error;
+        device::ProbeFirmwareNotice notice;
+        std::uint32_t serial = 0;
+    };
+    std::optional<FirmwareOutdated> m_firmwareOutdated;
 };
 
 } // namespace hwio::gui
