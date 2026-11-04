@@ -5,8 +5,8 @@
 # creates a DRAFT GitHub release with generated notes; a maintainer reviews and publishes it
 # (packaging/RELEASE.md). Nothing is published automatically.
 #
-#   gate          the version computed from the tag equals the tag, 0 unfinished Czech translations,
-#                 HWIO_TEST_OVERRIDES=OFF in the package configuration, and the full CI matrix
+#   gate          the version computed from the tag equals the tag, 0 unfinished translations (all
+#                 languages), HWIO_TEST_OVERRIDES=OFF in the package configuration, and the full CI matrix
 #                 (ci.yml through workflow_call, incl. the unsigned package jobs); the build and
 #                 sign jobs run in parallel with it, publish waits for it (ADR-0231)
 #   linux         Ubuntu 22.04 container: .deb + AppImage, checks, split DWARF symbols
@@ -90,11 +90,11 @@ jobs:
           cmake --preset linux-package | tee configure.log
           grep -q "HARDWARIO Monitor version: ${{ steps.version.outputs.version }} " configure.log
           grep -q '^HWIO_TEST_OVERRIDES:BOOL=OFF$' build/linux-package/CMakeCache.txt
-      - name: 0 unfinished Czech translations (ADR-0027)
+      - name: 0 unfinished translations in every language (ADR-0027, ADR-0208)
         run: |
           cmake --preset linux-debug -DHWIO_BUILD_TESTS=OFF > /dev/null
           cmake --build --preset linux-debug --target check_translations | tee translations.log
-          grep -q "Translations: 0 unfinished Czech" translations.log
+          grep -q "Translations: 0 unfinished entries in all languages" translations.log
 
   tests:
     name: tests (ci.yml)

@@ -3,19 +3,23 @@
 # One project catalog per language in i18n/hwio_<lang>.ts:
 #   hwio_en.ts  English plural forms only (English is the source language)
 #   hwio_cs.ts  full Czech translation
+#   hwio_de.ts, hwio_pl.ts, hwio_sk.ts  full German, Polish and Slovak translations (plan 0030; AI-made,
+#               terminology in i18n/GLOSSARY.md, ADR-0209)
 #
 # Targets:
 #   update_translations  runs lupdate over every backend library and hwio-monitor and rewrites the
 #                        committed .ts files (run it after changing user-visible strings).
 #   check_translations   runs the same lupdate into a temporary copy and fails when the committed
-#                        .ts files are stale; reports the number of unfinished Czech entries.
+#                        .ts files are stale; reports the number of unfinished entries per language
+#                        and in total (must be 0 in every language before a release, ADR-0208).
 #                        <location> lines are ignored, so moving code does not make a catalog stale.
 #
 # The .qm files are embedded into the GUI only (resource prefix /i18n); the CLI is English only.
 #
-# Adding a language: create i18n/hwio_<lang>.ts (e.g. by copying hwio_cs.ts and changing the language
-# attribute), add it to HWIO_TRANSLATED_TS_FILES below and add one entry to
-# hwio::i18n::supportedLanguages (libs/core/include/hwio/core/i18n.h).
+# Adding a language: add i18n/hwio_<lang>.ts to HWIO_TRANSLATED_TS_FILES below and run
+# update_translations (lupdate creates the catalog with the right plural forms), translate it completely
+# (ADR-0208), add one entry to hwio::i18n::supportedLanguages (libs/core/include/hwio/core/i18n.h, order
+# per ADR-0210) and the code to HWIO_QT_LOCALES (cmake/HWioPackaging.cmake, ADR-0211).
 #
 # This file is also run in script mode (cmake -P) by check_translations to compare catalogs.
 
@@ -34,17 +38,40 @@ if(CMAKE_SCRIPT_MODE_FILE)
         endif()
     endforeach()
 
-    file(READ "${HWIO_GENERATED_DIR}/check_hwio_cs.ts" _cs)
-    string(REGEX MATCHALL "type=\"unfinished\"" _unfinished "${_cs}")
-    list(LENGTH _unfinished _unfinished_count)
-    message(STATUS "Translations: ${_unfinished_count} unfinished Czech (cs) entries "
-                   "(must be 0 before a release, ADR-0027).")
+    # Unfinished entries per translated language (hwio_en.ts holds plural forms only), ADR-0208.
+    set(_total 0)
+    foreach(_name IN LISTS HWIO_TS_NAMES)
+        if(_name STREQUAL "hwio_en.ts")
+            continue()
+        endif()
+        file(READ "${HWIO_GENERATED_DIR}/check_${_name}" _ts)
+        string(REGEX MATCH "<TS [^>]* language=\"([a-z_A-Z]+)\"" _ignored "${_ts}")
+        set(_code "${CMAKE_MATCH_1}")
+        set(_language "${_code}")
+        foreach(_known IN ITEMS "cs=Czech" "de=German" "pl=Polish" "sk=Slovak")
+            string(REPLACE "=" ";" _known "${_known}")
+            list(GET _known 0 _known_code)
+            if(_known_code STREQUAL _code)
+                list(GET _known 1 _language)
+            endif()
+        endforeach()
+        string(REGEX MATCHALL "type=\"unfinished\"" _unfinished "${_ts}")
+        list(LENGTH _unfinished _unfinished_count)
+        math(EXPR _total "${_total} + ${_unfinished_count}")
+        message(STATUS "Translations: ${_unfinished_count} unfinished ${_language} (${_code}) entries")
+    endforeach()
+    if(_total EQUAL 0)
+        message(STATUS "Translations: 0 unfinished entries in all languages.")
+    else()
+        message(STATUS "Translations: ${_total} unfinished entries in total "
+                       "(must be 0 in every language before a release, ADR-0208).")
+    endif()
 
     if(_stale)
         message(FATAL_ERROR
             "Stale translation catalogs: ${_stale}. User-visible strings changed; run "
             "'cmake --build --preset <preset> --target update_translations', translate the new "
-            "Czech entries in i18n/hwio_cs.ts (Qt Linguist) and commit the .ts files.")
+            "entries in every i18n/hwio_<lang>.ts (Qt Linguist) and commit the .ts files.")
     endif()
     message(STATUS "Translations: catalogs are up to date.")
     return()
@@ -53,7 +80,11 @@ endif()
 include_guard(GLOBAL)
 
 set(HWIO_PLURALS_TS_FILE "${PROJECT_SOURCE_DIR}/i18n/hwio_en.ts")
-set(HWIO_TRANSLATED_TS_FILES "${PROJECT_SOURCE_DIR}/i18n/hwio_cs.ts")
+set(HWIO_TRANSLATED_TS_FILES
+    "${PROJECT_SOURCE_DIR}/i18n/hwio_cs.ts"
+    "${PROJECT_SOURCE_DIR}/i18n/hwio_de.ts"
+    "${PROJECT_SOURCE_DIR}/i18n/hwio_pl.ts"
+    "${PROJECT_SOURCE_DIR}/i18n/hwio_sk.ts")
 set(HWIO_LUPDATE_OPTIONS -no-obsolete)
 
 get_property(_hwio_backend_targets GLOBAL PROPERTY HWIO_BACKEND_TARGETS)

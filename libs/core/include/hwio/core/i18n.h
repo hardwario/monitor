@@ -25,6 +25,10 @@ struct LanguageInfo {
 inline constexpr std::array supportedLanguages{
     LanguageInfo{.code = "en", .nativeName = "English"},
     LanguageInfo{.code = "cs", .nativeName = "Čeština"},
+    // Further languages alphabetically by code (ADR-0210).
+    LanguageInfo{.code = "de", .nativeName = "Deutsch"},
+    LanguageInfo{.code = "pl", .nativeName = "Polski"},
+    LanguageInfo{.code = "sk", .nativeName = "Slovenčina"},
 };
 
 // UTF-8 wrapper over QCoreApplication::translate (thread-safe). Returns sourceText unchanged when

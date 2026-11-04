@@ -122,6 +122,14 @@ TestCase {
         compare(box.currentIndex, czech);
     }
 
+    // ADR-0210: "System", then the native names in the order of hwio::i18n::supportedLanguages.
+    function test_languageList() {
+        const vm = AppViewModel.globalPageViewModel("settings");
+        compare(vm.languages.map(language => language.code), ["system", "en", "cs", "de", "pl", "sk"]);
+        compare(vm.languages.slice(1).map(language => language.name),
+                ["English", "Čeština", "Deutsch", "Polski", "Slovenčina"]);
+    }
+
     function test_defaultSpeed() {
         const vm = AppViewModel.globalPageViewModel("settings");
         // 0021 (ADR-0172): "Open Settings" scrolls to the section.
@@ -153,8 +161,13 @@ TestCase {
         verify(find("settingsTitle") !== null);
     }
 
-    function test_layoutCzech960() {
-        AppViewModel.setLanguage("cs");
+    function test_layout960_data() {
+        return [{ tag: "cs", title: "Nastavení" }, { tag: "de", title: "Einstellungen" },
+                { tag: "pl", title: "Ustawienia" }, { tag: "sk", title: "Nastavenia" }];
+    }
+
+    function test_layout960(data) {
+        AppViewModel.setLanguage(data.tag);
         window.width = 960;
         window.height = 600;
         waitForRendering(window.contentItem);
@@ -164,6 +177,6 @@ TestCase {
             const r = rect(item);
             verify(r.x >= -0.5 && r.x + r.w <= window.width + 0.5, `${name} is clipped: x=${r.x} w=${r.w}`);
         }
-        compare(find("settingsTitle").text, "Nastavení");
+        compare(find("settingsTitle").text, data.title);
     }
 }

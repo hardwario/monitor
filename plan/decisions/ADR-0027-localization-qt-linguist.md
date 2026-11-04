@@ -1,6 +1,7 @@
 # ADR-0027 — Localization: English and Czech with Qt Linguist
 
-- **Status:** Accepted (amended by ADR-0103: everything sent over MCP is English, in the GUI too)
+- **Status:** Accepted (amended by ADR-0103: everything sent over MCP is English, in the GUI too; extended by
+  plan 0030 / ADR-0208..0211: German, Polish and Slovak, release gate for every language)
 - **Date:** 2026-10-09
 - **Decided by:** Matej Strnad (M1 planning session)
 
