@@ -15,7 +15,12 @@
 #include "hwio/device/console_line.h"
 #include "hwio/device/session_registry.h"
 #include "hwio/firmware/firmware_image.h"
+#include "hwio/mcp/activity.h"
+#include "hwio/mcp/consent.h"
 #include "language_manager.h"
+#include "mcp/activity_model.h"
+#include "mcp/gui_device_provider.h"
+#include "mcp/mcp_controller.h"
 #include "pages/builtin_pages.h"
 #include "support/fake_jlink_scenario.h"
 #include "support/test_page_view_model.h"
@@ -32,9 +37,12 @@
 #include <QByteArray>
 #include <QCoreApplication>
 #include <QCryptographicHash>
+#include <QDateTime>
 #include <QDir>
 #include <QFile>
+#include <QHostAddress>
 #include <QIODevice>
+#include <QJsonObject>
 #include <QObject>
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -43,10 +51,13 @@
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
+#include <QTcpServer>
 #include <QTemporaryDir>
 #include <QUrl>
 #include <QVariant>
+#include <QVariantMap>
 #include <QtContainerFwd>
+#include <QtCore/qnamespace.h>
 #include <QtCore/qtmetamacros.h>
 #include <QtEnvironmentVariables>
 #include <QtLogging>
@@ -365,6 +376,111 @@ public:
     }
     Q_INVOKABLE [[nodiscard]] QStringList openedUrls() const { return m_openedUrls; }
 
+    // ---- plan 0014 (MCP) ----
+    // A port that was free a moment ago.
+    Q_INVOKABLE [[nodiscard]] static int freePort() {
+        QTcpServer probe;
+        if (!probe.listen(QHostAddress(QHostAddress::LocalHost), 0)) {
+            return 0;
+        }
+        return probe.serverPort();
+    }
+    // Another program on a port (mcp.port_in_use); 0 = released again.
+    Q_INVOKABLE int blockPort(bool block) {
+        if (!block) {
+            m_blocker.close();
+            return 0;
+        }
+        if (!m_blocker.isListening()) {
+            (void)m_blocker.listen(QHostAddress(QHostAddress::LocalHost), 0);
+        }
+        return m_blocker.serverPort();
+    }
+    // A consent request of `client` as a tool would ask it (categories: "flash", "uicr", ...).
+    Q_INVOKABLE void requestConsent(const QString& client, const QString& tool,
+                                    const QStringList& categories, const QString& deviceId,
+                                    const QVariantMap& details) {
+        auto* mcp =
+            m_app->findChild<hwio::gui::McpController*>(QString(), Qt::FindDirectChildrenOnly);
+        if (mcp == nullptr) {
+            return;
+        }
+        hwio::mcp::ConsentRequest request;
+        request.client = {.name = client.toStdString(), .version = "1"};
+        request.clientKey = client.toStdString();
+        request.tool = tool.toStdString();
+        request.deviceId = deviceId.toStdString();
+        for (const QString& id : categories) {
+            if (const auto category = hwio::mcp::consentCategoryFromId(id.toStdString())) {
+                request.categories |= *category;
+            }
+        }
+        request.details = QJsonObject::fromVariantMap(details);
+        m_consentOutcomes.append(QStringLiteral("pending"));
+        const qsizetype index = m_consentOutcomes.size() - 1;
+        (void)mcp->broker().request(
+            std::move(request), [this, index](const hwio::mcp::ConsentDecision& decision) {
+                m_consentOutcomes[index] =
+                    decision ? QStringLiteral("allowed")
+                             : QString::fromLatin1(hwio::idOf(decision.error().code));
+            });
+    }
+    // "pending", "allowed" or the error id of the request number `index`.
+    Q_INVOKABLE [[nodiscard]] QString consentOutcome(int index) const {
+        return m_consentOutcomes.value(index);
+    }
+    // An activity entry as the server records it.
+    Q_INVOKABLE void recordActivity(const QString& client, const QString& tool,
+                                    const QString& result) {
+        if (auto* mcp = m_app->findChild<hwio::gui::McpController*>(QString(),
+                                                                    Qt::FindDirectChildrenOnly)) {
+            hwio::mcp::ActivityEntry entry;
+            entry.time = QDateTime::currentDateTimeUtc();
+            entry.client = client.toStdString();
+            entry.clientKey = entry.client;
+            entry.tool = tool.toStdString();
+            entry.deviceId = "jlink:801000001";
+            entry.arguments = R"({"command":"lte state"})";
+            entry.result = result.toStdString();
+            entry.duration = std::chrono::milliseconds(300);
+            mcp->activity()->record(std::move(entry));
+        }
+    }
+    // An AI operation on a tab (GuiDeviceProvider::beginBusy / endBusy); aiCancelled() tells
+    // whether the device bar's Cancel reached it.
+    Q_INVOKABLE void setAiBusy(int index, bool busy) {
+        hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);
+        if (tab == nullptr) {
+            return;
+        }
+        if (busy) {
+            m_aiCancelled = false;
+            tab->setBusy(QStringLiteral("ai"), QStringLiteral("AI: Flashing…"),
+                         QStringLiteral("An AI assistant is running an operation."),
+                         [this] { m_aiCancelled = true; });
+        } else {
+            tab->clearBusy(QStringLiteral("ai"));
+        }
+    }
+    Q_INVOKABLE [[nodiscard]] bool aiCancelled() const { return m_aiCancelled; }
+    Q_INVOKABLE void setAiCommandActive(int index, bool active) {
+        if (hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index); tab != nullptr) {
+            tab->setAiCommandActive(active);
+        }
+    }
+    // Probe refreshes of the MCP provider still waiting for a scan.
+    Q_INVOKABLE [[nodiscard]] int mcpRefreshPending() const {
+        auto* mcp =
+            m_app->findChild<hwio::gui::McpController*>(QString(), Qt::FindDirectChildrenOnly);
+        return mcp != nullptr ? static_cast<int>(mcp->provider().pendingRefreshes()) : 0;
+    }
+    // A tab marked as opened by an AI client (the AI badge).
+    Q_INVOKABLE void setOpenedBy(int index, const QString& client) {
+        if (hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index); tab != nullptr) {
+            tab->setOpenedBy(client, client.toStdString());
+        }
+    }
+
 private:
     [[nodiscard]] QUrl write(const QString& name, const QByteArray& bytes) const {
         const QString path = m_dir + QLatin1Char('/') + name;
@@ -378,7 +494,10 @@ private:
 
     hwio::gui::AppViewModel* m_app;
     QString m_dir;
-    QStringList m_openedUrls; // interceptConsoleUrls()
+    QStringList m_openedUrls;      // interceptConsoleUrls()
+    QTcpServer m_blocker;          // blockPort()
+    QStringList m_consentOutcomes; // requestConsent()
+    bool m_aiCancelled = false;    // setAiBusy()
 };
 
 class Setup : public QObject {

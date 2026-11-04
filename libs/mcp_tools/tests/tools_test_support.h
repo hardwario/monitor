@@ -193,8 +193,8 @@ public:
     MOCK_METHOD(hwio::Status, close,
                 (std::string_view id, const hwio::mcp::RequestContext& context), (override));
     MOCK_METHOD(std::optional<DeviceRef>, find, (std::string_view id), (override));
-    MOCK_METHOD(void, beginBusy, (std::string_view id, QString text, std::function<void()> cancel),
-                (override));
+    MOCK_METHOD(hwio::Status, beginBusy,
+                (std::string_view id, QString text, std::function<void()> cancel), (override));
     MOCK_METHOD(void, endBusy, (std::string_view id), (override));
     MOCK_METHOD(void, marker, (std::string_view id, QString text), (override));
     MOCK_METHOD(void, setAiCommandHint, (std::string_view id, bool active), (override));
@@ -275,9 +275,11 @@ public:
         }
         return DeviceRef{.console = it->second.get(), .jlink = nullptr};
     }
-    void beginBusy(std::string_view id, QString text, std::function<void()> cancel) override {
+    hwio::Status beginBusy(std::string_view id, QString text,
+                           std::function<void()> cancel) override {
         m_record.busy.emplace_back(id, std::move(text));
         m_record.busyCancel = std::move(cancel);
+        return {};
     }
     void endBusy(std::string_view /*id*/) override { ++m_record.endBusy; }
     void marker(std::string_view id, QString text) override {

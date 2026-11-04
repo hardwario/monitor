@@ -17,6 +17,8 @@ Rectangle {
     id: input
 
     required property ConsoleViewModel viewModel
+    // Plan 0014 (ADR-0105): an AI send_command runs on this tab (a hint; the input stays enabled).
+    property bool aiCommandActive: false
     readonly property alias field: field
     readonly property bool historyOpen: history.visible
     readonly property alias suggestionList: suggestions
@@ -146,9 +148,9 @@ Rectangle {
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width
                         visible: field.text === "" && !field.preeditText
-                        text: input.viewModel.inputEnabled
-                              ? qsTr("Type a command, Enter to send · ↑↓ history · Ctrl+R search")
-                              : input.viewModel.inputDisabledReason
+                        text: !input.viewModel.inputEnabled ? input.viewModel.inputDisabledReason
+                              : input.aiCommandActive ? qsTr("AI is running a command…")
+                              : qsTr("Type a command, Enter to send · ↑↓ history · Ctrl+R search")
                         font: Theme.fontMono
                         color: Theme.textMuted
                         elide: Text.ElideRight

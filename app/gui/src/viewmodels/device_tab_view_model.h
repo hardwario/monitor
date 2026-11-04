@@ -51,6 +51,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -122,6 +123,11 @@ class DeviceTabViewModel : public QObject {
     // 0021 (ADR-0166): the firmware in the device from `info show` after the console attached:
     // {valid, fwName, fwVersion, text ("hio-chester-push-fm v4.0.1")}; invalid while unknown.
     Q_PROPERTY(QVariantMap deviceInfo READ deviceInfo NOTIFY deviceInfoChanged)
+    // Plan 0014 (ADR-0243, ADR-0244): the AI client that opened this tab over MCP ("" = the user;
+    // shown as the "AI" badge, such tabs are not restored) and an AI send_command running now (the
+    // console input hint, ADR-0105).
+    Q_PROPERTY(QString openedBy READ openedBy NOTIFY aiStateChanged)
+    Q_PROPERTY(bool aiCommandActive READ aiCommandActive NOTIFY aiStateChanged)
 
 public:
     // Unscoped: QML compares DeviceTabViewModel.Connected etc. with the int property.
@@ -244,6 +250,17 @@ public:
         return m_lastIdentity;
     }
     [[nodiscard]] QString busyConfirmText() const;
+    // Plan 0014: set by the MCP provider before configure() (never persisted): the client's
+    // display name and its key (RequestContext::clientKey; only that client may close the tab,
+    // ADR-0260).
+    [[nodiscard]] QString openedBy() const { return m_openedBy; }
+    [[nodiscard]] const std::string& openedByKey() const noexcept { return m_openedByKey; }
+    void setOpenedBy(const QString& client, std::string clientKey = {});
+    // ADR-0260: the user changed the device or an option of an AI tab: openedBy is cleared (no
+    // badge, saved in ui/tabs, the AI can no longer close it). No-op for a user's tab.
+    void handOverToUser();
+    [[nodiscard]] bool aiCommandActive() const noexcept { return m_aiCommandActive; }
+    void setAiCommandActive(bool active);
     // [Cancel and close] / quit: calls the busy page's cancel callback (once); with `close`, the
     // tab emits closeReady when the page clears its busy state.
     void cancelBusy(bool close);
@@ -270,6 +287,8 @@ signals:
     void deviceInfoQueried();
     // 0021: the console (re-)attached (Connected).
     void consoleAttached();
+    // Plan 0014: openedBy or aiCommandActive changed.
+    void aiStateChanged();
 
 private:
     struct BusyState {
@@ -324,6 +343,9 @@ private:
     // Plan 0028 (D7): `info show` of the current session (one per session; nullptr without).
     std::unique_ptr<device::DeviceInfoWatcher> m_infoWatcher;
     std::optional<device::FirmwareIdentity> m_lastIdentity;
+    QString m_openedBy;             // plan 0014
+    std::string m_openedByKey;      // plan 0014 (ADR-0260)
+    bool m_aiCommandActive = false; // plan 0014
 };
 
 } // namespace hwio::gui

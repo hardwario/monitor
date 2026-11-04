@@ -204,6 +204,9 @@ public:
 
     // --- tabs ---
     Q_INVOKABLE void newTab();
+    // Plan 0014 (ADR-0244): a Choose-device tab at the end without switching to it (MCP connect);
+    // nullptr when the tab limit is reached.
+    DeviceTabViewModel* appendTab();
     // Closes a tab. While a page of it is busy and !force: closeConfirmationNeeded. With force:
     // cancels the operation and closes when the page has finished. The last tab is replaced by an
     // empty Choose device tab.

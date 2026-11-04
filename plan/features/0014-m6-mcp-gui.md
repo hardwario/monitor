@@ -1,11 +1,13 @@
 # 0014 — M6 MCP in the GUI: server lifecycle, tabs as devices, consent, activity, settings
 
-- **Status:** Draft (revised 2026-11-03)
+- **Status:** In progress (approved 2026-11-03 by Matej Strnad, revised text incl. ADR-0240–ADR-0244; phases A, B,
+  C1, C3 and D1 implemented 2026-11-04 on `strnad/mcp-gui-0014-1b1a4c` after merging `main` with 0012 and 0033;
+  the manual checks C2 are open)
 - **Milestone:** M6 (plan 2 of 2, ADR-0094)
 - **Author:** Matej Strnad (with Claude), 2026-10-16; revised 2026-11-03 against the code after 0021–0029
 - **Related ADRs:** ADR-0003, ADR-0008, ADR-0025, ADR-0027, ADR-0043, ADR-0058, ADR-0059, ADR-0063,
   ADR-0094–ADR-0105, ADR-0107, ADR-0108, ADR-0150, ADR-0161, ADR-0162, ADR-0164, ADR-0172, ADR-0181, ADR-0182,
-  ADR-0188, ADR-0202, **ADR-0240–ADR-0244** (this revision)
+  ADR-0188, ADR-0202, **ADR-0240–ADR-0244** (this revision), ADR-0260 (2026-11-04)
 - **Depends on:** [0013](0013-m6-mcp-core-cli.md) phases A–C (`hwio_mcp`, `hwio_mcp_tools`, `TokenStore`, CLI
   `hwio mcp`), [0025](0025-security-fixes-round-1.md) (MCP hardening), [0004](0004-m3-gui-shell.md) /
   [0005](0005-m3-console.md) / [0006](0006-m3-flash-settings.md) / [0021](0021-gui-feedback-round-1.md) /
@@ -189,7 +191,8 @@ contributed Settings section (`id "mcp"`, order 50, between nRF Util and About).
 | File | Change |
 |---|---|
 | `DeviceTabViewModel` | `Q_PROPERTY(QString openedBy …)` (client name, "" = the user; set before `configure`), `Q_PROPERTY(bool aiCommandActive …)` |
-| `AppViewModel` | `DeviceTabViewModel* appendTab()` (a Choose-device tab at the end, current tab unchanged; nullptr when full); `tabsJson()` skips tabs with `openedBy` |
+| `AppViewModel` | `DeviceTabViewModel* appendTab()` (a Choose-device tab at the end, current tab unchanged; nullptr when full); the `ui/tabs` writer skips tabs with `openedBy` (implementation note 2026-11-04: that is `saveTabs()`; `tabsJson()` is the tab list of the diagnostic report and keeps them) |
+| `ConnectionViewModel` | `setSessionOverrides(speedKhz, autoReconnect)`: options for the tab's sessions that are not remembered for the probe (MCP `connect` arguments; clarified 2026-11-04) |
 | `NavRail.qml` | `McpRailIndicator {}` between the spacer and the global pages |
 | `DeviceTabBar.qml` | "AI" badge after the title when `openedBy !== ""` |
 | `DeviceBar.qml` | Cancel button when `tab.busyPage === "ai"` → `McpController.cancelOperation(tab)` |
@@ -243,11 +246,21 @@ class GuiDeviceProvider final : public hwio::mcp::tools::IDeviceProvider {
     //   while no scan result exists yet).
     // open(): synchronous (R17): a tab with a session → it; a user tab without one → connectDevice() (ADR-0242);
     //   else appendTab() (full → internal.session_limit), openedBy = client name, configure(profile, target,
-    //   serial), speed_khz / auto_reconnect applied to the new tab's ConnectionViewModel, connectDevice().
+    //   serial), speed_khz / auto_reconnect applied to the new tab only
+//   (ConnectionViewModel::setSessionOverrides, never remembered in probes/<sn>/...; clarified 2026-11-04 by
+//   Matej Strnad), connectDevice().
     //   An open error closes a new tab again and is returned.
-    // close(): AI-opened tab → AppViewModel::closeTabObject(tab, true) (queued); user tab → mcp.tool_not_allowed
-    //   (English call-site text: "The tab of <id> was opened by the user; only the user can close it.").
-    // beginBusy/endBusy → setBusy("ai", text, confirmText, cancel) / clearBusy("ai").
+    // close(): a tab the calling client opened (same clientKey, ADR-0260) → AppViewModel::closeTabObject(tab,
+    //   true) (queued); a user's or another client's tab → mcp.tool_not_allowed (English call-site text: "The
+    //   tab of <id> was opened by the user; only the user can close it.").
+    // beginBusy/endBusy → setBusy("ai", text, confirmText, cancel) / clearBusy("ai"); beginBusy returns a Status:
+    //   internal.busy while a user page holds the tab busy (review M3; IDeviceProvider::beginBusy became a
+    //   [[nodiscard]] Status on 2026-11-04).
+    // Hand-over (ADR-0260): the user choosing another device or changing a connection option of an AI tab
+    //   clears openedBy (badge gone, saved in ui/tabs, the AI cannot close it); only the user's changes are
+    //   remembered for the probe.
+    // Client names / versions are sanitised (ADR-0183, bidi controls, line breaks, 64 characters) where they
+    //   enter the broker, the activity list and openedBy (review M4).
     // marker → tab.consoleLog()->appendMarker(Shell, text); setAiCommandHint → tab.aiCommandActive.
     // devicesChanged: tab rows inserted/removed, sessionChanged, configurationChanged, a changed scan.
 };
@@ -259,6 +272,10 @@ class GuiConsentBroker final : public hwio::mcp::IConsentBroker {
     // (injectable for tests); Deny → mcp.consent_denied (detail: tool). The cancel functor withdraws it.
 };
 
+// Review H1 (ADR-0244 clarified): every answer carries the prompt id (GuiConsentBroker::answer(id, …) ignores
+// another id); each newly shown prompt re-places the window, focuses Deny and arms Allow after 700 ms.
+// Regenerate token (review M2): pending prompts are denied and the server restarts (stopServer(true)), so the
+// sessions, streams and calls of the old token end.
 class ConsentViewModel : public QObject {    // the shown prompt: title, client, action, device, tab index,
     // detail rows [{label, value, warning}], remember label, seconds left, queued count;
     // Q_INVOKABLE deny(), allowOnce(), allowForClient(), showDevice(), placeWindow(QWindow*), alert()
@@ -330,21 +347,21 @@ active-client timer 1 s while listening · shutdown drain 5 s.
 ## Implementation steps
 
 Phase A — controller and provider
-- [ ] A0 Prerequisite check: 0013 phases A–C, 0025 and 0004/0005/0006/0021/0028 implemented (otherwise stop and report)
-- [ ] A1 `ActivityModel`, `ClientSnippets` + tests
-- [ ] A2 `GuiConsentBroker` + `ConsentViewModel` (rules, grants, queue, timeout, withdrawal) + tests
-- [ ] A3 Shell additions (`openedBy`, `aiCommandActive`, `appendTab`, restore skip) + `GuiDeviceProvider` + tests
-- [ ] A4 `McpController` + `registerMcp` (lifecycle, port change, token, state, active clients, shutdown) + tests
+- [x] A0 Prerequisite check: 0013 phases A–C, 0025 and 0004/0005/0006/0021/0028 implemented (otherwise stop and report)
+- [x] A1 `ActivityModel`, `ClientSnippets` + tests
+- [x] A2 `GuiConsentBroker` + `ConsentViewModel` (rules, grants, queue, timeout, withdrawal) + tests
+- [x] A3 Shell additions (`openedBy`, `aiCommandActive`, `appendTab`, restore skip) + `GuiDeviceProvider` + tests
+- [x] A4 `McpController` + `registerMcp` (lifecycle, port change, token, state, active clients, shutdown) + tests
 
 Phase B — QML
-- [ ] B1 `McpSection.qml` (state, port, token, snippets, permissions, grants, activity)
-- [ ] B2 `ConsentWindow.qml` (flags, screen, alert, Show device, countdown); `McpRailIndicator.qml`; "AI" badge;
+- [x] B1 `McpSection.qml` (state, port, token, snippets, permissions, grants, activity)
+- [x] B2 `ConsentWindow.qml` (flags, screen, alert, Show device, countdown); `McpRailIndicator.qml`; "AI" badge;
   device-bar Cancel; console input hint
-- [ ] B3 Czech translations (0 unfinished); accessibility (names, focus order, prompt announcement); screenshots
+- [x] B3 Czech translations (0 unfinished); accessibility (names, focus order, prompt announcement); screenshots
   from Qt Quick tests (light/dark, EN/CS, 960 × 600) and a short entry in `plan/gui/mockups/index.html`
 
 Phase C — verification
-- [ ] C1 GUI integration test (GTest, in-process HTTP client against the controller's server, fake J-Link):
+- [x] C1 GUI integration test (GTest, in-process HTTP client against the controller's server, fake J-Link):
   token/Origin/Host refusals; `list_devices`; `connect` → prompt → Allow once → AI tab with badge; `flash` on the
   tab → prompt → Allow once → markers, busy, activity, result; Deny; a user tab → `disconnect` refused; two clients
   (one denied, one allowed); 32 in-flight `wait_for_state` calls keep the event loop responsive (timer latency
@@ -353,10 +370,26 @@ Phase C — verification
   port in use; regenerate token; quit while an AI flash runs; the prompt over other apps with the main window
   minimised and on another virtual desktop (Windows 10/11, macOS, GNOME X11, GNOME and KDE Wayland; record where
   focus is not given)
-- [ ] C3 Update roadmap, `0004-mcp.md`
+- [x] C3 Update roadmap, `0004-mcp.md`
 
 Phase D — after 0012 is in `main`
-- [ ] D1 Bluetooth tabs and recently seen BLE devices in `GuiDeviceProvider` (ADR-0243) + tests
+- [x] D1 Bluetooth tabs and recently seen BLE devices in `GuiDeviceProvider` (ADR-0243) + tests
+
+## Implementation notes
+
+- *Test-stability fix (user decision, Matej Strnad, 2026-11-04):* `OwnerThread.ThirtyTwoWaitsOnAFastStreamDoNotStall`
+  (libs/mcp_tools) failed under machine load (28–67 ms against the 20 ms bound, also on `main`). It is now
+  load-relative: the same 5 ms probe first measures a baseline on the same event loop with the stream running and no
+  waits (3 s), and the check is `worst with the 32 waits < baseline + allowance` (allowance unchanged: 20 ms, 100 ms
+  on macOS and under ASan, not checked under TSan). An injected 35 ms block still fails it (40 ms vs 2 ms + 20 ms).
+  User decisions 2026-11-04: the test is skipped (`GTEST_SKIP` with the reason) instead of failing (a) when the
+  probe got fewer than half of its 600 expected ticks during the baseline, and (b) when the bound is exceeded while
+  the 1-minute load average before or after the run (`getloadavg`; none on Windows: never skipped there) is above
+  the number of CPUs (`std::thread::hardware_concurrency`). It is never skipped while the load is at most the CPU
+  count. The tick criterion is deliberately not applied to the measurement with the waits (a loop hogged by the
+  scan work would lose ticks too). Verified 2026-11-04: 10 of 10 unloaded runs pass; an injected 35 ms block fails
+  (39 ms vs 1 ms + 20 ms at load 1.8); with 32 busy processes on 16 cores (load 24–29) 2 runs passed and 4 were
+  skipped, none failed. Resolved.
 
 ## Tests and verification
 

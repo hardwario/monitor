@@ -42,6 +42,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <utility>
 
@@ -567,6 +568,7 @@ void DeviceTabViewModel::chooseAnotherProbe() {
     if (isBusy()) {
         return;
     }
+    handOverToUser(); // ADR-0260: the user changes the device of an AI tab
     releaseSession();
     m_lastIdentity.reset(); // plan 0028 (D14): another device
     m_connection->setOpenError(std::nullopt);
@@ -749,6 +751,32 @@ void DeviceTabViewModel::cancelBusy(bool close) {
             const std::function<void()> cancel = m_busy->cancel;
             cancel();
         }
+    }
+}
+
+void DeviceTabViewModel::setOpenedBy(const QString& client, std::string clientKey) {
+    m_openedByKey = std::move(clientKey);
+    if (client != m_openedBy) {
+        m_openedBy = client;
+        aiStateChanged(); // signal
+    }
+}
+
+void DeviceTabViewModel::handOverToUser() {
+    if (m_openedBy.isEmpty()) {
+        return;
+    }
+    qCInfo(lcGui) << "Tab: the user took over the tab opened by" << m_openedBy;
+    m_openedBy.clear();
+    m_openedByKey.clear();
+    aiStateChanged();       // signal
+    configurationChanged(); // signal: ui/tabs is saved with this tab now
+}
+
+void DeviceTabViewModel::setAiCommandActive(bool active) {
+    if (active != m_aiCommandActive) {
+        m_aiCommandActive = active;
+        aiStateChanged(); // signal
     }
 }
 

@@ -630,18 +630,25 @@ bool OperationCall::begin(const QString& action) {
         return false;
     }
     m_begun = std::chrono::steady_clock::now();
+    if (m_settings.busy) {
+        // Plan 0014 review M3: a device another (user) operation holds busy refuses the call
+        // before any marker is written.
+        const QPointer<OperationCall> self(this);
+        if (hwio::Status busy = provider().beginBusy(id(), busyText(m_settings.tool),
+                                                     [self] {
+                                                         if (!self.isNull()) {
+                                                             self->cancel();
+                                                         }
+                                                     });
+            !busy) {
+            completeError(std::move(busy).error());
+            return false;
+        }
+        m_busy = true;
+    }
     if (m_settings.marker) {
         provider().marker(id(), markerStart(context(), action));
         m_begunMarker = true;
-    }
-    if (m_settings.busy) {
-        m_busy = true;
-        const QPointer<OperationCall> self(this);
-        provider().beginBusy(id(), busyText(m_settings.tool), [self] {
-            if (!self.isNull()) {
-                self->cancel();
-            }
-        });
     }
     return true;
 }

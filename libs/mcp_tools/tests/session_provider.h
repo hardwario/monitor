@@ -213,9 +213,11 @@ public:
                              dynamic_cast<hwio::device::DeviceSession*>(it->second.session.get())};
     }
 
-    void beginBusy(std::string_view id, QString text, std::function<void()> cancel) override {
+    hwio::Status beginBusy(std::string_view id, QString text,
+                           std::function<void()> cancel) override {
         m_record.busy.emplace_back(id, std::move(text));
         m_record.busyCancel = std::move(cancel);
+        return {};
     }
     void endBusy(std::string_view /*id*/) override { ++m_record.endBusy; }
     void marker(std::string_view id, QString text) override {

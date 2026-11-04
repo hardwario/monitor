@@ -626,6 +626,10 @@ void AppViewModel::newTab() {
     }
 }
 
+DeviceTabViewModel* AppViewModel::appendTab() {
+    return m_tabs->canAdd() ? addTab(makeTab()) : nullptr;
+}
+
 void AppViewModel::closeTab(int index, bool force) {
     if (index >= 0 && index == m_tabs->settingsRow()) {
         closeSettings(); // 0021 (ADR-0172)
@@ -930,7 +934,8 @@ void AppViewModel::saveTabs() {
         const DeviceTabViewModel* tab = m_tabs->at(i);
         const std::optional<std::uint32_t> serial = tab->probeSerial();
         const bool ble = tab->isBle() && !tab->bleDeviceId().isEmpty();
-        if (tab->choosing() || (!serial && !ble)) {
+        // Plan 0014 (ADR-0244): tabs an AI assistant opened are not restored.
+        if (tab->choosing() || (!serial && !ble) || !tab->openedBy().isEmpty()) {
             continue;
         }
         if (i == m_currentTab || (m_currentTab == m_tabs->settingsRow() && i == m_lastDeviceTab)) {

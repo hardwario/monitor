@@ -21,6 +21,17 @@
     </message>
 </context>
 <context>
+    <name>ConsentWindow</name>
+    <message numerus="yes">
+        <location filename="../../../app/gui/qml/mcp/ConsentWindow.qml" line="211"/>
+        <source>%n more request(s) waiting.</source>
+        <translation>
+            <numerusform>%n more request waiting.</numerusform>
+            <numerusform>%n more requests waiting.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>ConsoleSearchBar</name>
     <message numerus="yes">
         <location filename="../../../app/gui/qml/console/ConsoleSearchBar.qml" line="318"/>
@@ -69,6 +80,25 @@
         <translation type="unfinished">
             <numerusform></numerusform>
             <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::McpController</name>
+    <message numerus="yes">
+        <location filename="../../../app/gui/src/mcp/mcp_controller.cpp" line="377"/>
+        <source>Listening · %n client(s)</source>
+        <translation>
+            <numerusform>Listening · %n client</numerusform>
+            <numerusform>Listening · %n clients</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../../app/gui/src/mcp/mcp_controller.cpp" line="394"/>
+        <source>AI assistants: listening on port %1, %n client(s)</source>
+        <translation>
+            <numerusform>AI assistants: listening on port %1, %n client</numerusform>
+            <numerusform>AI assistants: listening on port %1, %n clients</numerusform>
         </translation>
     </message>
 </context>

@@ -78,10 +78,12 @@ TEST_F(SettingsTest, SectionsInRegistryOrder) {
     for (const QVariant& section : settings().sections()) {
         ids.append(section.toMap().value(QStringLiteral("sectionId")).toString());
     }
-    // Console (order 20) is contributed by plan 0005, Advanced (80) by plan 0033.
-    EXPECT_EQ(ids, (QStringList{QStringLiteral("general"), QStringLiteral("console"),
-                                QStringLiteral("jlink"), QStringLiteral("nrfutil"),
-                                QStringLiteral("advanced"), QStringLiteral("about")}));
+    // Console (order 20) is contributed by plan 0005, AI assistants (50) by plan 0014, Advanced
+    // (80) by plan 0033.
+    EXPECT_EQ(
+        ids, (QStringList{QStringLiteral("general"), QStringLiteral("console"),
+                          QStringLiteral("jlink"), QStringLiteral("nrfutil"), QStringLiteral("mcp"),
+                          QStringLiteral("advanced"), QStringLiteral("about")}));
     EXPECT_EQ(settings().sections().at(2).toMap().value(QStringLiteral("title")).toString(),
               QStringLiteral("J-Link"));
 }

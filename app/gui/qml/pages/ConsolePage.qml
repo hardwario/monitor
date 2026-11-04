@@ -626,6 +626,7 @@ Item {
 
                                     Layout.fillWidth: true
                                     viewModel: page.vm
+                                    aiCommandActive: page.tab !== null && page.tab.aiCommandActive
                                 }
                             }
                         }

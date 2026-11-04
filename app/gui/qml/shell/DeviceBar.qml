@@ -1,7 +1,7 @@
 // Device bar of a tab (ADR-0043, ADR-0052, ADR-0053; ADR-0233: no target box): probe, state text
 // ("Connected", "Connecting…", "Reconnecting… (target not powered)", the busy page's text),
 // Connect / Cancel / Disconnect and the ⋯ Advanced popover. Plan 0012: a Bluetooth tab shows the
-// device chip (name · RSSI) with the Bluetooth icon.
+// device chip (name · RSSI) with the Bluetooth icon. Plan 0014: Cancel of a running AI operation.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -143,6 +143,16 @@ Rectangle {
             visible: !bar.choosing && bar.connection.canChooseAnotherProbe
             text: bar.connection.isBle ? qsTr("Choose another device") : qsTr("Choose another probe")
             onClicked: bar.connection.chooseAnotherProbe()
+        }
+
+        // Plan 0014 (ADR-0105, ADR-0244): cancels a running AI operation (the tool call ends with
+        // `cancelled`).
+        HButton {
+            objectName: "aiCancel"
+            visible: bar.tab.busyPage === "ai"
+            text: qsTr("Cancel")
+            Accessible.name: qsTr("Cancel the AI operation")
+            onClicked: McpController.cancelOperation(bar.tab)
         }
 
         HButton {

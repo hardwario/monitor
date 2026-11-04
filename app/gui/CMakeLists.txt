@@ -51,6 +51,8 @@ set(HWIO_GUI_QML_FILES
     qml/flash/ProgressCard.qml
     qml/flash/ResultCard.qml
     qml/flash/SourceCard.qml
+    qml/mcp/ConsentWindow.qml
+    qml/mcp/McpRailIndicator.qml
     qml/pages/ChooseDevicePage.qml
     qml/pages/ConsolePage.qml
     qml/pages/FlashPage.qml
@@ -60,6 +62,7 @@ set(HWIO_GUI_QML_FILES
     qml/settings/AdvancedSection.qml
     qml/settings/GeneralSection.qml
     qml/settings/JLinkSection.qml
+    qml/settings/McpSection.qml
     qml/settings/NrfUtilSection.qml
     qml/settings/SettingsRow.qml
     qml/shell/AdvancedPopover.qml
@@ -100,6 +103,22 @@ qt_add_qml_module(hwio_gui
         src/install_paths.h
         src/language_manager.cpp
         src/language_manager.h
+        src/mcp/activity_model.cpp
+        src/mcp/activity_model.h
+        src/mcp/client_name.cpp
+        src/mcp/client_name.h
+        src/mcp/client_snippets.cpp
+        src/mcp/client_snippets.h
+        src/mcp/consent_view_model.cpp
+        src/mcp/consent_view_model.h
+        src/mcp/gui_consent_broker.cpp
+        src/mcp/gui_consent_broker.h
+        src/mcp/gui_device_provider.cpp
+        src/mcp/gui_device_provider.h
+        src/mcp/mcp_controller.cpp
+        src/mcp/mcp_controller.h
+        src/mcp/mcp_registration.cpp
+        src/mcp/mcp_registration.h
         src/pages/builtin_pages.cpp
         src/pages/builtin_pages.h
         src/pages/console_page.cpp
@@ -193,6 +212,7 @@ qt_add_qml_module(hwio_gui
 target_include_directories(hwio_gui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 # The generated QML type registration includes the view model headers by file name.
 target_include_directories(hwio_gui PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/mcp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/pages"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/viewmodels"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/wizard"
@@ -202,6 +222,8 @@ target_link_libraries(hwio_gui PUBLIC
     hwio::device
     hwio::diag
     hwio::firmware
+    hwio::mcp
+    hwio::mcp_tools
     hwio::update
     Qt6::Core
     Qt6::Gui

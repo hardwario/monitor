@@ -357,6 +357,10 @@ void ConnectionViewModel::setAutoSpeed(bool value) {
         return;
     }
     m_options.autoSpeed = value;
+    if (m_rememberable) {
+        m_rememberable->autoSpeed = value;
+    }
+    userChangedOptions();
     rememberOptions();
     optionsChanged(); // signal
 }
@@ -369,6 +373,10 @@ void ConnectionViewModel::setSpeedKhz(int value) {
         return;
     }
     m_options.speedKhz = value;
+    if (m_rememberable) {
+        m_rememberable->speedKhz = value;
+    }
+    userChangedOptions();
     rememberOptions();
     optionsChanged(); // signal
 }
@@ -380,6 +388,10 @@ void ConnectionViewModel::setLatencyMs(int value) {
         return;
     }
     m_options.latencyMs = value;
+    if (m_rememberable) {
+        m_rememberable->latencyMs = value;
+    }
+    userChangedOptions();
     rememberOptions();
     optionsChanged(); // signal
 }
@@ -389,6 +401,10 @@ void ConnectionViewModel::setAutoReconnect(bool value) {
         return;
     }
     m_options.autoReconnect = value;
+    if (m_rememberable) {
+        m_rememberable->autoReconnect = value;
+    }
+    userChangedOptions();
     if (isBle()) {
         rememberBleOptions();
         optionsChanged(); // signal
@@ -403,6 +419,10 @@ void ConnectionViewModel::setResetOnOpen(bool value) {
         return;
     }
     m_options.resetOnOpen = value;
+    if (m_rememberable) {
+        m_rememberable->resetOnOpen = value;
+    }
+    userChangedOptions();
     rememberOptions();
     optionsChanged(); // signal
 }
@@ -414,6 +434,10 @@ void ConnectionViewModel::setLogToFile(bool value) {
     // Per tab only: the default is the console/logToFile setting (plan 0005); a Bluetooth device
     // remembers it (plan 0012).
     m_options.logToFile = value;
+    if (m_rememberable) {
+        m_rememberable->logToFile = value;
+    }
+    userChangedOptions();
     if (isBle()) {
         rememberBleOptions();
     }
@@ -515,8 +539,16 @@ void ConnectionViewModel::loadOptions(std::optional<std::uint32_t> serial,
         m_remembered = false;
     }
     m_options = options;
+    m_rememberable.reset();
     optionsChanged(); // signal
     targetChanged();  // signal
+}
+
+void ConnectionViewModel::userChangedOptions() {
+    // ADR-0260: the user changing an option of an AI tab takes the tab over.
+    if (m_tab != nullptr) {
+        m_tab->handOverToUser();
+    }
 }
 
 void ConnectionViewModel::rememberOptions() {
@@ -524,15 +556,16 @@ void ConnectionViewModel::rememberOptions() {
         return;
     }
     const std::uint32_t serial = *m_serial;
+    // ADR-0260: the session overrides of an MCP `connect` are never remembered.
+    const ConnectionOptions& stored = m_rememberable ? *m_rememberable : m_options;
     // ADR-0111: 0 = automatic.
     logFailure("speedKhz",
-               m_settings->setValue(probeKey(serial, "speedKhz"), m_options.speedToStore()));
-    logFailure("latencyMs",
-               m_settings->setValue(probeKey(serial, "latencyMs"), m_options.latencyMs));
+               m_settings->setValue(probeKey(serial, "speedKhz"), stored.speedToStore()));
+    logFailure("latencyMs", m_settings->setValue(probeKey(serial, "latencyMs"), stored.latencyMs));
     logFailure("autoReconnect",
-               m_settings->setValue(probeKey(serial, "autoReconnect"), m_options.autoReconnect));
+               m_settings->setValue(probeKey(serial, "autoReconnect"), stored.autoReconnect));
     logFailure("resetOnOpen",
-               m_settings->setValue(probeKey(serial, "resetOnOpen"), m_options.resetOnOpen));
+               m_settings->setValue(probeKey(serial, "resetOnOpen"), stored.resetOnOpen));
     m_remembered = true;
     touchRememberedProbe();
 }
@@ -558,19 +591,37 @@ void ConnectionViewModel::loadBleOptions(const QString& deviceId, const QString&
         m_remembered = false;
     }
     m_options = options;
+    m_rememberable.reset();
     probeChanged();   // signal
     optionsChanged(); // signal
     targetChanged();  // signal
+}
+
+void ConnectionViewModel::setSessionOverrides(std::optional<int> speedKhz,
+                                              std::optional<bool> autoReconnect) {
+    if (!m_rememberable) {
+        m_rememberable = m_options;
+    }
+    if (speedKhz && *speedKhz >= device::minSpeedKhz && *speedKhz <= device::maxSpeedKhz &&
+        m_bleId.isEmpty()) {
+        m_options.autoSpeed = false;
+        m_options.speedKhz = *speedKhz;
+    }
+    if (autoReconnect) {
+        m_options.autoReconnect = *autoReconnect;
+    }
+    optionsChanged(); // signal (nothing is stored)
 }
 
 void ConnectionViewModel::rememberBleOptions() {
     if (m_bleId.isEmpty() || m_settings == nullptr || m_settings->readOnly()) {
         return;
     }
+    const ConnectionOptions& stored = m_rememberable ? *m_rememberable : m_options;
     logFailure("ble autoReconnect",
-               m_settings->setValue(bleKey(m_bleId, "autoReconnect"), m_options.autoReconnect));
+               m_settings->setValue(bleKey(m_bleId, "autoReconnect"), stored.autoReconnect));
     logFailure("ble logToFile",
-               m_settings->setValue(bleKey(m_bleId, "logToFile"), m_options.logToFile));
+               m_settings->setValue(bleKey(m_bleId, "logToFile"), stored.logToFile));
     m_remembered = true;
     touchRememberedBleDevice();
 }

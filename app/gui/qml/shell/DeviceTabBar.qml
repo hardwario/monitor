@@ -133,6 +133,40 @@ Rectangle {
                         elide: Text.ElideRight
                     }
 
+                    // Plan 0014 (ADR-0244): a tab an AI assistant opened.
+                    Rectangle {
+                        objectName: "tabAiBadge"
+                        visible: !tabButton.settingsTab && tabButton.stableTab !== null
+                                 && tabButton.stableTab.openedBy !== ""
+                        implicitWidth: aiLabel.implicitWidth + 2 * Theme.spacingXs
+                        implicitHeight: aiLabel.implicitHeight
+                        radius: Theme.radiusM
+                        color: Theme.accentSoft
+                        Accessible.role: Accessible.StaticText
+                        Accessible.name: aiTip.text
+
+                        Label {
+                            id: aiLabel
+
+                            textFormat: Text.PlainText
+                            anchors.centerIn: parent
+                            text: qsTr("AI")
+                            font: Theme.fontUiSmall
+                            color: Theme.accent
+                        }
+
+                        HoverHandler {
+                            id: aiHover
+                        }
+
+                        HToolTip {
+                            id: aiTip
+
+                            visible: aiHover.hovered
+                            text: tabButton.stableTab !== null ? qsTr("Opened by %1").arg(tabButton.stableTab.openedBy) : ""
+                        }
+                    }
+
                     HToolButton {
                         objectName: "tabClose"
                         implicitWidth: 22
