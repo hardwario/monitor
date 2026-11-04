@@ -81,6 +81,10 @@ add_executable(hwio_gui_tests
     viewmodels/gui_test_support.h
     viewmodels/install_paths_test.cpp
     viewmodels/main.cpp
+    viewmodels/mcp_controller_test.cpp
+    viewmodels/mcp_gui_test_support.h
+    viewmodels/mcp_models_test.cpp
+    viewmodels/mcp_provider_test.cpp
     viewmodels/page_registry_test.cpp
     viewmodels/probe_firmware_view_model_test.cpp
     viewmodels/probe_picker_test.cpp
@@ -97,6 +101,8 @@ target_include_directories(hwio_gui_tests PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/viewmodels"
     "${PROJECT_SOURCE_DIR}/libs/device/tests"
+    # mcp_test_support.h (plan 0014 tests: RecordingReplyChannel)
+    "${PROJECT_SOURCE_DIR}/libs/mcp/tests"
     # hex_builder.h, zip_builder.h, http_fixture.h (plan 0006 tests)
     "${PROJECT_SOURCE_DIR}/libs/firmware/tests")
 target_link_libraries(hwio_gui_tests PRIVATE hwio_gui hwio::miniz Qt6::Test GTest::gmock)

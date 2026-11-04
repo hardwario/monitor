@@ -543,6 +543,8 @@ const SCREENS = {
    <p class="muted">Click Pair and enter the passkey in the system dialog. The passkey is 123456 unless it was changed when the device was configured. Already paired but it does not work? Remove the device in the system Bluetooth settings and pair it again.</p>
    <div class="acts"><button class="btn primary">Pair</button><button class="btn">Open Bluetooth settings</button><button class="btn ghost">${t('details')} ▾</button></div></div></div>
    <div class="content"><div class="split">${shellPane({disabled:'Not connected'})}</div></div>`}) },
+ mcp: { label:'AI assistants (MCP)', note:'Plan 0014 (ADR-0101, ADR-0105, ADR-0108, ADR-0244): no hand-drawn mockup; the look is documented by the screenshots of the Qt Quick test tst_mcp.qml (960 × 600, light/dark, EN/CS) in plan/features/0014-screenshots: Settings → AI assistants (MCP), the consent prompt window, and an AI-opened tab with the "AI" badge, the busy text, Cancel and the MCP rail indicator.',
+  render:() => `<div class="scroll"><div class="cards">${['mcp-01-settings','mcp-02-consent','mcp-03-ai-tab'].map(n=>`<div class="card"><h2>${n}</h2><img alt="${n}" style="max-width:100%" src="../../features/0014-screenshots/${n}-960x600-${S.theme==='dark'?'dark':'light'}-${S.lang==='cs'?'cs':'en'}.png"></div>`).join('')}</div></div>` },
  noprobe: { label:'No probe (empty state)', note:'Empty state shows the next step and simple checks. “Help me fix this” is disabled until the M4 Connect wizard.',
   render:() => frame({page:'choose', dev:'choose', tabState:'', content:`<div class="empty"><div class="in"><div class="ico">🔌</div>
    <p class="big">${t('noProbeTitle')}</p><p class="muted">${t('noProbeSub')}</p>

@@ -100,7 +100,8 @@ public:
     [[nodiscard]] hwio::Status close(std::string_view id,
                                      const hwio::mcp::RequestContext& context) override;
     [[nodiscard]] std::optional<hwio::mcp::tools::DeviceRef> find(std::string_view id) override;
-    void beginBusy(std::string_view id, QString text, std::function<void()> cancel) override;
+    [[nodiscard]] hwio::Status beginBusy(std::string_view id, QString text,
+                                         std::function<void()> cancel) override;
     void endBusy(std::string_view id) override;
     void marker(std::string_view id, QString text) override;
     void setAiCommandHint(std::string_view id, bool active) override;

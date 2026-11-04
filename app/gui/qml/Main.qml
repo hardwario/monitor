@@ -14,6 +14,8 @@ ApplicationWindow {
 
     // The toast column (in the overlay layer, plan 0028 D21; tests find it here).
     readonly property Item toastLayer: toastColumn
+    // Plan 0014: the MCP consent prompt window (tests find it here).
+    readonly property Window consentWindow: consentPrompt
 
     objectName: "mainWindow"
     width: 1280
@@ -163,6 +165,13 @@ ApplicationWindow {
 
     // Plan 0036: the J-Link firmware update.
     ProbeFirmwareDialog {}
+
+    // Plan 0014 (ADR-0108): the MCP consent prompt, a window of its own.
+    ConsentWindow {
+        id: consentPrompt
+
+        mainWindow: window
+    }
 
     Shortcuts {}
 

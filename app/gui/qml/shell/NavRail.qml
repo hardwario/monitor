@@ -1,6 +1,6 @@
 // The rail (ADR-0043, ADR-0061): the per-tab pages (Console, Flash, ...) with icon and label, a
 // busy badge on the page that runs an operation; Settings (global pages) and Help (the Help menu,
-// plan/features/0007) at the bottom.
+// plan/features/0007) at the bottom; plan 0014: the MCP indicator above Settings.
 // Below 1100 px window width it shows icons only, with the labels as tooltips.
 // Plan 0012: a page the tab cannot use (Flash in a Bluetooth tab) is dimmed, its tooltip says why
 // and a click shows the reason as a toast.
@@ -135,6 +135,9 @@ Rectangle {
         Item {
             Layout.fillHeight: true
         }
+
+        // Plan 0014 (ADR-0105, ADR-0244): the MCP state above Settings (hidden while off).
+        McpRailIndicator {}
 
         Repeater {
             model: AppViewModel.pages

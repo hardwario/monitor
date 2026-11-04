@@ -124,8 +124,10 @@ public:
     [[nodiscard]] virtual std::optional<DeviceRef> find(std::string_view id) = 0;
     // ADR-0105: an AI operation runs on the device ("AI: Flashing…" + a Cancel button in the GUI);
     // `cancel` is called (owner thread) when the user cancels it. endBusy() follows every
-    // beginBusy().
-    virtual void beginBusy(std::string_view id, QString text, std::function<void()> cancel) = 0;
+    // successful beginBusy(). Errors (plan 0014 review M3): internal.busy when the device is busy
+    // with another (user) operation; the tool then ends with that error.
+    [[nodiscard]] virtual hwio::Status beginBusy(std::string_view id, QString text,
+                                                 std::function<void()> cancel) = 0;
     virtual void endBusy(std::string_view id) = 0;
     // ADR-0105: a console marker line in the device's ConsoleLog (ConsoleLog::appendMarker); the
     // text is already translated.

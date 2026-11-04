@@ -237,6 +237,11 @@ public:
     // Plan 0012: the options of a Bluetooth device (remembered or the defaults).
     void loadBleOptions(const QString& deviceId, const QString& name);
     void touchRememberedBleDevice();
+    // Plan 0014 (clarified 2026-11-04, ADR-0260): options for this tab's sessions only, never
+    // remembered (probes/<sn>/..., ble/<id>/...): the speed (a fixed kHz value; J-Link only) and
+    // auto-reconnect of an MCP `connect`. nullopt keeps the current value. A later change by the
+    // user is remembered on its own (the overrides stay unremembered).
+    void setSessionOverrides(std::optional<int> speedKhz, std::optional<bool> autoReconnect);
     void setPairingPending(bool pending);
     void setPairing(bool pairing);
     void setProduct(const QString& product);
@@ -263,11 +268,16 @@ signals:
 private:
     void rememberOptions();
     void rememberBleOptions();
+    // A user setter ran: hands an AI tab over to the user (ADR-0260).
+    void userChangedOptions();
     void setError(std::optional<Error> error);
 
     DeviceTabViewModel* m_tab; // the parent
     SettingsStore* m_settings; // non-owning, owned by AppViewModel (outlives the tabs)
     ConnectionOptions m_options;
+    // ADR-0260: while session overrides (MCP `connect`) apply, the options that may be remembered
+    // for the probe: the loaded ones plus the user's own changes.
+    std::optional<ConnectionOptions> m_rememberable;
     std::optional<std::uint32_t> m_serial;
     bool m_remembered = false; // the probe (or Bluetooth device) has stored options
     QString m_bleId;           // plan 0012: the device of a Bluetooth tab ("" = J-Link)

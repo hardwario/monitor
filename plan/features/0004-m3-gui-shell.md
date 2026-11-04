@@ -24,9 +24,14 @@
 > list; `DeviceTabViewModel` gains `transport`, `consoleSession()`, `openBle()`, `bleSession()`; BLE tabs have a BLE
 > device bar and title; `ui/tabs` entries gain `transport`; settings `ui/lastTransport`, `ble/*`.
 
-> **Pending amendment from M6 (ADR-0105, specified in [0014](0014-m6-mcp-gui.md)):** an "MCP" indicator on the rail
-> above Settings; an "AI" badge on tabs opened by an AI assistant (not restored); busy page id `ai` for AI
-> operations; `AppViewModel::openTab` overload for programmatic opening.
+> **Amended by M6 ([0014](0014-m6-mcp-gui.md), ADR-0105, ADR-0243, ADR-0244; applied 2026-11-04 under 0014's
+> checklist):** MCP is a registered extension (`registerMcp`, called by `registerBuiltInPages`). Shell additions:
+> `DeviceTabViewModel::openedBy` (the AI client that opened the tab, set before `configure`; never persisted) and
+> `aiCommandActive` (console input hint "AI is running a command…"); `AppViewModel::appendTab()` (a Choose-device
+> tab at the end without switching to it; nullptr when full); `ui/tabs` skips AI-opened tabs; busy page id `ai` for
+> AI operations; QML: the "MCP" rail indicator above Settings (`McpRailIndicator`), the "AI" badge on AI-opened
+> tabs (`DeviceTabBar`), the device bar's Cancel of an AI operation, and the `ConsentWindow` in `Main.qml`. The
+> earlier `AppViewModel::openTab` overload is not needed (ADR-0243).
 
 > **Pending amendment from M7 ([0015](0015-m7-packaging-release.md), [0016](0016-m7-update-check.md); applied when
 > they are approved — then this plan needs re-approval):** the shell banner area hosts `UpdateBanner` (below error

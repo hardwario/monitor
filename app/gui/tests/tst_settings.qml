@@ -72,7 +72,9 @@ TestCase {
 
     function test_sectionsAndDetection() {
         const sections = findAll(window.contentItem, "sectionLoader").filter(effectivelyVisible);
-        compare(sections.length, 6); // General, Console (0005), J-Link, nRF Util, Advanced (0033), About
+        // General, Console (0005), J-Link, nRF Util, AI assistants (0014), Advanced (0033), About
+        compare(sections.length, 7);
+        verify(find("section_mcp") !== null);
         verify(find("section_general") !== null);
         verify(find("section_console") !== null);
         verify(find("section_about") !== null);

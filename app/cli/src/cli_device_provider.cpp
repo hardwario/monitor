@@ -387,9 +387,10 @@ std::optional<DeviceRef> CliDeviceProvider::find(std::string_view id) {
     return DeviceRef{.console = it->second.session.get(), .jlink = it->second.jlink};
 }
 
-void CliDeviceProvider::beginBusy(std::string_view id, QString text,
-                                  std::function<void()> /*cancel*/) {
+Status CliDeviceProvider::beginBusy(std::string_view id, QString text,
+                                    std::function<void()> /*cancel*/) {
     qCInfo(log::lcMcp).noquote() << "MCP:" << toQString(id) << "busy:" << text;
+    return {};
 }
 
 void CliDeviceProvider::endBusy(std::string_view id) {

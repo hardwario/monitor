@@ -459,6 +459,42 @@
     </message>
 </context>
 <context>
+    <name>ConsentWindow</name>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="29"/>
+        <source>HARDWARIO Monitor — Allow AI assistant?</source>
+        <translation>HARDWARIO Monitor — KI-Assistent zulassen?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="146"/>
+        <source>Show device ↗</source>
+        <translation>Gerät anzeigen ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="150"/>
+        <source>Show device</source>
+        <translation>Gerät anzeigen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="172"/>
+        <source>Deny</source>
+        <translation>Ablehnen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="182"/>
+        <source>Allow once</source>
+        <translation>Einmal erlauben</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="211"/>
+        <source>%n more request(s) waiting.</source>
+        <translation>
+            <numerusform>%n weitere Anfrage wartet.</numerusform>
+            <numerusform>%n weitere Anfragen warten.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>ConsolePage</name>
     <message>
         <location filename="../app/gui/qml/pages/ConsolePage.qml" line="33"/>
@@ -565,7 +601,7 @@
     </message>
     <message>
         <location filename="../app/gui/qml/pages/ConsolePage.qml" line="313"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="655"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="656"/>
         <source>Log</source>
         <translation>Protokoll</translation>
     </message>
@@ -929,22 +965,28 @@
         <translation>Anderes Gerät wählen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="153"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="163"/>
         <source>Connect</source>
         <translation>Verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="154"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="153"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="164"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="154"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="164"/>
         <source>Disconnect</source>
         <translation>Trennen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="165"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="154"/>
+        <source>Cancel the AI operation</source>
+        <translation>KI-Vorgang abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="175"/>
         <source>Advanced</source>
         <translation>Erweitert</translation>
     </message>
@@ -957,17 +999,27 @@
         <translation>Geräte-Tabs</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="145"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="179"/>
         <source>Close tab</source>
         <translation>Tab schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="168"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="153"/>
+        <source>AI</source>
+        <translation>KI</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="166"/>
+        <source>Opened by %1</source>
+        <translation>Geöffnet von %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="202"/>
         <source>New device</source>
         <translation>Neues Gerät</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="184"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="218"/>
         <source>At most %1 devices can be open.</source>
         <translation>Es können höchstens %1 Geräte geöffnet sein.</translation>
     </message>
@@ -1314,33 +1366,33 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="24"/>
+        <location filename="../app/gui/qml/Main.qml" line="26"/>
         <source>HARDWARIO Monitor</source>
         <translation>HARDWARIO Monitor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="177"/>
+        <location filename="../app/gui/qml/Main.qml" line="186"/>
         <source>Close the tab?</source>
         <translation>Tab schließen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="178"/>
+        <location filename="../app/gui/qml/Main.qml" line="187"/>
         <source>Cancel and close</source>
         <translation>Abbrechen und schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="179"/>
-        <location filename="../app/gui/qml/Main.qml" line="189"/>
+        <location filename="../app/gui/qml/Main.qml" line="188"/>
+        <location filename="../app/gui/qml/Main.qml" line="198"/>
         <source>Keep running</source>
         <translation>Weiterlaufen lassen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="187"/>
+        <location filename="../app/gui/qml/Main.qml" line="196"/>
         <source>Quit HARDWARIO Monitor?</source>
         <translation>HARDWARIO Monitor beenden?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="188"/>
+        <location filename="../app/gui/qml/Main.qml" line="197"/>
         <source>Cancel and quit</source>
         <translation>Abbrechen und beenden</translation>
     </message>
@@ -1394,6 +1446,198 @@
     </message>
 </context>
 <context>
+    <name>McpRailIndicator</name>
+    <message>
+        <location filename="../app/gui/qml/mcp/McpRailIndicator.qml" line="25"/>
+        <source>MCP</source>
+        <translation>MCP</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/McpRailIndicator.qml" line="97"/>
+        <source>AI</source>
+        <translation>KI</translation>
+    </message>
+</context>
+<context>
+    <name>McpSection</name>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="37"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="47"/>
+        <source>Allow AI assistants to use HARDWARIO Monitor</source>
+        <translation>KI-Assistenten die Nutzung von HARDWARIO Monitor erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="38"/>
+        <source>AI tools such as Claude Code can read the console, send commands and, with your permission, flash devices.</source>
+        <translation>KI-Werkzeuge wie Claude Code können die Konsole lesen, Befehle senden und mit Ihrer Erlaubnis Firmware auf Geräte aufspielen.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="71"/>
+        <source>Retry</source>
+        <translation>Erneut versuchen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="81"/>
+        <source>Regenerate token</source>
+        <translation>Token neu erzeugen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="88"/>
+        <source>Address</source>
+        <translation>Adresse</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="89"/>
+        <source>After a port change, AI clients have to be configured again.</source>
+        <translation>Nach einer Portänderung müssen die KI-Clients neu eingerichtet werden.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="111"/>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="124"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="161"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="205"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="382"/>
+        <source>Copy</source>
+        <translation>Kopieren</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="125"/>
+        <source>Copied.</source>
+        <translation>Kopiert.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="132"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="149"/>
+        <source>Token</source>
+        <translation>Token</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="133"/>
+        <source>AI clients send it with every request. Keep it private.</source>
+        <translation>KI-Clients senden ihn mit jeder Anfrage. Halten Sie ihn geheim.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="145"/>
+        <source>Created when the server starts</source>
+        <translation>Wird beim Start des Servers erstellt</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="149"/>
+        <source>Token, hidden</source>
+        <translation>Token, verborgen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="154"/>
+        <source>Hide</source>
+        <translation>Verbergen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="154"/>
+        <source>Show</source>
+        <translation>Anzeigen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="168"/>
+        <source>Regenerate…</source>
+        <translation>Neu erzeugen…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="176"/>
+        <source>Connect a client</source>
+        <translation>Client verbinden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="206"/>
+        <source>Copy %1</source>
+        <translation>%1 kopieren</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="246"/>
+        <source>Permissions</source>
+        <translation>Berechtigungen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="247"/>
+        <source>What an AI assistant may do without asking you first.</source>
+        <translation>Was ein KI-Assistent tun darf, ohne Sie vorher zu fragen.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="260"/>
+        <source>Ask</source>
+        <translation>Fragen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="268"/>
+        <source>Always allow</source>
+        <translation>Immer erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="314"/>
+        <source>%1: ask</source>
+        <translation>%1: fragen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="323"/>
+        <source>%1: always allow</source>
+        <translation>%1: immer erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="335"/>
+        <source>No answers are remembered for a client.</source>
+        <translation>Für keinen Client sind Antworten gespeichert.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="364"/>
+        <source>Revoke</source>
+        <translation>Widerrufen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="365"/>
+        <source>Revoke the permissions of %1</source>
+        <translation>Berechtigungen von %1 widerrufen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="374"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="417"/>
+        <source>Activity</source>
+        <translation>Aktivität</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="375"/>
+        <source>The last %1 calls, kept until the application quits.</source>
+        <translation>Die letzten %1 Aufrufe, gespeichert bis zum Beenden der Anwendung.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="389"/>
+        <source>Clear</source>
+        <translation>Leeren</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="400"/>
+        <source>No calls yet.</source>
+        <translation>Noch keine Aufrufe.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="518"/>
+        <source>Regenerate the token?</source>
+        <translation>Token neu erzeugen?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="519"/>
+        <source>Connected AI clients stop working until you update their configuration.</source>
+        <translation>Verbundene KI-Clients funktionieren nicht mehr, bis Sie ihre Konfiguration aktualisieren.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="520"/>
+        <source>Regenerate</source>
+        <translation>Neu erzeugen</translation>
+    </message>
+</context>
+<context>
     <name>NavRail</name>
     <message>
         <location filename="../app/gui/qml/shell/NavRail.qml" line="23"/>
@@ -1406,7 +1650,7 @@
         <translation>Beschäftigt</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/NavRail.qml" line="163"/>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="166"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
@@ -1554,6 +1798,11 @@
         <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="123"/>
         <source>About</source>
         <translation>Über</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_registration.cpp" line="20"/>
+        <source>AI assistants (MCP)</source>
+        <translation>KI-Assistenten (MCP)</translation>
     </message>
 </context>
 <context>
@@ -1815,17 +2064,22 @@
 <context>
     <name>ShellInput</name>
     <message>
-        <location filename="../app/gui/qml/console/ShellInput.qml" line="140"/>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="142"/>
         <source>Command</source>
         <translation>Befehl</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ShellInput.qml" line="150"/>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="153"/>
         <source>Type a command, Enter to send · ↑↓ history · Ctrl+R search</source>
         <translation>Befehl eingeben, Enter zum Senden · ↑↓ Verlauf · Ctrl+R Suche</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ShellInput.qml" line="246"/>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="152"/>
+        <source>AI is running a command…</source>
+        <translation>KI führt einen Befehl aus…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="248"/>
         <source>Send</source>
         <translation>Senden</translation>
     </message>
@@ -1928,45 +2182,45 @@
         <translation>Firmware-Datei wählen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="406"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="408"/>
         <source>New device tab</source>
         <translation>Neuer Geräte-Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="409"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="411"/>
         <source>Close the device tab</source>
         <translation>Geräte-Tab schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="412"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="415"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="414"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="417"/>
         <source>Next tab</source>
         <translation>Nächster Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="418"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="421"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="420"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="423"/>
         <source>Previous tab</source>
         <translation>Vorheriger Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="424"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="426"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="427"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="429"/>
         <source>Connect or disconnect</source>
         <translation>Verbinden oder trennen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="430"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="432"/>
         <source>Reconnect</source>
         <translation>Neu verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="433"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="436"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="435"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="438"/>
         <source>Keyboard shortcuts</source>
         <translation>Tastenkürzel</translation>
     </message>
@@ -4553,9 +4807,17 @@
     </message>
 </context>
 <context>
+    <name>hwio::gui::ActivityModel</name>
+    <message>
+        <location filename="../app/gui/src/mcp/activity_model.cpp" line="33"/>
+        <source>%1 s</source>
+        <translation>%1 s</translation>
+    </message>
+</context>
+<context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1167"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1174"/>
         <source>Copied to clipboard.</source>
         <translation>In die Zwischenablage kopiert.</translation>
     </message>
@@ -4736,70 +4998,224 @@
         <translation>Erneut verbinden…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="507"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="531"/>
         <source>The J-Link firmware is outdated (%1, available: %2).</source>
         <translation>Die J-Link-Firmware ist veraltet (%1, verfügbar: %2).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="755"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="807"/>
         <source>The console log file could not be written; logging to file is off for this session.</source>
         <translation>Die Konsolen-Protokolldatei konnte nicht geschrieben werden; die Protokollierung in eine Datei ist für diese Sitzung deaktiviert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="773"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="825"/>
         <source>target not powered</source>
         <translation>Gerät nicht mit Strom versorgt</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="775"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="827"/>
         <source>J-Link not found</source>
         <translation>J-Link nicht gefunden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="777"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="829"/>
         <source>J-Link used by another program</source>
         <translation>J-Link wird von einem anderen Programm verwendet</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="779"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="831"/>
         <source>J-Link could not be opened</source>
         <translation>J-Link konnte nicht geöffnet werden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="781"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="833"/>
         <source>target does not respond</source>
         <translation>Gerät antwortet nicht</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="784"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="836"/>
         <source>no RTT console found</source>
         <translation>keine RTT-Konsole gefunden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="788"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="792"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="840"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="844"/>
         <source>connection lost</source>
         <translation>Verbindung verloren</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="790"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="842"/>
         <source>out of range</source>
         <translation>außer Reichweite</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="795"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="847"/>
         <source>not paired</source>
         <translation>nicht gekoppelt</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="797"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="849"/>
         <source>Bluetooth is off</source>
         <translation>Bluetooth ist aus</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="801"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="853"/>
         <source>J-Link Software missing</source>
         <translation>J-Link Software fehlt</translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::ConsentViewModel</name>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="49"/>
+        <source>Allow these for %1</source>
+        <translation>Diese für %1 erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="52"/>
+        <source>Allow flashing for %1</source>
+        <translation>Flashen für %1 erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="55"/>
+        <source>Allow erasing for %1</source>
+        <translation>Löschen für %1 erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="58"/>
+        <source>Allow memory writes for %1</source>
+        <translation>Speicherschreiben für %1 erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="61"/>
+        <source>Allow UICR writes for %1</source>
+        <translation>UICR-Schreiben für %1 erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="63"/>
+        <source>Allow connecting devices for %1</source>
+        <translation>Verbinden von Geräten für %1 erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="116"/>
+        <source>An AI assistant</source>
+        <translation>Ein KI-Assistent</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="127"/>
+        <source>%1 wants to flash firmware</source>
+        <translation>%1 möchte Firmware aufspielen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="130"/>
+        <source>%1 wants to update the LTE modem firmware</source>
+        <translation>%1 möchte die Firmware des LTE-Modems aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="133"/>
+        <source>%1 wants to write to the flash memory</source>
+        <translation>%1 möchte in den Flash-Speicher schreiben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="136"/>
+        <source>%1 wants to erase the device</source>
+        <translation>%1 möchte das Gerät löschen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="139"/>
+        <source>%1 wants to recover the device (erases everything)</source>
+        <translation>%1 möchte das Gerät wiederherstellen (löscht alles)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="142"/>
+        <source>%1 wants to write to the memory</source>
+        <translation>%1 möchte in den Speicher schreiben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="145"/>
+        <source>%1 wants to connect a device</source>
+        <translation>%1 möchte ein Gerät verbinden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="147"/>
+        <source>%1 wants to run %2</source>
+        <translation>%1 möchte %2 ausführen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="160"/>
+        <source>Client</source>
+        <translation>Client</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="167"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="171"/>
+        <source>Device</source>
+        <translation>Gerät</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="168"/>
+        <source>Open a new tab for %1</source>
+        <translation>Neuen Tab für %1 öffnen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="169"/>
+        <source>Connect the tab %1</source>
+        <translation>Tab %1 verbinden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="177"/>
+        <source>File</source>
+        <translation>Datei</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="181"/>
+        <source>Size</source>
+        <translation>Größe</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="185"/>
+        <source>Catalog ID</source>
+        <translation>Katalog-ID</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="189"/>
+        <source>Profile</source>
+        <translation>Profil</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="193"/>
+        <source>Target</source>
+        <translation>Ziel</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="196"/>
+        <source>Scope</source>
+        <translation>Umfang</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="199"/>
+        <source>Address range</source>
+        <translation>Adressbereich</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="206"/>
+        <source>The PIB (serial number, keys) is lost.</source>
+        <translation>Der PIB (Seriennummer, Schlüssel) geht verloren.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="210"/>
+        <source>Contains UICR data: factory data of the device may be overwritten.</source>
+        <translation>Enthält UICR-Daten: Werksdaten des Geräts können überschrieben werden.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="216"/>
+        <source>Writing memory can make the device run arbitrary code.</source>
+        <translation>Speicherschreiben kann das Gerät beliebigen Code ausführen lassen.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="245"/>
+        <source>Denied automatically in %1 if not answered.</source>
+        <translation>Wird in %1 automatisch abgelehnt, wenn keine Antwort kommt.</translation>
     </message>
 </context>
 <context>
@@ -4934,44 +5350,44 @@
 <context>
     <name>hwio::gui::DeviceTabViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="168"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="169"/>
         <source>New device</source>
         <translation>Neues Gerät</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="199"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="200"/>
         <source>Flashing needs a J-Link. Open a J-Link tab to flash this device.</source>
         <translation>Zum Flashen wird ein J-Link benötigt. Öffnen Sie einen J-Link-Tab, um dieses Gerät zu flashen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="541"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="602"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="542"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="604"/>
         <source>— disconnected: %1 —</source>
         <translation>— getrennt: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="555"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="603"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="556"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="605"/>
         <source>— disconnected —</source>
         <translation>— getrennt —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="595"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="597"/>
         <source>— connected —</source>
         <translation>— verbunden —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="595"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="597"/>
         <source>— connected (Bluetooth) —</source>
         <translation>— verbunden (Bluetooth) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="723"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="725"/>
         <source>— paused: %1 —</source>
         <translation>— pausiert: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="736"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="738"/>
         <source>— resumed —</source>
         <translation>— fortgesetzt —</translation>
     </message>
@@ -5530,6 +5946,14 @@
     </message>
 </context>
 <context>
+    <name>hwio::gui::GuiDeviceProvider</name>
+    <message>
+        <location filename="../app/gui/src/mcp/gui_device_provider.cpp" line="512"/>
+        <source>An AI assistant is running an operation on this device. Cancel it and close the tab?</source>
+        <translation>Ein KI-Assistent führt einen Vorgang auf diesem Gerät aus. Abbrechen und den Tab schließen?</translation>
+    </message>
+</context>
+<context>
     <name>hwio::gui::LicensesModel</name>
     <message>
         <location filename="../app/gui/src/viewmodels/licenses_model.cpp" line="33"/>
@@ -5719,6 +6143,141 @@
         <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="552"/>
         <source>Copy: %1</source>
         <translation>Kopie: %1</translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::McpController</name>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="67"/>
+        <source>Flash firmware (flash, LTE, raw flash)</source>
+        <translation>Firmware flashen (Flash, LTE, Raw-Flash)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="69"/>
+        <source>Erase and recover</source>
+        <translation>Löschen und Wiederherstellen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="71"/>
+        <source>Write memory</source>
+        <translation>Speicher schreiben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="73"/>
+        <source>Write UICR / factory data</source>
+        <translation>UICR / Werksdaten schreiben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="75"/>
+        <source>Connect devices (opens a tab)</source>
+        <translation>Geräte verbinden (öffnet einen Tab)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="145"/>
+        <source>The AI assistant cancelled the request</source>
+        <translation>Der KI-Assistent hat die Anfrage abgebrochen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="245"/>
+        <source>Writing memory can make the device run arbitrary code.</source>
+        <translation>Speicherschreiben kann das Gerät beliebigen Code ausführen lassen.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="262"/>
+        <source>An AI assistant</source>
+        <translation>Ein KI-Assistent</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="270"/>
+        <source>Allowed until disconnect: %1 — %2</source>
+        <translation>Erlaubt bis zur Trennung: %1 — %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="302"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="364"/>
+        <source>Copied.</source>
+        <translation>Kopiert.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="339"/>
+        <source>Claude Code (HTTP)</source>
+        <translation>Claude Code (HTTP)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="342"/>
+        <source>Claude Code (.mcp.json, token from HWIO_MCP_TOKEN)</source>
+        <translation>Claude Code (.mcp.json, Token aus HWIO_MCP_TOKEN)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="345"/>
+        <source>Claude Desktop (runs the hwio command separately)</source>
+        <translation>Claude Desktop (führt den Befehl hwio separat aus)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="346"/>
+        <source>Runs separately from this window and cannot use a probe that is open here.</source>
+        <translation>Läuft getrennt von diesem Fenster und kann keinen hier geöffneten Programmieradapter verwenden.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="363"/>
+        <source>Copied. Run it in a terminal.</source>
+        <translation>Kopiert. Führen Sie es in einem Terminal aus.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="372"/>
+        <source>Off</source>
+        <translation>Aus</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="374"/>
+        <source>Starting…</source>
+        <translation>Wird gestartet…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="376"/>
+        <source>Listening</source>
+        <translation>Empfangsbereit</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="377"/>
+        <source>Listening · %n client(s)</source>
+        <translation>
+            <numerusform>Empfangsbereit · %n Client</numerusform>
+            <numerusform>Empfangsbereit · %n Clients</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="379"/>
+        <source>Stopping…</source>
+        <translation>Wird beendet…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="382"/>
+        <source>Port %1 is in use by another program — choose another port</source>
+        <translation>Port %1 wird von einem anderen Programm verwendet — wählen Sie einen anderen Port</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="393"/>
+        <source>AI assistants: listening on port %1</source>
+        <translation>KI-Assistenten: empfangsbereit auf Port %1</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="394"/>
+        <source>AI assistants: listening on port %1, %n client(s)</source>
+        <translation>
+            <numerusform>KI-Assistenten: empfangsbereit auf Port %1, %n Client</numerusform>
+            <numerusform>KI-Assistenten: empfangsbereit auf Port %1, %n Clients</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="402"/>
+        <source>AI assistants: %1</source>
+        <translation>KI-Assistenten: %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="611"/>
+        <source>%1 (tab %2)</source>
+        <translation>%1 (Tab %2)</translation>
     </message>
 </context>
 <context>

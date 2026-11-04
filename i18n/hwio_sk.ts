@@ -461,6 +461,43 @@
     </message>
 </context>
 <context>
+    <name>ConsentWindow</name>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="29"/>
+        <source>HARDWARIO Monitor — Allow AI assistant?</source>
+        <translation>HARDWARIO Monitor — povoliť AI asistentovi?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="146"/>
+        <source>Show device ↗</source>
+        <translation>Zobraziť zariadenie ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="150"/>
+        <source>Show device</source>
+        <translation>Zobraziť zariadenie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="172"/>
+        <source>Deny</source>
+        <translation>Zamietnuť</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="182"/>
+        <source>Allow once</source>
+        <translation>Povoliť raz</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="211"/>
+        <source>%n more request(s) waiting.</source>
+        <translation>
+            <numerusform>Čaká ešte %n požiadavka.</numerusform>
+            <numerusform>Čakajú ešte %n požiadavky.</numerusform>
+            <numerusform>Čaká ešte %n požiadaviek.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>ConsolePage</name>
     <message>
         <location filename="../app/gui/qml/pages/ConsolePage.qml" line="33"/>
@@ -567,7 +604,7 @@
     </message>
     <message>
         <location filename="../app/gui/qml/pages/ConsolePage.qml" line="313"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="655"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="656"/>
         <source>Log</source>
         <translation>Záznam</translation>
     </message>
@@ -934,22 +971,28 @@
         <translation>Vybrať iné zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="153"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="163"/>
         <source>Connect</source>
         <translation>Pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="154"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="153"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="164"/>
         <source>Cancel</source>
         <translation>Zrušiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="154"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="164"/>
         <source>Disconnect</source>
         <translation>Odpojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="165"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="154"/>
+        <source>Cancel the AI operation</source>
+        <translation>Zrušiť operáciu AI</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="175"/>
         <source>Advanced</source>
         <translation>Pokročilé</translation>
     </message>
@@ -962,17 +1005,27 @@
         <translation>Karty zariadení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="145"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="179"/>
         <source>Close tab</source>
         <translation>Zavrieť kartu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="168"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="153"/>
+        <source>AI</source>
+        <translation>AI</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="166"/>
+        <source>Opened by %1</source>
+        <translation>Otvoril(a) %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="202"/>
         <source>New device</source>
         <translation>Nové zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="184"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="218"/>
         <source>At most %1 devices can be open.</source>
         <translation>Otvoriť možno najviac %1 zariadení.</translation>
     </message>
@@ -1319,33 +1372,33 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="24"/>
+        <location filename="../app/gui/qml/Main.qml" line="26"/>
         <source>HARDWARIO Monitor</source>
         <translation>HARDWARIO Monitor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="177"/>
+        <location filename="../app/gui/qml/Main.qml" line="186"/>
         <source>Close the tab?</source>
         <translation>Zavrieť kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="178"/>
+        <location filename="../app/gui/qml/Main.qml" line="187"/>
         <source>Cancel and close</source>
         <translation>Zrušiť a zavrieť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="179"/>
-        <location filename="../app/gui/qml/Main.qml" line="189"/>
+        <location filename="../app/gui/qml/Main.qml" line="188"/>
+        <location filename="../app/gui/qml/Main.qml" line="198"/>
         <source>Keep running</source>
         <translation>Pokračovať</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="187"/>
+        <location filename="../app/gui/qml/Main.qml" line="196"/>
         <source>Quit HARDWARIO Monitor?</source>
         <translation>Ukončiť HARDWARIO Monitor?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="188"/>
+        <location filename="../app/gui/qml/Main.qml" line="197"/>
         <source>Cancel and quit</source>
         <translation>Zrušiť a ukončiť</translation>
     </message>
@@ -1399,6 +1452,198 @@
     </message>
 </context>
 <context>
+    <name>McpRailIndicator</name>
+    <message>
+        <location filename="../app/gui/qml/mcp/McpRailIndicator.qml" line="25"/>
+        <source>MCP</source>
+        <translation>MCP</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/McpRailIndicator.qml" line="97"/>
+        <source>AI</source>
+        <translation>AI</translation>
+    </message>
+</context>
+<context>
+    <name>McpSection</name>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="37"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="47"/>
+        <source>Allow AI assistants to use HARDWARIO Monitor</source>
+        <translation>Povoliť AI asistentom používať HARDWARIO Monitor</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="38"/>
+        <source>AI tools such as Claude Code can read the console, send commands and, with your permission, flash devices.</source>
+        <translation>AI nástroje, ako je Claude Code, môžu čítať konzolu, posielať príkazy a s vaším súhlasom nahrávať firmvér do zariadení.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="71"/>
+        <source>Retry</source>
+        <translation>Skúsiť znova</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="81"/>
+        <source>Regenerate token</source>
+        <translation>Vygenerovať nový token</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="88"/>
+        <source>Address</source>
+        <translation>Adresa</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="89"/>
+        <source>After a port change, AI clients have to be configured again.</source>
+        <translation>Po zmene portu je potrebné AI klientov znova nastaviť.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="111"/>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="124"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="161"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="205"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="382"/>
+        <source>Copy</source>
+        <translation>Kopírovať</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="125"/>
+        <source>Copied.</source>
+        <translation>Skopírované.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="132"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="149"/>
+        <source>Token</source>
+        <translation>Token</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="133"/>
+        <source>AI clients send it with every request. Keep it private.</source>
+        <translation>AI klienti ho posielajú s každou požiadavkou. Nikomu ho neprezrádzajte.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="145"/>
+        <source>Created when the server starts</source>
+        <translation>Vytvorí sa pri spustení servera</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="149"/>
+        <source>Token, hidden</source>
+        <translation>Token, skrytý</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="154"/>
+        <source>Hide</source>
+        <translation>Skryť</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="154"/>
+        <source>Show</source>
+        <translation>Zobraziť</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="168"/>
+        <source>Regenerate…</source>
+        <translation>Vygenerovať nový…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="176"/>
+        <source>Connect a client</source>
+        <translation>Pripojenie klienta</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="206"/>
+        <source>Copy %1</source>
+        <translation>Kopírovať %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="246"/>
+        <source>Permissions</source>
+        <translation>Oprávnenia</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="247"/>
+        <source>What an AI assistant may do without asking you first.</source>
+        <translation>Čo smie AI asistent urobiť bez toho, aby sa vás najprv opýtal.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="260"/>
+        <source>Ask</source>
+        <translation>Opýtať sa</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="268"/>
+        <source>Always allow</source>
+        <translation>Vždy povoliť</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="314"/>
+        <source>%1: ask</source>
+        <translation>%1: opýtať sa</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="323"/>
+        <source>%1: always allow</source>
+        <translation>%1: vždy povoliť</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="335"/>
+        <source>No answers are remembered for a client.</source>
+        <translation>Pre žiadneho klienta nie sú zapamätané odpovede.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="364"/>
+        <source>Revoke</source>
+        <translation>Odvolať</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="365"/>
+        <source>Revoke the permissions of %1</source>
+        <translation>Odvolať oprávnenia klienta %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="374"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="417"/>
+        <source>Activity</source>
+        <translation>Aktivita</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="375"/>
+        <source>The last %1 calls, kept until the application quits.</source>
+        <translation>Posledných %1 volaní, uchovaných do ukončenia aplikácie.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="389"/>
+        <source>Clear</source>
+        <translation>Vymazať</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="400"/>
+        <source>No calls yet.</source>
+        <translation>Zatiaľ žiadne volania.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="518"/>
+        <source>Regenerate the token?</source>
+        <translation>Vygenerovať nový token?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="519"/>
+        <source>Connected AI clients stop working until you update their configuration.</source>
+        <translation>Pripojení AI klienti prestanú fungovať, kým neaktualizujete ich nastavenia.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="520"/>
+        <source>Regenerate</source>
+        <translation>Vygenerovať</translation>
+    </message>
+</context>
+<context>
     <name>NavRail</name>
     <message>
         <location filename="../app/gui/qml/shell/NavRail.qml" line="23"/>
@@ -1411,7 +1656,7 @@
         <translation>Prebieha operácia</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/NavRail.qml" line="163"/>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="166"/>
         <source>Help</source>
         <translation>Pomocník</translation>
     </message>
@@ -1559,6 +1804,11 @@
         <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="123"/>
         <source>About</source>
         <translation>O aplikácii</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_registration.cpp" line="20"/>
+        <source>AI assistants (MCP)</source>
+        <translation>AI asistenti (MCP)</translation>
     </message>
 </context>
 <context>
@@ -1820,17 +2070,22 @@
 <context>
     <name>ShellInput</name>
     <message>
-        <location filename="../app/gui/qml/console/ShellInput.qml" line="140"/>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="142"/>
         <source>Command</source>
         <translation>Príkaz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ShellInput.qml" line="150"/>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="153"/>
         <source>Type a command, Enter to send · ↑↓ history · Ctrl+R search</source>
         <translation>Napíšte príkaz, Enter odošle · ↑↓ história · Ctrl+R hľadať</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ShellInput.qml" line="246"/>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="152"/>
+        <source>AI is running a command…</source>
+        <translation>AI vykonáva príkaz…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="248"/>
         <source>Send</source>
         <translation>Odoslať</translation>
     </message>
@@ -1933,45 +2188,45 @@
         <translation>Vybrať súbor s firmvérom</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="406"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="408"/>
         <source>New device tab</source>
         <translation>Nová karta zariadenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="409"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="411"/>
         <source>Close the device tab</source>
         <translation>Zavrieť kartu zariadenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="412"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="415"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="414"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="417"/>
         <source>Next tab</source>
         <translation>Ďalšia karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="418"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="421"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="420"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="423"/>
         <source>Previous tab</source>
         <translation>Predchádzajúca karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="424"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="426"/>
         <source>Settings</source>
         <translation>Nastavenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="427"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="429"/>
         <source>Connect or disconnect</source>
         <translation>Pripojiť alebo odpojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="430"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="432"/>
         <source>Reconnect</source>
         <translation>Znova pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="433"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="436"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="435"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="438"/>
         <source>Keyboard shortcuts</source>
         <translation>Klávesové skratky</translation>
     </message>
@@ -4558,9 +4813,17 @@
     </message>
 </context>
 <context>
+    <name>hwio::gui::ActivityModel</name>
+    <message>
+        <location filename="../app/gui/src/mcp/activity_model.cpp" line="33"/>
+        <source>%1 s</source>
+        <translation>%1 s</translation>
+    </message>
+</context>
+<context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1167"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1174"/>
         <source>Copied to clipboard.</source>
         <translation>Skopírované do schránky.</translation>
     </message>
@@ -4742,70 +5005,224 @@
         <translation>Opätovné pripájanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="507"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="531"/>
         <source>The J-Link firmware is outdated (%1, available: %2).</source>
         <translation>Firmvér J-Linku je zastaraný (%1, k dispozícii: %2).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="755"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="807"/>
         <source>The console log file could not be written; logging to file is off for this session.</source>
         <translation>Súbor s výpisom konzoly sa nedá zapísať; ukladanie do súboru je pre túto reláciu vypnuté.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="773"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="825"/>
         <source>target not powered</source>
         <translation>zariadenie nie je napájané</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="775"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="827"/>
         <source>J-Link not found</source>
         <translation>J-Link sa nenašiel</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="777"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="829"/>
         <source>J-Link used by another program</source>
         <translation>J-Link používa iný program</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="779"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="831"/>
         <source>J-Link could not be opened</source>
         <translation>J-Link sa nedá otvoriť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="781"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="833"/>
         <source>target does not respond</source>
         <translation>zariadenie neodpovedá</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="784"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="836"/>
         <source>no RTT console found</source>
         <translation>konzola RTT sa nenašla</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="788"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="792"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="840"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="844"/>
         <source>connection lost</source>
         <translation>spojenie sa stratilo</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="790"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="842"/>
         <source>out of range</source>
         <translation>mimo dosahu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="795"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="847"/>
         <source>not paired</source>
         <translation>nespárované</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="797"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="849"/>
         <source>Bluetooth is off</source>
         <translation>Bluetooth je vypnuté</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="801"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="853"/>
         <source>J-Link Software missing</source>
         <translation>chýba softvér J-Link</translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::ConsentViewModel</name>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="49"/>
+        <source>Allow these for %1</source>
+        <translation>Povoliť tieto akcie pre %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="52"/>
+        <source>Allow flashing for %1</source>
+        <translation>Povoliť nahrávanie firmvéru pre %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="55"/>
+        <source>Allow erasing for %1</source>
+        <translation>Povoliť mazanie pre %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="58"/>
+        <source>Allow memory writes for %1</source>
+        <translation>Povoliť zápis do pamäte pre %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="61"/>
+        <source>Allow UICR writes for %1</source>
+        <translation>Povoliť zápis do UICR pre %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="63"/>
+        <source>Allow connecting devices for %1</source>
+        <translation>Povoliť pripájanie zariadení pre %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="116"/>
+        <source>An AI assistant</source>
+        <translation>AI asistent</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="127"/>
+        <source>%1 wants to flash firmware</source>
+        <translation>%1 chce nahrať firmvér</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="130"/>
+        <source>%1 wants to update the LTE modem firmware</source>
+        <translation>%1 chce aktualizovať firmvér LTE modemu</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="133"/>
+        <source>%1 wants to write to the flash memory</source>
+        <translation>%1 chce zapisovať do pamäte flash</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="136"/>
+        <source>%1 wants to erase the device</source>
+        <translation>%1 chce vymazať zariadenie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="139"/>
+        <source>%1 wants to recover the device (erases everything)</source>
+        <translation>%1 chce obnoviť zariadenie (vymaže všetko)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="142"/>
+        <source>%1 wants to write to the memory</source>
+        <translation>%1 chce zapisovať do pamäte</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="145"/>
+        <source>%1 wants to connect a device</source>
+        <translation>%1 chce pripojiť zariadenie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="147"/>
+        <source>%1 wants to run %2</source>
+        <translation>%1 chce spustiť %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="160"/>
+        <source>Client</source>
+        <translation>Klient</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="167"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="171"/>
+        <source>Device</source>
+        <translation>Zariadenie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="168"/>
+        <source>Open a new tab for %1</source>
+        <translation>Otvoriť novú kartu pre %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="169"/>
+        <source>Connect the tab %1</source>
+        <translation>Pripojiť kartu %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="177"/>
+        <source>File</source>
+        <translation>Súbor</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="181"/>
+        <source>Size</source>
+        <translation>Veľkosť</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="185"/>
+        <source>Catalog ID</source>
+        <translation>ID v katalógu</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="189"/>
+        <source>Profile</source>
+        <translation>Profil</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="193"/>
+        <source>Target</source>
+        <translation>Cieľ</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="196"/>
+        <source>Scope</source>
+        <translation>Rozsah</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="199"/>
+        <source>Address range</source>
+        <translation>Rozsah adries</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="206"/>
+        <source>The PIB (serial number, keys) is lost.</source>
+        <translation>PIB (sériové číslo, kľúče) sa stratí.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="210"/>
+        <source>Contains UICR data: factory data of the device may be overwritten.</source>
+        <translation>Obsahuje dáta UICR: továrenské dáta zariadenia môžu byť prepísané.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="216"/>
+        <source>Writing memory can make the device run arbitrary code.</source>
+        <translation>Zápis do pamäte môže zariadenie prinútiť spustiť ľubovoľný kód.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="245"/>
+        <source>Denied automatically in %1 if not answered.</source>
+        <translation>Bez odpovede bude o %1 automaticky zamietnuté.</translation>
     </message>
 </context>
 <context>
@@ -4941,44 +5358,44 @@
 <context>
     <name>hwio::gui::DeviceTabViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="168"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="169"/>
         <source>New device</source>
         <translation>Nové zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="199"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="200"/>
         <source>Flashing needs a J-Link. Open a J-Link tab to flash this device.</source>
         <translation>Nahrávanie firmvéru vyžaduje J-Link. Na nahratie do tohto zariadenia otvorte kartu s J-Linkom.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="541"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="602"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="542"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="604"/>
         <source>— disconnected: %1 —</source>
         <translation>— odpojené: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="555"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="603"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="556"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="605"/>
         <source>— disconnected —</source>
         <translation>— odpojené —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="595"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="597"/>
         <source>— connected —</source>
         <translation>— pripojené —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="595"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="597"/>
         <source>— connected (Bluetooth) —</source>
         <translation>— pripojené (Bluetooth) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="723"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="725"/>
         <source>— paused: %1 —</source>
         <translation>— pozastavené: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="736"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="738"/>
         <source>— resumed —</source>
         <translation>— obnovené —</translation>
     </message>
@@ -5537,6 +5954,14 @@
     </message>
 </context>
 <context>
+    <name>hwio::gui::GuiDeviceProvider</name>
+    <message>
+        <location filename="../app/gui/src/mcp/gui_device_provider.cpp" line="512"/>
+        <source>An AI assistant is running an operation on this device. Cancel it and close the tab?</source>
+        <translation>AI asistent na tomto zariadení vykonáva operáciu. Zrušiť ju a zavrieť kartu?</translation>
+    </message>
+</context>
+<context>
     <name>hwio::gui::LicensesModel</name>
     <message>
         <location filename="../app/gui/src/viewmodels/licenses_model.cpp" line="33"/>
@@ -5726,6 +6151,143 @@
         <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="552"/>
         <source>Copy: %1</source>
         <translation>Kópia: %1</translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::McpController</name>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="67"/>
+        <source>Flash firmware (flash, LTE, raw flash)</source>
+        <translation>Nahrávanie firmvéru (flash, LTE, priamy zápis do flash)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="69"/>
+        <source>Erase and recover</source>
+        <translation>Mazanie a obnova</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="71"/>
+        <source>Write memory</source>
+        <translation>Zápis do pamäte</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="73"/>
+        <source>Write UICR / factory data</source>
+        <translation>Zápis do UICR / továrenských dát</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="75"/>
+        <source>Connect devices (opens a tab)</source>
+        <translation>Pripájanie zariadení (otvorí kartu)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="145"/>
+        <source>The AI assistant cancelled the request</source>
+        <translation>AI asistent požiadavku zrušil</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="245"/>
+        <source>Writing memory can make the device run arbitrary code.</source>
+        <translation>Zápis do pamäte môže zariadenie prinútiť spustiť ľubovoľný kód.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="262"/>
+        <source>An AI assistant</source>
+        <translation>AI asistent</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="270"/>
+        <source>Allowed until disconnect: %1 — %2</source>
+        <translation>Povolené do odpojenia: %1 — %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="302"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="364"/>
+        <source>Copied.</source>
+        <translation>Skopírované.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="339"/>
+        <source>Claude Code (HTTP)</source>
+        <translation>Claude Code (HTTP)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="342"/>
+        <source>Claude Code (.mcp.json, token from HWIO_MCP_TOKEN)</source>
+        <translation>Claude Code (.mcp.json, token z HWIO_MCP_TOKEN)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="345"/>
+        <source>Claude Desktop (runs the hwio command separately)</source>
+        <translation>Claude Desktop (spúšťa príkaz hwio samostatne)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="346"/>
+        <source>Runs separately from this window and cannot use a probe that is open here.</source>
+        <translation>Beží oddelene od tohto okna a nemôže použiť programátor, ktorý je otvorený tu.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="363"/>
+        <source>Copied. Run it in a terminal.</source>
+        <translation>Skopírované. Spustite to v termináli.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="372"/>
+        <source>Off</source>
+        <translation>Vypnuté</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="374"/>
+        <source>Starting…</source>
+        <translation>Spúšťa sa…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="376"/>
+        <source>Listening</source>
+        <translation>Počúva</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="377"/>
+        <source>Listening · %n client(s)</source>
+        <translation>
+            <numerusform>Počúva · %n klient</numerusform>
+            <numerusform>Počúva · %n klienti</numerusform>
+            <numerusform>Počúva · %n klientov</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="379"/>
+        <source>Stopping…</source>
+        <translation>Zastavuje sa…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="382"/>
+        <source>Port %1 is in use by another program — choose another port</source>
+        <translation>Port %1 používa iný program — zvoľte iný port</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="393"/>
+        <source>AI assistants: listening on port %1</source>
+        <translation>AI asistenti: počúva na porte %1</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="394"/>
+        <source>AI assistants: listening on port %1, %n client(s)</source>
+        <translation>
+            <numerusform>AI asistenti: počúva na porte %1, %n klient</numerusform>
+            <numerusform>AI asistenti: počúva na porte %1, %n klienti</numerusform>
+            <numerusform>AI asistenti: počúva na porte %1, %n klientov</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="402"/>
+        <source>AI assistants: %1</source>
+        <translation>AI asistenti: %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="611"/>
+        <source>%1 (tab %2)</source>
+        <translation>%1 (karta %2)</translation>
     </message>
 </context>
 <context>
