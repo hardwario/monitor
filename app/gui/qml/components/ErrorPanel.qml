@@ -125,6 +125,18 @@ Rectangle {
                 wrapMode: Text.Wrap
             }
 
+            // Plan 0037 (ADR-0258): troubleshooting.md#<error id> in the UI language; the URL is
+            // computed at the click (a language switch applies at once).
+            HButton {
+                objectName: "errorLearnMore"
+                visible: !panel.collapsed && panel.error.valid
+                         && AppViewModel.errorDocsLink(panel.error.code) !== ""
+                kind: "ghost"
+                text: qsTr("Learn more ↗")
+                Accessible.name: qsTr("Learn more about this error (opens browser)")
+                onClicked: Qt.openUrlExternally(AppViewModel.errorDocsLink(panel.error.code))
+            }
+
             Label {
                 textFormat: Text.PlainText
                 objectName: "errorNote"

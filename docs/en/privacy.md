@@ -33,6 +33,7 @@ itself.
 
 The command line checks only when you ask: `hwio update check` (`--prerelease` includes pre-releases).
 
+<a id="diagnostic-report"></a>
 ## Diagnostic report
 
 When you need help from HARDWARIO support, create a diagnostic report: **Help → Create diagnostic report…** in the

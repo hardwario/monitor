@@ -189,6 +189,50 @@ TestCase {
         verify(!empty.visible);
     }
 
+    // Plan 0037 (ADR-0258): "Learn more" opens troubleshooting.md#<error id> in the UI language.
+    function test_errorPanelLearnMore() {
+        const panel = createTemporaryObject(errorPanelComponent, testCase,
+                                            { error: testSupport.error("probe.not_found", false) });
+        const link = findChild(panel, "errorLearnMore");
+        verify(link.visible);
+        compare(link.text, "Learn more ↗");
+        compare(link.Accessible.name, "Learn more about this error (opens browser)");
+        const url = AppViewModel.errorDocsLink("probe.not_found");
+        verify(url.startsWith("https://github.com/hardwario/monitor/blob/"), url);
+        verify(url.endsWith("/docs/en/troubleshooting.md#probe.not_found"), url);
+        // Keyboard: after "What to do", before the primary action.
+        link.forceActiveFocus();
+        verify(link.activeFocus);
+        keyClick(Qt.Key_Tab);
+        verify(findChild(panel, "errorPrimary").activeFocus);
+        keyClick(Qt.Key_Backtab);
+        verify(link.activeFocus);
+        // Compact: hidden like the cause and the suggestion.
+        panel.compact = true;
+        verify(!link.visible);
+        // No error: hidden.
+        const empty = createTemporaryObject(errorPanelComponent, testCase);
+        verify(!findChild(empty, "errorLearnMore").visible);
+    }
+
+    // ADR-0248: German (the longest language) in a narrow panel (a page of the 960 x 600 window).
+    function test_errorPanelLearnMoreGerman() {
+        AppViewModel.setLanguage("de");
+        try {
+            const panel = createTemporaryObject(errorPanelComponent, testCase,
+                                                { error: testSupport.error("probe.not_found", false), width: 420 });
+            const link = findChild(panel, "errorLearnMore");
+            verify(link.visible);
+            verify(link.text !== "Learn more ↗", link.text);
+            verify(AppViewModel.errorDocsLink("probe.not_found").endsWith("/docs/de/troubleshooting.md#probe.not_found"));
+            waitForRendering(panel);
+            const right = link.mapToItem(panel, link.width, 0).x;
+            verify(right <= panel.width - Theme.spacingM, right + " > " + panel.width);
+        } finally {
+            AppViewModel.setLanguage("en");
+        }
+    }
+
     function test_actionTexts() {
         const panel = createTemporaryObject(errorPanelComponent, testCase,
                                             { error: testSupport.error("dependency.jlink_not_found", false) });
@@ -230,9 +274,14 @@ TestCase {
         compare(findChild(banner, "bannerDetailsText").text,
                 "probe.firmware_outdated\nVTref = 0 mV · J-Link 801000001");
         compare(findChild(banner, "bannerCause").text, "Probably: the target voltage is 0.0 V.");
+        // Plan 0037 (ADR-0258): "Learn more" with the details.
+        const learnMore = findChild(banner, "bannerLearnMore");
+        verify(learnMore.visible);
+        compare(learnMore.Accessible.name, "Learn more about this error (opens browser)");
         tryVerify(() => banner.height > collapsedHeight);
         mouseClick(toggle);
         verify(!findChild(banner, "bannerDetails").visible);
+        verify(!learnMore.visible);
         // Another warning starts collapsed.
         mouseClick(toggle);
         banner.details = testSupport.error("io.write_failed", false);

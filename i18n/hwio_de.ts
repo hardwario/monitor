@@ -1015,32 +1015,42 @@
         <translation>Was zu tun ist: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="162"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="135"/>
+        <source>Learn more ↗</source>
+        <translation>Mehr erfahren ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="136"/>
+        <source>Learn more about this error (opens browser)</source>
+        <translation>Mehr über diesen Fehler erfahren (öffnet den Browser)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="174"/>
         <source>Help me fix this</source>
         <translation>Hilfe bei der Behebung</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="169"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="181"/>
         <source>Details</source>
         <translation>Details</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="171"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
         <source>Expanded</source>
         <translation>Ausgeklappt</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="171"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
         <source>Collapsed</source>
         <translation>Eingeklappt</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="201"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="213"/>
         <source>Error details</source>
         <translation>Fehlerdetails</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="207"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="219"/>
         <source>Copy</source>
         <translation>Kopieren</translation>
     </message>
@@ -1271,27 +1281,27 @@
 <context>
     <name>LteUpdateStep</name>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="78"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="68"/>
         <source>Set path in Settings</source>
         <translation>Pfad in Einstellungen festlegen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="84"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="74"/>
         <source>How to install ↗</source>
         <translation>Installationsanleitung ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="122"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="125"/>
         <source>The application that was in the device</source>
         <translation>Die Anwendung, die im Gerät war</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="142"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="145"/>
         <source>Firmware from the catalog or a file</source>
         <translation>Firmware aus dem Katalog oder aus einer Datei</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="164"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="168"/>
         <source>Choose a firmware file</source>
         <translation>Firmware-Datei wählen</translation>
     </message>
@@ -1703,12 +1713,12 @@
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="59"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="98"/>
         <source>Settings were created by a newer version and are read-only.</source>
         <translation>Die Einstellungen wurden von einer neueren Version erstellt und sind schreibgeschützt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="79"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="118"/>
         <source>The setting was not saved: %1</source>
         <translation>Die Einstellung wurde nicht gespeichert: %1</translation>
     </message>
@@ -2036,12 +2046,22 @@
         <translation>Was zu tun ist: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WarningBanner.qml" line="139"/>
+        <location filename="../app/gui/qml/components/WarningBanner.qml" line="120"/>
+        <source>Learn more ↗</source>
+        <translation>Mehr erfahren ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/WarningBanner.qml" line="121"/>
+        <source>Learn more about this error (opens browser)</source>
+        <translation>Mehr über diesen Fehler erfahren (öffnet den Browser)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/WarningBanner.qml" line="150"/>
         <source>Warning details</source>
         <translation>Details der Warnung</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WarningBanner.qml" line="145"/>
+        <location filename="../app/gui/qml/components/WarningBanner.qml" line="156"/>
         <source>Copy</source>
         <translation>Kopieren</translation>
     </message>
@@ -4771,7 +4791,7 @@
         <translation>Sendet jede Zeile einer UTF-8-Textdatei als Shell-Befehl an das Gerät, eine Zeile alle %1 ms. Leere Zeilen und Zeilen, die mit # beginnen, werden übersprungen. Höchstens %2 Befehle, %3 MiB pro Datei und %4 Bytes pro Zeile.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="769"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="770"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Die erste %n Zeile wurde in die Zwischenablage kopiert (Kopierlimit).</numerusform>
@@ -4779,7 +4799,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="784"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="785"/>
         <source>There is no console log file for this device yet.</source>
         <translation>Für dieses Gerät gibt es noch keine Konsolen-Protokolldatei.</translation>
     </message>

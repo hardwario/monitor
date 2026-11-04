@@ -118,7 +118,8 @@ class AppViewModel : public QObject {
     Q_PROPERTY(hwio::gui::WizardViewModel* wizard READ wizard CONSTANT)
     Q_PROPERTY(hwio::gui::WizardLauncher* launcher READ launcher CONSTANT)
     Q_PROPERTY(hwio::gui::ReportViewModel* report READ report CONSTANT)
-    Q_PROPERTY(QString documentationUrl READ documentationUrl CONSTANT)
+    // Plan 0037 (ADR-0247): docs/<UI language>/index.md on GitHub at the release tag.
+    Q_PROPERTY(QString documentationUrl READ documentationUrl NOTIFY languageChanged)
     // Plan 0015 B3 (ADR-0123): the previous run crashed (the crash handler's marker exists); the
     // shell shows CrashNoticeBanner until reportCrash() or dismissCrashNotice().
     Q_PROPERTY(bool crashedLastRun READ crashedLastRun NOTIFY crashedLastRunChanged)
@@ -184,7 +185,7 @@ public:
     [[nodiscard]] WizardViewModel* wizard() const { return m_wizard; }
     [[nodiscard]] WizardLauncher* launcher() const { return m_launcher; }
     [[nodiscard]] ReportViewModel* report() const { return m_report; }
-    [[nodiscard]] static QString documentationUrl();
+    [[nodiscard]] QString documentationUrl() const;
 
     // --- registries (extension registration and tests) ---
     [[nodiscard]] PageRegistry& pageRegistry() { return m_pages; }
@@ -246,7 +247,12 @@ public:
     // otherwise the clipboard and the toast `toast`, by default "Copied to clipboard.".
     Q_INVOKABLE void copyToClipboard(const QString& text, const QString& toast = QString());
     // Help → Documentation (opens the browser).
-    Q_INVOKABLE static void openDocumentation();
+    Q_INVOKABLE void openDocumentation() const;
+    // Plan 0037: a docs link in the UI language (effectiveLanguage) - `topicId` is the kebab-case
+    // name of a hwio::DocsTopic ("install-jlink", "trouble-bluetooth"; unknown → the index page);
+    // errorDocsLink: troubleshooting.md#<error id> (ADR-0258), empty for an unknown id.
+    Q_INVOKABLE [[nodiscard]] QString docsLink(const QString& topicId) const;
+    Q_INVOKABLE [[nodiscard]] QString errorDocsLink(const QString& errorId) const;
 
     [[nodiscard]] bool crashedLastRun() const noexcept { return m_crashedLastRun; }
     // [Create diagnostic report] of the crash notice: opens the report dialog (the report contains

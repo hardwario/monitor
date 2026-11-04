@@ -749,8 +749,9 @@ QString ConsoleViewModel::batchHelpText() const {
 }
 
 void ConsoleViewModel::openBatchDocs() const {
+    // Plan 0037: the language in use, not the setting ("system").
     const QString language =
-        m_context.app != nullptr ? m_context.app->language() : QStringLiteral("en");
+        m_context.app != nullptr ? m_context.app->effectiveLanguage() : QStringLiteral("en");
     const QUrl url = docsUrl(DocsTopic::ConsoleBatch, language);
     if (m_context.settings == nullptr || !m_context.settings->openUrl(url)) {
         qCWarning(lcGui) << "The documentation could not be opened:" << url.toString();

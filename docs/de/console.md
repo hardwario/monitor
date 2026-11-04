@@ -99,6 +99,7 @@ Zeitstempeln, wenn sie eingeschaltet sind. Der Name ist vorausgefüllt, zum Beis
 `chester-app-clime-v3.2.0-20261103-101500-log.txt`, und der Ordner ist der zuletzt verwendete (beim ersten Mal
 Dokumente).
 
+<a id="batch-files"></a>
 ## Batch-Dateien
 
 Eine Batch-Datei ist eine UTF-8-Textdatei mit einem Shell-Befehl pro Zeile. **Batch…** (<kbd>Ctrl</kbd>+<kbd>B</kbd>)

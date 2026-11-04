@@ -1,6 +1,6 @@
 # 0037 — Documentation links: per-topic, per-language table to GitHub at the release tag
 
-- **Status:** Approved (2026-11-04 by Matej Strnad)
+- **Status:** In progress (approved 2026-11-04 by Matej Strnad; implementation 2026-11-04, manual checks open)
 - **Milestone:** 2.0.0 (takes over 0017 § E2 "links from About, wizards and error panels")
 - **Author:** Matej Strnad (with Claude), 2026-11-04
 - **Related ADRs:** ADR-0247 (accepted 2026-11-04: GitHub at the release tag), ADR-0248 (translations), ADR-0258,
@@ -144,18 +144,19 @@ Topic table compile-time (`std::array`, ≤ 64 entries); error ids from `errorTa
 
 ## Implementation steps
 
-- [ ] L0 Prerequisite: plan Approved; ADR-0258/0259 answered
-- [ ] L1 `docs/<lang>/*.md`: `<a id>` anchors for every table topic in en, cs, de, sk, pl; `docs/README.md` rule;
+- [x] L0 Prerequisite: plan Approved; ADR-0258/0259 answered
+- [x] L1 `docs/<lang>/*.md`: `<a id>` anchors for every table topic in en, cs, de, sk, pl; `docs/README.md` rule;
   `getting-started.md` § Help "Documentation ↗" text (GitHub, version) in five languages; `privacy.md` unchanged
   (row "Documentation links … your browser" stays true)
-- [ ] L2 `docs_urls.*` table, `docsRef`, `errorDocsUrl` + GTest (`docs_urls_test.cpp` rewritten)
-- [ ] L3 Anchor CTest `docs_anchors` (GTest in `libs/core/tests`, `HWIO_DOCS_DIR` compile definition =
+- [x] L2 `docs_urls.*` table, `docsRef`, `errorDocsUrl` + GTest (`docs_urls_test.cpp` rewritten)
+- [x] L3 Anchor CTest `docs_anchors` (GTest in `libs/core/tests`, `HWIO_DOCS_DIR` compile definition =
   `${PROJECT_SOURCE_DIR}/docs`): for every topic and language the file exists (or the page is English-only and the
   `en` file exists) and contains the anchor (`<a id="x">` or a heading whose GitHub slug is x); every `errorTable` id
   has `<a id="<id>">` in all five `troubleshooting.md`
-- [ ] L4 GUI callers (`AppViewModel`, `ConsoleViewModel`), `ErrorPanel` / `WarningBanner` "Learn more" + Qt Quick tests
-- [ ] L5 ADR-0220 status line, open question 29 row, `update_translations`; cs + de + sk + pl 0 unfinished
-- [ ] L6 Verification below
+- [x] L4 GUI callers (`AppViewModel`, `ConsoleViewModel`), `ErrorPanel` / `WarningBanner` "Learn more" + Qt Quick tests
+- [x] L5 ADR-0220 status line, open question 29 row, `update_translations`; cs + de + sk + pl 0 unfinished
+- [ ] L6 Verification below (automated part passed 2026-11-04: build, ctest, tidy, qmllint, translations, format, LFS;
+  manual checks by the user open)
 
 ## Tests and verification
 

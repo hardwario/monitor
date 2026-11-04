@@ -71,6 +71,7 @@ J-Link ([Konzole](console.md#soubory-konzole)).
 K zařízení může být připojený jen jeden program. Pokud je k němu připojený jiný `hwio`, dostanete chybu
 [ble.in_use_by_other_process](troubleshooting.md#ble.in_use_by_other_process).
 
+<a id="pairing"></a>
 ## Párování
 
 CHESTER chrání svůj shell přes Bluetooth přístupovým klíčem, proto se s ním počítač musí jednou spárovat (bond).

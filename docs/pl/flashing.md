@@ -77,6 +77,7 @@ pozostawia urządzenie bez działającego firmware, dopóki nie wgrasz go ponown
 Na koniec strona wyświetla na przykład **Firmware flashed and verified in 12 s.** z przyciskami **Open console** i
 **Flash again**.
 
+<a id="lte-firmware-update"></a>
 ## Aktualizacja firmware LTE
 
 W CHESTER-M MCU LTE ma własne złącze programowania, a firmware aplikacji resetuje MCU LTE, gdy modem nie odpowiada, co
@@ -119,6 +120,7 @@ Sekcja **Maintenance — application MCU** na dole strony jest domyślnie zwini�
 pojawiają się tylko przy włączonym **Settings › Advanced › Show expert maintenance actions** (pokaż eksperckie akcje
 konserwacji), ponieważ mogą skasować numer seryjny i konfigurację urządzenia. W MCU LTE wymagają J-Link na złączu LTE.
 
+<a id="recover"></a>
 ### Odzyskiwanie (Recover)
 
 Gdy MCU ma ochronę przed odczytem (approtect), J-Link nie może go odczytać ani zapisać, a wgrywanie kończy się błędem

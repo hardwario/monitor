@@ -34,6 +34,7 @@ Aplikacja nigdy sama niczego nie pobiera ani nie instaluje.
 Wiersz poleceń sprawdza aktualizacje tylko na żądanie: `hwio update check` (`--prerelease` uwzględnia wersje
 przedpremierowe).
 
+<a id="diagnostic-report"></a>
 ## Raport diagnostyczny
 
 Gdy potrzebujesz pomocy wsparcia technicznego HARDWARIO, utwórz raport diagnostyczny: **Help → Create diagnostic

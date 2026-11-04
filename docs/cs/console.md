@@ -90,6 +90,7 @@ schránky.“); najednou se zkopíruje nejvýše 100 000 řádků.
 značek, pokud jsou zapnuté. Název je předvyplněný, například `chester-app-clime-v3.2.0-20261103-101500-log.txt`, a
 složka je ta, kterou jste použili naposledy (poprvé Dokumenty).
 
+<a id="batch-files"></a>
 ## Dávkové soubory
 
 Dávkový soubor je textový soubor v UTF-8 s jedním příkazem shellu na řádek. **Dávka…** (<kbd>Ctrl</kbd>+<kbd>B</kbd>)

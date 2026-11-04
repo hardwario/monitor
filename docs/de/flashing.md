@@ -86,6 +86,7 @@ erneut flashen.
 Am Ende zeigt die Seite zum Beispiel **Firmware flashed and verified in 12 s.**, mit **Open console** (Konsole
 öffnen) und **Flash again** (Erneut flashen).
 
+<a id="lte-firmware-update"></a>
 ## LTE-Firmware-Update
 
 Bei einem CHESTER-M hat die LTE-MCU ihren eigenen Programmieranschluss, und die Anwendungsfirmware setzt die LTE-MCU
@@ -130,6 +131,7 @@ den Schaltflächen) erscheinen nur mit **Settings › Advanced › Show expert m
 (Experten-Wartungsaktionen anzeigen), weil sie die Seriennummer und die Konfiguration des Geräts löschen können. Auf
 der LTE-MCU brauchen sie den J-Link am LTE-Anschluss.
 
+<a id="recover"></a>
 ### Recover
 
 Ist die MCU gegen Auslesen geschützt (approtect), kann der J-Link sie weder lesen noch beschreiben, und das Flashen

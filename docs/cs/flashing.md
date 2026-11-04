@@ -73,6 +73,7 @@ funkčního firmwaru, dokud ho znovu nenaflashujete.
 Na konci stránka ukáže například **Firmware nahrán a ověřen za 12 s.** s tlačítky **Otevřít konzoli** a
 **Nahrát znovu**.
 
+<a id="lte-firmware-update"></a>
 ## Aktualizace firmwaru LTE
 
 U CHESTER-M má LTE MCU vlastní programovací konektor a aplikační firmware resetuje LTE MCU, když modem neodpovídá, což
@@ -111,6 +112,7 @@ aplikaci. Kopie zůstane ve složce `backups` ([Soukromí a uložená data](priv
 zobrazí jen se zapnutou volbou **Nastavení › Pokročilé › Zobrazit odborné akce údržby**, protože mohou smazat sériové
 číslo a konfiguraci zařízení. U LTE MCU potřebují J-Link na konektoru LTE.
 
+<a id="recover"></a>
 ### Obnovení (recover)
 
 Když je MCU chráněný proti čtení (approtect), J-Link do něj nemůže číst ani zapisovat a flashování selže s chybou

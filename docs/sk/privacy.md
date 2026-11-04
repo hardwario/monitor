@@ -34,6 +34,7 @@ Aplikácia sama nikdy nič nesťahuje ani neinštaluje.
 Príkazový riadok kontroluje len vtedy, keď o to požiadate: `hwio update check` (`--prerelease` zahrnie predbežné
 vydania).
 
+<a id="diagnostic-report"></a>
 ## Diagnostická správa
 
 Keď potrebujete pomoc od podpory HARDWARIO, vytvorte diagnostickú správu: **Help → Create diagnostic report…**

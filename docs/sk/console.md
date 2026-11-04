@@ -90,6 +90,7 @@ vyberie všetko. <kbd>Ctrl</kbd>+<kbd>C</kbd> alebo ponuka po kliknutí pravým 
 zapnuté. Názov je predvyplnený, napríklad `chester-app-clime-v3.2.0-20261103-101500-log.txt`, a priečinok je ten,
 ktorý ste použili naposledy (pri prvom použití Dokumenty).
 
+<a id="batch-files"></a>
 ## Dávkové súbory
 
 Dávkový súbor je textový súbor v UTF-8 s jedným príkazom shellu na riadok. **Batch…** (<kbd>Ctrl</kbd>+<kbd>B</kbd>)

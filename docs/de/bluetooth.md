@@ -75,6 +75,7 @@ einen Befehlsverlauf, wie die J-Link-Konsole ([Konsole](console.md#konsolendatei
 Nur ein Programm kann mit einem Gerät verbunden sein. Ist ein anderes `hwio` damit verbunden, erhalten Sie
 [ble.in_use_by_other_process](troubleshooting.md#ble.in_use_by_other_process).
 
+<a id="pairing"></a>
 ## Kopplung
 
 CHESTER schützt seine Bluetooth-Shell mit einem Passkey, daher muss der Computer sich einmal mit ihm koppeln (Bond).

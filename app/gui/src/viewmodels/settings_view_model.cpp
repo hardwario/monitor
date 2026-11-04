@@ -457,7 +457,7 @@ QString SettingsViewModel::cliSymlinkCommand() { return hwio::gui::cliSymlinkCom
 
 bool SettingsViewModel::cliOnPath() { return hwio::gui::cliOnPath(); }
 
-QString SettingsViewModel::documentationUrl() { return AppViewModel::documentationUrl(); }
+QString SettingsViewModel::documentationUrl() const { return m_app.documentationUrl(); }
 
 QString SettingsViewModel::catalogUrl() const {
     const device::DeviceProfile* chester = device::ProfileRegistry::find("chester");

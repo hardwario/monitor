@@ -75,6 +75,7 @@ leaves the device without working firmware until you flash it again.
 At the end the page says, for example, **Firmware flashed and verified in 12 s.**, with **Open console** and
 **Flash again**.
 
+<a id="lte-firmware-update"></a>
 ## LTE firmware update
 
 On a CHESTER-M the LTE MCU has its own programming connector, and the application firmware resets the LTE MCU when the
@@ -113,6 +114,7 @@ you flash an application. The copy stays in the backups folder ([Privacy and sto
 above the buttons) appear only with **Settings › Advanced › Show expert maintenance actions**, because they can erase
 the serial number and the configuration of the device. On the LTE MCU they need the J-Link on the LTE connector.
 
+<a id="recover"></a>
 ### Recover
 
 When the MCU is read-back protected (approtect), the J-Link cannot read or write it, and flashing fails with

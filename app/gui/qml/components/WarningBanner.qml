@@ -111,6 +111,17 @@ Rectangle {
             wrapMode: Text.Wrap
         }
 
+        // Plan 0037 (ADR-0258): troubleshooting.md#<error id> in the UI language.
+        HButton {
+            objectName: "bannerLearnMore"
+            visible: banner.detailsExpanded && banner.details.valid
+                     && AppViewModel.errorDocsLink(banner.details.code) !== ""
+            kind: "ghost"
+            text: qsTr("Learn more ↗")
+            Accessible.name: qsTr("Learn more about this error (opens browser)")
+            onClicked: Qt.openUrlExternally(AppViewModel.errorDocsLink(banner.details.code))
+        }
+
         Rectangle {
             objectName: "bannerDetails"
             Layout.fillWidth: true

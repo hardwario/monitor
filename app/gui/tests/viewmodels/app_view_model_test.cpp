@@ -3,6 +3,7 @@
 
 #include "fonts.h"
 #include "gui_test_support.h"
+#include "hwio/core/docs_urls.h"
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/device_tab_list_model.h"
 #include "viewmodels/device_tab_view_model.h"
@@ -418,6 +419,23 @@ TEST_F(AppViewModelTest, QuitWithoutBusyPagesSavesState) {
     QSignalSpy needed(app.get(), &AppViewModel::quitConfirmationNeeded);
     EXPECT_TRUE(app->canQuit());
     EXPECT_EQ(needed.count(), 0);
+}
+
+// Plan 0037 (ADR-0247, ADR-0258): docs links in the UI language ("en" without a LanguageManager).
+TEST_F(AppViewModelTest, DocsLinks) {
+    const auto app = makeApp();
+    EXPECT_EQ(app->documentationUrl(), hwio::docsUrl(hwio::DocsTopic::Monitor, u"en").toString());
+    EXPECT_EQ(app->docsLink(QStringLiteral("install-jlink")),
+              hwio::docsUrl(hwio::DocsTopic::InstallJLink, u"en").toString());
+    EXPECT_EQ(app->docsLink(QStringLiteral("trouble-bluetooth")),
+              hwio::docsUrl(hwio::DocsTopic::TroubleBluetooth, u"en").toString());
+    EXPECT_EQ(app->docsLink(QStringLiteral("mcp")),
+              hwio::docsUrl(hwio::DocsTopic::Mcp, u"en").toString());
+    EXPECT_EQ(app->docsLink(QStringLiteral("no-such-topic")), app->documentationUrl());
+    EXPECT_TRUE(app->errorDocsLink(QStringLiteral("probe.not_found"))
+                    .endsWith(QStringLiteral("/docs/en/troubleshooting.md#probe.not_found")));
+    EXPECT_TRUE(app->errorDocsLink(QStringLiteral("no.such_error")).isEmpty());
+    EXPECT_TRUE(app->errorDocsLink(QString()).isEmpty());
 }
 
 // ADR-0205 (plan 0028 U1): grayscale text antialiasing unless the environment says otherwise.

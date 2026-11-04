@@ -72,6 +72,7 @@ zariadenie v dosahu. Konzola zapisuje súbor konzoly a uchováva históriu prík
 K zariadeniu môže byť pripojený len jeden program. Ak je k nemu pripojený iný `hwio`, dostanete chybu
 [ble.in_use_by_other_process](troubleshooting.md#ble.in_use_by_other_process).
 
+<a id="pairing"></a>
 ## Párovanie
 
 CHESTER chráni svoj Bluetooth shell prístupovým kľúčom (passkey), preto sa s ním počítač musí raz spárovať (bond).

@@ -92,11 +92,13 @@ Zmiany obowiązują natychmiast.
 - **Keyboard shortcuts (F1)**: wszystkie skróty klawiaturowe aplikacji (także <kbd>Ctrl</kbd>+<kbd>/</kbd>).
 - **Create diagnostic report…**: plik zip dla wsparcia technicznego HARDWARIO
   ([Prywatność](privacy.md#raport-diagnostyczny)).
-- **Documentation ↗**: strona HARDWARIO Monitor w serwisie docs.hardwario.com.
+- **Documentation ↗**: te strony w serwisie GitHub, dla zainstalowanej wersji aplikacji i w języku aplikacji
+  (po angielsku, jeśli strona nie jest przetłumaczona).
 
 Gdy coś się nie powiedzie, aplikacja pokazuje, co się stało, prawdopodobną przyczynę (**Probably:**) i co należy
 zrobić (**What to do:**). **Details** pokazuje kod błędu; [Rozwiązywanie problemów](troubleshooting.md) zawiera
 wszystkie kody.
+**Learn more ↗** otwiera w przeglądarce opis kodu błędu na tej stronie.
 
 ## Wiersz poleceń
 

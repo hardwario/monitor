@@ -8,7 +8,7 @@ Diese Seite hilft Ihnen, wenn etwas nicht funktioniert. Sie beginnt mit den häu
 
 Jeder Fehler hat eine kurze Meldung, eine wahrscheinliche Ursache und einen Vorschlag.
 
-- **Desktop-App (`hwio-monitor`):** Der Fehlerbereich zeigt die Meldung, **Probably:** (die Ursache) und **What to do:** (den Vorschlag), mit einer Schaltfläche für den nächsten Schritt, etwa **Reconnect**, **Open Settings** oder **Retry**. **Details** zeigt den Fehlercode (zum Beispiel `probe.not_found`) und technische Details; **Copy** kopiert sie.
+- **Desktop-App (`hwio-monitor`):** Der Fehlerbereich zeigt die Meldung, **Probably:** (die Ursache) und **What to do:** (den Vorschlag), mit einer Schaltfläche für den nächsten Schritt, etwa **Reconnect**, **Open Settings** oder **Retry**. **Details** zeigt den Fehlercode (zum Beispiel `probe.not_found`) und technische Details; **Copy** kopiert sie. **Learn more ↗** öffnet den Eintrag des Fehlercodes auf dieser Seite.
 - **CLI (`hwio`):** Der Fehler wird nach stderr geschrieben:
 
   ```text
@@ -30,6 +30,7 @@ Jeder Fehlercode unten hat einen Anker, der dem Code entspricht, sodass Sie dire
 
 ## Häufige Probleme
 
+<a id="no-j-link-found"></a>
 ### Kein J-Link gefunden
 
 - Prüfen Sie das USB-Kabel zwischen dem J-Link und dem Computer. Versuchen Sie einen anderen USB-Anschluss oder ein anderes Kabel.
@@ -50,12 +51,14 @@ Unter Linux braucht Ihr Benutzerkonto Zugriff auf den J-Link über USB. Das `.de
 
 Fehlercodes: [`usb.access_denied`](#usb.access_denied), [`usb.world_accessible`](#usb.world_accessible).
 
+<a id="the-j-link-is-used-by-another-program"></a>
 ### Der J-Link wird von einem anderen Programm verwendet
 
 Nur ein Programm kann einen J-Link zur gleichen Zeit verwenden. Schließen Sie das andere Fenster von HARDWARIO Monitor, den anderen `hwio`-Befehl oder andere Debugging-Werkzeuge (zum Beispiel die SEGGER-Werkzeuge). In der Desktop-App ist eine Probe, die ein anderes Programm verwendet, in der Geräteliste mit **In use by another program** markiert. `hwio doctor` listet Programme auf, die die Probe belegen könnten.
 
 Fehlercodes: [`probe.in_use_by_other_process`](#probe.in_use_by_other_process), [`probe.held_by_program`](#probe.held_by_program), [`probe.open_failed`](#probe.open_failed).
 
+<a id="the-device-has-no-power-or-does-not-respond"></a>
 ### Das Gerät hat keinen Strom oder antwortet nicht
 
 - CHESTER braucht eine eigene Stromversorgung: Batterien oder den USB-C-Stromeingang.
@@ -64,12 +67,14 @@ Fehlercodes: [`probe.in_use_by_other_process`](#probe.in_use_by_other_process), 
 
 Fehlercodes: [`target.no_power`](#target.no_power), [`target.connect_failed`](#target.connect_failed), [`target.wrong_family`](#target.wrong_family).
 
+<a id="no-console-rtt-found"></a>
 ### Keine Konsole (RTT) gefunden
 
 Die Konsole braucht Firmware mit einer RTT-Konsole. Setzen Sie das Gerät zurück oder flashen Sie solche Firmware. Auch eine sehr niedrige J-Link-Geschwindigkeit kann die Ursache sein: Verwenden Sie **Automatic speed**. Die LTE-MCU des CHESTER hat keine Konsole; verwenden Sie die app-MCU. Siehe [Konsole](console.md).
 
 Fehlercodes: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_buffer_not_found`](#target.rtt_buffer_not_found), [`target.rtt_write_timeout`](#target.rtt_write_timeout), [`target.not_connected`](#target.not_connected).
 
+<a id="flashing-fails-or-the-mcu-is-protected"></a>
 ### Flashen schlägt fehl oder die MCU ist geschützt
 
 - Prüfen Sie die Kabel und die Stromversorgung und flashen Sie dann erneut.
@@ -79,18 +84,21 @@ Fehlercodes: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_buffe
 
 Fehlercodes: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed).
 
+<a id="the-j-link-is-on-the-lte-connector"></a>
 ### Der J-Link steckt am LTE-Anschluss
 
 Ein Tab arbeitet mit der Anwendungs-MCU. Antwortet der J-Link von der LTE-MCU, zeigt der Tab statt der Konsole **The J-Link is connected to the LTE MCU.** und verbindet sich nicht von selbst neu. Stecken Sie das Kabel an den APP-Anschluss um und drücken Sie **Retry**, oder drücken Sie **Update LTE firmware…**, um das [LTE-Firmware-Update](flashing.md#lte-firmware-update) zu starten.
 
 Fehlercode: [`target.other_connector`](#target.other_connector).
 
+<a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Die LTE-Modem-Firmware braucht nRF Util
 
 Das Aktualisieren der LTE-Modem-Firmware verwendet Nordic nRF Util mit seinem Befehl `device`. Nichts anderes braucht es. Installieren Sie es wie unter [Nordic nRF Util](install.md#nordic-nrf-util-nur-für-die-lte-modem-firmware) beschrieben, oder legen Sie seinen Pfad in **Settings** › **nRF Util** fest, oder mit `--nrfutil PATH` in der CLI.
 
 Fehlercodes: [`dependency.nrfutil_not_found`](#dependency.nrfutil_not_found), [`dependency.nrfutil_device_missing`](#dependency.nrfutil_device_missing), [`dependency.nrfutil_too_old`](#dependency.nrfutil_too_old), [`firmware.modem_update_failed`](#firmware.modem_update_failed).
 
+<a id="bluetooth-device-not-found-or-pairing-fails"></a>
 ### Bluetooth-Gerät nicht gefunden oder Kopplung schlägt fehl
 
 - Schalten Sie Bluetooth ein und öffnen Sie die Bluetooth-Ansicht der App, oder führen Sie `hwio ble scan` aus. Es werden nur Geräte angezeigt, deren Name `CHESTER` enthält; **Show all devices** (alle Geräte anzeigen) in der App und `--all` zeigen jedes Gerät.

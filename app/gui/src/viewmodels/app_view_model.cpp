@@ -72,10 +72,12 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
 #include <optional>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -1143,12 +1145,70 @@ diag::EnvironmentContext AppViewModel::diagEnvironment() const {
     return context;
 }
 
-QString AppViewModel::documentationUrl() {
-    // Plan 0028 (D18): the central table; it does not use the language until plan 0029.
-    return docsUrl(DocsTopic::Monitor, u"en").toString();
+namespace {
+
+// Plan 0037: the QML topic ids of docsLink() - the kebab-case names of hwio::DocsTopic.
+struct DocsTopicId {
+    std::u16string_view id;
+    DocsTopic topic = DocsTopic::Monitor;
+};
+constexpr std::array docsTopicIds{
+    DocsTopicId{.id = u"monitor", .topic = DocsTopic::Monitor},
+    DocsTopicId{.id = u"install", .topic = DocsTopic::Install},
+    DocsTopicId{.id = u"install-jlink", .topic = DocsTopic::InstallJLink},
+    DocsTopicId{.id = u"install-usb-linux", .topic = DocsTopic::InstallUsbLinux},
+    DocsTopicId{.id = u"install-nrf-util", .topic = DocsTopic::InstallNrfUtil},
+    DocsTopicId{.id = u"getting-started", .topic = DocsTopic::GettingStarted},
+    DocsTopicId{.id = u"console", .topic = DocsTopic::Console},
+    DocsTopicId{.id = u"console-batch", .topic = DocsTopic::ConsoleBatch},
+    DocsTopicId{.id = u"flashing", .topic = DocsTopic::Flashing},
+    DocsTopicId{.id = u"flashing-lte", .topic = DocsTopic::FlashingLte},
+    DocsTopicId{.id = u"flashing-recover", .topic = DocsTopic::FlashingRecover},
+    DocsTopicId{.id = u"bluetooth", .topic = DocsTopic::Bluetooth},
+    DocsTopicId{.id = u"bluetooth-pairing", .topic = DocsTopic::BluetoothPairing},
+    DocsTopicId{.id = u"troubleshooting", .topic = DocsTopic::Troubleshooting},
+    DocsTopicId{.id = u"trouble-no-probe", .topic = DocsTopic::TroubleNoProbe},
+    DocsTopicId{.id = u"trouble-probe-busy", .topic = DocsTopic::TroubleProbeBusy},
+    DocsTopicId{.id = u"trouble-no-power", .topic = DocsTopic::TroubleNoPower},
+    DocsTopicId{.id = u"trouble-no-console", .topic = DocsTopic::TroubleNoConsole},
+    DocsTopicId{.id = u"trouble-flashing", .topic = DocsTopic::TroubleFlashing},
+    DocsTopicId{.id = u"trouble-other-connector", .topic = DocsTopic::TroubleOtherConnector},
+    DocsTopicId{.id = u"trouble-nrf-util", .topic = DocsTopic::TroubleNrfUtil},
+    DocsTopicId{.id = u"trouble-bluetooth", .topic = DocsTopic::TroubleBluetooth},
+    DocsTopicId{.id = u"privacy", .topic = DocsTopic::Privacy},
+    DocsTopicId{.id = u"privacy-report", .topic = DocsTopic::PrivacyReport},
+    DocsTopicId{.id = u"cli", .topic = DocsTopic::Cli},
+    DocsTopicId{.id = u"cli-migration", .topic = DocsTopic::CliMigration},
+    DocsTopicId{.id = u"mcp", .topic = DocsTopic::Mcp},
+};
+static_assert(docsTopicIds.size() == static_cast<std::size_t>(DocsTopic::Mcp) + 1,
+              "every DocsTopic has a QML id");
+
+} // namespace
+
+QString AppViewModel::documentationUrl() const {
+    // Plan 0037 (ADR-0247): computed on demand, so a language switch applies at the next click.
+    return docsUrl(DocsTopic::Monitor, effectiveLanguage()).toString();
 }
 
-void AppViewModel::openDocumentation() { QDesktopServices::openUrl(QUrl(documentationUrl())); }
+void AppViewModel::openDocumentation() const {
+    QDesktopServices::openUrl(QUrl(documentationUrl()));
+}
+
+QString AppViewModel::docsLink(const QString& topicId) const {
+    DocsTopic topic = DocsTopic::Monitor; // unknown id: the index page
+    for (const DocsTopicId& entry : docsTopicIds) {
+        if (QStringView(entry.id) == topicId) {
+            topic = entry.topic;
+            break;
+        }
+    }
+    return docsUrl(topic, effectiveLanguage()).toString();
+}
+
+QString AppViewModel::errorDocsLink(const QString& errorId) const {
+    return errorDocsUrl(toStdString(errorId), effectiveLanguage()).toString();
+}
 
 QJsonArray AppViewModel::tabsJson() const {
     QJsonArray tabs;

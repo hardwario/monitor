@@ -89,10 +89,12 @@ Změny se projeví okamžitě.
 
 - **Klávesové zkratky (F1)**: všechny klávesové zkratky aplikace (také <kbd>Ctrl</kbd>+<kbd>/</kbd>).
 - **Vytvořit diagnostickou zprávu…**: soubor zip pro podporu HARDWARIO ([Soukromí](privacy.md#diagnostická-zpráva)).
-- **Dokumentace ↗**: stránka HARDWARIO Monitor na docs.hardwario.com.
+- **Dokumentace ↗**: tyto stránky na GitHubu, pro nainstalovanou verzi aplikace a v jazyce aplikace (anglicky,
+  pokud stránka není přeložená).
 
 Když něco selže, aplikace ukáže, co se stalo, pravděpodobnou příčinu (**Pravděpodobně:**) a co dělat
 (**Co dělat:**). **Podrobnosti** ukážou kód chyby; [Řešení problémů](troubleshooting.md) uvádí všechny kódy.
+**Další informace ↗** otevře v prohlížeči popis kódu chyby na této stránce.
 
 ## Příkazová řádka
 

@@ -8,7 +8,7 @@ Táto stránka vám pomôže, keď niečo nefunguje. Začína najčastejšími p
 
 Každá chyba má krátku správu, pravdepodobnú príčinu a odporúčanie.
 
-- **Desktopová aplikácia (`hwio-monitor`):** panel chyby zobrazuje správu, **Probably:** (príčinu) a **What to do:** (odporúčanie) s tlačidlom pre ďalší krok, napríklad **Reconnect**, **Open Settings** alebo **Retry**. **Details** zobrazí kód chyby (napríklad `probe.not_found`) a technické podrobnosti; **Copy** ich skopíruje.
+- **Desktopová aplikácia (`hwio-monitor`):** panel chyby zobrazuje správu, **Probably:** (príčinu) a **What to do:** (odporúčanie) s tlačidlom pre ďalší krok, napríklad **Reconnect**, **Open Settings** alebo **Retry**. **Details** zobrazí kód chyby (napríklad `probe.not_found`) a technické podrobnosti; **Copy** ich skopíruje. **Learn more ↗** otvorí opis kódu chyby na tejto stránke.
 - **CLI (`hwio`):** chyba sa vypíše na stderr:
 
   ```text
@@ -30,6 +30,7 @@ Každý kód chyby nižšie má kotvu rovnakú ako kód, takže naň môžete od
 
 ## Časté problémy
 
+<a id="no-j-link-found"></a>
 ### J-Link sa nenašiel
 
 - Skontrolujte kábel USB medzi J-Linkom a počítačom. Skúste iný port USB alebo iný kábel.
@@ -50,12 +51,14 @@ V Linuxe potrebuje váš používateľský účet prístup k J-Linku cez USB. Ba
 
 Kódy chýb: [`usb.access_denied`](#usb.access_denied), [`usb.world_accessible`](#usb.world_accessible).
 
+<a id="the-j-link-is-used-by-another-program"></a>
 ### J-Link používa iný program
 
 J-Link môže naraz používať len jeden program. Zatvorte druhé okno HARDWARIO Monitor, druhý príkaz `hwio` alebo iné ladiace nástroje (napríklad nástroje SEGGER). V desktopovej aplikácii je sonda, ktorú používa iný program, v zozname zariadení označená **In use by another program**. `hwio doctor` uvedie programy, ktoré môžu sondu držať.
 
 Kódy chýb: [`probe.in_use_by_other_process`](#probe.in_use_by_other_process), [`probe.held_by_program`](#probe.held_by_program), [`probe.open_failed`](#probe.open_failed).
 
+<a id="the-device-has-no-power-or-does-not-respond"></a>
 ### Zariadenie nemá napájanie alebo neodpovedá
 
 - CHESTER musí mať vlastné napájanie: batérie alebo napájací vstup USB-C.
@@ -64,12 +67,14 @@ Kódy chýb: [`probe.in_use_by_other_process`](#probe.in_use_by_other_process), 
 
 Kódy chýb: [`target.no_power`](#target.no_power), [`target.connect_failed`](#target.connect_failed), [`target.wrong_family`](#target.wrong_family).
 
+<a id="no-console-rtt-found"></a>
 ### Konzola (RTT) sa nenašla
 
 Konzola potrebuje firmvér s konzolou RTT. Resetujte zariadenie alebo nahrajte taký firmvér. Príčinou môže byť aj veľmi nízka rýchlosť J-Linku: použite **Automatic speed**. LTE MCU zariadenia CHESTER nemá konzolu; použite aplikačný MCU. Pozrite si [Konzola](console.md).
 
 Kódy chýb: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_buffer_not_found`](#target.rtt_buffer_not_found), [`target.rtt_write_timeout`](#target.rtt_write_timeout), [`target.not_connected`](#target.not_connected).
 
+<a id="flashing-fails-or-the-mcu-is-protected"></a>
 ### Nahrávanie zlyhá alebo je MCU chránený
 
 - Skontrolujte káble a napájanie a potom nahrajte firmvér znova.
@@ -79,18 +84,21 @@ Kódy chýb: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_buffe
 
 Kódy chýb: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed).
 
+<a id="the-j-link-is-on-the-lte-connector"></a>
 ### J-Link je na konektore LTE
 
 Karta pracuje s aplikačným MCU. Keď J-Link odpovedá z LTE MCU, karta namiesto konzoly zobrazí **The J-Link is connected to the LTE MCU.** a sama sa znova nepripojí. Prepojte kábel ku konektoru APP a stlačte **Retry**, alebo stlačte **Update LTE firmware…** a spustite [aktualizáciu LTE firmvéru](flashing.md#aktualizácia-lte-firmvéru).
 
 Kód chyby: [`target.other_connector`](#target.other_connector).
 
+<a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Firmvér LTE modemu potrebuje nRF Util
 
 Aktualizácia firmvéru LTE modemu používa Nordic nRF Util s jeho príkazom `device`. Nič iné ho nepotrebuje. Nainštalujte ho podľa postupu v časti [Nordic nRF Util](install.md#nordic-nrf-util-len-firmvér-lte-modemu) alebo nastavte jeho cestu v **Settings** › **nRF Util**, prípadne pomocou `--nrfutil PATH` v CLI.
 
 Kódy chýb: [`dependency.nrfutil_not_found`](#dependency.nrfutil_not_found), [`dependency.nrfutil_device_missing`](#dependency.nrfutil_device_missing), [`dependency.nrfutil_too_old`](#dependency.nrfutil_too_old), [`firmware.modem_update_failed`](#firmware.modem_update_failed).
 
+<a id="bluetooth-device-not-found-or-pairing-fails"></a>
 ### Zariadenie Bluetooth sa nenašlo alebo párovanie zlyhá
 
 - Zapnite Bluetooth a otvorte zobrazenie Bluetooth v aplikácii alebo spustite `hwio ble scan`. Zobrazia sa len zariadenia, ktorých názov obsahuje `CHESTER`; **Show all devices** v aplikácii a `--all` zobrazia všetky zariadenia.

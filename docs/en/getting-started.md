@@ -88,10 +88,12 @@ Changes apply immediately.
 
 - **Keyboard shortcuts (F1)**: every shortcut of the app (also <kbd>Ctrl</kbd>+<kbd>/</kbd>).
 - **Create diagnostic report…**: a zip file for HARDWARIO support ([Privacy](privacy.md#diagnostic-report)).
-- **Documentation ↗**: the HARDWARIO Monitor page on docs.hardwario.com.
+- **Documentation ↗**: these pages on GitHub, for the installed version of the app and in the app language (English
+  where a page is not translated).
 
 When something fails, the app shows what happened, the probable cause (**Probably:**) and what to do
 (**What to do:**). **Details** shows the error code; [Troubleshooting](troubleshooting.md) lists every code.
+**Learn more ↗** opens the entry of the error code on that page in your browser.
 
 ## Command line
 

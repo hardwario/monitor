@@ -1020,32 +1020,42 @@
         <translation>Čo robiť: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="162"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="135"/>
+        <source>Learn more ↗</source>
+        <translation>Ďalšie informácie ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="136"/>
+        <source>Learn more about this error (opens browser)</source>
+        <translation>Ďalšie informácie o tejto chybe (otvorí prehliadač)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="174"/>
         <source>Help me fix this</source>
         <translation>Pomôžte mi to vyriešiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="169"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="181"/>
         <source>Details</source>
         <translation>Podrobnosti</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="171"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
         <source>Expanded</source>
         <translation>Rozbalené</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="171"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
         <source>Collapsed</source>
         <translation>Zbalené</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="201"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="213"/>
         <source>Error details</source>
         <translation>Podrobnosti chyby</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="207"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="219"/>
         <source>Copy</source>
         <translation>Kopírovať</translation>
     </message>
@@ -1276,27 +1286,27 @@
 <context>
     <name>LteUpdateStep</name>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="78"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="68"/>
         <source>Set path in Settings</source>
         <translation>Nastaviť cestu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="84"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="74"/>
         <source>How to install ↗</source>
         <translation>Ako nainštalovať ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="122"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="125"/>
         <source>The application that was in the device</source>
         <translation>Aplikácia, ktorá bola v zariadení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="142"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="145"/>
         <source>Firmware from the catalog or a file</source>
         <translation>Firmvér z katalógu alebo zo súboru</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="164"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="168"/>
         <source>Choose a firmware file</source>
         <translation>Vyberte súbor s firmvérom</translation>
     </message>
@@ -1708,12 +1718,12 @@
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="59"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="98"/>
         <source>Settings were created by a newer version and are read-only.</source>
         <translation>Nastavenia vytvorila novšia verzia a sú len na čítanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="79"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="118"/>
         <source>The setting was not saved: %1</source>
         <translation>Nastavenie sa neuložilo: %1</translation>
     </message>
@@ -2041,12 +2051,22 @@
         <translation>Čo robiť: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WarningBanner.qml" line="139"/>
+        <location filename="../app/gui/qml/components/WarningBanner.qml" line="120"/>
+        <source>Learn more ↗</source>
+        <translation>Ďalšie informácie ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/WarningBanner.qml" line="121"/>
+        <source>Learn more about this error (opens browser)</source>
+        <translation>Ďalšie informácie o tejto chybe (otvorí prehliadač)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/WarningBanner.qml" line="150"/>
         <source>Warning details</source>
         <translation>Podrobnosti varovania</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WarningBanner.qml" line="145"/>
+        <location filename="../app/gui/qml/components/WarningBanner.qml" line="156"/>
         <source>Copy</source>
         <translation>Kopírovať</translation>
     </message>
@@ -4777,7 +4797,7 @@
         <translation>Odošle každý riadok textového súboru v UTF-8 do zariadenia ako príkaz shellu, jeden riadok každých %1 ms. Prázdne riadky a riadky začínajúce znakom # sa preskočia. Najviac %2 príkazov, %3 MiB na súbor a %4 bajtov na riadok.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="769"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="770"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Do schránky bol skopírovaný prvý %n riadok (limit kopírovania).</numerusform>
@@ -4786,7 +4806,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="784"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="785"/>
         <source>There is no console log file for this device yet.</source>
         <translation>Pre toto zariadenie zatiaľ neexistuje súbor so záznamom konzoly.</translation>
     </message>
