@@ -1,5 +1,6 @@
 #include "hwio/core/error.h"
 #include "hwio/core/i18n.h"
+#include "hwio/core/json.h"
 
 #include <QCoreApplication>
 #include <QString>
@@ -8,6 +9,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <set>
 #include <string>
 #include <string_view>
@@ -51,7 +53,15 @@ TEST(I18n, SupportedLanguagesTable) {
     }
     ASSERT_GE(hwio::i18n::supportedLanguages.size(), 2U);
     EXPECT_EQ(hwio::i18n::supportedLanguages[0].code, "en"); // source language first
-    EXPECT_TRUE(codes.contains("cs"));
+    EXPECT_EQ(hwio::i18n::supportedLanguages[1].code, "cs");
+    // ADR-0210: further languages alphabetically by code.
+    for (std::size_t i = 3; i < hwio::i18n::supportedLanguages.size(); ++i) {
+        EXPECT_LT(hwio::i18n::supportedLanguages.at(i - 1).code,
+                  hwio::i18n::supportedLanguages.at(i).code);
+    }
+    for (const std::string_view code : {"cs", "de", "pl", "sk"}) {
+        EXPECT_TRUE(codes.contains(code)) << code;
+    }
 }
 
 TEST(I18n, UntranslatedReturnsSource) {
@@ -104,6 +114,31 @@ TEST(I18n, ErrorTextsDifferFromEnglishInCzech) {
         EXPECT_NE(czech.message, source.message) << hwio::idOf(source.code);
         EXPECT_NE(czech.cause, source.cause) << hwio::idOf(source.code);
         EXPECT_NE(czech.suggestion, source.suggestion) << hwio::idOf(source.code);
+    }
+}
+
+// Every supported language other than English has an embedded catalog (plan 0030) that
+// translates every error text (ADR-0208: no unfinished entries).
+TEST(I18n, EveryLanguageTranslatesErrorTexts) {
+    std::vector<hwio::Error> english;
+    english.reserve(hwio::errorTable.size());
+    for (const hwio::ErrorInfo& info : hwio::errorTable) {
+        english.push_back(hwio::makeError(info.code));
+    }
+    for (const hwio::i18n::LanguageInfo& language : hwio::i18n::supportedLanguages) {
+        if (language.code == "en") {
+            continue;
+        }
+        const ScopedTranslator translator(
+            QStringLiteral(":/i18n/hwio_%1.qm").arg(hwio::toQString(language.code)));
+        ASSERT_TRUE(translator.ok()) << language.code;
+        for (const hwio::Error& source : english) {
+            const hwio::Error translated = hwio::makeError(source.code);
+            EXPECT_NE(translated.message, source.message)
+                << language.code << " " << hwio::idOf(source.code);
+            EXPECT_NE(translated.suggestion, source.suggestion)
+                << language.code << " " << hwio::idOf(source.code);
+        }
     }
 }
 

@@ -792,11 +792,12 @@ Result<CommandResult> guidedResult(const device::LteUpdateProcedure& procedure, 
                              .streamed = false};
     }
     if (procedure.step() == Step::Cancelled && noCopyEnd) {
-        return CommandResult{
-            .data = {},
-            .humanText = "The LTE firmware was updated. The application MCU is empty: flash an "
-                         "application with `hwio chester app flash`.",
-            .streamed = false};
+        // Plan 0034 (B1, ADR-0238): not completed - the application was not written back, so the
+        // command fails (exit code 130) and says what to do.
+        Error error = makeError(ErrorCode::Cancelled, "guided LTE update: no application copy");
+        error.message = "The LTE firmware was updated. The application MCU is empty.";
+        error.suggestion = "Flash an application with `hwio chester app flash`.";
+        return std::unexpected(std::move(error));
     }
     if (procedure.step() == Step::Cancelled) {
         Error error = makeError(ErrorCode::Cancelled, "guided LTE update");

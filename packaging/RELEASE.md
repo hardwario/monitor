@@ -23,7 +23,8 @@ it. Nothing in this repository creates tags or publishes releases by itself.
 
 ## Release gates (all must hold before tagging)
 
-- [ ] `check_translations`: 0 unfinished Czech entries (ADR-0027; the gate job fails otherwise).
+- [ ] `check_translations`: 0 unfinished entries in every language (cs, de, pl, sk; ADR-0208; the gate job fails
+      otherwise).
 - [ ] CI is green on the commit to be tagged (`main` or the release branch), including the three
       `package-<os>` jobs.
 - [ ] Manual verification matrix of plan 0015 (F4) on the release candidate: Ubuntu 22.04 AppImage, Ubuntu
@@ -33,7 +34,9 @@ it. Nothing in this repository creates tags or publishes releases by itself.
 - [ ] User docs match the release (plan 0029, ADR-0222): every command and option of `docs/en/cli.md` against
       `hwio … --help`, every error id of `error.h` in each `docs/<lang>/troubleshooting.md`, package names and
       minimum OS versions in `README.md` and `docs/*/install.md`.
-- [ ] Release notes draft: minimum OS versions, "Install SEGGER J-Link Software 8.00 or newer separately", the
+- [ ] Release notes committed as `packaging/release-notes/v2.X.Y[-pre].md` (the tag name + `.md`) on the commit to be
+      tagged: the gate job of `release.yml` fails at once without it, and the draft release takes its text from it
+      (`gh release create --notes-file`; plan 0034). Contents: minimum OS versions, "Install SEGGER J-Link Software 8.00 or newer separately", the
       side-by-side period with v1 (until M8).
 - [ ] Product name (ADR-0237): the notes say **HARDWARIO Monitor**. The "2" appears only inside a full version number
       ("HARDWARIO Monitor 2.0.0") or as "version 2" — never "HARDWARIO Monitor 2" as a name. `product_name_check`
@@ -47,7 +50,7 @@ it. Nothing in this repository creates tags or publishes releases by itself.
    failed sign job: fix the cause and `gh run rerun <run id> --failed`.
 3. Review the draft: assets (`hwio-monitor-<v>-x86_64.AppImage`, `hardwario-monitor_<v>_amd64.deb`,
    `hwio-monitor-<v>-macos-universal.dmg`, `hwio-monitor-<v>-windows-x64.msi`, `SHA256SUMS`,
-   `hwio-monitor-<v>-debug-symbols-{linux,macos,windows}.zip`, ADR-0232), the generated notes, the pre-release flag
+   `hwio-monitor-<v>-debug-symbols-{linux,macos,windows}.zip`, ADR-0232), the notes (from the notes file), the pre-release flag
    (set automatically for tags with a `-`).
 4. Spot checks: `sha256sum -c SHA256SUMS`; `gh attestation verify <file> --repo hardwario/monitor`;
    macOS `packaging/macos/sign-and-notarize.sh verify-dmg <dmg>` (the DMG and the app inside it: signature,

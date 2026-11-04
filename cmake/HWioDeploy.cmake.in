@@ -10,9 +10,9 @@ set(_hwio_qt_translations_dir "@HWIO_DEPLOY_QT_TRANSLATIONS_DIR@")
 set(_hwio_qt_catalogs "@HWIO_QT_CATALOGS@")
 set(_hwio_qt_locales "@HWIO_QT_LOCALES@")
 
-# The Qt catalogs of the UI languages (ADR-0027): the individual files, because LanguageManager
+# The Qt catalogs of the UI languages (ADR-0027, ADR-0211): the individual files, because LanguageManager
 # loads qtbase_<lang>.qm and qtdeclarative_<lang>.qm from QLibraryInfo::TranslationsPath. Missing
-# catalogs (e.g. qtdeclarative_cs in some Qt versions) are skipped.
+# catalogs (e.g. qtdeclarative_cs, qtconnectivity_sk in some Qt versions) are skipped.
 function(_hwio_deploy_qt_translations destination)
     foreach(_locale IN LISTS _hwio_qt_locales)
         foreach(_catalog IN LISTS _hwio_qt_catalogs)

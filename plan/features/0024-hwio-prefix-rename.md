@@ -80,7 +80,10 @@ Unchanged.
 - [x] Audit grep clean (only protected names, see the whitelist below).
 - [ ] Verification below — Linux done 2026-10-29 (debug 1455/1455, asan 1455/1455, tsan 1399/1399, tidy 0,
   qmllint, check_translations 0 unfinished, clang-format, check-lfs, CLI/MCP/self-test smoke, local `.deb` with
-  `hwio` / `hwio-monitor`); AppImage (container tools) and macOS / Windows CI still open.
+  `hwio` / `hwio-monitor`); AppImage (container tools) and macOS / Windows CI still open. *0034 (2026-11-04): the
+  AppImage and macOS / Windows builds are green in CI (`package-linux`, `package-macos`, `package-windows`, run
+  41814387160 on `main`) and shipped as `hwio*` in v2.0.0-rc.2; the local AppImage check and the macOS / Windows
+  verification of the list below are still open.*
 
 ## Tests and verification
 

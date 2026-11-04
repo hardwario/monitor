@@ -191,6 +191,39 @@ TestCase {
         tryVerify(() => !AppViewModel.wizard.open);
     }
 
+    // Plan 0034 (B4): at 960 x 600 (Czech, own file) the missing nRF Util is shown above the firmware
+    // card, inside the visible part of the wizard (it is why Next is disabled); the card carries no
+    // Flash page step number ("Step 1 of 8" is the wizard's).
+    function test_ltePrerequisiteVisible960() {
+        AppViewModel.setLanguage("cs");
+        mouseClick(find("kindCard" + FirmwareSourceViewModel.LteFirmware));
+        mouseClick(find("lteUpdateButton"));
+        const dialog = findChild(window, "wizardDialog");
+        tryVerify(() => dialog.opened);
+        const part = name => {
+            const items = findAll(dialog.contentItem, name).filter(effectivelyVisible);
+            return items.length > 0 ? items[0] : null;
+        };
+        const wizard = testSupport.openWizard();
+        tryVerify(() => part("ownFileRadio") !== null, 10000);
+        mouseClick(part("ownFileRadio"));
+        wizard.lteSource.loadFile(testSupport.writeModemZip());
+        tryVerify(() => wizard.lteSource.sourceState === FirmwareSourceViewModel.Ready, 5000);
+        window.width = 960;
+        window.height = 600;
+        tryVerify(() => part("ltePrerequisite") !== null, 10000);
+        waitForRendering(window.contentItem);
+        verify(!AppViewModel.wizard.canPrimary);
+        const content = rect(findChild(dialog, "wizardContent"));
+        const prerequisite = rect(part("ltePrerequisite"));
+        const card = part("lteSourceCard");
+        verify(prerequisite.y < rect(card).y, "the prerequisite is above the firmware card");
+        verify(prerequisite.y >= content.y - 0.5 && prerequisite.y + prerequisite.h <= content.y + content.h + 0.5,
+               `the prerequisite is visible without scrolling: y=${prerequisite.y} h=${prerequisite.h}, view y=${content.y} h=${content.h}`);
+        compare(card.number, 0);
+        compare(wizard.stage, LteUpdateWizard.Firmware);
+    }
+
     function cleanup() {
         if (AppViewModel.wizard.open)
             AppViewModel.wizard.cancel(true);

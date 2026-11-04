@@ -27,7 +27,7 @@
 # QT_QML_MODULE_NO_IMPORT_SCAN ON, so qt_generate_deploy_qml_app_script() has no import list) and
 # the Qt libraries they need (file(GET_RUNTIME_DEPENDENCIES), Qt's lib directory only); macOS uses
 # macdeployqt and Windows windeployqt through qt_deploy_runtime_dependencies() (both scan
-# app/gui/qml themselves). Only the Czech Qt catalogs are deployed (ADR-0027).
+# app/gui/qml themselves). Only the Qt catalogs of HWIO_QT_LOCALES are deployed (ADR-0027, ADR-0211).
 #
 # Functions:
 #   hwio_generate_package_kind_header()  before the libraries (generated/hwio/core/package_kind.h)
@@ -133,10 +133,10 @@ set(HWIO_LINUX_QML_MODULES
     QtQuick/Dialogs/quickimpl
     Qt/labs/folderlistmodel)
 
-# Qt translation catalogs deployed for each UI language other than English (ADR-0027); missing
-# catalogs (e.g. qtdeclarative_cs in some Qt versions) are skipped.
+# Qt translation catalogs deployed for each UI language other than English (ADR-0027, ADR-0211);
+# missing catalogs (e.g. qtdeclarative_cs, qtconnectivity_sk in some Qt versions) are skipped.
 set(HWIO_QT_CATALOGS qtbase qtdeclarative qtconnectivity)
-set(HWIO_QT_LOCALES cs)
+set(HWIO_QT_LOCALES cs de pl sk)
 
 function(hwio_generate_package_kind_header)
     configure_file(

@@ -169,7 +169,9 @@ The LTE MCU has no console. Modem firmware needs nRF Util.
 `--guided` runs the [LTE firmware update](flashing.md#lte-firmware-update) of the app in the terminal: start with the
 J-Link on the APP connector; it saves a copy of the application, erases the application, asks you to move the J-Link
 to the LTE connector, updates the LTE MCU, asks you to move it back and writes the application back. Each step
-continues by itself as soon as the J-Link reaches the right MCU; the copy's path is printed at the end. It needs an
+continues by itself as soon as the J-Link reaches the right MCU; the copy's path is printed at the end. When there is
+no copy to write back (an empty or unreadable application), the command ends with exit code 130 and the application
+MCU stays empty: flash an application with `hwio chester app flash`. It needs an
 interactive terminal (not with `--json`). Without `--guided` the command flashes only the LTE MCU, as py-hardwario's
 `hardwario chester lte flash` does.
 
@@ -177,7 +179,7 @@ interactive terminal (not with `--json`). Without `--guided` the command flashes
 
 | Command | Does |
 |---|---|
-| `hwio ble scan [--timeout S] [--all] [--profile ID]` | Lists CHESTER devices nearby (5 s; `--all`: every device), strongest signal first. RSSI is the average over the scan; JSON also has `rssi_last`, the last measured value |
+| `hwio ble scan [--timeout S] [--all] [--profile ID]` | Lists CHESTER devices nearby (5 s; `--all`: every device), strongest signal first. RSSI is the average over the scan; JSON also has `rssiLast`, the last measured value |
 | `hwio ble console (-a ID \| --name N) [--auto-reconnect] [--history-file PATH] [--console-file PATH]` | The console over Bluetooth |
 | `hwio ble command (-a ID \| --name N) [-t SECONDS] [--console-file PATH] COMMAND` | One command; ends at the prompt or after `-t` seconds (default 3) |
 | `hwio ble pair (-a ID \| --name N)` | Asks the system to pair; it asks for the passkey (Linux, Windows) |
@@ -264,7 +266,7 @@ hwio --json chester app console < cmds.txt | jq -c 'select(.data.type=="line" an
 | 7 | Invalid firmware image, verification failed, unknown catalog ID |
 | 8 | Download or catalog failure |
 | 9 | Timeout |
-| 130 | Cancelled (<kbd>Ctrl</kbd>+<kbd>C</kbd>) |
+| 130 | Cancelled or not completed (<kbd>Ctrl</kbd>+<kbd>C</kbd>, SIGTERM, guided procedure ended without restoring the application) |
 
 The codes are part of the public interface and do not change between versions.
 

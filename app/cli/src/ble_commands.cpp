@@ -323,10 +323,10 @@ Result<CommandResult> scan(const Context& context, const ScanCommandOptions& opt
         row.insert(QStringLiteral("id"), toQString(info.id));
         row.insert(QStringLiteral("name"), toQString(info.name));
         // Plan 0033 (D5, ADR-0235): the smoothed RSSI over the scan (whole dBm, 0 = unknown); the
-        // last measured value as rssi_last.
+        // last measured value as rssiLast.
         const int smoothed = static_cast<int>(std::lround(info.rssiSmoothed));
         row.insert(QStringLiteral("rssi"), smoothed);
-        row.insert(QStringLiteral("rssi_last"), info.rssi);
+        row.insert(QStringLiteral("rssiLast"), info.rssi);
         row.insert(QStringLiteral("nusAdvertised"), info.nusAdvertised);
         row.insert(QStringLiteral("profile"), info.profileId.empty()
                                                   ? QJsonValue(QJsonValue::Null)

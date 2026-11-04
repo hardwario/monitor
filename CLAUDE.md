@@ -48,7 +48,7 @@ All design documentation lives in [`plan/`](plan/README.md). Read `plan/README.m
 | UI | **Qt Quick / QML**, thin; no business logic in QML — ADR-0003 |
 | Backend | May use QtCore, QtNetwork, QtBluetooth; **never QtGui / QtQuick / QtWidgets** — ADR-0004 |
 | Hardware | **SEGGER JLinkARM library only** (≥ 8.00) for RTT and programming (flash/erase/reset/recover/UICR), runtime-loaded from own declarations, one library copy per session, behind interfaces; py-hardwario / rttt 1.9.2 are the behavioural reference. Optional **nRF Util** subprocess only for nRF91 modem firmware. No nrfjprog — ADR-0015, ADR-0016, ADR-0006, ADR-0028–0030, ADR-0034 |
-| Localization | **English + Czech** via Qt Linguist (English source text), extensible; every user-visible string translatable; backend translates at creation; CLI English only — ADR-0027 |
+| Localization | **English + Czech, German, Polish, Slovak** via Qt Linguist (English source text), extensible; every user-visible string translatable; backend translates at creation; CLI English only; 0 unfinished entries in every language before a release — ADR-0027, ADR-0208 |
 | Naming | Project prefix **`hwio` / `HWio` / `HWIO_`**: namespace `hwio::`, includes `<hwio/...>`, CLI `hwio`, GUI `hwio-monitor`; product name "HARDWARIO Monitor", `com.hardwario.monitor` and the repository `hardwario/monitor` unchanged — ADR-0181 |
 | Errors | `std::expected<T, hwio::Error>`; no exceptions crossing module, thread or C-callback boundaries — ADR-0007 |
 | Build | CMake + `CMakePresets.json`; third-party deps via **CPM / FetchContent pinned to exact tags + hashes** (no Conan, no vcpkg) — ADR-0010 |
@@ -107,7 +107,7 @@ ctest --preset linux-debug --output-on-failure  # unit, CLI end-to-end, Qt Quick
 cmake --build --preset linux-tidy               # clang-tidy build: must have zero findings
 cmake --build --preset linux-debug --target all_qmllint           # QML lint
 cmake --build --preset linux-debug --target update_translations   # after changing user-visible strings
-cmake --build --preset linux-debug --target check_translations    # .ts freshness (CI), unfinished cs count
+cmake --build --preset linux-debug --target check_translations    # .ts freshness (CI), unfinished count per language
 git ls-files -z -- '*.h' '*.cpp' | xargs -0 clang-format-21 --dry-run --Werror   # formatting
 tools/check-lfs.sh [--untracked]                # Git LFS rule (binary, generated text > 100 KB)
 tools/check-includes.sh                         # no <bits/...> includes (libc++ / MSVC STL)
@@ -125,5 +125,5 @@ HWIO_JLINK_LIBRARY=build/linux-debug/tests/fake_jlink/libhwio_fake_jlink.so \
 HWIO_HIL=1 ctest --preset linux-debug -L hil --output-on-failure   # hardware-in-the-loop (CHESTER + J-Link)
 ```
 
-Translations: run `update_translations`, translate the new entries of `i18n/hwio_cs.ts` (Qt Linguist), commit
-both `.ts` files. CI (`.github/workflows/ci.yml`) runs all of the above on Linux plus macOS and Windows builds.
+Translations: run `update_translations`, translate the new entries of every `i18n/hwio_<lang>.ts` (Qt Linguist,
+terminology in `i18n/GLOSSARY.md`), commit all `.ts` files. CI (`.github/workflows/ci.yml`) runs all of the above on Linux plus macOS and Windows builds.
