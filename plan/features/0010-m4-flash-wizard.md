@@ -1,6 +1,6 @@
 # 0010 — M4 flash firmware wizard
 
-- **Status:** Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments); amended by 0021 (approved 2026-10-20 by Matej Strnad, implemented under 0021's checklist; the shared `FirmwareSourceViewModel` has the two kinds and the LTE sources since 2026-10-23, the wizard itself is not implemented yet)
+- **Status:** Approved (re-approved with the [0035](0035-wizards-rebaseline-2-0-0.md) amendments, 2026-11-04). Previously: Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments); amended by 0021 (approved 2026-10-20 by Matej Strnad, implemented under 0021's checklist; the shared `FirmwareSourceViewModel` has the two kinds and the LTE sources since 2026-10-23, the wizard itself is not implemented yet)
 - **Milestone:** M4 (plan 4 of 4, ADR-0065)
 - **Author:** Matej Strnad (with Claude)
 - **Related ADRs:** ADR-0174, ADR-0165, ADR-0166 (0021), ADR-0036, ADR-0037, ADR-0038, ADR-0040, ADR-0049, ADR-0054, ADR-0055, ADR-0057, ADR-0062,
@@ -21,6 +21,28 @@
 > over to the LTE firmware update wizard (`WizardId::LteUpdate`, "lte-update"), which moves the J-Link between the
 > connectors, keeps a copy of the application and writes it back. This wizard covers application firmware only; tabs
 > have no target choice (ADR-0233).
+
+> **Amendment by [0035](0035-wizards-rebaseline-2-0-0.md) (2026-11-04; ADR-0245, ADR-0248 accepted; ADR-0252, ADR-0253
+> accepted 2026-11-04; re-approved 2026-11-04 by Matej Strnad). Supersedes the conflicting text below where they differ:**
+> - **Scope:** ships in 2.0.0, **application firmware only** (ADR-0245); parallel with 0008, after the 0035 probe
+>   picker (ADR-0252).
+> - **No kind step (ADR-0253):** steps Probe · Cable · Firmware · Confirm · Flash · Done. The Firmware step
+>   has the link "Updating the LTE firmware? [Update LTE firmware…]" which closes this wizard and opens `lte-update`
+>   (ADR-0234). Everything about LTE bundles, modem firmware, nRF Util prerequisites, "step 1/2" and the LTE console
+>   below is obsolete.
+> - **Probe step:** the Embedded `probe-picker` of 0035 (wizard mode).
+> - **Cable step:** the console target's guide (ADR-0233); a J-Link answering from the LTE MCU → "Move the cable to the
+>   APP connector" or [Update LTE firmware…].
+> - **`firmware.out_of_range`:** when the image fits the LTE MCU: "This is LTE firmware." + hand-off `lte-update`;
+>   otherwise the 0010 text.
+> - **W1 is done:** `FirmwareSourceViewModel` exists (`app/gui/src/viewmodels/firmware_source_view_model.*`, 0021); the
+>   wizard instantiates its own instance with the Application kind fixed.
+> - **Done:** [Open console] is always offered (application MCU = console target).
+> - **Maintenance:** none in the wizard (ADR-0236 unchanged).
+> - **Entry points:** Flash page "Guide me" only while the Application kind is selected; Choose device link only in
+>   the J-Link view (0012 transport bar).
+> - **Names (0024):** `hio` → `hwio`.
+> - **Texts:** cs + de + sk + pl with 0 unfinished (ADR-0248); step W5 reads "cs + de + sk + pl".
 
 ## Context
 

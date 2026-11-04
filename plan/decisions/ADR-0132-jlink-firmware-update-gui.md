@@ -1,6 +1,6 @@
 # ADR-0132 — J-Link firmware update is offered in the GUI
 
-- **Status:** Accepted
+- **Status:** Accepted (the session detach/re-attach part is superseded by ADR-0246; placement amended by ADR-0255)
 - **Date:** 2026-10-19
 - **Decided by:** Matej Strnad (M8 planning session)
 

@@ -1,6 +1,6 @@
 # ADR-0220 — User documentation stays in `docs/`; in-app links unchanged until docs.hardwario.com
 
-- **Status:** Accepted (confirms the location part of ADR-0138)
+- **Status:** Accepted (confirms the location part of ADR-0138); the in-app link part is superseded by ADR-0247
 - **Date:** 2026-11-03
 - **Decided by:** Matej Strnad (plan 0029 session)
 

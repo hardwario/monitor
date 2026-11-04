@@ -1,6 +1,6 @@
 # 0009 — M4 connect-device and troubleshooting wizards
 
-- **Status:** Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments)
+- **Status:** Approved (re-approved with the [0035](0035-wizards-rebaseline-2-0-0.md) amendments, 2026-11-04). Previously: Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments)
 - **Milestone:** M4 (plan 3 of 4, ADR-0065)
 - **Author:** Matej Strnad (with Claude)
 - **Related ADRs:** ADR-0032, ADR-0050, ADR-0053, ADR-0057, ADR-0058, ADR-0066, ADR-0067, ADR-0069, ADR-0072,
@@ -16,6 +16,33 @@
 
 > **Pending amendment from M8 ([0017](0017-m8-parity.md), ADR-0132):** the troubleshooting topic `probe-firmware` gets an
 > [Update J-Link firmware] step; the `hio jlink update-firmware` CommandBlock stays as the alternative.
+
+> **Amendment by [0035](0035-wizards-rebaseline-2-0-0.md) (2026-11-04; ADR-0245, ADR-0248 accepted; ADR-0249, ADR-0250,
+> ADR-0251, ADR-0252, ADR-0255 accepted 2026-11-04; re-approved 2026-11-04 by Matej Strnad). Supersedes the conflicting text below where they differ
+> (including the two pending amendments above):**
+> - **Scope:** ships in 2.0.0 (ADR-0245); implemented last (after 0008 and 0010, ADR-0252).
+> - **Connect wizard (ADR-0249):** J-Link only, application MCU only, **no Device step** — steps Probe · Cable
+>   · Power · Check · Done. The Device step returns automatically only with a second J-Link profile (plan 0033 D1).
+>   Cable shows the console target's `connectionGuide`. On Check, `target.wrong_family` / `target.other_connector` for
+>   the LTE MCU → "The J-Link is on the LTE connector. Move it to the APP connector." [Show me how] (→ Cable) and
+>   [Update LTE firmware…] (hand-off `lte-update`, ADR-0234). `target.not_connected` starts at Check. `diagnose(target)`
+>   always runs on the console target (ADR-0233). The `target.protected` hand-off is
+>   `open-flash-page:recover:app` (ADR-0236, 0033).
+> - **Probe step:** the Embedded `probe-picker` of 0035 (wizard mode: rows used by another tab disabled, no tab switch).
+> - **Troubleshooting:** the topic table is replaced by 0035 § C (derived from `docs/en/troubleshooting.md`, HARDWARIO
+>   review, ADR-0251). New codes: `probe.io_failed` (`no-probe`), `target.rtt_write_failed` (`console-stuck`),
+>   `probe.firmware_update_failed` (`probe-firmware`). New topics `other-connector` and `bluetooth` (manual, no codes).
+>   `modem-failed` hands off to `lte-update` instead of the Flash page.
+> - **`probe-firmware` topic:** [Update J-Link firmware…] from plan 0036 (ADR-0255; the tab is disconnected
+>   first, ADR-0246), the `hwio jlink update-firmware` CommandBlock as the alternative. This replaces the M8 pending
+>   amendment above (ADR-0132's pause/resume is superseded by ADR-0246).
+> - **BLE (ADR-0250):** the coverage test skips codes whose wizard is BlePairing while 0032 is not registered;
+>   the Connect wizard stays J-Link only. This replaces the M5 pending amendment above until 0032.
+> - **Coverage test:** `app/gui/tests/wizard/wizard_coverage_test.cpp` (0035 § D).
+> - **Choose device page:** the disabled "Help me fix this" of the J-Link empty state (`ChooseDevicePage.qml`, "Coming
+>   soon" tooltip) becomes [Guide me]; Help menu items already exist in `HelpMenu.qml`.
+> - **Names (0024):** `hio` → `hwio`, `hio::gui` → `hwio::gui`.
+> - **Texts:** cs + de + sk + pl with 0 unfinished (ADR-0248); step T5 reads "cs + de + sk + pl".
 
 ## Context
 
