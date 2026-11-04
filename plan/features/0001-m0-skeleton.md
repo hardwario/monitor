@@ -469,9 +469,11 @@ Phase D — GUI
 
 Phase E — CI and docs
 - [x] E1 `tools/check-lfs.sh`
-- [ ] E2 `.github/workflows/ci.yml` (all jobs green) — workflow written, actions pinned by SHA; not yet run on GitHub
+- [x] E2 `.github/workflows/ci.yml` (all jobs green) — workflow written, actions pinned by SHA *(0034: verified 2026-11-04 — CI run 41814387160 on `main` green, all jobs incl. macOS / Windows)*
 - [ ] E3 Fill in the CLAUDE.md "Commands" section; update `plan/roadmap.md` M0 → Done — Commands filled in and
   roadmap set to *In progress* (2026-10-09); M0 → Done after CI is green and the macOS/Windows manual checks pass
+  *(0034, 2026-11-04: Commands filled in, CI green (E2); still open: the macOS / Windows manual checks, moved to the
+  0015 F4 matrix. M0 stays In progress until they pass.)*
 
 ### Review fixes (code review 2026-10-09)
 

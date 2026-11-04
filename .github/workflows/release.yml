@@ -2,10 +2,12 @@
 # ADR-0123, ADR-0224, ADR-0231).
 #
 # A pushed tag v2.X.Y (or v2.X.Y-<pre-release>) builds, signs and checksums the packages and
-# creates a DRAFT GitHub release with generated notes; a maintainer reviews and publishes it
-# (packaging/RELEASE.md). Nothing is published automatically.
+# creates a DRAFT GitHub release with the notes of packaging/release-notes/<tag>.md (plan 0034 B3,
+# ADR-0239); a maintainer reviews and publishes it (packaging/RELEASE.md). Nothing is published
+# automatically.
 #
-#   gate          the version computed from the tag equals the tag, 0 unfinished Czech translations,
+#   gate          the version computed from the tag equals the tag, the release notes file exists,
+#                 0 unfinished Czech translations,
 #                 HWIO_TEST_OVERRIDES=OFF in the package configuration, and the full CI matrix
 #                 (ci.yml through workflow_call, incl. the unsigned package jobs); the build and
 #                 sign jobs run in parallel with it, publish waits for it (ADR-0231)
@@ -71,6 +73,13 @@ jobs:
           version="${tag#v}"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           if [[ "$version" == *-* ]]; then echo "prerelease=true" >> "$GITHUB_OUTPUT"; else echo "prerelease=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Release notes file (plan/features/0034 B3, ADR-0239)
+        run: |
+          notes="packaging/release-notes/${GITHUB_REF_NAME}.md"
+          if [ ! -s "$notes" ]; then
+            echo "::error file=$notes::Release notes missing: commit $notes (written by hand, packaging/RELEASE.md) before tagging ${GITHUB_REF_NAME}."
+            exit 1
+          fi
       - name: Install LLVM 21 and Qt build prerequisites
         # lld: the Linux linker (ADR-0207); the same retrying install as ci.yml.
         env:
@@ -86,9 +95,11 @@ jobs:
           # Actions cache (a poisoned entry would feed the signed binaries).
           cache: false
       - name: Package configuration (version from the tag, HWIO_TEST_OVERRIDES=OFF)
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           cmake --preset linux-package | tee configure.log
-          grep -q "HARDWARIO Monitor version: ${{ steps.version.outputs.version }} " configure.log
+          grep -q "HARDWARIO Monitor version: ${VERSION} " configure.log
           grep -q '^HWIO_TEST_OVERRIDES:BOOL=OFF$' build/linux-package/CMakeCache.txt
       - name: 0 unfinished Czech translations (ADR-0027)
         run: |
@@ -124,8 +135,10 @@ jobs:
             packaging/linux/check-packages.sh build/packages
           packaging/linux/smoke-clean.sh build/packages
       - name: Symbols (split DWARF, ADR-0123)
+        env:
+          VERSION: ${{ needs.gate.outputs.version }}
         run: |
-          version="${{ needs.gate.outputs.version }}"
+          version="${VERSION}"
           mkdir -p symbols
           docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:$PWD" -w "$PWD" hwio-monitor-build:22.04 bash -c '
             for exe in app/gui/hwio-monitor app/cli/hwio; do
@@ -167,11 +180,13 @@ jobs:
           cmake --build --preset macos-package
           cmake --install build/macos-package --prefix "$PWD/build/macos-install"
       - name: Symbols (.dSYM, ADR-0123)
+        env:
+          VERSION: ${{ needs.gate.outputs.version }}
         run: |
           mkdir -p symbols build/packages
           dsymutil build/macos-package/app/gui/hwio-monitor.app/Contents/MacOS/hwio-monitor -o symbols/hwio-monitor.dSYM
           dsymutil build/macos-package/app/cli/hwio -o symbols/hwio.dSYM
-          (cd symbols && zip -9 -r "../build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-debug-symbols-macos.zip" .)
+          (cd symbols && zip -9 -r "../build/packages/hwio-monitor-${VERSION}-debug-symbols-macos.zip" .)
       # ditto keeps the bundle's symlinks, modes and extended attributes; a plain artifact upload
       # loses them.
       - name: Bundle for the sign job
@@ -227,10 +242,12 @@ jobs:
           cmake --install build/windows-package --prefix "$PWD/build/windows-install"
       - name: Symbols (.pdb, ADR-0123)
         shell: pwsh
+        env:
+          VERSION: ${{ needs.gate.outputs.version }}
         run: |
           New-Item -ItemType Directory -Force symbols, build/packages | Out-Null
           Copy-Item build/windows-package/hwio-monitor.pdb, build/windows-package/hwio.pdb symbols/
-          Compress-Archive -Path symbols/* -DestinationPath "build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-debug-symbols-windows.zip"
+          Compress-Archive -Path symbols/* -DestinationPath "build/packages/hwio-monitor-$($env:VERSION)-debug-symbols-windows.zip"
       # The installed tree and what CPack needs to build the MSI from it in sign-windows
       # (packaging/windows/build-msi.ps1). The paths keep their place under build/.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -453,14 +470,23 @@ jobs:
       id-token: write     # build provenance attestations
       attestations: write
     steps:
+      # Only the release notes (plan 0034 B3); before the download, so the checkout never cleans dist/.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          lfs: false
+          sparse-checkout: packaging/release-notes
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: release-*
           path: dist
           merge-multiple: true
       - name: Every package and debug symbol archive
+        env:
+          VERSION: ${{ needs.gate.outputs.version }}
         run: |
-          v="${{ needs.gate.outputs.version }}"
+          v="${VERSION}"
           cd dist
           ls -l
           missing=0
@@ -482,9 +508,11 @@ jobs:
       - name: Draft release
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.gate.outputs.version }}
+          PRERELEASE: ${{ needs.gate.outputs.prerelease }}
         run: |
           prerelease=""
-          if [ "${{ needs.gate.outputs.prerelease }}" = "true" ]; then prerelease="--prerelease"; fi
+          if [ "${PRERELEASE}" = "true" ]; then prerelease="--prerelease"; fi
           gh release create "${GITHUB_REF_NAME}" dist/* --repo "${GITHUB_REPOSITORY}" \
-            --draft $prerelease --generate-notes \
-            --title "HARDWARIO Monitor ${{ needs.gate.outputs.version }}"
+            --draft $prerelease --notes-file "packaging/release-notes/${GITHUB_REF_NAME}.md" \
+            --title "HARDWARIO Monitor ${VERSION}"

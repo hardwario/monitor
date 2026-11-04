@@ -34,18 +34,8 @@ ColumnLayout {
         Accessible.name: text
     }
 
-    // Step 1: the LTE firmware.
-    SourceCard {
-        objectName: "lteSourceCard"
-        Layout.fillWidth: true
-        visible: step.stage === LteUpdateWizard.Firmware && step.vm !== null
-        source: step.vm ? step.vm.lteSource : null
-        onBrowseRequested: {
-            fileDialog.target = step.vm.lteSource;
-            fileDialog.open();
-        }
-    }
-
+    // Plan 0034 (B4): the missing prerequisite above the firmware card, visible without scrolling
+    // at 960 x 600 (it is why Next is disabled).
     Rectangle {
         objectName: "ltePrerequisite"
         Layout.fillWidth: true
@@ -84,6 +74,19 @@ ColumnLayout {
                 text: qsTr("How to install ↗")
                 onClicked: Qt.openUrlExternally(step.vm.nrfUtilInstallUrl)
             }
+        }
+    }
+
+    // Step 1: the LTE firmware.
+    SourceCard {
+        objectName: "lteSourceCard"
+        Layout.fillWidth: true
+        number: 0 // plan 0034 (B4): the Flash page's step number, not the wizard's
+        visible: step.stage === LteUpdateWizard.Firmware && step.vm !== null
+        source: step.vm ? step.vm.lteSource : null
+        onBrowseRequested: {
+            fileDialog.target = step.vm.lteSource;
+            fileDialog.open();
         }
     }
 
@@ -147,6 +150,7 @@ ColumnLayout {
         SourceCard {
             objectName: "appSourceCard"
             Layout.fillWidth: true
+            number: 0 // plan 0034 (B4): no Flash page step number inside the wizard
             visible: step.vm !== null && !step.vm.useBackup
             source: step.vm ? step.vm.appSource : null
             onBrowseRequested: {

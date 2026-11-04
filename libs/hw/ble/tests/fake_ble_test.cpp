@@ -171,7 +171,7 @@ TEST(BleScanner, RssiSmoothingIsATimeBasedMovingAverage) {
 }
 
 // Plan 0033 (ADR-0235): noisy advertisements are averaged; the order follows the average and the
-// last value stays available (CLI JSON rssi_last).
+// last value stays available (CLI JSON rssiLast).
 TEST(BleScanner, NoisyRssiIsSmoothedAndSortedByTheAverage) {
     const ScanResult result = scan("noisy.json", false, 600ms);
     ASSERT_EQ(result.devices.size(), 30U);

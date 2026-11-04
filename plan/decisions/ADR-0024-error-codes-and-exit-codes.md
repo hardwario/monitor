@@ -1,6 +1,6 @@
 # ADR-0024 — Error codes, categories and CLI exit codes
 
-- **Status:** Accepted
+- **Status:** Accepted; the meaning of exit code 130 widened by ADR-0238 (cancelled or not completed)
 - **Date:** 2026-10-09
 - **Decided by:** Matej Strnad (M0 planning session)
 

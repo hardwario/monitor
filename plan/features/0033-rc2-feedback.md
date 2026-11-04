@@ -275,7 +275,8 @@ What was built, per phase, and the small choices the plan did not settle (to che
   `BlePickerViewModel::Hooks::devices` is a test seam (like `now`). Fake BLE: `rssiJitter` (deterministic LCG noise),
   scenario `tests/ble_scenarios/noisy.json` (30 devices). CLI: `rssi` is the rounded average, `rssi_last` the last
   value — **open point:** the other JSON keys of `ble scan` are camelCase (`nusAdvertised`, `inUseBy`); `rssi_last`
-  follows D5 literally.
+  follows D5 literally. *Resolved 2026-11-04 by user decision (plan [0034](0034-pre-release-fixes.md) H1): the key is
+  `rssiLast`, deviating literally from D5.*
 - **D (ADR-0233).** `ErrorCode::TargetOtherConnector` (`target.other_connector`, category Target, wizard LteUpdate);
   `WizardId::LteUpdate` ("lte-update"). The family check runs only in sessions that attach RTT (console sessions: GUI
   tabs, `hwio chester app console`); flash-style CLI sessions keep their `target.wrong_family` behaviour. It reads FICR
