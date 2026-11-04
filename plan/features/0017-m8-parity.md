@@ -59,8 +59,8 @@ step, with the CLI command still shown as an alternative.
 
 ## CLI
 
-- `hio --dump-command-tree` (hidden, JSON of the CLI11 command tree; used by the compat test only).
-- No change to `hio jlink update-firmware`; it and the GUI share the backend operation.
+- `hwio --dump-command-tree` (hidden, JSON of the CLI11 command tree; used by the compat test only).
+- No change to `hwio jlink update-firmware`; it and the GUI share the backend operation.
 - Any compat gap found in phase C is fixed as an alias or option (CLI11 aliases) unless the user accepts it as a
   difference.
 
@@ -102,11 +102,11 @@ this plan (new checklist item) or written into the decisions table as an accepte
   `canUpdate`, `blockedReason`; `Q_INVOKABLE requestUpdate()` → dialog; `confirmUpdate()`.
 - Flow on the session owner thread: if a `DeviceSession` is open on the probe → `pauseForProbeMaintenance()` (stop
   RTT, release the probe but keep the probe lock, ADR-0058) → `updateFirmware()` via the existing backend operation →
-  re-open → re-attach → resume. Without a session: short-lived probe session as `hio jlink update-firmware` does.
+  re-open → re-attach → resume. Without a session: short-lived probe session as `hwio jlink update-firmware` does.
 - Blocked when MCP holds the device (ADR-0105) or a flash/erase operation is running ("Wait for the current operation
   to finish").
 - New error `probe.firmware_update_failed` (category probe, EN + CS, troubleshooting `probe-firmware`); CLI
-  `hio jlink update-firmware` maps the same failure to it (exit 5).
+  `hwio jlink update-firmware` maps the same failure to it (exit 5).
 - Banner suppression "Not now": in-memory set of probe SNs (bounded 32).
 
 ### C. CLI compatibility (ADR-0139)
@@ -120,7 +120,7 @@ this plan (new checklist item) or written into the decisions table as an accepte
 ### D. HIL CI (ADR-0140)
 
 - `.github/workflows/hil.yml` (dispatch + `v2.*` tags), environment `hil`, runner labels `self-hosted, hil, chester`.
-- `tests/hil/` CTest label `hil`: scripts drive `hio` with `--json` and assert results; fixtures: a known-good
+- `tests/hil/` CTest label `hil`: scripts drive `hwio` with `--json` and assert results; fixtures: a known-good
   CHESTER app hex (built from a public HARDWARIO sample, LFS) and a catalog id.
 - `hil/README.md`: runner setup (OS, J-Link Software, nRF Util, udev, service user, power switch), maintenance.
 
@@ -130,9 +130,9 @@ this plan (new checklist item) or written into the decisions table as an accepte
 generator and no `docs_cli_fresh` CTest (ADR-0220..0222); the `docsUrl()` anchors wait for docs.hardwario.com.*
 
 
-- `docs/` pages listed in ADR-0138; `cli.md` generated from `hio --help` per command (CTest `docs_cli_fresh` fails
-  when stale); `troubleshooting.md` anchors = `hio::Error` codes (CTest: every code in the registry has an anchor).
-- `libs/core` `docsUrl(DocsTopic)` table → `https://github.com/hardwario/hio-monitor/blob/main/docs/<page>.md#<anchor>`;
+- `docs/` pages listed in ADR-0138; `cli.md` generated from `hwio --help` per command (CTest `docs_cli_fresh` fails
+  when stale); `troubleshooting.md` anchors = `hwio::Error` codes (CTest: every code in the registry has an anchor).
+- `libs/core` `docsUrl(DocsTopic)` table → `https://github.com/hardwario/monitor/blob/main/docs/<page>.md#<anchor>`;
   used by About, wizards and error panels ("More help").
 
 ## Decisions requiring user confirmation

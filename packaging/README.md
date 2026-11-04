@@ -124,10 +124,11 @@ their vendors' signatures.
 
 - `ci.yml` (pull requests, `main`): `package-linux`, `package-macos`, `package-windows` build unsigned packages
   after the normal jobs, run the checks above and upload them as artifacts for 7 days.
-- `release.yml` (tags `v2.*.*`): gate (version = tag, 0 unfinished Czech translations, `HWIO_TEST_OVERRIDES=OFF`,
+- `release.yml` (tags `v2.*.*`): gate (version = tag, `packaging/release-notes/<tag>.md` present, 0 unfinished
+  Czech translations, `HWIO_TEST_OVERRIDES=OFF`,
   the whole `ci.yml` through `workflow_call`); build jobs `linux`, `macos`, `windows` (unsigned bundle and
   installed tree as `unsigned-*` artifacts, symbol archives); sign jobs `sign-macos`, `sign-windows`; `publish`
-  (every package present, `SHA256SUMS`, build provenance attestations, **draft** release). See
+  (every package present, `SHA256SUMS`, build provenance attestations, **draft** release with the notes file). See
   [RELEASE.md](RELEASE.md).
 - Only the sign jobs run in the environment `signing` and see its secrets or an OIDC token. They run this
   repository's packaging scripts and the packaging tools (create-dmg, CPack, WiX), never a compiler or a

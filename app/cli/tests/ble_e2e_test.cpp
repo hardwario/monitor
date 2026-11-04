@@ -84,7 +84,7 @@ protected:
 };
 
 // Plan 0033 (ADR-0235): noisy advertisements - `rssi` is the average over the scan (sorted by
-// it), `rssi_last` the last measured value.
+// it), `rssiLast` the last measured value.
 TEST_F(FakeBleCli, ScanShowsTheSmoothedRssi) {
     const RunResult result =
         hwio("noisy.json", {QStringLiteral("--json"), QStringLiteral("ble"), QStringLiteral("scan"),
@@ -98,7 +98,7 @@ TEST_F(FakeBleCli, ScanShowsTheSmoothedRssi) {
         const QJsonObject row = devices.at(i).toObject();
         const int rssi = row.value(QStringLiteral("rssi")).toInt();
         EXPECT_LT(rssi, 0);
-        EXPECT_LT(row.value(QStringLiteral("rssi_last")).toInt(), 0);
+        EXPECT_LT(row.value(QStringLiteral("rssiLast")).toInt(), 0);
         if (i > 0) {
             EXPECT_GE(previous, rssi); // sorted by the (unrounded) average
         }
@@ -120,7 +120,7 @@ TEST_F(FakeBleCli, ScanListsProfileDevicesByRssi) {
     EXPECT_EQ(first.value(QStringLiteral("id")).toString(), device);
     EXPECT_EQ(first.value(QStringLiteral("name")).toString(), QStringLiteral("CHESTER-ABC123"));
     EXPECT_EQ(first.value(QStringLiteral("rssi")).toInt(), -58);
-    EXPECT_EQ(first.value(QStringLiteral("rssi_last")).toInt(), -58); // plan 0033 (D5)
+    EXPECT_EQ(first.value(QStringLiteral("rssiLast")).toInt(), -58); // plan 0033 (D5)
     EXPECT_TRUE(first.value(QStringLiteral("nusAdvertised")).toBool());
     EXPECT_EQ(first.value(QStringLiteral("profile")).toString(), QStringLiteral("chester"));
     EXPECT_TRUE(first.value(QStringLiteral("inUseBy")).isNull());

@@ -301,37 +301,45 @@ No new `hio::Error` codes at runtime except in 0016. Package-time failures are C
   checked by a libstdc++ 13 build (phase C1 container).
 
 **Phase A — common install tree**
-- [ ] A1 `cmake/HioPackaging.cmake`: install rules per OS, `qt_generate_deploy_qml_app_script`, Qt `cs`
+- [x] A1 `cmake/HioPackaging.cmake`: install rules per OS, `qt_generate_deploy_qml_app_script`, Qt `cs`
   translations, `qt.conf`, `HIO_PACKAGE_KIND` + `package_kind.h`, `*-package` presets.
-- [ ] A2 `--self-test` GUI option and the installed-tree CTest (offscreen) on all three OSes.
-- [ ] A3 Icons (v1 icon reused), `.rc` + VERSIONINFO, `setDesktopFileName`, AppUserModelID, Info.plist keys.
+- [x] A2 `--self-test` GUI option and the installed-tree CTest (offscreen) on all three OSes.
+- [x] A3 Icons (v1 icon reused), `.rc` + VERSIONINFO, `setDesktopFileName`, AppUserModelID, Info.plist keys.
 - [x] A4 Licences: `packaging/common/licenses/`, `licenses.cmake`, `THIRD-PARTY-NOTICES.txt`, CPM coverage CTest.
 
 **Phase B — crash handler**
-- [ ] B1 `hio::crash` POSIX + Windows, unit tests with a crashing child process (each signal / exception), pruning.
+- [x] B1 `hio::crash` POSIX + Windows, unit tests with a crashing child process (each signal / exception), pruning.
 - [x] B2 Diagnostic report `crashes/` (ADR-0075 bounds), CLI `hio diag report` test.
 - [x] B3 GUI `CrashNoticeBanner` + view-model property, Qt Quick test, translations.
 
 **Phase C — Linux**
-- [ ] C1 Containerfile + CI build in the container; check `objdump -T` max `GLIBC_` ≤ 2.35.
+- [x] C1 Containerfile + CI build in the container; check `objdump -T` max `GLIBC_` ≤ 2.35.
 - [x] C2 .deb (CPack DEB, symlinks, udev rule, postinst/postrm, desktop/metainfo/icons), lintian clean.
 - [x] C3 AppImage (AppDir, linuxdeploy, AppRun dispatch + checkrt, appimagetool).
 
 **Phase D — macOS**
-- [ ] D1 Bundle layout, `hio` inside, entitlements, inside-out signing script, verify (ad-hoc in PR CI).
-- [ ] D2 DMG layout, notarization + stapling (release only), entitlement CTest.
+- [x] D1 Bundle layout, `hio` inside, entitlements, inside-out signing script, verify (ad-hoc in PR CI).
+- [x] D2 DMG layout, notarization + stapling (release only), entitlement CTest.
 
 **Phase E — Windows**
-- [ ] E1 windeployqt + app-local MSVC runtime, WiX via CPack, fragments (PATH, shortcuts, downgrade), ICE validation.
-- [ ] E2 Trusted Signing integration (exe/dll before CPack, MSI after), `signtool verify`.
+- [x] E1 windeployqt + app-local MSVC runtime, WiX via CPack, fragments (PATH, shortcuts, downgrade), ICE validation.
+- [x] E2 Trusted Signing integration (exe/dll before CPack, MSI after), `signtool verify`.
 
 **Phase F — CI and release**
-- [ ] F1 `package-<os>` jobs in `ci.yml`.
-- [ ] F2 `release.yml` (gate, builds, symbols, checksums, attestations, draft release), `release` environment,
-  tag protection rule (repository setting — done by a maintainer, listed in RELEASE.md).
-- [ ] F3 `packaging/README.md`, `packaging/RELEASE.md`; dry-run with a `v2.0.0-rc.0` tag on a fork or with signing
+- [x] F1 `package-<os>` jobs in `ci.yml`.
+- [x] F2 `release.yml` (gate, builds, symbols, checksums, attestations, draft release), `release` environment
+  (since 0031: `signing`).
+- [ ] F2b Tag protection rule (repository setting — done by a maintainer, listed in RELEASE.md); split out of F2 by
+  0034, not verifiable from the repository.
+- [x] F3 `packaging/README.md`, `packaging/RELEASE.md`; dry-run with a `v2.0.0-rc.0` tag on a fork or with signing
   steps in "dry-run" mode.
 - [ ] F4 Manual verification matrix (below) on the RC; record results in this plan.
+- *0034 (2026-11-04): A1–F3 ticked after checking the code and CI — `cmake/HWioPackaging.cmake` (renamed by 0024),
+  `--self-test` + installed-tree self-test in the three `package-<os>` jobs, icons / `version.rc.in` /
+  `setDesktopFileName` / AppUserModelID, `libs/core` crash handler + `crash_handler_test`, Containerfile build and the
+  `GLIBC_2.35` check in `check-packages.sh`, ad-hoc signed bundle and entitlements in PR CI, WiX MSI with ICE
+  validation, Azure Artifact Signing (0031), `release.yml` and the docs; the real `v2.0.0-rc.2` release run
+  (41684668499) stands in for the F3 dry-run. F2b (tag protection rule) and F4 (manual matrix) stay open.*
 
 ## Tests and verification
 

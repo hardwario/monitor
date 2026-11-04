@@ -16,19 +16,46 @@ Item {
     property DeviceTabViewModel tab
     property SettingsViewModel vm
 
+    // The section still to scroll to (plan 0034 B2): kept until the page is laid out.
+    property string pendingSection: ""
+
     // 0021 (ADR-0172): scrolls to a section ("Open Settings" of an error panel, a wizard link).
     function showSection(sectionId: string) {
         if (sectionId === "")
             return;
+        page.pendingSection = sectionId;
+        page.scrollToPending();
+    }
+
+    // Scrolls only once the section and the content below it are laid out (plan 0034 B2: on the
+    // first open the Loaders are not laid out yet, contentY would clamp to 0); retried on layout
+    // changes, and only a real scroll clears the request.
+    function scrollToPending() {
+        if (page.pendingSection === "")
+            return;
+        const flickable = scroll.contentItem as Flickable;
         for (let i = 0; i < sections.count; ++i) {
             const item = sections.itemAt(i);
-            if (item !== null && item.objectName === "section_" + sectionId) {
-                const flickable = scroll.contentItem as Flickable;
-                flickable.contentY = Math.max(0, Math.min(item.y, flickable.contentHeight - flickable.height));
-                AppViewModel.clearSettingsSection(); // used: never re-applied later (review F8)
-                return;
-            }
+            if (item === null || item.objectName !== "section_" + page.pendingSection)
+                continue;
+            if (item.y <= 0 || scroll.availableWidth <= 0 || flickable.height <= 0
+                    || flickable.contentHeight < item.y + item.height)
+                return; // not laid out yet: retried by the layout change
+            flickable.contentY = Math.max(0, Math.min(item.y, flickable.contentHeight - flickable.height));
+            page.pendingSection = "";
+            AppViewModel.clearSettingsSection(); // used: never re-applied later (review F8)
+            return;
         }
+        if (sections.count > 0) {
+            // An unknown section id: nothing to scroll to, the request is dropped.
+            page.pendingSection = "";
+            AppViewModel.clearSettingsSection();
+        }
+    }
+
+    function retryScroll() {
+        if (page.pendingSection !== "")
+            Qt.callLater(page.scrollToPending);
     }
 
     objectName: "settingsPage"
@@ -44,6 +71,18 @@ Item {
 
         function onSettingsSectionRequested(sectionId: string) {
             Qt.callLater(page.showSection, sectionId);
+        }
+    }
+
+    Connections {
+        target: scroll.contentItem as Flickable
+
+        function onContentHeightChanged() {
+            page.retryScroll();
+        }
+
+        function onHeightChanged() {
+            page.retryScroll();
         }
     }
 
@@ -86,6 +125,7 @@ Item {
             id: scroll
 
             objectName: "settingsScroll"
+            onAvailableWidthChanged: page.retryScroll()
             Layout.fillWidth: true
             Layout.fillHeight: true
             contentWidth: availableWidth
@@ -122,6 +162,7 @@ Item {
                         objectName: "section_" + section.modelData.sectionId
                         Layout.fillWidth: true
                         spacing: Theme.spacingS
+                        onYChanged: page.retryScroll()
 
                         Label {
                             textFormat: Text.PlainText

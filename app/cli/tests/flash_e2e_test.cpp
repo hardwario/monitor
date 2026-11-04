@@ -559,6 +559,49 @@ TEST_F(FlashCli, GuidedLteFlashWithScriptedConnectorMoves) {
               -1)
         << read.out;
 }
+
+// Plan 0034 (B1, ADR-0238): an empty application flash needs no copy; the LTE MCU is updated, the
+// application MCU stays empty, and the command is not completed - exit code 130 with what to do.
+TEST_F(FlashCli, GuidedLteFlashWithoutACopyExitsNonZero) {
+    writeFile(QStringLiteral("lte.hex"), QByteArray::fromStdString(appHex()));
+    writeFile(QStringLiteral("connector"), "app");
+    useScenario(QStringLiteral(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+        "connectors": {"file": "%1", "chips": {
+          "app": {},
+          "lte": {"family": "nrf91"}}}}]})")
+                    .arg(path(QStringLiteral("connector"))));
+    QProcessEnvironment env = fakeEnvironment();
+    env.insert(QStringLiteral("HWIO_TEST_INTERACTIVE"), QStringLiteral("1"));
+    QProcess process;
+    process.setProcessEnvironment(env);
+    process.start(QStringLiteral(HWIO_CLI_EXECUTABLE),
+                  {QStringLiteral("chester"), QStringLiteral("lte"), QStringLiteral("flash"),
+                   QStringLiteral("--guided"), path(QStringLiteral("lte.hex"))});
+    ASSERT_TRUE(process.waitForStarted(10000));
+    QByteArray err;
+    const auto waitFor = [&](const char* text) {
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+        while (!err.contains(text) && std::chrono::steady_clock::now() < deadline &&
+               process.state() != QProcess::NotRunning) {
+            process.waitForReadyRead(50);
+            err += process.readAllStandardError();
+        }
+        return err.contains(text);
+    };
+    ASSERT_TRUE(waitFor("Connect the J-Link cable to the LTE connector.")) << err.toStdString();
+    writeFile(QStringLiteral("connector"), "lte");
+    ASSERT_TRUE(waitFor("This is the LTE connector. Move the cable to the APP connector."))
+        << err.toStdString();
+    writeFile(QStringLiteral("connector"), "app");
+    ASSERT_TRUE(process.waitForFinished(60000));
+    err += process.readAllStandardError();
+    const std::string out = process.readAllStandardOutput().toStdString();
+    EXPECT_EQ(process.exitCode(), 130) << out << err.toStdString();
+    EXPECT_NE(err.indexOf("The LTE firmware was updated. The application MCU is empty."), -1)
+        << err.toStdString();
+    EXPECT_NE(err.indexOf("Flash an application with `hwio chester app flash`."), -1)
+        << err.toStdString();
+}
 #endif
 
 TEST_F(FlashCli, NrfUtilMissing) {

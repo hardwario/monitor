@@ -143,6 +143,33 @@ TestCase {
         verify(!find("defaultSpeedWarning"));
     }
 
+    // Plan 0034 (B2): "Open Settings" with a section while Settings is not open yet: the page is
+    // created, laid out, and then scrolled to the section; the request is cleared only after that.
+    function test_sectionOnFirstOpen() {
+        AppViewModel.closeGlobalPage();
+        tryVerify(() => findAll(window.contentItem, "settingsPage").length === 0);
+        AppViewModel.openSettings("nrfutil");
+        tryVerify(() => find("settingsPage") !== null);
+        const flickable = findAll(window.contentItem, "settingsScroll")[0].contentItem;
+        tryVerify(() => find("section_nrfutil") !== null);
+        const section = find("section_nrfutil");
+        tryVerify(() => section.y > 0 && flickable.contentY > 0
+                  && Math.abs(flickable.contentY - Math.min(section.y, flickable.contentHeight - flickable.height)) < 1,
+                  5000, "scrolled to the nRF Util section");
+        compare(AppViewModel.settingsSection, "");
+    }
+
+    // Plan 0034 (B2): an unknown section id is dropped (no scroll, request cleared).
+    function test_unknownSection() {
+        const page = find("settingsPage");
+        const flickable = findAll(window.contentItem, "settingsScroll")[0].contentItem;
+        flickable.contentY = 0;
+        AppViewModel.openSettings("no-such-section");
+        tryCompare(AppViewModel, "settingsSection", "");
+        compare(page.pendingSection, "");
+        compare(flickable.contentY, 0);
+    }
+
     function test_themes_data() {
         return [{ tag: "light", theme: "light" }, { tag: "dark", theme: "dark" }];
     }
