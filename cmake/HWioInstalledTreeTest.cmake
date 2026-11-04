@@ -84,11 +84,13 @@ if(NOT _result EQUAL 0)
 endif()
 message(STATUS "hwio-monitor --self-test: OK\n${_output}")
 
-# Czech Qt catalog and licences.
-file(GLOB_RECURSE _qtbase_cs "${HWIO_PREFIX}/*qtbase_cs.qm")
-if(NOT _qtbase_cs)
-    message(FATAL_ERROR "qtbase_cs.qm is not in the installed tree (${HWIO_PREFIX}).")
-endif()
+# Qt catalogs of the UI languages (ADR-0211) and licences.
+foreach(_locale IN ITEMS cs de pl sk)
+    file(GLOB_RECURSE _qtbase "${HWIO_PREFIX}/*qtbase_${_locale}.qm")
+    if(NOT _qtbase)
+        message(FATAL_ERROR "qtbase_${_locale}.qm is not in the installed tree (${HWIO_PREFIX}).")
+    endif()
+endforeach()
 foreach(_licence LICENSE THIRD-PARTY-NOTICES.txt Qt-LGPL-3.0.txt Qt-SOURCE.txt)
     # The file at any depth (Contents/Resources/licenses/ in the macOS bundle), in a licenses/.
     file(GLOB_RECURSE _found "${HWIO_PREFIX}/${_licence}")

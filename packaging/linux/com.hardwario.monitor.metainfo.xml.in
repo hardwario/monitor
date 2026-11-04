@@ -9,6 +9,9 @@
   <name>HARDWARIO Monitor</name>
   <summary>Console, log and flashing tool for HARDWARIO devices</summary>
   <summary xml:lang="cs">Konzole, logy a programování zařízení HARDWARIO</summary>
+  <summary xml:lang="de">Konsole, Protokolle und Flashen für HARDWARIO-Geräte</summary>
+  <summary xml:lang="pl">Konsola, dzienniki i wgrywanie firmware urządzeń HARDWARIO</summary>
+  <summary xml:lang="sk">Konzola, záznamy a programovanie zariadení HARDWARIO</summary>
   <description>
     <p>
       HARDWARIO Monitor connects to HARDWARIO devices such as CHESTER through a SEGGER J-Link probe

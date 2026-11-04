@@ -18,7 +18,7 @@ names). No package contains SEGGER J-Link Software, its USB driver or nRF Util (
 ```
 cmake/HWioPackaging.cmake      install rules per OS, HWIO_PACKAGE_KIND, CPack, installed-tree CTest
 cmake/HWioDeploy.cmake.in      Qt deployment at install time (Linux: explicit plugin / QML module lists;
-                              macOS: macdeployqt; Windows: windeployqt), Czech Qt catalogs
+                              macOS: macdeployqt; Windows: windeployqt), Qt catalogs of cs/de/pl/sk
 cmake/HWioInstalledTreeTest.cmake  CTest Packaging.InstalledTreeSelfTest
 packaging/common/icons/       the v1 icon (hwio-monitor.icns / .ico from branch main) + hicolor PNGs (extract.sh)
 packaging/common/licenses/    third-party licence texts; licenses.cmake installs them + generated notices
@@ -125,7 +125,7 @@ their vendors' signatures.
 - `ci.yml` (pull requests, `main`): `package-linux`, `package-macos`, `package-windows` build unsigned packages
   after the normal jobs, run the checks above and upload them as artifacts for 7 days.
 - `release.yml` (tags `v2.*.*`): gate (version = tag, `packaging/release-notes/<tag>.md` present, 0 unfinished
-  Czech translations, `HWIO_TEST_OVERRIDES=OFF`,
+  translations in every language, `HWIO_TEST_OVERRIDES=OFF`,
   the whole `ci.yml` through `workflow_call`); build jobs `linux`, `macos`, `windows` (unsigned bundle and
   installed tree as `unsigned-*` artifacts, symbol archives); sign jobs `sign-macos`, `sign-windows`; `publish`
   (every package present, `SHA256SUMS`, build provenance attestations, **draft** release with the notes file). See

@@ -50,7 +50,8 @@ TestCase {
 
     function test_languages() {
         const codes = AppViewModel.availableLanguages.map(language => language.code);
-        compare(codes, ["system", "en", "cs"]);
+        // ADR-0210: en, cs, then the further languages by code (plan 0030).
+        compare(codes, ["system", "en", "cs", "de", "pl", "sk"]);
     }
 
     function test_switchToCzechAndBack() {

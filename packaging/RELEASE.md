@@ -23,7 +23,8 @@ it. Nothing in this repository creates tags or publishes releases by itself.
 
 ## Release gates (all must hold before tagging)
 
-- [ ] `check_translations`: 0 unfinished Czech entries (ADR-0027; the gate job fails otherwise).
+- [ ] `check_translations`: 0 unfinished entries in every language (cs, de, pl, sk; ADR-0208; the gate job fails
+      otherwise).
 - [ ] CI is green on the commit to be tagged (`main` or the release branch), including the three
       `package-<os>` jobs.
 - [ ] Manual verification matrix of plan 0015 (F4) on the release candidate: Ubuntu 22.04 AppImage, Ubuntu
