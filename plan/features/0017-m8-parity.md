@@ -3,7 +3,7 @@
 - **Status:** Draft
 - **Milestone:** M8 (plan 1 of 2, ADR-0131; followed by [0018](0018-m8-beta-release-retirement.md))
 - **Author:** Matej Strnad (with Claude), 2026-10-19
-- **Related ADRs:** ADR-0006, ADR-0012, ADR-0017, ADR-0024, ADR-0026, ADR-0075, ADR-0099, ADR-0105, ADR-0106,
+- **Related ADRs:** ADR-0246, ADR-0247 (2026-11-04), ADR-0006, ADR-0012, ADR-0017, ADR-0024, ADR-0026, ADR-0075, ADR-0099, ADR-0105, ADR-0106,
   ADR-0125, ADR-0131, ADR-0132, ADR-0137–ADR-0140
 - **Depends on:** M1–M7 implemented and merged into `v2-dev` (the audit runs on the integrated build). Phases C
   (CLI compat) and E (docs) can start as soon as the CLI of M1–M6 is merged; phase D needs the runner hardware.
@@ -21,7 +21,8 @@ manual, and users have no documentation outside the app.
 **Goals**
 1. Audit every row of the 0002 parity checklist on the integrated `v2-dev` build on Linux, macOS and Windows, with
    evidence; fix gaps or record them as accepted differences approved by the user.
-2. J-Link firmware update in the GUI (ADR-0132).
+2. ~~J-Link firmware update in the GUI (ADR-0132).~~ *Moved to plan [0036](0036-jlink-firmware-update-gui.md) on
+   2026-11-04 (ADR-0246: disconnect first, no session pause/resume).*
 3. CLI compatibility snapshot, expectations and CTest; `docs/cli-migration.md` (ADR-0139).
 4. HIL workflow on a self-hosted runner, part of the release gate (ADR-0140).
 5. User documentation in `docs/` and the `docsUrl()` link table (ADR-0138).
@@ -33,7 +34,9 @@ manual, and users have no documentation outside the app.
 
 ## User experience
 
-**J-Link firmware update (ADR-0132)**
+**J-Link firmware update (ADR-0132)** — *moved to [0036](0036-jlink-firmware-update-gui.md) (2026-11-04); the dialog
+text below is superseded there: the tab is disconnected first (ADR-0246), so "The console of this device is paused and
+resumes afterwards" no longer applies.*
 
 Banner on the device bar after connect when the probe firmware is outdated:
 
@@ -88,8 +91,8 @@ test name, manual check id or screenshot under LFS).
 | Flash by catalog ID, cache | 0003, 0006 | catalog tests | HIL |
 | Flash log | 0003, 0006 | — | GUI |
 | Update check | 0016 | update tests | packaged build |
-| Doc / HARDWARIO links | 0006, ADR-0138 | link table test (every `docsUrl` topic has a page) | GUI |
-| J-Link firmware outdated → offer update | ADR-0132 (this plan) | view-model tests | HIL manual with an outdated probe |
+| Doc / HARDWARIO links | 0006, ADR-0138, ADR-0247 ([0037](0037-docs-links.md)) | link table test (every `docsUrl` topic has a page) | GUI |
+| J-Link firmware outdated → offer update | ADR-0132, ADR-0246 ([0036](0036-jlink-firmware-update-gui.md)) | view-model tests | HIL manual with an outdated probe |
 | py-hardwario behaviour (program/erase/recover/LTE/RTT/PIB read/catalog) | 0002, 0003 | backend tests | HIL suite (D) |
 | Old-app and py-hardwario defects must not recur | all | regression tests named after the defect | review |
 
@@ -97,6 +100,10 @@ Rules: a row is ticked only with evidence on all three OSes (BLE: OSes where M5 
 this plan (new checklist item) or written into the decisions table as an accepted difference with the user's answer.
 
 ### B. J-Link firmware update in the GUI (ADR-0132)
+
+*Moved to plan [0036](0036-jlink-firmware-update-gui.md) on 2026-11-04. ADR-0246 (decided by the user) supersedes the
+pause/resume flow below: the GUI updates only a probe that no tab uses (banner "Disconnect and update"), with the
+existing `device::updateProbeFirmware()`. The text below is kept for history.*
 
 - `ProbeFirmwareViewModel` (app/gui): `status` (Current/Outdated/Newer/Unknown), `currentString`, `availableString`,
   `canUpdate`, `blockedReason`; `Q_INVOKABLE requestUpdate()` → dialog; `confirmUpdate()`.
@@ -149,7 +156,7 @@ generator and no `docs_cli_fresh` CTest (ADR-0220..0222); the `docsUrl()` anchor
 | py-hardwario deprecation | out of scope / notice | out of scope | ADR-0137 |
 | Czech user documentation | English only in v2.0 / EN + CS | English only in v2.0 | ADR-0138 |
 | Old search keys `n` / Shift+`n` (v1) | add as aliases in the log view / Enter + Shift+Enter only | add as aliases (log view focus, search active) | — |
-| Minor defaults: banner "Not now" per probe until restart; session paused and resumed around the update; blocked while MCP or a flash runs; error `probe.firmware_update_failed`; HIL suite contents and 20-min bound; modem flash and recover only on dispatch; `docsUrl` points to GitHub `main`; parity row ticked only with evidence on all three OSes; `--dump-command-tree` hidden option | accept / change | accepted (2026-10-19) | — |
+| Minor defaults: banner "Not now" per probe until restart; session paused and resumed around the update (superseded by ADR-0246); blocked while MCP or a flash runs; error `probe.firmware_update_failed`; HIL suite contents and 20-min bound; modem flash and recover only on dispatch; `docsUrl` points to GitHub `main` (superseded by ADR-0247: the release tag); parity row ticked only with evidence on all three OSes; `--dump-command-tree` hidden option | accept / change | accepted (2026-10-19) | — |
 
 ## Implementation steps
 
@@ -157,15 +164,15 @@ generator and no `docs_cli_fresh` CTest (ADR-0220..0222); the `docsUrl()` anchor
 - [ ] A2 Manual parity session on Linux, macOS, Windows; gaps → items below or decision rows.
 - [ ] A3 v1 search keys: `n` / Shift+`n` jump to next / previous match while the log view has focus and a search is
   active (not in text fields); Qt Quick test; shortcut overlay (F1) updated.
-- [ ] B1 `pauseForProbeMaintenance` / resume in the session layer + tests on the fake J-Link (update success, failure,
+- [ ] ~~B1~~ dropped (ADR-0246, 2026-11-04) — `pauseForProbeMaintenance` / resume in the session layer + tests on the fake J-Link (update success, failure,
   unplug mid-update simulated by the fake).
-- [ ] B2 `ProbeFirmwareViewModel`, banner, dialog, doctor Fix, troubleshooting step; Qt Quick tests; translations.
+- [ ] ~~B2~~ moved to [0036](0036-jlink-firmware-update-gui.md) — `ProbeFirmwareViewModel`, banner, dialog, doctor Fix, troubleshooting step; Qt Quick tests; translations.
 - [ ] C1 Extract script + snapshot; `--dump-command-tree`; expectations; CTest `cli_compat`.
 - [ ] C2 Resolve listed items (aliases/options) or decision rows; `docs/cli-migration.md` generator.
 - [ ] D1 Runner set-up (HARDWARIO), `hil/README.md`.
 - [ ] D2 `tests/hil/` suite, `hil.yml`, release gate wiring with `release.yml`.
 - [ ] E1 `docs/` pages, `docsUrl` table + tests, `cli.md` generator + freshness test.
-- [ ] E2 Links from About, wizards and error panels.
+- [ ] ~~E2~~ moved to [0037](0037-docs-links.md) (ADR-0247) — Links from About, wizards and error panels.
 - [ ] F1 All parity rows ticked (0002 updated), plan verification record complete.
 
 ## Tests and verification

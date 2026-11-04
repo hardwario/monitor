@@ -1,6 +1,6 @@
 # 0008 — M4 first-run setup wizard
 
-- **Status:** Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments)
+- **Status:** Approved (re-approved with the [0035](0035-wizards-rebaseline-2-0-0.md) amendments, 2026-11-04). Previously: Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments)
 - **Milestone:** M4 (plan 2 of 4, ADR-0065)
 - **Author:** Matej Strnad (with Claude)
 - **Related ADRs:** ADR-0006, ADR-0016, ADR-0025, ADR-0027, ADR-0029, ADR-0042, ADR-0066, ADR-0067, ADR-0068,
@@ -14,6 +14,31 @@
 > this plan needs re-approval):** optional **Bluetooth** step after nRF Util (adapter, macOS permission prompt);
 > `ble.permission_denied` starts the wizard at that step; the Done summary lists Bluetooth. This replaces the "macOS
 > Bluetooth permission: M5" non-goal.
+
+> **Amendment by [0035](0035-wizards-rebaseline-2-0-0.md) (2026-11-04; ADR-0245, ADR-0248 accepted; ADR-0250, ADR-0252,
+> ADR-0254, ADR-0255 accepted 2026-11-04; re-approved 2026-11-04 by Matej Strnad). Supersedes the conflicting text below where they differ:**
+> - **Scope:** ships in 2.0.0 (ADR-0245). Implementation order: probe picker (0035 phase A) → 0008 ∥ 0010 → 0009.
+> - **Names (0024):** `hio doctor` → `hwio doctor`, `hio jlink update-firmware` → `hwio jlink update-firmware`,
+>   namespace `hwio::gui`.
+> - **Welcome:** a language combo box (System default, English, Čeština, Deutsch, Slovenčina, Polski), bound to the
+>   Settings → General language; the step texts re-translate live (ADR-0254).
+> - **USB access (step 3):** also the start step for `usb.world_accessible`; the commands are the `uaccess` rule of
+>   ADR-0185 (`TAG+="uaccess"` only, not the `MODE="0666"` rule of ADR-0072).
+> - **Test with a probe (step 5):** the Embedded `probe-picker` of 0035 in read-only mode (no selection, no Connect).
+>   The `probe-firmware` Warning row gets [Update J-Link firmware…] when plan 0036 is registered (ADR-0255);
+>   a probe used by a tab shows "Disconnect tab %1 first" instead (ADR-0246). The "open question 19 — no button" text is
+>   obsolete.
+> - **Bluetooth step:** stays in plan 0032; if ADR-0250 is accepted, `ble.permission_denied` names no wizard until
+>   0032 (change in `libs/core/src/error.cpp`).
+> - **Start-up (ADR-0071 kept, confirmed 2026-11-04):** `app/gui/src/startup_check.*` as in 0035 § C; not opened while
+>   another wizard is open or when the settings are read-only. Existing rc users have no `setup/completedVersion` and
+>   see the wizard once (0035 decision row).
+> - **Settings:** `currentSettingsSchema` 2 → 3, migration 3 = no-op (0035 § B).
+> - **Entry points:** the Settings page links go into `app/gui/qml/settings/JLinkSection.qml` and
+>   `NrfUtilSection.qml`; Help → "Setup wizard…" already exists in `HelpMenu.qml` (shown when registered).
+> - **Texts:** translated into cs + de + sk + pl with 0 unfinished (ADR-0248); step S5 reads "cs + de + sk + pl".
+> - **Docs:** the "setup wizard is not available yet" sentences of `docs/<lang>/troubleshooting.md` are removed in all
+>   five languages.
 
 ## Context
 
