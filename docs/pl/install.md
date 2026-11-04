@@ -60,9 +60,10 @@ pokazuje jego ścieżkę i polecenie tworzące dowiązanie, które można skopio
 sudo ln -s '/Applications/HARDWARIO Monitor.app/Contents/MacOS/hwio' /usr/local/bin/hwio
 ```
 
-**Bluetooth:** przy pierwszym poleceniu `hwio ble` macOS poprosi o dostęp do Bluetooth. macOS przyznaje uprawnienie
-aplikacji, z której uruchamiasz `hwio`, zwykle Terminalowi. Jeśli odmówiono, zezwól na dostęp w **System Settings →
-Privacy & Security → Bluetooth** (**Ustawienia systemowe → Prywatność i ochrona → Bluetooth**).
+**Bluetooth:** przy pierwszym otwarciu widoku Bluetooth w aplikacji lub przy pierwszym poleceniu `hwio ble` macOS
+poprosi o dostęp do Bluetooth. Dla `hwio` macOS przyznaje uprawnienie aplikacji, z której je uruchamiasz, zwykle
+Terminalowi. Jeśli odmówiono, zezwól na dostęp w **System Settings → Privacy & Security → Bluetooth** (**Ustawienia
+systemowe → Prywatność i ochrona → Bluetooth**).
 
 Aby zaktualizować, zastąp aplikację w folderze Programy nową wersją. Aby odinstalować, przenieś ją do Kosza.
 

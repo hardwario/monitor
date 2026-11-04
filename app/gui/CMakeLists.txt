@@ -45,6 +45,7 @@ set(HWIO_GUI_QML_FILES
     qml/flash/FlashBar.qml
     qml/flash/FlashCard.qml
     qml/flash/KindCards.qml
+    qml/flash/LteUpdateStep.qml
     qml/flash/MaintenanceSection.qml
     qml/flash/OptionsCard.qml
     qml/flash/ProgressCard.qml
@@ -56,11 +57,13 @@ set(HWIO_GUI_QML_FILES
     qml/pages/PlaceholderPage.qml
     qml/pages/SettingsPage.qml
     qml/settings/AboutSection.qml
+    qml/settings/AdvancedSection.qml
     qml/settings/GeneralSection.qml
     qml/settings/JLinkSection.qml
     qml/settings/NrfUtilSection.qml
     qml/settings/SettingsRow.qml
     qml/shell/AdvancedPopover.qml
+    qml/shell/BleDeviceList.qml
     qml/shell/CrashNoticeBanner.qml
     qml/shell/UpdateBanner.qml
     qml/shell/DeviceBar.qml
@@ -108,6 +111,8 @@ qt_add_qml_module(hwio_gui
         src/pages/placeholder_view_model.cpp
         src/pages/placeholder_view_model.h
         src/platform.h
+        src/quit_signals.cpp
+        src/quit_signals.h
         src/settings_store.cpp
         src/settings_store.h
         src/single_instance.cpp
@@ -118,6 +123,8 @@ qt_add_qml_module(hwio_gui
         src/update_service.h
         src/viewmodels/app_view_model.cpp
         src/viewmodels/app_view_model.h
+        src/viewmodels/ble_picker_view_model.cpp
+        src/viewmodels/ble_picker_view_model.h
         src/viewmodels/connection_view_model.cpp
         src/viewmodels/connection_view_model.h
         src/viewmodels/console_line_model.cpp
@@ -160,6 +167,8 @@ qt_add_qml_module(hwio_gui
         src/viewmodels/update_view_model.h
         src/wizard/check_list_model.cpp
         src/wizard/check_list_model.h
+        src/wizard/lte_update_wizard.cpp
+        src/wizard/lte_update_wizard.h
         src/wizard/report_view_model.cpp
         src/wizard/report_view_model.h
         src/wizard/wizard.cpp
@@ -172,6 +181,8 @@ qt_add_qml_module(hwio_gui
         src/wizard/wizard_view_model.h
         src/workers/batch_runner.cpp
         src/workers/batch_runner.h
+        src/workers/ble_service.cpp
+        src/workers/ble_service.h
         src/workers/diag_worker.cpp
         src/workers/diag_worker.h
         src/workers/firmware_loader.cpp

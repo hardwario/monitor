@@ -112,6 +112,7 @@ void NusLink::connect(bool automatic) {
     m_handler->onConnecting(automatic);
     m_attempts = 0;
     m_busyRetries = 0;
+    m_lastAttempt = false;
     m_lastAttemptError.reset();
     m_deadlineAt = std::chrono::steady_clock::now() + m_timing.connectDeadline;
     m_deadline.start(m_timing.connectDeadline);
@@ -141,15 +142,23 @@ void NusLink::attemptFailed(Error error) {
     // may still be connecting; a new attempt then would only fail with InProgress.
     const bool busy = ran >= m_timing.connectBusyAttempt || ran < m_timing.connectImmediateFailure;
     constexpr int maxBackoffShift = 4; // at most 16x connectBusyRetryDelay
-    const std::chrono::milliseconds delay =
+    std::chrono::milliseconds delay =
         busy ? m_timing.connectBusyRetryDelay * (1 << std::min(m_busyRetries, maxBackoffShift))
              : m_timing.connectRetryDelay;
-    const bool retry =
-        error.code == ErrorCode::BleConnectFailed && !m_pairingWait && now + delay < m_deadlineAt;
+    // HIL 2026-11-03 H12: a delay past the deadline becomes one last attempt shortly before it.
+    const auto lastStart = std::chrono::duration_cast<std::chrono::milliseconds>(
+        m_deadlineAt - now - m_timing.connectLastAttemptLead);
+    const bool last = delay > lastStart;
+    if (last) {
+        delay = lastStart;
+    }
+    const bool retry = error.code == ErrorCode::BleConnectFailed && !m_pairingWait &&
+                       !m_lastAttempt && delay >= std::chrono::milliseconds{0};
     if (retry) {
         if (busy) {
             ++m_busyRetries;
         }
+        m_lastAttempt = last;
         qCInfo(log::lcBle).noquote()
             << "Connect attempt" << m_attempts << "to" << toQString(m_device) << "failed after"
             << std::chrono::duration_cast<std::chrono::milliseconds>(ran).count()

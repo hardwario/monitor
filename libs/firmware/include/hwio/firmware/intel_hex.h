@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <span>
 #include <stop_token>
+#include <string>
 #include <string_view>
 
 namespace hwio::firmware {
@@ -37,5 +38,11 @@ inline constexpr std::uint64_t maxHexLines = 1024ULL * 1024;            // lines
 // (`cancelled` when `stop` is requested).
 [[nodiscard]] Result<FirmwareImage> readIntelHexFile(const std::filesystem::path& path,
                                                      const std::stop_token& stop = {});
+
+// Plan 0033 (application backup): the image as Intel HEX text - 16 data bytes per 00 record, an
+// 04 extended linear address record whenever the upper 16 address bits change, a 05 record for a
+// start address, the 01 end-of-file record; "\n" line ends. parseIntelHex() reads it back to an
+// equal image.
+[[nodiscard]] std::string toIntelHex(const FirmwareImage& image);
 
 } // namespace hwio::firmware

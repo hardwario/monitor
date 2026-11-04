@@ -61,6 +61,10 @@ void FirmwareServices::registerKeys(SettingsStore& store) {
                    .type = QMetaType::QString,
                    .defaultValue = QString(),
                    .validator = validators::maxLength(maxPathLength)},
+        SettingKey{.path = expertActionsKey,
+                   .type = QMetaType::Bool,
+                   .defaultValue = false,
+                   .validator = {}},
     };
     store.registerKeys(keys);
 }

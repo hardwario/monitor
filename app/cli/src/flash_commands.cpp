@@ -9,6 +9,7 @@
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
 #include "hwio/device/device_session.h"
+#include "hwio/device/lte_update_procedure.h"
 #include "hwio/device/operation.h"
 #include "hwio/device/pib.h"
 #include "hwio/device/profile.h"
@@ -28,14 +29,20 @@
 #include "terminal.h"
 
 #include <QByteArrayView>
+#include <QEventLoop>
 #include <QFile>
 #include <QFileDevice>
 #include <QIODevice>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QLoggingCategory>
+#include <QMetaObject>
+#include <QObject>
 #include <QString>
 #include <QStringLiteral>
+#include <QTimer>
+#include <QtCore/qnamespace.h>
+#include <QtEnvironmentVariables>
 #include <QtLogging>
 #include <QtTypes>
 
@@ -516,22 +523,29 @@ Result<firmware::DesignatedDownload> downloadDesignated(const Context& context, 
     return downloaded;
 }
 
-Result<CommandResult> lteFlash(const Context& context, const GlobalOptions& globals,
-                               const ProbeOptions& group, const ProbeOptions& own,
-                               const std::string& file, bool allowUicr, bool noCache) {
-    ProgressUi ui(context, std::cerr, stderrIsTerminal());
+// The LTE firmware of `chester lte flash` - the designated firmware or a classified FILE - as the
+// operation of the plain command and as the source of the guided update (plan 0033).
+struct LteJob {
+    QJsonObject image;
+    StartFn start;
+    std::optional<fs::path> nrfUtil;
+    device::LteUpdateProcedure::Source source;
+};
+
+Result<LteJob> prepareLte(const Context& context, const GlobalOptions& globals, ProgressUi& ui,
+                          const std::string& file, bool allowUicr, bool noCache) {
     const fs::path path = toPath(file);
     // Without FILE: the designated firmware (a verified bundle); otherwise the classified file.
     std::optional<firmware::DesignatedDownload> designated;
     std::optional<firmware::LteInput> input;
-    std::optional<fs::path> nrfUtil;
+    LteJob job;
     if (file.empty()) {
         // The designated bundle always contains modem firmware: nRF Util first (ADR-0042).
         auto checked = checkNrfUtil(globals, ui);
         if (!checked) {
             return std::unexpected(std::move(checked).error());
         }
-        nrfUtil = *checked;
+        job.nrfUtil = *checked;
         auto downloaded = downloadDesignated(context, ui, noCache);
         if (!downloaded) {
             return std::unexpected(std::move(downloaded).error());
@@ -556,17 +570,22 @@ Result<CommandResult> lteFlash(const Context& context, const GlobalOptions& glob
         input = std::move(*classified);
     }
     const device::FlashOptions flash{.halt = false, .allowUicr = allowUicr};
-    QJsonObject image;
-    StartFn start;
+    using SourceKind = device::LteUpdateProcedure::Source::Kind;
     if (designated) {
         const firmware::DesignatedFirmware& entry = designatedLte();
-        image = imageJson(designated->bundle->application, "designated", QStringLiteral("name"),
-                          toQString(entry.name));
-        image.insert(QStringLiteral("version"), toQString(entry.version));
-        image.insert(QStringLiteral("cached"), designated->fromCache);
-        start = [shared = designated->bundle, flash](device::DeviceSession& session) {
+        job.image = imageJson(designated->bundle->application, "designated", QStringLiteral("name"),
+                              toQString(entry.name));
+        job.image.insert(QStringLiteral("version"), toQString(entry.version));
+        job.image.insert(QStringLiteral("cached"), designated->fromCache);
+        job.start = [shared = designated->bundle, flash](device::DeviceSession& session) {
             return session.flashLteBundle("lte", shared, flash);
         };
+        job.source = {.kind = SourceKind::Bundle,
+                      .image = nullptr,
+                      .bundle = designated->bundle,
+                      .modemZip = {},
+                      .name = std::format("{} {}", entry.name, entry.version),
+                      .options = flash};
     } else if (auto* bundle = std::get_if<firmware::LteBundle>(&*input)) {
         ui.info(std::format("Bundle: modem firmware {} + application.hex ({})",
                             toUtf8(path.filename()), kib(bundle->application.totalBytes())));
@@ -574,42 +593,260 @@ Result<CommandResult> lteFlash(const Context& context, const GlobalOptions& glob
         if (!checked) {
             return std::unexpected(std::move(checked).error());
         }
-        nrfUtil = *checked;
-        image = imageJson(bundle->application, "bundle", QStringLiteral("path"),
-                          toQString(toUtf8(path)));
+        job.nrfUtil = *checked;
+        job.image = imageJson(bundle->application, "bundle", QStringLiteral("path"),
+                              toQString(toUtf8(path)));
         auto shared = std::make_shared<const firmware::LteBundle>(std::move(*bundle));
-        start = [shared, flash](device::DeviceSession& session) {
+        job.start = [shared, flash](device::DeviceSession& session) {
             return session.flashLteBundle("lte", shared, flash);
         };
+        job.source = {.kind = SourceKind::Bundle,
+                      .image = nullptr,
+                      .bundle = shared,
+                      .modemZip = {},
+                      .name = toUtf8(path.filename()),
+                      .options = flash};
     } else if (const auto* modem = std::get_if<firmware::ModemOnly>(&*input)) {
         ui.info(std::format("Modem firmware {}", toUtf8(modem->path.filename())));
         auto checked = checkNrfUtil(globals, ui);
         if (!checked) {
             return std::unexpected(std::move(checked).error());
         }
-        nrfUtil = *checked;
-        image.insert(QStringLiteral("source"), QStringLiteral("modem"));
-        image.insert(QStringLiteral("path"), toQString(toUtf8(modem->path)));
-        start = [zip = modem->path](device::DeviceSession& session) {
+        job.nrfUtil = *checked;
+        job.image.insert(QStringLiteral("source"), QStringLiteral("modem"));
+        job.image.insert(QStringLiteral("path"), toQString(toUtf8(modem->path)));
+        job.start = [zip = modem->path](device::DeviceSession& session) {
             return session.updateModem("lte", zip);
         };
+        job.source = {.kind = SourceKind::Modem,
+                      .image = nullptr,
+                      .bundle = nullptr,
+                      .modemZip = modem->path,
+                      .name = toUtf8(modem->path.filename()),
+                      .options = {}};
     } else {
         auto& hex = std::get<firmware::AppHex>(*input);
         ui.info(std::format("Firmware {} ({})", toUtf8(path), kib(hex.image.totalBytes())));
-        image = imageJson(hex.image, "file", QStringLiteral("path"), toQString(toUtf8(path)));
+        job.image = imageJson(hex.image, "file", QStringLiteral("path"), toQString(toUtf8(path)));
         auto shared = std::make_shared<const firmware::FirmwareImage>(std::move(hex.image));
-        start = [shared, flash](device::DeviceSession& session) {
+        job.start = [shared, flash](device::DeviceSession& session) {
             return session.flash("lte", shared, flash);
         };
+        job.source = {.kind = SourceKind::Image,
+                      .image = shared,
+                      .bundle = nullptr,
+                      .modemZip = {},
+                      .name = toUtf8(path.filename()),
+                      .options = flash};
     }
-    auto outcome = runOperation(context, globals, group, own, "lte", ui, start, nrfUtil);
+    return job;
+}
+
+Result<CommandResult> lteFlash(const Context& context, const GlobalOptions& globals,
+                               const ProbeOptions& group, const ProbeOptions& own,
+                               const std::string& file, bool allowUicr, bool noCache) {
+    ProgressUi ui(context, std::cerr, stderrIsTerminal());
+    auto job = prepareLte(context, globals, ui, file, allowUicr, noCache);
+    if (!job) {
+        return std::unexpected(std::move(job).error());
+    }
+    auto outcome = runOperation(context, globals, group, own, "lte", ui, job->start, job->nrfUtil);
     if (!outcome) {
         return std::unexpected(std::move(outcome).error());
     }
     QJsonObject data = resultJson("lte", outcome->result);
-    data.insert(QStringLiteral("image"), image);
+    data.insert(QStringLiteral("image"), job->image);
     data.insert(QStringLiteral("halted"), false);
     return CommandResult{.data = data, .humanText = std::string(completed), .streamed = false};
+}
+
+// Plan 0033 (D7, ADR-0234): `chester lte flash --guided` - the guided procedure of the GUI wizard
+// in a terminal (LteUpdateProcedure): copy and erase the application on the APP connector, update
+// the LTE MCU on the LTE connector, write the application back on the APP connector. Each
+// connector step waits until the J-Link reaches that MCU.
+bool interactiveTerminal() {
+#ifdef HWIO_TEST_OVERRIDES
+    // Test builds only (like HWIO_CATALOG_URL): the end-to-end test drives it through pipes.
+    if (qEnvironmentVariableIsSet("HWIO_TEST_INTERACTIVE")) {
+        return true;
+    }
+#endif
+    return stdinIsTerminal() && stderrIsTerminal();
+}
+
+// Drives one LteUpdateProcedure in the terminal: its prompts and progress on stderr, the y/N
+// question of a failed copy, Ctrl+C (cancelled where the procedure allows it).
+class GuidedTerminal {
+public:
+    using Step = device::LteUpdateProcedure::Step;
+
+    GuidedTerminal(const Context& context, ProgressUi& ui, device::LteUpdateProcedure& procedure)
+        : m_context(context), m_ui(ui), m_procedure(procedure) {
+        QObject::connect(&procedure, &device::LteUpdateProcedure::changed, &m_loop,
+                         [this] { onChanged(); });
+        QObject::connect(&procedure, &device::LteUpdateProcedure::progressChanged, &m_loop,
+                         [this] { onProgress(); });
+        QObject::connect(&procedure, &device::LteUpdateProcedure::finished, &m_loop,
+                         &QEventLoop::quit);
+        QObject::connect(&m_stopCheck, &QTimer::timeout, &m_loop, [this] { onStopCheck(); });
+    }
+
+    // Runs until the procedure ends (it was started by the caller).
+    void run() {
+        show();
+        m_stopCheck.start(std::chrono::milliseconds(100));
+        if (!ended()) {
+            m_loop.exec();
+        }
+        m_stopCheck.stop();
+        m_ui.finish();
+    }
+
+    [[nodiscard]] bool noCopyEnd() const noexcept { return m_noCopyEnd; }
+
+private:
+    [[nodiscard]] bool ended() const {
+        const Step step = m_procedure.step();
+        return step == Step::Done || step == Step::Failed || step == Step::Cancelled;
+    }
+
+    void show() {
+        const Step step = m_procedure.step();
+        const std::string prompt = toStdString(m_procedure.promptText());
+        if (step == Step::Failed || step == Step::Cancelled || prompt == m_lastPrompt) {
+            return;
+        }
+        m_ui.finish();
+        m_lastPrompt = prompt;
+        m_ui.info(prompt);
+    }
+
+    void onChanged() {
+        show();
+        const Step step = m_procedure.step();
+        if (step == Step::BackupFailed) {
+            if (m_procedure.error()) {
+                m_ui.warning(*m_procedure.error());
+            }
+            // Asked on the next turn of the event loop; nothing runs on the device meanwhile.
+            QMetaObject::invokeMethod(&m_loop, [this] { askAboutTheCopy(); }, Qt::QueuedConnection);
+        } else if (step == Step::ChooseApplication && !m_procedure.hasBackup()) {
+            // No copy (an empty or unreadable application): the LTE MCU is updated; the
+            // application is the user's to flash.
+            m_noCopyEnd = true;
+            QMetaObject::invokeMethod(
+                &m_loop, [this] { (void)m_procedure.cancel(); }, Qt::QueuedConnection);
+        }
+    }
+
+    void askAboutTheCopy() {
+        if (m_procedure.step() != Step::BackupFailed) {
+            return;
+        }
+        if (askYesNo("Continue without a copy of the application? [y/N] ")) {
+            m_procedure.continueWithoutBackup();
+        } else {
+            (void)m_procedure.cancel();
+        }
+    }
+
+    void onProgress() {
+        const Step step = m_procedure.step();
+        if (step == Step::Backup) {
+            m_ui.progress("reading", m_procedure.progress().done, m_procedure.progress().total);
+        } else if (step == Step::Erase || step == Step::UpdateLte || step == Step::Restore) {
+            m_ui.progress(m_procedure.progress());
+        }
+    }
+
+    void onStopCheck() {
+        if (!m_context.stop.stop_requested()) {
+            return;
+        }
+        if (!m_procedure.cancel() && !m_cancelRefusedShown) {
+            m_cancelRefusedShown = true;
+            m_ui.info("The MCU is being written and cannot be interrupted; cancelling afterwards.");
+        }
+    }
+
+    const Context& m_context;
+    ProgressUi& m_ui;
+    device::LteUpdateProcedure& m_procedure;
+    QEventLoop m_loop;
+    QTimer m_stopCheck;
+    std::string m_lastPrompt;
+    bool m_noCopyEnd = false;
+    bool m_cancelRefusedShown = false;
+};
+
+// The command's result for the procedure's end.
+Result<CommandResult> guidedResult(const device::LteUpdateProcedure& procedure, bool noCopyEnd) {
+    using Step = device::LteUpdateProcedure::Step;
+    const std::string backup = procedure.hasBackup() ? toUtf8(procedure.backupFile()) : "";
+    if (procedure.step() == Step::Done) {
+        const std::string copy = backup.empty() ? "" : std::format(" (copy: {})", backup);
+        return CommandResult{.data = {},
+                             .humanText = std::format("{}: the LTE firmware was updated and the "
+                                                      "application written back{}.",
+                                                      completed, copy),
+                             .streamed = false};
+    }
+    if (procedure.step() == Step::Cancelled && noCopyEnd) {
+        return CommandResult{
+            .data = {},
+            .humanText = "The LTE firmware was updated. The application MCU is empty: flash an "
+                         "application with `hwio chester app flash`.",
+            .streamed = false};
+    }
+    if (procedure.step() == Step::Cancelled) {
+        Error error = makeError(ErrorCode::Cancelled, "guided LTE update");
+        if (procedure.applicationErased()) {
+            error.message = toStdString(procedure.promptText());
+        }
+        if (procedure.applicationErased() && !backup.empty()) {
+            error.suggestion = std::format(
+                "Flash an application, e.g. the copy: hwio chester app flash \"{}\"", backup);
+        }
+        return std::unexpected(std::move(error));
+    }
+    Error error = procedure.error().value_or(
+        makeError(ErrorCode::InternalUnexpected, "the guided LTE update ended unexpectedly"));
+    if (procedure.applicationErased() && !backup.empty()) {
+        error.detail += std::format("; the copy of the application: {}", backup);
+    }
+    return std::unexpected(std::move(error));
+}
+
+Result<CommandResult> lteGuided(const Context& context, const GlobalOptions& globals,
+                                const ProbeOptions& group, const ProbeOptions& own,
+                                const std::string& file, bool allowUicr, bool noCache) {
+    if (context.mode == OutputMode::Json || !interactiveTerminal()) {
+        return std::unexpected(usage(
+            QStringLiteral("--guided needs an interactive terminal: it waits for you to move the "
+                           "J-Link cable. It cannot be used with --json or without a terminal."),
+            "guided LTE update"));
+    }
+    ProgressUi ui(context, std::cerr, stderrIsTerminal());
+    auto job = prepareLte(context, globals, ui, file, allowUicr, noCache);
+    if (!job) {
+        return std::unexpected(std::move(job).error());
+    }
+    auto runner = OperationRunner::open(context, globals, group, own, "app", ui, job->nrfUtil);
+    if (!runner) {
+        return std::unexpected(std::move(runner).error());
+    }
+    device::LteUpdateProcedure procedure(
+        (*runner)->session(),
+        device::LteUpdateProcedure::Options{.pollInterval = std::chrono::seconds(1),
+                                            .backupDirectory = {},
+                                            .autoRestore = true,
+                                            .now = {}});
+    GuidedTerminal terminal(context, ui, procedure);
+    if (Status started = procedure.start(job->source); !started) {
+        return std::unexpected(std::move(started).error());
+    }
+    terminal.run();
+    return guidedResult(procedure, terminal.noCopyEnd());
 }
 
 } // namespace
@@ -801,6 +1038,7 @@ void registerLteCommands(CLI::App& chesterCommand, CommandSlot& slot,
         std::string file;
         bool allowUicr = false;
         bool noCache = false;
+        bool guided = false;
     };
     auto flashOptions = std::make_shared<FlashOptions>();
     CLI::App* flash = lte->add_subcommand(
@@ -817,9 +1055,18 @@ void registerLteCommands(CLI::App& chesterCommand, CommandSlot& slot,
         "Also program the image's UICR records (the Product Information Block is kept)");
     flash->add_flag("--no-cache", flashOptions->noCache,
                     "Download the HARDWARIO LTE firmware even when it is cached");
+    // Plan 0033 (D7, ADR-0234): the guided update (interactive terminal only).
+    flash->add_flag("--guided", flashOptions->guided,
+                    "Guide the whole update: keep a copy of the application and erase it on the "
+                    "APP connector, update the LTE MCU on the LTE connector, write the "
+                    "application back (waits for you to move the J-Link cable)");
     addProbeOptions(*flash, flashOptions->probe);
     flash->callback([&slot, &globals, group, flashOptions] {
         slot.command = [&globals, group, flashOptions](const Context& context) {
+            if (flashOptions->guided) {
+                return lteGuided(context, globals, *group, flashOptions->probe, flashOptions->file,
+                                 flashOptions->allowUicr, flashOptions->noCache);
+            }
             return lteFlash(context, globals, *group, flashOptions->probe, flashOptions->file,
                             flashOptions->allowUicr, flashOptions->noCache);
         };

@@ -1,6 +1,7 @@
 // The Flash page of a device tab (plan/features/0006-m3-flash-settings.md; ADR-0049, ADR-0055):
 // header with "Guide me" (flash wizard, shown only when it is registered, 0010), then 1 kind cards,
-// 2 firmware file, 3 options, the maintenance section and the sticky Flash bar. While an operation
+// 2 firmware file, 3 options (application firmware; plan 0033: for LTE firmware a text and
+// [Update LTE firmware…] instead), the maintenance section and the sticky Flash bar. While an operation
 // runs the cards are replaced by the progress card; afterwards the result card is shown. Files can
 // be dropped anywhere on the page. Gets `tab` and `vm` from the PageHost (page contract, 0004).
 pragma ComponentBehavior: Bound
@@ -136,13 +137,41 @@ Item {
 
                             SourceCard {
                                 Layout.fillWidth: true
+                                visible: page.model.kind === FirmwareSourceViewModel.AppFirmware
                                 source: page.model.source
                                 onBrowseRequested: page.browse()
                             }
 
                             OptionsCard {
                                 Layout.fillWidth: true
+                                visible: page.model.kind === FirmwareSourceViewModel.AppFirmware
+                                         && (page.model.haltAvailable || page.model.source.hasUicr)
                                 vm: page.model
+                            }
+
+                            // Plan 0033 (ADR-0234): the LTE MCU is updated by the guided procedure.
+                            FlashCard {
+                                objectName: "lteUpdateCard"
+                                Layout.fillWidth: true
+                                visible: page.model.kind === FirmwareSourceViewModel.LteFirmware
+                                number: 2
+                                title: qsTr("LTE firmware update")
+
+                                Label {
+                                    textFormat: Text.PlainText
+                                    Layout.fillWidth: true
+                                    text: qsTr("Updating the LTE MCU needs the J-Link moved between the APP and LTE connectors. The guide stops the application, updates the LTE MCU and puts the application back.")
+                                    color: Theme.text
+                                    wrapMode: Text.Wrap
+                                }
+
+                                HButton {
+                                    objectName: "lteUpdateButton"
+                                    kind: "primary"
+                                    text: qsTr("Update LTE firmware…")
+                                    enabled: page.model.canRunMaintenance
+                                    onClicked: page.model.requestLteUpdate()
+                                }
                             }
 
                             MaintenanceSection {
@@ -176,7 +205,8 @@ Item {
     DropArea {
         objectName: "flashDropArea"
         anchors.fill: parent
-        enabled: !page.running && !page.showResult
+        enabled: !page.running && !page.showResult && page.model !== null
+                 && page.model.kind === FirmwareSourceViewModel.AppFirmware
         onDropped: drop => page.model.source.loadFile(drop.urls[0])
     }
 

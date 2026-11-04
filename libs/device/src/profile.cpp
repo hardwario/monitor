@@ -327,4 +327,13 @@ Status checkFlashWrite(const TargetProfile& target, std::uint32_t address, std::
     return {};
 }
 
+std::string_view consoleTargetId(const DeviceProfile& profile) noexcept {
+    for (const TargetProfile& target : profile.targets) {
+        if (!target.rttTerminal.empty()) {
+            return target.id;
+        }
+    }
+    return profile.targets.empty() ? std::string_view() : profile.targets.front().id;
+}
+
 } // namespace hwio::device

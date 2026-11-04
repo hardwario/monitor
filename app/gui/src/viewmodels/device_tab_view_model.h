@@ -22,6 +22,11 @@
 // "— disconnected —", "— disconnected: <cause> —" on connection changes, "— paused: <busy text> —"
 // on setBusy and "— resumed —" when the busy page clears; pages never add these markers.
 //
+// Plan 0012 (ADR-0081, ADR-0228): a tab has a transport, "jlink" or "ble". A Bluetooth tab owns at
+// most one BleSession instead of the DeviceSession (consoleSession() is either; session() stays the
+// J-Link DeviceSession, nullptr in a Bluetooth tab, for operations). Its pages that need operations
+// (PageDescriptor::needsOperations) are disabled with pageDisabledReason().
+//
 // Ownership: child of DeviceTabListModel (Qt parent). GUI thread only.
 
 #include "hwio/core/result.h"
@@ -30,11 +35,13 @@
 #include "hwio/device/firmware_identity.h"
 #include "hwio/device/session_events.h"
 #include "hwio/device/shell_query.h"
+#include "viewmodels/ble_picker_view_model.h"
 #include "viewmodels/connection_view_model.h"
 #include "viewmodels/probe_picker_view_model.h"
 
 #include <QObject>
 #include <QString>
+#include <QUrl>
 #include <QVariantMap>
 #include <QtCore/qobjectdefs.h>
 #include <QtQmlIntegration>
@@ -52,7 +59,9 @@ struct LocatorOptions;
 } // namespace hwio::jlink
 
 namespace hwio::device {
+class BleSession;
 class ConsoleLog;
+class ConsoleSession;
 class DeviceSession;
 class SessionRegistry;
 struct DeviceProfile;
@@ -60,6 +69,7 @@ struct DeviceProfile;
 
 namespace hwio::gui {
 
+class BleService;
 class PageRegistry;
 class ProbeScanner;
 class SettingsStore;
@@ -70,10 +80,15 @@ struct TabContext {
     SettingsStore* settings = nullptr;           // outlives the tabs
     const PageRegistry* pages = nullptr;         // may be null (no pages)
     ProbeScanner* scanner = nullptr;             // may be null (no probe list)
+    BleService* ble = nullptr;                   // may be null (no Bluetooth; plan 0012)
     // The locator options for opening a session (environment, setting, search paths).
     std::function<jlink::LocatorOptions()> locatorOptions;
     // The 0-based index of another tab that uses this probe, -1 = none.
     std::function<int(std::uint32_t serial, const DeviceTabViewModel* self)> tabUsingProbe;
+    // Plan 0012: the 0-based index of another tab that uses this Bluetooth device, -1 = none.
+    std::function<int(const QString& deviceId, const DeviceTabViewModel* self)> tabUsingBleDevice;
+    // Plan 0012: "hwio, PID 1234" when another program holds the device's BleLock, "" otherwise.
+    std::function<QString(const QString& deviceId)> bleOtherProgram;
     // Shows a toast (AppViewModel, ≤ 3 visible); may be empty.
     std::function<void(QString)> showToast;
     // Plan 0028 (ADR-0202): AppViewModel::copyToClipboard(text, toast); toast "" = the default.
@@ -81,6 +96,8 @@ struct TabContext {
     // M4 (plan/features/0007): opens a wizard for this tab (AppViewModel's WizardLauncher); may be
     // empty.
     std::function<void(const QString& wizardId, DeviceTabViewModel* tab)> openWizard;
+    // Plan 0012: opens a system URL (Bluetooth / privacy settings); empty: QDesktopServices.
+    std::function<void(const QUrl& url)> openUrl;
 };
 
 class DeviceTabViewModel : public QObject {
@@ -92,6 +109,11 @@ class DeviceTabViewModel : public QObject {
     Q_PROPERTY(bool hasError READ hasError NOTIFY stateChanged)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(hwio::gui::ProbePickerViewModel* picker READ picker CONSTANT)
+    // Plan 0012: "jlink" | "ble"; changeable while choosing (the Choose-device switch).
+    Q_PROPERTY(QString transport READ transport WRITE setTransport NOTIFY transportChanged)
+    Q_PROPERTY(hwio::gui::BlePickerViewModel* blePicker READ blePicker CONSTANT)
+    // Plan 0012: the application has Bluetooth (the Choose-device switch is shown).
+    Q_PROPERTY(bool bluetoothAvailable READ bluetoothAvailable CONSTANT)
     Q_PROPERTY(hwio::gui::ConnectionViewModel* connection READ connection CONSTANT)
     Q_PROPERTY(QObjectList pageViewModels READ pageViewModels CONSTANT) // in PageRegistry order
     Q_PROPERTY(QString currentPage READ currentPage WRITE setCurrentPage NOTIFY currentPageChanged)
@@ -124,6 +146,17 @@ public:
     [[nodiscard]] bool hasError() const;
     [[nodiscard]] QString title() const;
     [[nodiscard]] ProbePickerViewModel* picker() const { return m_picker; }
+    [[nodiscard]] BlePickerViewModel* blePicker() const { return m_blePicker; }
+    [[nodiscard]] QString transport() const { return m_transport; }
+    [[nodiscard]] bool isBle() const { return m_transport == bleTransport(); }
+    [[nodiscard]] bool bluetoothAvailable() const noexcept { return m_context.ble != nullptr; }
+    // Only while choosing; remembered as ui/lastTransport (ADR-0081).
+    void setTransport(const QString& transport);
+    [[nodiscard]] static QString jlinkTransport() { return QStringLiteral("jlink"); }
+    [[nodiscard]] static QString bleTransport() { return QStringLiteral("ble"); }
+    // Plan 0012: why a page cannot be used in this tab ("" = it can): pages with
+    // PageDescriptor::needsOperations in a Bluetooth tab.
+    Q_INVOKABLE [[nodiscard]] QString pageDisabledReason(const QString& pageId) const;
     [[nodiscard]] ConnectionViewModel* connection() const { return m_connection; }
     [[nodiscard]] QObjectList pageViewModels() const { return m_pageViewModels; }
     [[nodiscard]] QString currentPage() const { return m_currentPage; }
@@ -134,8 +167,12 @@ public:
     Q_INVOKABLE [[nodiscard]] QObject* pageViewModel(const QString& pageId) const;
 
     // --- contract for pages (C++ only) ---
-    // nullptr while choosing / disconnected.
+    // The J-Link session; nullptr while choosing / disconnected and in a Bluetooth tab.
     [[nodiscard]] device::DeviceSession* session() const;
+    // Plan 0012 (ADR-0079): the console of either transport; nullptr while none.
+    [[nodiscard]] device::ConsoleSession* consoleSession() const;
+    // Plan 0012: the Bluetooth session; nullptr in a J-Link tab or while none.
+    [[nodiscard]] device::BleSession* bleSession() const;
     // Opens the tab's session when none exists: always on the console target, with RTT when the
     // target has an RTT console. Operations carry their own target (ADR-0057), so a page never
     // opens a session on another target (review S2). No-op when a working session exists; a
@@ -146,6 +183,7 @@ public:
     // target not connected) on the console target, for a wizard's Diagnose; operations and
     // diagnose() carry their own target. With true, an existing probe-only session is promoted
     // (DeviceSession::startConnection, RTT when the target has a console).
+    // A Bluetooth tab: usage.invalid_argument ("needs a J-Link"), operations are J-Link only.
     [[nodiscard]] Status ensureSession(bool connectTarget = true);
     // M4 (plan/features/0007): opens the wizard `wizardId` for this tab (WizardLauncher).
     Q_INVOKABLE void openWizard(const QString& wizardId);
@@ -159,20 +197,30 @@ public:
                  std::function<void()> cancel);
     void clearBusy(const QString& pageId);
     void showToast(QString text); // queued in AppViewModel (≤ 3 visible)
+    // Plan 0012: a system settings URL (TabContext::openUrl).
+    void openExternalUrl(const QUrl& url);
     // Plan 0028 (ADR-0202): clipboard + toast ("Copied to clipboard." unless `toast` is given).
     void copyToClipboard(const QString& text, const QString& toast = QString());
 
     // --- shell (AppViewModel, ConnectionViewModel) ---
     // Leaves ChoosingDevice with this configuration (restore or the picker); never connects.
-    // Returns false when the profile or target is unknown.
-    bool configure(const QString& profileId, const QString& targetId, std::uint32_t serial,
+    // Returns false when the profile or target is unknown. ADR-0233: the tab always uses the
+    // profile's console target, whatever target is requested (a tab saved with "lte").
+    bool configure(const QString& profileId, const QString& requestedTarget, std::uint32_t serial,
                    const QString& product = {});
+    // Plan 0012: the Bluetooth variant (restore or the Bluetooth picker); never connects. Returns
+    // false when the profile is unknown or has no Bluetooth, or the id is empty.
+    bool configureBle(const QString& profileId, const QString& deviceId, const QString& name);
+    [[nodiscard]] QString bleDeviceId() const { return m_bleId; }
+    [[nodiscard]] QString bleDeviceName() const { return m_bleName; }
+    // Plan 0012 (ADR-0227): app-initiated pairing of the tab's Bluetooth device (Linux, Windows);
+    // reconnects when it succeeded, shows the error otherwise.
+    void pairDevice();
+    [[nodiscard]] bool pairing() const noexcept { return m_pairing; }
     [[nodiscard]] bool choosing() const noexcept { return m_choosing; }
     [[nodiscard]] QString profileId() const;
     [[nodiscard]] std::optional<std::uint32_t> probeSerial() const noexcept { return m_serial; }
     [[nodiscard]] QString product() const { return m_product; }
-    // Changes the console target (only without a session).
-    void setConsoleTarget(const QString& targetId);
     // Device bar actions.
     void connectDevice();
     void disconnectDevice();
@@ -206,6 +254,7 @@ public:
 
 signals:
     void stateChanged();
+    void transportChanged();
     void titleChanged();
     void currentPageChanged();
     void busyChanged();
@@ -232,6 +281,10 @@ private:
     };
 
     [[nodiscard]] Status openSession(bool connectTarget = true);
+    [[nodiscard]] Status openBleSession();
+    void createBlePicker();
+    // Connects the signals of a new session (either transport) and publishes it.
+    void adoptSession(device::ConsoleSession& session);
     [[nodiscard]] Status promoteSession();
     // The session stopped with an error (fatal); see sessionFailed() in the .cpp (S18).
     [[nodiscard]] bool sessionFailed() const;
@@ -243,6 +296,7 @@ private:
 
     TabContext m_context;
     ProbePickerViewModel* m_picker = nullptr;         // child
+    BlePickerViewModel* m_blePicker = nullptr;        // child
     ConnectionViewModel* m_connection = nullptr;      // child
     QObjectList m_pageViewModels;                     // children
     QStringList m_pageIds;                            // parallel to m_pageViewModels
@@ -250,13 +304,18 @@ private:
     QString m_targetId;
     std::optional<std::uint32_t> m_serial;
     QString m_product;
+    QString m_transport;
+    QString m_bleId;   // the canonical BleDeviceId of a Bluetooth tab
+    QString m_bleName; // its advertised name ("" when unknown)
+    bool m_pairing = false;
     bool m_choosing = true;
     QString m_currentPage;
     std::shared_ptr<device::ConsoleLog> m_consoleLog;
     std::unique_ptr<device::DeviceSession> m_session;
+    std::unique_ptr<device::BleSession> m_bleSession; // plan 0012; never together with m_session
     // Closed sessions, deleted on the next event-loop turn (a session is never deleted inside one
     // of its own signals).
-    std::vector<std::unique_ptr<device::DeviceSession>> m_retiredSessions;
+    std::vector<std::unique_ptr<device::ConsoleSession>> m_retiredSessions;
     std::optional<BusyState> m_busy;
     bool m_closePending = false;
     State m_state = ChoosingDevice;

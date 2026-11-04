@@ -43,6 +43,8 @@ std::string_view wizardIdString(WizardId wizard) noexcept {
         return "troubleshooting";
     case WizardId::BlePairing:
         return "ble-pairing";
+    case WizardId::LteUpdate:
+        return "lte-update";
     }
     return "troubleshooting";
 }
@@ -50,7 +52,7 @@ std::string_view wizardIdString(WizardId wizard) noexcept {
 std::optional<WizardId> wizardIdFromString(std::string_view id) noexcept {
     for (const WizardId wizard :
          {WizardId::FirstRunSetup, WizardId::ConnectDevice, WizardId::FlashFirmware,
-          WizardId::Troubleshooting, WizardId::BlePairing}) {
+          WizardId::Troubleshooting, WizardId::BlePairing, WizardId::LteUpdate}) {
         if (wizardIdString(wizard) == id) {
             return wizard;
         }

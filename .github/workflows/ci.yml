@@ -51,15 +51,10 @@ jobs:
       - name: Portable includes (no <bits/...>)
         run: tools/check-includes.sh
       - name: Install LLVM ${{ env.LLVM_MAJOR }}
-        run: |
-          curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key \
-            | sudo gpg --dearmor -o /usr/share/keyrings/llvm-snapshot.gpg
-          echo "deb [signed-by=/usr/share/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/noble/ llvm-toolchain-noble-${LLVM_MAJOR} main" \
-            | sudo tee /etc/apt/sources.list.d/llvm.list
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            clang-${LLVM_MAJOR} clang-format-${LLVM_MAJOR} lld-${LLVM_MAJOR} ninja-build libgl1-mesa-dev \
-            libxkbcommon-dev
+        run: >-
+          .github/install-llvm.sh
+          clang-${LLVM_MAJOR} clang-format-${LLVM_MAJOR} lld-${LLVM_MAJOR} ninja-build
+          libgl1-mesa-dev libxkbcommon-dev
       - name: clang-format
         run: |
           git ls-files -z -- '*.h' '*.cpp' | xargs -0 clang-format-${LLVM_MAJOR} --dry-run --Werror
@@ -108,16 +103,11 @@ jobs:
         shell: bash
         run: git lfs pull
       - name: Install LLVM ${{ env.LLVM_MAJOR }} and build tools
-        run: |
-          curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key \
-            | sudo gpg --dearmor -o /usr/share/keyrings/llvm-snapshot.gpg
-          echo "deb [signed-by=/usr/share/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/noble/ llvm-toolchain-noble-${LLVM_MAJOR} main" \
-            | sudo tee /etc/apt/sources.list.d/llvm.list
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            clang-${LLVM_MAJOR} clang-tidy-${LLVM_MAJOR} lld-${LLVM_MAJOR} llvm-${LLVM_MAJOR} \
-            libclang-rt-${LLVM_MAJOR}-dev ninja-build \
-            libgl1-mesa-dev libegl1 libxkbcommon-dev libxkbcommon-x11-0 libfontconfig1 libdbus-1-3
+        run: >-
+          .github/install-llvm.sh
+          clang-${LLVM_MAJOR} clang-tidy-${LLVM_MAJOR} lld-${LLVM_MAJOR} llvm-${LLVM_MAJOR}
+          libclang-rt-${LLVM_MAJOR}-dev ninja-build libgl1-mesa-dev libegl1 libxkbcommon-dev
+          libxkbcommon-x11-0 libfontconfig1 libdbus-1-3
       - name: Czech locale
         # CliProcess.CzechLocaleStaysEnglish runs `hwio` under cs_CZ.UTF-8; the runner image only
         # has C.UTF-8 and en_US.UTF-8 (plan 0023).
@@ -126,7 +116,7 @@ jobs:
         if: matrix.preset == 'tsan'
         # The race:tzset_internal suppression (plan 0019) matches a static glibc function, which the
         # stripped libc.so.6 of the runner image does not name without its debug info (plan 0023).
-        run: sudo apt-get install -y --no-install-recommends libc6-dbg
+        run: sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends libc6-dbg
       - name: Allow TSan memory mappings
         if: matrix.preset == 'tsan'
         # TSan cannot map its shadow memory with the runner's high ASLR entropy.
@@ -146,19 +136,12 @@ jobs:
         shell: bash
         run: |
           # Plan 0028 (R5): the translation lint (Python 3) must run, never be skipped.
-          cmake --preset linux-${{ matrix.preset }} -DHWIO_REQUIRE_PYTHON=ON 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          cmake --preset linux-${{ matrix.preset }} -DHWIO_REQUIRE_PYTHON=ON
       - name: Build
         shell: bash
-        run: cmake --build --preset linux-${{ matrix.preset }} 2>&1 | tee "$RUNNER_TEMP/build.log"
+        run: cmake --build --preset linux-${{ matrix.preset }}
       - name: Test
         run: ctest --preset linux-${{ matrix.preset }} --output-on-failure
-      - name: TEMPORARY failure notes (plan 0023)
-        if: failure()
-        shell: bash
-        run: |
-          py=$(command -v python3 || command -v python)
-          "$py" .github/ci-failure-notes.py "build/linux-${{ matrix.preset }}" \
-            "$RUNNER_TEMP/configure.log" "$RUNNER_TEMP/build.log" "$RUNNER_TEMP/coverage.log"
       - name: QML lint
         if: matrix.preset == 'debug'
         run: cmake --build --preset linux-debug --target all_qmllint
@@ -166,7 +149,6 @@ jobs:
         if: matrix.preset == 'coverage'
         shell: bash
         run: |
-          exec > >(tee "$RUNNER_TEMP/coverage.log") 2>&1
           build_dir=build/linux-coverage
           llvm-profdata-${LLVM_MAJOR} merge -sparse "${build_dir}"/profiles/*.profraw \
             -o "${build_dir}/coverage.profdata"
@@ -191,10 +173,6 @@ jobs:
           path: |
             build/linux-coverage/coverage-html
             build/linux-coverage/coverage.lcov
-      - name: TEMPORARY coverage failure notes (plan 0023)
-        if: failure() && matrix.preset == 'coverage'
-        shell: bash
-        run: python3 .github/ci-failure-notes.py build/none "$RUNNER_TEMP/coverage.log"
 
   fuzz:
     # ADR-0152: libFuzzer smoke run of the MCP HTTP parser and JSON-RPC handling, 60 s per target;
@@ -210,15 +188,10 @@ jobs:
       - name: Problem matchers
         run: echo "::add-matcher::.github/problem-matchers.json"
       - name: Install LLVM ${{ env.LLVM_MAJOR }} and build tools
-        run: |
-          curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key \
-            | sudo gpg --dearmor -o /usr/share/keyrings/llvm-snapshot.gpg
-          echo "deb [signed-by=/usr/share/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/noble/ llvm-toolchain-noble-${LLVM_MAJOR} main" \
-            | sudo tee /etc/apt/sources.list.d/llvm.list
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            clang-${LLVM_MAJOR} lld-${LLVM_MAJOR} llvm-${LLVM_MAJOR} libclang-rt-${LLVM_MAJOR}-dev ninja-build \
-            libgl1-mesa-dev libxkbcommon-dev
+        run: >-
+          .github/install-llvm.sh
+          clang-${LLVM_MAJOR} lld-${LLVM_MAJOR} llvm-${LLVM_MAJOR} libclang-rt-${LLVM_MAJOR}-dev
+          ninja-build libgl1-mesa-dev libxkbcommon-dev
       - uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4.4.1
         with:
           version: ${{ env.QT_VERSION }}
@@ -309,19 +282,12 @@ jobs:
       - name: Configure
         shell: bash
         run: |
-          cmake --preset macos-${{ matrix.preset }} 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          cmake --preset macos-${{ matrix.preset }}
       - name: Build
         shell: bash
-        run: cmake --build --preset macos-${{ matrix.preset }} 2>&1 | tee "$RUNNER_TEMP/build.log"
+        run: cmake --build --preset macos-${{ matrix.preset }}
       - name: Test
         run: ctest --preset macos-${{ matrix.preset }} --output-on-failure
-      - name: TEMPORARY failure notes (plan 0023)
-        if: failure()
-        shell: bash
-        run: |
-          py=$(command -v python3 || command -v python)
-          "$py" .github/ci-failure-notes.py "build/macos-${{ matrix.preset }}" \
-            "$RUNNER_TEMP/configure.log" "$RUNNER_TEMP/build.log" "$RUNNER_TEMP/coverage.log"
 
   windows:
     name: windows-${{ matrix.preset }}
@@ -378,34 +344,12 @@ jobs:
         shell: bash
         run: |
           clang-cl --version
-          cmake --preset windows-${{ matrix.preset }} 2>&1 | tee "$RUNNER_TEMP/configure.log"
+          cmake --preset windows-${{ matrix.preset }}
       - name: Build
         shell: bash
-        run: cmake --build --preset windows-${{ matrix.preset }} 2>&1 | tee "$RUNNER_TEMP/build.log"
+        run: cmake --build --preset windows-${{ matrix.preset }}
       - name: Test
         run: ctest --preset windows-${{ matrix.preset }} --output-on-failure
-      - name: TEMPORARY failure notes (plan 0023)
-        if: failure()
-        shell: bash
-        run: |
-          py=$(command -v python3 || command -v python)
-          "$py" .github/ci-failure-notes.py "build/windows-${{ matrix.preset }}" \
-            "$RUNNER_TEMP/configure.log" "$RUNNER_TEMP/build.log" "$RUNNER_TEMP/coverage.log"
-      - name: TEMPORARY tst_console probe (plan 0023)
-        # ctest showed no output of tst_gui.tst_console on Windows: run it alone with its exit code.
-        if: failure()
-        shell: bash
-        run: |
-          exe=$(find "build/windows-${{ matrix.preset }}" -name tst_gui.exe | head -n 1)
-          status=0
-          QT_QPA_PLATFORM=offscreen QT_IM_MODULE=none QT_IM_MODULES=none /usr/bin/timeout 120 \
-            "$exe" -input app/gui/tests/tst_console.qml -o "$RUNNER_TEMP/console-qt.txt,txt" \
-            > "$RUNNER_TEMP/console.log" 2>&1 || status=$?
-          echo "exit $status" >> "$RUNNER_TEMP/console.log"
-          cat "$RUNNER_TEMP/console-qt.txt" >> "$RUNNER_TEMP/console.log" || true
-          cat "$RUNNER_TEMP/console.log"
-          py=$(command -v python3 || command -v python)
-          "$py" .github/ci-failure-notes.py build/none "$RUNNER_TEMP/console.log"
 
   # ---- Packages (plan/features/0015 F1, ADR-0125): unsigned, 7-day artifacts ----------------------
 
@@ -546,8 +490,9 @@ jobs:
           path: build/packages/*.dmg
 
   package-windows:
-    # windeployqt + app-local MSVC runtime, MSI through CPack WIX (WiX >= 4), ICE validation,
-    # Trusted Signing in dry-run mode (no secrets in PR CI).
+    # windeployqt + app-local MSVC runtime into the installed tree, self-test, MSI from that tree
+    # through CPack WIX (WiX >= 4) as in release.yml sign-windows (packaging/windows/build-msi.ps1,
+    # ADR-0224), ICE validation, Artifact Signing in dry-run mode (no secrets in PR CI).
     name: package-windows
     needs: windows
     runs-on: windows-2022
@@ -624,8 +569,12 @@ jobs:
           $gui = Start-Process -FilePath build/windows-install/hwio-monitor.exe -ArgumentList "--self-test" -Wait -PassThru
           if ($gui.ExitCode -ne 0) { throw "hwio-monitor --self-test failed: $($gui.ExitCode)" }
           Get-ChildItem build/windows-install -Filter "vcruntime140*.dll"
-      - name: MSI
-        run: cpack --preset windows-package -B "$PWD/build/packages"
+      # The release path: the MSI packages the installed tree above as it is (no install scripts).
+      - name: MSI from the installed tree
+        shell: pwsh
+        run: >-
+          packaging/windows/build-msi.ps1 -BuildDir build/windows-package
+          -Tree build/windows-install -OutDir build/packages
       - name: ICE validation
         shell: pwsh
         run: |

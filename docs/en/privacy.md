@@ -74,9 +74,10 @@ The application data folder holds:
 | `logs` | application logs, one file per run | 10 files of the app, 20 of `hwio`, 50 MiB each kind |
 | `firmware-cache` | downloaded catalog firmware and LTE firmware | 100 files, 500 MiB |
 | `crashes` | crash reports | 5 files |
+| `backups` | copies of the application firmware made by the [LTE firmware update](flashing.md#lte-firmware-update) (`<serial>-<UTC time>.hex`) | 10 files |
 
-The settings file, the logs and the console files are shared by the app and `hwio`. Console files and the history
-can be read only by your user (Linux, macOS). Commands that carry secrets are not saved in the history and are
+The settings file, the logs and the console files are shared by the app and `hwio`. Console files, the history and
+the backups can be read only by your user (Linux, macOS). Commands that carry secrets are not saved in the history and are
 written as `<redacted>` in console files ([Console](console.md#command-history)).
 
 Uninstalling HARDWARIO Monitor does not delete these folders; delete them yourself if you want. To delete only the

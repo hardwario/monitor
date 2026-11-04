@@ -1,0 +1,8 @@
+{
+  "advertiseIntervalMs": 20,
+  "devices": [
+    {"id": "F1:00:00:00:00:01", "name": "CHESTER-FLICKER", "rssi": -60, "rssiZeroEvery": 2},
+    {"id": "F1:00:00:00:00:02", "name": "CHESTER-NEAR", "rssi": -50, "rssiZeroEvery": 2},
+    {"id": "F1:00:00:00:00:03", "name": "CHESTER-UNKNOWN", "rssi": 0}
+  ]
+}

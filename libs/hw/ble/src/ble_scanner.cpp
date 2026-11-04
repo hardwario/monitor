@@ -18,6 +18,8 @@
 #include <QtLogging>
 
 #include <algorithm>
+#include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <iterator>
 #include <optional>
@@ -33,7 +35,26 @@ template <class... Ts> struct Overloaded : Ts... {
     using Ts::operator()...;
 };
 
+// The strongest smoothed signal first (ADR-0235); unknown (no sample) after every measured value
+// (HIL 2026-11-03 H14).
+bool strongerFirst(const BleDeviceInfo& a, const BleDeviceInfo& b) {
+    const bool aUnknown = a.rssiSmoothed == 0;
+    const bool bUnknown = b.rssiSmoothed == 0;
+    if (aUnknown != bUnknown) {
+        return bUnknown;
+    }
+    return a.rssiSmoothed > b.rssiSmoothed;
+}
+
 } // namespace
+
+double smoothRssi(double smoothed, int sample, std::chrono::nanoseconds elapsed) {
+    const double seconds =
+        std::max(0.0, std::chrono::duration<double>(elapsed).count()); // a clock step back: 0
+    const double tau = std::chrono::duration<double>(BleScanner::rssiTimeConstant).count();
+    const double alpha = 1.0 - std::exp(-seconds / tau);
+    return smoothed + ((static_cast<double>(sample) - smoothed) * alpha);
+}
 
 std::string truncateUtf8(std::string text, std::size_t maxBytes) {
     if (text.size() <= maxBytes) {
@@ -112,6 +133,8 @@ void BleScanner::add(const Advertisement& advertisement) {
         m_devices.push_back(BleDeviceInfo{.id = advertisement.id,
                                           .name = {},
                                           .rssi = 0,
+                                          .rssiSmoothed = 0,
+                                          .rssiSampled = {},
                                           .nusAdvertised = false,
                                           .profileId = {},
                                           .lastSeen = {}});
@@ -121,7 +144,16 @@ void BleScanner::add(const Advertisement& advertisement) {
         // ADR-0183 (review L-19): the advertised name is device data; sanitised once here.
         it->name = truncateUtf8(sanitizeDeviceText(advertisement.name), maxNameBytes);
     }
-    it->rssi = advertisement.rssi;
+    // HIL 2026-11-03 H14: BlueZ reports cached devices (and some updates) with RSSI 0 = unknown;
+    // it must not replace a measured value.
+    if (advertisement.rssi != 0) {
+        it->rssi = advertisement.rssi;
+        // ADR-0235: the first sample is the value, later ones move the average.
+        it->rssiSmoothed = it->rssiSmoothed == 0 ? static_cast<double>(advertisement.rssi)
+                                                 : smoothRssi(it->rssiSmoothed, advertisement.rssi,
+                                                              advertisement.seen - it->rssiSampled);
+        it->rssiSampled = advertisement.seen;
+    }
     it->nusAdvertised = it->nusAdvertised || nus;
     if (!profileId.empty()) {
         it->profileId = profileId;
@@ -135,8 +167,7 @@ void BleScanner::publish() {
         return;
     }
     m_dirty = false;
-    std::ranges::stable_sort(
-        m_devices, [](const BleDeviceInfo& a, const BleDeviceInfo& b) { return a.rssi > b.rssi; });
+    std::ranges::stable_sort(m_devices, strongerFirst);
     emit devicesChanged(QList<BleDeviceInfo>(m_devices.begin(), m_devices.end()));
 }
 
@@ -158,10 +189,7 @@ void BleScanner::drainEvents() {
                            m_signalTimer.stop();
                            // Sorted before the result even when nothing changed since the last
                            // signal.
-                           std::ranges::stable_sort(
-                               m_devices, [](const BleDeviceInfo& a, const BleDeviceInfo& b) {
-                                   return a.rssi > b.rssi;
-                               });
+                           std::ranges::stable_sort(m_devices, strongerFirst);
                            publish();
                            if (done.error) {
                                qCWarning(log::lcBle).noquote()

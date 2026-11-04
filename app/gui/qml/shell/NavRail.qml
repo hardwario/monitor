@@ -2,6 +2,8 @@
 // busy badge on the page that runs an operation; Settings (global pages) and Help (the Help menu,
 // plan/features/0007) at the bottom.
 // Below 1100 px window width it shows icons only, with the labels as tooltips.
+// Plan 0012: a page the tab cannot use (Flash in a Bluetooth tab) is dimmed, its tooltip says why
+// and a click shows the reason as a toast.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -35,6 +37,7 @@ Rectangle {
         property bool selected: false
         property bool busy: false
         property string shortcutId: ""
+        property string unavailableReason: ""
 
         objectName: "railItem"
         Layout.alignment: Qt.AlignHCenter
@@ -44,10 +47,11 @@ Rectangle {
         Accessible.role: Accessible.Button
         Accessible.name: item.text
         Accessible.checked: item.selected
-        Accessible.description: item.busy ? qsTr("Busy") : ""
+        Accessible.description: item.busy ? qsTr("Busy") : item.unavailableReason
         HToolTip {
             visible: item.hovered
-            text: AppViewModel.shortcuts.tooltip(item.text, item.shortcutId)
+            text: item.unavailableReason !== "" ? item.text + " — " + item.unavailableReason
+                                                : AppViewModel.shortcuts.tooltip(item.text, item.shortcutId)
             delay: 400
         }
 
@@ -70,7 +74,7 @@ Rectangle {
                 Icon {
                     anchors.centerIn: parent
                     symbol: item.iconName
-                    color: item.selected ? Theme.accent : (item.enabled ? Theme.textMuted : Theme.border)
+                    color: item.selected ? Theme.accent : (item.enabled && item.unavailableReason === "" ? Theme.textMuted : Theme.border)
                 }
 
                 BusyIndicator {
@@ -120,6 +124,8 @@ Rectangle {
                 text: pageItem.title
                 shortcutId: "page." + pageItem.pageId
                 enabled: rail.tab !== null && rail.tab.state !== DeviceTabViewModel.ChoosingDevice
+                // The transport is read so that the binding follows it.
+                unavailableReason: rail.tab !== null && rail.tab.transport !== "" ? rail.tab.pageDisabledReason(pageItem.pageId) : ""
                 selected: enabled && AppViewModel.globalPage === "" && rail.tab.currentPage === pageItem.pageId
                 busy: rail.tab !== null && rail.tab.busyPage === pageItem.pageId
                 onClicked: AppViewModel.showPage(pageItem.pageId)

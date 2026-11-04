@@ -53,8 +53,12 @@ struct QtLinkError {
     std::optional<QLowEnergyController::Error> controller;
     std::optional<QLowEnergyService::ServiceError> service;
     LinkPhase phase = LinkPhase::Connecting;
+    // The system has a bond with the device (IBleApi::isPaired) when the error came.
+    bool bonded = true;
 };
-// ble.not_paired only with the platform's authentication/encryption detail (ADR-0084, review B7).
+// ble.not_paired only with the platform's authentication/encryption detail (ADR-0084, review B7),
+// or for a failed CCCD write while an unbonded link pairs (HIL 2026-11-03 H11: BlueZ ends a
+// passkey request that is never answered after ~25 s with a descriptor write error).
 [[nodiscard]] Error mapLinkError(const QtLinkError& error);
 
 // ble.pairing_failed; on Linux with a text that names both causes (H1 rework): no agent (BlueZ
@@ -77,6 +81,10 @@ public:
     // Devices remembered from scans (their QBluetoothDeviceInfo is needed to connect, e.g. the
     // CoreBluetooth UUID on macOS).
     static constexpr std::size_t maxKnownDevices = 256;
+    // HIL 2026-11-03 H13: how long a connect scans for a device the system does not know (bond
+    // just removed, an unbonded device whose cache entry expired, an absent device) before it
+    // ends with ble.device_not_found.
+    static constexpr std::chrono::milliseconds resolveTimeout{10000};
 
     QtBleApi();
     ~QtBleApi() override;
@@ -108,6 +116,8 @@ private:
         WriteMode mode = WriteMode::WithResponse;
         bool cccdPending = false;
         bool ready = false;
+        bool resolving = false; // H13: scanning for the device before the controller starts
+        bool resolved = false;  // H13: at most one such scan per link
         std::deque<std::uint64_t> writes; // with-response tokens in write order
     };
 
@@ -115,8 +125,12 @@ private:
     void advertisement(const QBluetoothDeviceInfo& info);
     void servicesDiscovered(LinkId id);
     void detailsDiscovered(LinkId id);
+    void serviceError(LinkId id, QLowEnergyService::ServiceError error);
     void lost(LinkId id, Error error);
     void startController(LinkId id);
+    void resolve(LinkId id);
+    void stopResolveScan();
+    void ensureAgent();
     [[nodiscard]] static detail::LinkPhase phaseOf(const Link& link);
     void release(Link& link);
     [[nodiscard]] Link* find(LinkId id);
@@ -126,6 +140,7 @@ private:
     std::unique_ptr<QBluetoothLocalDevice> m_local;
     std::unique_ptr<QBluetoothDeviceDiscoveryAgent> m_agent;
     bool m_scanning = false;
+    bool m_resolveScan = false; // H13: the agent runs (also) for resolving links
     std::map<BleDeviceId, QBluetoothDeviceInfo> m_known; // <= maxKnownDevices
     std::deque<BleDeviceId> m_knownOrder;                // oldest first
     std::map<LinkId, Link> m_links;

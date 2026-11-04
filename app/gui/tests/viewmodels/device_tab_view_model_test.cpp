@@ -271,7 +271,7 @@ TEST_F(DeviceTabTest, ConnectDuringDiagnoseKeepsTheProbeOnlySession) {
 
 TEST_F(DeviceTabTest, AFatallyStoppedSessionIsReleased) {
     // Review S1, S18: a fatal connect failure (missing probe) releases the session on the next
-    // event-loop turn; its error stays shown, the target can be changed, Connect opens a new one.
+    // event-loop turn; its error stays shown, Connect opens a new one.
     ASSERT_TRUE(tab().configure(QStringLiteral("chester"), QStringLiteral("app"), 123456));
     tab().connectDevice();
     ASSERT_TRUE(waitFor([&] { return tab().connection()->error().valid(); }));
@@ -281,11 +281,7 @@ TEST_F(DeviceTabTest, AFatallyStoppedSessionIsReleased) {
     EXPECT_TRUE(tab().hasError());
     EXPECT_EQ(tab().connection()->stateKind(), QStringLiteral("error"));
     EXPECT_TRUE(tab().connection()->stateText().startsWith(QStringLiteral("Disconnected — ")));
-    EXPECT_TRUE(tab().connection()->canChangeTarget());
     EXPECT_EQ(tab().connection()->action(), QStringLiteral("connect"));
-    tab().connection()->setTargetId(QStringLiteral("lte"));
-    EXPECT_EQ(tab().consoleTargetId(), QStringLiteral("lte"));
-    tab().connection()->setTargetId(QStringLiteral("app"));
     EXPECT_TRUE(tab().ensureSession()); // a new session
     EXPECT_NE(tab().session(), nullptr);
     ASSERT_TRUE(waitFor([&] { return tab().session() == nullptr; })); // fails and is released
@@ -334,16 +330,19 @@ TEST_F(DeviceTabTest, DismissedErrorClearsTheTabError) {
     EXPECT_EQ(tab().connection()->stateKind(), QStringLiteral("idle"));
 }
 
-TEST_F(DeviceTabTest, TargetChangesOnlyWithoutASession) {
+// Plan 0033 (ADR-0233, D8): a J-Link on the LTE connector - the banner state, no reconnect by
+// itself, [Retry] after the cable moved.
+TEST_F(DeviceTabTest, TheLteConnectorShowsTheOtherConnectorState) {
+    useScenario(R"({"probes": [{"serialNumber": 801000001, "chip": {"family": "nrf91"}}]})");
     ASSERT_TRUE(tab().configure(QStringLiteral("chester"), QStringLiteral("app"), 801000001));
-    tab().connection()->setTargetId(QStringLiteral("lte"));
-    EXPECT_EQ(tab().consoleTargetId(), QStringLiteral("lte"));
-    EXPECT_EQ(tab().title(), QStringLiteral("CHESTER lte · 801000001"));
-    tab().connection()->setTargetId(QStringLiteral("app"));
-    ASSERT_TRUE(connectAndWait(tab()));
-    EXPECT_FALSE(tab().connection()->canChangeTarget());
-    tab().connection()->setTargetId(QStringLiteral("lte"));
-    EXPECT_EQ(tab().consoleTargetId(), QStringLiteral("app"));
+    tab().connectDevice();
+    ASSERT_TRUE(waitFor([&] { return tab().connection()->otherConnector(); }));
+    EXPECT_EQ(tab().connection()->error().code(), QStringLiteral("target.other_connector"));
+    EXPECT_EQ(tab().connection()->otherConnectorText(),
+              QStringLiteral("The J-Link is connected to the LTE MCU. The console runs on the "
+                             "application MCU; the J-Link cable is on the other connector. Move "
+                             "the J-Link cable to the APP connector, or update the LTE firmware."));
+    EXPECT_EQ(tab().connection()->error().wizard(), QStringLiteral("lte-update"));
 }
 
 TEST_F(DeviceTabTest, BusyStateAndText) {

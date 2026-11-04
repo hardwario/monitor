@@ -16,6 +16,12 @@
 > firmware); the Firmware step for LTE offers the designated LTE firmware (default) or an own file; catalog IDs show
 > the firmware name and version.
 
+> **Amendment from [0033](0033-rc2-feedback.md) (ADR-0233, ADR-0234; approved 2026-11-04 by Matej Strnad):** LTE
+> firmware is no longer flashed by this wizard or the Flash page. When the user picks **LTE firmware**, the wizard hands
+> over to the LTE firmware update wizard (`WizardId::LteUpdate`, "lte-update"), which moves the J-Link between the
+> connectors, keeps a copy of the application and writes it back. This wizard covers application firmware only; tabs
+> have no target choice (ADR-0233).
+
 ## Context
 
 The M3 Flash page (ADR-0049, ADR-0055) is a single form for everyday flashing. First-time users still fail before

@@ -61,9 +61,9 @@ kopieren:
 sudo ln -s '/Applications/HARDWARIO Monitor.app/Contents/MacOS/hwio' /usr/local/bin/hwio
 ```
 
-**Bluetooth:** Beim ersten `hwio ble`-Befehl fragt macOS nach dem Zugriff auf Bluetooth. macOS erteilt die
-Berechtigung der App, aus der Sie `hwio` starten, meist dem Terminal. Wenn Sie abgelehnt haben, erlauben Sie es in
-**System Settings → Privacy & Security → Bluetooth** (Systemeinstellungen → Datenschutz & Sicherheit → Bluetooth).
+**Bluetooth:** Wenn Sie zum ersten Mal die Bluetooth-Ansicht der App öffnen oder den ersten `hwio ble`-Befehl
+ausführen, fragt macOS nach dem Zugriff auf Bluetooth. Für `hwio` erteilt macOS die Berechtigung der App, aus der Sie
+es starten, meist dem Terminal. Wenn Sie abgelehnt haben, erlauben Sie es in **System Settings → Privacy & Security → Bluetooth** (Systemeinstellungen → Datenschutz & Sicherheit → Bluetooth).
 
 Zum Aktualisieren ersetzen Sie die App im Ordner Programme durch die neue. Zum Deinstallieren ziehen Sie sie in den
 Papierkorb.

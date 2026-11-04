@@ -1,6 +1,6 @@
 # ADR-0083 — BLE scan filter, device identity, cross-process lock and tab restore
 
-- **Status:** Accepted (extends ADR-0058; amends ADR-0061); filter amended by ADR-0142 (name pattern only)
+- **Status:** Accepted (extends ADR-0058; amends ADR-0061); filter amended by ADR-0142 (name pattern only); amended by ADR-0235 (2026-11-04): the list is ordered by the smoothed RSSI with hysteresis
 - **Date:** 2026-10-10
 - **Decided by:** Matej Strnad (M5 planning session)
 

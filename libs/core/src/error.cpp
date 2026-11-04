@@ -144,6 +144,7 @@ consteval bool isEnumerator(ErrorCode code) {
     case ErrorCode::McpToFileNotAllowed:
     case ErrorCode::CliFileIsSymlink:
     case ErrorCode::UsbWorldAccessible:
+    case ErrorCode::TargetOtherConnector:
         return true;
     }
     return false;
@@ -1226,6 +1227,24 @@ constexpr std::array defaultTexts{
             "then reconnect the J-Link. A J-Link Software update may install the rule again.",
             "usb.world_accessible suggestion"),
         .wizard = WizardId::FirstRunSetup,
+    },
+    // Plan 0033 (ADR-0233): a J-Link tab whose cable is on another MCU's connector. The device
+    // layer names the MCUs ("The J-Link is connected to the LTE MCU.").
+    DefaultTexts{
+        .code = ErrorCode::TargetOtherConnector,
+        .message = QT_TRANSLATE_NOOP3("hwio::core",
+                                      "The J-Link is connected to another MCU of the device.",
+                                      "target.other_connector message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "The console runs on another MCU; the J-Link cable is on the other connector.",
+            "target.other_connector cause"),
+        .suggestion = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "Move the J-Link cable to the connector of the console's MCU, or update the LTE "
+            "firmware.",
+            "target.other_connector suggestion"),
+        .wizard = WizardId::LteUpdate,
     },
 };
 

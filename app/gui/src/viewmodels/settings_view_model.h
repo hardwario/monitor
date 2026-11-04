@@ -16,6 +16,7 @@
 //     same ConnectionOptions logic as the popover), RTT latency (rtt/latencyMs, 0 = the profile's),
 //     auto-reconnect, reset on connect.
 //   - nRF Util: Automatic / Custom path (nrfutil/path, checked before it is saved).
+//   - Advanced (plan 0033, ADR-0236): "Show expert maintenance actions" (advanced/expertActions).
 //   - About: versions, licences, links; Copy.
 // A settings file of a newer schema is read-only (readOnly: the page disables every control).
 //
@@ -76,6 +77,9 @@ class SettingsViewModel : public QObject {
     Q_PROPERTY(int maxSpeedKhz READ maxSpeedKhz CONSTANT)
     Q_PROPERTY(int minLatencyMs READ minLatencyMs CONSTANT)
     Q_PROPERTY(int maxLatencyMs READ maxLatencyMs CONSTANT)
+
+    // Advanced (plan 0033, ADR-0236): advanced/expertActions.
+    Q_PROPERTY(bool expertActions READ expertActions WRITE setExpertActions NOTIFY valuesChanged)
 
     // nRF Util
     Q_PROPERTY(QString nrfUtilMode READ nrfUtilMode WRITE setNrfUtilMode NOTIFY nrfUtilChanged)
@@ -151,6 +155,9 @@ public:
     [[nodiscard]] static int maxSpeedKhz();
     [[nodiscard]] static int minLatencyMs();
     [[nodiscard]] static int maxLatencyMs();
+
+    [[nodiscard]] bool expertActions() const;
+    void setExpertActions(bool value);
 
     [[nodiscard]] QString nrfUtilMode() const;
     void setNrfUtilMode(const QString& mode);

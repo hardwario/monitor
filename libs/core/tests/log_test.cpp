@@ -92,6 +92,17 @@ TEST(Logging, WritesFormattedLinesToFile) {
     EXPECT_NE(content.find("[wrn] hwio.core"), std::string::npos);
 }
 
+#ifndef _WIN32
+// HIL 2026-11-03 H15 (ADR-0186): the log may contain device output; owner-only.
+TEST(Logging, FilesAreOwnerOnly) {
+    const QTemporaryDir dir;
+    auto logging = initOrFail(AppKind::Cli, tempPath(dir));
+    ASSERT_TRUE(logging);
+    EXPECT_EQ(fs::status(logging->currentFile()).permissions() & fs::perms::all,
+              fs::perms::owner_read | fs::perms::owner_write);
+}
+#endif
+
 TEST(Logging, GuiFilePrefix) {
     const QTemporaryDir dir;
     auto logging = initOrFail(AppKind::Gui, tempPath(dir));

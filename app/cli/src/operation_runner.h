@@ -67,6 +67,9 @@ public:
     // Releases the probe (and its lock) now; joins the worker's current step. Idempotent.
     void close();
 
+    // Plan 0033: the session itself (LteUpdateProcedure drives it directly).
+    [[nodiscard]] device::DeviceSession& session() noexcept { return *m_session; }
+
     // The serial number of the probe used by the last run() (0 before).
     [[nodiscard]] std::uint32_t probeSerial() const noexcept { return m_probeSerial; }
 

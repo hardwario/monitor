@@ -1,4 +1,4 @@
-# Packaging (plan/features/0015, ADR-0115 … ADR-0126, ADR-0177)
+# Packaging (plan/features/0015, plan/features/0031, ADR-0115 … ADR-0126, ADR-0177, ADR-0224)
 
 How HARDWARIO Monitor v2 is installed, packaged and signed. The release procedure is in
 [RELEASE.md](RELEASE.md).
@@ -8,7 +8,7 @@ How HARDWARIO Monitor v2 is installed, packaged and signed. The release procedur
 | `hwio-monitor-<v>-x86_64.AppImage` | Ubuntu 22.04+ and other glibc ≥ 2.35 distributions | `packaging/linux/build-packages.sh` (container) | no (SHA256SUMS + provenance) |
 | `hardwario-monitor_<v>_amd64.deb` | Ubuntu 24.04+ / Debian 13+ | same build tree, CPack DEB | no (SHA256SUMS + provenance) |
 | `hwio-monitor-<v>-macos-universal.dmg` | macOS 13.3+ (arm64 + x86_64) | `macos-package` preset, `packaging/macos/sign-and-notarize.sh` | Developer ID, notarized, stapled |
-| `hwio-monitor-<v>-windows-x64.msi` | Windows 10 22H2+ x64 | `windows-package` preset, CPack WIX (WiX ≥ 4) | Azure Trusted Signing |
+| `hwio-monitor-<v>-windows-x64.msi` | Windows 10 22H2+ x64 | `windows-package` preset, installed tree, `packaging/windows/build-msi.ps1` (CPack WIX, WiX ≥ 4) | Azure Artifact Signing (executables and MSI) |
 
 `<v>` is the version from the git tag (`cmake/HWioVersion.cmake`; build metadata `+` is written as `.` in file
 names). No package contains SEGGER J-Link Software, its USB driver or nRF Util (ADR-0006, ADR-0016).
@@ -25,7 +25,8 @@ packaging/common/licenses/    third-party licence texts; licenses.cmake installs
 packaging/linux/              Containerfile, build-packages.sh, build-appimage.sh, check-packages.sh,
                               smoke-clean.sh, desktop file, AppStream metainfo, udev rule, deb/, appimage/AppRun
 packaging/macos/              entitlements.plist, sign-and-notarize.sh, dmg/background.png
-packaging/windows/            version.rc.in (icon + VERSIONINFO), wix/ (CPack config, template, features), sign.ps1
+packaging/windows/            version.rc.in (icon + VERSIONINFO), wix/ (CPack config, template, features), build-msi.ps1,
+                              sign.ps1
 ```
 
 `HWIO_PACKAGE_KIND` (`dev` | `appimage` | `deb` | `macos-bundle` | `msi`) is compiled into the binaries
@@ -83,8 +84,13 @@ hardened runtime, `--timestamp` (not ad hoc) and `entitlements.plist` (only
 `com.apple.security.cs.disable-library-validation`, so that SEGGER's JLinkARM library and its copies load). The
 `verify` step checks the strict signature, the hardened runtime and the entitlements of both binaries and that
 the Bluetooth usage descriptions survived (ADR-0086). The DMG is made with create-dmg (pinned release archive,
-SHA-256 checked) and, in the release workflow only, notarized with `xcrun notarytool` (App Store Connect API
-key) and stapled.
+SHA-256 checked).
+
+The release (job `sign-macos`, ADR-0224) signs with the Developer ID, then `notarize-app` zips the bundle with
+`ditto`, notarizes it with `xcrun notarytool` (App Store Connect API key) and staples the ticket to the app, so the
+copy in `/Applications` carries it too. The DMG is built from the stapled app, signed, notarized and stapled
+(`notarize`), and `verify-dmg` mounts it and checks the DMG and the app inside it (`codesign --verify --strict`,
+`stapler validate`, `spctl`). A rejected submission prints Apple's `notarytool log`.
 
 ## Windows (ADR-0117, ADR-0120)
 
@@ -94,42 +100,87 @@ and WiX ≥ 4 (`dotnet tool install --global wix --version 5.0.2` and
 
 ```powershell
 cmake --preset windows-package; cmake --build --preset windows-package
-packaging/windows/sign.ps1 -DryRun -Files build/windows-package/app/gui/hwio-monitor.exe,build/windows-package/app/cli/hwio.exe
-cpack --preset windows-package -B build/packages
+cmake --install build/windows-package --prefix "$PWD/build/windows-install"        # windeployqt (absolute prefix)
+packaging/windows/sign.ps1 -DryRun -Files build/windows-install/hwio-monitor.exe,build/windows-install/hwio.exe
+packaging/windows/build-msi.ps1 -BuildDir build/windows-package -Tree build/windows-install -OutDir build/packages
 wix msi validate build/packages/hwio-monitor-<v>-windows-x64.msi
 ```
+
+`build-msi.ps1` runs CPack WIX with the build tree's `CPackConfig.cmake` but packages the installed tree as it is
+(`CPACK_INSTALL_CMAKE_PROJECTS` empty, `CPACK_INSTALLED_DIRECTORIES`): no compiler, no windeployqt and no
+dependency's CMake code runs. That is how the release signs the executables first and then builds the MSI from
+the signed files in the sign job (ADR-0224); PR CI uses the same script on the unsigned tree.
+`CPackConfig.cmake` holds absolute paths of the configure run, so the script runs in the same workspace path.
 
 The MSI is per-machine (`%ProgramFiles%\HARDWARIO\Monitor`), with a fixed UpgradeCode (major upgrades; a
 downgrade shows "A newer version of HARDWARIO Monitor is already installed."), the features "Add hwio to PATH"
 (on) and "Desktop shortcut" (off; `msiexec /i <msi> /qn ADDDESKTOPSHORTCUT=1`) and a Start-menu shortcut with the
-AppUserModelID `com.hardwario.monitor`. The executables are signed after the build and before CPack, the MSI
-after CPack; `signtool verify /pa` checks all three.
+AppUserModelID `com.hardwario.monitor`. The release (job `sign-windows`) signs `hwio-monitor.exe` and `hwio.exe` in
+the installed tree, builds the MSI from it, signs the MSI, extracts it (`msiexec /a`) and checks that all four
+executables and the MSI have a valid HARDWARIO a.s. signature with a timestamp. Qt DLLs and the MSVC runtime keep
+their vendors' signatures.
 
 ## CI (ADR-0125)
 
 - `ci.yml` (pull requests, `main`): `package-linux`, `package-macos`, `package-windows` build unsigned packages
   after the normal jobs, run the checks above and upload them as artifacts for 7 days.
 - `release.yml` (tags `v2.*.*`): gate (version = tag, 0 unfinished Czech translations, `HWIO_TEST_OVERRIDES=OFF`,
-  the whole `ci.yml` through `workflow_call`), signed builds, symbol archives, `SHA256SUMS`, build provenance
-  attestations and a **draft** release. See [RELEASE.md](RELEASE.md).
+  the whole `ci.yml` through `workflow_call`); build jobs `linux`, `macos`, `windows` (unsigned bundle and
+  installed tree as `unsigned-*` artifacts, symbol archives); sign jobs `sign-macos`, `sign-windows`; `publish`
+  (every package present, `SHA256SUMS`, build provenance attestations, **draft** release). See
+  [RELEASE.md](RELEASE.md).
+- Only the sign jobs run in the environment `signing` and see its secrets or an OIDC token. They run this
+  repository's packaging scripts and the packaging tools (create-dmg, CPack, WiX), never a compiler or a
+  dependency's build code (ADR-0224).
 
-## Secrets (environment `release`, required reviewers)
+## Signing (environment `signing`, ADR-0120, ADR-0224)
 
-| Secret | Use | Rotation |
+The GitHub environment **`signing`** admits deployments only from tags matching `v*`; only the jobs `sign-macos` and
+`sign-windows` use it. The same setup (names, Azure app, Apple certificate) is used by every HARDWARIO repository
+that signs in GitHub Actions.
+
+| Name | Kind | Use |
 |---|---|---|
-| `MACOS_CERT_P12_BASE64` | Developer ID Application certificate + key (.p12, base64) | before expiry (5 years); export a new .p12 from the Apple Developer account, replace both secrets |
-| `MACOS_CERT_PASSWORD` | password of the .p12 | with the certificate |
-| `MACOS_NOTARY_KEY_P8` | App Store Connect API key (.p8 content) for notarytool | revoke and create a new key in App Store Connect › Users and Access › Keys when a maintainer leaves or yearly |
-| `MACOS_NOTARY_KEY_ID` | its key id | with the key |
-| `MACOS_NOTARY_ISSUER` | the issuer id of the team | does not change |
-| `AZURE_CLIENT_ID` | app registration with a federated credential for this repository's `release` environment (OIDC, no client secret) | no secret to rotate; review the federated credential subject when the repository or environment changes |
-| `AZURE_TENANT_ID` | Azure tenant | — |
-| `AZURE_SUBSCRIPTION_ID` | subscription of the Trusted Signing account | — |
-| `TRUSTED_SIGNING_ACCOUNT` | Trusted Signing (Artifact Signing) account name | — |
-| `TRUSTED_SIGNING_PROFILE` | certificate profile name | Microsoft renews the short-lived certificates itself |
-| `TRUSTED_SIGNING_ENDPOINT` | regional endpoint, e.g. `https://weu.codesigning.azure.net/` | — |
+| `AZURE_CLIENT_ID` | variable | client id of the Entra app `github-codesign` (OIDC federated credentials, no client secret) |
+| `AZURE_TENANT_ID` | variable | HARDWARIO's Azure tenant |
+| `AZURE_SUBSCRIPTION_ID` | variable | subscription of the Artifact Signing account |
+| `APPLE_API_KEY` | variable | key id of the App Store Connect API key used by notarytool |
+| `APPLE_API_ISSUER` | variable | issuer id of the Apple team `C32QFQ68V9` |
+| `APPLE_CERTIFICATE` | secret | "Developer ID Application: HARDWARIO a.s. (C32QFQ68V9)" with its private key, `.p12`, base64 |
+| `APPLE_CERTIFICATE_PASSWORD` | secret | password of the `.p12` |
+| `APPLE_API_KEY_P8` | secret | content of the API key's `.p8` file |
 
-PR builds never see these secrets and are never signed.
+The values are set in the environment (repository settings); ask Pavel Hübner for them and for the key files.
+
+**Windows (Azure Artifact Signing):** account `hardwario`, endpoint `https://weu.codesigning.azure.net/`,
+certificate profile `hardwario` (Public Trust, `CN=HARDWARIO a.s., O=HARDWARIO a.s., L=Liberec, S=Liberecký, C=CZ`).
+These names are fixed in `release.yml` and are the defaults of `sign.ps1`. Microsoft issues certificates valid for about three days and rotates them itself, so every signature carries an
+RFC 3161 timestamp (`http://timestamp.acs.microsoft.com`); nothing to renew. The job logs in with GitHub OIDC
+through the federated credential `github-monitor-signing` of the app `github-codesign`, subject
+`repo:hardwario@28539912/monitor@1444229107:environment:signing` (the repository sends the immutable subject with
+owner and repository ids; a rename keeps it, a new repository or environment needs a new credential, otherwise
+the login fails with `AADSTS700213`). The app's only role is "Artifact Signing Certificate Profile Signer" on the
+profile `hardwario`.
+
+**macOS:** the Developer ID Application certificate expires on **2027-11-18**. Renewal: the team's Account Holder
+creates a new certificate from a certificate signing request in developer.apple.com (the App Store Connect API
+cannot create Developer ID certificates), then the new `.p12` goes into `APPLE_CERTIFICATE` and
+`APPLE_CERTIFICATE_PASSWORD` of every repository that signs. The `.p12` must be readable by `security import`
+(LibreSSL `/usr/bin/openssl`, or OpenSSL 3 with `-legacy`) and include the intermediate "Developer ID
+Certification Authority" (G2). The API key also serves other build systems: never revoke it as part of a rotation
+here. There is no Developer ID Installer certificate, so no `.pkg`.
+
+Whoever has the `.p12`, its password and the `.p8` as files sets the secrets without the values passing through a
+terminal log, then deletes the files:
+
+```sh
+base64 -i <path>/HARDWARIO-Developer-ID-Application.p12 | gh secret set APPLE_CERTIFICATE --env signing --repo hardwario/monitor
+gh secret set APPLE_CERTIFICATE_PASSWORD --env signing --repo hardwario/monitor < <path>/password.txt
+gh secret set APPLE_API_KEY_P8 --env signing --repo hardwario/monitor < <path>/AuthKey_<key id>.p8
+gh secret list --env signing --repo hardwario/monitor
+```
+
+PR builds never see these values and are never signed.
 
 ## Troubleshooting
 
@@ -138,6 +189,15 @@ PR builds never see these secrets and are never signed.
 - **`hwio-monitor --self-test` fails in the installed tree:** run it with `QT_DEBUG_PLUGINS=1` and check
   `qml/` against `HWIO_LINUX_QML_MODULES` / `HWIO_LINUX_QT_PLUGINS` (cmake/HWioPackaging.cmake).
 - **AppImage does not start without FUSE:** `--appimage-extract-and-run`.
-- **notarytool: Invalid:** `xcrun notarytool log <submission id> --key … --key-id … --issuer …` lists the files
-  (usually an unsigned Mach-O or a missing hardened runtime); the job prints the log in notarytool.log.
+- **notarytool: Invalid:** the sign job prints `xcrun notarytool log <submission id>`; it names the file and the
+  problem (usually an unsigned Mach-O, a missing hardened runtime or a missing secure timestamp).
+- **`security import` fails with a MAC error:** the `.p12` uses OpenSSL 3 defaults; rebuild it with LibreSSL or
+  `-legacy`.
+- **`AADSTS700213 … presented assertion subject 'repo:…'`:** the federated credential does not match the subject
+  GitHub sends; compare the subject in the error with the one above and with the federated credentials of
+  `github-codesign` (`az ad app federated-credential list`).
+- **SmartScreen still warns ("More info", "Run anyway"):** a new certificate has no reputation yet; not a signing
+  failure.
+- **A failed sign job:** fix the cause and rerun only the failed jobs (`gh run rerun <run id> --failed`); the
+  release stays a draft until a maintainer publishes it.
 - **WiX errors about extensions:** the WiX extension version must match the WiX tool version (`WIX_VERSION`).

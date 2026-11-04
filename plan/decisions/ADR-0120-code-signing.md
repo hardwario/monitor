@@ -1,6 +1,6 @@
 # ADR-0120 — Code signing: Apple Developer ID with notarization, Windows via Azure Trusted Signing
 
-- **Status:** Accepted
+- **Status:** Accepted; environment, secret names and signing in the build jobs superseded by ADR-0224
 - **Date:** 2026-10-19
 - **Decided by:** Matej Strnad (M7 planning session)
 

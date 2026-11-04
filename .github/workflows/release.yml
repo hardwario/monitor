@@ -1,21 +1,30 @@
-# HARDWARIO Monitor v2 - release (plan/features/0015 F2, ADR-0125, ADR-0120, ADR-0123).
+# HARDWARIO Monitor v2 - release (plan/features/0015 F2, plan/features/0031, ADR-0125, ADR-0120,
+# ADR-0123, ADR-0224, ADR-0231).
 #
 # A pushed tag v2.X.Y (or v2.X.Y-<pre-release>) builds, signs and checksums the packages and
 # creates a DRAFT GitHub release with generated notes; a maintainer reviews and publishes it
 # (packaging/RELEASE.md). Nothing is published automatically.
 #
-#   gate      the version computed from the tag equals the tag, 0 unfinished Czech translations,
-#             HWIO_TEST_OVERRIDES=OFF in the package configuration, and the full CI matrix
-#             (ci.yml through workflow_call, incl. the unsigned package jobs)
-#   linux     Ubuntu 22.04 container: .deb + AppImage, checks, split DWARF symbols
-#   macos     universal bundle signed with the Developer ID (temporary keychain), DMG notarized
-#             and stapled, .dSYM symbols
-#   windows   executables and MSI signed with Azure Trusted Signing (OIDC), .pdb symbols
-#   publish   SHA256SUMS, build provenance attestations, draft release
+#   gate          the version computed from the tag equals the tag, 0 unfinished Czech translations,
+#                 HWIO_TEST_OVERRIDES=OFF in the package configuration, and the full CI matrix
+#                 (ci.yml through workflow_call, incl. the unsigned package jobs); the build and
+#                 sign jobs run in parallel with it, publish waits for it (ADR-0231)
+#   linux         Ubuntu 22.04 container: .deb + AppImage, checks, split DWARF symbols
+#   macos         universal bundle, unsigned (artifact unsigned-macos), .dSYM symbols
+#   windows       installed tree, unsigned (artifact unsigned-windows), .pdb symbols
+#   sign-macos    bundle signed with the Developer ID (temporary keychain), the app notarized and
+#                 stapled, then the DMG built from it, signed, notarized and stapled
+#   sign-windows  executables signed with Azure Artifact Signing (OIDC), the MSI built from the
+#                 signed tree (CPack WIX, no install scripts), the MSI signed
+#   publish       every package present, SHA256SUMS, build provenance attestations, draft release
 #
-# Secrets live only in the environment `release` (required reviewers); names and rotation are in
-# packaging/README.md. Every third-party action is pinned by its full commit SHA (tag in the
-# comment), as in ci.yml.
+# ADR-0224: the build jobs run the compiler and every dependency's build code and never see a
+# signing secret or an OIDC token. Only the two sign jobs run in the environment `signing` (it
+# admits release tags v* only); they run this repository's packaging scripts and packaging tools
+# (create-dmg, CPack, WiX), never a compiler. Hand-over: unsigned-* artifacts from the build jobs to
+# the sign jobs; release-* artifacts go into the release. Variables, secrets and the Azure federated
+# credential are in packaging/README.md. Every third-party action is pinned by its full commit SHA
+# (tag in the comment), as in ci.yml.
 name: Release
 
 on:
@@ -63,13 +72,10 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           if [[ "$version" == *-* ]]; then echo "prerelease=true" >> "$GITHUB_OUTPUT"; else echo "prerelease=false" >> "$GITHUB_OUTPUT"; fi
       - name: Install LLVM 21 and Qt build prerequisites
-        run: |
-          curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key \
-            | sudo gpg --dearmor -o /usr/share/keyrings/llvm-snapshot.gpg
-          echo "deb [signed-by=/usr/share/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/noble/ llvm-toolchain-noble-21 main" \
-            | sudo tee /etc/apt/sources.list.d/llvm.list
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends clang-21 ninja-build libgl1-mesa-dev libxkbcommon-dev
+        # lld: the Linux linker (ADR-0207); the same retrying install as ci.yml.
+        env:
+          LLVM_MAJOR: "21"
+        run: .github/install-llvm.sh clang-21 lld-21 ninja-build libgl1-mesa-dev libxkbcommon-dev
       - uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4.4.1
         with:
           version: ${{ env.QT_VERSION }}
@@ -97,7 +103,7 @@ jobs:
 
   linux:
     name: linux (.deb, AppImage)
-    needs: [gate, tests]
+    needs: gate
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
@@ -125,34 +131,27 @@ jobs:
             for exe in app/gui/hwio-monitor app/cli/hwio; do
               llvm-objcopy-21 --only-keep-debug "build/linux-package/$exe" "symbols/$(basename $exe).debug"
             done'
-          (cd symbols && zip -9 "../build/packages/hwio-monitor-${version}-symbols-linux.zip" *.debug)
+          (cd symbols && zip -9 "../build/packages/hwio-monitor-${version}-debug-symbols-linux.zip" *.debug)
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-linux
           path: |
             build/packages/*.deb
             build/packages/*.AppImage
-            build/packages/*-symbols-linux.zip
+            build/packages/*-debug-symbols-linux.zip
 
   macos:
-    name: macos (DMG, signed and notarized)
-    needs: [gate, tests]
+    name: macos (universal bundle, unsigned)
+    needs: gate
     runs-on: macos-15
     timeout-minutes: 120
-    environment: release
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           lfs: true
       - name: Build tools
-        run: |
-          brew install ninja
-          curl -fsSLo "$RUNNER_TEMP/create-dmg.tar.gz" \
-            "https://github.com/create-dmg/create-dmg/archive/refs/tags/v${CREATE_DMG_VERSION}.tar.gz"
-          echo "${CREATE_DMG_SHA256}  $RUNNER_TEMP/create-dmg.tar.gz" | shasum -a 256 -c -
-          tar -xzf "$RUNNER_TEMP/create-dmg.tar.gz" -C "$RUNNER_TEMP"
-          echo "$RUNNER_TEMP/create-dmg-${CREATE_DMG_VERSION}" >> "$GITHUB_PATH"
+        run: brew install ninja
       - uses: jurplel/install-qt-action@a9c63c7c123f3069cff414e7e482d95dfa9d8125 # v4.4.1
         with:
           version: ${{ env.QT_VERSION }}
@@ -167,61 +166,32 @@ jobs:
           cmake --preset macos-package
           cmake --build --preset macos-package
           cmake --install build/macos-package --prefix "$PWD/build/macos-install"
-      - name: Signing identity (temporary keychain)
-        env:
-          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
-          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
-        run: |
-          keychain="$RUNNER_TEMP/release.keychain-db"
-          password="$(openssl rand -hex 24)"
-          echo "$MACOS_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
-          security create-keychain -p "$password" "$keychain"
-          security set-keychain-settings -lut 3600 "$keychain"
-          security unlock-keychain -p "$password" "$keychain"
-          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain"
-          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
-          rm -f "$RUNNER_TEMP/cert.p12"
-          identity="$(security find-identity -v -p codesigning "$keychain" | grep 'Developer ID Application' | head -n 1 | awk '{print $2}')"
-          [ -n "$identity" ] || { echo "No Developer ID Application identity" >&2; exit 1; }
-          echo "MACOS_IDENTITY=$identity" >> "$GITHUB_ENV"
-      - name: Sign, DMG, notarize, staple
-        env:
-          MACOS_NOTARY_KEY_P8: ${{ secrets.MACOS_NOTARY_KEY_P8 }}
-          MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
-          MACOS_NOTARY_ISSUER: ${{ secrets.MACOS_NOTARY_ISSUER }}
-        run: |
-          app="build/macos-install/HARDWARIO Monitor.app"
-          dmg="build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-macos-universal.dmg"
-          packaging/macos/sign-and-notarize.sh sign "$app" "$MACOS_IDENTITY"
-          spctl -a -t exec -vv "$app" || true # Gatekeeper accepts it only after notarization
-          packaging/macos/sign-and-notarize.sh dmg "$app" "$dmg" "$MACOS_IDENTITY"
-          packaging/macos/sign-and-notarize.sh notarize "$dmg"
       - name: Symbols (.dSYM, ADR-0123)
         run: |
-          mkdir -p symbols
+          mkdir -p symbols build/packages
           dsymutil build/macos-package/app/gui/hwio-monitor.app/Contents/MacOS/hwio-monitor -o symbols/hwio-monitor.dSYM
           dsymutil build/macos-package/app/cli/hwio -o symbols/hwio.dSYM
-          (cd symbols && zip -9 -r "../build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-symbols-macos.zip" .)
-      - name: Remove the keychain
-        if: always()
-        run: security delete-keychain "$RUNNER_TEMP/release.keychain-db" || true
+          (cd symbols && zip -9 -r "../build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-debug-symbols-macos.zip" .)
+      # ditto keeps the bundle's symlinks, modes and extended attributes; a plain artifact upload
+      # loses them.
+      - name: Bundle for the sign job
+        run: ditto -c -k --keepParent "build/macos-install/HARDWARIO Monitor.app" build/unsigned-macos.zip
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: release-macos
-          path: |
-            build/packages/*.dmg
-            build/packages/*-symbols-macos.zip
+          name: unsigned-macos
+          path: build/unsigned-macos.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-debug-symbols-macos
+          path: build/packages/*-debug-symbols-macos.zip
+          if-no-files-found: error
 
   windows:
-    name: windows (MSI, signed)
-    needs: [gate, tests]
+    name: windows (installed tree, unsigned)
+    needs: gate
     runs-on: windows-2022
     timeout-minutes: 120
-    environment: release
-    permissions:
-      contents: read
-      id-token: write # OIDC login to Azure (Trusted Signing, ADR-0120)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -237,11 +207,6 @@ jobs:
           $target = "C:\llvm-$env:LLVM_WINDOWS_VERSION"
           Start-Process -FilePath $installer -ArgumentList "/S", "/D=$target" -Wait
           "$target\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      - name: WiX ${{ env.WIX_VERSION }}
-        shell: pwsh
-        run: |
-          dotnet tool install --global wix --version $env:WIX_VERSION
-          wix extension add -g "WixToolset.UI.wixext/$env:WIX_VERSION"
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         with:
           arch: x64
@@ -254,90 +219,235 @@ jobs:
           # Review L-5 (plan/features/0025): signed release artifacts never use Qt from the
           # Actions cache (a poisoned entry would feed the signed binaries).
           cache: false
-      - name: Build
+      - name: Build and install (windeployqt, app-local MSVC runtime)
         run: |
           cmake --preset windows-package
           cmake --build --preset windows-package
-      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      # The executables after the build, before CPack: the MSI contains the signed files.
-      - name: Sign the executables
-        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
-        with:
-          endpoint: ${{ secrets.TRUSTED_SIGNING_ENDPOINT }}
-          signing-account-name: ${{ secrets.TRUSTED_SIGNING_ACCOUNT }}
-          certificate-profile-name: ${{ secrets.TRUSTED_SIGNING_PROFILE }}
-          files: |
-            ${{ github.workspace }}\build\windows-package\hwio-monitor.exe
-            ${{ github.workspace }}\build\windows-package\hwio.exe
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
-          exclude-environment-credential: true
-          exclude-workload-identity-credential: true
-          exclude-managed-identity-credential: true
-          exclude-shared-token-cache-credential: true
-          exclude-visual-studio-credential: true
-          exclude-visual-studio-code-credential: true
-          exclude-azure-cli-credential: false
-          exclude-azure-powershell-credential: true
-          exclude-azure-developer-cli-credential: true
-          exclude-interactive-browser-credential: true
-      - name: MSI
-        run: cpack --preset windows-package -B "$PWD/build/packages"
-      - name: Sign the MSI
-        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
-        with:
-          endpoint: ${{ secrets.TRUSTED_SIGNING_ENDPOINT }}
-          signing-account-name: ${{ secrets.TRUSTED_SIGNING_ACCOUNT }}
-          certificate-profile-name: ${{ secrets.TRUSTED_SIGNING_PROFILE }}
-          files-folder: ${{ github.workspace }}\build\packages
-          files-folder-filter: msi
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
-          exclude-environment-credential: true
-          exclude-workload-identity-credential: true
-          exclude-managed-identity-credential: true
-          exclude-shared-token-cache-credential: true
-          exclude-visual-studio-credential: true
-          exclude-visual-studio-code-credential: true
-          exclude-azure-cli-credential: false
-          exclude-azure-powershell-credential: true
-          exclude-azure-developer-cli-credential: true
-          exclude-interactive-browser-credential: true
-      - name: Verify the signatures, ICE validation
-        shell: pwsh
-        run: |
-          $msi = (Get-ChildItem build/packages -Filter *.msi | Select-Object -First 1).FullName
-          foreach ($file in @("build/windows-package/hwio-monitor.exe", "build/windows-package/hwio.exe", $msi)) {
-            & signtool verify /pa /v $file
-            if ($LASTEXITCODE -ne 0) { throw "signtool verify failed: $file" }
-          }
-          # ICE38/43/57: per-user checks, not for this perMachine MSI (as in ci.yml).
-          wix msi validate -sice ICE38 -sice ICE43 -sice ICE57 $msi
+          # Absolute: Qt runs windeployqt inside the prefix (as on macOS).
+          cmake --install build/windows-package --prefix "$PWD/build/windows-install"
       - name: Symbols (.pdb, ADR-0123)
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force symbols | Out-Null
+          New-Item -ItemType Directory -Force symbols, build/packages | Out-Null
           Copy-Item build/windows-package/hwio-monitor.pdb, build/windows-package/hwio.pdb symbols/
-          Compress-Archive -Path symbols/* -DestinationPath "build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-symbols-windows.zip"
+          Compress-Archive -Path symbols/* -DestinationPath "build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-debug-symbols-windows.zip"
+      # The installed tree and what CPack needs to build the MSI from it in sign-windows
+      # (packaging/windows/build-msi.ps1). The paths keep their place under build/.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: unsigned-windows
+          path: |
+            build/windows-install/
+            build/windows-package/CPackConfig.cmake
+            build/windows-package/packaging/LICENSE.txt
+          if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-debug-symbols-windows
+          path: build/packages/*-debug-symbols-windows.zip
+          if-no-files-found: error
+
+  # Signing jobs (ADR-0224): environment `signing`, tags only, no compiler, no dependency code.
+  sign-macos:
+    name: sign-macos (Developer ID, notarized DMG)
+    needs: [gate, macos]
+    if: github.ref_type == 'tag'
+    runs-on: macos-15
+    timeout-minutes: 150
+    environment: signing
+    permissions:
+      contents: read
+    env:
+      APPLE_API_KEY: ${{ vars.APPLE_API_KEY || secrets.APPLE_API_KEY }}
+      APPLE_API_ISSUER: ${{ vars.APPLE_API_ISSUER || secrets.APPLE_API_ISSUER }}
+      APP: build/macos-install/HARDWARIO Monitor.app
+      DMG: build/packages/hwio-monitor-${{ needs.gate.outputs.version }}-macos-universal.dmg
+    steps:
+      # The packaging scripts, the entitlements and the DMG background (LFS).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          lfs: true
+      - name: create-dmg ${{ env.CREATE_DMG_VERSION }} (checksum verified)
+        run: |
+          curl -fsSLo "$RUNNER_TEMP/create-dmg.tar.gz" \
+            "https://github.com/create-dmg/create-dmg/archive/refs/tags/v${CREATE_DMG_VERSION}.tar.gz"
+          echo "${CREATE_DMG_SHA256}  $RUNNER_TEMP/create-dmg.tar.gz" | shasum -a 256 -c -
+          tar -xzf "$RUNNER_TEMP/create-dmg.tar.gz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/create-dmg-${CREATE_DMG_VERSION}" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: unsigned-macos
+          path: build/unsigned
+      - name: Unpack the bundle
+        run: |
+          mkdir -p build/macos-install build/packages
+          ditto -x -k build/unsigned/unsigned-macos.zip build/macos-install
+          test -x "$APP/Contents/MacOS/hwio-monitor"
+      - name: Signing identity (temporary keychain)
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password="$(openssl rand -hex 24)"
+          trap 'rm -f "$RUNNER_TEMP/certificate.p12"' EXIT
+          printf '%s' "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security create-keychain -p "$password" "$keychain"
+          echo "KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/certificate.p12" -k "$keychain" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$keychain" > /dev/null
+          # In front of the existing keychains (xargs undoes their quotes).
+          security list-keychains -d user | xargs security list-keychains -d user -s "$keychain"
+          identity="$(security find-identity -v -p codesigning "$keychain" | grep 'Developer ID Application' | head -n 1 | awk '{print $2}')"
+          [ -n "$identity" ] || { echo "::error::No Developer ID Application identity in APPLE_CERTIFICATE"; exit 1; }
+          echo "IDENTITY=$identity" >> "$GITHUB_ENV"
+      - name: Sign the bundle (inside-out, hardened runtime, timestamp)
+        run: packaging/macos/sign-and-notarize.sh sign "$APP" "$IDENTITY"
+      - name: Notarize and staple the app
+        env:
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+        run: packaging/macos/sign-and-notarize.sh notarize-app "$APP"
+      - name: DMG from the stapled app
+        run: packaging/macos/sign-and-notarize.sh dmg "$APP" "$DMG" "$IDENTITY"
+      - name: Notarize and staple the DMG
+        env:
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+        run: packaging/macos/sign-and-notarize.sh notarize "$DMG"
+      - name: Verify the DMG and the app inside it
+        run: packaging/macos/sign-and-notarize.sh verify-dmg "$DMG"
+      - name: Remove the keychain
+        if: always()
+        run: |
+          if [ -n "${KEYCHAIN:-}" ]; then security delete-keychain "$KEYCHAIN" || true; fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-macos
+          path: build/packages/*.dmg
+          if-no-files-found: error
+
+  sign-windows:
+    name: sign-windows (Artifact Signing, MSI)
+    needs: [gate, windows]
+    if: github.ref_type == 'tag'
+    # The build job's image: CPackConfig.cmake holds absolute paths of that job's workspace and of
+    # the image's CMake (packaging/windows/build-msi.ps1).
+    runs-on: windows-2022
+    timeout-minutes: 60
+    environment: signing
+    permissions:
+      contents: read
+      id-token: write # OIDC login to Azure (Artifact Signing, ADR-0120)
+    env:
+      MSI_NAME: hwio-monitor-${{ needs.gate.outputs.version }}-windows-x64.msi
+    steps:
+      # The packaging scripts and the WiX sources (template, features.wxs, icon in LFS).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          lfs: true
+      - name: WiX ${{ env.WIX_VERSION }}
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version $env:WIX_VERSION
+          wix extension add -g "WixToolset.UI.wixext/$env:WIX_VERSION"
+          wix --version
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: unsigned-windows
+          path: build
+      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
+      # Our two executables in the installed tree, before the MSI is built from it. Qt DLLs and the
+      # MSVC runtime are third-party files and keep their own signatures (ADR-0120).
+      - name: Sign the executables
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
+        with:
+          endpoint: https://weu.codesigning.azure.net/
+          signing-account-name: hardwario
+          certificate-profile-name: hardwario
+          files: |
+            ${{ github.workspace }}\build\windows-install\hwio-monitor.exe
+            ${{ github.workspace }}\build\windows-install\hwio.exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+          description: HARDWARIO Monitor
+          description-url: https://github.com/hardwario/monitor
+          # Only the Azure CLI login above; the others would be tried first.
+          exclude-environment-credential: true
+          exclude-workload-identity-credential: true
+          exclude-managed-identity-credential: true
+          exclude-shared-token-cache-credential: true
+          exclude-visual-studio-credential: true
+          exclude-visual-studio-code-credential: true
+          exclude-azure-cli-credential: false
+          exclude-azure-powershell-credential: true
+          exclude-azure-developer-cli-credential: true
+          exclude-interactive-browser-credential: true
+      - name: MSI from the signed tree
+        shell: pwsh
+        run: packaging/windows/build-msi.ps1 -BuildDir build/windows-package -Tree build/windows-install -OutDir build/packages
+      - name: Sign the MSI
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
+        with:
+          endpoint: https://weu.codesigning.azure.net/
+          signing-account-name: hardwario
+          certificate-profile-name: hardwario
+          files: ${{ github.workspace }}\build\packages\${{ env.MSI_NAME }}
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+          description: HARDWARIO Monitor
+          description-url: https://github.com/hardwario/monitor
+          exclude-environment-credential: true
+          exclude-workload-identity-credential: true
+          exclude-managed-identity-credential: true
+          exclude-shared-token-cache-credential: true
+          exclude-visual-studio-credential: true
+          exclude-visual-studio-code-credential: true
+          exclude-azure-cli-credential: false
+          exclude-azure-powershell-credential: true
+          exclude-azure-developer-cli-credential: true
+          exclude-interactive-browser-credential: true
+      # The two executables, the MSI and the executables inside the MSI (administrative install):
+      # valid, signed by HARDWARIO a.s., timestamped. Then ICE validation.
+      - name: Verify the signatures, ICE validation
+        shell: pwsh
+        run: |
+          $msi = (Resolve-Path -LiteralPath "build/packages/$env:MSI_NAME").Path
+          $extract = Join-Path $env:RUNNER_TEMP 'msi-admin'
+          $admin = Start-Process -FilePath msiexec.exe -ArgumentList @('/a', "`"$msi`"", '/qn', "TARGETDIR=`"$extract`"") -Wait -PassThru
+          if ($admin.ExitCode -ne 0) { throw "msiexec /a failed with exit code $($admin.ExitCode)" }
+          $inside = @(Get-ChildItem -Path $extract -Recurse -File -Include hwio-monitor.exe, hwio.exe)
+          if ($inside.Count -ne 2) { throw "Expected hwio-monitor.exe and hwio.exe in the MSI, found: $($inside.FullName -join ', ')" }
+          $files = @('build/windows-install/hwio-monitor.exe', 'build/windows-install/hwio.exe', $msi) + $inside.FullName
+          foreach ($file in $files) {
+            $sig = Get-AuthenticodeSignature -LiteralPath $file
+            '{0}: {1}, signed by {2}, timestamped by {3}' -f $file, $sig.Status, $sig.SignerCertificate.Subject, $sig.TimeStamperCertificate.Subject
+            if ($sig.Status -ne 'Valid') { throw "${file}: $($sig.Status) $($sig.StatusMessage)" }
+            if ($sig.SignerCertificate.Subject -notlike '*O=HARDWARIO a.s.*') { throw "${file}: signed by $($sig.SignerCertificate.Subject)" }
+            if (-not $sig.TimeStamperCertificate) { throw "${file}: no timestamp" }
+          }
+          # ICE38/43/57: per-user checks, not for this perMachine MSI (as in ci.yml).
+          wix msi validate -sice ICE38 -sice ICE43 -sice ICE57 $msi
+          if ($LASTEXITCODE -ne 0) { throw "wix msi validate failed: $msi" }
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-windows
-          path: |
-            build/packages/*.msi
-            build/packages/*-symbols-windows.zip
+          path: build/packages/${{ env.MSI_NAME }}
+          if-no-files-found: error
 
   publish:
     name: publish (checksums, attestations, draft release)
-    needs: [gate, linux, macos, windows]
+    needs: [gate, tests, linux, macos, windows, sign-macos, sign-windows]
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    environment: release
     permissions:
       contents: write     # the draft release
       id-token: write     # build provenance attestations
@@ -348,6 +458,19 @@ jobs:
           pattern: release-*
           path: dist
           merge-multiple: true
+      - name: Every package and debug symbol archive
+        run: |
+          v="${{ needs.gate.outputs.version }}"
+          cd dist
+          ls -l
+          missing=0
+          for f in "hwio-monitor-$v-x86_64.AppImage" "hardwario-monitor_${v}_amd64.deb" \
+                   "hwio-monitor-$v-macos-universal.dmg" "hwio-monitor-$v-windows-x64.msi" \
+                   "hwio-monitor-$v-debug-symbols-linux.zip" "hwio-monitor-$v-debug-symbols-macos.zip" \
+                   "hwio-monitor-$v-debug-symbols-windows.zip"; do
+            if [ ! -f "$f" ]; then echo "::error::missing $f"; missing=1; fi
+          done
+          exit $missing
       - name: SHA256SUMS
         run: |
           cd dist

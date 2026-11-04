@@ -1,6 +1,6 @@
 # ADR-0043 — GUI window layout: device tabs, per-tab rail and device bar
 
-- **Status:** Accepted; Settings placement superseded by ADR-0172 (2026-10-20)
+- **Status:** Accepted; Settings placement superseded by ADR-0172 (2026-10-20); amended by ADR-0233 (2026-11-04): the device bar has no target box, a J-Link tab uses the console target
 - **Date:** 2026-10-09
 - **Decided by:** Matej Strnad (M3 GUI planning session)
 

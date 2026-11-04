@@ -59,8 +59,9 @@ príkaz, ktorý vytvorí odkaz; môžete ho skopírovať:
 sudo ln -s '/Applications/HARDWARIO Monitor.app/Contents/MacOS/hwio' /usr/local/bin/hwio
 ```
 
-**Bluetooth:** pri prvom príkaze `hwio ble` sa macOS spýta na prístup k Bluetooth. macOS udelí povolenie aplikácii,
-z ktorej `hwio` spúšťate, zvyčajne aplikácii Terminál. Ak ste ho odmietli, povoľte ho v **System Settings → Privacy &
+**Bluetooth:** keď prvýkrát otvoríte zobrazenie Bluetooth v aplikácii alebo spustíte prvý príkaz `hwio ble`, macOS sa
+spýta na prístup k Bluetooth. Pre `hwio` udelí macOS povolenie aplikácii, z ktorej ho spúšťate, zvyčajne aplikácii
+Terminál. Ak ste ho odmietli, povoľte ho v **System Settings → Privacy &
 Security → Bluetooth** (Systémové nastavenia → Súkromie a bezpečnosť → Bluetooth).
 
 Pri aktualizácii nahraďte aplikáciu v priečinku Aplikácie novou. Pri odinštalovaní ju presuňte do Koša.

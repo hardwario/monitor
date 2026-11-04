@@ -449,7 +449,17 @@ private:
         if (!step(m_probe->selectSwd())) {
             return;
         }
-        if (!step(connectDevice(*m_config.target, m_config.target->jlinkDevice, stop))) {
+        Status connected = connectDevice(*m_config.target, m_config.target->jlinkDevice, stop);
+        // Plan 0033 (ADR-0233): a console session first checks which MCU answers; on the other
+        // MCU's connector it stops (no auto-reconnect; the user moves the cable or updates LTE).
+        if (m_config.attachRtt) {
+            if (std::optional<Error> other = otherConnector(connected)) {
+                m_fatal = true;
+                report(ConnectionState::Stopped, std::move(other), true);
+                return;
+            }
+        }
+        if (!step(std::move(connected))) {
             return;
         }
         readPowerAfterConnect();
@@ -463,6 +473,34 @@ private:
             return;
         }
         report(ConnectionState::Connected);
+    }
+
+    // Plan 0033 (ADR-0233): target.other_connector when the probe reaches another target of the
+    // profile than the console target - after a connect (one FICR read) or after a failed connect
+    // (the CTRL-AP of the other family may answer). nullopt otherwise, also when nothing can be
+    // identified (the usual connect / RTT errors follow).
+    [[nodiscard]] std::optional<Error> otherConnector(const Status& connected) {
+        if (m_config.profile->targets.size() < 2 || !m_api || !m_probe || !m_probe->isOpen()) {
+            return std::nullopt;
+        }
+        if (!connected && connected.error().code != ErrorCode::TargetConnectFailed) {
+            return std::nullopt;
+        }
+        jlink::JLinkProgrammer programmer(*m_api, *m_probe, clock(),
+                                          programmerConfigFor(*m_config.target));
+        auto chip = programmer.identify();
+        if (!chip) {
+            return std::nullopt;
+        }
+        const TargetProfile* found = targetOfChip(*m_config.profile, *chip);
+        if (found == nullptr || found == m_config.target) {
+            return std::nullopt;
+        }
+        qCInfo(log::lcDevice).noquote()
+            << "The J-Link reaches the" << toQString(found->id) << "MCU, not the console target"
+            << toQString(m_config.target->id);
+        return otherConnectorError(*m_config.target, *found,
+                                   std::format("found target: {}", found->id));
     }
 
     // Connects the probe to `target` with the J-Link device name `device`.
@@ -505,8 +543,9 @@ private:
     }
 
     [[nodiscard]] bool shouldAutoReconnect() {
-        if (!m_config.autoReconnect || m_probeOnly || m_suspended || m_halted || m_fatal ||
-            m_reported != ConnectionState::Disconnected || clock().now() < m_nextReconnect) {
+        if (!m_config.autoReconnect || m_probeOnly || m_suspended || m_held || m_halted ||
+            m_fatal || m_reported != ConnectionState::Disconnected ||
+            clock().now() < m_nextReconnect) {
             return false;
         }
         // Retries stay off the probe while the board has no power (each attempt takes seconds).
@@ -822,6 +861,15 @@ private:
             m_fatal = false;
             report(ConnectionState::Connected);
         };
+        if (m_held) {
+            // Plan 0033 (D4): a held session leaves the target as it is (the J-Link cable may be
+            // on another connector) and attaches nothing until the hold ends; only the probe is
+            // opened again after nRF Util.
+            if (Status reopened = reopenProbe(stop); !reopened) {
+                report(ConnectionState::Stopped, std::move(reopened).error(), true);
+            }
+            return;
+        }
         if (m_probeOnly) {
             // ADR-0069: a probe-only session keeps the probe open and the target as it is.
             if (Status reopened = reopenProbe(stop); !reopened) {
@@ -994,6 +1042,8 @@ private:
         }
         case OperationKind::Diagnose: // runDiagnose()
             break;
+        case OperationKind::Identify:
+            return runIdentify(run, result);
         case OperationKind::Halt:
         case OperationKind::Go:
         case OperationKind::TargetStatus:
@@ -1004,6 +1054,37 @@ private:
             return executeTargetOperation(run, result);
         }
         return std::unexpected(makeError(ErrorCode::InternalUnexpected, "unknown operation"));
+    }
+
+    // Plan 0033 (ADR-0233, ADR-0234): which target of the profile answers through the probe. A
+    // fresh connect every time (the cable may have moved since the last one); a target that does
+    // not connect is asked through the CTRL-APs. Only probe-level errors fail the operation.
+    [[nodiscard]] Status runIdentify(OperationRun& run, OperationResult& result) {
+        m_probeTarget = nullptr;
+        if (Status prepared = prepareProbe(run.target, false, run.stop); !prepared) {
+            return prepared;
+        }
+        run.reporter.phase(ProgramPhase::Connecting);
+        ChipFamilyMatch match{.expectedTargetId = std::string(run.target.id),
+                              .foundTargetId = {},
+                              .protectedChip = false};
+        jlink::JLinkProgrammer programmer(*m_api, *m_probe, clock(),
+                                          programmerConfigFor(run.target));
+        if (auto chip = programmer.identify(); chip) {
+            if (const TargetProfile* found = targetOfChip(*m_config.profile, *chip)) {
+                match.foundTargetId = std::string(found->id);
+            }
+            match.protectedChip = chip->protectedChip;
+            if (chip->part != 0) {
+                result.chip = *chip;
+            }
+        } else if (chip.error().code == ErrorCode::Cancelled) {
+            return std::unexpected(std::move(chip).error());
+        }
+        flashLog(std::format("Identify {}: found {}", run.target.id,
+                             match.foundTargetId.empty() ? "nothing" : match.foundTargetId));
+        result.familyMatch = std::move(match);
+        return {};
     }
 
     // M6 (plan/features/0013, ADR-0158): the low-level target operations of
@@ -1088,7 +1169,8 @@ private:
                                .checks = {},
                                .targetStatus = std::nullopt,
                                .registers = {},
-                               .zones = {}};
+                               .zones = {},
+                               .familyMatch = std::nullopt};
         if (m_suspended) {
             result.status = std::unexpected(notConnected("operation not run (suspended)"));
             finishOperation(command, reporter, std::move(result));
@@ -1660,7 +1742,8 @@ private:
                                .checks = {},
                                .targetStatus = std::nullopt,
                                .registers = {},
-                               .zones = {}};
+                               .zones = {},
+                               .familyMatch = std::nullopt};
         if (m_suspended) {
             result.status = std::unexpected(notConnected("diagnose not run (suspended)"));
             finishOperation(command, reporter, std::move(result));
@@ -1729,6 +1812,32 @@ private:
         emitEvent(OperationFinishedEvent{.id = command.id, .result = std::move(result)});
     }
 
+    // Plan 0033 (D4): DeviceSession::hold() / the release of the last SessionHold.
+    void setHeld(bool held, const std::stop_token& stop) {
+        if (held == m_held) {
+            return;
+        }
+        m_held = held;
+        if (m_held) {
+            // RTT paused, no auto-reconnect; the probe stays open for the operations of the
+            // hold's owner.
+            qCInfo(log::lcDevice) << "Session held";
+            if (m_attached && m_rtt) {
+                m_rtt->stop();
+            }
+            m_attached = false;
+            report(ConnectionState::Stopped, std::nullopt, true);
+            return;
+        }
+        qCInfo(log::lcDevice) << "Session released: reconnecting";
+        if (m_suspended || m_released || m_probeOnly) {
+            return; // those keep their own way back
+        }
+        m_halted = false;
+        m_fatal = false;
+        reconnect(stop);
+    }
+
     void handle(Command command, const std::stop_token& stop) {
         std::visit(
             Overloaded{
@@ -1755,6 +1864,10 @@ private:
                     connect(stop, true);
                 },
                 [&](const ReconnectCommand&) {
+                    if (m_held) { // plan 0033: the hold's owner decides when to reconnect
+                        qCInfo(log::lcDevice) << "Reconnect ignored: the session is held";
+                        return;
+                    }
                     if (m_released) { // review R19: only through the reacquire path
                         reattachProbe(stop);
                         return;
@@ -1794,6 +1907,7 @@ private:
                         adoptIdentity(*identity);
                     }
                 },
+                [&](const HoldCommand& hold) { setHeld(hold.held, stop); },
                 [&](const SetRttAddressCommand& set) {
                     // Sticky (rttt): used by every later attach.
                     m_config.rttAddress = set.address;
@@ -1901,6 +2015,7 @@ private:
     Clock::TimePoint m_nextReconnect;
     bool m_attached = false;
     bool m_suspended = false;
+    bool m_held = false; // plan 0033 (D4): DeviceSession::hold()
     // M6 releaseProbe() until a successful reattachProbe() (review R19); implies m_suspended.
     bool m_released = false;
     // After reset(halt = true) or halt on the console target: no auto-reconnect (reviews R25, S7).

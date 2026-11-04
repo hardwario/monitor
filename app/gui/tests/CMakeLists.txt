@@ -54,7 +54,9 @@ foreach(_test IN LISTS _hwio_gui_qml_tests)
     endif()
     # tst_update needs HWIO_UPDATE_URL, honoured only with HWIO_TEST_OVERRIDES (not in Release
     # builds); without it the check would ask the real GitHub API.
-    if(NOT HWIO_TEST_OVERRIDES AND _name STREQUAL "tst_update")
+    # tst_ble (plan 0012) needs the fake BLE API, also a HWIO_TEST_OVERRIDES-only switch (ADR-0087);
+    # without it the shell talks to the runner's real Bluetooth stack.
+    if(NOT HWIO_TEST_OVERRIDES AND _name MATCHES "^tst_(update|ble)$")
         continue()
     endif()
     add_test(NAME "tst_gui.${_name}"
@@ -68,6 +70,7 @@ endforeach()
 
 add_executable(hwio_gui_tests
     viewmodels/app_view_model_test.cpp
+    viewmodels/ble_gui_test.cpp
     viewmodels/connection_view_model_test.cpp
     viewmodels/console_line_model_test.cpp
     viewmodels/console_view_model_test.cpp
@@ -99,7 +102,8 @@ target_link_libraries(hwio_gui_tests PRIVATE hwio_gui hwio::miniz Qt6::Test GTes
 target_compile_definitions(hwio_gui_tests PRIVATE
     "HWIO_FAKE_JLINK_LIBRARY=\"$<TARGET_FILE:hwio_fake_jlink>\""
     "HWIO_FAKE_JLINK_INCOMPLETE_LIBRARY=\"$<TARGET_FILE:hwio_fake_jlink_incomplete>\""
-    "HWIO_FAKE_NRFUTIL=\"$<TARGET_FILE:hwio_fake_nrfutil>\"")
+    "HWIO_FAKE_NRFUTIL=\"$<TARGET_FILE:hwio_fake_nrfutil>\""
+    "HWIO_BLE_SCENARIOS_DIR=\"${PROJECT_SOURCE_DIR}/tests/ble_scenarios\"")
 # HWIO_CATALOG_URL is honoured only with HWIO_TEST_OVERRIDES (not in Release builds).
 target_compile_definitions(hwio_gui_tests PRIVATE ${HWIO_TEST_OVERRIDES_DEFINE})
 set_target_properties(hwio_gui_tests PROPERTIES AUTOMOC ON)

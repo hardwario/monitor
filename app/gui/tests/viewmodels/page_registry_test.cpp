@@ -22,6 +22,7 @@ PageDescriptor page(const char* id, int order, bool global = false) {
                           .qml = QUrl(QStringLiteral("qrc:/Page.qml")),
                           .order = order,
                           .global = global,
+                          .needsOperations = false,
                           .createViewModel = {}};
 }
 

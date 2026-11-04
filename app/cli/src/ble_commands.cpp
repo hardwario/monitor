@@ -45,6 +45,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <expected>
 #include <filesystem>
@@ -235,6 +236,13 @@ Result<ResolvedDevice> resolveDevice(const Context& context, ble::BleHost& host,
                                      const DeviceOptions& options,
                                      const device::DeviceProfile& profile) {
     if (!options.address.empty()) {
+        if (!ble::isDeviceId(options.address)) { // HIL 2026-11-03 H13
+            return std::unexpected(usage(
+                std::format("\"{}\" is not a Bluetooth address (such as F1:22:33:44:55:66) or a "
+                            "device UUID.",
+                            options.address),
+                options.address));
+        }
         return ResolvedDevice{.id = ble::canonicalDeviceId(options.address), .name = {}}; // B6
     }
     if (context.mode == OutputMode::Human) {
@@ -314,7 +322,11 @@ Result<CommandResult> scan(const Context& context, const ScanCommandOptions& opt
         QJsonObject row;
         row.insert(QStringLiteral("id"), toQString(info.id));
         row.insert(QStringLiteral("name"), toQString(info.name));
-        row.insert(QStringLiteral("rssi"), info.rssi);
+        // Plan 0033 (D5, ADR-0235): the smoothed RSSI over the scan (whole dBm, 0 = unknown); the
+        // last measured value as rssi_last.
+        const int smoothed = static_cast<int>(std::lround(info.rssiSmoothed));
+        row.insert(QStringLiteral("rssi"), smoothed);
+        row.insert(QStringLiteral("rssi_last"), info.rssi);
         row.insert(QStringLiteral("nusAdvertised"), info.nusAdvertised);
         row.insert(QStringLiteral("profile"), info.profileId.empty()
                                                   ? QJsonValue(QJsonValue::Null)
@@ -322,7 +334,7 @@ Result<CommandResult> scan(const Context& context, const ScanCommandOptions& opt
         row.insert(QStringLiteral("inUseBy"), ownerJson(owner));
         rowsJson.append(row);
         rows.push_back({info.id, info.name.empty() ? std::string(unknown) : info.name,
-                        std::to_string(info.rssi),
+                        std::to_string(smoothed),
                         info.profileId.empty() ? std::string(unknown) : info.profileId,
                         owner ? std::format("{}, PID {}", owner->app, owner->pid) : std::string()});
     }

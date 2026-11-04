@@ -1,6 +1,6 @@
 # ADR-0055 — Flash page: choose what to flash first
 
-- **Status:** Accepted; kind list superseded by ADR-0174 (2026-10-20)
+- **Status:** Accepted; kind list superseded by ADR-0174 (2026-10-20); amended by ADR-0233 and ADR-0234 (2026-11-04): the kind no longer follows a tab target, the LTE kind starts the LTE update wizard
 - **Date:** 2026-10-09
 - **Decided by:** Matej Strnad (M3 GUI review of mockups)
 

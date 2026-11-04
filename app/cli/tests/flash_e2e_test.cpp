@@ -485,6 +485,82 @@ TEST_F(FlashCli, LteBundleWithTheFakeNrfUtil) {
     EXPECT_EQ(errorCode(other), QStringLiteral("firmware.invalid_image"));
 }
 
+// Plan 0033 (D7, ADR-0234): `lte flash --guided` - refused without a terminal and with --json.
+TEST_F(FlashCli, GuidedLteFlashNeedsAnInteractiveTerminal) {
+    writeFile(QStringLiteral("lte.hex"), QByteArray::fromStdString(appHex()));
+    for (const QStringList& args :
+         {QStringList{QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("lte"),
+                      QStringLiteral("flash"), QStringLiteral("--guided"),
+                      path(QStringLiteral("lte.hex"))},
+          QStringList{QStringLiteral("chester"), QStringLiteral("lte"), QStringLiteral("flash"),
+                      QStringLiteral("--guided"), path(QStringLiteral("lte.hex"))}}) {
+        const RunResult result = hwio(args);
+        EXPECT_EQ(result.exitCode, 2) << result.out << result.err;
+        EXPECT_NE((result.out + result.err).find("--guided needs an interactive terminal"),
+                  std::string::npos)
+            << result.out << result.err;
+    }
+}
+
+#ifdef HWIO_TEST_OVERRIDES
+// The guided procedure end to end on a two-connector board: the test moves the J-Link cable when
+// the command asks for it (HWIO_TEST_INTERACTIVE stands in for the terminal).
+TEST_F(FlashCli, GuidedLteFlashWithScriptedConnectorMoves) {
+    writeFile(QStringLiteral("lte.hex"), QByteArray::fromStdString(appHex()));
+    writeFile(QStringLiteral("connector"), "app");
+    useScenario(QStringLiteral(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+        "connectors": {"file": "%1", "chips": {
+          "app": {"memory": [{"address": 4096, "hex": "a5a5a5a5"}]},
+          "lte": {"family": "nrf91"}}}}]})")
+                    .arg(path(QStringLiteral("connector"))));
+    QProcessEnvironment env = fakeEnvironment();
+    env.insert(QStringLiteral("HWIO_TEST_INTERACTIVE"), QStringLiteral("1"));
+    QProcess process;
+    process.setProcessEnvironment(env);
+    process.start(QStringLiteral(HWIO_CLI_EXECUTABLE),
+                  {QStringLiteral("chester"), QStringLiteral("lte"), QStringLiteral("flash"),
+                   QStringLiteral("--guided"), path(QStringLiteral("lte.hex"))});
+    ASSERT_TRUE(process.waitForStarted(10000));
+    QByteArray err;
+    const auto waitFor = [&](const char* text) {
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+        while (!err.contains(text) && std::chrono::steady_clock::now() < deadline &&
+               process.state() != QProcess::NotRunning) {
+            process.waitForReadyRead(50);
+            err += process.readAllStandardError();
+        }
+        return err.contains(text);
+    };
+    ASSERT_TRUE(waitFor("Connect the J-Link cable to the LTE connector.")) << err.toStdString();
+    EXPECT_TRUE(err.contains("Saving a copy of the application")) << err.toStdString();
+    writeFile(QStringLiteral("connector"), "lte");
+    // After the LTE update the cable is still on LTE: the command says so and waits.
+    ASSERT_TRUE(waitFor("This is the LTE connector. Move the cable to the APP connector."))
+        << err.toStdString();
+    EXPECT_TRUE(err.contains("Updating the LTE MCU")) << err.toStdString();
+    writeFile(QStringLiteral("connector"), "app");
+    ASSERT_TRUE(process.waitForFinished(60000));
+    err += process.readAllStandardError();
+    const std::string out = process.readAllStandardOutput().toStdString();
+    EXPECT_EQ(process.exitCode(), 0) << out << err.toStdString();
+    EXPECT_NE(out.find("the LTE firmware was updated and the application written back (copy: "),
+              std::string::npos)
+        << out;
+    // The application is back on the application MCU.
+    const RunResult read =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("mem"), QStringLiteral("read"), QStringLiteral("0x1000"),
+              QStringLiteral("--length"), QStringLiteral("4")});
+    ASSERT_EQ(read.exitCode, 0) << read.out << read.err;
+    EXPECT_NE(QString::fromStdString(read.out)
+                  .remove(QLatin1Char(' '))
+                  .toLower()
+                  .indexOf(QStringLiteral("a5a5a5a5")),
+              -1)
+        << read.out;
+}
+#endif
+
 TEST_F(FlashCli, NrfUtilMissing) {
     writeFile(QStringLiteral("mfw.zip"),
               hwio::firmware::test::zipBytes(

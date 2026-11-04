@@ -13,11 +13,16 @@
 //   "pairingSupported": true          false = macOS: requestPairing -> ble.pairing_not_supported
 //   "scanError": "<error id>"         startScan fails with it
 //   "advertiseIntervalMs": 1000       every advertising device is reported this often
-//   "generate": {"count": 300, "namePrefix": "CHESTER-GEN", "rssi": -80}   extra devices
+//   "generate": {"count": 300, "namePrefix": "CHESTER-GEN", "rssi": -80, "rssiJitter": 0}
+//                                     extra devices
 //   "devices": [{
 //     "id": "F1:22:33:44:55:66", "name": "CHESTER-ABC123", "rssi": -58,
 //     "nus": true,                    advertises the NUS service UUID
 //     "advertise": true,              seen by scans
+//     "rssiZeroEvery": 0,             > 0: every n-th advertisement reports RSSI 0 (unknown), as
+//                                     BlueZ does for cached devices (HIL 2026-11-03 H14)
+//     "rssiJitter": 0,                > 0: each advertisement reports rssi + a deterministic
+//                                     pseudo-random offset in [-jitter, +jitter] dB (plan 0033)
 //     "paired": true,                 IBleApi::isPaired
 //     "pairing": "ok" | "fail" | "noAgent" | "never",   result of requestPairing (after 100 ms;
 //                                     noAgent = ble.no_pairing_agent, HIL H1)
@@ -78,6 +83,10 @@ struct FakeDevice {
     int rssi = -60;
     bool nus = true;
     bool advertise = true;
+    int rssiZeroEvery = 0;
+    int rssiJitter = 0;            // plan 0033: ± dB per advertisement
+    std::uint32_t jitterState = 1; // the device's pseudo-random sequence (seeded by its index)
+    int advertisements = 0;        // reported so far (rssiZeroEvery)
     bool paired = true;
     std::string pairing = "ok";
     int connectDelayMs = 20;

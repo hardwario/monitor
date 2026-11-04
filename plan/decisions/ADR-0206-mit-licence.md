@@ -1,6 +1,6 @@
 # ADR-0206 — v2 under the MIT licence
 
-- **Status:** Accepted (supersedes the licence part of ADR-0119)
+- **Status:** Accepted (supersedes the licence part of ADR-0119); the written offer for Qt superseded by ADR-0230
 - **Date:** 2026-11-03
 - **Decided by:** Matej Strnad (RC preparation session)
 

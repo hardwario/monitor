@@ -257,7 +257,7 @@ void acknowledge(const std::filesystem::path& directory);                    // 
 ### Licences (ADR-0119)
 
 - `licenses/` in every package: `LICENSE` (HARDWARIO, with the LGPL exception once approved), `Qt-LGPL-3.0.txt`,
-  `GPL-3.0.txt`, `Qt-SOURCE.txt` (Qt version, download URL of the exact source archive, written offer), fonts
+  `GPL-3.0.txt`, `Qt-SOURCE.txt` (Qt version, download URL of the exact source archive; the written offer was dropped by ADR-0230), fonts
   `OFL-1.1` (ADR-0048), Material Symbols `Apache-2.0`, CLI11 `BSD-3-Clause`, replxx (its licence files), miniz `MIT`,
   and a generated `THIRD-PARTY-NOTICES.txt` index (name, version, licence, URL) produced at configure time from a
   table in `packaging/common/licenses.cmake` (CTest checks every CPM dependency has a row).

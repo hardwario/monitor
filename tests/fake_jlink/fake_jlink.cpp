@@ -80,7 +80,16 @@
 //         "halted": false                           M6 (review Q10): the CPU is halted after
 //                                                   JLINKARM_Open and every other boot (a
 //                                                   JLINKARM_Reset always halts it)
+//       },
+//       "connectors": {                             plan 0033: a board with two connectors
+//         "file": "/tmp/connector",                 its text (trimmed) names the connector the
+//                                                   cable is on now; missing / unknown = "initial"
+//         "initial": "app",
+//         "chips": {"app": {<chip>}, "lte": {<chip>}}   the chip behind each connector (each
+//                                                   keeps its own memory); "chip" is ignored
 //       } } ] }
+// A connector change (seen by the next library call) drops the target connection and RTT, like
+// moving the cable: the next JLINKARM_Connect reaches the other chip.
 // Memory: flash 0x0-0x100000 and the UICR page (nRF52: 0x10001000, nRF91: 0x00FF8000; 4 KiB) start
 // erased (0xFF). The FICR page (nRF52: 0x10000000, nRF91: 0x00FF0000; 4 KiB, read-only) reads
 // 0xFF except INFO.PART / INFO.VARIANT. Reads of any other address (outside "ram") fail, like an
@@ -301,7 +310,13 @@ struct ProbeScenario {
     int connectMinMillivolts = 1000;
     std::vector<std::pair<std::int64_t, int>> vtref{{0, 3300}};
     RttScenario rtt;
-    ChipScenario chip;
+    ChipScenario chip; // the chip the probe is connected to now
+    // Plan 0033 ("connectors"): the other chips by connector name, the file that names the
+    // connector in use, and the connector of `chip`.
+    std::map<std::string, ChipScenario> otherChips;
+    std::string connectorFile;
+    std::string connector;
+    std::string initialConnector;
 };
 
 struct Scenario {
@@ -494,6 +509,23 @@ Scenario loadScenario() {
         }
         probe.rtt = readRtt(object.value(QStringLiteral("rtt")).toObject());
         probe.chip = readChip(object.value(QStringLiteral("chip")).toObject());
+        if (object.contains(QStringLiteral("connectors"))) {
+            const QJsonObject connectors = object.value(QStringLiteral("connectors")).toObject();
+            probe.connectorFile = connectors.value(QStringLiteral("file")).toString().toStdString();
+            probe.initialConnector = connectors.value(QStringLiteral("initial"))
+                                         .toString(QStringLiteral("app"))
+                                         .toStdString();
+            const QJsonObject chips = connectors.value(QStringLiteral("chips")).toObject();
+            for (auto it = chips.begin(); it != chips.end(); ++it) {
+                probe.otherChips.emplace(it.key().toStdString(), readChip(it.value().toObject()));
+            }
+            if (auto initial = probe.otherChips.find(probe.initialConnector);
+                initial != probe.otherChips.end()) {
+                probe.chip = std::move(initial->second);
+                probe.otherChips.erase(initial);
+                probe.connector = probe.initialConnector;
+            }
+        }
         scenario.probes.push_back(std::move(probe));
     }
     return scenario;
@@ -560,7 +592,38 @@ struct State {
 
     ProbeScenario* probe() {
         const std::size_t index = selected.value_or(data().probes.size());
-        return index < data().probes.size() ? &data().probes.at(index) : nullptr;
+        ProbeScenario* p = index < data().probes.size() ? &data().probes.at(index) : nullptr;
+        if (p != nullptr && !p->connectorFile.empty()) {
+            followConnector(*p);
+        }
+        return p;
+    }
+
+    // Plan 0033: the cable moved when the connector file names another connector (read on every
+    // call, so a test's move is seen by the next library call).
+    void followConnector(ProbeScenario& p) {
+        std::string wanted = p.initialConnector;
+        QFile file(QString::fromStdString(p.connectorFile));
+        if (file.open(QIODevice::ReadOnly)) {
+            const std::string text = file.readAll().trimmed().toStdString();
+            if (p.otherChips.contains(text) || text == p.connector) {
+                wanted = text;
+            }
+        }
+        if (wanted == p.connector || !p.otherChips.contains(wanted)) {
+            return;
+        }
+        auto next = p.otherChips.find(wanted);
+        ChipScenario previous = std::move(p.chip);
+        p.chip = std::move(next->second);
+        p.otherChips.erase(next);
+        p.otherChips.emplace(p.connector, std::move(previous));
+        p.connector = wanted;
+        connected = false; // the cable left the old target
+        rttStarted = false;
+        downloading = false;
+        downloadData.clear();
+        halted = p.chip.startHalted;
     }
 
     [[nodiscard]] std::int64_t sinceOpen() const {

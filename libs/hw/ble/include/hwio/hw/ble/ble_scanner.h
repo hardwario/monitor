@@ -5,7 +5,11 @@
 //
 // Rows are de-duplicated by device id (never by name: legacy bug), hold at most maxDevices (the
 // one seen least recently is evicted), names are sanitised (hwio::sanitizeDeviceText, ADR-0183)
-// and cut at maxNameBytes (UTF-8 boundary), and rows are sorted by RSSI (strongest first). Which
+// and cut at maxNameBytes (UTF-8 boundary), and rows are sorted by the smoothed RSSI (strongest
+// first; plan 0033, ADR-0235): per device a time-based exponential moving average
+//   s += (r - s) * (1 - e^(-dt / rssiTimeConstant)), the first sample = its value,
+// where dt is the time between the advertisements that carried an RSSI (Advertisement::seen, so
+// tests drive it with their own time points). RSSI 0 (unknown) is not a sample. Which
 // profile a device belongs to is decided by the injected matcher (libs/device:
 // ProfileRegistry::findByAdvertisement); without `all`, devices without a profile
 // are left out. devicesChanged() is emitted at most every signalInterval, finished() once per
@@ -46,7 +50,11 @@ struct ScanOptions {
 struct BleDeviceInfo {
     BleDeviceId id;
     std::string name; // <= BleScanner::maxNameBytes
-    int rssi = 0;
+    int rssi = 0;     // the last measured value (dBm), 0 = unknown
+    // Plan 0033 (ADR-0235): the smoothed RSSI (dBm), 0 = no sample yet; the time of its last
+    // sample.
+    double rssiSmoothed = 0;
+    std::chrono::steady_clock::time_point rssiSampled;
     bool nusAdvertised = false;
     std::string profileId; // "" = no profile
     std::chrono::steady_clock::time_point lastSeen;
@@ -59,6 +67,8 @@ public:
     static constexpr std::size_t maxDevices = 256;
     static constexpr std::size_t maxNameBytes = 64;
     static constexpr std::chrono::milliseconds signalInterval{250}; // <= 4 signals per second
+    // Plan 0033 (D5, ADR-0235): the time constant of the RSSI smoothing.
+    static constexpr std::chrono::milliseconds rssiTimeConstant{3000};
 
     explicit BleScanner(BleHost& host, QObject* parent = nullptr);
     ~BleScanner() override;
@@ -72,7 +82,7 @@ public:
     void stop();
     void clear();
     [[nodiscard]] bool isScanning() const noexcept { return m_scanning; }
-    // Sorted by RSSI, strongest first.
+    // Sorted by the smoothed RSSI, strongest first (unknown last).
     [[nodiscard]] const std::vector<BleDeviceInfo>& devices() const noexcept { return m_devices; }
 
 signals:
@@ -93,6 +103,10 @@ private:
     std::vector<BleDeviceInfo> m_devices; // <= maxDevices
     QTimer m_signalTimer;
 };
+
+// One step of the RSSI smoothing (ADR-0235): `smoothed` moved towards `sample` by
+// 1 - e^(-elapsed / rssiTimeConstant). A negative elapsed time counts as 0.
+[[nodiscard]] double smoothRssi(double smoothed, int sample, std::chrono::nanoseconds elapsed);
 
 // `text` cut to at most `maxBytes` bytes without splitting a UTF-8 character.
 [[nodiscard]] std::string truncateUtf8(std::string text, std::size_t maxBytes);

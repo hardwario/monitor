@@ -25,6 +25,7 @@
 #include "language_manager.h"
 #include "pages/builtin_pages.h"
 #include "platform.h"
+#include "quit_signals.h"
 #include "settings_store.h"
 #include "single_instance.h"
 #include "viewmodels/app_view_model.h"
@@ -205,6 +206,8 @@ int run(int& argc, char** argv) {
         QTimer::singleShot(std::chrono::seconds(3), &app, [] { std::abort(); });
     }
 #endif
+    // HIL 2026-11-03 (plan 0012 G-H4): SIGTERM / SIGINT / SIGHUP quit like closing the window.
+    const hwio::gui::QuitSignals quitSignals;
     const int code = QGuiApplication::exec();
     appViewModel.saveState();
     return code;

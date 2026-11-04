@@ -16,6 +16,7 @@
 #include <QIODevice>
 #include <QObject>
 #include <QSettings>
+#include <QSignalSpy>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
@@ -77,12 +78,25 @@ TEST_F(SettingsTest, SectionsInRegistryOrder) {
     for (const QVariant& section : settings().sections()) {
         ids.append(section.toMap().value(QStringLiteral("sectionId")).toString());
     }
-    // Console (order 20) is contributed by plan 0005.
+    // Console (order 20) is contributed by plan 0005, Advanced (80) by plan 0033.
     EXPECT_EQ(ids, (QStringList{QStringLiteral("general"), QStringLiteral("console"),
                                 QStringLiteral("jlink"), QStringLiteral("nrfutil"),
-                                QStringLiteral("about")}));
+                                QStringLiteral("advanced"), QStringLiteral("about")}));
     EXPECT_EQ(settings().sections().at(2).toMap().value(QStringLiteral("title")).toString(),
               QStringLiteral("J-Link"));
+}
+
+// Plan 0033 (ADR-0236): Settings → Advanced → "Show expert maintenance actions", off by default,
+// stored as advanced/expertActions.
+TEST_F(SettingsTest, ExpertActionsSwitchIsStored) {
+    EXPECT_FALSE(settings().expertActions());
+    QSignalSpy changed(&settings(), &hwio::gui::SettingsViewModel::valuesChanged);
+    settings().setExpertActions(true);
+    EXPECT_TRUE(settings().expertActions());
+    EXPECT_TRUE(app().settingsStore()->value(QStringLiteral("advanced/expertActions")).toBool());
+    EXPECT_GE(changed.count(), 1);
+    settings().setExpertActions(false);
+    EXPECT_FALSE(app().settingsStore()->value(QStringLiteral("advanced/expertActions")).toBool());
 }
 
 TEST_F(SettingsTest, GeneralItemsApplyImmediately) {

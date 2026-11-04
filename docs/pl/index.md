@@ -2,7 +2,7 @@
 
 HARDWARIO Monitor to narzędzie do obsługi konsoli, logów i wgrywania firmware w urządzeniach HARDWARIO CHESTER:
 aplikacja desktopowa (`hwio-monitor`) i narzędzie wiersza poleceń (`hwio`) dla systemów Windows, macOS i Linux.
-Komunikuje się z urządzeniem przez sondę SEGGER J-Link, a z wiersza poleceń także przez Bluetooth LE.
+Komunikuje się z urządzeniem przez sondę SEGGER J-Link i przez Bluetooth LE.
 
 Inne języki: [Čeština](../cs/index.md) · [Deutsch](../de/index.md) · [Slovenčina](../sk/index.md) ·
 [English](../en/index.md)

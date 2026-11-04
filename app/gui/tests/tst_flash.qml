@@ -88,6 +88,7 @@ TestCase {
         // Tall enough that every card is on screen for the clicks (the recent list grows).
         window.width = 1280;
         window.height = 1400;
+        verify(testSupport.setSetting("advanced/expertActions", false));
         verify(testSupport.configureTab(0, "app", 801000001, "Test Probe"));
         AppViewModel.showPage("flash");
         tryVerify(() => find("flashPage") !== null);
@@ -110,13 +111,18 @@ TestCase {
         compare(find("flashBarText").text, "Choose a firmware file or enter a catalog ID");
         verify(!find("flashButton").enabled);
 
-        // 0021 (ADR-0174, ADR-0165): the LTE card - the designated LTE firmware by default.
+        // Plan 0033 (ADR-0234): the LTE card - a text and [Update LTE firmware…] instead of the
+        // firmware and options cards; the Flash button stays disabled.
         mouseClick(find("kindCard" + FirmwareSourceViewModel.LteFirmware));
         compare(flash.kind, FirmwareSourceViewModel.LteFirmware);
-        verify(!find("catalogIdField")); // no catalog ID on the LTE card
+        verify(!find("catalogIdField"));
+        verify(!find("designatedRadio"));
+        verify(find("lteUpdateCard") !== null);
+        verify(find("lteUpdateButton").enabled);
+        verify(!find("flashButton").enabled);
+        compare(find("flashBarText").text,
+                "Use Update LTE firmware… above: the J-Link has to be moved between the connectors.");
         tryVerify(() => find("prerequisite") !== null, 10000); // nRF Util is missing
-        verify(find("modemNote") !== null);
-        verify(find("designatedRadio").checked);
 
         mouseClick(find("kindCard" + FirmwareSourceViewModel.AppFirmware));
         flash.source.loadFile(testSupport.writeHex("app.hex", 4096, false));
@@ -150,30 +156,48 @@ TestCase {
         mouseClick(find("switchKind"));
         compare(flash.kind, FirmwareSourceViewModel.LteFirmware);
         verify(!find("kindHint"));
-        // The file is the LTE card's own file now.
-        verify(find("ownFileRadio").checked);
-        tryVerify(() => find("summaryText") !== null);
-        verify(find("summaryText").text.indexOf("Modem firmware 2.0.2 (modem only)") >= 0);
+        // Plan 0033: LTE firmware goes through the LTE update wizard.
+        verify(find("lteUpdateButton") !== null);
     }
 
-    // 0021 (ADR-0165): the designated LTE firmware downloads when its row is shown (a local
-    // fixture here); "Use your own file…" shows the drop zone and the recent list.
+    // 0021 (ADR-0165), plan 0033: the designated LTE firmware downloads when its row is shown in
+    // the LTE update wizard (a local fixture here); "Use your own file…" shows the drop zone.
     function test_lteDesignatedFirmware() {
-        const flash = vm();
         mouseClick(find("kindCard" + FirmwareSourceViewModel.LteFirmware));
-        verify(find("designatedRadio").checked);
-        compare(find("designatedRadio").text, "HARDWARIO LTE firmware 1.7.0 (recommended)");
-        tryVerify(() => flash.source.designatedState === FirmwareSourceViewModel.DesignatedReady, 10000);
-        tryCompare(find("designatedStatusText"), "text", "Ready");
-        verify(!find("dropText"));
-        compare(find("flashBarText").text, "nRF Util was not found");
-        mouseClick(find("ownFileRadio"));
-        compare(flash.source.lteSource, FirmwareSourceViewModel.OwnFile);
-        verify(find("dropText") !== null);
-        verify(!find("designatedStatus"));
-        mouseClick(find("designatedRadio"));
-        compare(flash.source.lteSource, FirmwareSourceViewModel.Designated);
-        verify(!find("dropText"));
+        mouseClick(find("lteUpdateButton"));
+        const dialog = findChild(window, "wizardDialog");
+        tryVerify(() => dialog.opened);
+        const part = name => {
+            const items = findAll(dialog.contentItem, name).filter(effectivelyVisible);
+            return items.length > 0 ? items[0] : null;
+        };
+        const wizard = testSupport.openWizard();
+        verify(wizard !== null);
+        compare(wizard.stage, LteUpdateWizard.Firmware);
+        tryVerify(() => part("designatedRadio") !== null);
+        verify(part("designatedRadio").checked);
+        compare(part("designatedRadio").text, "HARDWARIO LTE firmware 1.7.0 (recommended)");
+        tryVerify(() => wizard.lteSource.designatedState === FirmwareSourceViewModel.DesignatedReady, 10000);
+        tryCompare(part("designatedStatusText"), "text", "Ready");
+        verify(!part("dropText"));
+        tryVerify(() => part("ltePrerequisite") !== null, 10000); // nRF Util is missing
+        verify(!AppViewModel.wizard.canPrimary);
+        mouseClick(part("ownFileRadio"));
+        compare(wizard.lteSource.lteSource, FirmwareSourceViewModel.OwnFile);
+        verify(part("dropText") !== null);
+        mouseClick(part("designatedRadio"));
+        compare(wizard.lteSource.lteSource, FirmwareSourceViewModel.Designated);
+        AppViewModel.wizard.cancel(false);
+        tryVerify(() => !AppViewModel.wizard.open);
+    }
+
+    function cleanup() {
+        if (AppViewModel.wizard.open)
+            AppViewModel.wizard.cancel(true);
+        tryVerify(() => !AppViewModel.wizard.open);
+        // The modal dialog blocks the clicks of the next test until it has really closed.
+        const dialog = findChild(window, "wizardDialog");
+        tryVerify(() => !dialog || !dialog.visible);
     }
 
     // 0021 (ADR-0167): "Find firmware IDs ↗" is the documentation in the UI language.
@@ -258,6 +282,14 @@ TestCase {
         verify(!find("maintenanceActions"));
         mouseClick(find("maintenanceHeader"));
         verify(find("maintenanceActions") !== null);
+        // ADR-0236: Erase everything and Recover only with the expert actions.
+        verify(!find("eraseAllButton"));
+        verify(!find("recoverButton"));
+        verify(!find("maintenanceTargets"));
+        verify(testSupport.setSetting("advanced/expertActions", true));
+        tryVerify(() => find("eraseAllButton") !== null);
+        verify(find("maintenanceTargets") !== null);
+        waitForRendering(window.contentItem);
         mouseClick(find("eraseAllButton"));
         const dialog = findChild(find("flashPage"), "maintenanceConfirm");
         tryVerify(() => dialog.opened);
@@ -281,11 +313,16 @@ TestCase {
     }
 
     // Review F1/F2: the LTE MCU has no code-only erase; its erase-all and recover name the PIB.
+    // Plan 0033 (ADR-0236): the LTE MCU is chosen in Maintenance with the expert actions on.
     function test_lteMaintenance() {
         const flash = vm();
+        verify(testSupport.setSetting("advanced/expertActions", true));
         mouseClick(find("maintenanceHeader"));
         verify(find("eraseCodeButton") !== null);
-        flash.kind = FirmwareSourceViewModel.LteFirmware;
+        tryVerify(() => find("maintenanceTarget_lte") !== null);
+        waitForRendering(window.contentItem); // the choice above the buttons is laid out
+        mouseClick(find("maintenanceTarget_lte"));
+        compare(flash.maintenanceTarget, "lte");
         tryVerify(() => find("eraseCodeButton") === null);
         mouseClick(find("eraseAllButton"));
         const dialog = findChild(find("flashPage"), "maintenanceConfirm");
@@ -304,12 +341,12 @@ TestCase {
         compare(flash.opState, FlashViewModel.Idle);
     }
 
-    function test_connectorWarning() {
+    // Plan 0033 (ADR-0233): no connector warning; the maintenance stays on the application MCU.
+    function test_noConnectorWarning() {
         const flash = vm();
-        verify(!find("connectorWarning"));
         flash.kind = FirmwareSourceViewModel.LteFirmware;
-        tryVerify(() => find("connectorWarning") !== null);
-        compare(find("maintenanceHeader").Accessible.name, "Maintenance — LTE MCU");
+        verify(!find("connectorWarning"));
+        compare(find("maintenanceHeader").Accessible.name, "Maintenance — application MCU");
     }
 
     function test_themes_data() {
@@ -358,7 +395,8 @@ TestCase {
         const flash = vm();
         flash.source.loadFile(testSupport.writeHex("app.hex", 4096, true));
         tryVerify(() => flash.source.sourceState === FirmwareSourceViewModel.Ready, 5000);
-        find("maintenance").expanded = true; // below the fold at 600 px
+        verify(testSupport.setSetting("advanced/expertActions", true));
+        vm().maintenanceExpanded = true; // below the fold at 600 px
         tryVerify(() => find("maintenanceActions") !== null);
         waitForRendering(window.contentItem);
         checkInside(find("flashButton"), true);

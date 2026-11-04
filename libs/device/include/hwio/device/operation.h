@@ -55,6 +55,20 @@ enum class OperationKind : std::uint8_t {
     ReadRegisters,
     MemoryZones,
     WriteFlash,
+    // Plan 0033 (ADR-0233, ADR-0234): which MCU of the profile answers through the probe.
+    Identify,
+};
+
+// Plan 0033: what Identify found. `foundTargetId` is the target of the session's profile whose
+// chip family answered (FICR part, or a Nordic CTRL-AP at that family's AP index when FICR cannot
+// be read); "" when no MCU answered (no cable, no power, unknown part).
+struct ChipFamilyMatch {
+    std::string expectedTargetId; // the operation's target
+    std::string foundTargetId;
+    bool protectedChip = false; // APPROTECT: FICR unreadable, only the CTRL-AP answered
+    [[nodiscard]] bool matches() const noexcept {
+        return !foundTargetId.empty() && foundTargetId == expectedTargetId;
+    }
 };
 
 // M6: what targetStatus() found (Halt / Go set only `halted`).
@@ -118,6 +132,8 @@ struct OperationResult {
     std::optional<TargetStatus> targetStatus;
     std::vector<RegisterValue> registers;
     std::vector<MemoryZone> zones;
+    // Plan 0033: Identify only.
+    std::optional<ChipFamilyMatch> familyMatch = std::nullopt;
 };
 
 struct FlashOptions {
@@ -134,9 +150,9 @@ inline constexpr std::size_t maxWriteFlashBytes = 1024ULL * 1024;
 inline constexpr std::size_t maxRegisters = jlink::maxRegisters;
 inline constexpr std::size_t maxMemoryZones = jlink::maxMemoryZones;
 
-// M6 (ADR-0157): halt, go, targetStatus, readMemory, writeMemory, readRegisters and memoryZones
-// are "light" operations: on the session's console target they run with RTT attached (no pause,
-// no re-attach; a halted core keeps the console Connected).
+// M6 (ADR-0157): halt, go, targetStatus, readMemory, writeMemory, readRegisters, memoryZones and
+// (plan 0033) identify are "light" operations: on the session's console target they run with RTT
+// attached (no pause, no re-attach; a halted core keeps the console Connected).
 [[nodiscard]] bool isLightOperation(OperationKind kind) noexcept;
 
 // The phases an operation of `kind` goes through, in order. `crossTarget`: the operation's target
@@ -147,7 +163,7 @@ inline constexpr std::size_t maxMemoryZones = jlink::maxMemoryZones;
 
 // Stable lowercase ids used in JSON: "flash", "eraseCode", "eraseAll", "recover", "modem",
 // "lteBundle", "reset", "readMemory", "diagnose"; M6: "halt", "go", "targetStatus",
-// "writeMemory", "readRegisters", "memoryZones", "writeFlash".
+// "writeMemory", "readRegisters", "memoryZones", "writeFlash"; plan 0033: "identify".
 [[nodiscard]] std::string_view operationKindId(OperationKind kind) noexcept;
 
 } // namespace hwio::device

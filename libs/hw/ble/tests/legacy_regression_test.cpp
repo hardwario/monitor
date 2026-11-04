@@ -84,6 +84,13 @@ TEST(LegacyBle, NotPairedOnlyWithAnAuthenticationDetail) {
               ErrorCode::BleConnectFailed);
     EXPECT_EQ(controller(QLowEnergyController::UnknownRemoteDeviceError, LinkPhase::Connecting),
               ErrorCode::BleConnectFailed);
+    // HIL 2026-11-03 H11: a CCCD write that fails while an unbonded link pairs is not_paired.
+    EXPECT_EQ(mapLinkError(QtLinkError{.controller = std::nullopt,
+                                       .service = QLowEnergyService::DescriptorWriteError,
+                                       .phase = LinkPhase::PairingPending,
+                                       .bonded = false})
+                  .code,
+              ErrorCode::BleNotPaired);
     EXPECT_EQ(controller(QLowEnergyController::RemoteHostClosedError, LinkPhase::Ready),
               ErrorCode::BleDisconnected);
     EXPECT_EQ(controller(QLowEnergyController::UnknownError, LinkPhase::Ready),
@@ -158,6 +165,11 @@ TEST(LegacyBle, DeviceIdsAreCanonical) {
     EXPECT_EQ(hwio::ble::canonicalDeviceId("6A0B3F1C-1D2E-4F50-8A9B-0C1D2E3F4A5B"),
               "6a0b3f1c-1d2e-4f50-8a9b-0c1d2e3f4a5b");
     EXPECT_EQ(hwio::ble::canonicalDeviceId("not-an-id"), "not-an-id");
+    // HIL 2026-11-03 H13: the CLI rejects what is neither an address nor a UUID.
+    EXPECT_TRUE(hwio::ble::isDeviceId("f1:22:33:44:55:6a"));
+    EXPECT_TRUE(hwio::ble::isDeviceId("6A0B3F1C-1D2E-4F50-8A9B-0C1D2E3F4A5B"));
+    EXPECT_FALSE(hwio::ble::isDeviceId("nonsense"));
+    EXPECT_FALSE(hwio::ble::isDeviceId("F1:22:33:44:55"));
     EXPECT_TRUE(hwio::ble::sameDeviceId("aa:bb", "AA:BB"));
     EXPECT_FALSE(hwio::ble::sameDeviceId("aa:bb", "AA:BC"));
 }

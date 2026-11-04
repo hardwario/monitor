@@ -70,7 +70,7 @@ SettingsViewModel::SettingsViewModel(AppViewModel& app, FirmwareServices& servic
             loadSpeed();
             valuesChanged(); // signal
         } else if (key == restoreTabsKey || key == latencyKey || key == autoReconnectKey ||
-                   key == resetOnOpenKey) {
+                   key == resetOnOpenKey || key == FirmwareServices::expertActionsKey) {
             valuesChanged(); // signal
         } else if (key == FirmwareServices::jlinkPathKey) {
             jlinkLibraryChanged(); // signal
@@ -280,6 +280,16 @@ void SettingsViewModel::setDefaultLatencyMs(int latency) {
         write(latencyKey, latency);
     }
     valuesChanged(); // signal
+}
+
+bool SettingsViewModel::expertActions() const {
+    return m_app.settingsStore()->value(FirmwareServices::expertActionsKey).toBool();
+}
+
+void SettingsViewModel::setExpertActions(bool value) {
+    if (value != expertActions()) {
+        write(FirmwareServices::expertActionsKey, value);
+    }
 }
 
 bool SettingsViewModel::autoReconnect() const {

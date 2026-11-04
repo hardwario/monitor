@@ -79,6 +79,12 @@ Fehlercodes: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_buffe
 
 Fehlercodes: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed).
 
+### Der J-Link steckt am LTE-Anschluss
+
+Ein Tab arbeitet mit der Anwendungs-MCU. Antwortet der J-Link von der LTE-MCU, zeigt der Tab statt der Konsole **The J-Link is connected to the LTE MCU.** und verbindet sich nicht von selbst neu. Stecken Sie das Kabel an den APP-Anschluss um und drücken Sie **Retry**, oder drücken Sie **Update LTE firmware…**, um das [LTE-Firmware-Update](flashing.md#lte-firmware-update) zu starten.
+
+Fehlercode: [`target.other_connector`](#target.other_connector).
+
 ### Die LTE-Modem-Firmware braucht nRF Util
 
 Das Aktualisieren der LTE-Modem-Firmware verwendet Nordic nRF Util mit seinem Befehl `device`. Nichts anderes braucht es. Installieren Sie es wie unter [Nordic nRF Util](install.md#nordic-nrf-util-nur-für-die-lte-modem-firmware) beschrieben, oder legen Sie seinen Pfad in **Settings** › **nRF Util** fest, oder mit `--nrfutil PATH` in der CLI.
@@ -87,9 +93,7 @@ Fehlercodes: [`dependency.nrfutil_not_found`](#dependency.nrfutil_not_found), [`
 
 ### Bluetooth-Gerät nicht gefunden oder Kopplung schlägt fehl
 
-Bluetooth ist nur in der CLI verfügbar (`hwio ble ...`).
-
-- Schalten Sie Bluetooth ein und führen Sie `hwio ble scan` aus. Es werden nur Geräte angezeigt, deren Name `CHESTER` enthält; `--all` zeigt jedes Gerät.
+- Schalten Sie Bluetooth ein und öffnen Sie die Bluetooth-Ansicht der App, oder führen Sie `hwio ble scan` aus. Es werden nur Geräte angezeigt, deren Name `CHESTER` enthält; **Show all devices** (alle Geräte anzeigen) in der App und `--all` zeigen jedes Gerät.
 - Bringen Sie das Gerät näher und trennen Sie es von anderen Telefonen oder Computern.
 - Schlägt die Kopplung fehl, entfernen Sie das Gerät in den Bluetooth-Einstellungen des Systems und koppeln Sie erneut. Unter Linux muss ein Pairing-Agent laufen, der nach dem Passkey fragt. Siehe [Kopplung](bluetooth.md#kopplung).
 
@@ -191,7 +195,7 @@ Die Meldung kann die Version nennen, etwa „nRF Util `<version>` is too old.“
 - **Probably:** The computer has no Bluetooth or it is disabled in the system.
 - **What to do:** Enable Bluetooth or connect a USB Bluetooth adapter.
 
-Bluetooth ist nur in der CLI verfügbar (`hwio ble ...`). `hwio doctor` meldet es ebenfalls als Warnung. Siehe [Bluetooth](bluetooth.md).
+In der App ersetzt der Fehler die Liste der Bluetooth-Geräte, bis der Adapter bereit ist. `hwio doctor` meldet es ebenfalls als Warnung. Siehe [Bluetooth](bluetooth.md).
 
 <a id="ble.adapter_off"></a>
 #### `ble.adapter_off`
@@ -201,7 +205,7 @@ Bluetooth ist nur in der CLI verfügbar (`hwio ble ...`). `hwio doctor` meldet e
 - **Probably:** Bluetooth is turned off in the system settings or with a hardware switch.
 - **What to do:** Turn Bluetooth on in the system settings.
 
-Bluetooth ist nur in der CLI verfügbar (`hwio ble ...`).
+In der App ersetzt der Fehler die Liste der Bluetooth-Geräte, bis Bluetooth eingeschaltet ist.
 
 <a id="ble.permission_denied"></a>
 #### `ble.permission_denied`
@@ -439,6 +443,16 @@ Sie haben einen Befehl gesendet, während die Konsole getrennt war. Bei eingesch
 
 Das Flachbandkabel steckt im Anschluss der anderen MCU (zum Beispiel im LTE-Anschluss, wenn Sie die app-MCU flashen). Die Meldung kann „Expected the `<target>` MCU (`<part>`) but found `<found>`.“ lauten.
 
+<a id="target.other_connector"></a>
+#### `target.other_connector`
+
+**The J-Link is connected to another MCU of the device.**
+
+- **Probably:** The console runs on another MCU; the J-Link cable is on the other connector.
+- **What to do:** Move the J-Link cable to the connector of the console's MCU, or update the LTE firmware.
+
+Bei CHESTER lautet die Meldung „The J-Link is connected to the LTE MCU.“, die Ursache „The console runs on the application MCU; the J-Link cable is on the other connector.“ und der Vorschlag „Move the J-Link cable to the APP connector, or update the LTE firmware.“ Die Desktop-App zeigt sie als Banner mit **Update LTE firmware…** und **Retry**; die Sitzung verbindet sich nicht von selbst neu. Siehe [Der J-Link steckt am LTE-Anschluss](#der-j-link-steckt-am-lte-anschluss).
+
 <a id="target.protected"></a>
 #### `target.protected`
 
@@ -447,7 +461,7 @@ Das Flachbandkabel steckt im Anschluss der anderen MCU (zum Beispiel im LTE-Ansc
 - **Probably:** Access port protection (APPROTECT) is enabled.
 - **What to do:** Recover the MCU (this erases it), then flash it again.
 
-Recover entfernt den Schutz, löscht aber die MCU vollständig, einschließlich des Product Information Block. Siehe [Recover](flashing.md#recover). Für eine benannte MCU lautet der Vorschlag „Run `hwio <profile> <target> recover` (erases the MCU).“; in der Desktop-App verwenden Sie **Recover…** unter **Maintenance** auf der Seite **Flash**.
+Recover entfernt den Schutz, löscht aber die MCU vollständig, einschließlich des Product Information Block. Siehe [Recover](flashing.md#recover). Für eine benannte MCU lautet der Vorschlag „Run `hwio <profile> <target> recover` (erases the MCU).“; in der Desktop-App verwenden Sie **Recover…** unter **Maintenance** auf der Seite **Flash** (angezeigt mit **Settings › Advanced › Show expert maintenance actions** oder einmal, wenn die Fehlerbehebungsanleitung Sie dorthin schickt).
 
 <a id="target.program_failed"></a>
 #### `target.program_failed`
@@ -497,7 +511,7 @@ Der Product Information Block enthält die Seriennummer und die Hardware-Version
 - **Probably:** The device is out of range, turned off or its Bluetooth is disabled.
 - **What to do:** Bring the device closer and make sure its Bluetooth is on.
 
-Kommt von `hwio ble console` oder `hwio ble command` mit `--name` oder `-a`. Führen Sie `hwio ble scan` aus, um die Geräte in Reichweite zu sehen. Siehe [Bluetooth](bluetooth.md).
+In der App kehrt **Choose another device** (anderes Gerät wählen) zur Geräteliste zurück. Auf der Kommandozeile kommt er von `hwio ble console` oder `hwio ble command` mit `--name` oder `-a`; führen Sie `hwio ble scan` aus, um die Geräte in Reichweite zu sehen. Siehe [Bluetooth](bluetooth.md).
 
 <a id="ble.connect_failed"></a>
 #### `ble.connect_failed`
@@ -527,7 +541,7 @@ Auf dem Gerät läuft keine CHESTER-Firmware mit Bluetooth-Konsole.
 - **Probably:** Pairing was cancelled, failed or was removed on one side.
 - **What to do:** Pair the device: enter its passkey when the system asks.
 
-Führen Sie `hwio ble pair` aus (Linux und Windows); unter macOS fragt das System beim Verbinden nach dem Passkey. Siehe [Kopplung](bluetooth.md#kopplung).
+Drücken Sie **Pair** (Koppeln) in der App oder führen Sie `hwio ble pair` aus (Linux und Windows); unter macOS fragt das System beim Verbinden nach dem Passkey. Siehe [Kopplung](bluetooth.md#kopplung).
 
 <a id="ble.pairing_failed"></a>
 #### `ble.pairing_failed`

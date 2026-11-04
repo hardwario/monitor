@@ -1,6 +1,7 @@
 # ADR-0125 — Releases are built on version tags into a draft GitHub release
 
-- **Status:** Accepted
+- **Status:** Accepted; the job layout (signing inside the build jobs) superseded by ADR-0224; the symbol
+  archive name amended by ADR-0232 (`-debug-symbols-<os>.zip`)
 - **Date:** 2026-10-19
 - **Decided by:** Matej Strnad (M7 planning session)
 

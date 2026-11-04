@@ -267,9 +267,6 @@ TEST_F(ConsoleViewModelTest, SendsAndSharesTheHistoryBetweenTabs) {
     EXPECT_EQ(other->historyPrevious(QStringLiteral("draft")), QStringLiteral("version"));
     EXPECT_EQ(other->historyNext(QStringLiteral("version")), QStringLiteral("draft"));
     EXPECT_EQ(other->historySearch(QStringLiteral("VERS")), QStringList{QStringLiteral("version")});
-    // Another target has another history.
-    ASSERT_TRUE(second->configure(QStringLiteral("chester"), QStringLiteral("lte"), 801000002));
-    EXPECT_TRUE(other->historySearch(QString()).isEmpty());
 }
 
 TEST_F(ConsoleViewModelTest, HistoryUpAndDown) {

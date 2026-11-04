@@ -18,8 +18,8 @@ Během flashování je konzole karty pozastavená a poté se sama obnoví.
 
 Karta ukazuje firmware, který je teď v zařízení, pokud ho zařízení hlásí.
 
-U CHESTER-M má každý MCU vlastní programovací konektor. Pokud cíl karty neodpovídá tomu, co chcete flashovat, stránka
-vás vyzve, abyste nejprve připojili J-Link k druhému konektoru a přepnuli cíl karty.
+Karta vždy pracuje s aplikačním MCU. **LTE firmware** se z této stránky nenahrává: spustí průvodce [aktualizací
+firmwaru LTE](#aktualizace-firmwaru-lte), který vám řekne, kdy přepojit kabel J-Linku.
 
 ## 2. Firmware
 
@@ -33,6 +33,8 @@ vás vyzve, abyste nejprve připojili J-Link k druhému konektoru a přepnuli c�
 Stažený firmware se uchovává v mezipaměti a znovu se nestahuje. **Nedávné** obsahuje posledních 10 souborů a ID.
 
 ### LTE firmware
+
+Volíte ho v prvním kroku [aktualizace firmwaru LTE](#aktualizace-firmwaru-lte):
 
 - **HARDWARIO LTE firmware 1.7.0 (doporučeno)**: aplikace LTE a firmware modemu, které HARDWARIO otestoval se
   zařízením CHESTER. Stahuje se z docs.hardwario.com a jeho kontrolní součet se ověřuje.
@@ -71,24 +73,51 @@ funkčního firmwaru, dokud ho znovu nenaflashujete.
 Na konci stránka ukáže například **Firmware nahrán a ověřen za 12 s.** s tlačítky **Otevřít konzoli** a
 **Nahrát znovu**.
 
+## Aktualizace firmwaru LTE
+
+U CHESTER-M má LTE MCU vlastní programovací konektor a aplikační firmware resetuje LTE MCU, když modem neodpovídá, což
+flashování přeruší. **Aktualizovat firmware LTE…** (na kartě **LTE firmware**, nebo v banneru, když je J-Link na
+konektoru LTE) vás proto provede celým postupem:
+
+1. **Firmware**: LTE firmware HARDWARIO, nebo váš vlastní soubor.
+2. **Konektor APP**: připojte J-Link ke konektoru APP. Průvodce pokračuje sám, jakmile aplikační MCU odpoví; na
+   nesprávném konektoru ukáže **Toto je konektor LTE. Přepojte kabel ke konektoru APP.**
+3. **Zastavení aplikace**: uloží se kopie aplikačního firmwaru a potom se aplikace smaže (**Smazat aplikaci**: UICR i
+   PIB zůstanou). Pokud kopii nelze vytvořit, například u MCU chráněného proti čtení, můžete **Pokračovat bez kopie**
+   a na konci nahrát aplikaci sami.
+4. **Konektor LTE**: přepojte J-Link ke konektoru LTE.
+5. **Aktualizace**: aktualizuje se LTE MCU a jeho modem (u balíčku ve dvou krocích).
+6. **Konektor APP**: přepojte J-Link zpět.
+7. **Aplikace**: zapíše se zpět kopie (výchozí), nebo zvolte firmware z katalogu či ze souboru.
+8. **Hotovo**: aplikace znovu běží a konzole se znovu připojí.
+
+Během průvodce je konzole karty pozastavená (**Pozastaveno kvůli aktualizaci firmwaru LTE**). Zrušit lze kdykoli kromě
+zápisu do MCU. Po kroku 3 se průvodce nejprve zeptá: aplikační MCU je smazaný a zařízení neběží, dokud nenahrajete
+aplikaci. Kopie zůstane ve složce `backups` ([Soukromí a uložená data](privacy.md)).
+
 ## Údržba
 
-**Údržba — MCU aplikace** (nebo **MCU LTE**) ve spodní části stránky je ve výchozím stavu sbalená:
+**Údržba — MCU aplikace** ve spodní části stránky je ve výchozím stavu sbalená:
 
 | Akce | Funkce | Ptá se předem |
 |---|---|---|
 | **Reset** | Resetuje MCU | ne |
 | **Reset a zastavit** | Resetuje MCU a ponechá procesor zastavený | ne |
 | **Smazat aplikaci** | Smaže firmware; zachová UICR i PIB (jen aplikační MCU) | ne |
-| **Smazat vše…** | Smaže paměť flash, UICR i PIB | ano |
-| **Obnovit (recover)…** | Viz níže | ano |
+| **Smazat vše…** | Smaže paměť flash, UICR i PIB (jen odborné akce) | ano |
+| **Obnovit (recover)…** | Viz níže (jen odborné akce) | ano |
+
+**Smazat vše…**, **Obnovit (recover)…** a údržba **LTE MCU** (volba **Aplikační MCU | LTE MCU** nad tlačítky) se
+zobrazí jen se zapnutou volbou **Nastavení › Pokročilé › Zobrazit odborné akce údržby**, protože mohou smazat sériové
+číslo a konfiguraci zařízení. U LTE MCU potřebují J-Link na konektoru LTE.
 
 ### Obnovení (recover)
 
 Když je MCU chráněný proti čtení (approtect), J-Link do něj nemůže číst ani zapisovat a flashování selže s chybou
 [target.protected](troubleshooting.md#target.protected). **Obnovit (recover)…** ochranu odstraní tím, že MCU úplně
-smaže, včetně UICR a PIB. U LTE MCU potom nahraje malý obraz, díky kterému zůstane MCU laditelný. Po obnovení
-firmware znovu naflashujte. Obnovení se nikdy nespouští samo.
+smaže, včetně UICR a PIB. U LTE MCU potom nahraje malý obraz, díky kterému zůstane MCU laditelný. Po obnovení firmware
+znovu naflashujte. Obnovení se nikdy nespouští samo. Když vás průvodce řešením problémů u chráněného MCU pošle na
+stránku **Nahrát FW**, zobrazí se tam **Obnovit (recover)…** jednou, i bez odborného nastavení.
 
 ## Příkazová řádka
 
@@ -98,6 +127,7 @@ hwio chester app flash 0123456789abcdef0123456789abcdef   # a catalog ID
 hwio chester app flash                                    # the build output in build/ or build/zephyr/
 hwio chester lte flash                                    # the HARDWARIO LTE firmware
 hwio chester lte flash mfw_nrf91x1_2.0.2.zip              # a modem firmware zip
+hwio chester lte flash --guided                           # the guided LTE update (as in the app)
 hwio chester app erase --all
 hwio chester app recover
 ```

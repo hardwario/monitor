@@ -41,6 +41,11 @@ BleDeviceId canonicalDeviceId(std::string_view id) {
     return text.toStdString();
 }
 
+bool isDeviceId(std::string_view id) {
+    const QString text = QString::fromUtf8(id.data(), static_cast<qsizetype>(id.size())).trimmed();
+    return !QBluetoothAddress(text).isNull() || !QUuid::fromString(text).isNull();
+}
+
 bool sameDeviceId(std::string_view a, std::string_view b) {
     return a.size() == b.size() && toLowerAscii(a) == toLowerAscii(b);
 }

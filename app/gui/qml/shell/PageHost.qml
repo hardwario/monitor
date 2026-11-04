@@ -5,6 +5,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import HardwarioMonitor
 
@@ -18,15 +19,70 @@ Item {
         anchors.fill: parent
         spacing: 0
 
+        // Plan 0033 (ADR-0233, D8): the J-Link is on the LTE connector - a warning instead of the
+        // console's error, with the LTE update and a retry (no automatic reconnect).
+        Rectangle {
+            objectName: "otherConnectorBanner"
+            Layout.fillWidth: true
+            visible: !host.choosing && host.tab.connection.otherConnector
+            implicitHeight: otherConnectorRow.implicitHeight + 2 * Theme.spacingS
+            color: Theme.warningPanelBg
+            Accessible.role: Accessible.AlertMessage
+            Accessible.name: host.tab.connection.otherConnectorText
+
+            RowLayout {
+                id: otherConnectorRow
+
+                anchors.fill: parent
+                anchors.topMargin: Theme.spacingS
+                anchors.bottomMargin: Theme.spacingS
+                anchors.leftMargin: Theme.spacingM
+                anchors.rightMargin: Theme.spacingS
+                spacing: Theme.spacingS
+
+                Icon {
+                    Layout.alignment: Qt.AlignTop
+                    symbol: "warning"
+                    color: Theme.warning
+                }
+
+                Label {
+                    textFormat: Text.PlainText
+                    objectName: "otherConnectorText"
+                    Layout.fillWidth: true
+                    text: host.tab.connection.otherConnectorText
+                    color: Theme.text
+                    wrapMode: Text.Wrap
+                }
+
+                HButton {
+                    objectName: "updateLteButton"
+                    visible: AppViewModel.launcher.canOpen("lte-update")
+                    text: qsTr("Update LTE firmware…")
+                    onClicked: host.tab.connection.updateLteFirmware()
+                }
+
+                HButton {
+                    objectName: "otherConnectorRetry"
+                    kind: "ghost"
+                    text: qsTr("Retry")
+                    onClicked: host.tab.connection.reconnect()
+                }
+            }
+        }
+
         ErrorPanel {
             objectName: "connectionError"
             Layout.fillWidth: true
             Layout.margins: Theme.spacingM
-            visible: !host.choosing && host.tab.connection.error.valid
+            visible: !host.choosing && host.tab.connection.error.valid && !host.tab.connection.otherConnector
             error: host.tab.connection.error
             compact: Window.window !== null && Window.window.height < 700
-            secondaryActionText: host.tab.connection.canChooseAnotherProbe ? qsTr("Choose another probe") : ""
-            onSecondaryActionTriggered: host.tab.connection.chooseAnotherProbe()
+            secondaryActionText: host.tab.connection.secondaryActionText
+            customActionText: host.tab.connection.customActionText
+            note: host.tab.connection.pairingHelp
+            onSecondaryActionTriggered: host.tab.connection.triggerSecondaryAction()
+            onCustomActionTriggered: host.tab.connection.triggerCustomAction()
             onActionTriggered: action => action === ErrorAction.OpenSettings ? AppViewModel.openSettings(host.tab.connection.error.settingsSection)
                                                                                : host.tab.connection.triggerErrorAction(action)
         }
@@ -47,6 +103,7 @@ Item {
             ChooseDevicePage {
                 anchors.fill: parent
                 visible: host.choosing
+                tab: host.tab
                 picker: host.tab.picker
                 active: host.choosing && host.tab === AppViewModel.currentTabViewModel
                         && AppViewModel.globalPage === ""

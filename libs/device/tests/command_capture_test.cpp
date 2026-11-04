@@ -340,6 +340,33 @@ TEST(ShellQueryTest, SilentAndUserLinesWait) {
     EXPECT_FALSE(session.shellCaptureActive());
 }
 
+// HIL 2026-11-03 H15 (ADR-0186): the debug log of a query keeps the device's secrets out; the
+// result keeps them (the device info needs no secret, but the caller decides).
+TEST(ShellQueryTest, DebugLogRedactsSensitiveOutput) {
+    FakeSession session(promptProfile());
+    static QString* captured = nullptr;
+    QString log;
+    captured = &log;
+    const QtMessageHandler previous =
+        qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString& text) {
+            *captured += text + QLatin1Char('\n');
+        });
+    auto query = ShellQuery::start(session, "info show");
+    ASSERT_TRUE(query);
+    session.output("serial number: 2159000001");
+    session.output("claim token: 0123456789abcdef0123456789abcdef");
+    session.output("ble passkey: 123456");
+    session.prompt();
+    qInstallMessageHandler(previous);
+    ASSERT_TRUE((*query)->isFinished());
+    EXPECT_EQ(resultOf(**query).lines.size(), 3U);
+    EXPECT_TRUE(log.contains(QStringLiteral("serial number: 2159000001"))) << log.toStdString();
+    EXPECT_TRUE(log.contains(QStringLiteral("claim token: <redacted>"))) << log.toStdString();
+    EXPECT_TRUE(log.contains(QStringLiteral("ble passkey: <redacted>"))) << log.toStdString();
+    EXPECT_FALSE(log.contains(QStringLiteral("0123456789abcdef"))) << log.toStdString();
+    EXPECT_FALSE(log.contains(QStringLiteral("123456\n"))) << log.toStdString();
+}
+
 TEST(ShellQueryTest, RefusedWhenNotConnectedOrBusy) {
     FakeSession session;
     session.setState(hwio::device::ConnectionState::Connecting);
