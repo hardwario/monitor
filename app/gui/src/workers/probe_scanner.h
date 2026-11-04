@@ -28,6 +28,11 @@
 // there. The stop token is honoured between scans and the thread is joined in the destructor
 // (one enumeration, a few hundred ms, may still finish first).
 //
+// Suspension (plan 0036, ADR-0257): while a ScanSuspension token lives no scan starts (periodic
+// or requested; an enumeration already running finishes and is delivered), so the scanner does
+// not enumerate while a probe re-enumerates during a J-Link firmware update. Requests made while
+// suspended are kept; releasing the last token scans at once.
+//
 // Thread safety: the public functions are called on the GUI thread (the owner).
 
 #include "hwio/core/error.h"
@@ -65,6 +70,30 @@ struct ProbeScan {
     std::vector<ScannedProbe> probes;
 };
 
+class ProbeScanner;
+
+// Plan 0036: move-only RAII token of ProbeScanner::suspend(); GUI thread only. Must not outlive
+// the scanner. A default-constructed (or moved-from) token suspends nothing.
+class ScanSuspension {
+public:
+    ScanSuspension() = default;
+    ~ScanSuspension() { reset(); }
+    ScanSuspension(const ScanSuspension&) = delete;
+    ScanSuspension& operator=(const ScanSuspension&) = delete;
+    ScanSuspension(ScanSuspension&& other) noexcept;
+    ScanSuspension& operator=(ScanSuspension&& other) noexcept;
+
+    [[nodiscard]] bool active() const noexcept { return m_scanner != nullptr; }
+    // Resumes (when this was the last token). Idempotent.
+    void reset() noexcept;
+
+private:
+    friend class ProbeScanner;
+    explicit ScanSuspension(ProbeScanner& scanner) noexcept : m_scanner(&scanner) {}
+
+    ProbeScanner* m_scanner = nullptr; // non-owning; outlives the token
+};
+
 class ProbeScanner : public QObject {
     Q_OBJECT
 
@@ -96,6 +125,10 @@ public:
     // Scans as soon as possible (Refresh), also when no picker is visible.
     void scanNow();
 
+    // Plan 0036: no scan starts while a returned token lives (see above).
+    [[nodiscard]] ScanSuspension suspend();
+    [[nodiscard]] bool suspended() const;
+
     // Stops and joins the worker (idempotent; one enumeration in progress finishes first). No
     // scan runs afterwards. Used by the destructor and by the Qt Quick test runner, which stops
     // the scanner when a test file has finished, before QtQuickTest tears down its result
@@ -109,8 +142,12 @@ signals:
     void scanned(const hwio::gui::ProbeScan& scan);
 
 private:
+    friend class ScanSuspension;
+
     // GUI thread: invoked (queued, by name) by the worker.
     Q_INVOKABLE void deliver();
+    // The last token went away: scan at once.
+    void resume() noexcept;
 
     void run(const std::stop_token& stop);
     // Worker thread. `forced`: a Refresh / a picker became visible (retries a failed library).
@@ -140,10 +177,11 @@ private:
     std::atomic<int> m_libraryLoadAttempts{0};
     std::optional<FailedLibrary> m_failed; // worker thread only
 
-    std::mutex m_mutex; // guards the members below
+    mutable std::mutex m_mutex; // guards the members below
     std::condition_variable_any m_wake;
     bool m_scanRequested = false;
     bool m_activityChanged = false; // the last picker was released
+    int m_suspensions = 0;          // ScanSuspension tokens alive (plan 0036)
     jlink::LocatorOptions m_options;
     std::optional<ProbeScan> m_pending; // the newest result not yet delivered
     std::uint64_t m_sequence = 0;

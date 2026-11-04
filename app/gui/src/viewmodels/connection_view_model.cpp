@@ -9,9 +9,11 @@
 #include "hwio/device/device_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
+#include "hwio/hw/jlink/types.h"
 #include "settings_store.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
+#include "viewmodels/probe_firmware_view_model.h"
 #include "viewmodels/probe_picker_view_model.h"
 
 #include <QChar>
@@ -92,7 +94,23 @@ void ConnectionOptions::applyStoredSpeed(std::optional<int> speed) {
 }
 
 ConnectionViewModel::ConnectionViewModel(DeviceTabViewModel* tab, SettingsStore* settings)
-    : QObject(tab), m_tab(tab), m_settings(settings) {}
+    : QObject(tab), m_tab(tab), m_settings(settings) {
+    // Plan 0036: the banner's blocked reason follows the tab's busy state and the update.
+    connect(m_tab, &DeviceTabViewModel::busyChanged, this, &ConnectionViewModel::firmwareChanged);
+    // Review M1: the banner belongs to the session that reported it; another probe never shows it.
+    connect(m_tab, &DeviceTabViewModel::sessionChanged, this, [this] {
+        if (m_firmwareOutdated) {
+            m_firmwareOutdated.reset();
+            firmwareChanged(); // signal
+        }
+    });
+    connect(m_tab, &DeviceTabViewModel::configurationChanged, this,
+            &ConnectionViewModel::firmwareChanged);
+    if (ProbeFirmwareViewModel* update = m_tab->probeFirmware(); update != nullptr) {
+        connect(update, &ProbeFirmwareViewModel::changed, this,
+                &ConnectionViewModel::firmwareChanged);
+    }
+}
 
 QString ConnectionViewModel::probeLabel() const {
     if (isBle()) {
@@ -471,6 +489,55 @@ void ConnectionViewModel::dismissWarning() {
 
 void ConnectionViewModel::chooseAnotherProbe() { m_tab->chooseAnotherProbe(); }
 
+bool ConnectionViewModel::firmwareOutdated() const {
+    return m_firmwareOutdated && m_tab->probeSerial() == m_firmwareOutdated->serial;
+}
+
+QString ConnectionViewModel::firmwareOutdatedText() const {
+    if (!m_firmwareOutdated || !firmwareOutdated()) {
+        return {};
+    }
+    const QString current =
+        ProbePickerViewModel::firmwareDate(toQString(m_firmwareOutdated->notice.probeFirmware));
+    const QString available =
+        ProbePickerViewModel::firmwareDate(toQString(m_firmwareOutdated->notice.libraryFirmware));
+    if (current.isEmpty() || available.isEmpty()) {
+        return toQString(m_firmwareOutdated->error.message); // "The J-Link firmware is outdated."
+    }
+    return tr("The J-Link firmware is outdated (%1, available: %2).").arg(current, available);
+}
+
+QString ConnectionViewModel::firmwareBlockedReason() const {
+    const ProbeFirmwareViewModel* update = m_tab->probeFirmware();
+    if (update == nullptr || !m_firmwareOutdated || !firmwareOutdated()) {
+        return {};
+    }
+    return update->blockedReason(m_firmwareOutdated->serial, m_tab);
+}
+
+void ConnectionViewModel::updateProbeFirmware() {
+    ProbeFirmwareViewModel* update = m_tab->probeFirmware();
+    if (update == nullptr || !m_firmwareOutdated || !firmwareOutdated() ||
+        !firmwareBlockedReason().isEmpty()) {
+        return;
+    }
+    // The banner is gone with the session (ADR-0246); the dialog takes over.
+    m_firmwareOutdated.reset();
+    firmwareChanged(); // signal
+    update->requestFromTab(*m_tab);
+}
+
+void ConnectionViewModel::notNowProbeFirmware() {
+    if (!m_firmwareOutdated || !firmwareOutdated()) {
+        return;
+    }
+    if (ProbeFirmwareViewModel* update = m_tab->probeFirmware(); update != nullptr) {
+        update->notNow(m_firmwareOutdated->serial);
+    }
+    m_firmwareOutdated.reset();
+    firmwareChanged(); // signal
+}
+
 void ConnectionViewModel::loadOptions(std::optional<std::uint32_t> serial,
                                       const device::TargetProfile& target) {
     if (serial != m_serial || !m_bleId.isEmpty()) {
@@ -665,6 +732,22 @@ void ConnectionViewModel::setError(std::optional<Error> error) {
 }
 
 void ConnectionViewModel::setWarning(const Error& warning) {
+    // Plan 0036: Outdated probe firmware gets its own banner (the GUI can update it); Newer and
+    // a tab without the update keep the plain warning.
+    const device::DeviceSession* session = m_tab->session();
+    ProbeFirmwareViewModel* update = m_tab->probeFirmware();
+    if (warning.code == ErrorCode::ProbeFirmwareOutdated && session != nullptr &&
+        update != nullptr && session->probeFirmwareNotice() &&
+        session->probeFirmwareNotice()->status == jlink::FirmwareStatus::Outdated) {
+        const std::uint32_t serial = session->probe().serialNumber;
+        if (update->isNotNow(serial)) {
+            return; // "Not now" until the application ends (ADR-0132)
+        }
+        m_firmwareOutdated = FirmwareOutdated{
+            .error = warning, .notice = *session->probeFirmwareNotice(), .serial = serial};
+        firmwareChanged(); // signal
+        return;
+    }
     Error shown = warning;
     if (shown.code == ErrorCode::IoWriteFailed) {
         // The session's only io.write_failed warning is its console log file, which it then stops

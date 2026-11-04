@@ -318,6 +318,12 @@ public:
     // The probe; serialNumber is 0 until the worker has opened it (connectionChanged is emitted
     // after it is set).
     [[nodiscard]] jlink::ProbeInfo probe() const;
+    // Plan 0036: the probe firmware notice of the last warning(), set before it is emitted: the
+    // status and firmware strings of probe.firmware_outdated, nullopt for every other warning.
+    // Owner thread.
+    [[nodiscard]] const std::optional<ProbeFirmwareNotice>& probeFirmwareNotice() const noexcept {
+        return m_probeFirmware;
+    }
     // The console log file the session writes now (amended by plan 0005): empty before the worker
     // opened it (after the probe is identified), without a console file and after a write failure
     // stopped it (the session's io.write_failed warning). Updated by the worker's events, like
@@ -377,6 +383,7 @@ private:
     std::atomic<bool> m_wakePending{false};
     ConnectionEvent m_connection;
     jlink::ProbeInfo m_probe;
+    std::optional<ProbeFirmwareNotice> m_probeFirmware; // plan 0036
     std::filesystem::path m_consoleFile;
     std::uint64_t m_reportedDrops = 0;
     int m_holds = 0; // plan 0033: SessionHold objects alive

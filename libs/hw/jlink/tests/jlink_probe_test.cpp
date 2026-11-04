@@ -321,12 +321,19 @@ TEST_F(FirmwareUpdate, UnknownIsUpdatedAndVerified) {
     EXPECT_EQ(*before, FirmwareStatus::Unknown);
 }
 
-TEST_F(FirmwareUpdate, StillUnknownAfterTheUpdateFails) {
-    script("unreadable", libraryFirmware, false);
+// ADR-0261 (replaces "still Unknown after the update fails"): an Unknown status cannot be
+// compared after the update either; the vendor call's return value decides.
+TEST_F(FirmwareUpdate, UnknownIsJudgedByTheVendorCall) {
+    script("unreadable", libraryFirmware, false); // still unreadable afterwards
     ASSERT_TRUE(probe().open(111U));
-    const auto before = probe().updateFirmware();
-    ASSERT_FALSE(before);
-    EXPECT_EQ(before.error().code, ErrorCode::ProbeFirmwareUpdateFailed);
+    const auto written = probe().updateFirmware(); // checksum 0x1234: something was written
+    ASSERT_TRUE(written) << written.error().detail;
+    EXPECT_EQ(*written, FirmwareStatus::Unknown);
+
+    ON_CALL(api(), updateFirmwareIfNewer()).WillByDefault(Return(std::uint32_t{0}));
+    const auto nothing = probe().updateFirmware(); // 0: nothing to write
+    ASSERT_TRUE(nothing) << nothing.error().detail;
+    EXPECT_EQ(*nothing, FirmwareStatus::Current);
 }
 
 TEST_F(FirmwareUpdate, NewerIsSynchronizedAfterInvalidating) {

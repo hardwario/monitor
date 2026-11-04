@@ -66,24 +66,24 @@ Result<ProbeLock> lockFirstFree(const SessionRegistry& registry, jlink::JLinkPro
     return fail(ErrorCode::ProbeNotFound);
 }
 
-Result<OpenProbe> openExclusive(const SessionRegistry& registry,
+// `registry` (nullable, non-owning) is used only without a serial number (lockFirstFree); the
+// registry-free overloads always pass a serial number.
+Result<OpenProbe> openExclusive(const RegistryOptions& options, const SessionRegistry* registry,
                                 const jlink::LibraryLocation& location,
                                 std::optional<std::uint32_t> serialNumber) {
-    if (serialNumber) {
-        if (auto available = registry.checkAvailable(serialNumber);
-            !available && available.error().code == ErrorCode::ProbeOpenFailed) {
-            return std::unexpected(std::move(available).error());
-        }
-    }
-    auto library = jlink::JLinkLibrary::loadCopy(location, registry.options().instanceRoot);
+    auto library = jlink::JLinkLibrary::loadCopy(location, options.instanceRoot);
     if (!library) {
         return std::unexpected(std::move(library).error());
     }
     OpenProbe open;
     open.library = std::move(*library);
     open.probe = std::make_unique<jlink::JLinkProbe>(*open.library, jlink::SystemClock::instance());
-    auto lock = serialNumber ? ProbeLock::acquire(*serialNumber, registry.options().lockDirectory)
-                             : lockFirstFree(registry, *open.probe);
+    Result<ProbeLock> lock = fail(ErrorCode::ProbeNotFound);
+    if (serialNumber) {
+        lock = ProbeLock::acquire(*serialNumber, options.lockDirectory);
+    } else if (registry != nullptr) {
+        lock = lockFirstFree(*registry, *open.probe);
+    }
     if (!lock) {
         return std::unexpected(std::move(lock).error());
     }
@@ -97,12 +97,21 @@ Result<OpenProbe> openExclusive(const SessionRegistry& registry,
     return open;
 }
 
-} // namespace
+// The probe must not be used by a session of this process.
+Status checkRegistry(const SessionRegistry& registry, std::optional<std::uint32_t> serialNumber) {
+    if (serialNumber) {
+        if (auto available = registry.checkAvailable(serialNumber);
+            !available && available.error().code == ErrorCode::ProbeOpenFailed) {
+            return std::unexpected(std::move(available).error());
+        }
+    }
+    return {};
+}
 
-Result<ProbeDetails> inspectProbe(const SessionRegistry& registry,
-                                  const jlink::LibraryLocation& location,
-                                  std::optional<std::uint32_t> serialNumber) {
-    auto open = openExclusive(registry, location, serialNumber);
+Result<ProbeDetails> inspect(const RegistryOptions& options, const SessionRegistry* registry,
+                             const jlink::LibraryLocation& location,
+                             std::optional<std::uint32_t> serialNumber) {
+    auto open = openExclusive(options, registry, location, serialNumber);
     if (!open) {
         return std::unexpected(std::move(open).error());
     }
@@ -122,12 +131,12 @@ Result<ProbeDetails> inspectProbe(const SessionRegistry& registry,
     return details;
 }
 
-Result<FirmwareUpdate> updateProbeFirmware(const SessionRegistry& registry,
-                                           const jlink::LibraryLocation& location,
-                                           std::optional<std::uint32_t> serialNumber) {
+Result<FirmwareUpdate> update(const RegistryOptions& options, const SessionRegistry* registry,
+                              const jlink::LibraryLocation& location,
+                              std::optional<std::uint32_t> serialNumber) {
     // Opened normally: the status "before" comes from a Normal open (review R24); updateFirmware()
     // reopens in FirmwareUpdate mode only when needed, then normally to verify (R11).
-    auto open = openExclusive(registry, location, serialNumber);
+    auto open = openExclusive(options, registry, location, serialNumber);
     if (!open) {
         return std::unexpected(std::move(open).error());
     }
@@ -136,6 +145,38 @@ Result<FirmwareUpdate> updateProbeFirmware(const SessionRegistry& registry,
         return std::unexpected(std::move(before).error());
     }
     return FirmwareUpdate{.serialNumber = open->info.serialNumber, .before = *before};
+}
+
+} // namespace
+
+Result<ProbeDetails> inspectProbe(const SessionRegistry& registry,
+                                  const jlink::LibraryLocation& location,
+                                  std::optional<std::uint32_t> serialNumber) {
+    if (auto available = checkRegistry(registry, serialNumber); !available) {
+        return std::unexpected(std::move(available).error());
+    }
+    return inspect(registry.options(), &registry, location, serialNumber);
+}
+
+Result<ProbeDetails> inspectProbe(const RegistryOptions& options,
+                                  const jlink::LibraryLocation& location,
+                                  std::uint32_t serialNumber) {
+    return inspect(options, nullptr, location, serialNumber);
+}
+
+Result<FirmwareUpdate> updateProbeFirmware(const SessionRegistry& registry,
+                                           const jlink::LibraryLocation& location,
+                                           std::optional<std::uint32_t> serialNumber) {
+    if (auto available = checkRegistry(registry, serialNumber); !available) {
+        return std::unexpected(std::move(available).error());
+    }
+    return update(registry.options(), &registry, location, serialNumber);
+}
+
+Result<FirmwareUpdate> updateProbeFirmware(const RegistryOptions& options,
+                                           const jlink::LibraryLocation& location,
+                                           std::uint32_t serialNumber) {
+    return update(options, nullptr, location, serialNumber);
 }
 
 } // namespace hwio::device

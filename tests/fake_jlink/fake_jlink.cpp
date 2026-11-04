@@ -22,6 +22,11 @@
 //       "firmware": "J-Link V1 compiled Oct  1 2024 10:00:00",
 //       "libraryFirmware": "...",                   GetEmbeddedFWString (default: firmware)
 //       "openError": "",                            non-empty: JLINKARM_Open fails with it
+//       "updateResult": "updated",                  JLINKARM_UpdateFirmwareIfNewer (plan 0036):
+//                                                   "updated" (firmware = libraryFirmware),
+//                                                   "unchanged" (returns 0, nothing changes),
+//                                                   "unplugged" (the probe cannot be opened again)
+//       "updateDelayMs": 0,                         JLINKARM_UpdateFirmwareIfNewer blocks this long
 //       "connectFailures": 0,                       the first N JLINKARM_Connect calls fail
 //       "connectDelayMs": 0,                        every JLINKARM_Connect blocks this long
 //       "connectMinMillivolts": 1000,               JLINKARM_Connect fails below this VTref
@@ -305,6 +310,8 @@ struct ProbeScenario {
     std::string firmware;
     std::string libraryFirmware;
     std::string openError;
+    std::string updateResult = "updated";
+    std::int64_t updateDelayMs = 0;
     int connectFailures = 0;
     std::int64_t connectDelayMs = 0;
     int connectMinMillivolts = 1000;
@@ -496,6 +503,10 @@ Scenario loadScenario() {
                 ? object.value(QStringLiteral("libraryFirmware")).toString().toStdString()
                 : probe.firmware;
         probe.openError = object.value(QStringLiteral("openError")).toString().toStdString();
+        probe.updateResult = object.value(QStringLiteral("updateResult"))
+                                 .toString(QStringLiteral("updated"))
+                                 .toStdString();
+        probe.updateDelayMs = object.value(QStringLiteral("updateDelayMs")).toInteger(0);
         probe.connectFailures = object.value(QStringLiteral("connectFailures")).toInt();
         probe.connectDelayMs = object.value(QStringLiteral("connectDelayMs")).toInteger();
         probe.connectMinMillivolts =
@@ -974,10 +985,26 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_GetEmbeddedFWString(const char* /*id*/, char
 }
 
 HWIO_FAKE_JLINK_EXPORT std::uint32_t JLINKARM_UpdateFirmwareIfNewer() {
+    std::int64_t delay = 0;
+    {
+        State& s = state();
+        const std::scoped_lock lock(s.mutex);
+        if (const ProbeScenario* probe = s.probe()) {
+            delay = probe->updateDelayMs;
+        }
+    }
+    if (delay > 0) {
+        std::this_thread::sleep_for(Milliseconds(delay)); // a slow vendor call, outside the lock
+    }
     State& s = state();
     const std::scoped_lock lock(s.mutex);
     ProbeScenario* probe = s.probe();
-    if (probe == nullptr || probe->firmware == probe->libraryFirmware) {
+    if (probe == nullptr || probe->firmware == probe->libraryFirmware ||
+        probe->updateResult == "unchanged") {
+        return 0;
+    }
+    if (probe->updateResult == "unplugged") {
+        probe->openError = "J-Link not found (unplugged during the update)";
         return 0;
     }
     probe->firmware = probe->libraryFirmware;

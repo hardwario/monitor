@@ -28,6 +28,7 @@
 #include "viewmodels/history_store.h"
 #include "viewmodels/page_list_model.h"
 #include "viewmodels/page_registry.h"
+#include "viewmodels/probe_firmware_view_model.h"
 #include "viewmodels/shortcut_registry.h"
 #include "viewmodels/update_view_model.h"
 #include "wizard/report_view_model.h"
@@ -124,6 +125,8 @@ class AppViewModel : public QObject {
     Q_PROPERTY(bool crashedLastRun READ crashedLastRun NOTIFY crashedLastRunChanged)
     // Plan 0016 C2 (ADR-0116): the update banner and the update block of Settings > About.
     Q_PROPERTY(hwio::gui::UpdateViewModel* update READ update CONSTANT)
+    // Plan 0036: the J-Link firmware update (ProbeFirmwareDialog).
+    Q_PROPERTY(hwio::gui::ProbeFirmwareViewModel* probeFirmware READ probeFirmware CONSTANT)
 
 public:
     static constexpr int railBreakpoint = 1100; // ADR-0061
@@ -258,6 +261,7 @@ public:
     void refreshCrashNotice();
 
     [[nodiscard]] UpdateViewModel* update() const noexcept { return m_update; }
+    [[nodiscard]] ProbeFirmwareViewModel* probeFirmware() const noexcept { return m_probeFirmware; }
     [[nodiscard]] UpdateService& updateService() noexcept { return *m_updateService; }
     // One spin-box step on the grid of `step` (review S15): up from 1 → 10, from 10 → 20; down
     // from 15 → 10; clamped to [minimum, maximum]. direction: +1 / -1.
@@ -350,6 +354,9 @@ private:
     std::unique_ptr<QNetworkAccessManager> m_network;
     UpdateService* m_updateService = nullptr; // child
     UpdateViewModel* m_update = nullptr;      // child
+    // Plan 0036: child; deleted by the destructor after the tabs, before the registry and the
+    // scanner (its reservation and scanner suspension); waits for a running update.
+    ProbeFirmwareViewModel* m_probeFirmware = nullptr;
 };
 
 } // namespace hwio::gui

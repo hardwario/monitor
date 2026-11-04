@@ -306,6 +306,7 @@ Item {
                                         required property int inUseTab
                                         required property string inUseOther
                                         required property bool selectable
+                                        required property bool updatingFirmware
                                         readonly property bool selected: row.index === page.picker.selectedRow
 
                                         objectName: "probeRow"
@@ -392,7 +393,9 @@ Item {
                                                 textFormat: Text.PlainText
                                                 objectName: "probeInUse"
                                                 visible: tag.text !== ""
-                                                text: row.inUseOther !== "" ? qsTr("In use by another program (%1)").arg(row.inUseOther)
+                                                // Plan 0036: reserved for a J-Link firmware update.
+                                                text: row.updatingFirmware ? qsTr("Updating firmware…")
+                                                    : row.inUseOther !== "" ? qsTr("In use by another program (%1)").arg(row.inUseOther)
                                                     : row.inUseTab > 0 ? qsTr("In use (tab %1)").arg(row.inUseTab) : ""
                                                 font: Theme.fontUiSmall
                                                 color: Theme.textMuted

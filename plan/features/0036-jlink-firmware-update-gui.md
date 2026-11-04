@@ -1,11 +1,11 @@
 # 0036 — J-Link firmware update in the GUI
 
-- **Status:** Approved (2026-11-04 by Matej Strnad)
+- **Status:** In progress (implementation 2026-11-04 on `strnad/impl-0036`; HIL and the 0008/0009 hooks open)
 - **Milestone:** 2.0.0 (split from [0017](0017-m8-parity.md) § B on 2026-11-04)
 - **Author:** Matej Strnad (with Claude), 2026-11-04
 - **Related ADRs:** ADR-0132 (placement and dialog; session part superseded), ADR-0246 (accepted 2026-11-04:
   disconnect first), ADR-0248 (translations), ADR-0255, ADR-0256, ADR-0257 (accepted 2026-11-04); ADR-0030, ADR-0031,
-  ADR-0058, ADR-0066, ADR-0093, ADR-0099, ADR-0105, ADR-0184
+  ADR-0058, ADR-0066, ADR-0093, ADR-0099, ADR-0105, ADR-0184, ADR-0261 (accepted 2026-11-04, review follow-up)
 - **Depends on:** M1 backend (`device::updateProbeFirmware()`, `libs/device/include/hwio/device/probe_tools.h`),
   0007 (`DiagWorker`, check `probe-firmware`). Hooks in [0008](0008-m4-first-run-setup.md) and
   [0009](0009-m4-connect-and-troubleshooting.md) appear when those wizards exist (order in
@@ -181,22 +181,28 @@ only in the message text (`session_worker.cpp`, connect path ~line 354); the ses
 | J-Link FW placement | banner + setup row (0008) + troubleshooting topic (0009) / banner only / + Choose device rows | banner + setup row + troubleshooting topic | **banner + setup row + troubleshooting topic** (decided by Matej Strnad 2026-11-04) | ADR-0255 |
 | After a successful update from a banner | tab reconnects / stays disconnected | reconnect | **reconnect** (decided by Matej Strnad 2026-11-04) | ADR-0256 |
 | Threading and exclusivity | owned worker per job + registry reservation + scanner suspension / `DiagWorker` request / probe-only session | owned worker + reservation + suspension | **owned worker + reservation + suspension** (decided by Matej Strnad 2026-11-04) | ADR-0257 |
+| Update fails while a quit is pending (review 2026-11-04) | cancel the quit and show the error / quit anyway | — | **cancel the quit, show `probe.firmware_update_failed` with its advice; the app stays open** (decided by Matej Strnad 2026-11-04) | ADR-0261 |
+| Probe firmware status `Unknown` (review 2026-11-04) | explicit "Update anyway?" + success by the vendor call's return value / as Outdated | — | **confirm dialog says "The J-Link firmware status could not be determined. Update anyway?"; success judged by the return value of `JLINKARM_UpdateFirmwareIfNewer`, not by the status after** (decided by Matej Strnad 2026-11-04) | ADR-0261 |
 | Kept from ADR-0132 / 0017 (accepted 2026-10-19) | "Not now" per serial until restart; no downgrade for `Newer`; blocked while MCP or an operation runs; no MCP tool | — | accepted (2026-10-19) | ADR-0132 |
 
 ## Implementation steps
 
-- [ ] P0 Prerequisite: plan Approved; ADR-0255..0257 answered
-- [ ] P1 `libs/device`: registry-free `updateProbeFirmware` / `inspectProbe` overloads, `SessionRegistry::reserve()`;
+- [x] P0 Prerequisite: plan Approved; ADR-0255..0257 answered
+- [x] P1 `libs/device`: registry-free `updateProbeFirmware` / `inspectProbe` overloads, `SessionRegistry::reserve()`;
   firmware status in the `probe.firmware_outdated` warning event; GTest on the fake J-Link (success, failure, unplug
   simulated, reserved serial refused by `checkAvailable` / connect)
-- [ ] P2 `ProbeScanner::suspend()` + GTest (no scan while suspended; resumes)
-- [ ] P3 `ProbeFirmwareWorker`, `ProbeFirmwareViewModel`, `ConnectionViewModel` additions + GTest (state machine,
+- [x] P2 `ProbeScanner::suspend()` + GTest (no scan while suspended; resumes)
+- [x] P3 `ProbeFirmwareWorker`, `ProbeFirmwareViewModel`, `ConnectionViewModel` additions + GTest (state machine,
   blocking reasons, Not now bound, reconnect after success, no reconnect after failure / cancel)
-- [ ] P4 QML: banner in `PageHost.qml`, `ProbeFirmwareDialog.qml`; Qt Quick tests (light/dark, keyboard, Esc, 960 × 600
+- [x] P4 QML: banner in `PageHost.qml`, `ProbeFirmwareDialog.qml`; Qt Quick tests (light/dark, keyboard, Esc, 960 × 600
   in DE and CS)
 - [ ] P5 Hooks: setup wizard row and troubleshooting step (only when 0008 / 0009 are registered; otherwise done when
-  they land, tracked in their checklists)
-- [ ] P6 Docs: `troubleshooting.md` § `probe.firmware_outdated` / `probe.firmware_update_failed` mention the app action
+  they land, tracked in their checklists) — after 0035/0008/0009: the reusable action is
+  `ProbeFirmwareViewModel::requestForSerial()` / `blockedReasonFor()` (`AppViewModel.probeFirmware`); the MCP
+  "AI assistant" check plugs in through `ProbeFirmwareViewModel::setAiHoldsProbe()` (plan 0014). When the
+  troubleshooting wizard is registered, the failure panel's [Close] in `ProbeFirmwareDialog.qml` (the ErrorPanel's
+  `customActionText`, ~line 166) must give way to "Help me fix this" (and the dialog close before the wizard opens)
+- [x] P6 Docs: `troubleshooting.md` § `probe.firmware_outdated` / `probe.firmware_update_failed` mention the app action
   in en, cs, de, sk, pl; `update_translations`, cs + de + sk + pl 0 unfinished
 - [ ] P7 Verification below; 0017 parity row "J-Link firmware outdated → offer update" ticked with evidence
 
@@ -219,5 +225,12 @@ only in the message text (`session_worker.cpp`, connect path ~line 354); the ses
 - **Test probe:** an outdated probe is hard to keep (no downgrade); fake-only coverage for some branches.
 - **Quit during an update** must wait; a forced kill can brick the probe (J-Link Commander repairs it) — documented in
   the error's "What to do".
+- **CLI JSON change (2026-11-04):** a probe that does not come back after the vendor update call is now
+  `probe.firmware_update_failed` instead of `probe.not_found` / `probe.open_failed` (ADR-0132); `hwio jlink
+  update-firmware --json` reports that `code` (the exit code stays 5). An `Unknown` probe is judged by the vendor
+  call's return value (ADR-0261).
+- **HIL: slow USB re-enumeration.** The verify step reopens the probe right after the update; a probe that takes
+  longer to re-enumerate (hubs, Windows driver load) would be reported as a failed update although it was updated.
+  Check on all three OSes; if seen, the reopen needs a bounded retry.
 - **MCP blocking** is effective only once the GUI MCP server (plan 0014) exists; until then an MCP stdio process is
   caught by the `ProbeLock` (`probe.in_use_by_other_process`).

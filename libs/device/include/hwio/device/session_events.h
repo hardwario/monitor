@@ -5,11 +5,13 @@
 
 #include "hwio/core/error.h"
 #include "hwio/device/console_line.h"
+#include "hwio/hw/jlink/types.h"
 
 #include <QMetaType>
 
 #include <cstdint>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <variant>
 
@@ -51,8 +53,17 @@ struct LinesDropped {
     std::uint64_t count = 0;
 };
 
+// Plan 0036: what the J-Link session found about the probe firmware after the first open; carried
+// by the probe.firmware_outdated warning (Outdated or Newer), so the GUI never parses its text.
+struct ProbeFirmwareNotice {
+    jlink::FirmwareStatus status = jlink::FirmwareStatus::Current;
+    std::string probeFirmware;   // the probe's firmware string
+    std::string libraryFirmware; // the firmware bundled in the library ("" when unknown)
+};
+
 struct Warning {
     Error error;
+    std::optional<ProbeFirmwareNotice> probeFirmware = std::nullopt; // plan 0036
 };
 
 // The shell prompt of the profile was seen after output (ADR-0082 for BLE; M6, ADR-0104: also

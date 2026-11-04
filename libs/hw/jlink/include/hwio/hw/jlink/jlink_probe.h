@@ -89,8 +89,10 @@ public:
     // R24). When that is not Current, the probe is reopened in OpenMode::FirmwareUpdate, updated
     // (Outdated, Unknown) or synchronized (Newer) with the library's firmware, closed, opened
     // again normally and the status re-read (review R11). Returns the status before the update
-    // (Current: nothing was done). Errors: probe.firmware_update_failed (still not Current),
-    // those of open().
+    // (Current: nothing was done). Errors: probe.firmware_update_failed (still not Current, or the
+    // probe did not come back after the update), those of open(). ADR-0261: with Unknown before,
+    // the status after is not compared; the vendor call's return value decides (0: nothing was
+    // done, returned as Current).
     [[nodiscard]] Result<FirmwareStatus> updateFirmware();
 
     // Resets the target; `halt` = false lets the CPU run again. Errors: target.connect_failed.

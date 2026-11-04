@@ -13,6 +13,7 @@
 #include "hwio/device/device_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
+#include "hwio/device/session_registry.h"
 #include "hwio/device/shell_query.h"
 #include "hwio/hw/ble/types.h"
 #include "hwio/hw/jlink/library_locator.h"
@@ -49,6 +50,11 @@ namespace hwio::gui {
 
 namespace {
 
+// Plan 0036: the probe is reserved for a J-Link firmware update.
+bool probeReserved(const device::SessionRegistry* registry, std::uint32_t serial) {
+    return registry != nullptr && registry->reserved(serial);
+}
+
 const QString lastTransportKey = QStringLiteral("ui/lastTransport");
 
 } // namespace
@@ -75,6 +81,9 @@ DeviceTabViewModel::DeviceTabViewModel(TabContext context, QObject* parent)
             return m_context.tabUsingProbe ? m_context.tabUsingProbe(serial, this) : -1;
         },
         this);
+    // Plan 0036 (ADR-0257): a probe reserved for a firmware update shows "Updating firmware…".
+    m_picker->setReservedCheck(
+        [this](std::uint32_t serial) { return probeReserved(m_context.registry, serial); });
     connect(m_picker, &ProbePickerViewModel::tabActivationRequested, this,
             &DeviceTabViewModel::tabActivationRequested);
     connect(m_picker, &ProbePickerViewModel::connectRequested, this,

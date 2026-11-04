@@ -28,6 +28,7 @@
 #include "viewmodels/history_store.h"
 #include "viewmodels/page_list_model.h"
 #include "viewmodels/page_registry.h"
+#include "viewmodels/probe_firmware_view_model.h"
 #include "viewmodels/shortcut_registry.h"
 #include "viewmodels/update_view_model.h"
 #include "wizard_launcher.h"
@@ -47,6 +48,7 @@
 #include <QJsonParseError>
 #include <QJsonValue>
 #include <QKeySequence>
+#include <QList>
 #include <QLoggingCategory>
 #include <QMetaObject>
 #include <QMetaType>
@@ -188,6 +190,33 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
         *m_updateService, *m_settings, {}, this);
     m_updateService->start();
 
+    // Plan 0036 (ADR-0257): the J-Link firmware update. Qt parent ownership: a child, deleted by
+    // the destructor after the tabs.
+    m_probeFirmware = new ProbeFirmwareViewModel( // NOLINT(cppcoreguidelines-owning-memory)
+        ProbeFirmwareContext{.registry = m_registry.get(),
+                             .scanner = m_scanner.get(),
+                             .locatorOptions = [this] { return locatorOptions(); },
+                             .tabs =
+                                 [this] {
+                                     QList<DeviceTabViewModel*> tabs;
+                                     for (int i = 0; i < m_tabs->count(); ++i) {
+                                         tabs.append(m_tabs->at(i));
+                                     }
+                                     return tabs;
+                                 },
+                             .showToast = [this](const QString& text) { showToast(text); }},
+        this);
+    connect(m_probeFirmware, &ProbeFirmwareViewModel::changed, this, [this] {
+        // The pickers show "Updating firmware…" for the reserved probe.
+        for (int i = 0; i < m_tabs->count(); ++i) {
+            m_tabs->at(i)->picker()->updateFromScanner();
+        }
+        checkQuit();
+    });
+    // ADR-0261: a failed update cancels a pending quit (the error stays on screen).
+    connect(m_probeFirmware, &ProbeFirmwareViewModel::quitCancelled, this,
+            [this] { m_quitPending = false; });
+
     connect(m_scanner.get(), &ProbeScanner::scanned, this, &AppViewModel::onScan);
     connect(m_wizard, &WizardViewModel::handOff, this, &AppViewModel::onHandOff);
     connect(m_settings, &SettingsStore::valueChanged, this, [this](const QString& key) {
@@ -242,6 +271,13 @@ AppViewModel::~AppViewModel() {
             const std::unique_ptr<QObject> owned(viewModel);
         }
         viewModel = nullptr;
+    }
+    // Plan 0036: after the tabs (they use it), before the members it reserves and suspends; waits
+    // for a running update (it must not be interrupted).
+    if (m_probeFirmware != nullptr) {
+        m_probeFirmware->setParent(nullptr);
+        const std::unique_ptr<ProbeFirmwareViewModel> owned(m_probeFirmware);
+        m_probeFirmware = nullptr;
     }
     // The members follow: the scanner's worker is joined, then the registry is destroyed.
 }
@@ -586,6 +622,7 @@ std::unique_ptr<DeviceTabViewModel> AppViewModel::makeTab() {
     context.openWizard = [this](const QString& wizardId, DeviceTabViewModel* tab) {
         (void)m_launcher->openForTab(wizardId, tab);
     };
+    context.probeFirmware = m_probeFirmware;
     return std::make_unique<DeviceTabViewModel>(std::move(context), nullptr);
 }
 
@@ -1035,6 +1072,13 @@ void AppViewModel::activateWindow() {
 // ---- quit -------------------------------------------------------------------------------------
 
 bool AppViewModel::canQuit() {
+    // Plan 0036: an update in progress must not be interrupted; quit when it has finished (the
+    // dialog says so).
+    if (m_probeFirmware != nullptr && m_probeFirmware->updating()) {
+        m_quitPending = true;
+        m_probeFirmware->setQuitPending(true);
+        return false;
+    }
     for (int i = 0; i < m_tabs->count(); ++i) {
         const DeviceTabViewModel* tab = m_tabs->at(i);
         if (tab->isBusy()) {
@@ -1057,6 +1101,9 @@ void AppViewModel::cancelOperationsAndQuit() {
 void AppViewModel::checkQuit() {
     if (!m_quitPending) {
         return;
+    }
+    if (m_probeFirmware != nullptr && m_probeFirmware->updating()) {
+        return; // plan 0036: quit when the J-Link firmware update has finished
     }
     for (int i = 0; i < m_tabs->count(); ++i) {
         if (m_tabs->at(i)->isBusy()) {

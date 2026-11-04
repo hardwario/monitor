@@ -56,6 +56,36 @@ struct BleUse {
     std::optional<ProbeLockOwner> otherProcess; // another process's BleLock owner
 };
 
+class SessionRegistry;
+
+// Plan 0036 (ADR-0257): a probe reserved by this process for a short-lived probe operation run
+// off the owner thread (the GUI's J-Link firmware update). While it lives, checkAvailable() of
+// that serial number fails (probe.open_failed "is being updated"), so no session of this process
+// can open the probe. Move-only RAII; owner thread only; must be released before the registry
+// is destroyed. A default-constructed (or moved-from) reservation holds nothing.
+class ProbeReservation {
+public:
+    ProbeReservation() = default;
+    ~ProbeReservation() { release(); }
+    ProbeReservation(const ProbeReservation&) = delete;
+    ProbeReservation& operator=(const ProbeReservation&) = delete;
+    ProbeReservation(ProbeReservation&& other) noexcept;
+    ProbeReservation& operator=(ProbeReservation&& other) noexcept;
+
+    [[nodiscard]] bool valid() const noexcept { return m_registry != nullptr; }
+    [[nodiscard]] std::uint32_t serialNumber() const noexcept { return m_serialNumber; }
+    // Idempotent.
+    void release() noexcept;
+
+private:
+    friend class SessionRegistry;
+    ProbeReservation(SessionRegistry& registry, std::uint32_t serialNumber) noexcept
+        : m_registry(&registry), m_serialNumber(serialNumber) {}
+
+    SessionRegistry* m_registry = nullptr; // non-owning; outlives the reservation
+    std::uint32_t m_serialNumber = 0;
+};
+
 struct ProbeStatusList {
     std::uint32_t libraryVersion = 0; // read from the loaded library
     std::vector<ProbeStatus> probes;
@@ -99,8 +129,16 @@ public:
     // ble.in_use_by_other_process "already used by this application" (BLE key, Q3).
     [[nodiscard]] Status checkAvailable(const std::optional<SessionKey>& key) const;
 
+    // Plan 0036 (ADR-0257): reserves the probe (see ProbeReservation). Call after a successful
+    // checkAvailable(serialNumber). An empty reservation (valid() false) when the serial number
+    // is already reserved or maxReservations are held.
+    static constexpr std::size_t maxReservations = maxSessions;
+    [[nodiscard]] ProbeReservation reserve(std::uint32_t serialNumber);
+    [[nodiscard]] bool reserved(std::uint32_t serialNumber) const;
+
 private:
     friend class BleSession;
+    friend class ProbeReservation;
     friend class DeviceSession;
     friend struct detail::BleSessionInternals;
     friend struct detail::SessionInternals;
@@ -110,6 +148,7 @@ private:
 
     RegistryOptions m_options;
     std::vector<ConsoleSession*> m_sessions; // non-owning; each removes itself in close()
+    std::vector<std::uint32_t> m_reserved;   // ≤ maxReservations serial numbers (plan 0036)
 };
 
 } // namespace hwio::device

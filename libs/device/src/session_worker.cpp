@@ -161,10 +161,10 @@ private:
         }
     }
 
-    void warn(Error error) {
+    void warn(Error error, std::optional<ProbeFirmwareNotice> probeFirmware = std::nullopt) {
         qCWarning(log::lcDevice).noquote()
             << "Warning:" << toQString(error.message) << toQString(error.detail);
-        emitEvent(Warning{.error = std::move(error)});
+        emitEvent(Warning{.error = std::move(error), .probeFirmware = std::move(probeFirmware)});
     }
 
     // Reports a connection state, but only when the state or its error code changed (ADR-0034;
@@ -364,7 +364,12 @@ private:
                             "hwio::device", "The J-Link firmware is newer than the J-Link library.")
                             .toStdString();
                 }
-                warn(std::move(error));
+                // Plan 0036: the status and both firmware strings for the GUI's banner.
+                auto embedded = m_api->embeddedFirmwareString(jlink::firmwareId(info->firmware));
+                ProbeFirmwareNotice notice{.status = status,
+                                           .probeFirmware = info->firmware,
+                                           .libraryFirmware = embedded ? *embedded : std::string()};
+                warn(std::move(error), std::move(notice));
             }
         }
         if (!m_probeOnly) {

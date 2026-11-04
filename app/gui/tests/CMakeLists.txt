@@ -82,6 +82,7 @@ add_executable(hwio_gui_tests
     viewmodels/install_paths_test.cpp
     viewmodels/main.cpp
     viewmodels/page_registry_test.cpp
+    viewmodels/probe_firmware_view_model_test.cpp
     viewmodels/probe_picker_test.cpp
     viewmodels/settings_store_test.cpp
     viewmodels/settings_view_model_test.cpp

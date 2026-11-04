@@ -130,6 +130,17 @@ Status SessionRegistry::checkAvailable(const std::optional<SessionKey>& key) con
         key && std::holds_alternative<ProbeKey>(*key)
             ? std::optional<std::uint32_t>(std::get<ProbeKey>(*key).sn)
             : std::nullopt;
+    if (serialNumber && reserved(*serialNumber)) {
+        Error error =
+            makeError(ErrorCode::ProbeOpenFailed,
+                      std::format("J-Link {} is reserved for a firmware update by this process",
+                                  *serialNumber));
+        error.message = QCoreApplication::translate(
+                            "hwio::device", "The firmware of the J-Link %1 is being updated.")
+                            .arg(*serialNumber)
+                            .toStdString();
+        return std::unexpected(std::move(error));
+    }
     if (serialNumber && sessionForProbe(*serialNumber) != nullptr) {
         Error error = makeError(
             ErrorCode::ProbeOpenFailed,
@@ -141,6 +152,39 @@ Status SessionRegistry::checkAvailable(const std::optional<SessionKey>& key) con
         return std::unexpected(std::move(error));
     }
     return {};
+}
+
+ProbeReservation SessionRegistry::reserve(std::uint32_t serialNumber) {
+    if (reserved(serialNumber) || m_reserved.size() >= maxReservations) {
+        return {};
+    }
+    m_reserved.push_back(serialNumber);
+    return {*this, serialNumber};
+}
+
+bool SessionRegistry::reserved(std::uint32_t serialNumber) const {
+    return std::ranges::find(m_reserved, serialNumber) != m_reserved.end();
+}
+
+ProbeReservation::ProbeReservation(ProbeReservation&& other) noexcept
+    : m_registry(std::exchange(other.m_registry, nullptr)),
+      m_serialNumber(std::exchange(other.m_serialNumber, 0)) {}
+
+ProbeReservation& ProbeReservation::operator=(ProbeReservation&& other) noexcept {
+    if (this != &other) {
+        release();
+        m_registry = std::exchange(other.m_registry, nullptr);
+        m_serialNumber = std::exchange(other.m_serialNumber, 0);
+    }
+    return *this;
+}
+
+void ProbeReservation::release() noexcept {
+    if (m_registry != nullptr) {
+        std::erase(m_registry->m_reserved, m_serialNumber);
+        m_registry = nullptr;
+        m_serialNumber = 0;
+    }
 }
 
 void SessionRegistry::add(ConsoleSession* session) { m_sessions.push_back(session); }

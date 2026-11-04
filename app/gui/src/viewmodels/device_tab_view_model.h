@@ -71,6 +71,7 @@ namespace hwio::gui {
 
 class BleService;
 class PageRegistry;
+class ProbeFirmwareViewModel;
 class ProbeScanner;
 class SettingsStore;
 
@@ -98,6 +99,8 @@ struct TabContext {
     std::function<void(const QString& wizardId, DeviceTabViewModel* tab)> openWizard;
     // Plan 0012: opens a system URL (Bluetooth / privacy settings); empty: QDesktopServices.
     std::function<void(const QUrl& url)> openUrl;
+    // Plan 0036: the J-Link firmware update (AppViewModel's); may be null (no banner action).
+    ProbeFirmwareViewModel* probeFirmware = nullptr; // outlives the tabs
 };
 
 class DeviceTabViewModel : public QObject {
@@ -221,6 +224,8 @@ public:
     [[nodiscard]] QString profileId() const;
     [[nodiscard]] std::optional<std::uint32_t> probeSerial() const noexcept { return m_serial; }
     [[nodiscard]] QString product() const { return m_product; }
+    // Plan 0036: TabContext::probeFirmware (may be null).
+    [[nodiscard]] ProbeFirmwareViewModel* probeFirmware() const { return m_context.probeFirmware; }
     // Device bar actions.
     void connectDevice();
     void disconnectDevice();

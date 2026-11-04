@@ -71,6 +71,76 @@ Item {
             }
         }
 
+        // Plan 0036 (ADR-0132, ADR-0246): outdated J-Link firmware - the tab disconnects and the
+        // update dialog opens; [Not now] hides it for this probe until the app ends. Disabled
+        // with the reason while an operation, an AI assistant or another update holds the probe.
+        Rectangle {
+            objectName: "probeFirmwareBanner"
+            Layout.fillWidth: true
+            visible: !host.choosing && host.tab.connection.firmwareOutdated
+            implicitHeight: probeFirmwareRow.implicitHeight + 2 * Theme.spacingS
+            color: Theme.warningPanelBg
+            Accessible.role: Accessible.AlertMessage
+            Accessible.name: host.tab.connection.firmwareOutdatedText
+
+            RowLayout {
+                id: probeFirmwareRow
+
+                anchors.fill: parent
+                anchors.topMargin: Theme.spacingS
+                anchors.bottomMargin: Theme.spacingS
+                anchors.leftMargin: Theme.spacingM
+                anchors.rightMargin: Theme.spacingS
+                spacing: Theme.spacingS
+
+                Icon {
+                    symbol: "warning"
+                    color: Theme.warning
+                }
+
+                Label {
+                    textFormat: Text.PlainText
+                    objectName: "probeFirmwareText"
+                    Layout.fillWidth: true
+                    text: host.tab.connection.firmwareOutdatedText
+                    color: Theme.text
+                    wrapMode: Text.Wrap
+                }
+
+                Item {
+                    implicitWidth: probeFirmwareUpdate.implicitWidth
+                    implicitHeight: probeFirmwareUpdate.implicitHeight
+
+                    HButton {
+                        id: probeFirmwareUpdate
+
+                        objectName: "probeFirmwareUpdate"
+                        anchors.fill: parent
+                        enabled: host.tab.connection.firmwareBlockedReason === ""
+                        text: qsTr("Disconnect and update…")
+                        Accessible.description: host.tab.connection.firmwareBlockedReason
+                        onClicked: host.tab.connection.updateProbeFirmware()
+                    }
+
+                    HoverHandler {
+                        id: probeFirmwareHover
+                    }
+
+                    HToolTip {
+                        visible: probeFirmwareHover.hovered && host.tab.connection.firmwareBlockedReason !== ""
+                        text: host.tab.connection.firmwareBlockedReason
+                    }
+                }
+
+                HButton {
+                    objectName: "probeFirmwareNotNow"
+                    kind: "ghost"
+                    text: qsTr("Not now")
+                    onClicked: host.tab.connection.notNowProbeFirmware()
+                }
+            }
+        }
+
         ErrorPanel {
             objectName: "connectionError"
             Layout.fillWidth: true

@@ -288,7 +288,7 @@ V Linuxu jsou častou příčinou chybějící oprávnění k USB; viz [Přístu
 - **Pravděpodobně:** Firmware J-Linku se liší od firmwaru dodávaného s J-Link Software.
 - **Co dělat:** Spusťte `hwio jlink update-firmware`.
 
-Jde o varování; J-Link dál funguje. Hlásí to také `hwio doctor`. Když je firmware sondy novější než knihovna, zpráva zní „Firmware J-Linku je novější než knihovna J-Link.“ V takovém případě místo toho aktualizujte J-Link Software.
+Jde o varování; J-Link dál funguje. Hlásí to také `hwio doctor`. V HARDWARIO Monitoru nabízí pruh nad konzolí **Odpojit a aktualizovat…**: karta se odpojí, dialog ukáže současný a nový firmware a po **Aktualizovat** se J-Link aktualizuje (asi 10–30 s; neodpojujte ho) a karta se znovu připojí. **Teď ne** skryje pruh pro tento J-Link do zavření aplikace. Když je firmware sondy novější než knihovna, zpráva zní „Firmware J-Linku je novější než knihovna J-Link.“ V takovém případě místo toho aktualizujte J-Link Software.
 
 <a id="probe.firmware_update_failed"></a>
 #### `probe.firmware_update_failed`
@@ -298,7 +298,7 @@ Jde o varování; J-Link dál funguje. Hlásí to také `hwio doctor`. Když je 
 - **Pravděpodobně:** Aktualizace selhala, nebo sonda stále hlásí jiný firmware, než obsahuje knihovna.
 - **Co dělat:** Odpojte a znovu připojte J-Link a pak znovu spusťte `hwio jlink update-firmware`.
 
-Pochází z `hwio jlink update-firmware`.
+Pochází z `hwio jlink update-firmware` a z **Odpojit a aktualizovat…** v HARDWARIO Monitoru; karta pak zůstane odpojená. Pokud se J-Link po přerušené aktualizaci už neobjeví, spusťte J-Link Commander, který umí firmware opravit.
 
 <a id="probe.io_failed"></a>
 #### `probe.io_failed`

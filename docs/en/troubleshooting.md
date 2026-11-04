@@ -291,7 +291,7 @@ On Linux, missing USB permissions are a common cause; see [USB access to the J-L
 - **Probably:** The J-Link firmware differs from the firmware bundled with the J-Link Software.
 - **What to do:** Run `hwio jlink update-firmware`.
 
-This is a warning; the J-Link keeps working. `hwio doctor` reports it too. When the probe firmware is newer than the library, the message is "The J-Link firmware is newer than the J-Link library." In that case, update the J-Link Software instead.
+This is a warning; the J-Link keeps working. `hwio doctor` reports it too. In HARDWARIO Monitor the banner above the console offers **Disconnect and update…**: the tab disconnects, a dialog shows the current and the new firmware and, after **Update**, the J-Link is updated (about 10–30 s; do not unplug it) and the tab connects again. **Not now** hides the banner for this J-Link until the app is closed. When the probe firmware is newer than the library, the message is "The J-Link firmware is newer than the J-Link library." In that case, update the J-Link Software instead.
 
 <a id="probe.firmware_update_failed"></a>
 #### `probe.firmware_update_failed`
@@ -301,7 +301,7 @@ This is a warning; the J-Link keeps working. `hwio doctor` reports it too. When 
 - **Probably:** The update failed or the probe still reports a firmware different from the library's.
 - **What to do:** Disconnect and reconnect the J-Link, then run `hwio jlink update-firmware` again.
 
-Comes from `hwio jlink update-firmware`.
+Comes from `hwio jlink update-firmware` and from **Disconnect and update…** in HARDWARIO Monitor; the tab then stays disconnected. If the J-Link no longer appears after an interrupted update, run J-Link Commander, which can repair the firmware.
 
 <a id="probe.io_failed"></a>
 #### `probe.io_failed`

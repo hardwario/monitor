@@ -75,16 +75,22 @@ QVariant ProbePickerViewModel::data(const QModelIndex& index, int role) const {
     case InUseOtherRole:
         return row.inUseOther;
     case SelectableRole:
-        return row.inUseOther.isEmpty();
+        return row.inUseOther.isEmpty() && !row.updating;
+    case UpdatingFirmwareRole:
+        return row.updating;
     default:
         return {};
     }
 }
 
 QHash<int, QByteArray> ProbePickerViewModel::roleNames() const {
-    return {{SerialRole, "serial"},         {ProductRole, "product"},
-            {FirmwareRole, "firmware"},     {InUseTabRole, "inUseTab"},
-            {InUseOtherRole, "inUseOther"}, {SelectableRole, "selectable"}};
+    return {{SerialRole, "serial"},
+            {ProductRole, "product"},
+            {FirmwareRole, "firmware"},
+            {InUseTabRole, "inUseTab"},
+            {InUseOtherRole, "inUseOther"},
+            {SelectableRole, "selectable"},
+            {UpdatingFirmwareRole, "updatingFirmware"}};
 }
 
 void ProbePickerViewModel::setActive(bool active) {
@@ -159,8 +165,9 @@ void ProbePickerViewModel::setSelectedRow(int row) {
     if (row < -1 || row >= count()) {
         return;
     }
-    if (row >= 0 && !m_rows.at(static_cast<std::size_t>(row)).inUseOther.isEmpty()) {
-        return; // used by another program: disabled
+    if (row >= 0 && (!m_rows.at(static_cast<std::size_t>(row)).inUseOther.isEmpty() ||
+                     m_rows.at(static_cast<std::size_t>(row)).updating)) {
+        return; // used by another program or being updated: disabled
     }
     m_selectedSerial =
         row >= 0 ? std::optional(m_rows.at(static_cast<std::size_t>(row)).serial) : std::nullopt;
@@ -175,7 +182,7 @@ bool ProbePickerViewModel::canConnect() const {
         return false;
     }
     const Row& row = m_rows.at(static_cast<std::size_t>(m_selectedRow));
-    return row.inUseOther.isEmpty() && row.inUseTab < 0;
+    return row.inUseOther.isEmpty() && row.inUseTab < 0 && !row.updating;
 }
 
 void ProbePickerViewModel::choose(int row) {
@@ -204,6 +211,10 @@ void ProbePickerViewModel::connectSelected() {
     connectRequested(row.serial, row.product, m_profileId, targetId()); // signal
 }
 
+void ProbePickerViewModel::setReservedCheck(std::function<bool(std::uint32_t)> reserved) {
+    m_reserved = std::move(reserved);
+}
+
 void ProbePickerViewModel::updateFromScanner() {
     if (m_scanner != nullptr && m_scanner->last()) {
         apply(*m_scanner->last());
@@ -220,6 +231,7 @@ std::vector<ProbePickerViewModel::Row> ProbePickerViewModel::rowsOf(const ProbeS
                                                     : toQString(scanned.probe.product);
         row.firmware = firmwareDate(toQString(scanned.probe.firmware));
         row.inUseTab = m_tabUsingProbe ? m_tabUsingProbe(row.serial) : -1;
+        row.updating = m_reserved && m_reserved(row.serial);
         // Our own lock (a tab that just disconnected, before the next scan) is not "another
         // program" (review S8); the tabs of this process are covered by inUseTab.
         const bool ownLock =
@@ -266,7 +278,7 @@ void ProbePickerViewModel::restoreSelection() {
         const std::uint32_t serial = *m_selectedSerial;
         const auto it =
             std::ranges::find_if(m_rows, [serial](const Row& row) { return row.serial == serial; });
-        if (it != m_rows.end() && it->inUseOther.isEmpty()) {
+        if (it != m_rows.end() && it->inUseOther.isEmpty() && !it->updating) {
             selected = static_cast<int>(it - m_rows.begin());
         }
     }
@@ -302,7 +314,7 @@ void ProbePickerViewModel::preselect() {
     int freeRow = -1;
     int freeCount = 0;
     for (std::size_t i = 0; i < m_rows.size(); ++i) {
-        if (m_rows[i].inUseOther.isEmpty() && m_rows[i].inUseTab < 0) {
+        if (m_rows[i].inUseOther.isEmpty() && m_rows[i].inUseTab < 0 && !m_rows[i].updating) {
             freeRow = static_cast<int>(i);
             ++freeCount;
         }

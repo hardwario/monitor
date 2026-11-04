@@ -398,33 +398,38 @@
         <translation>Hledání programátorů J-Link…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="380"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="381"/>
         <source>FW %1</source>
         <translation>FW %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="395"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="397"/>
+        <source>Updating firmware…</source>
+        <translation>Aktualizuje se firmware…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="398"/>
         <source>In use by another program (%1)</source>
         <translation>Používá jiný program (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="396"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="399"/>
         <source>In use (tab %1)</source>
         <translation>Používá se (karta %1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="434"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="453"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="437"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="456"/>
         <source>Device</source>
         <translation>Zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="480"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="483"/>
         <source>Choose a free probe in the list above.</source>
         <translation>Vyberte v seznamu výše volný programátor.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="493"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="496"/>
         <source>Connect</source>
         <translation>Připojit</translation>
     </message>
@@ -1276,27 +1281,27 @@
 <context>
     <name>LteUpdateStep</name>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="78"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="68"/>
         <source>Set path in Settings</source>
         <translation>Nastavit cestu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="84"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="74"/>
         <source>How to install ↗</source>
         <translation>Jak nainstalovat ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="122"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="125"/>
         <source>The application that was in the device</source>
         <translation>Aplikace, která byla v zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="142"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="145"/>
         <source>Firmware from the catalog or a file</source>
         <translation>Firmware z katalogu nebo ze souboru</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="164"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="168"/>
         <source>Choose a firmware file</source>
         <translation>Vyberte soubor s firmwarem</translation>
     </message>
@@ -1309,28 +1314,28 @@
         <translation>HARDWARIO Monitor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="174"/>
+        <location filename="../app/gui/qml/Main.qml" line="177"/>
         <source>Close the tab?</source>
         <translation>Zavřít kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="175"/>
+        <location filename="../app/gui/qml/Main.qml" line="178"/>
         <source>Cancel and close</source>
         <translation>Zrušit a zavřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="176"/>
-        <location filename="../app/gui/qml/Main.qml" line="186"/>
+        <location filename="../app/gui/qml/Main.qml" line="179"/>
+        <location filename="../app/gui/qml/Main.qml" line="189"/>
         <source>Keep running</source>
         <translation>Pokračovat</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="184"/>
+        <location filename="../app/gui/qml/Main.qml" line="187"/>
         <source>Quit HARDWARIO Monitor?</source>
         <translation>Ukončit HARDWARIO Monitor?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="185"/>
+        <location filename="../app/gui/qml/Main.qml" line="188"/>
         <source>Cancel and quit</source>
         <translation>Zrušit a ukončit</translation>
     </message>
@@ -1490,6 +1495,16 @@
         <source>Retry</source>
         <translation>Zkusit znovu</translation>
     </message>
+    <message>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="120"/>
+        <source>Disconnect and update…</source>
+        <translation>Odpojit a aktualizovat…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="138"/>
+        <source>Not now</source>
+        <translation>Teď ne</translation>
+    </message>
 </context>
 <context>
     <name>Pages</name>
@@ -1607,6 +1622,80 @@
     </message>
 </context>
 <context>
+    <name>ProbeFirmwareDialog</name>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="33"/>
+        <source>Update J-Link firmware?</source>
+        <translation>Aktualizovat firmware J-Linku?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="33"/>
+        <source>J-Link firmware update</source>
+        <translation>Aktualizace firmwaru J-Linku</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="70"/>
+        <source>%1 · SN %2</source>
+        <translation>%1 · SN %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="71"/>
+        <source>SN %1</source>
+        <translation>SN %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="90"/>
+        <source>Updating J-Link firmware…</source>
+        <translation>Aktualizuje se firmware J-Linku…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="91"/>
+        <source>Reading the J-Link…</source>
+        <translation>Čte se J-Link…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="109"/>
+        <source>Current:</source>
+        <translation>Současný:</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="125"/>
+        <source>New:</source>
+        <translation>Nový:</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="146"/>
+        <source>The J-Link firmware status could not be determined. Update anyway?</source>
+        <translation>Stav firmwaru J-Linku se nepodařilo zjistit. Přesto aktualizovat?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="156"/>
+        <source>Do not unplug the J-Link during the update (about 10–30 s).</source>
+        <translation>Během aktualizace J-Link neodpojujte (asi 10–30 s).</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="167"/>
+        <source>HARDWARIO Monitor quits when the update has finished.</source>
+        <translation>HARDWARIO Monitor se ukončí po dokončení aktualizace.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="178"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="179"/>
+        <source>Close</source>
+        <translation>Zavřít</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="201"/>
+        <source>Cancel</source>
+        <translation>Zrušit</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="210"/>
+        <source>Update</source>
+        <translation>Aktualizovat</translation>
+    </message>
+</context>
+<context>
     <name>ProgressCard</name>
     <message>
         <location filename="../app/gui/qml/flash/ProgressCard.qml" line="38"/>
@@ -1708,12 +1797,12 @@
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="59"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="98"/>
         <source>Settings were created by a newer version and are read-only.</source>
         <translation>Nastavení vytvořila novější verze a jsou jen pro čtení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="79"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="118"/>
         <source>The setting was not saved: %1</source>
         <translation>Nastavení nebylo uloženo: %1</translation>
     </message>
@@ -1752,45 +1841,45 @@
 <context>
     <name>Shortcuts</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="370"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="406"/>
         <source>New device tab</source>
         <translation>Nová karta zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="373"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="409"/>
         <source>Close the device tab</source>
         <translation>Zavřít kartu zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="376"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="379"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="412"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="415"/>
         <source>Next tab</source>
         <translation>Další karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="382"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="385"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="418"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="421"/>
         <source>Previous tab</source>
         <translation>Předchozí karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="388"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="424"/>
         <source>Settings</source>
         <translation>Nastavení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="391"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="427"/>
         <source>Connect or disconnect</source>
         <translation>Připojit nebo odpojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="394"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="430"/>
         <source>Reconnect</source>
         <translation>Znovu připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="397"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="400"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="433"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="436"/>
         <source>Keyboard shortcuts</source>
         <translation>Klávesové zkratky</translation>
     </message>
@@ -3855,102 +3944,102 @@
     </message>
     <message>
         <location filename="../libs/device/src/probe_lock.cpp" line="104"/>
-        <location filename="../libs/device/src/session_registry.cpp" line="137"/>
+        <location filename="../libs/device/src/session_registry.cpp" line="148"/>
         <source>The J-Link %1 is already used by this application.</source>
         <translation>J-Link %1 už tato aplikace používá.</translation>
     </message>
     <message>
         <location filename="../libs/device/src/session_worker.cpp" line="363"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1418"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1423"/>
         <location filename="../libs/diag/src/environment.cpp" line="298"/>
         <source>The J-Link firmware is newer than the J-Link library.</source>
         <translation>Firmware J-Linku je novější než knihovna J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="408"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1702"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="413"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1707"/>
         <source>RTT buffer &quot;%1&quot; not found; the device log is not shown.</source>
         <translation>Vyrovnávací paměť RTT &quot;%1&quot; nebyla nalezena; log zařízení se nezobrazí.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="671"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1438"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="676"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1443"/>
         <source>The device has no power (%1 mV).</source>
         <translation>Zařízení nemá napájení (%1 mV).</translation>
     </message>
     <message>
         <location filename="../libs/device/src/ble_session.cpp" line="288"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="689"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="694"/>
         <source>Wait for the console to reconnect.</source>
         <translation>Počkejte, až se konzole znovu připojí.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1316"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1396"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1499"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1503"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1597"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1668"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1321"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1401"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1504"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1508"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1602"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1673"/>
         <source>Cancelled</source>
         <translation>Zrušeno</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1321"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1326"/>
         <source>Not checked</source>
         <translation>Nezkontrolováno</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1334"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1339"/>
         <source>Not checked: the time for the checks ran out</source>
         <translation>Nezkontrolováno: čas na kontroly vypršel</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1493"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1498"/>
         <source>Not measured by this J-Link</source>
         <translation>Tento J-Link napětí neměří</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1520"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1525"/>
         <source>Only the debug port answers</source>
         <translation>Odpovídá jen ladicí port</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1531"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1536"/>
         <source>Connected (SWD %1 kHz)</source>
         <translation>Připojeno (SWD %1 kHz)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1533"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1538"/>
         <source>Connected (SWD, automatic speed)</source>
         <translation>Připojeno (SWD, automatická rychlost)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1611"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1616"/>
         <source>%1, not protected</source>
         <translation>%1, nechráněno</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1633"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1638"/>
         <source>This MCU has no console</source>
         <translation>Tento MCU nemá konzoli</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1637"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1642"/>
         <source>Not checked: the MCU is protected</source>
         <translation>Nezkontrolováno: MCU je chráněn</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1684"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1689"/>
         <source>Found</source>
         <translation>Nalezeno</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1958"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1963"/>
         <source>Another program opened the J-Link after it was released.</source>
         <translation>Po uvolnění J-Linku jej otevřel jiný program.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1962"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1967"/>
         <source>Close the other program, then reacquire the J-Link.</source>
         <translation>Zavřete druhý program a pak J-Link znovu převezměte.</translation>
     </message>
@@ -4165,6 +4254,11 @@
         <source>Console channels</source>
         <translation>Kanály konzole</translation>
     </message>
+    <message>
+        <location filename="../libs/device/src/session_registry.cpp" line="138"/>
+        <source>The firmware of the J-Link %1 is being updated.</source>
+        <translation>Firmware J-Linku %1 se právě aktualizuje.</translation>
+    </message>
 </context>
 <context>
     <name>hwio::device::LteUpdateProcedure</name>
@@ -4232,7 +4326,7 @@
 <context>
     <name>hwio::diag</name>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1358"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1363"/>
         <location filename="../libs/diag/src/check.cpp" line="233"/>
         <location filename="../libs/diag/src/environment.cpp" line="203"/>
         <source>The check &quot;%1&quot; did not finish in time.</source>
@@ -4446,7 +4540,7 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1120"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1167"/>
         <source>Copied to clipboard.</source>
         <translation>Zkopírováno do schránky.</translation>
     </message>
@@ -4524,167 +4618,172 @@
 <context>
     <name>hwio::gui::ConnectionViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="274"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="290"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
         <source>Disconnected — %1</source>
         <translation>Odpojeno — %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="274"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="290"/>
         <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="310"/>
         <source>Disconnected</source>
         <translation>Odpojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="278"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="296"/>
         <source>Connecting…</source>
         <translation>Připojování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="280"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="298"/>
         <source>J-Link open, device not connected</source>
         <translation>J-Link otevřen, zařízení nepřipojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="271"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="283"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="301"/>
         <source>Connected</source>
         <translation>Připojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="102"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="120"/>
         <source>%1 · %2 dBm</source>
         <translation>%1 · %2 dBm</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="144"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="162"/>
         <source>Click Pair and enter the passkey in the system dialog.</source>
         <translation>Klikněte na Spárovat a zadejte přístupový klíč v dialogu systému.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="145"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="163"/>
         <source>Click Connect and enter the passkey when macOS asks for it.</source>
         <translation>Klikněte na Připojit a zadejte přístupový klíč, až si o něj macOS řekne.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="148"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="166"/>
         <source>Already paired but it does not work? Remove the device in the system Bluetooth settings and pair it again.</source>
         <translation>Zařízení je spárované, ale nefunguje? Odeberte ho v systémovém nastavení Bluetooth a spárujte ho znovu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="179"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="197"/>
         <source>Pair</source>
         <translation>Spárovat</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="184"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
         <source>Choose another device</source>
         <translation>Vybrat jiné zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="184"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
         <source>Choose another probe</source>
         <translation>Vybrat jiný programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="187"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="205"/>
         <source>Open Bluetooth settings</source>
         <translation>Otevřít nastavení Bluetooth</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="191"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="209"/>
         <source>Open Privacy settings</source>
         <translation>Otevřít nastavení soukromí</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="263"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="281"/>
         <source>Pairing — confirm the passkey in the system dialog…</source>
         <translation>Párování — potvrďte přístupový klíč v dialogu systému…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="267"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="285"/>
         <source>Waiting for pairing — enter the passkey in the system dialog</source>
         <translation>Čeká se na spárování — zadejte přístupový klíč v dialogu systému</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="271"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
         <source>Connected · MTU %1</source>
         <translation>Připojeno · MTU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="284"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="302"/>
         <source>Connected · %1 V</source>
         <translation>Připojeno · %1 V</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="287"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="305"/>
         <source>Reconnecting… (%1)</source>
         <translation>Opětovné připojování… (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="288"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="306"/>
         <source>Reconnecting…</source>
         <translation>Opětovné připojování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="673"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="507"/>
+        <source>The J-Link firmware is outdated (%1, available: %2).</source>
+        <translation>Firmware J-Linku je zastaralý (%1, k dispozici: %2).</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="755"/>
         <source>The console log file could not be written; logging to file is off for this session.</source>
         <translation>Soubor s výpisem konzole nelze zapsat; ukládání do souboru je pro tuto relaci vypnuté.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="691"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="773"/>
         <source>target not powered</source>
         <translation>zařízení není napájené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="693"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="775"/>
         <source>J-Link not found</source>
         <translation>J-Link nenalezen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="695"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="777"/>
         <source>J-Link used by another program</source>
         <translation>J-Link používá jiný program</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="697"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="779"/>
         <source>J-Link could not be opened</source>
         <translation>J-Link nelze otevřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="699"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="781"/>
         <source>target does not respond</source>
         <translation>zařízení neodpovídá</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="702"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="784"/>
         <source>no RTT console found</source>
         <translation>konzole RTT nenalezena</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="706"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="710"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="788"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="792"/>
         <source>connection lost</source>
         <translation>spojení ztraceno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="708"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="790"/>
         <source>out of range</source>
         <translation>mimo dosah</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="713"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="795"/>
         <source>not paired</source>
         <translation>nespárováno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="715"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="797"/>
         <source>Bluetooth is off</source>
         <translation>Bluetooth je vypnuté</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="719"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="801"/>
         <source>J-Link Software missing</source>
         <translation>chybí software J-Link</translation>
     </message>
@@ -4822,44 +4921,44 @@
 <context>
     <name>hwio::gui::DeviceTabViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="159"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="168"/>
         <source>New device</source>
         <translation>Nové zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="190"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="199"/>
         <source>Flashing needs a J-Link. Open a J-Link tab to flash this device.</source>
         <translation>Nahrávání firmwaru vyžaduje J-Link. Pro nahrání do tohoto zařízení otevřete kartu s J-Linkem.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="532"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="593"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="541"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="602"/>
         <source>— disconnected: %1 —</source>
         <translation>— odpojeno: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="546"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="594"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="555"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="603"/>
         <source>— disconnected —</source>
         <translation>— odpojeno —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="586"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="595"/>
         <source>— connected —</source>
         <translation>— připojeno —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="586"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="595"/>
         <source>— connected (Bluetooth) —</source>
         <translation>— připojeno (Bluetooth) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="714"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="723"/>
         <source>— paused: %1 —</source>
         <translation>— pozastaveno: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="727"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="736"/>
         <source>— resumed —</source>
         <translation>— obnoveno —</translation>
     </message>
@@ -5610,24 +5709,63 @@
     </message>
 </context>
 <context>
+    <name>hwio::gui::ProbeFirmwareViewModel</name>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="54"/>
+        <source>Another J-Link update is running.</source>
+        <translation>Probíhá jiná aktualizace J-Linku.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="57"/>
+        <source>Used by an AI assistant</source>
+        <translation>Používá ho AI asistent</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="67"/>
+        <source>Wait for the current operation to finish.</source>
+        <translation>Počkejte na dokončení probíhající operace.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="70"/>
+        <source>Disconnect tab %1 first.</source>
+        <translation>Nejprve odpojte kartu %1.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="223"/>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="249"/>
+        <source>The J-Link firmware is already up to date.</source>
+        <translation>Firmware J-Linku je již aktuální.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="227"/>
+        <source>The J-Link firmware is newer than the J-Link library.</source>
+        <translation>Firmware J-Linku je novější než knihovna J-Link.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/probe_firmware_view_model.cpp" line="253"/>
+        <source>J-Link firmware updated.</source>
+        <translation>Firmware J-Linku byl aktualizován.</translation>
+    </message>
+</context>
+<context>
     <name>hwio::gui::ProbePickerViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="149"/>
+        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="155"/>
         <source>Application MCU</source>
         <translation>Aplikační MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="150"/>
+        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="156"/>
         <source>Application MCU (%1)</source>
         <translation>Aplikační MCU (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="153"/>
+        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="159"/>
         <source>LTE MCU</source>
         <translation>LTE MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="153"/>
+        <location filename="../app/gui/src/viewmodels/probe_picker_view_model.cpp" line="159"/>
         <source>LTE MCU (%1)</source>
         <translation>LTE MCU (%1)</translation>
     </message>
