@@ -76,10 +76,11 @@ Folder danych aplikacji zawiera:
 | `logs` | logi aplikacji, jeden plik na uruchomienie | 10 plików aplikacji desktopowej, 20 dla `hwio`, 50 MiB każdego rodzaju |
 | `firmware-cache` | pobrane firmware z katalogu i firmware LTE | 100 plików, 500 MiB |
 | `crashes` | raporty o awariach | 5 plików |
+| `backups` | kopie firmware aplikacji wykonane przez [aktualizację firmware LTE](flashing.md#aktualizacja-firmware-lte) (`<serial>-<UTC time>.hex`) | 10 plików |
 
-Plik ustawień, logi i pliki konsoli są wspólne dla aplikacji desktopowej i `hwio`. Pliki konsoli i historię może
-odczytać tylko Twój użytkownik (Linux, macOS). Polecenia zawierające sekrety nie są zapisywane w historii, a w
-plikach konsoli są zapisywane jako `<redacted>` ([Konsola](console.md#historia-poleceń)).
+Plik ustawień, logi i pliki konsoli są wspólne dla aplikacji desktopowej i `hwio`. Pliki konsoli, historię i kopie
+zapasowe może odczytać tylko Twój użytkownik (Linux, macOS). Polecenia zawierające sekrety nie są zapisywane w
+historii, a w plikach konsoli są zapisywane jako `<redacted>` ([Konsola](console.md#historia-poleceń)).
 
 Odinstalowanie HARDWARIO Monitor nie usuwa tych folderów; jeśli chcesz, usuń je samodzielnie. Aby usunąć tylko
 historię poleceń: **Settings → Console → Clear history** lub `hwio console history clear`.

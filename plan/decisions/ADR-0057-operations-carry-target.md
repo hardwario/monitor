@@ -1,6 +1,6 @@
 # ADR-0057 — Session operations carry their target MCU
 
-- **Status:** Accepted (amends feature 0003 and ADR-0031)
+- **Status:** Accepted (amends feature 0003 and ADR-0031; amended by ADR-0233: GUI tabs always use the console target; the connector is recognised by the chip family)
 - **Date:** 2026-10-09
 - **Decided by:** Matej Strnad (M3 GUI review of mockups)
 

@@ -24,6 +24,7 @@
 #include "update_service.h"
 #include "viewmodels/device_tab_list_model.h"
 #include "viewmodels/device_tab_view_model.h"
+#include "viewmodels/flash_view_model.h"
 #include "viewmodels/history_store.h"
 #include "viewmodels/page_list_model.h"
 #include "viewmodels/page_registry.h"
@@ -1186,8 +1187,17 @@ void AppViewModel::onHandOff(const QString& action, DeviceTabViewModel* tab) {
             tab->connectDevice(); // also promotes a wizard's probe-only session
         }
         showPage(QStringLiteral("console"));
-    } else if (action == QStringLiteral("open-flash-page")) {
+    } else if (action.startsWith(QStringLiteral("open-flash-page"))) {
         showPage(QStringLiteral("flash"));
+        // Plan 0033 (ADR-0236): "open-flash-page:recover:<target>" (target.protected) shows
+        // [Recover…] for that MCU once, Maintenance unfolded.
+        const QStringList parts = action.split(QLatin1Char(':'));
+        if (parts.size() == 3 && parts.at(1) == QStringLiteral("recover")) {
+            if (auto* flash =
+                    qobject_cast<FlashViewModel*>(tab->pageViewModel(FlashViewModel::pageId))) {
+                flash->revealRecover(parts.at(2));
+            }
+        }
     }
 }
 

@@ -23,8 +23,11 @@
 #include <QtCore/qnamespace.h>
 #include <QtCore/qsystemdetection.h>
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
+#include <map>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -313,11 +316,13 @@ std::chrono::steady_clock::time_point BlePickerViewModel::now() const {
 
 std::vector<BlePickerViewModel::Row> BlePickerViewModel::buildRows() {
     std::vector<Row> rows;
-    if (m_service == nullptr) {
+    if (m_service == nullptr && !m_hooks.devices) {
         return rows;
     }
     const auto current = now();
-    for (const ble::BleDeviceInfo& device : m_service->devices()) {
+    const std::vector<ble::BleDeviceInfo> devices =
+        m_hooks.devices ? m_hooks.devices() : m_service->devices();
+    for (const ble::BleDeviceInfo& device : devices) {
         const auto age = current - device.lastSeen;
         if (age > removeAfter) {
             continue;
@@ -328,7 +333,8 @@ std::vector<BlePickerViewModel::Row> BlePickerViewModel::buildRows() {
         }
         Row row{.id = toQString(device.id),
                 .name = toQString(device.name),
-                .rssi = device.rssi,
+                .rssi = static_cast<int>(std::lround(device.rssiSmoothed)),
+                .rssiSmoothed = device.rssiSmoothed,
                 .profileId = profileId,
                 .inUseTab = -1,
                 .inUseOther = {},
@@ -345,7 +351,56 @@ std::vector<BlePickerViewModel::Row> BlePickerViewModel::buildRows() {
         }
         rows.push_back(std::move(row));
     }
-    return rows; // the scanner's order: RSSI, strongest first
+    return rows; // the scanner's order: smoothed RSSI, strongest first
+}
+
+std::vector<BlePickerViewModel::Row> BlePickerViewModel::ordered(std::vector<Row> rows) const {
+    // Start from the order shown now; rows that are new come after it in the scanner's order.
+    std::map<QString, std::size_t> position;
+    for (std::size_t i = 0; i < m_rows.size(); ++i) {
+        position.emplace(m_rows[i].id, i);
+    }
+    const auto previous = [&position](const Row& row) {
+        const auto found = position.find(row.id);
+        return found != position.end() ? found->second : position.size();
+    };
+    std::ranges::stable_sort(rows, {}, previous);
+    if (m_freezeOrder) {
+        return rows; // ADR-0235: frozen while pointed at; new devices at the end
+    }
+    // ADR-0235: a profile device comes before one without a profile; within a group a row passes
+    // the one above it only when its smoothed RSSI is stronger by rssiMargin (unknown last).
+    const auto before = [](const Row& a, const Row& b) {
+        const bool aProfile = !a.profileId.isEmpty();
+        const bool bProfile = !b.profileId.isEmpty();
+        if (aProfile != bProfile) {
+            return aProfile;
+        }
+        const bool aKnown = a.rssiSmoothed != 0;
+        const bool bKnown = b.rssiSmoothed != 0;
+        if (aKnown != bKnown) {
+            return aKnown;
+        }
+        return aKnown && a.rssiSmoothed >= b.rssiSmoothed + rssiMargin;
+    };
+    // Insertion sort: each row moves up past every row it beats (bounded by maxDevices rows).
+    for (std::size_t i = 1; i < rows.size(); ++i) {
+        for (std::size_t j = i; j > 0 && before(rows[j], rows[j - 1]); --j) {
+            std::swap(rows[j], rows[j - 1]);
+        }
+    }
+    return rows;
+}
+
+void BlePickerViewModel::setFreezeOrder(bool freeze) {
+    if (freeze == m_freezeOrder) {
+        return;
+    }
+    m_freezeOrder = freeze;
+    freezeOrderChanged(); // signal
+    if (!freeze) {
+        update(); // the order catches up when the pointer leaves
+    }
 }
 
 void BlePickerViewModel::refreshOwners() {
@@ -363,7 +418,7 @@ void BlePickerViewModel::refreshOwners() {
 }
 
 void BlePickerViewModel::update() {
-    std::vector<Row> rows = buildRows();
+    std::vector<Row> rows = ordered(buildRows());
     // Ids not in the owner cache yet (new devices): read now.
     if (m_hooks.otherProgram) {
         for (Row& row : rows) {

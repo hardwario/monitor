@@ -48,6 +48,10 @@ class WizardViewModel : public QObject {
     Q_PROPERTY(bool canBack READ canBack NOTIFY changed)
     Q_PROPERTY(bool canPrimary READ canPrimary NOTIFY changed)
     Q_PROPERTY(QString busyCancelText READ busyCancelText NOTIFY changed)
+    // Plan 0033: Wizard::canCancel and the texts of the Cancel confirmation ("" = the defaults).
+    Q_PROPERTY(bool canCancel READ canCancel NOTIFY changed)
+    Q_PROPERTY(QString cancelAcceptText READ cancelAcceptText NOTIFY changed)
+    Q_PROPERTY(QString cancelRejectText READ cancelRejectText NOTIFY changed)
     Q_PROPERTY(hwio::gui::CheckListModel* checks READ checks NOTIFY changed)
     Q_PROPERTY(QObject* embedded READ embedded NOTIFY changed)
     Q_PROPERTY(QUrl embeddedSource READ embeddedSource NOTIFY changed)
@@ -83,6 +87,9 @@ public:
     [[nodiscard]] bool canBack() const;
     [[nodiscard]] bool canPrimary() const;
     [[nodiscard]] QString busyCancelText() const;
+    [[nodiscard]] bool canCancel() const;
+    [[nodiscard]] QString cancelAcceptText() const;
+    [[nodiscard]] QString cancelRejectText() const;
     [[nodiscard]] CheckListModel* checks() const;
     [[nodiscard]] QObject* embedded() const;
     [[nodiscard]] QUrl embeddedSource() const;

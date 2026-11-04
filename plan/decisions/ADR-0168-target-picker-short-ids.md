@@ -1,6 +1,6 @@
 # ADR-0168 — Target pickers show only `app` / `lte`
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0233: the GUI has no target picker any more; the CLI keeps the ids)
 - **Date:** 2026-10-20
 - **Decided by:** Matej Strnad (GUI feedback round 1, plan 0021)
 

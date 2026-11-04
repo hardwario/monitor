@@ -75,10 +75,11 @@ Priečinok údajov aplikácie obsahuje:
 | `logs` | logy aplikácie, jeden súbor na každé spustenie | 10 súborov desktopovej aplikácie, 20 súborov `hwio`, 50 MiB pre každý druh |
 | `firmware-cache` | stiahnutý firmvér z katalógu a LTE firmvér | 100 súborov, 500 MiB |
 | `crashes` | správy o páde | 5 súborov |
+| `backups` | kópie aplikačného firmvéru vytvorené [aktualizáciou LTE firmvéru](flashing.md#aktualizácia-lte-firmvéru) (`<serial>-<UTC time>.hex`) | 10 súborov |
 
-Súbor nastavení, logy a súbory konzoly zdieľa desktopová aplikácia aj `hwio`. Súbory konzoly a históriu môže čítať
-len váš používateľ (Linux, macOS). Príkazy obsahujúce tajné údaje sa do histórie neukladajú a v súboroch konzoly sa
-zapisujú ako `<redacted>` ([Konzola](console.md#história-príkazov)).
+Súbor nastavení, logy a súbory konzoly zdieľa desktopová aplikácia aj `hwio`. Súbory konzoly, históriu a zálohy môže
+čítať len váš používateľ (Linux, macOS). Príkazy obsahujúce tajné údaje sa do histórie neukladajú a v súboroch konzoly
+sa zapisujú ako `<redacted>` ([Konzola](console.md#história-príkazov)).
 
 Odinštalovanie HARDWARIO Monitor tieto priečinky nevymaže; ak chcete, vymažte ich sami. Ak chcete vymazať len históriu
 príkazov: **Settings → Console → Clear history** alebo `hwio console history clear`.

@@ -68,6 +68,8 @@ the README links to it.
 
 Tone and depth as tower-bridge: short sentences, UI names in **bold** exactly as the app shows them in that language,
 keys in `<kbd>`, tables for options, `<details>` for per-OS steps in the README, no marketing.
+The product is called **HARDWARIO Monitor** (ADR-0237, plan 0033): "2" only inside a full version number
+("HARDWARIO Monitor 2.0.0", "describes HARDWARIO Monitor 2.0") or as "version 2"; ctest `product_name_check`.
 
 ## CLI
 

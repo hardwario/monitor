@@ -225,37 +225,8 @@ QString ConnectionViewModel::serial() const {
 
 QString ConnectionViewModel::targetId() const { return m_tab->consoleTargetId(); }
 
-void ConnectionViewModel::setTargetId(const QString& id) {
-    if (!canChangeTarget()) {
-        targetChanged(); // signal: QML reverts its control
-        return;
-    }
-    m_tab->setConsoleTarget(id);
-    targetChanged(); // signal
-}
-
 QString ConnectionViewModel::targetTitle() const {
     return ProbePickerViewModel::targetTitle(m_tab->profileId(), targetId());
-}
-
-QVariantList ConnectionViewModel::targets() const {
-    QVariantList list;
-    for (const device::TargetProfile& target : m_tab->profile().targets) {
-        const QString id = toQString(target.id);
-        // 0021 (ADR-0168): pickers show the id ("label"); the long title is the tooltip.
-        list.append(QVariantMap{
-            {QStringLiteral("id"), id},
-            {QStringLiteral("label"), id},
-            {QStringLiteral("title"), ProbePickerViewModel::targetTitle(m_tab->profileId(), id)}});
-    }
-    return list;
-}
-
-bool ConnectionViewModel::canChangeTarget() const {
-    // A stopped session (fatal error) counts as none: it is replaced on the next connect (S1).
-    return (!m_connection || (m_connection->state == device::ConnectionState::Stopped &&
-                              m_connection->error.has_value())) &&
-           !m_tab->isBusy();
 }
 
 QString ConnectionViewModel::stateKind() const {
@@ -346,6 +317,29 @@ double ConnectionViewModel::targetVolts() const {
         return std::numeric_limits<double>::quiet_NaN();
     }
     return *m_connection->targetMillivolts / 1000.0;
+}
+
+bool ConnectionViewModel::otherConnector() const {
+    return m_error && m_error->code == ErrorCode::TargetOtherConnector;
+}
+
+QString ConnectionViewModel::otherConnectorText() const {
+    if (!m_error || m_error->code != ErrorCode::TargetOtherConnector) {
+        return {};
+    }
+    // The texts of the device layer: "The J-Link is connected to the LTE MCU." + cause +
+    // suggestion (plan 0033 UX A).
+    const Error& error = *m_error; // otherConnector(): m_error is set
+    QStringList parts{toQString(error.message), toQString(error.cause),
+                      toQString(error.suggestion)};
+    parts.removeAll(QString());
+    return parts.join(QLatin1Char(' '));
+}
+
+void ConnectionViewModel::updateLteFirmware() {
+    if (otherConnector()) {
+        m_tab->openWizard(QStringLiteral("lte-update"));
+    }
 }
 
 bool ConnectionViewModel::canChooseAnotherProbe() const {
@@ -649,8 +643,7 @@ void ConnectionViewModel::setConnection(std::optional<device::ConnectionEvent> e
     if (m_tab->session() != nullptr && m_product.isEmpty()) {
         setProduct(toQString(m_tab->session()->probe().product));
     }
-    stateChanged();  // signal
-    targetChanged(); // signal: canChangeTarget
+    stateChanged(); // signal
 }
 
 void ConnectionViewModel::setOpenError(std::optional<Error> error) {

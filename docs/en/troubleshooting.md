@@ -79,6 +79,15 @@ Error codes: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_buffe
 
 Error codes: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed).
 
+### The J-Link is on the LTE connector
+
+A tab works with the application MCU. When the J-Link answers from the LTE MCU, the tab shows **The J-Link is
+connected to the LTE MCU.** instead of the console and does not reconnect by itself. Move the cable to the APP
+connector and press **Retry**, or press **Update LTE firmware…** to run the [LTE firmware
+update](flashing.md#lte-firmware-update).
+
+Error code: [`target.other_connector`](#target.other_connector).
+
 ### LTE modem firmware needs nRF Util
 
 Updating the LTE modem firmware uses Nordic nRF Util with its `device` command. Nothing else needs it. Install it as described in [Nordic nRF Util](install.md#nordic-nrf-util-lte-modem-firmware-only), or set its path in **Settings** › **nRF Util**, or with `--nrfutil PATH` in the CLI.
@@ -437,6 +446,19 @@ You sent a command while the console was disconnected. With auto-reconnect on, t
 
 The flat cable is on the connector of the other MCU (for example the LTE connector when you flash the app MCU). The message can be "Expected the `<target>` MCU (`<part>`) but found `<found>`."
 
+<a id="target.other_connector"></a>
+#### `target.other_connector`
+
+**The J-Link is connected to another MCU of the device.**
+
+- **Probably:** The console runs on another MCU; the J-Link cable is on the other connector.
+- **What to do:** Move the J-Link cable to the connector of the console's MCU, or update the LTE firmware.
+
+On CHESTER the message is "The J-Link is connected to the LTE MCU.", the cause "The console runs on the application
+MCU; the J-Link cable is on the other connector." and the suggestion "Move the J-Link cable to the APP connector, or
+update the LTE firmware." The desktop app shows it as a banner with **Update LTE firmware…** and **Retry**; the
+session does not reconnect by itself. See [The J-Link is on the LTE connector](#the-j-link-is-on-the-lte-connector).
+
 <a id="target.protected"></a>
 #### `target.protected`
 
@@ -445,7 +467,7 @@ The flat cable is on the connector of the other MCU (for example the LTE connect
 - **Probably:** Access port protection (APPROTECT) is enabled.
 - **What to do:** Recover the MCU (this erases it), then flash it again.
 
-Recover removes the protection but erases the MCU completely, including the Product Information Block. See [Recover](flashing.md#recover). For a named MCU the suggestion is "Run `hwio <profile> <target> recover` (erases the MCU)."; in the desktop app use **Recover…** under **Maintenance** on the **Flash** page.
+Recover removes the protection but erases the MCU completely, including the Product Information Block. See [Recover](flashing.md#recover). For a named MCU the suggestion is "Run `hwio <profile> <target> recover` (erases the MCU)."; in the desktop app use **Recover…** under **Maintenance** on the **Flash** page (shown with **Settings › Advanced › Show expert maintenance actions**, or once when the troubleshooting guide sends you there).
 
 <a id="target.program_failed"></a>
 #### `target.program_failed`

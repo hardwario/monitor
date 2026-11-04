@@ -1,6 +1,6 @@
 # ADR-0129 — `libs/hw/ble` is transport only; console handling via a per-link handler from `libs/device`
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0235: the order of the device list)
 - **Date:** 2026-10-19
 - **Decided by:** Matej Strnad
 

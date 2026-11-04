@@ -12,11 +12,14 @@ und Log-Meldungen, die die Firmware sendet, erscheinen als Log-Zeilen.
 
 1. Öffnen Sie einen neuen Tab (<kbd>Ctrl</kbd>+<kbd>T</kbd>) und stellen Sie **Connect via** (Verbinden über) auf
    **Bluetooth** um. Die App merkt sich die Wahl für den nächsten Tab.
-2. Die Liste zeigt die CHESTER-Geräte in der Nähe, das stärkste Signal zuerst, und aktualisiert sich selbst. Filtern
-   Sie sie nach Namen, oder setzen Sie das Häkchen bei **Show all devices** (alle Geräte anzeigen), um jedes
-   Bluetooth-Gerät zu sehen. Ein Gerät, das ein anderer Tab verwendet, ist mit **In use (tab N)** (in Verwendung,
-   Tab N) markiert; wenn Sie es wählen, wechseln Sie zu diesem Tab. Ein Gerät, das ein anderes Programm verwendet, ist
-   mit **In use by another program** (von einem anderen Programm verwendet) markiert und kann nicht gewählt werden.
+2. Die Liste zeigt die CHESTER-Geräte in der Nähe, das stärkste Signal zuerst, und aktualisiert sich selbst. Das
+   Signal wird über einige Sekunden gemittelt, und ein Gerät rückt nur auf, wenn es deutlich stärker ist (6 dB), damit
+   die Liste ruhig bleibt; solange der Mauszeiger über der Liste ist (oder eine Zeile den Tastaturfokus hat), ändert
+   sich die Reihenfolge gar nicht, und neue Geräte werden am Ende angefügt. Filtern Sie sie nach Namen, oder setzen
+   Sie das Häkchen bei **Show all devices** (alle Geräte anzeigen), um jedes Bluetooth-Gerät zu sehen (CHESTER-Geräte
+   zuerst). Ein Gerät, das ein anderer Tab verwendet, ist mit **In use (tab N)** (in Verwendung, Tab N) markiert; wenn
+   Sie es wählen, wechseln Sie zu diesem Tab. Ein Gerät, das ein anderes Programm verwendet, ist mit **In use by
+   another program** (von einem anderen Programm verwendet) markiert und kann nicht gewählt werden.
 3. Wählen Sie das Gerät und drücken Sie **Connect** (Verbinden), oder doppelklicken Sie es, oder drücken Sie
    <kbd>Enter</kbd>.
 

@@ -53,7 +53,7 @@
 <context>
     <name>hwio::gui::BlePickerViewModel</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="453"/>
+        <location filename="../../../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="513"/>
         <source>%n device(s) found</source>
         <translation type="unfinished">
             <numerusform></numerusform>

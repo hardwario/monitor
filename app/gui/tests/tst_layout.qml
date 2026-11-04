@@ -126,10 +126,10 @@ TestCase {
         window.height = data.height;
         tryVerify(() => findAll(window.contentItem, "probeRow").filter(effectivelyVisible).length === 2, 5000);
         waitForRendering(window.contentItem);
-        const buttons = findAll(window.contentItem, "targetButton").filter(effectivelyVisible)
-                        .concat(findAll(window.contentItem, "connectButton").filter(effectivelyVisible))
-                        .concat(findAll(window.contentItem, "profileBox").filter(effectivelyVisible));
-        verify(buttons.length >= 4, buttons.length);
+        // Plan 0033 (ADR-0233, D1): no target buttons; one profile is shown as its name.
+        const buttons = findAll(window.contentItem, "profileName").filter(effectivelyVisible)
+                        .concat(findAll(window.contentItem, "connectButton").filter(effectivelyVisible));
+        verify(buttons.length >= 2, buttons.length);
         checkInside(buttons);
         checkNoOverlap(buttons);
         checkInside(findAll(window.contentItem, "probeRow").filter(effectivelyVisible));

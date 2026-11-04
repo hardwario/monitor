@@ -19,8 +19,12 @@
 // The session is held only as QPointer and re-read on sessionChanged (review S3). A session that
 // goes away during an operation ends it as failed with the session's error.
 //
-// Before starting, the page warns when the kind's MCU is not the tab's console target: on
-// CHESTER-M the other MCU is not reachable through the same connector (ADR-0057, Phase 0 result).
+// Plan 0033 (ADR-0233, ADR-0234, ADR-0236): the LTE kind does not flash from this page - it starts
+// the LTE firmware update wizard (lteUpdateRequested; the Flash bar is disabled for it). The
+// maintenance actions work on their own MCU (maintenanceTarget): the application MCU, unless the
+// expert actions are on (advanced/expertActions), which add Erase everything, Recover and the
+// choice of the LTE MCU (cross-target, ADR-0057). revealRecover() (the troubleshooting hand-off of
+// target.protected) shows Recover for one MCU once, without changing the setting.
 //
 // Ownership: child of its DeviceTabViewModel (Qt parent, created by the page registry). GUI thread
 // only.
@@ -69,8 +73,6 @@ class FlashViewModel : public QObject {
     Q_PROPERTY(QVariantList kinds READ kinds NOTIFY textsChanged)
     // nRF Util missing / too old for modem firmware or an LTE bundle (ADR-0016).
     Q_PROPERTY(QString prerequisiteText READ prerequisiteText NOTIFY stateChanged)
-    // ADR-0057 Phase 0: the kind's MCU is not the tab's console target.
-    Q_PROPERTY(QString connectorWarning READ connectorWarning NOTIFY stateChanged)
     Q_PROPERTY(bool haltAvailable READ haltAvailable NOTIFY stateChanged)
     Q_PROPERTY(bool halt READ halt WRITE setHalt NOTIFY haltChanged)
     Q_PROPERTY(bool canFlash READ canFlash NOTIFY stateChanged)
@@ -101,10 +103,22 @@ class FlashViewModel : public QObject {
     // The result ErrorPanel's primary action: Firmware errors keep "Choose another file"; other
     // errors of a flash retry it (Retry), of a maintenance action go back to the form (Dismiss).
     Q_PROPERTY(int errorAction READ errorAction NOTIFY stateChanged)
-    Q_PROPERTY(QString maintenanceTitle READ maintenanceTitle NOTIFY kindChanged)
+    Q_PROPERTY(QString maintenanceTitle READ maintenanceTitle NOTIFY maintenanceChanged)
     // [Erase application] (code only) exists only where the profile's default erase is code only
     // (CHESTER app); an LTE MCU is always erased completely behind the confirmation (ADR-0038).
-    Q_PROPERTY(bool eraseCodeAvailable READ eraseCodeAvailable NOTIFY kindChanged)
+    Q_PROPERTY(bool eraseCodeAvailable READ eraseCodeAvailable NOTIFY maintenanceChanged)
+    // Plan 0033 (ADR-0236): the expert setting, the MCU of the maintenance actions ("app" unless
+    // expert), the choice [{targetId, title}] (shown only when expert), and which of
+    // [Erase everything…] / [Recover…] are shown. The section's fold state lives here so that the
+    // troubleshooting hand-off can unfold it (ADR-0049: folded by default).
+    Q_PROPERTY(bool expertActions READ expertActions NOTIFY maintenanceChanged)
+    Q_PROPERTY(QString maintenanceTarget READ maintenanceTarget WRITE setMaintenanceTarget NOTIFY
+                   maintenanceChanged)
+    Q_PROPERTY(QVariantList maintenanceTargets READ maintenanceTargets NOTIFY maintenanceChanged)
+    Q_PROPERTY(bool eraseAllAvailable READ eraseAllAvailable NOTIFY maintenanceChanged)
+    Q_PROPERTY(bool recoverAvailable READ recoverAvailable NOTIFY maintenanceChanged)
+    Q_PROPERTY(bool maintenanceExpanded READ maintenanceExpanded WRITE setMaintenanceExpanded NOTIFY
+                   maintenanceChanged)
     Q_PROPERTY(bool canRunMaintenance READ canRunMaintenance NOTIFY stateChanged)
     Q_PROPERTY(QString nrfUtilInstallUrl READ nrfUtilInstallUrl CONSTANT)
     // The ConfirmDialog texts of the pending erase-all / recover (ADR-0038).
@@ -139,7 +153,6 @@ public:
     [[nodiscard]] QString targetId() const;
     [[nodiscard]] QVariantList kinds() const;
     [[nodiscard]] QString prerequisiteText() const;
-    [[nodiscard]] QString connectorWarning() const;
     [[nodiscard]] bool haltAvailable() const;
     [[nodiscard]] bool halt() const noexcept { return m_halt; }
     void setHalt(bool halt);
@@ -168,12 +181,26 @@ public:
     [[nodiscard]] bool eraseCodeAvailable() const;
     [[nodiscard]] bool canRunMaintenance() const;
     [[nodiscard]] static QString nrfUtilInstallUrl();
+    [[nodiscard]] bool expertActions() const;
+    [[nodiscard]] QString maintenanceTarget() const { return m_maintenanceTarget; }
+    // Another MCU than the console target only with the expert actions (ignored otherwise).
+    void setMaintenanceTarget(const QString& targetId);
+    [[nodiscard]] QVariantList maintenanceTargets() const;
+    [[nodiscard]] bool eraseAllAvailable() const { return expertActions(); }
+    [[nodiscard]] bool recoverAvailable() const;
+    [[nodiscard]] bool maintenanceExpanded() const noexcept { return m_maintenanceExpanded; }
+    void setMaintenanceExpanded(bool expanded);
+    // The target.protected hand-off (plan 0033 E, ADR-0236): unfolds Maintenance on `targetId`
+    // and shows [Recover…] for it until a recover of that MCU ran or the device changed.
+    Q_INVOKABLE void revealRecover(const QString& targetId);
 
     Q_INVOKABLE void flash();
     Q_INVOKABLE void cancel();
     Q_INVOKABLE void reset(bool halt);
     // Refused where eraseCodeAvailable is false.
     Q_INVOKABLE void eraseCode();
+    // Plan 0033 (ADR-0234): [Update LTE firmware…] of the LTE kind (opens the LTE update wizard).
+    Q_INVOKABLE void requestLteUpdate();
     // ConfirmDialog texts (ADR-0038): {title, body, items, consequence, acceptText}.
     Q_INVOKABLE [[nodiscard]] QVariantMap describeEraseAll() const;
     Q_INVOKABLE void eraseAll();
@@ -209,6 +236,9 @@ signals:
     // QML opens the Settings tab at `sectionId` (0021: "nrfutil", "jlink" or "").
     void settingsRequested(const QString& sectionId);
     void confirmationRequested();
+    void maintenanceChanged();
+    // [Update LTE firmware…] (plan 0033): the tab opens the LTE update wizard.
+    void lteUpdateRequested();
     // A text for screen readers (operation started / finished; design system § 6).
     void announcement(const QString& text);
 
@@ -257,6 +287,7 @@ private:
     [[nodiscard]] bool needsNrfUtil() const;
     [[nodiscard]] static QString busyText(device::OperationKind kind);
     [[nodiscard]] QVariantMap describeErase(bool recover) const;
+    void onExpertActionsChanged();
 
     DeviceTabViewModel* m_tab; // parent
     FirmwareServices& m_services;
@@ -266,6 +297,10 @@ private:
     // only); until then it follows the tab's target.
     bool m_kindChosen = false;
     bool m_halt = false;
+    QString m_maintenanceTarget =
+        QStringLiteral("app"); // the console target (set in the constructor)
+    QString m_revealedRecover; // the MCU whose [Recover…] the hand-off revealed ("" = none)
+    bool m_maintenanceExpanded = false;
     QPointer<device::DeviceSession> m_session;
     std::vector<QMetaObject::Connection> m_sessionConnections;
     std::optional<RunningOperation> m_running;

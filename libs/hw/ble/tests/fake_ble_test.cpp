@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <filesystem>
 #include <memory>
@@ -147,7 +148,43 @@ TEST(BleScanner, ListIsBounded) {
     const ScanResult result = scan("many.json", false);
     EXPECT_EQ(result.devices.size(), BleScanner::maxDevices);
     for (std::size_t i = 1; i < result.devices.size(); ++i) {
-        EXPECT_GE(result.devices[i - 1].rssi, result.devices[i].rssi);
+        EXPECT_GE(result.devices[i - 1].rssiSmoothed, result.devices[i].rssiSmoothed);
+    }
+}
+
+// Plan 0033 (ADR-0235): the time-based EMA with a fake clock (the advertisements' times).
+TEST(BleScanner, RssiSmoothingIsATimeBasedMovingAverage) {
+    using hwio::ble::smoothRssi;
+    // No time passed: unchanged; one time constant: 1 - 1/e of the way; long after: the sample.
+    EXPECT_DOUBLE_EQ(smoothRssi(-60.0, -80, 0ns), -60.0);
+    EXPECT_NEAR(smoothRssi(-60.0, -80, BleScanner::rssiTimeConstant), -60.0 - (20.0 * 0.6321206),
+                1e-6);
+    EXPECT_NEAR(smoothRssi(-60.0, -80, 60s), -80.0, 1e-6);
+    // A clock that steps back counts as no time.
+    EXPECT_DOUBLE_EQ(smoothRssi(-60.0, -80, -1s), -60.0);
+    // Three samples 1 s apart from -50 towards -80.
+    double smoothed = -50.0;
+    for (int i = 0; i < 3; ++i) {
+        smoothed = smoothRssi(smoothed, -80, 1s);
+    }
+    EXPECT_NEAR(smoothed, -50.0 - (30.0 * (1.0 - std::exp(-1.0))), 1e-6);
+}
+
+// Plan 0033 (ADR-0235): noisy advertisements are averaged; the order follows the average and the
+// last value stays available (CLI JSON rssi_last).
+TEST(BleScanner, NoisyRssiIsSmoothedAndSortedByTheAverage) {
+    const ScanResult result = scan("noisy.json", false, 600ms);
+    ASSERT_EQ(result.devices.size(), 30U);
+    for (std::size_t i = 1; i < result.devices.size(); ++i) {
+        EXPECT_GE(result.devices[i - 1].rssiSmoothed, result.devices[i].rssiSmoothed);
+    }
+    for (const hwio::ble::BleDeviceInfo& device : result.devices) {
+        EXPECT_LT(device.rssiSmoothed, 0.0);
+        EXPECT_NE(device.rssi, 0);
+        if (device.name == "CHESTER-NOISY-A") {
+            EXPECT_GE(device.rssiSmoothed, -70.0);
+            EXPECT_LE(device.rssiSmoothed, -50.0);
+        }
     }
 }
 

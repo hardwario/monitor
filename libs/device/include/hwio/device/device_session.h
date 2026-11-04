@@ -71,6 +71,7 @@
 
 #include <QList>
 #include <QObject>
+#include <QPointer>
 #include <QtTypes>
 
 #include <atomic>
@@ -144,6 +145,31 @@ inline constexpr int maxSpeedKhz = 50000;
 inline constexpr int minLatencyMs = 1;
 inline constexpr int maxLatencyMs = 1000;
 
+class DeviceSession;
+
+// Plan 0033 (D4, ADR-0234): while a SessionHold exists the session's RTT is detached (the console
+// reports Stopped without an error), it never re-attaches by itself and reconnect() is ignored;
+// operations still run (on the console target nothing is restored or attached after them, the
+// J-Link cable may be on another connector). When the last hold is destroyed the session
+// reconnects. Move-only; it keeps the session as a QPointer (a closed session needs no release).
+// Owner thread only.
+class SessionHold {
+public:
+    SessionHold() = default;
+    explicit SessionHold(DeviceSession* session);
+    ~SessionHold();
+    SessionHold(const SessionHold&) = delete;
+    SessionHold& operator=(const SessionHold&) = delete;
+    SessionHold(SessionHold&& other) noexcept;
+    SessionHold& operator=(SessionHold&& other) noexcept;
+    [[nodiscard]] bool active() const noexcept;
+    // Ends the hold now (idempotent).
+    void release();
+
+private:
+    QPointer<DeviceSession> m_session;
+};
+
 class DeviceSession final : public ConsoleSession {
     Q_OBJECT
 
@@ -176,6 +202,10 @@ public:
     [[nodiscard]] Status reconnect() override;
     [[nodiscard]] Status suspend(); // detach and release the probe (M2 / nRF Util)
     [[nodiscard]] Status resume();  // allow attaching again and re-attach now
+    // Plan 0033 (D4): see SessionHold. Holds nest (counted). Errors: internal.queue_full,
+    // cancelled (closed).
+    [[nodiscard]] Result<SessionHold> hold();
+    [[nodiscard]] bool held() const noexcept { return m_holds > 0; }
 
     // ---- operations (M2, ADR-0062) ----
     // Errors (immediate): usage.invalid_argument (unknown target, empty image, bad size),
@@ -249,6 +279,11 @@ public:
     // usage.invalid_argument (not ProbeOpen, or attachRtt on a target without a console),
     // internal.busy (an operation runs), internal.queue_full, cancelled (closed).
     [[nodiscard]] Status startConnection(bool attachRtt);
+    // Plan 0033 (ADR-0233, ADR-0234): which target of the profile answers through the probe now
+    // (a light operation, ADR-0157: on the console target RTT is not paused). The result's
+    // familyMatch says it; probe-level errors (library, probe gone) fail the operation, a target
+    // that does not answer is foundTargetId "".
+    [[nodiscard]] Result<OperationId> identifyTarget(std::string_view targetId);
     // Errors: usage.invalid_argument when `id` is not the running operation.
     [[nodiscard]] Status cancel(OperationId id);
     // The running operation (nullopt when none).
@@ -317,6 +352,9 @@ protected:
 
 private:
     friend struct detail::SessionInternals;
+    friend class SessionHold;
+
+    void releaseHold(); // SessionHold
 
     // The close path of closeSession() and the destructor. Idempotent.
     void closeNow();
@@ -341,6 +379,7 @@ private:
     jlink::ProbeInfo m_probe;
     std::filesystem::path m_consoleFile;
     std::uint64_t m_reportedDrops = 0;
+    int m_holds = 0; // plan 0033: SessionHold objects alive
     bool m_closed = false;
 };
 

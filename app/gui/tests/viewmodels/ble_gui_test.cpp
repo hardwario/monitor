@@ -8,6 +8,7 @@
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
 #include "hwio/device/session_events.h"
+#include "hwio/hw/ble/ble_scanner.h"
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/ble_picker_view_model.h"
 #include "viewmodels/connection_view_model.h"
@@ -37,6 +38,7 @@
 #include <chrono>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -165,9 +167,11 @@ TEST_F(BleGuiTest, ShowAllAndFilter) {
     BlePickerViewModel& picker = scannedPicker();
     picker.setShowAll(true);
     EXPECT_TRUE(waitFor([&] { return picker.count() == 4; }, scanWait));
-    EXPECT_EQ(nameAt(picker, 0), QStringLiteral("Phone")); // -40 dBm
-    EXPECT_EQ(picker.data(picker.index(0), BlePickerViewModel::ProfileRole).toString(), QString());
-    EXPECT_EQ(picker.data(picker.index(0), BlePickerViewModel::ProfileNameRole).toString(),
+    // Plan 0033 (ADR-0235): profile devices first, then the Phone (-40 dBm) before the Ruuvi tag.
+    EXPECT_EQ(nameAt(picker, 0), QStringLiteral("CHESTER-ABC123"));
+    EXPECT_EQ(nameAt(picker, 2), QStringLiteral("Phone"));
+    EXPECT_EQ(picker.data(picker.index(2), BlePickerViewModel::ProfileRole).toString(), QString());
+    EXPECT_EQ(picker.data(picker.index(2), BlePickerViewModel::ProfileNameRole).toString(),
               QStringLiteral("Unknown device"));
 
     picker.setFilterText(QStringLiteral("xyz"));
@@ -211,7 +215,8 @@ TEST_F(BleGuiTest, StaleRowsAreDimmedThenRemoved) {
             .tabUsingDevice = {},
             .otherProgram = {},
             .now = [&offset] { return std::chrono::steady_clock::now() + offset; },
-            .openUrl = {}},
+            .openUrl = {},
+            .devices = {}},
         nullptr);
     picker.setActive(true);
     ASSERT_TRUE(waitFor([&] { return picker.count() == 2; }, scanWait));
@@ -227,6 +232,80 @@ TEST_F(BleGuiTest, StaleRowsAreDimmedThenRemoved) {
     service.stop();
 }
 
+// Plan 0033 (ADR-0235): the picker order with scripted smoothed RSSI values.
+class BlePickerOrderTest : public hwio::gui::test::GuiTest {
+protected:
+    static hwio::ble::BleDeviceInfo device(const std::string& id, double rssi,
+                                           const std::string& profile = "chester") {
+        return hwio::ble::BleDeviceInfo{.id = id,
+                                        .name = "CHESTER-" + id,
+                                        .rssi = static_cast<int>(rssi),
+                                        .rssiSmoothed = rssi,
+                                        .rssiSampled = {},
+                                        .nusAdvertised = true,
+                                        .profileId = profile,
+                                        .lastSeen = std::chrono::steady_clock::now()};
+    }
+    BlePickerViewModel& picker() {
+        if (!m_picker) {
+            m_picker = std::make_unique<BlePickerViewModel>(
+                nullptr,
+                BlePickerViewModel::Hooks{.tabUsingDevice = {},
+                                          .otherProgram = {},
+                                          .now = {},
+                                          .openUrl = {},
+                                          .devices = [this] { return m_devices; }},
+                nullptr);
+        }
+        return *m_picker;
+    }
+    QStringList ids() {
+        QStringList list;
+        for (int row = 0; row < picker().count(); ++row) {
+            list.append(picker().data(picker().index(row), BlePickerViewModel::IdRole).toString());
+        }
+        return list;
+    }
+    void set(std::vector<hwio::ble::BleDeviceInfo> devices) {
+        m_devices = std::move(devices);
+        picker().update();
+    }
+
+private:
+    std::vector<hwio::ble::BleDeviceInfo> m_devices;
+    std::unique_ptr<BlePickerViewModel> m_picker;
+};
+
+TEST_F(BlePickerOrderTest, ARowOvertakesOnlyWhenStrongerByTheMargin) {
+    set({device("A", -60), device("B", -62), device("C", -70)});
+    EXPECT_EQ(ids(), (QStringList{QStringLiteral("A"), QStringLiteral("B"), QStringLiteral("C")}));
+    // B is now stronger than A, but by less than 6 dB: A stays above.
+    set({device("A", -62), device("B", -57.5), device("C", -70)});
+    EXPECT_EQ(ids(), (QStringList{QStringLiteral("A"), QStringLiteral("B"), QStringLiteral("C")}));
+    // 6 dB or more: B moves up; C passes nobody.
+    set({device("A", -64), device("B", -58), device("C", -66)});
+    EXPECT_EQ(ids(), (QStringList{QStringLiteral("B"), QStringLiteral("A"), QStringLiteral("C")}));
+    // The shown RSSI is the smoothed value, whole dBm.
+    EXPECT_EQ(picker().data(picker().index(1), BlePickerViewModel::RssiRole).toInt(), -64);
+}
+
+TEST_F(BlePickerOrderTest, ProfileDevicesFirstAndUnknownRssiLast) {
+    picker().setShowAll(true);
+    set({device("phone", -40, ""), device("A", -80), device("B", 0), device("tag", 0, "")});
+    EXPECT_EQ(ids(), (QStringList{QStringLiteral("A"), QStringLiteral("B"), QStringLiteral("phone"),
+                                  QStringLiteral("tag")}));
+}
+
+TEST_F(BlePickerOrderTest, TheOrderIsFrozenWhilePointedAt) {
+    set({device("A", -60), device("B", -70)});
+    picker().setFreezeOrder(true);
+    // B is far stronger now and a new device appears: the order stays, the new one is appended.
+    set({device("N", -40), device("A", -80), device("B", -50)});
+    EXPECT_EQ(ids(), (QStringList{QStringLiteral("A"), QStringLiteral("B"), QStringLiteral("N")}));
+    picker().setFreezeOrder(false); // the pointer left: the order catches up
+    EXPECT_EQ(ids(), (QStringList{QStringLiteral("N"), QStringLiteral("B"), QStringLiteral("A")}));
+}
+
 TEST_F(BleGuiTest, InUseByAnotherProgramDisablesTheRow) {
     BleService service;
     BlePickerViewModel picker(
@@ -239,7 +318,8 @@ TEST_F(BleGuiTest, InUseByAnotherProgramDisablesTheRow) {
                                                      : QString();
                                       },
                                   .now = {},
-                                  .openUrl = {}},
+                                  .openUrl = {},
+                                  .devices = {}},
         nullptr);
     picker.setActive(true);
     ASSERT_TRUE(waitFor([&] { return picker.count() == 2; }, scanWait));

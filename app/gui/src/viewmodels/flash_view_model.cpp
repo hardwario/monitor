@@ -9,6 +9,7 @@
 #include "hwio/device/profile.h"
 #include "hwio/firmware/program_progress.h"
 #include "pages/firmware_services.h"
+#include "settings_store.h"
 #include "viewmodels/dependency_status.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
@@ -99,10 +100,22 @@ FlashViewModel::FlashViewModel(DeviceTabViewModel* tab, FirmwareServices& servic
     connect(m_tab, &DeviceTabViewModel::stateChanged, this, &FlashViewModel::stateChanged);
     connect(m_tab, &DeviceTabViewModel::configurationChanged, this, [this] {
         applyDefaultKind();
-        kindChanged();  // signal
-        textsChanged(); // signal: the MCU names of the profile
-        stateChanged(); // signal
+        // Another device: the maintenance MCU goes back to the console target and a revealed
+        // [Recover…] is hidden again (plan 0033).
+        m_maintenanceTarget = m_tab->consoleTargetId();
+        m_revealedRecover.clear();
+        kindChanged();        // signal
+        textsChanged();       // signal: the MCU names of the profile
+        maintenanceChanged(); // signal
+        stateChanged();       // signal
     });
+    if (SettingsStore* store = m_services.settings(); store != nullptr) {
+        connect(store, &SettingsStore::valueChanged, this, [this](const QString& key) {
+            if (key == FirmwareServices::expertActionsKey) {
+                onExpertActionsChanged();
+            }
+        });
+    }
     connect(m_services.dependencies(), &DependencyStatus::nrfUtilChanged, this,
             &FlashViewModel::stateChanged);
     // 0021 (ADR-0166): "In the device" and, after an application flash, "Now in the device".
@@ -122,6 +135,7 @@ FlashViewModel::FlashViewModel(DeviceTabViewModel* tab, FirmwareServices& servic
 
     applyDefaultKind();
     m_source->setKind(m_kind);
+    m_maintenanceTarget = m_tab->consoleTargetId();
     onSessionChanged();
 }
 
@@ -155,11 +169,10 @@ void FlashViewModel::applyDefaultKind() {
     if (m_kindChosen || m_tab->choosing()) {
         return;
     }
-    // The default comes from the tab's target (ADR-0055); a kind chosen in this tab is kept for
-    // the tab's lifetime (in memory only, user decision 2026-10-16).
-    m_kind = m_tab->consoleTargetId() == QStringLiteral("lte")
-                 ? FirmwareSourceViewModel::LteFirmware
-                 : FirmwareSourceViewModel::AppFirmware;
+    // ADR-0233: a tab always works with the console target (the application MCU), so the default
+    // kind is application firmware; a kind chosen in this tab is kept for the tab's lifetime (in
+    // memory only, user decision 2026-10-16).
+    m_kind = FirmwareSourceViewModel::AppFirmware;
     m_source->setKind(m_kind);
 }
 
@@ -235,23 +248,6 @@ QString FlashViewModel::prerequisiteText() const {
     return toQString(problem->message) + QLatin1Char(' ') + toQString(problem->suggestion);
 }
 
-QString FlashViewModel::connectorWarning() const {
-    if (m_tab->choosing() || targetId() == m_tab->consoleTargetId()) {
-        return {};
-    }
-    const device::TargetProfile* kindTarget = targetProfile(targetId());
-    const device::TargetProfile* consoleTarget = targetProfile(m_tab->consoleTargetId());
-    if (kindTarget == nullptr || consoleTarget == nullptr) {
-        return {};
-    }
-    // ADR-0057, Phase 0 result (2026-10-16): on CHESTER-M the other MCU is not reachable through
-    // the same connector; the operation would fail with target.wrong_family.
-    return tr("This tab is set up for the %1 MCU. On CHESTER-M the %2 MCU can be reached only "
-              "through its own connector: connect the J-Link to the %2 connector and switch this "
-              "tab's target to %2 before flashing.")
-        .arg(device::targetDisplayName(*consoleTarget), device::targetDisplayName(*kindTarget));
-}
-
 void FlashViewModel::setHalt(bool halt) {
     if (halt == m_halt) {
         return;
@@ -270,6 +266,11 @@ bool FlashViewModel::otherOperationRunning() const {
 QString FlashViewModel::cannotFlashReason() const {
     if (m_tab->choosing()) {
         return tr("Choose a device first");
+    }
+    if (m_kind == FirmwareSourceViewModel::LteFirmware) {
+        // ADR-0234: the LTE MCU is updated by the guided procedure only.
+        return tr("Use Update LTE firmware… above: the J-Link has to be moved between the "
+                  "connectors.");
     }
     if (m_running || otherOperationRunning()) {
         return tr("Another operation is running");
@@ -320,7 +321,7 @@ QString FlashViewModel::flashSummary() const {
 // -----------------------------------------------------------------------------------
 
 void FlashViewModel::flash() {
-    if (!canFlash()) {
+    if (!canFlash() || m_kind != FirmwareSourceViewModel::AppFirmware) {
         return;
     }
     const LoadedSource* loaded = m_source->readySource();
@@ -371,29 +372,30 @@ void FlashViewModel::reset(bool halt) {
     if (!canRunMaintenance()) {
         return;
     }
-    const std::string target = toStdString(targetId());
+    const std::string target = toStdString(m_maintenanceTarget);
     m_resetHalt = halt;
-    start(OperationKind::Reset, targetId(), [target, halt](device::DeviceSession& session) {
-        return session.reset(target, halt ? device::ResetMode::Halt : device::ResetMode::Go);
-    });
+    start(OperationKind::Reset, m_maintenanceTarget,
+          [target, halt](device::DeviceSession& session) {
+              return session.reset(target, halt ? device::ResetMode::Halt : device::ResetMode::Go);
+          });
 }
 
 void FlashViewModel::eraseCode() {
     if (!canRunMaintenance() || !eraseCodeAvailable()) {
         return;
     }
-    const std::string target = toStdString(targetId());
-    start(OperationKind::EraseCode, targetId(), [target](device::DeviceSession& session) {
+    const std::string target = toStdString(m_maintenanceTarget);
+    start(OperationKind::EraseCode, m_maintenanceTarget, [target](device::DeviceSession& session) {
         return session.erase(target, device::EraseScope::Code);
     });
 }
 
-void FlashViewModel::eraseAll() { runEraseAll(targetId()); }
+void FlashViewModel::eraseAll() { runEraseAll(m_maintenanceTarget); }
 
-void FlashViewModel::recover() { runRecover(targetId()); }
+void FlashViewModel::recover() { runRecover(m_maintenanceTarget); }
 
 void FlashViewModel::runEraseAll(const QString& target) {
-    if (!canRunMaintenance()) {
+    if (!canRunMaintenance() || !eraseAllAvailable()) {
         return;
     }
     start(OperationKind::EraseAll, target,
@@ -403,8 +405,12 @@ void FlashViewModel::runEraseAll(const QString& target) {
 }
 
 void FlashViewModel::runRecover(const QString& target) {
-    if (!canRunMaintenance()) {
+    if (!canRunMaintenance() || !recoverAvailable()) {
         return;
+    }
+    if (target == m_revealedRecover) {
+        m_revealedRecover.clear(); // shown "this once" (ADR-0236)
+        maintenanceChanged();      // signal
     }
     start(OperationKind::Recover, target,
           [targetText = toStdString(target)](device::DeviceSession& session) {
@@ -414,12 +420,87 @@ void FlashViewModel::runRecover(const QString& target) {
 
 bool FlashViewModel::eraseCodeAvailable() const {
     // The profile's default erase (CHESTER: app Code, lte All; as `hwio chester lte erase`).
-    const device::TargetProfile* target = targetProfile(targetId());
+    const device::TargetProfile* target = targetProfile(m_maintenanceTarget);
     return target == nullptr || target->defaultErase == device::EraseScope::Code;
 }
 
 bool FlashViewModel::canRunMaintenance() const {
     return !m_tab->choosing() && !m_running && !otherOperationRunning();
+}
+
+// ---- plan 0033: expert maintenance actions (ADR-0236) and the LTE update (ADR-0234) ------------
+
+bool FlashViewModel::expertActions() const {
+    const SettingsStore* store = m_services.settings();
+    return store != nullptr && store->value(FirmwareServices::expertActionsKey).toBool();
+}
+
+void FlashViewModel::onExpertActionsChanged() {
+    // Without the expert actions only the console target and a revealed MCU remain choosable.
+    if (!expertActions() && m_maintenanceTarget != m_tab->consoleTargetId() &&
+        m_maintenanceTarget != m_revealedRecover) {
+        m_maintenanceTarget = m_tab->consoleTargetId();
+    }
+    maintenanceChanged(); // signal
+}
+
+void FlashViewModel::setMaintenanceTarget(const QString& targetId) {
+    if (targetId == m_maintenanceTarget || m_running || targetProfile(targetId) == nullptr) {
+        return;
+    }
+    if (!expertActions() && targetId != m_tab->consoleTargetId()) {
+        return; // the LTE MCU maintenance is an expert action
+    }
+    m_maintenanceTarget = targetId;
+    m_pending.reset();    // a confirmation names the MCU it was opened for
+    maintenanceChanged(); // signal
+}
+
+QVariantList FlashViewModel::maintenanceTargets() const {
+    QVariantList list;
+    const device::DeviceProfile* deviceProfile = profile();
+    if (deviceProfile == nullptr || !expertActions()) {
+        return list;
+    }
+    for (const device::TargetProfile& target : deviceProfile->targets) {
+        list.append(QVariantMap{
+            {QStringLiteral("targetId"), toQString(target.id)},
+            {QStringLiteral("title"), tr("%1 MCU").arg(device::targetDisplayName(target))}});
+    }
+    return list;
+}
+
+bool FlashViewModel::recoverAvailable() const {
+    return expertActions() ||
+           (!m_revealedRecover.isEmpty() && m_revealedRecover == m_maintenanceTarget);
+}
+
+void FlashViewModel::setMaintenanceExpanded(bool expanded) {
+    if (expanded == m_maintenanceExpanded) {
+        return;
+    }
+    m_maintenanceExpanded = expanded;
+    maintenanceChanged(); // signal
+}
+
+void FlashViewModel::revealRecover(const QString& targetId) {
+    if (m_running || targetProfile(targetId) == nullptr) {
+        return;
+    }
+    qCInfo(lcGui).noquote() << "Flash page: Recover shown once for" << targetId;
+    m_revealedRecover = targetId;
+    m_maintenanceTarget = targetId;
+    m_maintenanceExpanded = true;
+    m_pending.reset();
+    maintenanceChanged(); // signal
+}
+
+void FlashViewModel::requestLteUpdate() {
+    if (m_tab->choosing() || m_running || otherOperationRunning()) {
+        return;
+    }
+    lteUpdateRequested(); // signal
+    m_tab->openWizard(QStringLiteral("lte-update"));
 }
 
 void FlashViewModel::start(
@@ -717,6 +798,7 @@ QString FlashViewModel::busyText(OperationKind kind) {
     case OperationKind::ReadRegisters:
     case OperationKind::MemoryZones:
     case OperationKind::WriteFlash:
+    case OperationKind::Identify:
         break;
     }
     return tr("Working…");
@@ -749,6 +831,7 @@ QString FlashViewModel::operationTitle() const {
     case OperationKind::ReadRegisters:
     case OperationKind::MemoryZones:
     case OperationKind::WriteFlash:
+    case OperationKind::Identify:
         break;
     }
     return {};
@@ -853,6 +936,7 @@ QString FlashViewModel::consoleNote() const {
     case OperationKind::ReadRegisters:
     case OperationKind::MemoryZones:
     case OperationKind::WriteFlash:
+    case OperationKind::Identify:
         break;
     }
     return tr("The console is paused and resumes automatically afterwards.");
@@ -889,6 +973,7 @@ QString FlashViewModel::resultText() const {
         case OperationKind::ReadRegisters:
         case OperationKind::MemoryZones:
         case OperationKind::WriteFlash:
+        case OperationKind::Identify:
             break;
         }
         return {};
@@ -938,14 +1023,15 @@ int FlashViewModel::errorAction() const {
 }
 
 QString FlashViewModel::maintenanceTitle() const {
-    const device::TargetProfile* target = targetProfile(targetId());
+    const device::TargetProfile* target = targetProfile(m_maintenanceTarget);
     return target != nullptr ? tr("Maintenance — %1 MCU").arg(device::targetDisplayName(*target))
                              : tr("Maintenance");
 }
 
 QVariantMap FlashViewModel::describeErase(bool recover) const {
-    const device::TargetProfile* target = targetProfile(targetId());
-    const QString mcu = target != nullptr ? device::targetDisplayName(*target) : targetId();
+    const device::TargetProfile* target = targetProfile(m_maintenanceTarget);
+    const QString mcu =
+        target != nullptr ? device::targetDisplayName(*target) : m_maintenanceTarget;
     // ERASEALL and recover erase the PIB on every MCU (also on the nRF91, where a UICR erase alone
     // keeps it); the CLI names it for both targets (ADR-0038).
     const QStringList items{tr("Firmware (flash)"), tr("UICR configuration"),
@@ -971,11 +1057,11 @@ QVariantMap FlashViewModel::describeErase(bool recover) const {
 }
 
 void FlashViewModel::requestConfirmation(bool recover) {
-    if (!canRunMaintenance()) {
+    if (!canRunMaintenance() || (recover ? !recoverAvailable() : !eraseAllAvailable())) {
         return;
     }
     m_pending = PendingConfirmation{
-        .recover = recover, .targetId = targetId(), .profileId = m_tab->profileId()};
+        .recover = recover, .targetId = m_maintenanceTarget, .profileId = m_tab->profileId()};
     m_confirmation = describeErase(recover);
     confirmationRequested(); // signal
 }
@@ -985,10 +1071,10 @@ void FlashViewModel::confirm() {
     if (!pending) {
         return;
     }
-    if (pending->targetId != targetId() || pending->profileId != m_tab->profileId()) {
+    if (pending->targetId != m_maintenanceTarget || pending->profileId != m_tab->profileId()) {
         // The dialog named another MCU than the one the page shows now: never erase that one.
         qCWarning(lcGui).noquote() << "Flash page: confirmation for" << pending->targetId
-                                   << "refused: the MCU changed to" << targetId();
+                                   << "refused: the MCU changed to" << m_maintenanceTarget;
         return;
     }
     if (pending->recover) {
@@ -1003,10 +1089,11 @@ QVariantMap FlashViewModel::describeEraseAll() const { return describeErase(fals
 QVariantMap FlashViewModel::describeRecover() const { return describeErase(true); }
 
 void FlashViewModel::retranslate() {
-    kindChanged();     // signal
-    textsChanged();    // signal
-    progressChanged(); // signal
-    stateChanged();    // signal
+    kindChanged();        // signal
+    maintenanceChanged(); // signal
+    textsChanged();       // signal
+    progressChanged();    // signal
+    stateChanged();       // signal
 }
 
 } // namespace hwio::gui

@@ -185,17 +185,13 @@ TEST_F(ConnectionTest, OptionsComeFromTheProfileAndTheSettings) {
     EXPECT_FALSE(connection().autoReconnect());
 }
 
-// 0021 (ADR-0168): the device bar's target picker shows the ids; the long title is the tooltip.
-TEST_F(ConnectionTest, TargetLabelsAreTheIds) {
-    ASSERT_TRUE(tab().configure(QStringLiteral("chester"), QStringLiteral("app"), 683012345));
-    const QVariantList targets = connection().targets();
-    ASSERT_EQ(targets.size(), 2);
-    EXPECT_EQ(targets.at(0).toMap().value(QStringLiteral("label")).toString(),
-              QStringLiteral("app"));
-    EXPECT_EQ(targets.at(1).toMap().value(QStringLiteral("label")).toString(),
-              QStringLiteral("lte"));
-    EXPECT_EQ(targets.at(1).toMap().value(QStringLiteral("title")).toString(),
-              QStringLiteral("LTE MCU (nRF9151 / nRF9160)"));
+// ADR-0233 (plan 0033): a J-Link tab always uses the console target; a tab configured (or saved)
+// with the LTE target opens on the application MCU.
+TEST_F(ConnectionTest, TheTargetIsAlwaysTheConsoleTarget) {
+    ASSERT_TRUE(tab().configure(QStringLiteral("chester"), QStringLiteral("lte"), 683012345));
+    EXPECT_EQ(connection().targetId(), QStringLiteral("app"));
+    EXPECT_EQ(connection().targetTitle(), QStringLiteral("Application MCU (nRF52840)"));
+    EXPECT_EQ(tab().consoleTargetId(), QStringLiteral("app"));
 }
 
 TEST_F(ConnectionTest, AutomaticSpeedByDefault) {

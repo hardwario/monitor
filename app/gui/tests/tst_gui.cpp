@@ -182,6 +182,10 @@ public:
         set(QStringLiteral("update/includePrerelease"), false);
         m_app->update()->dismiss();
     }
+    // Plan 0033: a setting written through the store (e.g. advanced/expertActions).
+    Q_INVOKABLE [[nodiscard]] bool setSetting(const QString& key, const QVariant& value) const {
+        return static_cast<bool>(m_app->settingsStore()->setValue(key, value));
+    }
     Q_INVOKABLE [[nodiscard]] QString setting(const QString& key) const {
         return m_app->settingsStore()->value(key).toString();
     }

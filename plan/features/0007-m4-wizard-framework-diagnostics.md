@@ -683,6 +683,17 @@ not found (Warning).
 running); manual checks on Linux (without udev rule), Windows and macOS (process sources compiled there for the first
 time), report redaction review; confirmation of the open question above.
 
+## Amendment from 0033 (2026-11-04, LTE firmware update wizard)
+
+Plan [0033](0033-rc2-feedback.md) registers the first production wizard on this framework (`WizardId::LteUpdate`,
+"lte-update", ADR-0234) and adds to the contract, with defaults that keep every other wizard as it was:
+- `Wizard::canCancel()` (default true): false disables Cancel, × and Esc (the LTE update cannot be cancelled while the
+  erase or a flash runs); `WizardViewModel::canCancel`, `cancel()` refuses while false.
+- `Wizard::cancelAcceptText()` / `cancelRejectText()` (default ""): the buttons of the Cancel confirmation
+  ("Cancel anyway" / "Back" for the LTE update after the erase); "" keeps "Cancel and close" / "Keep going".
+- The hand-off `open-flash-page:recover:<target>` (0009's `protected` topic, ADR-0236).
+- The LTE update uses the existing WizardStep `illustration` above its Embedded step (the connector pictures).
+
 ## Open findings (independent review round 1, 2026-10-16)
 
 Verified state before the review: debug and ASan 742 tests (730 passed, 12 HIL/corpus skipped), TSan 730, tidy 0,

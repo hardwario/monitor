@@ -117,6 +117,22 @@ TestCase {
         compare(tab().title, "CHESTER · CHESTER-ABC123");
     }
 
+    // Plan 0033 (ADR-0235): the order is frozen while the pointer is over the list or a row has
+    // the keyboard focus.
+    function test_orderFrozenWhilePointedAt() {
+        showBluetooth();
+        const picker = tab().blePicker;
+        const row = visibleAll("bleRow")[0];
+        mouseMove(row, row.width / 2, row.height / 2);
+        tryVerify(() => picker.freezeOrder);
+        mouseMove(window.contentItem, 2, 2);
+        tryVerify(() => !picker.freezeOrder);
+        row.forceActiveFocus();
+        tryVerify(() => picker.freezeOrder);
+        visibleOne("bleFilter").forceActiveFocus();
+        tryVerify(() => !picker.freezeOrder);
+    }
+
     function test_bluetoothTab() {
         showBluetooth();
         click(visibleAll("bleRow")[0]);

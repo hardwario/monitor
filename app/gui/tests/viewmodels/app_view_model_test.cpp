@@ -119,11 +119,12 @@ TEST_F(AppViewModelTest, TabsAreSavedAndRestoredWithoutConnecting) {
         app->setCurrentTab(1);
         app->saveState();
     }
+    // Plan 0012: every entry names its transport. ADR-0233: a tab configured with "lte" works
+    // with the console target (app).
     EXPECT_EQ(readRaw(QStringLiteral("ui/tabs")),
-              // Plan 0012: every entry names its transport.
               QStringLiteral(R"({"current":1,"tabs":[{"profile":"chester","sn":801000001,)"
                              R"("target":"app","transport":"jlink"},{"profile":"chester",)"
-                             R"("sn":801000002,"target":"lte","transport":"jlink"}]})"));
+                             R"("sn":801000002,"target":"app","transport":"jlink"}]})"));
     const auto app = makeApp();
     ASSERT_EQ(app->tabs()->count(), 2);
     EXPECT_EQ(app->currentTab(), 1);
@@ -133,9 +134,20 @@ TEST_F(AppViewModelTest, TabsAreSavedAndRestoredWithoutConnecting) {
         EXPECT_EQ(tab->session(), nullptr); // never connects at start
     }
     EXPECT_EQ(app->tabs()->at(0)->title(), QStringLiteral("CHESTER app · 801000001"));
-    EXPECT_EQ(app->tabs()->at(1)->consoleTargetId(), QStringLiteral("lte"));
+    EXPECT_EQ(app->tabs()->at(1)->consoleTargetId(), QStringLiteral("app"));
     spin(std::chrono::milliseconds(300));
     EXPECT_EQ(app->sessionRegistry().sessionCount(), 0U);
+}
+
+// ADR-0233 (plan 0033): a tab saved by rc.2 with target "lte" is restored on the console target.
+TEST_F(AppViewModelTest, ATabSavedOnTheLteTargetIsRestoredOnTheApplicationMcu) {
+    writeRaw(QStringLiteral("ui/tabs"),
+             QStringLiteral(R"({"current":0,"tabs":[{"profile":"chester","sn":801000002,)"
+                            R"("target":"lte","transport":"jlink"}]})"));
+    const auto app = makeApp();
+    ASSERT_EQ(app->tabs()->count(), 1);
+    EXPECT_EQ(app->tabs()->at(0)->consoleTargetId(), QStringLiteral("app"));
+    EXPECT_EQ(app->tabs()->at(0)->title(), QStringLiteral("CHESTER app · 801000002"));
 }
 
 TEST_F(AppViewModelTest, RestoreCanBeTurnedOff) {

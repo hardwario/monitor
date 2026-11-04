@@ -42,9 +42,6 @@ ProbePickerViewModel::ProbePickerViewModel(ProbeScanner* scanner,
     const auto all = device::ProfileRegistry::all();
     if (!all.empty()) {
         m_profileId = toQString(all.front()->id);
-        if (!all.front()->targets.empty()) {
-            m_targetId = toQString(all.front()->targets.front().id);
-        }
     }
     if (m_scanner != nullptr) {
         connect(m_scanner, &ProbeScanner::scanned, this, [this] { updateFromScanner(); });
@@ -114,12 +111,18 @@ void ProbePickerViewModel::setProfileId(const QString& id) {
     }
     m_profileId = id;
     profileIdChanged(); // signal
-    targetsChanged();   // signal
-    const device::DeviceProfile* profile = device::ProfileRegistry::find(toStdString(id));
-    if (device::findTarget(*profile, toStdString(m_targetId)) == nullptr &&
-        !profile->targets.empty()) {
-        setTargetId(toQString(profile->targets.front().id));
-    }
+}
+
+QString ProbePickerViewModel::targetId() const {
+    const device::DeviceProfile* profile = device::ProfileRegistry::find(toStdString(m_profileId));
+    return profile != nullptr ? toQString(device::consoleTargetId(*profile)) : QString();
+}
+
+bool ProbePickerViewModel::profileChoice() { return device::ProfileRegistry::all().size() > 1; }
+
+QString ProbePickerViewModel::profileName() const {
+    const device::DeviceProfile* profile = device::ProfileRegistry::find(toStdString(m_profileId));
+    return profile != nullptr ? toQString(profile->displayName) : QString();
 }
 
 QVariantList ProbePickerViewModel::profiles() {
@@ -127,32 +130,6 @@ QVariantList ProbePickerViewModel::profiles() {
     for (const device::DeviceProfile* profile : device::ProfileRegistry::all()) {
         list.append(QVariantMap{{QStringLiteral("id"), toQString(profile->id)},
                                 {QStringLiteral("name"), toQString(profile->displayName)}});
-    }
-    return list;
-}
-
-void ProbePickerViewModel::setTargetId(const QString& id) {
-    const device::DeviceProfile* profile = device::ProfileRegistry::find(toStdString(m_profileId));
-    if (id == m_targetId || profile == nullptr ||
-        device::findTarget(*profile, toStdString(id)) == nullptr) {
-        return;
-    }
-    m_targetId = id;
-    targetIdChanged(); // signal
-}
-
-QVariantList ProbePickerViewModel::targets() const {
-    QVariantList list;
-    const device::DeviceProfile* profile = device::ProfileRegistry::find(toStdString(m_profileId));
-    if (profile == nullptr) {
-        return list;
-    }
-    for (const device::TargetProfile& target : profile->targets) {
-        const QString id = toQString(target.id);
-        // 0021 (ADR-0168): pickers show the id ("label"); the long title is the tooltip.
-        list.append(QVariantMap{{QStringLiteral("id"), id},
-                                {QStringLiteral("label"), id},
-                                {QStringLiteral("title"), targetTitle(m_profileId, id)}});
     }
     return list;
 }
@@ -224,7 +201,7 @@ void ProbePickerViewModel::connectSelected() {
         return;
     }
     const Row& row = m_rows.at(static_cast<std::size_t>(m_selectedRow));
-    connectRequested(row.serial, row.product, m_profileId, m_targetId); // signal
+    connectRequested(row.serial, row.product, m_profileId, targetId()); // signal
 }
 
 void ProbePickerViewModel::updateFromScanner() {
@@ -336,7 +313,7 @@ void ProbePickerViewModel::preselect() {
 }
 
 void ProbePickerViewModel::retranslate() {
-    targetsChanged(); // signal
+    profileIdChanged(); // signal
 }
 
 QString ProbePickerViewModel::firmwareDate(const QString& firmware) {

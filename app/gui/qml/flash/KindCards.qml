@@ -1,7 +1,7 @@
 // Flash step 1 (ADR-0055; amended by 0021, ADR-0174): "What do you want to flash?" - two radio
 // cards (application firmware, LTE firmware incl. the modem), stacked below 1000 px window width;
-// prerequisite problems (nRF Util) and the connector warning (ADR-0057 Phase 0) appear inline below
-// the cards.
+// prerequisite problems (nRF Util) appear inline below the cards (plan 0033: no connector warning,
+// the LTE kind starts the LTE update wizard).
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -173,40 +173,6 @@ FlashCard {
                 kind: "ghost"
                 text: qsTr("How to install ↗")
                 onClicked: Qt.openUrlExternally(card.vm.nrfUtilInstallUrl)
-            }
-        }
-    }
-
-    // ADR-0057 Phase 0: the other MCU is not reachable through the same connector (CHESTER-M).
-    Rectangle {
-        objectName: "connectorWarning"
-        Layout.fillWidth: true
-        visible: card.vm ? card.vm.connectorWarning !== "" : false
-        implicitHeight: warningRow.implicitHeight + 2 * Theme.spacingS
-        radius: Theme.radiusS
-        color: Theme.warningPanelBg
-        Accessible.role: Accessible.AlertMessage
-        Accessible.name: card.vm ? card.vm.connectorWarning : ""
-
-        RowLayout {
-            id: warningRow
-
-            anchors.fill: parent
-            anchors.margins: Theme.spacingS
-            spacing: Theme.spacingS
-
-            Icon {
-                Layout.alignment: Qt.AlignTop
-                symbol: "warning"
-                color: Theme.warning
-            }
-
-            Label {
-                textFormat: Text.PlainText
-                Layout.fillWidth: true
-                text: card.vm ? card.vm.connectorWarning : ""
-                color: Theme.text
-                wrapMode: Text.Wrap
             }
         }
     }

@@ -87,6 +87,8 @@ std::span<const ProgramPhase> plannedPhases(OperationKind kind, bool crossTarget
         return pick(crossTarget, readCross, readPhases);
     case OperationKind::WriteFlash:
         return pick(crossTarget, flashCross, flashPhases);
+    case OperationKind::Identify:
+        return pick(crossTarget, readCross, readPhases);
     }
     return {};
 }
@@ -100,6 +102,7 @@ bool isLightOperation(OperationKind kind) noexcept {
     case OperationKind::WriteMemory:
     case OperationKind::ReadRegisters:
     case OperationKind::MemoryZones:
+    case OperationKind::Identify:
         return true;
     default:
         return false;
@@ -160,6 +163,8 @@ std::string_view operationKindId(OperationKind kind) noexcept {
         return "memoryZones";
     case OperationKind::WriteFlash:
         return "writeFlash";
+    case OperationKind::Identify:
+        return "identify";
     }
     return "flash";
 }

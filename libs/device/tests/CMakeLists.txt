@@ -15,6 +15,7 @@ add_executable(hwio_device_tests
     firmware_identity_test.cpp
     line_assembler_test.cpp
     lock_holder.h
+    lte_update_test.cpp
     main.cpp
     diagnose_session_test.cpp
     operation_session_test.cpp

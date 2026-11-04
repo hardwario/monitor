@@ -247,6 +247,40 @@ Result<jlink::ChipInfo> unreadableChip(WorkflowContext& context, jlink::ChipInfo
 
 } // namespace
 
+const TargetProfile* targetOfChip(const DeviceProfile& profile,
+                                  const jlink::ChipInfo& chip) noexcept {
+    for (const TargetProfile& target : profile.targets) {
+        const bool matches = chip.part != 0
+                                 ? findPart(target, chip.part) != nullptr
+                                 : !chip.family.empty() && chip.family == target.chipFamily.name;
+        if (matches) {
+            return &target;
+        }
+    }
+    return nullptr;
+}
+
+Error otherConnectorError(const TargetProfile& console, const TargetProfile& found,
+                          std::string detail) {
+    Error error = makeError(ErrorCode::TargetOtherConnector, std::move(detail));
+    error.message =
+        QCoreApplication::translate("hwio::device", "The J-Link is connected to the %1 MCU.")
+            .arg(targetDisplayName(found))
+            .toStdString();
+    error.cause = QCoreApplication::translate(
+                      "hwio::device",
+                      "The console runs on the %1 MCU; the J-Link cable is on the other connector.")
+                      .arg(targetDisplayName(console))
+                      .toStdString();
+    // The connector by its board label (the target id in upper case: "APP", "LTE").
+    error.suggestion = QCoreApplication::translate(
+                           "hwio::device",
+                           "Move the J-Link cable to the %1 connector, or update the LTE firmware.")
+                           .arg(toQString(console.id).toUpper())
+                           .toStdString();
+    return error;
+}
+
 Result<jlink::ChipInfo> identifyTarget(WorkflowContext& context, bool allowProtected) {
     const DeviceProfile& profile = *context.profile;
     const TargetProfile& target = *context.target;

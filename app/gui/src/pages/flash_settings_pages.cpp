@@ -13,6 +13,7 @@
 #include "viewmodels/page_registry.h"
 #include "viewmodels/settings_view_model.h"
 #include "viewmodels/shortcut_registry.h"
+#include "wizard/lte_update_wizard.h"
 
 #include <QKeySequence>
 #include <QLoggingCategory>
@@ -66,6 +67,8 @@ void registerFlashAndSettingsPages(AppViewModel& app) {
         &app);
     QObject::connect(&app, &AppViewModel::languageChanged, services,
                      &FirmwareServices::retranslate);
+    // Plan 0033 (ADR-0234): the LTE firmware update wizard shares the firmware services.
+    registerLteUpdateWizard(app, *services);
 
     PageRegistry& pages = app.pageRegistry();
     pages.add(PageDescriptor{.id = FlashViewModel::pageId,
@@ -109,6 +112,12 @@ void registerFlashAndSettingsPages(AppViewModel& app) {
                                   .titleSourceText = QT_TRANSLATE_NOOP("Pages", "nRF Util"),
                                   .qml = qmlUrl("settings/NrfUtilSection.qml"),
                                   .order = 40});
+    // Plan 0033 (ADR-0236): Advanced (expert maintenance actions), the last before About.
+    pages.addSettingsSection(
+        SettingsSectionDescriptor{.id = QStringLiteral("advanced"),
+                                  .titleSourceText = QT_TRANSLATE_NOOP("Pages", "Advanced"),
+                                  .qml = qmlUrl("settings/AdvancedSection.qml"),
+                                  .order = 80});
     pages.addSettingsSection(
         SettingsSectionDescriptor{.id = QStringLiteral("about"),
                                   .titleSourceText = QT_TRANSLATE_NOOP("Pages", "About"),

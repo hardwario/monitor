@@ -1,7 +1,7 @@
-// Device bar of a tab (ADR-0043, ADR-0052, ADR-0053): probe, target (disabled while a session
-// exists), state text ("Connected", "Connecting…", "Reconnecting… (target not powered)", the busy
-// page's text), Connect / Cancel / Disconnect and the ⋯ Advanced popover. Plan 0012: a Bluetooth tab
-// shows the device chip (name · RSSI) with the Bluetooth icon and no target picker.
+// Device bar of a tab (ADR-0043, ADR-0052, ADR-0053; ADR-0233: no target box): probe, state text
+// ("Connected", "Connecting…", "Reconnecting… (target not powered)", the busy page's text),
+// Connect / Cancel / Disconnect and the ⋯ Advanced popover. Plan 0012: a Bluetooth tab shows the
+// device chip (name · RSSI) with the Bluetooth icon.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -84,55 +84,6 @@ Rectangle {
                     color: Theme.text
                     elide: Text.ElideMiddle
                 }
-            }
-        }
-
-        ComboBox {
-            id: targetBox
-
-            objectName: "targetBox"
-            visible: !bar.choosing && !bar.connection.isBle
-            implicitHeight: 30
-            Layout.maximumWidth: 260
-            model: bar.connection.targets
-            // 0021 (ADR-0168): the ids only; the long title is the tooltip.
-            textRole: "label"
-            valueRole: "id"
-            currentIndex: targetBox.indexOfValue(bar.connection.targetId)
-            enabled: bar.connection.canChangeTarget
-            font: Theme.fontUi
-            displayText: qsTr("Target: %1").arg(bar.connection.targetId)
-            Accessible.name: qsTr("Target")
-            Accessible.description: bar.connection.targetTitle
-            onActivated: bar.connection.targetId = targetBox.currentValue
-
-            delegate: ItemDelegate {
-                id: targetItem
-
-                required property var modelData
-                required property int index
-
-                width: targetBox.width
-                text: targetItem.modelData.label
-                font: Theme.fontUi
-                highlighted: targetBox.highlightedIndex === targetItem.index
-                Accessible.description: targetItem.modelData.title
-                HToolTip {
-                    visible: targetItem.hovered
-                    text: targetItem.modelData.title
-                    delay: 600
-                }
-            }
-            HToolTip {
-                visible: targetBox.hovered
-                text: bar.connection.canChangeTarget ? bar.connection.targetTitle
-                    : qsTr("Disconnect to change the target")
-                delay: 600
-            }
-
-            FocusRing {
-                control: targetBox
-                radiusOffset: Theme.radiusS
             }
         }
 

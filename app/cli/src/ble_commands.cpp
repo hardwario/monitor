@@ -45,6 +45,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <expected>
 #include <filesystem>
@@ -321,7 +322,11 @@ Result<CommandResult> scan(const Context& context, const ScanCommandOptions& opt
         QJsonObject row;
         row.insert(QStringLiteral("id"), toQString(info.id));
         row.insert(QStringLiteral("name"), toQString(info.name));
-        row.insert(QStringLiteral("rssi"), info.rssi);
+        // Plan 0033 (D5, ADR-0235): the smoothed RSSI over the scan (whole dBm, 0 = unknown); the
+        // last measured value as rssi_last.
+        const int smoothed = static_cast<int>(std::lround(info.rssiSmoothed));
+        row.insert(QStringLiteral("rssi"), smoothed);
+        row.insert(QStringLiteral("rssi_last"), info.rssi);
         row.insert(QStringLiteral("nusAdvertised"), info.nusAdvertised);
         row.insert(QStringLiteral("profile"), info.profileId.empty()
                                                   ? QJsonValue(QJsonValue::Null)
@@ -329,7 +334,7 @@ Result<CommandResult> scan(const Context& context, const ScanCommandOptions& opt
         row.insert(QStringLiteral("inUseBy"), ownerJson(owner));
         rowsJson.append(row);
         rows.push_back({info.id, info.name.empty() ? std::string(unknown) : info.name,
-                        std::to_string(info.rssi),
+                        std::to_string(smoothed),
                         info.profileId.empty() ? std::string(unknown) : info.profileId,
                         owner ? std::format("{}, PID {}", owner->app, owner->pid) : std::string()});
     }

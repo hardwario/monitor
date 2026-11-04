@@ -70,6 +70,10 @@ if(WIN32)
     target_compile_definitions(hwio_cli_impl PUBLIC NOMINMAX WIN32_LEAN_AND_MEAN)
 endif()
 
+# Plan 0033: the test-only HWIO_TEST_INTERACTIVE of `chester lte flash --guided` (debug builds
+# with HWIO_TEST_OVERRIDES only, like HWIO_CATALOG_URL).
+target_compile_definitions(hwio_cli_impl PRIVATE ${HWIO_TEST_OVERRIDES_DEFINE})
+
 qt_add_executable(hwio src/main.cpp)
 # Plan 0015 A3: icon and VERSIONINFO on Windows.
 if(WIN32)
