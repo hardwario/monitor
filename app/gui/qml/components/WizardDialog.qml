@@ -87,6 +87,7 @@ Dialog {
                 iconName: "close"
                 text: qsTr("Cancel")
                 display: AbstractButton.IconOnly
+                enabled: dialog.wizard.canCancel
                 onClicked: dialog.wizard.cancel(false)
             }
         }
@@ -328,7 +329,7 @@ Dialog {
             Layout.rightMargin: Theme.spacingXl
             Layout.bottomMargin: Theme.spacingL
             text: dialog.step.kind === StepKind.Done ? qsTr("Close") : qsTr("Cancel")
-            enabled: !dialog.wizard.closing
+            enabled: !dialog.wizard.closing && dialog.wizard.canCancel
             onClicked: dialog.wizard.cancel(false)
         }
     }
@@ -338,8 +339,9 @@ Dialog {
 
         objectName: "wizardCancelConfirm"
         title: qsTr("Cancel the wizard?")
-        acceptText: qsTr("Cancel and close")
-        rejectText: qsTr("Keep going")
+        // Plan 0033: a wizard may name the buttons ("Cancel anyway" / "Back").
+        acceptText: dialog.wizard.cancelAcceptText !== "" ? dialog.wizard.cancelAcceptText : qsTr("Cancel and close")
+        rejectText: dialog.wizard.cancelRejectText !== "" ? dialog.wizard.cancelRejectText : qsTr("Keep going")
         onAccepted: dialog.wizard.cancel(true)
     }
 }

@@ -12,10 +12,13 @@ firmvér posiela, sa zobrazujú ako riadky logu.
 
 1. Otvorte novú kartu (<kbd>Ctrl</kbd>+<kbd>T</kbd>) a prepnite **Connect via** (pripojiť cez) na **Bluetooth**.
    Aplikácia si voľbu zapamätá pre ďalšiu kartu.
-2. Zoznam zobrazuje zariadenia CHESTER v okolí, najsilnejší signál ako prvý, a sám sa obnovuje. Môžete ho filtrovať
-   podľa názvu alebo zaškrtnúť **Show all devices** (zobraziť všetky zariadenia) a zobraziť všetky zariadenia
-   Bluetooth. Zariadenie, ktoré používa iná karta, má označenie **In use (tab N)**; jeho výberom sa prepnete do tejto
-   karty. Zariadenie, ktoré používa iný program, má označenie **In use by another program** a nedá sa vybrať.
+2. Zoznam zobrazuje zariadenia CHESTER v okolí, najsilnejší signál ako prvý, a sám sa obnovuje. Signál sa priemeruje
+   počas niekoľkých sekúnd a zariadenie sa posunie vyššie, len keď je zreteľne silnejšie (o 6 dB), takže zoznam
+   zostáva pokojný; kým je ukazovateľ myši nad zoznamom (alebo má riadok fokus klávesnice), poradie sa vôbec nemení a
+   nové zariadenia sa pridávajú na koniec. Môžete ho filtrovať podľa názvu alebo zaškrtnúť **Show all devices**
+   (zobraziť všetky zariadenia) a zobraziť všetky zariadenia Bluetooth (zariadenia CHESTER ako prvé). Zariadenie,
+   ktoré používa iná karta, má označenie **In use (tab N)**; jeho výberom sa prepnete do tejto karty. Zariadenie,
+   ktoré používa iný program, má označenie **In use by another program** a nedá sa vybrať.
 3. Vyberte zariadenie a stlačte **Connect** (pripojiť), prípadne naň dvakrát kliknite alebo stlačte <kbd>Enter</kbd>.
 
 Karta funguje ako karta J-Linku: konzola s návrhmi, históriou, vyhľadávaním, dávkovými súbormi a súbormi konzoly

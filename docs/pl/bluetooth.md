@@ -12,9 +12,12 @@ logu wysyłane przez firmware pojawiają się jako wiersze logu.
 
 1. Otwórz nową kartę (<kbd>Ctrl</kbd>+<kbd>T</kbd>) i przełącz **Connect via** (połącz przez) na **Bluetooth**.
    Aplikacja zapamiętuje ten wybór dla następnej karty.
-2. Lista pokazuje pobliskie urządzenia CHESTER, od najsilniejszego sygnału, i odświeża się samoczynnie. Można ją
-   filtrować po nazwie albo zaznaczyć **Show all devices** (pokaż wszystkie urządzenia), aby zobaczyć wszystkie
-   urządzenia Bluetooth. Urządzenie używane w innej karcie jest oznaczone **In use (tab N)**; jego wybranie przełącza
+2. Lista pokazuje pobliskie urządzenia CHESTER, od najsilniejszego sygnału, i odświeża się samoczynnie. Sygnał jest
+   uśredniany przez kilka sekund, a urządzenie przesuwa się wyżej tylko wtedy, gdy jest wyraźnie silniejsze (o 6 dB),
+   dzięki czemu lista pozostaje stabilna; gdy wskaźnik myszy jest nad listą (lub wiersz ma fokus klawiatury),
+   kolejność w ogóle się nie zmienia, a nowe urządzenia są dodawane na końcu. Można ją filtrować po nazwie albo
+   zaznaczyć **Show all devices** (pokaż wszystkie urządzenia), aby zobaczyć wszystkie urządzenia Bluetooth (najpierw
+   urządzenia CHESTER). Urządzenie używane w innej karcie jest oznaczone **In use (tab N)**; jego wybranie przełącza
    na tę kartę. Urządzenie używane przez inny program jest oznaczone **In use by another program** i nie można go
    wybrać.
 3. Wybierz urządzenie i naciśnij **Connect** (połącz) (albo kliknij je dwukrotnie lub naciśnij <kbd>Enter</kbd>).

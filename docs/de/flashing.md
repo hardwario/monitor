@@ -19,9 +19,9 @@ Während ein Flash-Vorgang läuft, ist die Konsole des Tabs angehalten und wird 
 
 Die Karte zeigt die Firmware, die sich gerade im Gerät befindet, sofern das Gerät sie meldet.
 
-Bei einem CHESTER-M hat jede MCU ihren eigenen Programmieranschluss. Passt das Target des Tabs nicht zu dem, was Sie
-flashen möchten, fordert die Seite Sie auf, den J-Link zuerst an den anderen Anschluss anzuschließen und das Target
-des Tabs umzuschalten.
+Ein Tab arbeitet immer mit der Anwendungs-MCU. **LTE firmware** (LTE-Firmware) wird nicht auf dieser Seite geflasht:
+Es startet das geführte [LTE-Firmware-Update](#lte-firmware-update), das Ihnen sagt, wann Sie das J-Link-Kabel
+umstecken.
 
 ## 2. Firmware
 
@@ -38,6 +38,8 @@ Heruntergeladene Firmware wird in einem Cache aufbewahrt und nicht erneut herunt
 verwendet) listet die letzten 10 Dateien und IDs.
 
 ### LTE-Firmware
+
+Sie wählen sie im ersten Schritt des [LTE-Firmware-Updates](#lte-firmware-update):
 
 - **HARDWARIO LTE firmware 1.7.0 (recommended)** (empfohlen): die LTE-Anwendung und die Modem-Firmware, die
   HARDWARIO mit CHESTER getestet hat. Sie wird von docs.hardwario.com heruntergeladen, und ihre Prüfsumme wird
@@ -84,18 +86,49 @@ erneut flashen.
 Am Ende zeigt die Seite zum Beispiel **Firmware flashed and verified in 12 s.**, mit **Open console** (Konsole
 öffnen) und **Flash again** (Erneut flashen).
 
+## LTE-Firmware-Update
+
+Bei einem CHESTER-M hat die LTE-MCU ihren eigenen Programmieranschluss, und die Anwendungsfirmware setzt die LTE-MCU
+zurück, wenn das Modem nicht antwortet, was einen Flash-Vorgang abbricht. **Update LTE firmware…** (LTE-Firmware
+aktualisieren…; auf der Karte **LTE firmware** oder im Banner, wenn der J-Link am LTE-Anschluss steckt) führt Sie
+deshalb durch den ganzen Ablauf:
+
+1. **Firmware**: die HARDWARIO-LTE-Firmware oder Ihre eigene Datei.
+2. **APP connector** (APP-Anschluss): Schließen Sie den J-Link an den APP-Anschluss an. Der Assistent geht von selbst
+   weiter, sobald die Anwendungs-MCU antwortet; am falschen Anschluss meldet er **This is the LTE connector. Move the
+   cable to the APP connector.** (das ist der LTE-Anschluss, stecken Sie das Kabel an den APP-Anschluss um).
+3. **Stop the application** (Anwendung anhalten): Eine Kopie der Anwendungsfirmware wird gespeichert, dann wird die
+   Anwendung gelöscht (**Erase application**: der UICR und der PIB bleiben erhalten). Lässt sich keine Kopie
+   erstellen, zum Beispiel bei einer gegen Auslesen geschützten MCU, können Sie mit **Continue without a copy** (ohne
+   Kopie fortfahren) weitermachen und am Ende selbst eine Anwendung flashen.
+4. **LTE connector** (LTE-Anschluss): Stecken Sie den J-Link an den LTE-Anschluss um.
+5. **Update** (Aktualisierung): Die LTE-MCU und ihr Modem werden aktualisiert (bei einem Bundle in zwei Schritten).
+6. **APP connector**: Stecken Sie den J-Link zurück.
+7. **Application** (Anwendung): Die Kopie wird zurückgeschrieben (Standard), oder Sie wählen Firmware aus dem Katalog
+   oder eine Datei.
+8. **Done** (Fertig): Die Anwendung läuft wieder, und die Konsole verbindet sich neu.
+
+Während der Assistent läuft, ist die Konsole des Tabs angehalten (**Paused for the LTE firmware update**). Abbrechen
+ist jederzeit möglich, außer während die MCU beschrieben wird. Nach Schritt 3 fragt der Assistent zuerst nach: Die
+Anwendungs-MCU ist gelöscht, und das Gerät läuft erst wieder, wenn Sie eine Anwendung flashen. Die Kopie bleibt im
+Ordner `backups` ([Datenschutz und gespeicherte Daten](privacy.md)).
+
 ## Wartung
 
-**Maintenance — application MCU** (Wartung — Anwendungs-MCU) (oder **LTE MCU**) unten auf der Seite ist
-standardmäßig eingeklappt:
+**Maintenance — application MCU** (Wartung — Anwendungs-MCU) unten auf der Seite ist standardmäßig eingeklappt:
 
 | Aktion | Funktion | Fragt zuerst |
 |---|---|---|
 | **Reset** | Setzt die MCU zurück | nein |
 | **Reset and halt** | Setzt die MCU zurück und hält die CPU angehalten | nein |
 | **Erase application** | Löscht die Firmware; behält den UICR und den PIB (nur Anwendungs-MCU) | nein |
-| **Erase everything…** | Löscht den Flash, den UICR und den PIB | ja |
-| **Recover…** | Siehe unten | ja |
+| **Erase everything…** | Löscht den Flash, den UICR und den PIB (nur Expertenaktionen) | ja |
+| **Recover…** | Siehe unten (nur Expertenaktionen) | ja |
+
+**Erase everything…**, **Recover…** und die Wartung der **LTE MCU** (eine Auswahl **Application MCU | LTE MCU** über
+den Schaltflächen) erscheinen nur mit **Settings › Advanced › Show expert maintenance actions**
+(Experten-Wartungsaktionen anzeigen), weil sie die Seriennummer und die Konfiguration des Geräts löschen können. Auf
+der LTE-MCU brauchen sie den J-Link am LTE-Anschluss.
 
 ### Recover
 
@@ -103,6 +136,8 @@ Ist die MCU gegen Auslesen geschützt (approtect), kann der J-Link sie weder les
 schlägt mit [target.protected](troubleshooting.md#target.protected) fehl. **Recover…** entfernt den Schutz, indem es
 die MCU vollständig löscht, einschließlich des UICR und des PIB. Auf der LTE-MCU programmiert es danach ein kleines
 Image, das die MCU debugbar hält. Flashen Sie nach einem Recover die Firmware erneut. Recover läuft nie von selbst.
+Schickt Sie die Fehlerbehebungsanleitung für eine geschützte MCU auf die Seite **Flash**, wird **Recover…** dort
+einmal angezeigt, auch ohne die Experteneinstellung.
 
 ## Kommandozeile
 
@@ -112,6 +147,7 @@ hwio chester app flash 0123456789abcdef0123456789abcdef   # a catalog ID
 hwio chester app flash                                    # the build output in build/ or build/zephyr/
 hwio chester lte flash                                    # the HARDWARIO LTE firmware
 hwio chester lte flash mfw_nrf91x1_2.0.2.zip              # a modem firmware zip
+hwio chester lte flash --guided                           # the guided LTE update (as in the app)
 hwio chester app erase --all
 hwio chester app recover
 ```

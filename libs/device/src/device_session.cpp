@@ -175,7 +175,8 @@ SessionInternals::abandonRunning(Error error) {
                                                  .checks = {},
                                                  .targetStatus = std::nullopt,
                                                  .registers = {},
-                                                 .zones = {}});
+                                                 .zones = {},
+                                                 .familyMatch = std::nullopt});
     return lastFinished;
 }
 
@@ -412,6 +413,57 @@ Status DeviceSession::suspend() { return post(*m_internals, m_closed, detail::Su
 
 Status DeviceSession::resume() { return post(*m_internals, m_closed, detail::ResumeCommand{}); }
 
+// ---- plan 0033: hold (D4)
+// ------------------------------------------------------------------------
+
+Result<SessionHold> DeviceSession::hold() {
+    if (m_holds == 0) {
+        if (Status posted = post(*m_internals, m_closed, detail::HoldCommand{.held = true});
+            !posted) {
+            return std::unexpected(std::move(posted).error());
+        }
+    }
+    ++m_holds;
+    return SessionHold(this);
+}
+
+void DeviceSession::releaseHold() {
+    if (m_holds <= 0) {
+        return;
+    }
+    --m_holds;
+    if (m_holds == 0 && !m_closed) {
+        if (Status posted = post(*m_internals, m_closed, detail::HoldCommand{.held = false});
+            !posted) {
+            qCWarning(log::lcDevice).noquote()
+                << "Hold release not queued:" << toQString(posted.error().detail);
+        }
+    }
+}
+
+SessionHold::SessionHold(DeviceSession* session) : m_session(session) {}
+
+SessionHold::~SessionHold() { release(); }
+
+SessionHold::SessionHold(SessionHold&& other) noexcept
+    : m_session(std::exchange(other.m_session, nullptr)) {}
+
+SessionHold& SessionHold::operator=(SessionHold&& other) noexcept {
+    if (this != &other) {
+        release();
+        m_session = std::exchange(other.m_session, nullptr);
+    }
+    return *this;
+}
+
+bool SessionHold::active() const noexcept { return !m_session.isNull(); }
+
+void SessionHold::release() {
+    if (DeviceSession* session = std::exchange(m_session, nullptr); session != nullptr) {
+        session->releaseHold();
+    }
+}
+
 // ---- operations ----------------------------------------------------------------------------
 
 Result<OperationId> DeviceSession::startOperation(detail::OperationCommand command,
@@ -579,6 +631,12 @@ Result<OperationId> DeviceSession::halt(std::string_view targetId) {
 Result<OperationId> DeviceSession::go(std::string_view targetId) {
     detail::OperationCommand command;
     command.kind = OperationKind::Go;
+    return startOperation(std::move(command), targetId);
+}
+
+Result<OperationId> DeviceSession::identifyTarget(std::string_view targetId) {
+    detail::OperationCommand command;
+    command.kind = OperationKind::Identify;
     return startOperation(std::move(command), targetId);
 }
 
@@ -927,7 +985,8 @@ OperationResult waitForOperation(DeviceSession& session, OperationId id,
             .checks = {},
             .targetStatus = std::nullopt,
             .registers = {},
-            .zones = {}};
+            .zones = {},
+            .familyMatch = std::nullopt};
     }
     return std::move(*result);
 }

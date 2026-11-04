@@ -1,6 +1,6 @@
 # ADR-0157 — RTT stays attached during light target operations
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by plan 0033: identify is a light operation too)
 - **Date:** 2026-10-20
 - **Decided by:** Matej Strnad (M6 implementation, question from the 0013 implementation agent)
 

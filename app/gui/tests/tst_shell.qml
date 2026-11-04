@@ -110,11 +110,10 @@ TestCase {
         compare(currentBar("probeLabel").text, "Test Probe 2 · 801000002");
         tryCompare(currentBar("stateText"), "text", "Connected · 3.30 V"); // ADR-0091
         compare(currentBar("connectionAction").text, "Disconnect");
-        compare(currentBar("targetBox").enabled, false); // disabled while connected
+        verify(!currentBar("targetBox")); // ADR-0233: no target box
         click(currentBar("connectionAction"));
         tryCompare(tab, "state", DeviceTabViewModel.Disconnected);
         compare(currentBar("connectionAction").text, "Connect");
-        verify(currentBar("targetBox").enabled);
     }
 
     function test_probeInUseInAnotherTab() {

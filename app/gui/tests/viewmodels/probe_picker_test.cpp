@@ -90,7 +90,6 @@ TEST_F(ProbePickerTest, OneFreeProbeIsPreselectedAndConnects) {
     ASSERT_TRUE(waitForRows(picker, 1));
     EXPECT_EQ(picker.selectedRow(), 0);
     ASSERT_TRUE(picker.canConnect());
-    picker.setTargetId(QStringLiteral("app"));
     picker.connectSelected();
     EXPECT_EQ(tab.probeSerial(), 801000007U);
     EXPECT_EQ(tab.product(), QStringLiteral("Solo"));
@@ -278,28 +277,19 @@ TEST_F(ProbePickerTest, NoProbes) {
     EXPECT_EQ(picker.libraryVersion(), QStringLiteral("8.10"));
 }
 
-TEST_F(ProbePickerTest, ProfilesAndTargets) {
+// Plan 0033 (ADR-0233, D1): no target choice; with one J-Link profile its name is shown.
+TEST_F(ProbePickerTest, OneProfileAndTheConsoleTarget) {
     const auto app = makeApp();
     ProbePickerViewModel& picker = *app->currentTabViewModel()->picker();
     EXPECT_EQ(picker.profileId(), QStringLiteral("chester"));
     ASSERT_EQ(ProbePickerViewModel::profiles().size(), 1);
-    ASSERT_EQ(picker.targets().size(), 2);
+    EXPECT_FALSE(ProbePickerViewModel::profileChoice());
+    EXPECT_EQ(picker.profileName(), QStringLiteral("CHESTER"));
     EXPECT_EQ(picker.targetId(), QStringLiteral("app"));
-    picker.setTargetId(QStringLiteral("lte"));
-    EXPECT_EQ(picker.targetId(), QStringLiteral("lte"));
-    picker.setTargetId(QStringLiteral("nope"));
-    EXPECT_EQ(picker.targetId(), QStringLiteral("lte"));
     EXPECT_EQ(ProbePickerViewModel::targetTitle(QStringLiteral("chester"), QStringLiteral("app")),
               QStringLiteral("Application MCU (nRF52840)"));
     EXPECT_EQ(ProbePickerViewModel::targetTitle(QStringLiteral("chester"), QStringLiteral("lte")),
               QStringLiteral("LTE MCU (nRF9151 / nRF9160)"));
-    // 0021 (ADR-0168): the picker shows the id; the long title is the tooltip.
-    const QVariantMap first = picker.targets().at(0).toMap();
-    EXPECT_EQ(first.value(QStringLiteral("label")).toString(), QStringLiteral("app"));
-    EXPECT_EQ(first.value(QStringLiteral("title")).toString(),
-              QStringLiteral("Application MCU (nRF52840)"));
-    EXPECT_EQ(picker.targets().at(1).toMap().value(QStringLiteral("label")).toString(),
-              QStringLiteral("lte"));
 }
 
 } // namespace

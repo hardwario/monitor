@@ -96,6 +96,11 @@ public:
     [[nodiscard]] virtual bool canPrimary() const = 0;
     // Non-empty while an operation of the wizard runs: the question of the Cancel confirmation.
     [[nodiscard]] virtual QString busyCancelText() const { return {}; }
+    // Plan 0033 (LTE update): false while nothing may be cancelled (Cancel, × and Esc disabled),
+    // and the buttons of the Cancel confirmation ("" = "Cancel and close" / "Keep going").
+    [[nodiscard]] virtual bool canCancel() const { return true; }
+    [[nodiscard]] virtual QString cancelAcceptText() const { return {}; }
+    [[nodiscard]] virtual QString cancelRejectText() const { return {}; }
     virtual void cancelOperation() {}
     [[nodiscard]] virtual CheckListModel* checks() { return nullptr; }     // Checks steps
     [[nodiscard]] virtual QObject* embeddedViewModel() { return nullptr; } // Embedded steps
@@ -103,9 +108,11 @@ public:
     virtual void action(const QString& actionId) { emit handOff(actionId); }
 
 signals:
-    void changed();                      // step, buttons or checks changed
-    void finished(bool completed);       // the dialog closes
-    void handOff(const QString& action); // "open-console", "open-flash-page", "open-settings:<id>"
+    void changed();                // step, buttons or checks changed
+    void finished(bool completed); // the dialog closes
+    // "open-console", "open-flash-page", "open-settings:<id>"; plan 0033: the target.protected
+    // topic hands off "open-flash-page:recover:<target>" ([Recover…] shown once, ADR-0236).
+    void handOff(const QString& action);
 };
 
 struct WizardDescriptor {

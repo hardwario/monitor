@@ -35,6 +35,9 @@ it. Nothing in this repository creates tags or publishes releases by itself.
       minimum OS versions in `README.md` and `docs/*/install.md`.
 - [ ] Release notes draft: minimum OS versions, "Install SEGGER J-Link Software 8.00 or newer separately", the
       side-by-side period with v1 (until M8).
+- [ ] Product name (ADR-0237): the notes say **HARDWARIO Monitor**. The "2" appears only inside a full version number
+      ("HARDWARIO Monitor 2.0.0") or as "version 2" — never "HARDWARIO Monitor 2" as a name. `product_name_check`
+      (ctest) checks `README.md`, `docs/` and `packaging/release-notes/` from v2.0.0-rc.3 on.
 
 ## Tagging and publishing
 

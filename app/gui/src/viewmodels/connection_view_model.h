@@ -82,11 +82,9 @@ class ConnectionViewModel : public QObject {
 
     Q_PROPERTY(QString probeLabel READ probeLabel NOTIFY probeChanged)
     Q_PROPERTY(QString serial READ serial NOTIFY probeChanged)
-    Q_PROPERTY(QString targetId READ targetId WRITE setTargetId NOTIFY targetChanged)
+    // ADR-0233 (plan 0033): the console target of the tab (CHESTER: app), not changeable.
+    Q_PROPERTY(QString targetId READ targetId NOTIFY targetChanged)
     Q_PROPERTY(QString targetTitle READ targetTitle NOTIFY targetChanged)
-    // [{id, label (= id, 0021 ADR-0168), title}]
-    Q_PROPERTY(QVariantList targets READ targets NOTIFY targetChanged)
-    Q_PROPERTY(bool canChangeTarget READ canChangeTarget NOTIFY stateChanged)
     // "idle", "connecting", "connected", "reconnecting", "error", "busy"
     Q_PROPERTY(QString stateKind READ stateKind NOTIFY stateChanged)
     Q_PROPERTY(QString stateText READ stateText NOTIFY stateChanged)
@@ -97,6 +95,11 @@ class ConnectionViewModel : public QObject {
     Q_PROPERTY(hwio::gui::ErrorInfo error READ error NOTIFY errorChanged) // invalid when none
     Q_PROPERTY(hwio::gui::ErrorInfo warning READ warning NOTIFY warningChanged)
     Q_PROPERTY(bool canChooseAnotherProbe READ canChooseAnotherProbe NOTIFY errorChanged)
+    // Plan 0033 (ADR-0233, D8): the J-Link is on another MCU's connector (target.other_connector):
+    // PageHost shows a warning banner with [Update LTE firmware…] and [Retry] instead of the
+    // ErrorPanel; the session does not reconnect by itself.
+    Q_PROPERTY(bool otherConnector READ otherConnector NOTIFY errorChanged)
+    Q_PROPERTY(QString otherConnectorText READ otherConnectorText NOTIFY errorChanged)
     // ---- plan 0012: Bluetooth ----
     Q_PROPERTY(bool isBle READ isBle NOTIFY probeChanged)
     Q_PROPERTY(QString deviceName READ deviceName NOTIFY probeChanged) // name or id
@@ -145,10 +148,7 @@ public:
     [[nodiscard]] QString probeLabel() const;
     [[nodiscard]] QString serial() const;
     [[nodiscard]] QString targetId() const;
-    void setTargetId(const QString& id);
     [[nodiscard]] QString targetTitle() const;
-    [[nodiscard]] QVariantList targets() const;
-    [[nodiscard]] bool canChangeTarget() const;
     [[nodiscard]] QString stateKind() const;
     [[nodiscard]] QString stateText() const;
     [[nodiscard]] QString action() const;
@@ -200,6 +200,10 @@ public:
     // ChooseFile -> dismissError. OpenSettings is handled by the shell (AppViewModel).
     Q_INVOKABLE void triggerErrorAction(int action);
     Q_INVOKABLE void dismissError();
+    [[nodiscard]] bool otherConnector() const;
+    [[nodiscard]] QString otherConnectorText() const;
+    // [Update LTE firmware…] of the banner: the LTE update wizard on this tab.
+    Q_INVOKABLE void updateLteFirmware();
     Q_INVOKABLE void dismissWarning();
     Q_INVOKABLE void chooseAnotherProbe();
     // Plan 0012 (ADR-0227): the pairing actions of the ErrorPanel.

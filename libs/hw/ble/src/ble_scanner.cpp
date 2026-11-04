@@ -18,6 +18,8 @@
 #include <QtLogging>
 
 #include <algorithm>
+#include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <iterator>
 #include <optional>
@@ -33,15 +35,26 @@ template <class... Ts> struct Overloaded : Ts... {
     using Ts::operator()...;
 };
 
-// The strongest signal first; RSSI 0 (unknown) after every measured value (HIL 2026-11-03 H14).
+// The strongest smoothed signal first (ADR-0235); unknown (no sample) after every measured value
+// (HIL 2026-11-03 H14).
 bool strongerFirst(const BleDeviceInfo& a, const BleDeviceInfo& b) {
-    if ((a.rssi == 0) != (b.rssi == 0)) {
-        return b.rssi == 0;
+    const bool aUnknown = a.rssiSmoothed == 0;
+    const bool bUnknown = b.rssiSmoothed == 0;
+    if (aUnknown != bUnknown) {
+        return bUnknown;
     }
-    return a.rssi > b.rssi;
+    return a.rssiSmoothed > b.rssiSmoothed;
 }
 
 } // namespace
+
+double smoothRssi(double smoothed, int sample, std::chrono::nanoseconds elapsed) {
+    const double seconds =
+        std::max(0.0, std::chrono::duration<double>(elapsed).count()); // a clock step back: 0
+    const double tau = std::chrono::duration<double>(BleScanner::rssiTimeConstant).count();
+    const double alpha = 1.0 - std::exp(-seconds / tau);
+    return smoothed + ((static_cast<double>(sample) - smoothed) * alpha);
+}
 
 std::string truncateUtf8(std::string text, std::size_t maxBytes) {
     if (text.size() <= maxBytes) {
@@ -120,6 +133,8 @@ void BleScanner::add(const Advertisement& advertisement) {
         m_devices.push_back(BleDeviceInfo{.id = advertisement.id,
                                           .name = {},
                                           .rssi = 0,
+                                          .rssiSmoothed = 0,
+                                          .rssiSampled = {},
                                           .nusAdvertised = false,
                                           .profileId = {},
                                           .lastSeen = {}});
@@ -133,6 +148,11 @@ void BleScanner::add(const Advertisement& advertisement) {
     // it must not replace a measured value.
     if (advertisement.rssi != 0) {
         it->rssi = advertisement.rssi;
+        // ADR-0235: the first sample is the value, later ones move the average.
+        it->rssiSmoothed = it->rssiSmoothed == 0 ? static_cast<double>(advertisement.rssi)
+                                                 : smoothRssi(it->rssiSmoothed, advertisement.rssi,
+                                                              advertisement.seen - it->rssiSampled);
+        it->rssiSampled = advertisement.seen;
     }
     it->nusAdvertised = it->nusAdvertised || nus;
     if (!profileId.empty()) {

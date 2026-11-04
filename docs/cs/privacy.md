@@ -74,8 +74,9 @@ Složka dat aplikace obsahuje:
 | `logs` | logy aplikace, jeden soubor na každé spuštění | 10 souborů aplikace, 20 souborů `hwio`, 50 MiB každého druhu |
 | `firmware-cache` | stažený firmware z katalogu a LTE firmware | 100 souborů, 500 MiB |
 | `crashes` | zprávy o pádu | 5 souborů |
+| `backups` | kopie aplikačního firmwaru vytvořené [aktualizací firmwaru LTE](flashing.md#aktualizace-firmwaru-lte) (`<serial>-<UTC time>.hex`) | 10 souborů |
 
-Soubor nastavení, logy a soubory konzole sdílí aplikace a `hwio`. Soubory konzole a historii může číst jen váš
+Soubor nastavení, logy a soubory konzole sdílí aplikace a `hwio`. Soubory konzole, historii a zálohy může číst jen váš
 uživatel (Linux, macOS). Příkazy, které obsahují tajné údaje, se do historie neukládají a v souborech konzole se
 zapisují jako `<redacted>` ([Konzole](console.md#historie-příkazů)).
 

@@ -148,6 +148,10 @@ struct DeviceProfile {
     std::span<const LocalizedUrl> firmwareDocsUrl;
 };
 
+// Plan 0033 (ADR-0233): the target a J-Link console tab of `profile` always uses - the first
+// target with an RTT console (CHESTER: app), else the first target; "" for a profile without one.
+[[nodiscard]] std::string_view consoleTargetId(const DeviceProfile& profile) noexcept;
+
 // Size of the Product Information Block.
 inline constexpr std::uint32_t pibSize = 128;
 

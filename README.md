@@ -30,7 +30,7 @@ The console also works over **Bluetooth LE**, without a J-Link.
 It runs on Windows, macOS and Linux. `hwio`, its command-line sibling, does the same in a terminal and in scripts,
 and adds an **MCP server** for AI assistants, low-level target commands and JSON output. `hwio` keeps the commands of py-hardwario's `hardwario`, so existing scripts keep working.
 
-HARDWARIO Monitor 2 is a complete rewrite of the earlier HARDWARIO Monitor.
+HARDWARIO Monitor 2.0 is a complete rewrite of the earlier HARDWARIO Monitor (version 1).
 
 ## Features
 

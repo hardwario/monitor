@@ -9,6 +9,7 @@
 #include <QCoreApplication>
 #include <QString>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -287,6 +288,72 @@ Result<FirmwareImage> readIntelHexFile(const std::filesystem::path& path,
         return std::unexpected(std::move(bytes).error());
     }
     return parseIntelHex(*bytes, toUtf8(path.filename()), stop);
+}
+
+namespace {
+
+// One record ":LLAAAATT<data>CC\n".
+void appendRecord(std::string& out, std::uint8_t type, std::uint16_t address,
+                  std::span<const std::uint8_t> data) {
+    static constexpr std::string_view digits = "0123456789ABCDEF";
+    const auto hexByte = [&out](std::uint8_t value) {
+        out.push_back(digits[value >> 4U]);
+        out.push_back(digits[value & 0x0FU]);
+    };
+    auto sum = static_cast<std::uint8_t>(data.size());
+    sum = static_cast<std::uint8_t>(sum + (address >> 8U) + (address & 0xFFU) + type);
+    out.push_back(':');
+    hexByte(static_cast<std::uint8_t>(data.size()));
+    hexByte(static_cast<std::uint8_t>(address >> 8U));
+    hexByte(static_cast<std::uint8_t>(address & 0xFFU));
+    hexByte(type);
+    for (const std::uint8_t byte : data) {
+        hexByte(byte);
+        sum = static_cast<std::uint8_t>(sum + byte);
+    }
+    hexByte(static_cast<std::uint8_t>(0x100U - sum));
+    out.push_back('\n');
+}
+
+} // namespace
+
+std::string toIntelHex(const FirmwareImage& image) {
+    constexpr std::size_t bytesPerRecord = 16;
+    std::string out;
+    out.reserve((static_cast<std::size_t>(image.totalBytes()) * 2) + 1024);
+    std::optional<std::uint32_t> upper;
+    std::array<std::uint8_t, bytesPerRecord> buffer{};
+    for (const Segment& segment : image.segments()) {
+        std::size_t offset = 0;
+        while (offset < segment.data.size()) {
+            const std::uint32_t address = segment.address + static_cast<std::uint32_t>(offset);
+            if (const std::uint32_t high = address >> 16U; high != upper) {
+                const std::array record{static_cast<std::uint8_t>(high >> 8U),
+                                        static_cast<std::uint8_t>(high & 0xFFU)};
+                appendRecord(out, 0x04, 0, record);
+                upper = high;
+            }
+            // A record never crosses a 64 KiB boundary (its address is 16 bits).
+            const std::size_t toBoundary = 0x10000U - (address & 0xFFFFU);
+            const std::size_t count =
+                std::min({bytesPerRecord, segment.data.size() - offset, toBoundary});
+            for (std::size_t i = 0; i < count; ++i) {
+                buffer.at(i) = std::to_integer<std::uint8_t>(segment.data[offset + i]);
+            }
+            appendRecord(out, 0x00, static_cast<std::uint16_t>(address & 0xFFFFU),
+                         std::span<const std::uint8_t>(buffer.data(), count));
+            offset += count;
+        }
+    }
+    if (const std::optional<std::uint32_t> start = image.startAddress()) {
+        const std::array record{static_cast<std::uint8_t>(*start >> 24U),
+                                static_cast<std::uint8_t>((*start >> 16U) & 0xFFU),
+                                static_cast<std::uint8_t>((*start >> 8U) & 0xFFU),
+                                static_cast<std::uint8_t>(*start & 0xFFU)};
+        appendRecord(out, 0x05, 0, record);
+    }
+    appendRecord(out, 0x01, 0, {});
+    return out;
 }
 
 } // namespace hwio::firmware

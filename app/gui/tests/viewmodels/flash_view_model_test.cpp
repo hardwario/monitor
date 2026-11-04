@@ -24,6 +24,9 @@
 #include "viewmodels/firmware_source_view_model.h"
 #include "viewmodels/flash_view_model.h"
 #include "viewmodels/recent_sources_model.h"
+#include "wizard/lte_update_wizard.h"
+#include "wizard/wizard.h"
+#include "wizard/wizard_view_model.h"
 #include "workers/firmware_loader.h"
 #include "zip_builder.h"
 
@@ -34,6 +37,7 @@
 #include <QIODevice>
 #include <QObject>
 #include <QPointer>
+#include <QSignalSpy>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
@@ -43,6 +47,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 #include <QtContainerFwd>
+#include <QtCore/qtmetamacros.h>
 #include <QtEnvironmentVariables>
 #include <QtTypes>
 
@@ -106,6 +111,38 @@ protected:
     }
 
     [[nodiscard]] AppViewModel& app() { return *m_app; }
+    // Plan 0033: a board with the APP and LTE connectors; moveCable() moves the J-Link.
+    void startBoard(const std::string& lteChip = "") {
+        moveCable("app");
+        start(std::string(R"({"libraryVersion": 81000, "probes": [{"serialNumber": 801000001,
+            "product": "Test Probe", "firmware": "J-Link V11 compiled Sep 21 2023 10:38:43",
+            "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted\n"}]},
+            "connectors": {"file": ")") +
+              (root() / "connector").generic_string() +
+              R"(", "chips": {"app": {"memory": [{"address": 4096, "hex": "a5a5a5a5"}]},
+              "lte": {"family": "nrf91")" +
+              lteChip + "}}}}]}");
+    }
+    void moveCable(const std::string& connector) const {
+        QFile file(QString::fromStdString((root() / "connector").string()));
+        ASSERT_TRUE(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        file.write(QByteArray::fromStdString(connector));
+    }
+    hwio::gui::LteUpdateWizard* openLteWizard() {
+        tab().openWizard(QStringLiteral("lte-update"));
+        return qobject_cast<hwio::gui::LteUpdateWizard*>(app().wizard()->wizard());
+    }
+    static bool loadInto(hwio::gui::FirmwareSourceViewModel& target, const fs::path& path) {
+        target.loadFile(QUrl::fromLocalFile(QString::fromStdString(path.string())));
+        return waitFor([&] { return target.sourceState() != FirmwareSourceViewModel::Loading; });
+    }
+    static bool reachStage(const hwio::gui::LteUpdateWizard& wizard, int stage) {
+        return waitFor([&] { return wizard.stage() == stage; }, std::chrono::seconds(60));
+    }
+    void enableExpertActions() {
+        ASSERT_TRUE(
+            app().settingsStore()->setValue(QStringLiteral("advanced/expertActions"), true));
+    }
     [[nodiscard]] DeviceTabViewModel& tab() { return *m_app->currentTabViewModel(); }
     [[nodiscard]] FlashViewModel& flash() {
         return *qobject_cast<FlashViewModel*>(tab().pageViewModel(FlashViewModel::pageId));
@@ -179,11 +216,14 @@ private:
     std::string m_scenario;
 };
 
-TEST_F(FlashTest, KindDefaultsFromTheTabTarget) {
+// ADR-0233 (plan 0033): every tab works with the application MCU; application firmware first.
+TEST_F(FlashTest, KindDefaultsToApplicationFirmware) {
     start(probeScenario(), QStringLiteral("lte"));
-    EXPECT_EQ(flash().kind(), Kind::LteFirmware);
+    EXPECT_EQ(flash().kind(), Kind::AppFirmware);
+    EXPECT_EQ(flash().targetId(), QStringLiteral("app"));
+    EXPECT_EQ(source().kind(), Kind::AppFirmware);
+    flash().setKind(Kind::LteFirmware);
     EXPECT_EQ(flash().targetId(), QStringLiteral("lte"));
-    EXPECT_EQ(source().kind(), Kind::LteFirmware);
     flash().setKind(Kind::AppFirmware);
     EXPECT_EQ(flash().targetId(), QStringLiteral("app"));
     // Re-choosing the selected kind changes nothing.
@@ -201,14 +241,14 @@ TEST_F(FlashTest, KindDefaultsFromTheTabTarget) {
 }
 
 TEST_F(FlashTest, TheLastKindIsRememberedPerTabInMemoryOnly) {
-    start(probeScenario(), QStringLiteral("lte"));
-    flash().setKind(Kind::AppFirmware);
+    start(probeScenario());
+    flash().setKind(Kind::LteFirmware);
     // Nothing is persisted (review F4, user decision 2026-10-16: no flash/lastKind key).
     EXPECT_FALSE(app().settingsStore()->value(QStringLiteral("flash/lastKind")).isValid());
-    // The tab keeps its choice when its target changes (no session).
-    tab().setConsoleTarget(QStringLiteral("app"));
-    tab().setConsoleTarget(QStringLiteral("lte"));
-    EXPECT_EQ(flash().kind(), Kind::AppFirmware);
+    // The tab keeps its choice when it is configured again (no session).
+    ASSERT_TRUE(tab().configure(QStringLiteral("chester"), QStringLiteral("app"), 801000001,
+                                QStringLiteral("Test Probe")));
+    EXPECT_EQ(flash().kind(), Kind::LteFirmware);
 
     // Another tab starts from its own target, not from the first tab's choice.
     DeviceTabViewModel* first = &tab();
@@ -285,8 +325,8 @@ TEST_F(FlashTest, AFileOfAnotherKindShowsAHintAndNeverSwitchesSilently) {
 // 0021 (ADR-0174): every LTE input fits the LTE card; the summary follows the classification and
 // the operation is chosen from it.
 TEST_F(FlashTest, EveryLteInputFitsTheLteKind) {
-    start(probeScenario(), QStringLiteral("lte"));
-    ASSERT_EQ(flash().kind(), Kind::LteFirmware);
+    start(probeScenario());
+    flash().setKind(Kind::LteFirmware);
     ASSERT_TRUE(load(hexFile("lte.hex")));
     EXPECT_EQ(source().lteSource(), FirmwareSourceViewModel::OwnFile); // a file is the own file
     EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Ready);
@@ -449,97 +489,31 @@ TEST_F(FlashTest, CancelDuringVerify) {
     EXPECT_TRUE(tab().busyPage().isEmpty());
 }
 
-TEST_F(FlashTest, CrossTargetPhasesAndConnectorWarning) {
+// Plan 0033 (ADR-0234): LTE firmware is not flashed from the page; [Update LTE firmware…] opens
+// the guided update and the Flash bar says why it is disabled.
+TEST_F(FlashTest, TheLteKindOpensTheLteUpdateWizard) {
     start(probeScenario());
     flash().setKind(Kind::LteFirmware);
-    // ADR-0057 Phase 0: said before starting.
-    EXPECT_TRUE(flash().connectorWarning().contains(QStringLiteral("LTE connector")));
-    ASSERT_TRUE(load(hexFile()));
-    flash().flash();
-    ASSERT_EQ(flash().opState(), FlashViewModel::Running);
-    const QStringList phases = phaseTitles();
-    ASSERT_FALSE(phases.isEmpty());
-    EXPECT_EQ(phases.front(), QStringLiteral("Switching MCU"));
-    EXPECT_EQ(phases.back(), QStringLiteral("Restoring console"));
-    ASSERT_TRUE(finished());
-    // The probe is on the application MCU: the LTE operation fails early with the connector hint.
-    EXPECT_EQ(flash().opState(), FlashViewModel::Failed);
-    EXPECT_EQ(flash().error().code(), QStringLiteral("target.wrong_family"));
-    EXPECT_EQ(flash().errorAction(), hwio::gui::error_action::Retry);
-    flash().setKind(Kind::AppFirmware); // ignored only while running
-    EXPECT_TRUE(flash().connectorWarning().isEmpty());
-}
-
-TEST_F(FlashTest, LteBundleRunsInTwoStepsWithNrfUtil) {
-    qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
-    start(probeScenario(R"({"family": "nrf91"})"), QStringLiteral("lte"));
-    ASSERT_TRUE(load(bundleFile()));
-    ASSERT_EQ(source().sourceState(), FirmwareSourceViewModel::Ready);
-    EXPECT_TRUE(source().sourceSummary().contains(QStringLiteral("LTE bundle")));
-    EXPECT_TRUE(source().modemNoteVisible());
-    ASSERT_TRUE(waitFor([this] { return flash().canFlash(); })); // nRF Util detected
-    flash().flash();
-    ASSERT_EQ(flash().opState(), FlashViewModel::Running);
-    EXPECT_EQ(flash().steps(), 2);
-    EXPECT_EQ(flash().stepText(), QStringLiteral("Step 1 of 2"));
-    bool sawStepTwo = false;
-    ASSERT_TRUE(waitFor(
-        [&] {
-            sawStepTwo = sawStepTwo || flash().step() == 2;
-            return flash().opState() != FlashViewModel::Running;
-        },
-        std::chrono::seconds(60)));
-    EXPECT_TRUE(sawStepTwo);
-    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
-        << flash().error().detail().toStdString();
-    EXPECT_TRUE(
-        flash().resultText().startsWith(QStringLiteral("LTE modem firmware and LTE firmware")));
-}
-
-TEST_F(FlashTest, ModemFailureIsReported) {
-    qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
-    qputenv("HWIO_FAKE_NRFUTIL_MODE", "fail");
-    start(probeScenario(R"({"family": "nrf91"})"), QStringLiteral("lte"));
-    ASSERT_TRUE(load(modemFile()));
-    ASSERT_TRUE(waitFor([this] { return flash().canFlash(); })); // nRF Util detected
-    EXPECT_FALSE(flash().haltAvailable());
-    flash().flash();
-    EXPECT_EQ(tab().busyText(), QStringLiteral("Updating the modem…"));
-    ASSERT_TRUE(finished());
-    EXPECT_EQ(flash().opState(), FlashViewModel::Failed);
-    EXPECT_EQ(flash().error().code(), QStringLiteral("firmware.modem_update_failed"));
-}
-
-// Review F5 / ADR-0114: the nRF Util path is read from the settings when the modem update is
-// requested, not when the session was opened.
-TEST_F(FlashTest, AChangedNrfUtilPathReachesAnOpenSession) {
-    qunsetenv("HWIO_NRFUTIL"); // the setting decides (the environment would win over it)
-    start(probeScenario(R"({"family": "nrf91"})"), QStringLiteral("lte"));
-    hwio::gui::SettingsStore& settings = *app().settingsStore();
-    ASSERT_TRUE(
-        settings.setValue(QStringLiteral("nrfutil/path"),
-                          QString::fromStdString((root() / "no-nrfutil" / "nrfutil").string())));
-    tab().connectDevice();
-    const QPointer<hwio::device::DeviceSession> opened(tab().session());
-    ASSERT_FALSE(opened.isNull());
-    ASSERT_TRUE(load(modemFile()));
-    ASSERT_TRUE(waitFor([this] { return !flash().prerequisiteText().isEmpty(); }));
+    ASSERT_TRUE(load(hexFile("lte.hex")));
     EXPECT_FALSE(flash().canFlash());
-
-    // A new path in Settings while the session stays open.
-    ASSERT_TRUE(
-        settings.setValue(QStringLiteral("nrfutil/path"), QString::fromUtf8(HWIO_FAKE_NRFUTIL)));
-    ASSERT_TRUE(waitFor([this] { return flash().canFlash(); }));
-    flash().flash();
-    ASSERT_EQ(flash().opState(), FlashViewModel::Running);
-    EXPECT_EQ(tab().session(), opened.data()); // no new session
-    ASSERT_TRUE(finished());
-    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
-        << flash().error().code().toStdString() << " " << flash().error().detail().toStdString();
+    EXPECT_EQ(flash().cannotFlashReason(),
+              QStringLiteral("Use Update LTE firmware… above: the J-Link has to be moved between "
+                             "the connectors."));
+    flash().flash(); // refused
+    EXPECT_EQ(flash().opState(), FlashViewModel::Idle);
+    EXPECT_EQ(tab().session(), nullptr);
+    QSignalSpy requested(&flash(), &FlashViewModel::lteUpdateRequested);
+    flash().requestLteUpdate();
+    EXPECT_EQ(requested.count(), 1);
+    ASSERT_TRUE(app().wizard()->isOpen());
+    EXPECT_EQ(app().wizard()->wizardId(), QStringLiteral("lte-update"));
+    app().wizard()->cancel(false);
+    EXPECT_FALSE(app().wizard()->isOpen());
 }
 
 TEST_F(FlashTest, MissingNrfUtilIsAPrerequisite) {
-    start(probeScenario(), QStringLiteral("lte"));
+    start(probeScenario());
+    flash().setKind(Kind::LteFirmware);
     // 0021: the designated LTE firmware (the default source) always contains modem firmware.
     ASSERT_EQ(source().lteSource(), FirmwareSourceViewModel::Designated);
     ASSERT_TRUE(waitFor([this] { return !flash().prerequisiteText().isEmpty(); }));
@@ -547,7 +521,6 @@ TEST_F(FlashTest, MissingNrfUtilIsAPrerequisite) {
               QStringLiteral("nRF Util was not found. It is needed for LTE firmware."));
     ASSERT_TRUE(load(modemFile()));
     EXPECT_FALSE(flash().canFlash());
-    EXPECT_EQ(flash().cannotFlashReason(), QStringLiteral("nRF Util was not found"));
     // Application firmware does not need it.
     flash().setKind(Kind::AppFirmware);
     EXPECT_TRUE(flash().prerequisiteText().isEmpty());
@@ -591,6 +564,7 @@ TEST_F(FlashTest, UicrRecordsNeedTheOption) {
 
 TEST_F(FlashTest, ConfirmationTexts) {
     start(probeScenario());
+    enableExpertActions();
     QVariantMap app = flash().describeEraseAll();
     EXPECT_EQ(app.value(QStringLiteral("title")).toString(),
               QStringLiteral("Erase everything on the application MCU?"));
@@ -610,7 +584,7 @@ TEST_F(FlashTest, ConfirmationTexts) {
                     .contains(QStringLiteral(
                         "Product Information Block (serial number, hardware version, …)")));
 
-    flash().setKind(Kind::LteFirmware);
+    flash().setMaintenanceTarget(QStringLiteral("lte"));
     EXPECT_EQ(flash().maintenanceTitle(), QStringLiteral("Maintenance — LTE MCU"));
     const QVariantMap lte = flash().describeEraseAll();
     EXPECT_EQ(lte.value(QStringLiteral("title")).toString(),
@@ -630,8 +604,9 @@ TEST_F(FlashTest, ConfirmationTexts) {
 
 TEST_F(FlashTest, TheLteMcuHasNoCodeOnlyErase) {
     start(probeScenario());
+    enableExpertActions();
     EXPECT_TRUE(flash().eraseCodeAvailable()); // application MCU: defaultErase Code
-    flash().setKind(Kind::LteFirmware);
+    flash().setMaintenanceTarget(QStringLiteral("lte"));
     EXPECT_FALSE(flash().eraseCodeAvailable()); // LTE MCU: defaultErase All (review F2)
     flash().eraseCode();                        // refused
     EXPECT_EQ(flash().opState(), FlashViewModel::Idle);
@@ -640,17 +615,18 @@ TEST_F(FlashTest, TheLteMcuHasNoCodeOnlyErase) {
 
 TEST_F(FlashTest, AConfirmationIsRefusedWhenTheMcuChanged) {
     start(probeScenario());
+    enableExpertActions();
     flash().requestConfirmation(false);
     EXPECT_EQ(flash().confirmation().value(QStringLiteral("title")).toString(),
               QStringLiteral("Erase everything on the application MCU?"));
-    // The dialog named the application MCU; the kind (and its MCU) changed meanwhile (F11).
-    flash().setKind(Kind::LteFirmware);
+    // The dialog named the application MCU; the maintenance MCU changed meanwhile (F11).
+    flash().setMaintenanceTarget(QStringLiteral("lte"));
     flash().confirm();
     EXPECT_EQ(flash().opState(), FlashViewModel::Idle);
     EXPECT_TRUE(tab().busyPage().isEmpty());
     EXPECT_EQ(tab().session(), nullptr);
     // Not kept for later either.
-    flash().setKind(Kind::AppFirmware);
+    flash().setMaintenanceTarget(QStringLiteral("app"));
     flash().confirm();
     EXPECT_EQ(flash().opState(), FlashViewModel::Idle);
 }
@@ -666,6 +642,7 @@ TEST_F(FlashTest, MaintenanceActionsRunAsOperations) {
     EXPECT_FALSE(flash().flashOperation());
     flash().dismissResult();
 
+    enableExpertActions(); // ADR-0236: Erase everything and Recover
     flash().requestConfirmation(false);
     EXPECT_EQ(flash().confirmation().value(QStringLiteral("acceptText")).toString(),
               QStringLiteral("Erase everything"));
@@ -723,26 +700,6 @@ TEST_F(FlashTest, RetryFlashesTheStoredRequestAfterASourceChange) {
     EXPECT_EQ(flash().operationTitle(),
               QStringLiteral("Flashing first.hex to the application MCU"));
     ASSERT_TRUE(finished());
-}
-
-TEST_F(FlashTest, ADependencyErrorOffersTheSettings) {
-    qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
-    start(probeScenario(R"({"family": "nrf91"})"), QStringLiteral("lte"));
-    ASSERT_TRUE(load(modemFile()));
-    ASSERT_TRUE(waitFor([this] { return flash().canFlash(); })); // nRF Util detected
-    // nRF Util disappears before the session opens (it is located when the session opens).
-    qputenv("HWIO_NRFUTIL", (root() / "no-nrfutil" / "nrfutil").string().c_str());
-    flash().flash();
-    ASSERT_TRUE(finished());
-    ASSERT_EQ(flash().opState(), FlashViewModel::Failed);
-    EXPECT_EQ(flash().error().code(), QStringLiteral("dependency.nrfutil_not_found"));
-    EXPECT_EQ(flash().errorAction(), hwio::gui::error_action::OpenSettings); // F10
-    int settingsRequests = 0;
-    QObject::connect(&flash(), &FlashViewModel::settingsRequested, &flash(),
-                     [&settingsRequests] { ++settingsRequests; });
-    flash().triggerErrorAction(hwio::gui::error_action::OpenSettings);
-    EXPECT_EQ(settingsRequests, 1);
-    EXPECT_EQ(flash().opState(), FlashViewModel::Idle);
 }
 
 TEST_F(FlashTest, ALostSessionEndsTheOperationAsFailed) {
@@ -869,16 +826,15 @@ TEST_F(FlashTest, DesignatedLteFirmware) {
     qputenv("HWIO_DESIGNATED_URL", (http.baseUrl() + QStringLiteral("/lte.zip")).toUtf8());
     qputenv("HWIO_DESIGNATED_SHA256", sha.toUtf8());
     qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
-    start(probeScenario(R"({"family": "nrf91"})"), QStringLiteral("lte"));
-    ASSERT_EQ(flash().kind(), Kind::LteFirmware);
+    start(probeScenario(R"({"family": "nrf91"})"));
+    flash().setKind(Kind::LteFirmware);
     EXPECT_TRUE(source().designatedAvailable());
     EXPECT_TRUE(source().designatedActive());
     EXPECT_EQ(source().designatedTitle(),
               QStringLiteral("HARDWARIO LTE firmware 1.7.0 (recommended)"));
     // Nothing is downloaded before the row is shown.
     EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedIdle);
-    EXPECT_EQ(flash().cannotFlashReason(),
-              QStringLiteral("The LTE firmware is not downloaded yet"));
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::None);
     EXPECT_TRUE(source().modemNoteVisible());
     source().prepareDesignated();
     EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedDownloading);
@@ -890,15 +846,8 @@ TEST_F(FlashTest, DesignatedLteFirmware) {
         << source().designatedError().detail().toStdString();
     EXPECT_EQ(source().designatedStatus(), QStringLiteral("Ready"));
     EXPECT_EQ(source().sourceName(), QStringLiteral("HARDWARIO LTE firmware 1.7.0"));
-    ASSERT_TRUE(waitFor([this] { return flash().canFlash(); }))
-        << flash().cannotFlashReason().toStdString();
-    flash().flash();
-    ASSERT_EQ(flash().opState(), FlashViewModel::Running);
-    EXPECT_EQ(flash().steps(), 2); // the bundle: modem, then the application
-    ASSERT_TRUE(finished());
-    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
-        << flash().error().detail().toStdString();
-    flash().dismissResult();
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Ready);
+    // Plan 0033: flashed by the LTE update wizard (LteUpdateWizard tests), not by this page.
 
     // "Use your own file…": the designated firmware stays downloaded.
     source().setLteSource(FirmwareSourceViewModel::OwnFile);
@@ -912,6 +861,7 @@ TEST_F(FlashTest, DesignatedLteFirmware) {
     app().newTab();
     ASSERT_TRUE(tab().configure(QStringLiteral("chester"), QStringLiteral("lte"), 801000001,
                                 QStringLiteral("Test Probe")));
+    flash().setKind(Kind::LteFirmware);
     source().prepareDesignated();
     ASSERT_TRUE(waitFor([this] {
         return source().designatedState() == FirmwareSourceViewModel::DesignatedFailed;
@@ -920,8 +870,6 @@ TEST_F(FlashTest, DesignatedLteFirmware) {
     EXPECT_EQ(source().designatedError().message(),
               QStringLiteral("The downloaded file is damaged. Try again."));
     EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Invalid);
-    EXPECT_EQ(flash().cannotFlashReason(),
-              QStringLiteral("The LTE firmware could not be downloaded"));
     source().prepareDesignated(); // not after a failure: that needs Try again
     EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedFailed);
     qputenv("HWIO_DESIGNATED_SHA256", sha.toUtf8());
@@ -938,6 +886,7 @@ TEST_F(FlashTest, DesignatedLteFirmware) {
     app().newTab();
     ASSERT_TRUE(tab().configure(QStringLiteral("chester"), QStringLiteral("lte"), 801000001,
                                 QStringLiteral("Test Probe")));
+    flash().setKind(Kind::LteFirmware);
     source().prepareDesignated();
     ASSERT_TRUE(waitFor([this] {
         return source().designatedState() == FirmwareSourceViewModel::DesignatedFailed;
@@ -1097,6 +1046,195 @@ TEST_F(LoaderTest, LoadErrorsAreHWioErrors) {
     const auto result = hwio::gui::loadFirmwareFile(root() / "missing.hex");
     ASSERT_FALSE(result);
     EXPECT_EQ(result.error().code, ErrorCode::IoFileNotFound);
+}
+
+// ---- plan 0033: expert maintenance actions (ADR-0236)
+// --------------------------------------------
+
+TEST_F(FlashTest, ExpertActionsAreHiddenUntilTheSettingIsOn) {
+    start(probeScenario());
+    EXPECT_FALSE(flash().expertActions());
+    EXPECT_FALSE(flash().eraseAllAvailable());
+    EXPECT_FALSE(flash().recoverAvailable());
+    EXPECT_TRUE(flash().maintenanceTargets().isEmpty());
+    EXPECT_TRUE(flash().eraseCodeAvailable());
+    EXPECT_EQ(flash().maintenanceTitle(), QStringLiteral("Maintenance — application MCU"));
+    flash().setMaintenanceTarget(QStringLiteral("lte")); // ignored
+    EXPECT_EQ(flash().maintenanceTarget(), QStringLiteral("app"));
+    flash().requestConfirmation(false); // refused
+    EXPECT_TRUE(flash().confirmation().isEmpty());
+    flash().eraseAll();
+    EXPECT_EQ(flash().opState(), FlashViewModel::Idle);
+
+    QSignalSpy changed(&flash(), &FlashViewModel::maintenanceChanged);
+    enableExpertActions();
+    EXPECT_GE(changed.count(), 1);
+    EXPECT_TRUE(flash().eraseAllAvailable());
+    EXPECT_TRUE(flash().recoverAvailable());
+    ASSERT_EQ(flash().maintenanceTargets().size(), 2);
+    EXPECT_EQ(flash().maintenanceTargets().at(1).toMap().value(QStringLiteral("title")).toString(),
+              QStringLiteral("LTE MCU"));
+    flash().setMaintenanceTarget(QStringLiteral("lte"));
+    EXPECT_EQ(flash().maintenanceTitle(), QStringLiteral("Maintenance — LTE MCU"));
+    // Off again: back to the application MCU.
+    ASSERT_TRUE(app().settingsStore()->setValue(QStringLiteral("advanced/expertActions"), false));
+    EXPECT_EQ(flash().maintenanceTarget(), QStringLiteral("app"));
+    EXPECT_FALSE(flash().recoverAvailable());
+}
+
+// The target.protected hand-off (plan 0033 E): the Flash page with Maintenance unfolded and
+// [Recover…] for that MCU, once; the setting is not changed.
+TEST_F(FlashTest, TheProtectedHandOffShowsRecoverOnce) {
+    start(probeScenario());
+    EXPECT_FALSE(flash().maintenanceExpanded());
+    emit app().wizard() -> handOff(QStringLiteral("open-flash-page:recover:app"), &tab());
+    EXPECT_EQ(tab().currentPage(), FlashViewModel::pageId);
+    EXPECT_TRUE(flash().maintenanceExpanded());
+    EXPECT_TRUE(flash().recoverAvailable());
+    EXPECT_FALSE(flash().eraseAllAvailable());
+    EXPECT_FALSE(flash().expertActions());
+    flash().requestConfirmation(true);
+    EXPECT_EQ(flash().confirmation().value(QStringLiteral("title")).toString(),
+              QStringLiteral("Recover the application MCU?"));
+    flash().confirm();
+    ASSERT_TRUE(finished());
+    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
+        << flash().error().detail().toStdString();
+    EXPECT_FALSE(flash().recoverAvailable()); // this once
+}
+
+// ---- plan 0033: the LTE firmware update wizard (ADR-0234)
+// ----------------------------------------
+
+TEST_F(FlashTest, LteUpdateWizardRunsABundleThroughEveryStep) {
+    qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
+    startBoard();
+    hwio::gui::LteUpdateWizard* wizard = openLteWizard();
+    ASSERT_NE(wizard, nullptr);
+    EXPECT_EQ(wizard->stage(), hwio::gui::LteUpdateWizard::Firmware);
+    EXPECT_EQ(wizard->plannedSteps().size(), 8U);
+    EXPECT_FALSE(wizard->canBack());
+    wizard->lteSource()->setLteSource(FirmwareSourceViewModel::OwnFile);
+    ASSERT_TRUE(loadInto(*wizard->lteSource(), bundleFile()));
+    ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); })); // nRF Util detected
+    wizard->primary();
+    EXPECT_TRUE(tab().isBusy());
+    EXPECT_EQ(tab().busyText(), QStringLiteral("Paused for the LTE firmware update"));
+    // On APP: copy and erase, then the LTE connector. Cancel now asks first.
+    ASSERT_TRUE(waitFor([&] {
+        return wizard->procedure()->step() == hwio::device::LteUpdateProcedure::Step::ConnectLte;
+    }));
+    EXPECT_EQ(wizard->illustration(), QStringLiteral("chester-lte-cable"));
+    EXPECT_EQ(wizard->current().illustration, QStringLiteral("chester-lte-cable"));
+    EXPECT_TRUE(wizard->busyCancelText().startsWith(QStringLiteral(
+        "The application MCU is erased. The device will not run until you flash an application.")));
+    EXPECT_EQ(wizard->cancelAcceptText(), QStringLiteral("Cancel anyway"));
+    EXPECT_EQ(wizard->cancelRejectText(), QStringLiteral("Back"));
+    moveCable("lte");
+    bool sawSecondStep = false;
+    ASSERT_TRUE(waitFor(
+        [&] {
+            if (wizard->stage() == hwio::gui::LteUpdateWizard::Working) {
+                EXPECT_FALSE(wizard->canCancel()); // not during a flash
+                sawSecondStep =
+                    sawSecondStep || wizard->stepText() == QStringLiteral("Step 2 of 2");
+            }
+            return wizard->procedure()->step() ==
+                   hwio::device::LteUpdateProcedure::Step::ConnectAppAgain;
+        },
+        std::chrono::seconds(60)));
+    EXPECT_TRUE(sawSecondStep);
+    moveCable("app");
+    ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Application));
+    EXPECT_TRUE(wizard->hasBackup());
+    EXPECT_TRUE(wizard->useBackup());
+    EXPECT_TRUE(wizard->backupText().startsWith(QStringLiteral("Copy: ")));
+    EXPECT_EQ(wizard->current().primaryText, QStringLiteral("Write back"));
+    wizard->primary();
+    ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Summary));
+    EXPECT_EQ(wizard->current().kind, hwio::gui::StepKind::Done);
+    EXPECT_FALSE(tab().isBusy());
+    ASSERT_TRUE(waitFor([this] { return tab().state() == DeviceTabViewModel::Connected; }));
+    app().wizard()->action(QStringLiteral("open-console"));
+    EXPECT_EQ(tab().currentPage(), QStringLiteral("console"));
+    EXPECT_FALSE(app().wizard()->isOpen()); // the guide closes with the hand-off
+}
+
+TEST_F(FlashTest, LteUpdateWizardModemFailureCanBeRetriedOrCancelled) {
+    qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
+    qputenv("HWIO_FAKE_NRFUTIL_MODE", "fail");
+    startBoard();
+    hwio::gui::LteUpdateWizard* wizard = openLteWizard();
+    ASSERT_NE(wizard, nullptr);
+    wizard->lteSource()->setLteSource(FirmwareSourceViewModel::OwnFile);
+    ASSERT_TRUE(loadInto(*wizard->lteSource(), modemFile()));
+    ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
+    wizard->primary();
+    ASSERT_TRUE(waitFor([&] {
+        return wizard->procedure()->step() == hwio::device::LteUpdateProcedure::Step::ConnectLte;
+    }));
+    moveCable("lte");
+    ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Failed));
+    EXPECT_EQ(wizard->error().code(), QStringLiteral("firmware.modem_update_failed"));
+    EXPECT_EQ(wizard->current().primaryText, QStringLiteral("Try again"));
+    EXPECT_TRUE(wizard->canPrimary());
+    EXPECT_TRUE(tab().isBusy()); // still in the procedure
+    // Cancel asks (the application is erased); [Cancel anyway] closes the wizard.
+    app().wizard()->cancel(false);
+    EXPECT_TRUE(app().wizard()->isOpen());
+    app().wizard()->cancel(true);
+    EXPECT_FALSE(app().wizard()->isOpen());
+    EXPECT_FALSE(tab().isBusy());
+}
+
+// Review F5 / ADR-0114 (moved here by plan 0033): the nRF Util path is read from the settings when
+// the modem update is requested, not when the session was opened.
+TEST_F(FlashTest, AChangedNrfUtilPathReachesTheLteUpdate) {
+    qunsetenv("HWIO_NRFUTIL"); // the setting decides (the environment would win over it)
+    startBoard();
+    hwio::gui::SettingsStore& settings = *app().settingsStore();
+    ASSERT_TRUE(
+        settings.setValue(QStringLiteral("nrfutil/path"),
+                          QString::fromStdString((root() / "no-nrfutil" / "nrfutil").string())));
+    tab().connectDevice();
+    const QPointer<hwio::device::DeviceSession> opened(tab().session());
+    ASSERT_FALSE(opened.isNull());
+    hwio::gui::LteUpdateWizard* wizard = openLteWizard();
+    ASSERT_NE(wizard, nullptr);
+    wizard->lteSource()->setLteSource(FirmwareSourceViewModel::OwnFile);
+    ASSERT_TRUE(loadInto(*wizard->lteSource(), modemFile()));
+    ASSERT_TRUE(waitFor([&] { return !wizard->prerequisiteText().isEmpty(); }));
+    EXPECT_FALSE(wizard->canPrimary());
+    ASSERT_TRUE(
+        settings.setValue(QStringLiteral("nrfutil/path"), QString::fromUtf8(HWIO_FAKE_NRFUTIL)));
+    ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
+    wizard->primary();
+    EXPECT_EQ(tab().session(), opened.data()); // no new session
+    ASSERT_TRUE(waitFor([&] {
+        return wizard->procedure()->step() == hwio::device::LteUpdateProcedure::Step::ConnectLte;
+    }));
+    moveCable("lte");
+    ASSERT_TRUE(waitFor(
+        [&] {
+            return wizard->procedure()->step() ==
+                   hwio::device::LteUpdateProcedure::Step::ConnectAppAgain;
+        },
+        std::chrono::seconds(60)))
+        << wizard->error().detail().toStdString();
+    app().wizard()->cancel(true);
+    EXPECT_FALSE(app().wizard()->isOpen());
+}
+
+// ADR-0233 (D8): the J-Link on the LTE connector - [Update LTE firmware…] of the banner.
+TEST_F(FlashTest, TheOtherConnectorBannerOpensTheLteUpdate) {
+    startBoard();
+    moveCable("lte");
+    tab().connectDevice();
+    ASSERT_TRUE(waitFor([this] { return tab().connection()->otherConnector(); }));
+    tab().connection()->updateLteFirmware();
+    ASSERT_TRUE(app().wizard()->isOpen());
+    EXPECT_EQ(app().wizard()->wizardId(), QStringLiteral("lte-update"));
+    app().wizard()->cancel(false);
 }
 
 } // namespace

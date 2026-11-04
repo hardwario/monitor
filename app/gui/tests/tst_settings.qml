@@ -72,7 +72,7 @@ TestCase {
 
     function test_sectionsAndDetection() {
         const sections = findAll(window.contentItem, "sectionLoader").filter(effectivelyVisible);
-        compare(sections.length, 5); // General, Console (0005), J-Link, nRF Util, About
+        compare(sections.length, 6); // General, Console (0005), J-Link, nRF Util, Advanced (0033), About
         verify(find("section_general") !== null);
         verify(find("section_console") !== null);
         verify(find("section_about") !== null);
@@ -83,6 +83,20 @@ TestCase {
         verify(!find("jlinkSetupWizard"));
         verify(!find("nrfUtilSetupWizard"));
         verify(find("aboutText").text.indexOf("HARDWARIO Monitor") === 0);
+    }
+
+    // Plan 0033 (ADR-0236): Settings → Advanced → "Show expert maintenance actions".
+    function test_advancedSection() {
+        verify(find("section_advanced") !== null);
+        const sw = find("expertActionsSwitch");
+        verify(sw !== null);
+        compare(sw.checked, false);
+        const vm = AppViewModel.globalPageViewModel("settings");
+        sw.toggle();
+        sw.toggled();
+        compare(vm.expertActions, true);
+        vm.expertActions = false;
+        compare(sw.checked, false);
     }
 
     function test_themeIsLive() {

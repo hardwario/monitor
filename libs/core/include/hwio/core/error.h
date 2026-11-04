@@ -126,6 +126,8 @@ enum class ErrorCode : std::uint8_t {
     McpToFileNotAllowed, // ADR-0182
     CliFileIsSymlink,    // review L-17
     UsbWorldAccessible,  // review round 1, R1 (ADR-0185 amendment)
+    // rc.2 feedback (plan/features/0033-rc2-feedback.md, ADR-0233)
+    TargetOtherConnector,
 };
 
 // Wizards the UI can offer to fix an error (M4). Serialized as kebab-case ids.
@@ -135,6 +137,7 @@ enum class WizardId : std::uint8_t {
     FlashFirmware,
     Troubleshooting,
     BlePairing,
+    LteUpdate, // plan 0033 (ADR-0234): the guided LTE firmware update
 };
 
 struct ErrorInfo {
@@ -399,6 +402,9 @@ inline constexpr std::array errorTable{
     ErrorInfo{.code = ErrorCode::UsbWorldAccessible,
               .id = "usb.world_accessible",
               .category = ErrorCategory::Probe},
+    ErrorInfo{.code = ErrorCode::TargetOtherConnector,
+              .id = "target.other_connector",
+              .category = ErrorCategory::Target},
 };
 
 // Compile-time checks of errorTable (ids unique and well-formed, index == enum value, every

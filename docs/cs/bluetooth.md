@@ -12,10 +12,13 @@ logu, které firmware posílá, se zobrazují jako řádky logu.
 
 1. Otevřete novou kartu (<kbd>Ctrl</kbd>+<kbd>T</kbd>) a přepněte **Připojit přes** na **Bluetooth**. Aplikace si volbu
    zapamatuje pro další kartu.
-2. Seznam ukazuje zařízení CHESTER v okolí, nejsilnější signál první, a obnovuje se sám. Filtrujte ho podle názvu,
-   nebo zaškrtněte **Zobrazit všechna zařízení**, abyste viděli všechna zařízení Bluetooth. Zařízení, které používá
-   jiná karta, je označené **Používá se (karta N)**; jeho volbou se přepnete na tuto kartu. Zařízení, které používá jiný
-   program, je označené **Používá jiný program** a nelze ho zvolit.
+2. Seznam ukazuje zařízení CHESTER v okolí, nejsilnější signál první, a obnovuje se sám. Signál se průměruje za
+   několik sekund a zařízení se posune výš, jen když je zřetelně silnější (o 6 dB), takže seznam zůstává klidný; když
+   je ukazatel myši nad seznamem (nebo má řádek fokus klávesnice), pořadí se vůbec nemění a nová zařízení se přidávají
+   na konec. Filtrujte ho podle názvu, nebo zaškrtněte **Zobrazit všechna zařízení**, abyste viděli všechna zařízení
+   Bluetooth (zařízení CHESTER první). Zařízení, které používá jiná karta, je označené **Používá se (karta N)**; jeho
+   volbou se přepnete na tuto kartu. Zařízení, které používá jiný program, je označené **Používá jiný program** a
+   nelze ho zvolit.
 3. Zvolte zařízení a stiskněte **Připojit** (nebo na něj dvakrát klikněte, nebo stiskněte <kbd>Enter</kbd>).
 
 Karta funguje jako karta J-Link: konzole s návrhy, historií, hledáním, dávkovými soubory a soubory konzole

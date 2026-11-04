@@ -130,7 +130,8 @@ void DeviceTabViewModel::createBlePicker() {
                     return m_context.bleOtherProgram ? m_context.bleOtherProgram(id) : QString();
                 },
             .now = {},
-            .openUrl = [this](const QUrl& url) { openExternalUrl(url); }},
+            .openUrl = [this](const QUrl& url) { openExternalUrl(url); },
+            .devices = {}},
         this);
     connect(m_blePicker, &BlePickerViewModel::tabActivationRequested, this,
             &DeviceTabViewModel::tabActivationRequested);
@@ -234,13 +235,19 @@ const std::shared_ptr<device::ConsoleLog>& DeviceTabViewModel::consoleLog() cons
     return m_consoleLog;
 }
 
-bool DeviceTabViewModel::configure(const QString& profileId, const QString& targetId,
+bool DeviceTabViewModel::configure(const QString& profileId, const QString& requestedTarget,
                                    std::uint32_t serial, const QString& product) {
     const device::DeviceProfile* profile = device::ProfileRegistry::find(toStdString(profileId));
-    if (profile == nullptr || device::findTarget(*profile, toStdString(targetId)) == nullptr ||
-        serial == 0) {
-        qCWarning(lcGui) << "Tab: unknown configuration" << profileId << targetId << serial;
+    if (profile == nullptr ||
+        device::findTarget(*profile, toStdString(requestedTarget)) == nullptr || serial == 0) {
+        qCWarning(lcGui) << "Tab: unknown configuration" << profileId << requestedTarget << serial;
         return false;
+    }
+    // ADR-0233 (plan 0033): a J-Link tab always uses the profile's console target; a tab saved
+    // with another target (ui/tabs of rc.2) opens on it.
+    const QString targetId = toQString(device::consoleTargetId(*profile));
+    if (targetId != requestedTarget) {
+        qCInfo(lcGui) << "Tab: target" << requestedTarget << "->" << targetId << "(ADR-0233)";
     }
     if ((m_session && m_serial != serial) || m_bleSession) {
         releaseSession();
@@ -308,24 +315,6 @@ bool DeviceTabViewModel::configureBle(const QString& profileId, const QString& d
     configurationChanged(); // signal
     updateState();
     return true;
-}
-
-void DeviceTabViewModel::setConsoleTarget(const QString& targetId) {
-    if (targetId == m_targetId || isBusy() || (m_session && !sessionFailed()) ||
-        m_profile == nullptr) {
-        return;
-    }
-    const device::TargetProfile* target = device::findTarget(*m_profile, toStdString(targetId));
-    if (target == nullptr) {
-        return;
-    }
-    releaseSession(); // a stopped session of the old target (S1)
-    m_targetId = targetId;
-    m_connection->loadOptions(m_serial, *target);
-    m_connection->setOpenError(std::nullopt);
-    titleChanged();         // signal
-    configurationChanged(); // signal
-    updateState();
 }
 
 bool DeviceTabViewModel::sessionFailed() const {

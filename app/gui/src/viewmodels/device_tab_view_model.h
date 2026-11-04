@@ -204,8 +204,9 @@ public:
 
     // --- shell (AppViewModel, ConnectionViewModel) ---
     // Leaves ChoosingDevice with this configuration (restore or the picker); never connects.
-    // Returns false when the profile or target is unknown.
-    bool configure(const QString& profileId, const QString& targetId, std::uint32_t serial,
+    // Returns false when the profile or target is unknown. ADR-0233: the tab always uses the
+    // profile's console target, whatever target is requested (a tab saved with "lte").
+    bool configure(const QString& profileId, const QString& requestedTarget, std::uint32_t serial,
                    const QString& product = {});
     // Plan 0012: the Bluetooth variant (restore or the Bluetooth picker); never connects. Returns
     // false when the profile is unknown or has no Bluetooth, or the id is empty.
@@ -220,8 +221,6 @@ public:
     [[nodiscard]] QString profileId() const;
     [[nodiscard]] std::optional<std::uint32_t> probeSerial() const noexcept { return m_serial; }
     [[nodiscard]] QString product() const { return m_product; }
-    // Changes the console target (only without a session).
-    void setConsoleTarget(const QString& targetId);
     // Device bar actions.
     void connectDevice();
     void disconnectDevice();

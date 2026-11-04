@@ -79,6 +79,12 @@ Fehlercodes: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_buffe
 
 Fehlercodes: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed).
 
+### Der J-Link steckt am LTE-Anschluss
+
+Ein Tab arbeitet mit der Anwendungs-MCU. Antwortet der J-Link von der LTE-MCU, zeigt der Tab statt der Konsole **The J-Link is connected to the LTE MCU.** und verbindet sich nicht von selbst neu. Stecken Sie das Kabel an den APP-Anschluss um und drücken Sie **Retry**, oder drücken Sie **Update LTE firmware…**, um das [LTE-Firmware-Update](flashing.md#lte-firmware-update) zu starten.
+
+Fehlercode: [`target.other_connector`](#target.other_connector).
+
 ### Die LTE-Modem-Firmware braucht nRF Util
 
 Das Aktualisieren der LTE-Modem-Firmware verwendet Nordic nRF Util mit seinem Befehl `device`. Nichts anderes braucht es. Installieren Sie es wie unter [Nordic nRF Util](install.md#nordic-nrf-util-nur-für-die-lte-modem-firmware) beschrieben, oder legen Sie seinen Pfad in **Settings** › **nRF Util** fest, oder mit `--nrfutil PATH` in der CLI.
@@ -437,6 +443,16 @@ Sie haben einen Befehl gesendet, während die Konsole getrennt war. Bei eingesch
 
 Das Flachbandkabel steckt im Anschluss der anderen MCU (zum Beispiel im LTE-Anschluss, wenn Sie die app-MCU flashen). Die Meldung kann „Expected the `<target>` MCU (`<part>`) but found `<found>`.“ lauten.
 
+<a id="target.other_connector"></a>
+#### `target.other_connector`
+
+**The J-Link is connected to another MCU of the device.**
+
+- **Probably:** The console runs on another MCU; the J-Link cable is on the other connector.
+- **What to do:** Move the J-Link cable to the connector of the console's MCU, or update the LTE firmware.
+
+Bei CHESTER lautet die Meldung „The J-Link is connected to the LTE MCU.“, die Ursache „The console runs on the application MCU; the J-Link cable is on the other connector.“ und der Vorschlag „Move the J-Link cable to the APP connector, or update the LTE firmware.“ Die Desktop-App zeigt sie als Banner mit **Update LTE firmware…** und **Retry**; die Sitzung verbindet sich nicht von selbst neu. Siehe [Der J-Link steckt am LTE-Anschluss](#der-j-link-steckt-am-lte-anschluss).
+
 <a id="target.protected"></a>
 #### `target.protected`
 
@@ -445,7 +461,7 @@ Das Flachbandkabel steckt im Anschluss der anderen MCU (zum Beispiel im LTE-Ansc
 - **Probably:** Access port protection (APPROTECT) is enabled.
 - **What to do:** Recover the MCU (this erases it), then flash it again.
 
-Recover entfernt den Schutz, löscht aber die MCU vollständig, einschließlich des Product Information Block. Siehe [Recover](flashing.md#recover). Für eine benannte MCU lautet der Vorschlag „Run `hwio <profile> <target> recover` (erases the MCU).“; in der Desktop-App verwenden Sie **Recover…** unter **Maintenance** auf der Seite **Flash**.
+Recover entfernt den Schutz, löscht aber die MCU vollständig, einschließlich des Product Information Block. Siehe [Recover](flashing.md#recover). Für eine benannte MCU lautet der Vorschlag „Run `hwio <profile> <target> recover` (erases the MCU).“; in der Desktop-App verwenden Sie **Recover…** unter **Maintenance** auf der Seite **Flash** (angezeigt mit **Settings › Advanced › Show expert maintenance actions** oder einmal, wenn die Fehlerbehebungsanleitung Sie dorthin schickt).
 
 <a id="target.program_failed"></a>
 #### `target.program_failed`

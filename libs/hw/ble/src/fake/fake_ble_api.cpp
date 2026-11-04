@@ -83,6 +83,7 @@ FakeDevice deviceOf(const QJsonObject& object) {
     device.advertise = object.value(QStringLiteral("advertise")).toBool(device.advertise);
     device.rssiZeroEvery =
         object.value(QStringLiteral("rssiZeroEvery")).toInt(device.rssiZeroEvery);
+    device.rssiJitter = object.value(QStringLiteral("rssiJitter")).toInt(device.rssiJitter);
     device.paired = object.value(QStringLiteral("paired")).toBool(device.paired);
     device.pairing =
         object.value(QStringLiteral("pairing")).toString(QStringLiteral("ok")).toStdString();
@@ -155,12 +156,17 @@ Result<FakeScenario> loadFakeScenario(const std::filesystem::path& file) {
     const std::string prefix =
         generate.value(QStringLiteral("namePrefix")).toString(QStringLiteral("GEN-")).toStdString();
     const int rssi = generate.value(QStringLiteral("rssi")).toInt(-80);
+    const int jitter = generate.value(QStringLiteral("rssiJitter")).toInt(0);
     for (int i = 0; i < count; ++i) {
         FakeDevice device;
         device.id = std::format("C0:00:00:00:{:02X}:{:02X}", (i >> 8) & 0xFF, i & 0xFF);
         device.name = std::format("{}{:04}", prefix, i);
         device.rssi = rssi - (i % 20);
+        device.rssiJitter = jitter;
         scenario.devices.push_back(std::move(device));
+    }
+    for (std::size_t i = 0; i < scenario.devices.size(); ++i) {
+        scenario.devices[i].jitterState = static_cast<std::uint32_t>(i) + 1U;
     }
     return scenario;
 }
@@ -247,9 +253,17 @@ void FakeBleApi::advertise() {
         ++item.advertisements;
         const bool unknown =
             item.rssiZeroEvery > 0 && item.advertisements % item.rssiZeroEvery == 0;
+        int rssi = item.rssi;
+        if (item.rssiJitter > 0) {
+            // A small LCG per device: deterministic noise for the smoothing (plan 0033).
+            item.jitterState = (item.jitterState * 1664525U) + 1013904223U;
+            const auto span = static_cast<std::uint32_t>((2 * item.rssiJitter) + 1);
+            rssi += static_cast<int>((item.jitterState >> 16U) % span) - item.rssiJitter;
+            rssi = std::min(rssi, -1); // never 0 (unknown)
+        }
         Advertisement advertisement{.id = item.id,
                                     .name = item.name,
-                                    .rssi = unknown ? 0 : item.rssi,
+                                    .rssi = unknown ? 0 : rssi,
                                     .serviceUuids = {},
                                     .seen = now};
         if (item.nus) {

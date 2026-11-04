@@ -76,11 +76,12 @@ Der Ordner der Anwendungsdaten enthält:
 | `logs` | Anwendungslogs, eine Datei pro Lauf | 10 Dateien der App, 20 von `hwio`, je Art 50 MiB |
 | `firmware-cache` | heruntergeladene Katalog-Firmware und LTE-Firmware | 100 Dateien, 500 MiB |
 | `crashes` | Absturzberichte | 5 Dateien |
+| `backups` | Kopien der Anwendungsfirmware, die das [LTE-Firmware-Update](flashing.md#lte-firmware-update) anlegt (`<serial>-<UTC time>.hex`) | 10 Dateien |
 
 Die Einstellungsdatei, die Logs und die Konsolendateien werden von der App und `hwio` gemeinsam genutzt.
-Konsolendateien und der Verlauf können nur von Ihrem Benutzer gelesen werden (Linux, macOS). Befehle, die Geheimnisse
-enthalten, werden nicht im Verlauf gespeichert und in Konsolendateien als `<redacted>` geschrieben
-([Konsole](console.md#befehlsverlauf)).
+Konsolendateien, der Verlauf und die Sicherungskopien können nur von Ihrem Benutzer gelesen werden (Linux, macOS).
+Befehle, die Geheimnisse enthalten, werden nicht im Verlauf gespeichert und in Konsolendateien als `<redacted>`
+geschrieben ([Konsole](console.md#befehlsverlauf)).
 
 Die Deinstallation von HARDWARIO Monitor löscht diese Ordner nicht; löschen Sie sie selbst, wenn Sie möchten. Um nur
 den Befehlsverlauf zu löschen: **Settings → Console → Clear history** oder `hwio console history clear`.

@@ -2,6 +2,8 @@
 // ADR-0081, ADR-0229): nearby devices of a profile with Bluetooth from a continuous scan, a name
 // filter, "Show all devices", the device type for unknown devices and Connect. An ErrorPanel replaces
 // the list while the adapter cannot be used; an empty state after the first scan finds nothing.
+// Plan 0033 (ADR-0235): while the pointer is over the list or a row has keyboard focus the order is
+// frozen (picker.freezeOrder); new devices are appended until it is released.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -15,6 +17,14 @@ Item {
     required property BlePickerViewModel picker
     readonly property bool adapterProblem: view.picker.adapterError.valid
     readonly property bool noDevices: view.picker.scanned && view.picker.count === 0 && !view.adapterProblem
+    // Rows that have the keyboard focus (0 or 1; counted by the delegates).
+    property int focusedRows: 0
+
+    Binding {
+        target: view.picker
+        property: "freezeOrder"
+        value: listHover.hovered || view.focusedRows > 0
+    }
 
     objectName: "bleDeviceList"
 
@@ -138,6 +148,12 @@ Item {
                         border.color: Theme.border
                         clip: true
 
+                        HoverHandler {
+                            id: listHover
+
+                            objectName: "bleListHover"
+                        }
+
                         ColumnLayout {
                             id: deviceColumn
 
@@ -174,6 +190,11 @@ Item {
                                     Accessible.name: row.displayName + ", " + row.profileName
                                     Accessible.description: [signalText.text, tag.text, staleTag.visible ? staleTag.text : ""]
                                                             .filter(part => part !== "").join(", ")
+                                    onActiveFocusChanged: view.focusedRows = Math.max(0, view.focusedRows + (row.activeFocus ? 1 : -1))
+                                    Component.onDestruction: {
+                                        if (row.activeFocus)
+                                            view.focusedRows = Math.max(0, view.focusedRows - 1);
+                                    }
                                     onClicked: view.picker.choose(row.index)
                                     onDoubleClicked: {
                                         view.picker.choose(row.index);

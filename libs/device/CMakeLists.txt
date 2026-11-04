@@ -5,7 +5,9 @@
 # (ADR-0022).
 
 hwio_add_backend_library(hwio_device
+    include/hwio/device/application_backup.h
     include/hwio/device/ble_lock.h
+    include/hwio/device/lte_update_procedure.h
     include/hwio/device/ble_session.h
     include/hwio/device/command_capture.h
     include/hwio/device/command_history.h
@@ -31,7 +33,9 @@ hwio_add_backend_library(hwio_device
     include/hwio/device/session_key.h
     include/hwio/device/session_registry.h
     include/hwio/device/shell_query.h
+    src/application_backup.cpp
     src/ble_lock.cpp
+    src/lte_update_procedure.cpp
     src/ble_session.cpp
     src/ble_session_internal.h
     src/banner_scan.h

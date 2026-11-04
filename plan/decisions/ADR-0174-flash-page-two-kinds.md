@@ -1,6 +1,6 @@
 # ADR-0174 — Flash page: two kinds, one LTE card (LTE firmware and modem merged)
 
-- **Status:** Accepted (supersedes the kind list of ADR-0055)
+- **Status:** Accepted (supersedes the kind list of ADR-0055; amended by ADR-0234: LTE firmware is flashed by the guided LTE update, not from the Flash page)
 - **Date:** 2026-10-20
 - **Decided by:** Matej Strnad (GUI feedback round 1, plan 0021)
 

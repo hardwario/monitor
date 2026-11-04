@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <initializer_list>
+#include <span>
 #include <stop_token>
 #include <string>
 #include <utility>
@@ -296,6 +297,35 @@ TEST(FirmwareImage, SegmentBeyondTheAddressSpaceIsRejected) {
     std::vector<Segment> segments;
     segments.push_back(Segment{.address = 0xFFFFFFF0U, .data = filled(32, 0)});
     EXPECT_FALSE(FirmwareImage::fromSegments(std::move(segments)));
+}
+
+} // namespace
+
+namespace {
+
+// Plan 0033 (application backup): toIntelHex() writes what parseIntelHex() reads back.
+TEST(IntelHexWriter, RoundTripAcrossA64KiBBoundaryWithStartAddress) {
+    std::vector<hwio::firmware::Segment> segments;
+    std::vector<std::byte> low(70000);
+    for (std::size_t i = 0; i < low.size(); ++i) {
+        low[i] = static_cast<std::byte>(i * 7U);
+    }
+    segments.push_back(hwio::firmware::Segment{.address = 0xFFF8, .data = low});
+    segments.push_back(hwio::firmware::Segment{.address = 0x10001000,
+                                               .data = std::vector<std::byte>(5, std::byte{0xAB})});
+    auto image = hwio::firmware::FirmwareImage::fromSegments(std::move(segments), 0x0000F1A5U);
+    ASSERT_TRUE(image);
+    const std::string text = hwio::firmware::toIntelHex(*image);
+    EXPECT_TRUE(text.starts_with(":020000040000FA\n"));
+    EXPECT_TRUE(text.ends_with(":0400000500"
+                               "00F1A561\n:00000001FF\n"));
+    const auto parsed = hwio::firmware::parseIntelHex(std::as_bytes(std::span(text)), "written");
+    ASSERT_TRUE(parsed) << parsed.error().detail;
+    EXPECT_EQ(*parsed, *image);
+}
+
+TEST(IntelHexWriter, EmptyImageIsOnlyTheEofRecord) {
+    EXPECT_EQ(hwio::firmware::toIntelHex(hwio::firmware::FirmwareImage{}), ":00000001FF\n");
 }
 
 } // namespace

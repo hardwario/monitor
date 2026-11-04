@@ -88,4 +88,14 @@ runRecover(WorkflowContext& context, const std::function<Status()>& reconnect);
 [[nodiscard]] Error forTarget(Error error, const DeviceProfile& profile,
                               const TargetProfile& target);
 
+// Plan 0033 (ADR-0233): the target of `profile` whose chip answered as `chip` (by its FICR part,
+// or - FICR unreadable - by the family whose CTRL-AP answered); nullptr when none matches.
+[[nodiscard]] const TargetProfile* targetOfChip(const DeviceProfile& profile,
+                                                const jlink::ChipInfo& chip) noexcept;
+
+// target.other_connector (ADR-0233): the probe reaches `found` instead of the console target
+// `console` ("The J-Link is connected to the LTE MCU."). `detail` names the found target id.
+[[nodiscard]] Error otherConnectorError(const TargetProfile& console, const TargetProfile& found,
+                                        std::string detail);
+
 } // namespace hwio::device::detail

@@ -44,6 +44,9 @@ public:
     static inline const QString recentKey = QStringLiteral("flash/recent");
     static inline const QString jlinkPathKey = QStringLiteral("jlink/libraryPath");
     static inline const QString nrfUtilPathKey = QStringLiteral("nrfutil/path");
+    // Plan 0033 (ADR-0236): Settings → Advanced → "Show expert maintenance actions" (Erase
+    // everything, Recover and the LTE MCU maintenance on the Flash page). Default false.
+    static inline const QString expertActionsKey = QStringLiteral("advanced/expertActions");
 
     struct Options {
         SettingsStore* settings = nullptr;    // outlives this object (AppViewModel)

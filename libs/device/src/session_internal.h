@@ -63,6 +63,10 @@ struct ReattachProbeCommand {};
 struct SetRttAddressCommand {
     std::optional<std::uint32_t> address;
 };
+// Plan 0033 (D4, ADR-0234): DeviceSession::hold() / SessionHold: RTT and auto-reconnect paused.
+struct HoldCommand {
+    bool held = true;
+};
 // Plan 0028 (ADR-0200): ConsoleSession::setFirmwareIdentity().
 struct SetFirmwareIdentityCommand {
     std::optional<FirmwareIdentity> identity;
@@ -93,7 +97,7 @@ struct OperationCommand {
 using Command =
     std::variant<SendLineCommand, ReconnectCommand, SuspendCommand, ResumeCommand, OperationCommand,
                  StartConnectionCommand, DetachProbeCommand, ReattachProbeCommand,
-                 SetRttAddressCommand, SetFirmwareIdentityCommand>;
+                 SetRttAddressCommand, SetFirmwareIdentityCommand, HoldCommand>;
 
 // ---- events (worker -> owner thread) ----------------------------------------------------------
 

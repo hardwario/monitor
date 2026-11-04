@@ -12,8 +12,11 @@ messages the firmware sends appear as log lines.
 
 1. Open a new tab (<kbd>Ctrl</kbd>+<kbd>T</kbd>) and switch **Connect via** to **Bluetooth**. The app remembers the
    choice for the next tab.
-2. The list shows the CHESTER devices nearby, the strongest signal first, and refreshes by itself. Filter it by name,
-   or tick **Show all devices** to see every Bluetooth device. A device another tab uses is marked **In use (tab N)**;
+2. The list shows the CHESTER devices nearby, the strongest signal first, and refreshes by itself. The signal is
+   averaged over a few seconds and a device moves up only when it is clearly stronger (6 dB), so the list stays
+   steady; while the pointer is over the list (or a row has the keyboard focus) the order does not change at all and
+   new devices are added at the end. Filter it by name, or tick **Show all devices** to see every Bluetooth device
+   (CHESTER devices first). A device another tab uses is marked **In use (tab N)**;
    choosing it switches to that tab. A device another program uses is marked **In use by another program** and cannot
    be chosen.
 3. Choose the device and press **Connect** (or double-click it, or press <kbd>Enter</kbd>).

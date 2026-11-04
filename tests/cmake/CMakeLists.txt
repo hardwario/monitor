@@ -129,3 +129,12 @@ if(NOT HWIO_SANITIZERS AND (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR WIN32))
         LABELS "cmake")
     unset(_hwio_hardened_binaries)
 endif()
+
+# ADR-0237 (plan/features/0033 A1): the product name is "HARDWARIO Monitor", "2" only inside a version number.
+add_test(NAME product_name_check
+    COMMAND "${CMAKE_COMMAND}" "-DHWIO_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/check_product_name.cmake")
+set_tests_properties(product_name_check PROPERTIES
+    PASS_REGULAR_EXPRESSION "product_name_check: [0-9]+ files OK"
+    FAIL_REGULAR_EXPRESSION "ADR-0237"
+    LABELS "cmake")

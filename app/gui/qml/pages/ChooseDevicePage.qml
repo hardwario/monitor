@@ -1,5 +1,5 @@
 // "Choose device" page of a new tab (ADR-0050): the live probe list (refreshed every 2 s while
-// visible), the device and target pickers and Connect. Empty state when no probe is found, an
+// visible), the device picker (ADR-0233: no target choice) and Connect. Empty state when no probe is found, an
 // ErrorPanel when the J-Link Software is missing. Plan 0012 (ADR-0081): a "Connect via J-Link |
 // Bluetooth" switch on top; the Bluetooth view is BleDeviceList.
 pragma ComponentBehavior: Bound
@@ -414,7 +414,7 @@ Item {
                     }
                 }
 
-                // Device and target card.
+                // Device card (ADR-0233: no target choice).
                 Rectangle {
                     Layout.fillWidth: true
                     visible: !page.libraryMissing
@@ -444,6 +444,7 @@ Item {
                                 id: profileBox
 
                                 objectName: "profileBox"
+                                visible: page.picker.profileChoice
                                 implicitHeight: Theme.controlHeight
                                 model: page.picker.profiles
                                 textRole: "name"
@@ -458,30 +459,15 @@ Item {
                                 }
                             }
 
-                            Row {
-                                objectName: "targetChoice"
-                                spacing: 0
-                                Accessible.role: Accessible.Grouping
-                                Accessible.name: qsTr("Target")
-
-                                Repeater {
-                                    model: page.picker.targets
-
-                                    delegate: HButton {
-                                        required property var modelData
-
-                                        objectName: "targetButton"
-                                        kind: page.picker.targetId === modelData.id ? "primary" : "normal"
-                                        // 0021 (ADR-0168): the id; the long title is the tooltip.
-                                        text: modelData.label
-                                        toolTipText: modelData.title
-                                        checkable: true
-                                        checked: page.picker.targetId === modelData.id
-                                        Accessible.role: Accessible.RadioButton
-                                        Accessible.description: modelData.title
-                                        onClicked: page.picker.targetId = modelData.id
-                                    }
-                                }
+                            // Plan 0033 (D1): one J-Link profile - its name instead of the picker.
+                            Label {
+                                objectName: "profileName"
+                                textFormat: Text.PlainText
+                                visible: !page.picker.profileChoice
+                                height: Theme.controlHeight
+                                verticalAlignment: Text.AlignVCenter
+                                text: page.picker.profileName
+                                color: Theme.text
                             }
                         }
 

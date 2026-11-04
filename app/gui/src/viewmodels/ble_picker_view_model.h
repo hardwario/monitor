@@ -6,7 +6,12 @@
 // A list model over the devices of the application's BleService scan. Rows are the devices of a
 // profile with Bluetooth ("Show all devices": every device; rows without a profile are "Unknown
 // device" and connect with the device type picked below), filtered by a case-insensitive substring
-// of the name or id, sorted by RSSI (strongest first). The selection follows the device id, so it
+// of the name or id. Order (plan 0033, ADR-0235): devices with a profile first (matters with "Show
+// all devices"), then by the scanner's smoothed RSSI, strongest first; a row moves above another
+// only when its smoothed RSSI is higher by at least rssiMargin (hysteresis on the previous order),
+// unknown RSSI last. While `freezeOrder` is set (QML: the pointer is over the list or a row has
+// keyboard focus) the order is kept and new devices are appended; it updates when it is cleared.
+// The RSSI shown is the smoothed value (whole dBm). The selection follows the device id, so it
 // stays on its row when the order changes (legacy bug). A row is dimmed ("not seen recently")
 // staleAfter after its last advertisement and removed after removeAfter. Per row: who uses the
 // device - another tab of this window ("In use (tab 2)": choosing it switches to that tab) or
@@ -18,6 +23,7 @@
 //
 // Ownership: child of its DeviceTabViewModel (Qt parent). GUI thread only.
 
+#include "hwio/hw/ble/ble_scanner.h"
 #include "viewmodels/error_info.h"
 
 #include <QAbstractListModel>
@@ -66,6 +72,8 @@ class BlePickerViewModel : public QAbstractListModel {
     // The profile's power hint for the empty state ("" = none).
     Q_PROPERTY(QString powerHint READ powerHint NOTIFY profileIdChanged)
     Q_PROPERTY(QString profileName READ profileName NOTIFY profileIdChanged) // "CHESTER"
+    // Plan 0033 (ADR-0235): keep the order while the user points at the list.
+    Q_PROPERTY(bool freezeOrder READ freezeOrder WRITE setFreezeOrder NOTIFY freezeOrderChanged)
     // [Open Privacy settings] for ble.permission_denied (macOS).
     Q_PROPERTY(bool canOpenPrivacySettings READ canOpenPrivacySettings NOTIFY scanChanged)
 
@@ -75,12 +83,14 @@ public:
     static constexpr std::chrono::milliseconds announceInterval{5000};
     static constexpr std::chrono::milliseconds ageCheckInterval{1000};
     static constexpr std::chrono::milliseconds ownerRefreshInterval{2000};
+    // Plan 0033 (D5, ADR-0235): a row overtakes another only when stronger by this many dB.
+    static constexpr double rssiMargin = 6.0;
 
     // Unscoped: Qt model roles are ints.
     enum Roles : quint16 {         // NOLINT(cppcoreguidelines-use-enum-class)
         IdRole = Qt::UserRole + 1, // the BleDeviceId
         NameRole,                  // the advertised name; "" when none
-        RssiRole,                  // dBm, 0 = unknown
+        RssiRole,                  // smoothed dBm (rounded), 0 = unknown
         SignalLevelRole,           // 0 (unknown) .. 4
         ProfileRole,               // profile id or "" (Unknown device)
         ProfileNameRole,           // "CHESTER" or "Unknown device"
@@ -100,6 +110,8 @@ public:
         std::function<std::chrono::steady_clock::time_point()> now;
         // Opens a system URL (DeviceTabViewModel::openExternalUrl).
         std::function<void(const QUrl& url)> openUrl;
+        // Test seam (plan 0033): the scanned devices (BleService::devices() by default).
+        std::function<std::vector<ble::BleDeviceInfo>()> devices;
     };
 
     // `service` may be null (no Bluetooth list; tests of other parts).
@@ -134,6 +146,8 @@ public:
     [[nodiscard]] QString powerHint() const;
     [[nodiscard]] QString profileName() const;
     [[nodiscard]] bool canOpenPrivacySettings() const;
+    [[nodiscard]] bool freezeOrder() const noexcept { return m_freezeOrder; }
+    void setFreezeOrder(bool freeze);
     [[nodiscard]] QString selectedId() const { return m_selectedId.value_or(QString()); }
 
     // A click on a row: selects it, or switches to the tab that uses the device
@@ -158,6 +172,7 @@ signals:
     void filterChanged();
     void selectedRowChanged();
     void profileIdChanged();
+    void freezeOrderChanged();
     void tabActivationRequested(int tabIndex);
     void connectRequested(const QString& deviceId, const QString& name, const QString& profileId);
     // A text for screen readers ("3 devices found"), at most once per announceInterval.
@@ -167,9 +182,10 @@ private:
     struct Row {
         QString id;
         QString name;
-        int rssi = 0;
-        QString profileId; // "" = no profile
-        int inUseTab = -1; // 0-based
+        int rssi = 0;            // the smoothed RSSI rounded (shown)
+        double rssiSmoothed = 0; // the order (0 = unknown)
+        QString profileId;       // "" = no profile
+        int inUseTab = -1;       // 0-based
         QString inUseOther;
         bool stale = false;
 
@@ -178,6 +194,8 @@ private:
 
     [[nodiscard]] std::chrono::steady_clock::time_point now() const;
     [[nodiscard]] std::vector<Row> buildRows();
+    // The rows in display order (profile first, smoothed RSSI with the margin, or frozen).
+    [[nodiscard]] std::vector<Row> ordered(std::vector<Row> rows) const;
     void setRows(std::vector<Row> rows);
     void restoreSelection();
     void preselect();
@@ -193,6 +211,7 @@ private:
     int m_selectedRow = -1;
     bool m_active = false;
     bool m_showAll = false;
+    bool m_freezeOrder = false;
     QString m_filterText;
     QString m_profileId;
     ErrorInfo m_adapterError;

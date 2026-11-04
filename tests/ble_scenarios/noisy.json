@@ -1,0 +1,8 @@
+{
+  "advertiseIntervalMs": 20,
+  "devices": [
+    {"id": "F1:00:00:00:00:11", "name": "CHESTER-NOISY-A", "rssi": -60, "rssiJitter": 10, "nus": true},
+    {"id": "F1:00:00:00:00:12", "name": "CHESTER-NOISY-B", "rssi": -63, "rssiJitter": 10, "nus": true}
+  ],
+  "generate": {"count": 28, "namePrefix": "CHESTER-GEN", "rssi": -70, "rssiJitter": 8}
+}

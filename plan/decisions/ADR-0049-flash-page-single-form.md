@@ -1,6 +1,6 @@
 # ADR-0049 — Flash page: single-page form with in-place progress
 
-- **Status:** Accepted; step order superseded by ADR-0055
+- **Status:** Accepted; step order superseded by ADR-0055; amended by ADR-0236 (2026-11-04): Maintenance shows Erase everything, Recover and the LTE MCU only with the expert setting
 - **Date:** 2026-10-09
 - **Decided by:** Matej Strnad (M3 GUI planning session)
 

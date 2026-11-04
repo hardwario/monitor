@@ -188,6 +188,16 @@ QString WizardViewModel::busyCancelText() const {
     return !m_wizard.isNull() ? m_wizard->busyCancelText() : QString();
 }
 
+bool WizardViewModel::canCancel() const { return m_wizard.isNull() || m_wizard->canCancel(); }
+
+QString WizardViewModel::cancelAcceptText() const {
+    return !m_wizard.isNull() ? m_wizard->cancelAcceptText() : QString();
+}
+
+QString WizardViewModel::cancelRejectText() const {
+    return !m_wizard.isNull() ? m_wizard->cancelRejectText() : QString();
+}
+
 CheckListModel* WizardViewModel::checks() const {
     return !m_wizard.isNull() ? m_wizard->checks() : nullptr;
 }
@@ -232,7 +242,7 @@ void WizardViewModel::action(const QString& actionId) {
 }
 
 void WizardViewModel::cancel(bool force) {
-    if (m_wizard.isNull()) {
+    if (m_wizard.isNull() || !m_wizard->canCancel()) {
         return;
     }
     if (busyCancelText().isEmpty()) {

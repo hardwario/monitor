@@ -7,8 +7,9 @@
 // firmware date and who uses the probe: another tab of this window ("In use (tab 2)": choosing it
 // switches to that tab) or another program ("In use by another program (hwio, PID 1234)": the row
 // is disabled). The "in use by a tab" information is added here on the GUI thread. Exactly one
-// free probe is preselected. Below the list: the device profile and the target pickers and
-// Connect.
+// free probe is preselected. Below the list: the device profile picker (shown only with more than
+// one J-Link profile, plan 0033 D1) and Connect. ADR-0233: no target choice - a tab connects to
+// the profile's console target (CHESTER: app).
 //
 // While `active` (the page is visible) the picker holds the scanner (2 s scans).
 //
@@ -45,9 +46,12 @@ class ProbePickerViewModel : public QAbstractListModel {
     Q_PROPERTY(bool scanned READ scanned NOTIFY scanChanged)
     Q_PROPERTY(QString profileId READ profileId WRITE setProfileId NOTIFY profileIdChanged)
     Q_PROPERTY(QVariantList profiles READ profiles CONSTANT)
-    Q_PROPERTY(QString targetId READ targetId WRITE setTargetId NOTIFY targetIdChanged)
-    // [{id, label (= id, 0021 ADR-0168), title}]
-    Q_PROPERTY(QVariantList targets READ targets NOTIFY targetsChanged)
+    // Plan 0033 (D1): more than one J-Link profile (the Device picker is shown), and the name of
+    // the chosen one (shown as text otherwise).
+    Q_PROPERTY(bool profileChoice READ profileChoice CONSTANT)
+    Q_PROPERTY(QString profileName READ profileName NOTIFY profileIdChanged)
+    // ADR-0233: the console target of the chosen profile.
+    Q_PROPERTY(QString targetId READ targetId NOTIFY profileIdChanged)
     Q_PROPERTY(int selectedRow READ selectedRow WRITE setSelectedRow NOTIFY selectedRowChanged)
     Q_PROPERTY(bool canConnect READ canConnect NOTIFY selectedRowChanged)
     Q_PROPERTY(hwio::gui::ErrorInfo libraryError READ libraryError NOTIFY scanChanged)
@@ -85,9 +89,9 @@ public:
     [[nodiscard]] QString profileId() const { return m_profileId; }
     void setProfileId(const QString& id);
     [[nodiscard]] static QVariantList profiles();
-    [[nodiscard]] QString targetId() const { return m_targetId; }
-    void setTargetId(const QString& id);
-    [[nodiscard]] QVariantList targets() const;
+    [[nodiscard]] QString targetId() const;
+    [[nodiscard]] static bool profileChoice();
+    [[nodiscard]] QString profileName() const;
     [[nodiscard]] int selectedRow() const noexcept { return m_selectedRow; }
     void setSelectedRow(int row);
     [[nodiscard]] bool canConnect() const;
@@ -116,8 +120,6 @@ signals:
     void countChanged();
     void scanChanged();
     void profileIdChanged();
-    void targetIdChanged();
-    void targetsChanged();
     void selectedRowChanged();
     void tabActivationRequested(int tabIndex);
     void connectRequested(std::uint32_t serialNumber, const QString& product,
@@ -151,7 +153,6 @@ private:
     ErrorInfo m_libraryError;
     QString m_libraryVersion;
     QString m_profileId;
-    QString m_targetId;
 };
 
 } // namespace hwio::gui
