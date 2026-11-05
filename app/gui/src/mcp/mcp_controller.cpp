@@ -25,6 +25,7 @@
 #include "viewmodels/device_tab_list_model.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
+#include "viewmodels/probe_firmware_view_model.h"
 
 #include <QCoreApplication>
 #include <QJSEngine>
@@ -46,6 +47,7 @@
 #include <array>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <expected>
 #include <filesystem>
 #include <memory>
@@ -113,6 +115,12 @@ McpController::McpController(AppViewModel& app, Options options)
         }
     }
     m_tools = std::make_unique<hwio::mcp::tools::ToolsContext>(*m_provider, catalog);
+    // Plan 0036 (ADR-0105, ADR-0132): the J-Link firmware update is blocked ("Used by an AI
+    // assistant") while an AI operation runs on a tab of the probe. Removed by the destructor.
+    if (ProbeFirmwareViewModel* firmware = app.probeFirmware(); firmware != nullptr) {
+        firmware->setAiHoldsProbe(
+            [this](std::uint32_t serial) { return m_provider->aiOperationRuns(serial); });
+    }
 
     // Qt parent ownership: the prompt's view model is a child.
     m_consentView = new ConsentViewModel( // NOLINT(cppcoreguidelines-owning-memory)
@@ -164,7 +172,14 @@ McpController::McpController(AppViewModel& app, Options options)
     apply();
 }
 
-McpController::~McpController() { shutdown(); }
+McpController::~McpController() {
+    if (!m_app.isNull()) {
+        if (ProbeFirmwareViewModel* firmware = m_app->probeFirmware(); firmware != nullptr) {
+            firmware->setAiHoldsProbe({});
+        }
+    }
+    shutdown();
+}
 
 McpController* McpController::create(QQmlEngine* /*qmlEngine*/, QJSEngine* /*jsEngine*/) {
     auto* app = QCoreApplication::instance()->findChild<AppViewModel*>(QString(),
