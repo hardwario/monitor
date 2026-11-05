@@ -473,9 +473,9 @@ TEST_F(FlashCli, LteBundleWithTheFakeNrfUtil) {
                                  QStringLiteral("flash"), path(QStringLiteral("bundle.zip"))},
                                 env);
     EXPECT_EQ(human.exitCode, 0) << human.err;
-    EXPECT_NE(human.err.find("Warning: The application firmware on the APP MCU can reset the LTE "
-                             "MCU during the update."),
-              std::string::npos)
+    // Plan 0033 HIL G3: the first line, before "Using nRF Util" and the firmware lines.
+    EXPECT_TRUE(human.err.starts_with("Warning: The application firmware on the APP MCU can reset "
+                                      "the LTE MCU during the update."))
         << human.err;
     EXPECT_NE(human.err.find("hwio chester lte flash --guided"), std::string::npos) << human.err;
 

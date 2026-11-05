@@ -646,12 +646,9 @@ Result<CommandResult> lteFlash(const Context& context, const GlobalOptions& glob
                                const ProbeOptions& group, const ProbeOptions& own,
                                const std::string& file, bool allowUicr, bool noCache) {
     ProgressUi ui(context, std::cerr, stderrIsTerminal());
-    auto job = prepareLte(context, globals, ui, file, allowUicr, noCache);
-    if (!job) {
-        return std::unexpected(std::move(job).error());
-    }
     // Plan 0033 H5 (ADR-0273): a running application on the APP MCU can reset the LTE MCU during
     // the update (target.reset_during_update); the guided update erases it first. CLI: English.
+    // The first line of the human output (before nRF Util and the firmware), plan 0033 HIL G3.
     constexpr std::string_view guidedHint =
         "The application firmware on the APP MCU can reset the LTE MCU during the update. "
         "If the update fails, use `hwio chester lte flash --guided`: it stops the application "
@@ -660,6 +657,10 @@ Result<CommandResult> lteFlash(const Context& context, const GlobalOptions& glob
                                                     static_cast<qsizetype>(guidedHint.size()));
     if (context.mode == OutputMode::Human) {
         std::cerr << "Warning: " << guidedHint << '\n';
+    }
+    auto job = prepareLte(context, globals, ui, file, allowUicr, noCache);
+    if (!job) {
+        return std::unexpected(std::move(job).error());
     }
     auto outcome = runOperation(context, globals, group, own, "lte", ui, job->start, job->nrfUtil);
     if (!outcome) {

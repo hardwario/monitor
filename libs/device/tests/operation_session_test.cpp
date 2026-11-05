@@ -588,6 +588,37 @@ TEST_F(Operations, LteStepFailureAfterAPinResetIsResetDuringUpdate) {
     EXPECT_EQ(flashed->status.error().code, ErrorCode::TargetResetDuringUpdate);
 }
 
+// Plan 0033 HIL G3: after the pin reset the open J-Link library session still reports
+// "connected" but no longer reaches the LTE MCU. The reset reason is read over a fresh connection
+// (the probe closed and opened again), so the failure is still target.reset_during_update.
+TEST_F(Operations, LteDownloadFailureOnALostLinkReadsTheResetReasonAfterAReopen) {
+    auto session = openConnected(options("lte", false));
+    ASSERT_TRUE(session);
+    for (const bool bundled : {false, true}) {
+        clearOps();
+        target().set([](ScriptedTarget& t) {
+            t.pinResetDuringDownload = true;
+            t.pinResetLosesTheLink = true;
+        });
+        const auto started =
+            bundled ? session->flashLteBundle("lte", bundle(), {})
+                    : session->flash("lte", std::make_shared<FirmwareImage>(appImage()), {});
+        const OperationResult* failed = finish(started);
+        ASSERT_FALSE(failed->status);
+        EXPECT_EQ(failed->status.error().code, ErrorCode::TargetResetDuringUpdate)
+            << failed->status.error().detail;
+        EXPECT_NE(failed->status.error().detail.find("target.program_failed"), std::string::npos);
+        EXPECT_NE(failed->status.error().detail.find("(reset pin)"), std::string::npos);
+        const auto sequence = ops();
+        const auto download = std::ranges::find(sequence, "download");
+        ASSERT_NE(download, sequence.end());
+        const auto closed = std::find(download, sequence.end(), "close");
+        ASSERT_NE(closed, sequence.end()); // opened again after the failure
+        EXPECT_NE(std::find(closed, sequence.end(), "connect:NRF9151_XXCA"), sequence.end());
+    }
+    target().set([](ScriptedTarget& t) { t.pinResetLosesTheLink = false; });
+}
+
 // The application MCU has no reset reason register in the profile: nothing is cleared there.
 TEST_F(Operations, AppFlashDoesNotTouchAResetReason) {
     auto session = openConnected(options("app", false));

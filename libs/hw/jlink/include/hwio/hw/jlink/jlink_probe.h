@@ -58,6 +58,12 @@ public:
                                          OpenMode mode = OpenMode::Normal);
     // Closes the probe (no-op when not open).
     void close();
+    // Closes the open probe and opens it again (same serial number and OpenMode, SWD again when it
+    // was selected; the speed of setSpeed() is kept): a fresh library session whose next connect()
+    // initializes the target again. Plan 0033 H5: after the target was reset during an operation
+    // the old session still reports "connected" but no longer reaches it. No-op when not open.
+    // `why` completes the log line. Errors: those of open() and selectSwd().
+    [[nodiscard]] Status reopen(std::string_view why);
     [[nodiscard]] bool isOpen() const noexcept { return m_open; }
     // The open probe (serial number, product, firmware string).
     [[nodiscard]] const ProbeInfo& info() const noexcept { return m_info; }

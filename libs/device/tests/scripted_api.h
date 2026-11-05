@@ -164,6 +164,11 @@ public:
     bool pinResetDuringDownload = false;
     // H5: reading the reset reason register fails (the original error must stay).
     bool resetReasonUnreadable = false;
+    // Plan 0033 HIL G3: with this set, the pin reset of pinResetDuringDownload also breaks the
+    // open library session (linkLost): it still reports "connected", but every memory and
+    // CoreSight access fails until the probe is closed (and opened again), as on the hardware.
+    bool pinResetLosesTheLink = false;
+    bool linkLost = false;
     std::string failConnectTo;    // connect() with this device name fails
     std::vector<std::string> ops; // connect:<device>, reset, go, halt, download, eraseChip, ...
     bool connected = false;
@@ -249,6 +254,7 @@ public:
             t.rttStarted = false;
             t.sessionDevice.clear();
             t.staleDevice = false;
+            t.linkLost = false;
             t.ops.emplace_back("close");
         });
     }
@@ -407,7 +413,7 @@ public:
     }
     int readU32s(std::uint32_t address, std::span<std::uint32_t> items) override {
         return m_target->get([&](ScriptedTarget& t) {
-            if (!t.connected) {
+            if (!t.connected || t.linkLost) {
                 return -1;
             }
             if (t.chip().nrf91 && items.size() == 1 &&
@@ -524,6 +530,7 @@ public:
             if (t.pinResetDuringDownload) {
                 t.pinResetDuringDownload = false;
                 t.chip().resetReason |= 1U;
+                t.linkLost = t.pinResetLosesTheLink;
                 return -5;
             }
             if (t.endDownloadResult < 0 || !t.connected) {
@@ -550,7 +557,7 @@ public:
         }
         return m_target->get([&](ScriptedTarget& t) {
             ++t.readMemoryCalls;
-            if (!t.connected || t.chip().protectedChip) {
+            if (!t.connected || t.linkLost || t.chip().protectedChip) {
                 return -1;
             }
             for (std::size_t i = 0; i < buffer.size(); ++i) {
@@ -568,7 +575,7 @@ public:
     std::expected<std::uint32_t, int> readU32(std::uint32_t address) override {
         return m_target->get([&](ScriptedTarget& t) -> std::expected<std::uint32_t, int> {
             ScriptedChip& chip = t.chip();
-            if (!t.connected || chip.protectedChip) {
+            if (!t.connected || t.linkLost || chip.protectedChip) {
                 return std::unexpected(-1);
             }
             if (address == chip.ficrPart()) {
@@ -618,6 +625,9 @@ public:
 
     std::expected<std::uint32_t, int> coresightRead(std::uint8_t index, bool ap) override {
         return m_target->get([&](ScriptedTarget& t) -> std::expected<std::uint32_t, int> {
+            if (t.linkLost) {
+                return std::unexpected(-1);
+            }
             if (!ap) {
                 return index == 2 ? t.apSelect : 0U;
             }

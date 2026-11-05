@@ -871,15 +871,33 @@ private:
             code == ErrorCode::TargetOtherConnector || code == ErrorCode::TargetProtected) {
             return failed;
         }
+        // A fresh connection (plan 0033 H5 HIL): after a pin reset during a J-Link step the old
+        // library session still reports "connected" but no longer reaches the MCU, so the
+        // shortcut of prepareProbe() would keep it. A failed reopen leaves the probe closed;
+        // prepareProbe() opens it again (or fails: logged, the original error is kept).
+        if (m_probe && m_probe->isOpen()) {
+            if (Status reopened = m_probe->reopen("Reading the reset reason after the failure");
+                !reopened) {
+                flashLog("J-Link not opened again after the failure (" + reopened.error().detail +
+                         ")");
+            }
+        }
+        m_probeTarget = nullptr;
         if (Status prepared = prepareProbe(target, true, stop); !prepared) {
             flashLog("Reset reason not read after the failure (" + prepared.error().detail + ")");
             return failed;
         }
         jlink::JLinkProgrammer programmer(*m_api, *m_probe, clock(), programmerConfigFor(target));
         // Read only from the MCU that was armed (the register address is the target's own).
-        if (auto chip = programmer.identify();
-            !chip || chip->protectedChip || targetOfChip(*m_config.profile, *chip) != &target) {
-            flashLog("Reset reason not read after the failure (another MCU answers)");
+        auto chip = programmer.identify();
+        if (!chip) {
+            flashLog("Reset reason not read after the failure (identify failed: " +
+                     chip.error().detail + ")");
+            return failed;
+        }
+        if (chip->protectedChip || targetOfChip(*m_config.profile, *chip) != &target) {
+            flashLog(std::format("Reset reason not read after the failure ({})",
+                                 chip->protectedChip ? "protected" : "another MCU answers"));
             return failed;
         }
         auto bytes =
