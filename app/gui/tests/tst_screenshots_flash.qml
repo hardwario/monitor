@@ -84,7 +84,8 @@ TestCase {
 
     function test_shots_data() {
         return [{ tag: "light-en", theme: "light", language: "en" }, { tag: "dark-en", theme: "dark", language: "en" },
-                { tag: "light-cs", theme: "light", language: "cs" }, { tag: "dark-cs", theme: "dark", language: "cs" }];
+                { tag: "light-cs", theme: "light", language: "cs" }, { tag: "dark-cs", theme: "dark", language: "cs" },
+                { tag: "light-de", theme: "light", language: "de" }];
     }
 
     function test_shots(data) {
@@ -121,6 +122,15 @@ TestCase {
         tryVerify(() => vm.source.designatedState === FirmwareSourceViewModel.DesignatedReady, 10000);
         tryVerify(() => vm.prerequisiteText !== "", 10000);
         save("f05-flash-lte-designated");
+        // Plan 0038 A0: the prerequisite buttons wrap at the minimum window size (German is the longest).
+        window.width = 960;
+        window.height = 600;
+        tryVerify(() => find("nrfUtilInstall") !== null && find("nrfUtilInstall").width > 0, 5000);
+        verify(find("nrfUtilInstall").x + find("nrfUtilInstall").width <= find("nrfUtilInstall").parent.width + 0.5,
+               "the prerequisite buttons fit (wrap) at 960 × 600");
+        save("f05b-flash-lte-prerequisite-min");
+        window.width = 1280;
+        window.height = 800;
 
         // 0021: an own LTE bundle, then modem firmware (the LTE card's own file).
         vm.source.loadFile(testSupport.writeBundle());

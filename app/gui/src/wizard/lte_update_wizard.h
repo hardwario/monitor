@@ -47,7 +47,7 @@ class LteUpdateWizard : public Wizard {
     Q_PROPERTY(hwio::gui::FirmwareSourceViewModel* lteSource READ lteSource CONSTANT)
     Q_PROPERTY(hwio::gui::FirmwareSourceViewModel* appSource READ appSource CONSTANT)
     Q_PROPERTY(QString prerequisiteText READ prerequisiteText NOTIFY changed)
-    Q_PROPERTY(QString nrfUtilInstallUrl READ nrfUtilInstallUrl CONSTANT)
+    Q_PROPERTY(QString nrfUtilDownloadUrl READ nrfUtilDownloadUrl CONSTANT) // plan 0038 A0
     // The text of the running step (plain text: it may name connectors and paths).
     Q_PROPERTY(QString promptText READ promptText NOTIFY changed)
     Q_PROPERTY(QString illustration READ illustration NOTIFY changed) // slot id or ""
@@ -103,7 +103,7 @@ public:
     [[nodiscard]] FirmwareSourceViewModel* lteSource() const { return m_lteSource; }
     [[nodiscard]] FirmwareSourceViewModel* appSource() const { return m_appSource; }
     [[nodiscard]] QString prerequisiteText() const;
-    [[nodiscard]] static QString nrfUtilInstallUrl();
+    [[nodiscard]] static QString nrfUtilDownloadUrl();
     [[nodiscard]] QString promptText() const;
     [[nodiscard]] QString illustration() const;
     [[nodiscard]] bool wrongConnector() const;
