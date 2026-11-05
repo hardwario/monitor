@@ -1331,12 +1331,17 @@
         <translation>Co chcete nahrát?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/KindCards.qml" line="168"/>
+        <location filename="../app/gui/qml/flash/KindCards.qml" line="178"/>
         <source>Set path in Settings</source>
         <translation>Nastavit cestu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/KindCards.qml" line="174"/>
+        <location filename="../app/gui/qml/flash/KindCards.qml" line="187"/>
+        <source>Download nRF Util ↗</source>
+        <translation>Stáhnout nRF Util ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/flash/KindCards.qml" line="194"/>
         <source>How to install ↗</source>
         <translation>Jak nainstalovat ↗</translation>
     </message>
@@ -1344,27 +1349,32 @@
 <context>
     <name>LteUpdateStep</name>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="68"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="79"/>
         <source>Set path in Settings</source>
         <translation>Nastavit cestu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="74"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="88"/>
+        <source>Download nRF Util ↗</source>
+        <translation>Stáhnout nRF Util ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="95"/>
         <source>How to install ↗</source>
         <translation>Jak nainstalovat ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="125"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="147"/>
         <source>The application that was in the device</source>
         <translation>Aplikace, která byla v zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="145"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="167"/>
         <source>Firmware from the catalog or a file</source>
         <translation>Firmware z katalogu nebo ze souboru</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="168"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="190"/>
         <source>Choose a firmware file</source>
         <translation>Vyberte soubor s firmwarem</translation>
     </message>
@@ -1680,7 +1690,7 @@
     </message>
     <message>
         <location filename="../app/gui/qml/settings/NrfUtilSection.qml" line="51"/>
-        <location filename="../app/gui/qml/settings/NrfUtilSection.qml" line="118"/>
+        <location filename="../app/gui/qml/settings/NrfUtilSection.qml" line="128"/>
         <source>Choose the nrfutil program</source>
         <translation>Vyberte program nrfutil</translation>
     </message>
@@ -1700,17 +1710,22 @@
         <translation>Kontrola nRF Util…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/NrfUtilSection.qml" line="93"/>
+        <location filename="../app/gui/qml/settings/NrfUtilSection.qml" line="95"/>
+        <source>Download nRF Util ↗</source>
+        <translation>Stáhnout nRF Util ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/NrfUtilSection.qml" line="103"/>
         <source>How to install ↗</source>
         <translation>Jak nainstalovat ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/NrfUtilSection.qml" line="102"/>
+        <location filename="../app/gui/qml/settings/NrfUtilSection.qml" line="112"/>
         <source>Run the setup wizard</source>
         <translation>Spustit průvodce nastavením</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/NrfUtilSection.qml" line="109"/>
+        <location filename="../app/gui/qml/settings/NrfUtilSection.qml" line="119"/>
         <source>Check again</source>
         <translation>Zkontrolovat znovu</translation>
     </message>
@@ -6386,64 +6401,64 @@
 <context>
     <name>hwio::gui::SettingsViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="132"/>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="165"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="134"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="167"/>
         <source>System</source>
         <translation>Podle systému</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="167"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="169"/>
         <source>Light</source>
         <translation>Světlý</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="169"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="171"/>
         <source>Dark</source>
         <translation>Tmavý</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="385"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="387"/>
         <source>Detected: %1 · %2 · %3</source>
         <translation>Nalezeno: %1 · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="388"/>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="407"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="390"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="409"/>
         <source>Checking…</source>
         <translation>Kontrola…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="405"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="407"/>
         <source>Detected: %1 · %2</source>
         <translation>Nalezeno: %1 · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="410"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="412"/>
         <source>Not found — needed only for LTE modem firmware</source>
         <translation>Nenalezeno — potřeba jen pro firmware LTE modemu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="433"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="435"/>
         <source>checking…</source>
         <translation>kontrola…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="437"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="439"/>
         <source>not checked</source>
         <translation>nezkontrolováno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="444"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="446"/>
         <source>Build: %1</source>
         <translation>Sestavení: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="445"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="447"/>
         <source>J-Link Software: %1</source>
         <translation>J-Link Software: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="448"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="450"/>
         <source>nRF Util: %1</source>
         <translation>nRF Util: %1</translation>
     </message>

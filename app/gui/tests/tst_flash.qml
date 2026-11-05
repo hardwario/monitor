@@ -123,8 +123,16 @@ TestCase {
         compare(find("flashBarText").text,
                 "Use Update LTE firmware… above: the J-Link has to be moved between the connectors.");
         tryVerify(() => find("prerequisite") !== null, 10000); // nRF Util is missing
+        // Plan 0038 A0: direct Nordic download for this OS and our localized install guide.
+        verify(find("nrfUtilDownload") !== null);
+        verify(flash.nrfUtilDownloadUrl.startsWith("https://"), flash.nrfUtilDownloadUrl);
+        verify(find("nrfUtilInstall") !== null);
+        verify(AppViewModel.docsLink("install-nrf-util").endsWith(
+                   "/install.md#nordic-nrf-util-lte-modem-firmware-only"));
 
+        waitForRendering(window.contentItem, 2000);
         mouseClick(find("kindCard" + FirmwareSourceViewModel.AppFirmware));
+        compare(flash.kind, FirmwareSourceViewModel.AppFirmware);
         flash.source.loadFile(testSupport.writeHex("app.hex", 4096, false));
         tryVerify(() => flash.source.sourceState === FirmwareSourceViewModel.Ready, 5000);
         verify(find("summaryText").text.startsWith("app.hex · Intel HEX"));

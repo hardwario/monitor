@@ -142,16 +142,64 @@ domyślnych lokalizacji.
 <a id="nordic-nrf-util-lte-modem-firmware-only"></a>
 ## Nordic nRF Util (tylko firmware modemu LTE)
 
-nRF Util aktualizuje firmware modemu w MCU LTE. Wszystko inne działa bez niego. Zainstaluj `nrfutil` od Nordic
-Semiconductor, a następnie jego polecenie `device`:
+nRF Util aktualizuje firmware modemu w MCU LTE. Wszystko inne działa bez niego. W aplikacji przycisk **Download nRF
+Util ↗** (Pobierz nRF Util) otwiera właściwy plik do pobrania dla Twojego komputera.
 
-```sh
-nrfutil install device
-```
+**Windows**
 
-HARDWARIO Monitor szuka go w **Settings → nRF Util → Path** (lub `--nrfutil PATH`, lub `HWIO_NRFUTIL`), następnie
-w `PATH`, a potem w `~/.nrfutil/bin` (`%USERPROFILE%\.nrfutil\bin` w systemie Windows) i `/usr/local/bin`. Jeśli
-jest zbyt stary: `nrfutil self-upgrade` i `nrfutil upgrade device`.
+1. Pobierz [nrfutil.exe][nrfutil-win] do folderu **Pobrane** (Downloads).
+2. Otwórz PowerShell w folderze Pobrane (`cd $HOME\Downloads`) i uruchom:
+
+   ```powershell
+   .\nrfutil.exe install device
+   ```
+
+Możesz też uruchomić `winget install --id NordicSemiconductor.nrfutil`, a następnie w nowym terminalu
+`nrfutil install device`. Jeśli Windows zgłasza brak `VCRUNTIME140.dll` (lub `nrfutil.exe` kończy działanie bez
+komunikatu), zainstaluj [Microsoft Visual C++ Redistributable (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe) albo użyj winget, który instaluje go
+automatycznie.
+
+**macOS**
+
+1. Pobierz [nrfutil][nrfutil-mac] (jeden plik dla Intel i Apple silicon) do folderu **Pobrane** (Downloads).
+2. Otwórz Terminal i uruchom:
+
+   ```sh
+   cd ~/Downloads
+   chmod +x nrfutil
+   ./nrfutil install device
+   ```
+
+   Jeśli macOS informuje, że nie można otworzyć nrfutil, otwórz **Ustawienia systemowe › Prywatność i ochrona**,
+   kliknij **Otwórz mimo to** przy nrfutil i ponownie uruchom `./nrfutil install device`. Możesz też najpierw
+   uruchomić w tym samym Terminalu `xattr -d com.apple.quarantine nrfutil`.
+
+**Linux**
+
+1. Pobierz nrfutil dla [x86-64][nrfutil-linux] lub [ARM64][nrfutil-linux-arm] do folderu **Pobrane** (Downloads).
+2. Otwórz terminal i uruchom:
+
+   ```sh
+   cd ~/Downloads
+   chmod +x nrfutil
+   ./nrfutil install device
+   ```
+
+Pierwsze uruchomienie wymaga internetu: nrfutil instaluje siebie i swoje polecenie `device` w folderze `.nrfutil`
+w Twoim folderze domowym (`~/.nrfutil/bin`, w systemie Windows `%USERPROFILE%\.nrfutil\bin`). HARDWARIO Monitor sam go
+tam znajdzie; nie musisz zmieniać `PATH`. Następnie kliknij **Check again** (Sprawdź ponownie) w **Settings → nRF
+Util** lub uruchom `hwio doctor`. Pobrany plik możesz potem usunąć. Inne systemy: [strona pobierania nRF
+Util][nrfutil-page].
+
+**Zaawansowane.** HARDWARIO Monitor szuka nRF Util w **Settings → nRF Util → Path** (lub `--nrfutil PATH`, lub
+`HWIO_NRFUTIL`), następnie w `PATH`, a potem w `~/.nrfutil/bin` (`%USERPROFILE%\.nrfutil\bin` w systemie Windows)
+i `/usr/local/bin`. Jeśli jest zbyt stary: `~/.nrfutil/bin/nrfutil self-upgrade` / `~/.nrfutil/bin/nrfutil upgrade device` (Windows: `& "$HOME\.nrfutil\bin\nrfutil.exe" self-upgrade` / `& "$HOME\.nrfutil\bin\nrfutil.exe" upgrade device`).
+
+[nrfutil-win]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-pc-windows-msvc/nrfutil.exe
+[nrfutil-mac]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/universal-apple-darwin/nrfutil
+[nrfutil-linux]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil
+[nrfutil-linux-arm]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/aarch64-unknown-linux-gnu/nrfutil
+[nrfutil-page]: https://www.nordicsemi.com/Products/Development-tools/nrf-util
 
 ## Sprawdzenie instalacji
 

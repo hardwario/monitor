@@ -23,6 +23,8 @@
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
+#include <QStringView>
+#include <QSysInfo>
 #include <QUrl>
 #include <QVariant>
 #include <QVariantList>
@@ -470,8 +472,39 @@ QString SettingsViewModel::sourceUrl() {
     return QStringLiteral("https://github.com/hardwario/monitor");
 }
 
-QString SettingsViewModel::nrfUtilInstallUrl() {
-    return QStringLiteral("https://www.nordicsemi.com/Products/Development-tools/nRF-Util");
+QString SettingsViewModel::nrfUtilDownloadUrlFor(QStringView os, QStringView cpuArch) {
+    // Plan 0038 (ADR-0263): Nordic's install guide, "Installing nRF Util from the web". No Windows
+    // ARM64 build exists; the x64 one runs under emulation.
+    const QString base = QStringLiteral(
+        "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/");
+    if (os == u"windows") {
+        return base + QStringLiteral("x86_64-pc-windows-msvc/nrfutil.exe");
+    }
+    if (os == u"macos") {
+        return base + QStringLiteral("universal-apple-darwin/nrfutil");
+    }
+    if (os == u"linux") {
+        if (cpuArch == u"x86_64") {
+            return base + QStringLiteral("x86_64-unknown-linux-gnu/nrfutil");
+        }
+        if (cpuArch == u"arm64") {
+            return base + QStringLiteral("aarch64-unknown-linux-gnu/nrfutil");
+        }
+    }
+    return QStringLiteral("https://www.nordicsemi.com/Products/Development-tools/nrf-util");
+}
+
+QString SettingsViewModel::nrfUtilDownloadUrl() {
+#ifdef Q_OS_WIN
+    constexpr QStringView os = u"windows";
+#elifdef Q_OS_MACOS
+    constexpr QStringView os = u"macos";
+#elifdef Q_OS_LINUX
+    constexpr QStringView os = u"linux";
+#else
+    constexpr QStringView os = u"other";
+#endif
+    return nrfUtilDownloadUrlFor(os, QSysInfo::currentCpuArchitecture());
 }
 
 void SettingsViewModel::copyAbout() {
