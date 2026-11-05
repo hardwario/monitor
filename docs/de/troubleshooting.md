@@ -91,6 +91,13 @@ Ein Tab arbeitet mit der Anwendungs-MCU. Antwortet der J-Link von der LTE-MCU, z
 
 Fehlercode: [`target.other_connector`](#target.other_connector).
 
+<a id="the-lte-update-fails-the-lte-mcu-was-reset"></a>
+### Das LTE-Update schlägt fehl: die LTE-MCU wurde zurückgesetzt
+
+Ein einfaches LTE-Update (`hwio chester lte flash` oder ein Bundle, eine Modem- oder Anwendungsdatei für die LTE-MCU) lässt die Anwendung auf der Anwendungs-MCU weiterlaufen. Antwortet die LTE-MCU eine Weile nicht, setzt die CHESTER-Anwendungsfirmware sie über ihren Reset-Pin zurück, und das Update bricht ab. Die App liest dann den Reset-Grund der LTE-MCU und meldet **The LTE MCU was reset during the update.** Verwenden Sie stattdessen das geführte Update: **Update LTE firmware…** auf der Seite **Flash** oder `hwio chester lte flash --guided`. Es sichert eine Kopie der Anwendung, löscht sie, aktualisiert die LTE-MCU und schreibt die Anwendung zurück. Siehe [LTE-Firmware-Update](flashing.md#lte-firmware-update).
+
+Fehlercode: [`target.reset_during_update`](#target.reset_during_update).
+
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Die LTE-Modem-Firmware braucht nRF Util
 
@@ -460,6 +467,16 @@ Das Flachbandkabel steckt im Anschluss der anderen MCU (zum Beispiel im LTE-Ansc
 - **What to do:** Move the J-Link cable to the connector of the console's MCU, or update the LTE firmware.
 
 Bei CHESTER lautet die Meldung „The J-Link is connected to the LTE MCU.“, die Ursache „The console runs on the application MCU; the J-Link cable is on the other connector.“ und der Vorschlag „Move the J-Link cable to the APP connector, or update the LTE firmware.“ Die Desktop-App zeigt sie als Banner mit **Update LTE firmware…** und **Retry**; die Sitzung verbindet sich nicht von selbst neu. Siehe [Der J-Link steckt am LTE-Anschluss](#der-j-link-steckt-am-lte-anschluss).
+
+<a id="target.reset_during_update"></a>
+#### `target.reset_during_update`
+
+**The LTE MCU was reset during the update.**
+
+- **Probably:** The application firmware on the application MCU reset the LTE MCU through its reset pin while the LTE MCU was being updated.
+- **What to do:** Use the guided update, which stops the application first: Flash › Update LTE firmware… in the desktop app, or `hwio chester lte flash --guided`.
+
+Nach einem fehlgeschlagenen Schritt eines LTE-Updates war im Reset-Grund-Register der LTE-MCU das Bit des Reset-Pins gesetzt. Die Details enthalten den ursprünglichen Fehler (zum Beispiel `target.program_failed` oder `firmware.modem_update_failed`) und den Registerwert. Siehe [Das LTE-Update schlägt fehl: die LTE-MCU wurde zurückgesetzt](#the-lte-update-fails-the-lte-mcu-was-reset).
 
 <a id="target.protected"></a>
 #### `target.protected`

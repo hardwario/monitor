@@ -336,3 +336,57 @@ What was built, per phase, and the small choices the plan did not settle (to che
   product_name_check clean. G2 also ran `hwio chester lte flash --guided` in a real pseudo-terminal (exit 0, the copy
   written back).
 
+
+### HIL G3 — H5 (2026-11-05, rc.3, CHESTER-M, J-Link on the LTE connector, nRF Util 8.2.1 / device 2.23.0, HARDWARIO LTE firmware 1.7.0)
+
+- **H5 (cause: the APP firmware pin-resets the LTE MCU; reported since ADR-0273)** `hwio chester lte erase --yes` + `hwio chester lte flash` (bundle: modem via nRF Util, then the
+  application via J-Link) fails intermittently: `JLINKARM_EndDownload returned -3/-5` ("No CPU core or target device
+  has been selected"). Affects CLI `lte flash`, `--guided` and the GUI LTE wizard after an erase / recover.
+  - First suspicion: after nRF Util the probe connects as `NRF9151_XXCA` (the profile's first part), FICR reports
+    0x9160 and the probe was connected again as `NRF9160_xxAA` *in place* (`Device =` + `JLINKARM_Connect` on a
+    connected library session returns in ~18 ms without initializing the target). Changed (branch
+    `strnad/fix-h5-lte`; kept by user decision 2026-11-05): `JLinkProbe::connect()` closes and opens the probe again (same serial number,
+    OpenMode, SWD, speed) when the open session already selected another device; unit tests in
+    `jlink_probe_test.cpp`, session test `LteFlashOnAnotherPartOpensTheProbeAgainBeforeTheDownload` (the scripted
+    library fails EndDownload with -5 when the device changes on an open session).
+  - Second change (kept by user decision 2026-11-05): `JLinkLibrary::open()` installs the log / warning / error
+    handlers again after every Open; after a close + open the library log was silent (that is why the first failure
+    logs showed nothing).
+  - **HIL with both changes: still 8 failures in 24 bundle runs** (passed 6/8, 5/8, 5/8; the last round with a local,
+    reverted 1.5 s pause before reopening). The connect after the reopen is a full one (InitTarget, AP scan) as `NRF9160_xxAA`;
+    the library log now shows the real error, `Failed to erase sectors` 5–7 s into the download. In 5 of the 8
+    failures **nRF Util itself** failed 4 s into the modem update (`Failed to read from memory address 0x50003100:
+    Failed to write DebugPort register 0x08: Unknown error in the J-Link DLL (-1)`), with our process holding no USB
+    handle of the probe. Not failing: erase + `lte flash application.hex` 6/6; erase + nRF Util run directly + a
+    separate `lte flash application.hex` 5/5; `lte status` / `lte check` (2.98 V). Failures came in clusters.
+  - **Root cause (second round, probe re-plugged, machine idle): an external pin reset of the LTE MCU.** POWER
+    RESETREAS (0x50005400) cleared before each run: every failure had RESETPIN set (nRF Util 2/2, our application step
+    2/2), no success had it (~20 runs). With the J-Link idle (only a 4-byte read every 10–30 s) after a modem update and
+    with the application erased, RESETPIN appeared again about every 2–3.5 minutes. Neither our code (reset strategy
+    NORMAL = SYSRESETREQ) nor nRF Util drives the reset pin then; the most likely source is the CHESTER application
+    firmware on the APP MCU resetting an LTE MCU that does not answer (not checked on the APP MCU: it was not touched).
+    That window (~30 s modem + ~10 s application in a ~150 s cycle) matches the ~30 % failure rate. Not ours either:
+    nRF Util alone (its own erase + its modem update, no hwio process) failed 2/10, same error.
+  - Measurements (all `--json` nRF Util command lines as the app runs them): bundle after `lte erase` 6/10; the same with
+    the profile's first J-Link device set to `NRF9160_xxAA` (local experiment, reverted) 6/10, so the NRF9151 connect
+    is not involved; `lte erase` + nRF Util modem 8/10; `nrfutil device erase` + nRF Util modem 8/10; nRF Util-only
+    erase + modem + application 8/10 (application 8/8 after a good modem step).
+  - The guided update (`lte flash --guided`, GUI wizard; ADR-0234) erases the application code on the APP connector
+    before the LTE update, so the application firmware cannot reset the LTE MCU there; the plain `lte flash` (used in
+    this HIL) leaves it running.
+  - **Fix (user decision 2026-11-05, ADR-0273):** `TargetProfile::resetReason` (CHESTER `lte`: 0x50005400, bit 0);
+    the session worker clears it (write 1 to clear, after a FICR check that the probe reaches that MCU; the CPU is
+    neither reset nor halted for it) before a flash / modem update / bundle of the LTE MCU (a bundle: before step 1;
+    when that was not possible, again before step 2). After a failed step whose error a reset can cause (category
+    probe, target, firmware or timeout; not wrong family, other connector, protected, cancelled) it identifies the MCU
+    again, reads the register and, with the reset-pin bit set, reports the new `target.reset_during_update` (wizard
+    LteUpdate; the original error id, its detail and the register value in the detail). A failed read, another MCU
+    answering or a clear bit keep the original error. Plain `hwio chester lte flash` (any input; human output on
+    stderr, the log always) warns that `--guided` stops the application first; the GUI has no plain LTE path (ADR-0234).
+    Docs: troubleshooting common problem and error entry ×5, `cli.md`; error texts cs/de/sk/pl. Tests:
+    `Operations.LteStepFailureAfterAPinResetIsResetDuringUpdate`, `LteDownloadFailureWithoutAPinResetKeepsItsError`,
+    `UnreadableResetReasonKeepsTheOriginalError`, `ModemUpdaterMissingIsNotResetDuringUpdate`,
+    `AppFlashDoesNotTouchAResetReason` (scripted RESETREAS), `FlashCli.LteBundleWithTheFakeNrfUtil` (the warning). No
+    retry.
+  - **HIL still open (probe not connected when this was finished):** see the next steps in the report of the
+    implementing agent; to record here when run.

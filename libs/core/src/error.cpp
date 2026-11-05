@@ -145,6 +145,7 @@ consteval bool isEnumerator(ErrorCode code) {
     case ErrorCode::CliFileIsSymlink:
     case ErrorCode::UsbWorldAccessible:
     case ErrorCode::TargetOtherConnector:
+    case ErrorCode::TargetResetDuringUpdate:
         return true;
     }
     return false;
@@ -1244,6 +1245,25 @@ constexpr std::array defaultTexts{
             "Move the J-Link cable to the connector of the console's MCU, or update the LTE "
             "firmware.",
             "target.other_connector suggestion"),
+        .wizard = WizardId::LteUpdate,
+    },
+    // Plan 0033 H5 (ADR-0273): the reset-pin bit of the MCU's reset reason register was set after
+    // a failed LTE update step: something outside the J-Link reset the MCU (on CHESTER the
+    // application firmware resets an LTE MCU that does not answer).
+    DefaultTexts{
+        .code = ErrorCode::TargetResetDuringUpdate,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "The LTE MCU was reset during the update.",
+                                      "target.reset_during_update message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "The application firmware on the application MCU reset the LTE MCU through its reset "
+            "pin while the LTE MCU was being updated.",
+            "target.reset_during_update cause"),
+        .suggestion = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "Use the guided update, which stops the application first: Flash › Update LTE "
+            "firmware… in the desktop app, or `hwio chester lte flash --guided`.",
+            "target.reset_during_update suggestion"),
         .wizard = WizardId::LteUpdate,
     },
 };

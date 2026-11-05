@@ -133,6 +133,7 @@ Result<ProbeInfo> JLinkProbe::open(std::optional<std::uint32_t> serialNumber, Op
             libraryDetail(std::format("J-Link {}: {}", chosen->serialNumber, *openError))));
     }
     m_open = true;
+    m_openMode = mode;
     // Review R1: in every open mode, right after Open (pylink installs it there, too).
     // Without the hook a protected chip could be mass-erased by the library: do not continue.
     if (const int hooked = m_api.installUnsecureDialogHook(); hooked < 0) {
@@ -164,6 +165,8 @@ void JLinkProbe::execCommands(std::span<const std::string_view> commands) {
 }
 
 void JLinkProbe::close() {
+    m_swdSelected = false;
+    m_selectedDevice.reset();
     if (m_open) {
         m_api.close();
         m_api.flushMessages();
@@ -189,6 +192,30 @@ Status JLinkProbe::selectSwd() {
             makeError(ErrorCode::ProbeOpenFailed,
                       libraryDetail(std::format("JLINKARM_TIF_Select(SWD) returned {}", result))));
     }
+    m_swdSelected = true;
+    return {};
+}
+
+Status JLinkProbe::reopenForDevice(std::string_view deviceName) {
+    if (!m_open || !m_selectedDevice || *m_selectedDevice == deviceName) {
+        return {};
+    }
+    // plan 0033 H5: `Device =` and JLINKARM_Connect on a library session that is connected as
+    // another device return at once without initializing the target again; the flash download
+    // after it failed intermittently. A fresh library session selects the device before its
+    // first connect, as every pylink / py-hardwario session does.
+    qCInfo(log::lcJLink).noquote() << "Target device changes from" << toQString(*m_selectedDevice)
+                                   << "to" << toQString(deviceName) << "- opening the J-Link again";
+    const std::uint32_t serial = m_info.serialNumber;
+    const OpenMode mode = m_openMode;
+    const bool swd = m_swdSelected;
+    close();
+    if (auto reopened = open(serial, mode); !reopened) {
+        return std::unexpected(std::move(reopened).error());
+    }
+    if (swd) {
+        return selectSwd();
+    }
     return {};
 }
 
@@ -196,7 +223,13 @@ Status JLinkProbe::connect(std::string_view deviceName, int minTargetMillivolts,
                            bool healthyVoltageSeen, const std::stop_token& stop,
                            std::optional<int> attempts) {
     const int maxAttempts = std::max(1, attempts.value_or(m_timing.connectAttempts));
+    if (Status reopened = reopenForDevice(deviceName); !reopened) {
+        return reopened;
+    }
     const std::string deviceError = m_api.execCommand(std::format("Device = {}", deviceName));
+    if (m_open) {
+        m_selectedDevice = std::string(deviceName);
+    }
     // pylink JLink.connect(chip, speed): the speed is set again right after `Device =` and before
     // JLINKARM_Connect, by default 'auto' (JLINKARM_SetSpeed(0)), which overrides the speed rttt
     // and py-hardwario set before; ours is the setSpeed() value, auto unless a kHz was given

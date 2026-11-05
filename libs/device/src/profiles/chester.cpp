@@ -184,7 +184,8 @@ constexpr std::array chesterTargets{
                   .shellPrompt = "",
                   .designatedFirmware = std::nullopt,
                   .sensitiveCommandPrefixes = appSensitiveCommands,
-                  .sensitiveOutputKeys = appSensitiveOutput},
+                  .sensitiveOutputKeys = appSensitiveOutput,
+                  .resetReason = std::nullopt},
     // LTE modem MCU (nRF9151 or nRF9160). Programming only; no RTT console. Connected with the
     // first part's J-Link name, then with the exact part's name (to confirm in Phase 0). The PIB
     // lies in the UICR OTP area, which a UICR erase does not touch.
@@ -212,7 +213,10 @@ constexpr std::array chesterTargets{
                   .shellPrompt = "", // no RTT console
                   .designatedFirmware = lteFirmware,
                   .sensitiveCommandPrefixes = {},
-                  .sensitiveOutputKeys = {}},
+                  .sensitiveOutputKeys = {},
+                  // nRF9160 / nRF9151 POWER.RESETREAS (secure alias), bit 0 RESETPIN. HIL H5: the
+                  // CHESTER application firmware pin-resets the LTE MCU when it does not answer.
+                  .resetReason = ResetReasonRegister{.address = 0x50005400, .pinMask = 0x1}},
 };
 
 // Plan 0028 (ADR-0200): console file names are parsed back by splitting at '-' (the retention's
