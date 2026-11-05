@@ -584,3 +584,35 @@ TEST_F(Probe, ReopenFailureIsReturnedWithoutConnecting) {
 }
 
 } // namespace
+
+namespace {
+
+// Plan 0033 HIL G3: reopen() gives a fresh library session on the same probe (after a pin reset
+// the old one still reports "connected"); the same device name connects fully afterwards.
+TEST_F(Probe, ReopenOpensTheSameProbeAgainAndTheNextConnectIsFull) {
+    ASSERT_TRUE(probe().open(222U));
+    ASSERT_TRUE(probe().selectSwd());
+    ASSERT_TRUE(probe().connect("NRF9160_xxAA", 1000, false, {}));
+    EXPECT_CALL(api(), execCommand(_)).Times(::testing::AnyNumber()); // open()'s commands
+    {
+        InSequence order;
+        EXPECT_CALL(api(), close());
+        EXPECT_CALL(api(), selectBySerialNumber(222U)).WillOnce(Return(0));
+        EXPECT_CALL(api(), open()).WillOnce(Return(std::nullopt));
+        EXPECT_CALL(api(), selectInterface(hwio::jlink::TargetInterface::Swd)).WillOnce(Return(0));
+        EXPECT_CALL(api(), execCommand(::testing::StrEq("Device = NRF9160_xxAA")));
+        EXPECT_CALL(api(), connect()).WillOnce(Return(0));
+    }
+    ASSERT_TRUE(probe().reopen("test"));
+    EXPECT_TRUE(probe().isOpen());
+    ASSERT_TRUE(probe().connect("NRF9160_xxAA", 1000, false, {}));
+}
+
+TEST_F(Probe, ReopenOfAClosedProbeDoesNothing) {
+    EXPECT_CALL(api(), open()).Times(0);
+    EXPECT_CALL(api(), close()).Times(0);
+    ASSERT_TRUE(probe().reopen("test"));
+    EXPECT_FALSE(probe().isOpen());
+}
+
+} // namespace

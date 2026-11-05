@@ -196,16 +196,11 @@ Status JLinkProbe::selectSwd() {
     return {};
 }
 
-Status JLinkProbe::reopenForDevice(std::string_view deviceName) {
-    if (!m_open || !m_selectedDevice || *m_selectedDevice == deviceName) {
+Status JLinkProbe::reopen(std::string_view why) {
+    if (!m_open) {
         return {};
     }
-    // plan 0033 H5: `Device =` and JLINKARM_Connect on a library session that is connected as
-    // another device return at once without initializing the target again; the flash download
-    // after it failed intermittently. A fresh library session selects the device before its
-    // first connect, as every pylink / py-hardwario session does.
-    qCInfo(log::lcJLink).noquote() << "Target device changes from" << toQString(*m_selectedDevice)
-                                   << "to" << toQString(deviceName) << "- opening the J-Link again";
+    qCInfo(log::lcJLink).noquote() << toQString(why) << "- opening the J-Link again";
     const std::uint32_t serial = m_info.serialNumber;
     const OpenMode mode = m_openMode;
     const bool swd = m_swdSelected;
@@ -217,6 +212,18 @@ Status JLinkProbe::reopenForDevice(std::string_view deviceName) {
         return selectSwd();
     }
     return {};
+}
+
+Status JLinkProbe::reopenForDevice(std::string_view deviceName) {
+    if (!m_open || !m_selectedDevice || *m_selectedDevice == deviceName) {
+        return {};
+    }
+    // plan 0033 H5: `Device =` and JLINKARM_Connect on a library session that is connected as
+    // another device return at once without initializing the target again; the flash download
+    // after it failed intermittently. A fresh library session selects the device before its
+    // first connect, as every pylink / py-hardwario session does.
+    return reopen(
+        std::format("Target device changes from {} to {}", *m_selectedDevice, deviceName));
 }
 
 Status JLinkProbe::connect(std::string_view deviceName, int minTargetMillivolts,
