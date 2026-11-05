@@ -80,6 +80,9 @@ TestCase {
             verify(testSupport.configureTab(0, "app", 801000001, "Test Probe"));
         tab().connection.connectDevice();
         tryVerify(() => find("probeFirmwareBanner") !== null, 10000);
+        // The banner is visible before the page's layout has made room for it (the next polish);
+        // until then the console page still covers it and a click lands on its toolbar (Follow).
+        verify(waitForPolish(window));
     }
 
     function waitIdle() {
@@ -177,6 +180,7 @@ TestCase {
             window.height = 600;
             if (!find("probeFirmwareBanner"))
                 connectWithBanner();
+            verify(waitForPolish(window)); // the new size and language laid out
             const update = find("probeFirmwareUpdate");
             const banner = find("probeFirmwareBanner");
             tryVerify(() => rect(banner).x + banner.width <= window.width + 0.5);
@@ -191,6 +195,9 @@ TestCase {
             const cancel = find("probeFirmwareCancel");
             const confirm = find("probeFirmwareConfirm");
             tryVerify(() => cancel.width > 0 && confirm.width > 0);
+            // Geometry only after the enter transition (it scales the dialog) and the layout.
+            tryVerify(() => findChild(window, "probeFirmwareDialog").opened);
+            verify(waitForPolish(window));
             checkInside(find("probeFirmwareTitle"));
             checkInside(cancel);
             checkInside(confirm);
