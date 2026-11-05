@@ -30,6 +30,7 @@
 #include <QObject>
 #include <QPointer>
 #include <QString>
+#include <QStringLiteral>
 #include <QTimer>
 #include <QtCore/qtmetamacros.h>
 #include <QtTypes>
