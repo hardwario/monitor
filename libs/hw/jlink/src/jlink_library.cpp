@@ -477,6 +477,12 @@ int JLinkLibrary::selectBySerialNumber(std::uint32_t serialNumber) {
 std::optional<std::string> JLinkLibrary::open() {
     const char* error = m_impl->fn.open();
     if (error == nullptr) {
+        // plan 0033 H5: after JLINKARM_Close the library no longer calls the log handler (HIL
+        // 2026-11-05: no library log after the probe was opened again), so it is installed again
+        // after every Open, as pylink's JLINKARM_OpenEx(log, error) does on every open().
+        m_impl->fn.enableLog(m_impl->slot->logHandler());
+        m_impl->fn.setWarnOutHandler(m_impl->slot->warningHandler());
+        m_impl->fn.setErrorOutHandler(m_impl->slot->errorHandler());
         return std::nullopt;
     }
     std::string text = fromCString(error);

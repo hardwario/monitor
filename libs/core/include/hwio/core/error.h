@@ -128,6 +128,8 @@ enum class ErrorCode : std::uint8_t {
     UsbWorldAccessible,  // review round 1, R1 (ADR-0185 amendment)
     // rc.2 feedback (plan/features/0033-rc2-feedback.md, ADR-0233)
     TargetOtherConnector,
+    // rc.3 HIL H5 (plan/features/0033-rc2-feedback.md, ADR-0273)
+    TargetResetDuringUpdate,
 };
 
 // Wizards the UI can offer to fix an error (M4). Serialized as kebab-case ids.
@@ -404,6 +406,9 @@ inline constexpr std::array errorTable{
               .category = ErrorCategory::Probe},
     ErrorInfo{.code = ErrorCode::TargetOtherConnector,
               .id = "target.other_connector",
+              .category = ErrorCategory::Target},
+    ErrorInfo{.code = ErrorCode::TargetResetDuringUpdate,
+              .id = "target.reset_during_update",
               .category = ErrorCategory::Target},
 };
 

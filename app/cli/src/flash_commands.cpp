@@ -650,6 +650,17 @@ Result<CommandResult> lteFlash(const Context& context, const GlobalOptions& glob
     if (!job) {
         return std::unexpected(std::move(job).error());
     }
+    // Plan 0033 H5 (ADR-0273): a running application on the APP MCU can reset the LTE MCU during
+    // the update (target.reset_during_update); the guided update erases it first. CLI: English.
+    constexpr std::string_view guidedHint =
+        "The application firmware on the APP MCU can reset the LTE MCU during the update. "
+        "If the update fails, use `hwio chester lte flash --guided`: it stops the application "
+        "first.";
+    qCWarning(lcCli).noquote() << QString::fromUtf8(guidedHint.data(),
+                                                    static_cast<qsizetype>(guidedHint.size()));
+    if (context.mode == OutputMode::Human) {
+        std::cerr << "Warning: " << guidedHint << '\n';
+    }
     auto outcome = runOperation(context, globals, group, own, "lte", ui, job->start, job->nrfUtil);
     if (!outcome) {
         return std::unexpected(std::move(outcome).error());

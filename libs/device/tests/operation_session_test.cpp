@@ -76,6 +76,7 @@ struct ModemScript {
     bool factoryFails = false;
     // The `option` of the locator options each factory call got (ADR-0114); "" = none.
     std::vector<fs::path> locators;
+    bool pinReset = false; // H5: a failing update leaves the LTE MCU's reset-pin bit set
 };
 
 class ScriptedModemUpdater final : public hwio::nrfutil::IModemUpdater {
@@ -87,6 +88,7 @@ public:
     Status updateModem(const fs::path& /*zip*/, std::uint32_t probeSn,
                        const hwio::firmware::ProgressFn& progress, std::stop_token stop) override {
         ModemScript::Mode mode{};
+        bool pinReset = false;
         {
             const std::scoped_lock lock(m_script->mutex);
             ++m_script->calls;
@@ -94,6 +96,7 @@ public:
             m_script->probeOpenDuringUpdate =
                 m_target->get([](ScriptedTarget& t) { return t.open; });
             mode = m_script->mode;
+            pinReset = m_script->pinReset;
         }
         if (progress) {
             progress({.phase = ProgramPhase::Modem, .done = 50, .total = 100});
@@ -105,6 +108,9 @@ public:
             return hwio::fail(ErrorCode::Cancelled);
         }
         if (mode == ModemScript::Mode::Fail) {
+            if (pinReset) {
+                m_target->set([](ScriptedTarget& t) { t.lte.resetReason |= 1U; });
+            }
             return std::unexpected(
                 hwio::makeError(ErrorCode::FirmwareModemUpdateFailed, "simulated"));
         }
@@ -154,12 +160,19 @@ protected:
         hooks.modemUpdaterFactory =
             [script = m_modem, target = m_target](const hwio::nrfutil::LocatorOptions& locator)
             -> hwio::Result<std::unique_ptr<hwio::nrfutil::IModemUpdater>> {
+            bool fails = false;
+            bool pinReset = false;
             {
                 const std::scoped_lock lock(script->mutex);
                 script->locators.push_back(locator.option.value_or(fs::path()));
-                if (script->factoryFails) {
-                    return std::unexpected(hwio::makeError(ErrorCode::DependencyNrfUtilNotFound));
+                fails = script->factoryFails;
+                pinReset = script->pinReset;
+            }
+            if (fails) {
+                if (pinReset) { // H5: a pin reset in the same moment must not change the error
+                    target->set([](ScriptedTarget& t) { t.lte.resetReason |= 1U; });
                 }
+                return std::unexpected(hwio::makeError(ErrorCode::DependencyNrfUtilNotFound));
             }
             return std::make_unique<ScriptedModemUpdater>(script, target);
         };
@@ -496,6 +509,140 @@ TEST_F(Operations, LteBundleStepsAndModemFailureSkipsTheApplication) {
     EXPECT_EQ(failed->status.error().code, ErrorCode::FirmwareModemUpdateFailed);
     const auto sequence = ops();
     EXPECT_EQ(std::ranges::find(sequence, "download"), sequence.end()); // step 2 skipped
+}
+
+// plan 0033 H5: an nRF9160 on the LTE connector is connected as the profile's first part
+// (NRF9151_XXCA), FICR reports 0x9160, and the probe connects again as NRF9160_xxAA. The J-Link
+// is closed and opened again in between (the scripted library fails EndDownload with -5 when the
+// device changes on an open session, as the real one did after nRF Util), also for a plain flash.
+TEST_F(Operations, LteFlashOnAnotherPartOpensTheProbeAgainBeforeTheDownload) {
+    target().set([](ScriptedTarget& t) { t.lte.part = 0x9160; });
+    auto session = openConnected(options("lte", false));
+    ASSERT_TRUE(session);
+    clearOps();
+    const OperationResult* bundled = finish(session->flashLteBundle("lte", bundle(), {}));
+    ASSERT_TRUE(bundled->status) << bundled->status.error().detail;
+    EXPECT_EQ(bundled->chip.value_or(hwio::jlink::ChipInfo{}).name, "nRF9160");
+    const auto expectReopened = [](const std::vector<std::string>& sequence) {
+        const auto first = std::ranges::find(sequence, "connect:NRF9151_XXCA");
+        const auto second = std::ranges::find(sequence, "connect:NRF9160_xxAA");
+        const auto download = std::ranges::find(sequence, "download");
+        ASSERT_NE(first, sequence.end());
+        ASSERT_NE(second, sequence.end());
+        ASSERT_NE(download, sequence.end());
+        EXPECT_LT(first, second);
+        EXPECT_LT(second, download);
+        EXPECT_NE(std::find(first, second, "close"), second); // closed between the two connects
+    };
+    expectReopened(ops());
+    EXPECT_FALSE(target().get([](ScriptedTarget& t) { return t.staleDevice; }));
+
+    clearOps();
+    const OperationResult* flashed =
+        finish(session->flash("lte", std::make_shared<FirmwareImage>(appImage()), {}));
+    ASSERT_TRUE(flashed->status) << flashed->status.error().detail;
+}
+
+// H5 (ADR-0273): the LTE MCU's reset reason is cleared before the update; a failed step after
+// which the reset-pin bit is set (the application MCU reset the LTE MCU) is
+// target.reset_during_update with the original failure in the detail.
+TEST_F(Operations, LteStepFailureAfterAPinResetIsResetDuringUpdate) {
+    target().set([](ScriptedTarget& t) { t.lte.resetReason = 0x00020001U; }); // stale bits
+    auto session = openConnected(options("lte", false));
+    ASSERT_TRUE(session);
+
+    // Step 2 (the application download) fails after a pin reset.
+    clearOps();
+    target().set([](ScriptedTarget& t) { t.pinResetDuringDownload = true; });
+    const OperationResult* download = finish(session->flashLteBundle("lte", bundle(), {}));
+    ASSERT_FALSE(download->status);
+    EXPECT_EQ(download->status.error().code, ErrorCode::TargetResetDuringUpdate);
+    EXPECT_NE(download->status.error().detail.find("target.program_failed"), std::string::npos);
+    EXPECT_EQ(download->status.error().wizard, hwio::WizardId::LteUpdate);
+    const auto sequence = ops();
+    const auto cleared = std::ranges::find(sequence, "clearResetReason");
+    ASSERT_NE(cleared, sequence.end());
+    EXPECT_LT(cleared, std::ranges::find(sequence, "download")); // cleared before the update
+
+    // Step 1 (nRF Util) fails after a pin reset.
+    modem().mode = ModemScript::Mode::Fail;
+    modem().pinReset = true;
+    const OperationResult* modemFailed = finish(session->flashLteBundle("lte", bundle(), {}));
+    ASSERT_FALSE(modemFailed->status);
+    EXPECT_EQ(modemFailed->status.error().code, ErrorCode::TargetResetDuringUpdate);
+    EXPECT_NE(modemFailed->status.error().detail.find("firmware.modem_update_failed"),
+              std::string::npos);
+
+    // The same failure without a pin reset keeps its own error (the stale bits were cleared).
+    modem().pinReset = false;
+    const OperationResult* plain = finish(session->updateModem("lte", root() / "mfw.zip"));
+    ASSERT_FALSE(plain->status);
+    EXPECT_EQ(plain->status.error().code, ErrorCode::FirmwareModemUpdateFailed);
+    modem().mode = ModemScript::Mode::Succeed;
+
+    // A plain flash of the LTE MCU is checked, too.
+    target().set([](ScriptedTarget& t) { t.pinResetDuringDownload = true; });
+    const OperationResult* flashed =
+        finish(session->flash("lte", std::make_shared<FirmwareImage>(appImage()), {}));
+    ASSERT_FALSE(flashed->status);
+    EXPECT_EQ(flashed->status.error().code, ErrorCode::TargetResetDuringUpdate);
+}
+
+// The application MCU has no reset reason register in the profile: nothing is cleared there.
+TEST_F(Operations, AppFlashDoesNotTouchAResetReason) {
+    auto session = openConnected(options("app", false));
+    ASSERT_TRUE(session);
+    clearOps();
+    ASSERT_TRUE(
+        finish(session->flash("app", std::make_shared<FirmwareImage>(appImage()), {}))->status);
+    const auto sequence = ops();
+    EXPECT_EQ(std::ranges::find(sequence, "clearResetReason"), sequence.end());
+}
+
+// H5 (ADR-0273): without the reset-pin bit a failed download keeps its own error; clearing the
+// register does not reset or halt the LTE MCU (no extra reset before the update).
+TEST_F(Operations, LteDownloadFailureWithoutAPinResetKeepsItsError) {
+    target().set([](ScriptedTarget& t) { t.lte.resetReason = 0x00000004U; }); // SREQ, no pin
+    auto session = openConnected(options("lte", false));
+    ASSERT_TRUE(session);
+    clearOps();
+    target().set([](ScriptedTarget& t) { t.endDownloadResult = -5; });
+    const OperationResult* failed = finish(session->flashLteBundle("lte", bundle(), {}));
+    ASSERT_FALSE(failed->status);
+    EXPECT_EQ(failed->status.error().code, ErrorCode::TargetProgramFailed);
+    const auto sequence = ops();
+    const auto cleared = std::ranges::find(sequence, "clearResetReason");
+    ASSERT_NE(cleared, sequence.end());
+    EXPECT_EQ(std::find(sequence.begin(), cleared, "reset"), cleared);
+    EXPECT_EQ(std::find(sequence.begin(), cleared, "halt"), cleared);
+}
+
+// H5: a failed read of the register after the failure never hides the original error.
+TEST_F(Operations, UnreadableResetReasonKeepsTheOriginalError) {
+    auto session = openConnected(options("lte", false));
+    ASSERT_TRUE(session);
+    target().set([](ScriptedTarget& t) {
+        t.pinResetDuringDownload = true;
+        t.resetReasonUnreadable = true;
+    });
+    const OperationResult* failed =
+        finish(session->flash("lte", std::make_shared<FirmwareImage>(appImage()), {}));
+    ASSERT_FALSE(failed->status);
+    EXPECT_EQ(failed->status.error().code, ErrorCode::TargetProgramFailed);
+}
+
+// H5: a failure no reset can cause (nRF Util not found) is never reported as a pin reset.
+TEST_F(Operations, ModemUpdaterMissingIsNotResetDuringUpdate) {
+    auto session = openConnected(options("lte", false));
+    ASSERT_TRUE(session);
+    modem().factoryFails = true;
+    modem().pinReset = true;
+    const OperationResult* failed = finish(session->updateModem("lte", root() / "mfw.zip"));
+    ASSERT_FALSE(failed->status);
+    EXPECT_EQ(failed->status.error().code, ErrorCode::DependencyNrfUtilNotFound);
+    EXPECT_EQ(target().get([](ScriptedTarget& t) { return t.lte.resetReason; }) & 1U, 1U);
+    modem().factoryFails = false;
+    modem().pinReset = false;
 }
 
 TEST_F(Operations, LteBundleCancelInEachStep) {

@@ -48,6 +48,7 @@
 #include <QtLogging>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cstddef>
@@ -816,6 +817,90 @@ private:
         return {};
     }
 
+    // ---- plan 0033 H5 (ADR-0273): the reset reason around an LTE update -------------------------
+    // Connects `target`, checks that the probe reaches it (FICR) and clears its reset reason
+    // register (write 1 to clear; the CPU keeps running: no extra reset, and an operation that
+    // fails before it starts does not leave the MCU halted). True when it was cleared: only then
+    // does a later reading mean something. Never fails the operation (logged).
+    [[nodiscard]] bool armResetReason(const TargetProfile& target, const std::stop_token& stop) {
+        if (!target.resetReason || stop.stop_requested()) {
+            return false;
+        }
+        const auto skipped = [this](const std::string& why) {
+            flashLog("Reset reason not cleared (" + why + ")");
+            return false;
+        };
+        if (Status prepared = prepareProbe(target, true, stop); !prepared) {
+            return skipped(prepared.error().detail);
+        }
+        jlink::JLinkProgrammer programmer(*m_api, *m_probe, clock(), programmerConfigFor(target));
+        auto chip = programmer.identify();
+        // Never written to another MCU (the register address is the target's own).
+        if (!chip) {
+            return skipped(chip.error().detail);
+        }
+        if (chip->protectedChip || targetOfChip(*m_config.profile, *chip) != &target) {
+            return skipped(chip->protectedChip ? "protected" : "another MCU answers");
+        }
+        constexpr std::array allOnes{std::byte{0xFF}, std::byte{0xFF}, std::byte{0xFF},
+                                     std::byte{0xFF}};
+        if (Status cleared = programmer.writeMemory(target.resetReason->address, allOnes,
+                                                    jlink::AccessWidth::Bits32);
+            !cleared) {
+            return skipped(cleared.error().detail);
+        }
+        flashLog(
+            std::format("Reset reason register 0x{:08X} cleared", target.resetReason->address));
+        return true;
+    }
+
+    // After a failed step of an armed update: target.reset_during_update when the reset-pin bit
+    // of `target` is set (another MCU of the device reset it during the step); `failed` otherwise.
+    [[nodiscard]] Status explainFailure(const TargetProfile& target, bool armed, Status failed,
+                                        const std::stop_token& stop) {
+        if (failed || !armed || !target.resetReason || stop.stop_requested()) {
+            return failed;
+        }
+        const ErrorCode code = failed.error().code;
+        // Only failures a reset of the MCU can cause (not e.g. nRF Util missing or a file error).
+        const ErrorCategory category = categoryOf(code);
+        const bool hardware =
+            category == ErrorCategory::Probe || category == ErrorCategory::Target ||
+            category == ErrorCategory::Firmware || category == ErrorCategory::Timeout;
+        if (!hardware || code == ErrorCode::TargetWrongFamily ||
+            code == ErrorCode::TargetOtherConnector || code == ErrorCode::TargetProtected) {
+            return failed;
+        }
+        if (Status prepared = prepareProbe(target, true, stop); !prepared) {
+            flashLog("Reset reason not read after the failure (" + prepared.error().detail + ")");
+            return failed;
+        }
+        jlink::JLinkProgrammer programmer(*m_api, *m_probe, clock(), programmerConfigFor(target));
+        // Read only from the MCU that was armed (the register address is the target's own).
+        if (auto chip = programmer.identify();
+            !chip || chip->protectedChip || targetOfChip(*m_config.profile, *chip) != &target) {
+            flashLog("Reset reason not read after the failure (another MCU answers)");
+            return failed;
+        }
+        auto bytes =
+            programmer.readMemory(target.resetReason->address, 4, jlink::AccessWidth::Bits32);
+        if (!bytes || bytes->size() != 4) {
+            flashLog("Reset reason not readable after the failure");
+            return failed;
+        }
+        std::uint32_t value = 0;
+        for (std::size_t i = 0; i < 4; ++i) {
+            value |= std::to_integer<std::uint32_t>((*bytes)[i]) << (8U * i);
+        }
+        flashLog(std::format("Reset reason after the failure: 0x{:08X}", value));
+        if ((value & target.resetReason->pinMask) == 0) {
+            return failed;
+        }
+        return std::unexpected(makeError(ErrorCode::TargetResetDuringUpdate,
+                                         std::format("{}: {}; reset reason 0x{:08X} (reset pin)",
+                                                     idOf(code), failed.error().detail, value)));
+    }
+
     // Step "Modem": nRF Util with the probe released.
     // `locator`: the options the command carries (ADR-0114), else the snapshot of open().
     [[nodiscard]] Status runModem(const std::filesystem::path& modemZip,
@@ -978,12 +1063,22 @@ private:
         return {};
     }
 
+    // `armed`: the reset reason was cleared before an earlier step (LTE bundle); otherwise it is
+    // cleared here for a target that has one (H5, ADR-0273).
     [[nodiscard]] Status runFlashStep(OperationRun& run, const firmware::FirmwareImage& image,
-                                      OperationResult& result) {
+                                      OperationResult& result, bool armed = false) {
+        if (!armed && run.target.resetReason) {
+            if (run.crossTarget && run.command.kind != OperationKind::LteBundle) {
+                run.reporter.phase(ProgramPhase::SwitchingTarget); // before the probe moves
+            }
+            armed = armResetReason(run.target, run.stop);
+        }
         if (Status prepared = prepareOperation(run, true); !prepared) {
             return prepared;
         }
-        return keepChip(runFlash(run.context, image, run.command.flash), result);
+        return explainFailure(run.target, armed,
+                              keepChip(runFlash(run.context, image, run.command.flash), result),
+                              run.stop);
     }
 
     [[nodiscard]] Status executeOperation(OperationRun& run, OperationResult& result) {
@@ -1028,22 +1123,31 @@ private:
             result.data = std::move(*data);
             return {};
         }
-        case OperationKind::Modem:
+        case OperationKind::Modem: {
             if (run.crossTarget) {
                 run.reporter.phase(ProgramPhase::SwitchingTarget);
             }
-            return runModem(command.modemZip, command.nrfUtil, run.reporter, run.stop);
+            const bool armed = armResetReason(run.target, run.stop); // H5 (ADR-0273)
+            return explainFailure(
+                run.target, armed,
+                runModem(command.modemZip, command.nrfUtil, run.reporter, run.stop), run.stop);
+        }
         case OperationKind::LteBundle: {
             if (run.crossTarget) {
                 run.reporter.phase(ProgramPhase::SwitchingTarget);
             }
-            if (Status modem =
-                    runModem(command.bundle->modemZip, command.nrfUtil, run.reporter, run.stop);
+            // H5 (ADR-0273): cleared before step 1 and both steps are checked after a failure (when
+            // it could not be cleared before step 1, runFlashStep() tries again before step 2).
+            const bool armed = armResetReason(run.target, run.stop);
+            if (Status modem = explainFailure(
+                    run.target, armed,
+                    runModem(command.bundle->modemZip, command.nrfUtil, run.reporter, run.stop),
+                    run.stop);
                 !modem) {
                 return modem; // a failed or cancelled step 1 skips step 2 (ADR-0062)
             }
             run.reporter.step(2, 2);
-            return runFlashStep(run, command.bundle->application, result);
+            return runFlashStep(run, command.bundle->application, result, armed);
         }
         case OperationKind::Diagnose: // runDiagnose()
             break;

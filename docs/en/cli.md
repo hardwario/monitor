@@ -173,7 +173,9 @@ continues by itself as soon as the J-Link reaches the right MCU; the copy's path
 no copy to write back (an empty or unreadable application), the command ends with exit code 130 and the application
 MCU stays empty: flash an application with `hwio chester app flash`. It needs an
 interactive terminal (not with `--json`). Without `--guided` the command flashes only the LTE MCU, as py-hardwario's
-`hardwario chester lte flash` does.
+`hardwario chester lte flash` does, and leaves the application running; it first warns (human output only) that the
+application firmware can reset the LTE MCU during the update. When that happens the command fails with
+[`target.reset_during_update`](troubleshooting.md#target.reset_during_update): use `--guided`.
 
 ## Bluetooth LE (`hwio ble`)
 

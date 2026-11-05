@@ -463,6 +463,21 @@ TEST_F(FlashCli, LteBundleWithTheFakeNrfUtil) {
     QFile log(path(QStringLiteral("nrfutil.log")));
     ASSERT_TRUE(log.open(QIODevice::ReadOnly));
     EXPECT_TRUE(log.readAll().contains("device program --firmware"));
+    // Plan 0033 H5 (ADR-0273): the warning about the guided update is human output only.
+    EXPECT_EQ(result.err.find("Warning: The application firmware"), std::string::npos)
+        << result.err;
+
+    // H5: a plain update in human mode warns that `--guided` stops the application first.
+    const RunResult human = run({QStringLiteral("--nrfutil"), QStringLiteral(HWIO_FAKE_NRFUTIL),
+                                 QStringLiteral("chester"), QStringLiteral("lte"),
+                                 QStringLiteral("flash"), path(QStringLiteral("bundle.zip"))},
+                                env);
+    EXPECT_EQ(human.exitCode, 0) << human.err;
+    EXPECT_NE(human.err.find("Warning: The application firmware on the APP MCU can reset the LTE "
+                             "MCU during the update."),
+              std::string::npos)
+        << human.err;
+    EXPECT_NE(human.err.find("hwio chester lte flash --guided"), std::string::npos) << human.err;
 
     // Plan 0021 review F10: --no-cache with a FILE is said on stderr, not an error.
     const RunResult noCache = run(
