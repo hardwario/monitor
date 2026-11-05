@@ -175,6 +175,21 @@ std::string GuiDeviceProvider::deviceId(const DeviceTabViewModel& tab) {
     return serial ? std::format("{}{}", jlinkPrefix, *serial) : std::string();
 }
 
+bool GuiDeviceProvider::aiOperationRuns(std::uint32_t serial) const {
+    DeviceTabListModel* list = tabs();
+    if (list == nullptr) {
+        return false;
+    }
+    for (int i = 0; i < list->count(); ++i) {
+        const DeviceTabViewModel* tab = list->at(i);
+        if (tab != nullptr && !tab->choosing() && !tab->isBle() && tab->probeSerial() == serial &&
+            tab->busyPage() == busyPage()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 DeviceTabViewModel* GuiDeviceProvider::tabFor(std::string_view id) const {
     DeviceTabListModel* list = tabs();
     if (list == nullptr) {

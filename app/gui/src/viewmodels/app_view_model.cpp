@@ -156,6 +156,23 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
 
     registerShellKeys(*m_settings);
     registerShellShortcuts();
+    // Plan 0036 (ADR-0257): the J-Link firmware update. Qt parent ownership: a child, deleted by
+    // the destructor after the tabs. Created before the extensions: the MCP controller (plan 0014)
+    // installs its "AI assistant" check (setAiHoldsProbe) when it is registered.
+    m_probeFirmware = new ProbeFirmwareViewModel( // NOLINT(cppcoreguidelines-owning-memory)
+        ProbeFirmwareContext{.registry = m_registry.get(),
+                             .scanner = m_scanner.get(),
+                             .locatorOptions = [this] { return locatorOptions(); },
+                             .tabs =
+                                 [this] {
+                                     QList<DeviceTabViewModel*> tabs;
+                                     for (int i = 0; i < m_tabs->count(); ++i) {
+                                         tabs.append(m_tabs->at(i));
+                                     }
+                                     return tabs;
+                                 },
+                             .showToast = [this](const QString& text) { showToast(text); }},
+        this);
     // The plans' pages, sections, keys and shortcuts: before the first tab exists (contract).
     if (m_options.registerExtensions) {
         m_options.registerExtensions(*this);
@@ -192,22 +209,6 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
         *m_updateService, *m_settings, {}, this);
     m_updateService->start();
 
-    // Plan 0036 (ADR-0257): the J-Link firmware update. Qt parent ownership: a child, deleted by
-    // the destructor after the tabs.
-    m_probeFirmware = new ProbeFirmwareViewModel( // NOLINT(cppcoreguidelines-owning-memory)
-        ProbeFirmwareContext{.registry = m_registry.get(),
-                             .scanner = m_scanner.get(),
-                             .locatorOptions = [this] { return locatorOptions(); },
-                             .tabs =
-                                 [this] {
-                                     QList<DeviceTabViewModel*> tabs;
-                                     for (int i = 0; i < m_tabs->count(); ++i) {
-                                         tabs.append(m_tabs->at(i));
-                                     }
-                                     return tabs;
-                                 },
-                             .showToast = [this](const QString& text) { showToast(text); }},
-        this);
     connect(m_probeFirmware, &ProbeFirmwareViewModel::changed, this, [this] {
         // The pickers show "Updating firmware…" for the reserved probe.
         for (int i = 0; i < m_tabs->count(); ++i) {
