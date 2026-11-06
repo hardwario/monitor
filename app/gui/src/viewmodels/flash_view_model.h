@@ -120,7 +120,7 @@ class FlashViewModel : public QObject {
     Q_PROPERTY(bool maintenanceExpanded READ maintenanceExpanded WRITE setMaintenanceExpanded NOTIFY
                    maintenanceChanged)
     Q_PROPERTY(bool canRunMaintenance READ canRunMaintenance NOTIFY stateChanged)
-    Q_PROPERTY(QString nrfUtilInstallUrl READ nrfUtilInstallUrl CONSTANT)
+    Q_PROPERTY(QString nrfUtilDownloadUrl READ nrfUtilDownloadUrl CONSTANT) // plan 0038 A0
     // The ConfirmDialog texts of the pending erase-all / recover (ADR-0038).
     Q_PROPERTY(QVariantMap confirmation READ confirmation NOTIFY confirmationRequested)
 
@@ -180,7 +180,7 @@ public:
     [[nodiscard]] QString maintenanceTitle() const;
     [[nodiscard]] bool eraseCodeAvailable() const;
     [[nodiscard]] bool canRunMaintenance() const;
-    [[nodiscard]] static QString nrfUtilInstallUrl();
+    [[nodiscard]] static QString nrfUtilDownloadUrl();
     [[nodiscard]] bool expertActions() const;
     [[nodiscard]] QString maintenanceTarget() const { return m_maintenanceTarget; }
     // Another MCU than the console target only with the expert actions (ignored otherwise).

@@ -143,36 +143,57 @@ FlashCard {
         Accessible.role: Accessible.AlertMessage
         Accessible.name: card.vm ? card.vm.prerequisiteText : ""
 
-        RowLayout {
+        // Plan 0038 A0: the buttons wrap below the message (German, minimum window size).
+        ColumnLayout {
             id: prerequisiteRow
 
             anchors.fill: parent
             anchors.margins: Theme.spacingS
             spacing: Theme.spacingS
 
-            Icon {
-                symbol: "error"
-                color: Theme.error
-            }
-
-            Label {
-                textFormat: Text.PlainText
+            RowLayout {
                 Layout.fillWidth: true
-                text: card.vm ? card.vm.prerequisiteText : ""
-                color: Theme.text
-                wrapMode: Text.Wrap
+                spacing: Theme.spacingS
+
+                Icon {
+                    symbol: "error"
+                    color: Theme.error
+                }
+
+                Label {
+                    textFormat: Text.PlainText
+                    Layout.fillWidth: true
+                    text: card.vm ? card.vm.prerequisiteText : ""
+                    color: Theme.text
+                    wrapMode: Text.Wrap
+                }
             }
 
-            HButton {
-                objectName: "prerequisiteSettings"
-                text: qsTr("Set path in Settings")
-                onClicked: AppViewModel.openSettings("nrfutil")
-            }
+            Flow {
+                Layout.fillWidth: true
+                spacing: Theme.spacingS
 
-            HButton {
-                kind: "ghost"
-                text: qsTr("How to install ↗")
-                onClicked: Qt.openUrlExternally(card.vm.nrfUtilInstallUrl)
+                HButton {
+                    objectName: "prerequisiteSettings"
+                    text: qsTr("Set path in Settings")
+                    onClicked: AppViewModel.openSettings("nrfutil")
+                }
+
+                // Plan 0038 A0 (ADR-0263): Nordic's direct download for this OS, then our guide.
+                HButton {
+                    objectName: "nrfUtilDownload"
+                    kind: "ghost"
+                    toolTipText: card.vm ? card.vm.nrfUtilDownloadUrl : ""
+                    text: qsTr("Download nRF Util ↗")
+                    onClicked: Qt.openUrlExternally(card.vm.nrfUtilDownloadUrl)
+                }
+
+                HButton {
+                    objectName: "nrfUtilInstall"
+                    kind: "ghost"
+                    text: qsTr("How to install ↗")
+                    onClicked: Qt.openUrlExternally(AppViewModel.docsLink("install-nrf-util"))
+                }
             }
         }
     }

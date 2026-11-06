@@ -45,6 +45,9 @@ struct ScriptedChip {
     std::vector<jlink::MemoryZone> zones{
         {.name = "AHB-AP", .description = "AHB-AP (AP0)", .virtualAddress = 0}};
     std::uint32_t coreId = 0x2BA01477U;
+    // H5 (ADR-0273): POWER.RESETREAS at 0x50005400 of the nRF91 (write 1 to clear); bit 0 = pin.
+    std::uint32_t resetReason = 0;
+    static constexpr std::uint32_t resetReasonAddress = 0x50005400U;
 
     [[nodiscard]] std::uint8_t* ramAt(std::uint64_t address) {
         if (address >= 0x20000000U && address < 0x20000000U + ram.size()) {
@@ -151,7 +154,21 @@ public:
     // ---- M2: the two MCUs a CHESTER probe can reach (by J-Link device name: NRF91* = lte) ----
     ScriptedChip app;
     ScriptedChip lte = nrf91Chip();
-    std::string device;           // the last "Device = ..." command
+    std::string device; // the last "Device = ..." command
+    // plan 0033 H5: the device the open library session selected first; another `Device =` on
+    // the same open session marks it stale, and EndDownload then fails with -5 as the J-Link
+    // library did on the hardware ("No CPU core or target device has been selected").
+    std::string sessionDevice;
+    bool staleDevice = false;
+    // H5: the next EndDownload fails with -5 after the chip was pin-reset (another MCU did it).
+    bool pinResetDuringDownload = false;
+    // H5: reading the reset reason register fails (the original error must stay).
+    bool resetReasonUnreadable = false;
+    // Plan 0033 HIL G3: with this set, the pin reset of pinResetDuringDownload also breaks the
+    // open library session (linkLost): it still reports "connected", but every memory and
+    // CoreSight access fails until the probe is closed (and opened again), as on the hardware.
+    bool pinResetLosesTheLink = false;
+    bool linkLost = false;
     std::string failConnectTo;    // connect() with this device name fails
     std::vector<std::string> ops; // connect:<device>, reset, go, halt, download, eraseChip, ...
     bool connected = false;
@@ -235,6 +252,9 @@ public:
             t.open = false;
             t.connected = false;
             t.rttStarted = false;
+            t.sessionDevice.clear();
+            t.staleDevice = false;
+            t.linkLost = false;
             t.ops.emplace_back("close");
         });
     }
@@ -246,8 +266,16 @@ public:
     std::string execCommand(std::string_view command) override {
         constexpr std::string_view prefix = "Device = ";
         if (command.starts_with(prefix)) {
-            m_target->set(
-                [&](ScriptedTarget& t) { t.device = std::string(command.substr(prefix.size())); });
+            m_target->set([&](ScriptedTarget& t) {
+                t.device = std::string(command.substr(prefix.size()));
+                if (t.open) {
+                    if (t.sessionDevice.empty()) {
+                        t.sessionDevice = t.device;
+                    } else if (t.sessionDevice != t.device) {
+                        t.staleDevice = true;
+                    }
+                }
+            });
         }
         return {};
     }
@@ -359,6 +387,12 @@ public:
     }
     static int writeUnit(ScriptedTarget& t, std::uint32_t address, std::uint32_t value,
                          std::uint32_t size, std::string_view op) {
+        if (t.connected && t.chip().nrf91 && size == 4 &&
+            address == ScriptedChip::resetReasonAddress) {
+            t.ops.emplace_back("clearResetReason");
+            t.chip().resetReason &= ~value;
+            return 0;
+        }
         t.ops.emplace_back(op);
         for (std::uint32_t b = 0; b < size; ++b) {
             std::uint8_t* byte = t.chip().ramAt(std::uint64_t{address} + b);
@@ -379,8 +413,16 @@ public:
     }
     int readU32s(std::uint32_t address, std::span<std::uint32_t> items) override {
         return m_target->get([&](ScriptedTarget& t) {
-            if (!t.connected) {
+            if (!t.connected || t.linkLost) {
                 return -1;
+            }
+            if (t.chip().nrf91 && items.size() == 1 &&
+                address == ScriptedChip::resetReasonAddress) {
+                if (t.resetReasonUnreadable) {
+                    return -1;
+                }
+                items[0] = t.chip().resetReason;
+                return 1;
             }
             for (std::size_t i = 0; i < items.size(); ++i) {
                 std::uint32_t word = 0;
@@ -482,6 +524,15 @@ public:
         return m_target->get([](ScriptedTarget& t) {
             t.downloading = false;
             t.ops.emplace_back("download");
+            if (t.staleDevice) {
+                return -5;
+            }
+            if (t.pinResetDuringDownload) {
+                t.pinResetDuringDownload = false;
+                t.chip().resetReason |= 1U;
+                t.linkLost = t.pinResetLosesTheLink;
+                return -5;
+            }
             if (t.endDownloadResult < 0 || !t.connected) {
                 return t.endDownloadResult < 0 ? t.endDownloadResult : -1;
             }
@@ -506,7 +557,7 @@ public:
         }
         return m_target->get([&](ScriptedTarget& t) {
             ++t.readMemoryCalls;
-            if (!t.connected || t.chip().protectedChip) {
+            if (!t.connected || t.linkLost || t.chip().protectedChip) {
                 return -1;
             }
             for (std::size_t i = 0; i < buffer.size(); ++i) {
@@ -524,7 +575,7 @@ public:
     std::expected<std::uint32_t, int> readU32(std::uint32_t address) override {
         return m_target->get([&](ScriptedTarget& t) -> std::expected<std::uint32_t, int> {
             ScriptedChip& chip = t.chip();
-            if (!t.connected || chip.protectedChip) {
+            if (!t.connected || t.linkLost || chip.protectedChip) {
                 return std::unexpected(-1);
             }
             if (address == chip.ficrPart()) {
@@ -574,6 +625,9 @@ public:
 
     std::expected<std::uint32_t, int> coresightRead(std::uint8_t index, bool ap) override {
         return m_target->get([&](ScriptedTarget& t) -> std::expected<std::uint32_t, int> {
+            if (t.linkLost) {
+                return std::unexpected(-1);
+            }
             if (!ap) {
                 return index == 2 ? t.apSelect : 0U;
             }

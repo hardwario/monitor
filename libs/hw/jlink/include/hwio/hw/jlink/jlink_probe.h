@@ -58,6 +58,12 @@ public:
                                          OpenMode mode = OpenMode::Normal);
     // Closes the probe (no-op when not open).
     void close();
+    // Closes the open probe and opens it again (same serial number and OpenMode, SWD again when it
+    // was selected; the speed of setSpeed() is kept): a fresh library session whose next connect()
+    // initializes the target again. Plan 0033 H5: after the target was reset during an operation
+    // the old session still reports "connected" but no longer reaches it. No-op when not open.
+    // `why` completes the log line. Errors: those of open() and selectSwd().
+    [[nodiscard]] Status reopen(std::string_view why);
     [[nodiscard]] bool isOpen() const noexcept { return m_open; }
     // The open probe (serial number, product, firmware string).
     [[nodiscard]] const ProbeInfo& info() const noexcept { return m_info; }
@@ -76,6 +82,13 @@ public:
     // probe in this session; a probe that cannot measure VTref reports 0), target.connect_failed,
     // cancelled (stop requested).
     // `attempts` overrides connectAttempts (M4 Diagnose: one attempt, to report quickly).
+    // plan 0033 H5: when this open probe already selected another device (e.g. the LTE MCU was
+    // connected as NRF9151_XXCA and FICR reports an nRF9160), the probe is first closed and
+    // opened again (same serial number and OpenMode, SWD again when it was selected, the speed of
+    // setSpeed()): `Device =` on a connected library session does not re-initialize the target,
+    // and a later flash download failed ("No CPU core or target device has been selected").
+    // An attached RTT channel ends with that close. Additional errors: those of open() and
+    // selectSwd().
     [[nodiscard]] Status connect(std::string_view deviceName, int minTargetMillivolts,
                                  bool healthyVoltageSeen, const std::stop_token& stop,
                                  std::optional<int> attempts = std::nullopt);
@@ -105,12 +118,19 @@ private:
     void execCommands(std::span<const std::string_view> commands);
     void applySpeed();
     [[nodiscard]] bool isNetworkProbe(std::uint32_t serialNumber);
+    // H5: closes and opens the probe again before `Device = <deviceName>` when the open library
+    // session already selected another device.
+    [[nodiscard]] Status reopenForDevice(std::string_view deviceName);
 
     IJLinkApi& m_api;
     Clock& m_clock;
     ProbeTiming m_timing;
     ProbeInfo m_info;
     bool m_open = false;
+    OpenMode m_openMode = OpenMode::Normal; // of the last successful open()
+    bool m_swdSelected = false;             // selectSwd() succeeded since open()
+    // The device the open library session selected (`Device =`); nullopt after open() / close().
+    std::optional<std::string> m_selectedDevice;
     std::optional<int> m_speed; // kHz; nullopt = automatic (ADR-0090)
     // The result of the network-J-Link check of a serial number (isNetworkProbe, review R22).
     std::optional<std::pair<std::uint32_t, bool>> m_networkCheck;

@@ -86,7 +86,7 @@
 <context>
     <name>hwio::gui::McpController</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/mcp/mcp_controller.cpp" line="377"/>
+        <location filename="../../../app/gui/src/mcp/mcp_controller.cpp" line="392"/>
         <source>Listening · %n client(s)</source>
         <translation>
             <numerusform>Listening · %n client</numerusform>
@@ -94,7 +94,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/mcp/mcp_controller.cpp" line="394"/>
+        <location filename="../../../app/gui/src/mcp/mcp_controller.cpp" line="409"/>
         <source>AI assistants: listening on port %1, %n client(s)</source>
         <translation>
             <numerusform>AI assistants: listening on port %1, %n client</numerusform>

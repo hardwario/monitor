@@ -5,7 +5,7 @@
 - **Author:** Matej Strnad (with Claude), 2026-11-04
 - **Related ADRs:** ADR-0132 (placement and dialog; session part superseded), ADR-0246 (accepted 2026-11-04:
   disconnect first), ADR-0248 (translations), ADR-0255, ADR-0256, ADR-0257 (accepted 2026-11-04); ADR-0030, ADR-0031,
-  ADR-0058, ADR-0066, ADR-0093, ADR-0099, ADR-0105, ADR-0184, ADR-0261 (accepted 2026-11-04, review follow-up)
+  ADR-0058, ADR-0066, ADR-0093, ADR-0099, ADR-0105, ADR-0184, ADR-0261 (accepted 2026-11-04, review follow-up), ADR-0271 (accepted 2026-11-05, integration with 0014)
 - **Depends on:** M1 backend (`device::updateProbeFirmware()`, `libs/device/include/hwio/device/probe_tools.h`),
   0007 (`DiagWorker`, check `probe-firmware`). Hooks in [0008](0008-m4-first-run-setup.md) and
   [0009](0009-m4-connect-and-troubleshooting.md) appear when those wizards exist (order in
@@ -183,6 +183,7 @@ only in the message text (`session_worker.cpp`, connect path ~line 354); the ses
 | Threading and exclusivity | owned worker per job + registry reservation + scanner suspension / `DiagWorker` request / probe-only session | owned worker + reservation + suspension | **owned worker + reservation + suspension** (decided by Matej Strnad 2026-11-04) | ADR-0257 |
 | Update fails while a quit is pending (review 2026-11-04) | cancel the quit and show the error / quit anyway | — | **cancel the quit, show `probe.firmware_update_failed` with its advice; the app stays open** (decided by Matej Strnad 2026-11-04) | ADR-0261 |
 | Probe firmware status `Unknown` (review 2026-11-04) | explicit "Update anyway?" + success by the vendor call's return value / as Outdated | — | **confirm dialog says "The J-Link firmware status could not be determined. Update anyway?"; success judged by the return value of `JLINKARM_UpdateFirmwareIfNewer`, not by the status after** (decided by Matej Strnad 2026-11-04) | ADR-0261 |
+| What "an AI assistant holds the probe" means (integration with 0014, 2026-11-05) | also an idle connected AI tab and `send_command` / only a running AI operation | — | **only a running AI operation (busy page `"ai"`); an idle AI tab is disconnected by the banner like a user's tab** (decided by Matej Strnad 2026-11-05) | ADR-0271 |
 | Kept from ADR-0132 / 0017 (accepted 2026-10-19) | "Not now" per serial until restart; no downgrade for `Newer`; blocked while MCP or an operation runs; no MCP tool | — | accepted (2026-10-19) | ADR-0132 |
 
 ## Implementation steps
@@ -199,7 +200,22 @@ only in the message text (`session_worker.cpp`, connect path ~line 354); the ses
 - [ ] P5 Hooks: setup wizard row and troubleshooting step (only when 0008 / 0009 are registered; otherwise done when
   they land, tracked in their checklists) — after 0035/0008/0009: the reusable action is
   `ProbeFirmwareViewModel::requestForSerial()` / `blockedReasonFor()` (`AppViewModel.probeFirmware`); the MCP
-  "AI assistant" check plugs in through `ProbeFirmwareViewModel::setAiHoldsProbe()` (plan 0014). When the
+  "AI assistant" check plugs in through `ProbeFirmwareViewModel::setAiHoldsProbe()` (plan 0014).
+  - [x] MCP hook (integration of 0014 + 0036, 2026-11-04): `McpController` installs
+    `GuiDeviceProvider::aiOperationRuns(sn)` (a J-Link tab of the probe with busy page `"ai"`) — "Used by an AI
+    assistant" while an AI operation runs, also on the banner's own tab; the `ProbeFirmwareViewModel` is now
+    created before the extensions are registered. Reverse: MCP `connect` of a reserved probe gets the registry's
+    `probe.open_failed` ("The firmware of the J-Link %1 is being updated.") for a new AI tab (closed again) and a
+    user's tab. GTest `McpProvider.AiOperationBlocksTheFirmwareUpdate` / `ReservedProbeRefusesConnect`. An idle
+    AI-opened tab and a running `send_command` (no busy page) do not block; the banner disconnects an idle AI tab
+    like a user's tab (ADR-0271, decided 2026-11-05).
+  - [ ] Follow-up (verification 2026-11-05, not caused by the integration): two tests fail under heavy load (TSan,
+    load average ~25 on 16 cores) and pass at normal load — `OwnerThread.ThirtyTwoWaitsOnAFastStreamDoNotStall`
+    (`libs/mcp_tools/tests/owner_thread_test.cpp`: the `received > 25000` count has no load skip, only the latency
+    check has) and `StdinLineSource.DeliversLinesOverlongMarkersAndTheEnd` (`app/cli/tests/mcp_command_test.cpp`:
+    the reader thread starts in the constructor and may deliver every line before `setWakeup()`, so 0 wakeups).
+    Make both robust (plan 0014 / 0013 owners).
+  When the
   troubleshooting wizard is registered, the failure panel's [Close] in `ProbeFirmwareDialog.qml` (the ErrorPanel's
   `customActionText`, ~line 166) must give way to "Help me fix this" (and the dialog close before the wizard opens)
 - [x] P6 Docs: `troubleshooting.md` § `probe.firmware_outdated` / `probe.firmware_update_failed` mention the app action
@@ -233,4 +249,4 @@ only in the message text (`session_worker.cpp`, connect path ~line 354); the ses
   longer to re-enumerate (hubs, Windows driver load) would be reported as a failed update although it was updated.
   Check on all three OSes; if seen, the reopen needs a bounded retry.
 - **MCP blocking** is effective only once the GUI MCP server (plan 0014) exists; until then an MCP stdio process is
-  caught by the `ProbeLock` (`probe.in_use_by_other_process`).
+  caught by the `ProbeLock` (`probe.in_use_by_other_process`). Wired on 2026-11-04 (see P5); only a running AI operation blocks (ADR-0271).

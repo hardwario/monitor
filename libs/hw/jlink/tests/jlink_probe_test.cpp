@@ -490,3 +490,129 @@ TEST_F(Probe, OpenFailsWithoutTheUnsecureDialogHook) {
 }
 
 } // namespace
+
+namespace {
+
+using ::testing::StrEq;
+
+// plan 0033 H5: the LTE MCU is connected with the first part's device name, FICR reports the
+// other part, and the probe connects again as that part. A connected library session does not
+// initialize the target again on `Device =`, so the probe is closed and opened again first.
+TEST_F(Probe, ConnectAsAnotherDeviceOpensTheProbeAgainFirst) {
+    ASSERT_TRUE(probe().open(222U));
+    ASSERT_TRUE(probe().selectSwd());
+    ASSERT_TRUE(probe().connect("NRF9151_XXCA", 1000, false, {}));
+    EXPECT_CALL(api(), execCommand(_)).Times(::testing::AnyNumber()); // open()'s commands
+    {
+        InSequence order;
+        EXPECT_CALL(api(), close());
+        EXPECT_CALL(api(), selectBySerialNumber(222U)).WillOnce(Return(0));
+        EXPECT_CALL(api(), open()).WillOnce(Return(std::nullopt));
+        EXPECT_CALL(api(), installUnsecureDialogHook()).WillOnce(Return(0));
+        EXPECT_CALL(api(), selectInterface(hwio::jlink::TargetInterface::Swd)).WillOnce(Return(0));
+        EXPECT_CALL(api(), execCommand(StrEq("Device = NRF9160_xxAA")));
+        EXPECT_CALL(api(), setSpeed(hwio::jlink::autoSpeed));
+        EXPECT_CALL(api(), connect()).WillOnce(Return(0));
+    }
+    const auto status = probe().connect("NRF9160_xxAA", 1000, false, {});
+    ASSERT_TRUE(status) << status.error().detail;
+    EXPECT_TRUE(probe().isOpen());
+    EXPECT_EQ(probe().info().serialNumber, 222U);
+}
+
+// The reopened probe keeps the fixed speed and does not select SWD when it was not selected.
+TEST_F(Probe, ReopenForAnotherDeviceKeepsTheSpeed) {
+    ASSERT_TRUE(probe().open(111U));
+    probe().setSpeed(4000);
+    ASSERT_TRUE(probe().connect("NRF9151_XXCA", 1000, false, {}));
+    EXPECT_CALL(api(), selectInterface(_)).Times(0);
+    EXPECT_CALL(api(), setSpeed(0U)).Times(0);
+    EXPECT_CALL(api(), execCommand(_)).Times(::testing::AnyNumber()); // open()'s commands
+    {
+        InSequence order;
+        EXPECT_CALL(api(), close());
+        EXPECT_CALL(api(), open()).WillOnce(Return(std::nullopt));
+        EXPECT_CALL(api(), execCommand(StrEq("Device = NRF9160_xxAA")));
+        EXPECT_CALL(api(), setSpeed(4000U));
+        EXPECT_CALL(api(), connect()).WillOnce(Return(0));
+    }
+    ASSERT_TRUE(probe().connect("NRF9160_xxAA", 1000, false, {}));
+}
+
+TEST_F(Probe, ConnectAsTheSameDeviceDoesNotOpenAgain) {
+    ASSERT_TRUE(probe().open(111U));
+    ASSERT_TRUE(probe().connect("NRF9160_xxAA", 1000, false, {}));
+    EXPECT_CALL(api(), close()).Times(0);
+    EXPECT_CALL(api(), open()).Times(0);
+    EXPECT_CALL(api(), connect()).WillOnce(Return(0));
+    ASSERT_TRUE(probe().connect("NRF9160_xxAA", 1000, false, {}));
+}
+
+// A fresh open (also after close()) has no device selected: the first connect does not reopen.
+TEST_F(Probe, FirstConnectAfterOpenDoesNotOpenAgain) {
+    ASSERT_TRUE(probe().open(111U));
+    ASSERT_TRUE(probe().connect("NRF9151_XXCA", 1000, false, {}));
+    probe().close();
+    ASSERT_TRUE(probe().open(111U));
+    EXPECT_CALL(api(), close()).Times(0);
+    EXPECT_CALL(api(), open()).Times(0);
+    ASSERT_TRUE(probe().connect("NRF9160_xxAA", 1000, false, {}));
+}
+
+// A failed connect leaves the device selected in the library: the next device reopens, too.
+TEST_F(Probe, FailedConnectStillCountsAsSelected) {
+    ASSERT_TRUE(probe().open(111U));
+    EXPECT_CALL(api(), connect()).Times(3).WillRepeatedly(Return(-1));
+    ASSERT_FALSE(probe().connect("NRF9151_XXCA", 1000, false, {}));
+    ::testing::Mock::VerifyAndClearExpectations(&api());
+    EXPECT_CALL(api(), open()).WillOnce(Return(std::nullopt));
+    EXPECT_CALL(api(), connect()).WillOnce(Return(0));
+    ASSERT_TRUE(probe().connect("NRF9160_xxAA", 1000, false, {}));
+}
+
+TEST_F(Probe, ReopenFailureIsReturnedWithoutConnecting) {
+    ASSERT_TRUE(probe().open(111U));
+    ASSERT_TRUE(probe().connect("NRF9151_XXCA", 1000, false, {}));
+    EXPECT_CALL(api(), open()).WillOnce(Return(std::string("probe busy")));
+    EXPECT_CALL(api(), execCommand(_)).Times(::testing::AnyNumber()); // open()'s commands
+    EXPECT_CALL(api(), execCommand(StrEq("Device = NRF9160_xxAA"))).Times(0);
+    EXPECT_CALL(api(), connect()).Times(0);
+    const auto status = probe().connect("NRF9160_xxAA", 1000, false, {});
+    ASSERT_FALSE(status);
+    EXPECT_EQ(status.error().code, ErrorCode::ProbeOpenFailed);
+    EXPECT_FALSE(probe().isOpen());
+}
+
+} // namespace
+
+namespace {
+
+// Plan 0033 HIL G3: reopen() gives a fresh library session on the same probe (after a pin reset
+// the old one still reports "connected"); the same device name connects fully afterwards.
+TEST_F(Probe, ReopenOpensTheSameProbeAgainAndTheNextConnectIsFull) {
+    ASSERT_TRUE(probe().open(222U));
+    ASSERT_TRUE(probe().selectSwd());
+    ASSERT_TRUE(probe().connect("NRF9160_xxAA", 1000, false, {}));
+    EXPECT_CALL(api(), execCommand(_)).Times(::testing::AnyNumber()); // open()'s commands
+    {
+        InSequence order;
+        EXPECT_CALL(api(), close());
+        EXPECT_CALL(api(), selectBySerialNumber(222U)).WillOnce(Return(0));
+        EXPECT_CALL(api(), open()).WillOnce(Return(std::nullopt));
+        EXPECT_CALL(api(), selectInterface(hwio::jlink::TargetInterface::Swd)).WillOnce(Return(0));
+        EXPECT_CALL(api(), execCommand(::testing::StrEq("Device = NRF9160_xxAA")));
+        EXPECT_CALL(api(), connect()).WillOnce(Return(0));
+    }
+    ASSERT_TRUE(probe().reopen("test"));
+    EXPECT_TRUE(probe().isOpen());
+    ASSERT_TRUE(probe().connect("NRF9160_xxAA", 1000, false, {}));
+}
+
+TEST_F(Probe, ReopenOfAClosedProbeDoesNothing) {
+    EXPECT_CALL(api(), open()).Times(0);
+    EXPECT_CALL(api(), close()).Times(0);
+    ASSERT_TRUE(probe().reopen("test"));
+    EXPECT_FALSE(probe().isOpen());
+}
+
+} // namespace

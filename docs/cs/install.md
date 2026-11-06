@@ -138,16 +138,63 @@ umístění. Cesta, která neexistuje, je chyba; HARDWARIO Monitor se pak k výc
 <a id="nordic-nrf-util-lte-modem-firmware-only"></a>
 ## Nordic nRF Util (jen firmware modemu LTE)
 
-nRF Util aktualizuje firmware modemu v LTE MCU. Vše ostatní funguje bez něj. Nainstalujte `nrfutil` od Nordic
-Semiconductor a potom jeho příkaz `device`:
+nRF Util aktualizuje firmware modemu v LTE MCU. Vše ostatní funguje bez něj. V aplikaci otevře tlačítko **Stáhnout nRF
+Util ↗** správné stažení pro váš počítač.
 
-```sh
-nrfutil install device
-```
+**Windows**
 
-HARDWARIO Monitor ho hledá v **Nastavení → nRF Util → Cesta** (nebo `--nrfutil PATH`, nebo `HWIO_NRFUTIL`), potom
-v cestě `PATH`, potom v `~/.nrfutil/bin` (ve Windows `%USERPROFILE%\.nrfutil\bin`) a v `/usr/local/bin`. Je-li příliš
-starý: `nrfutil self-upgrade` a `nrfutil upgrade device`.
+1. Stáhněte [nrfutil.exe][nrfutil-win] do složky **Stažené soubory** (Downloads).
+2. Otevřete PowerShell ve složce Stažené soubory (`cd $HOME\Downloads`) a spusťte:
+
+   ```powershell
+   .\nrfutil.exe install device
+   ```
+
+Případně spusťte `winget install --id NordicSemiconductor.nrfutil` a potom v novém terminálu `nrfutil install device`.
+Pokud Windows hlásí, že chybí `VCRUNTIME140.dll` (nebo `nrfutil.exe` skončí bez výpisu), nainstalujte
+[Microsoft Visual C++ Redistributable (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe), nebo použijte winget, který ho nainstaluje sám.
+
+**macOS**
+
+1. Stáhněte [nrfutil][nrfutil-mac] (jeden soubor pro Intel i Apple silicon) do složky **Stažené soubory** (Downloads).
+2. Otevřete Terminál a spusťte:
+
+   ```sh
+   cd ~/Downloads
+   chmod +x nrfutil
+   ./nrfutil install device
+   ```
+
+   Pokud macOS hlásí, že nrfutil nelze otevřít, otevřete **Nastavení systému › Soukromí a zabezpečení**, u nrfutil
+   klikněte na **Přesto otevřít** a spusťte `./nrfutil install device` znovu. Případně nejdřív ve stejném
+   Terminálu spusťte `xattr -d com.apple.quarantine nrfutil`.
+
+**Linux**
+
+1. Stáhněte nrfutil pro [x86-64][nrfutil-linux] nebo [ARM64][nrfutil-linux-arm] do složky **Stažené soubory**
+   (Downloads).
+2. Otevřete terminál a spusťte:
+
+   ```sh
+   cd ~/Downloads
+   chmod +x nrfutil
+   ./nrfutil install device
+   ```
+
+První spuštění potřebuje internet: nrfutil nainstaluje sám sebe a svůj příkaz `device` do složky `.nrfutil` ve vaší
+domovské složce (`~/.nrfutil/bin`, ve Windows `%USERPROFILE%\.nrfutil\bin`). HARDWARIO Monitor ho tam najde sám;
+`PATH` měnit nemusíte. Potom klikněte na **Zkontrolovat znovu** v **Nastavení → nRF Util**, nebo spusťte `hwio doctor`.
+Stažený soubor pak můžete smazat. Jiné systémy: [stránka ke stažení nRF Util][nrfutil-page].
+
+**Pokročilé.** HARDWARIO Monitor hledá nRF Util v **Nastavení → nRF Util → Cesta** (nebo `--nrfutil PATH`, nebo
+`HWIO_NRFUTIL`), potom v cestě `PATH`, potom v `~/.nrfutil/bin` (ve Windows `%USERPROFILE%\.nrfutil\bin`) a
+v `/usr/local/bin`. Je-li příliš starý: `~/.nrfutil/bin/nrfutil self-upgrade` / `~/.nrfutil/bin/nrfutil upgrade device` (Windows: `& "$HOME\.nrfutil\bin\nrfutil.exe" self-upgrade` / `& "$HOME\.nrfutil\bin\nrfutil.exe" upgrade device`).
+
+[nrfutil-win]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-pc-windows-msvc/nrfutil.exe
+[nrfutil-mac]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/universal-apple-darwin/nrfutil
+[nrfutil-linux]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil
+[nrfutil-linux-arm]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/aarch64-unknown-linux-gnu/nrfutil
+[nrfutil-page]: https://www.nordicsemi.com/Products/Development-tools/nrf-util
 
 ## Kontrola instalace
 

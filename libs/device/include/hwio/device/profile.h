@@ -52,6 +52,13 @@ struct ConnectionGuideStep {
     const char* bodySourceText = "";   // one or two sentences
 };
 
+// Plan 0033 H5 (ADR-0273): the MCU's reset reason register (write 1 to clear, as Nordic's
+// POWER.RESETREAS) and the bit its reset pin sets.
+struct ResetReasonRegister {
+    std::uint32_t address = 0;
+    std::uint32_t pinMask = 0;
+};
+
 struct TargetProfile {
     std::string_view id; // "app", "lte" (CLI, logs, file names)
     // In user-visible text ("the %1 MCU", "the %1 connector"): English source text, marked with
@@ -109,6 +116,11 @@ struct TargetProfile {
     // "claim token", "ble passkey"), compared after the `info show` key normalisation (lower case,
     // spaces as '-'). The console file writes "<key>: <redacted>" (matchSensitiveOutput).
     std::span<const std::string_view> sensitiveOutputKeys;
+    // ---- plan 0033 H5 (ADR-0273) ----
+    // Cleared before a flash or modem update of this target; when the step fails and the reset-pin
+    // bit is set afterwards, the failure becomes target.reset_during_update (another MCU of the
+    // device reset this one). nullopt = not checked.
+    std::optional<ResetReasonRegister> resetReason = std::nullopt;
 };
 
 // A URL for one UI language (ADR-0167): `language` is a BCP 47 primary language subtag ("en",

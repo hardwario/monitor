@@ -94,6 +94,13 @@ update](flashing.md#lte-firmware-update).
 
 Error code: [`target.other_connector`](#target.other_connector).
 
+<a id="the-lte-update-fails-the-lte-mcu-was-reset"></a>
+### The LTE update fails: the LTE MCU was reset
+
+A plain LTE update (`hwio chester lte flash`, or a bundle, modem or application file for the LTE MCU) leaves the application on the application MCU running. When the LTE MCU does not answer for a while, the CHESTER application firmware resets it through its reset pin, and the update stops. The app then reads the LTE MCU's reset reason and reports **The LTE MCU was reset during the update.** Use the guided update instead: **Update LTE firmware…** on the **Flash** page, or `hwio chester lte flash --guided`. It keeps a copy of the application, erases it, updates the LTE MCU and writes the application back. See [LTE firmware update](flashing.md#lte-firmware-update).
+
+Error code: [`target.reset_during_update`](#target.reset_during_update).
+
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### LTE modem firmware needs nRF Util
 
@@ -466,6 +473,16 @@ On CHESTER the message is "The J-Link is connected to the LTE MCU.", the cause "
 MCU; the J-Link cable is on the other connector." and the suggestion "Move the J-Link cable to the APP connector, or
 update the LTE firmware." The desktop app shows it as a banner with **Update LTE firmware…** and **Retry**; the
 session does not reconnect by itself. See [The J-Link is on the LTE connector](#the-j-link-is-on-the-lte-connector).
+
+<a id="target.reset_during_update"></a>
+#### `target.reset_during_update`
+
+**The LTE MCU was reset during the update.**
+
+- **Probably:** The application firmware on the application MCU reset the LTE MCU through its reset pin while the LTE MCU was being updated.
+- **What to do:** Use the guided update, which stops the application first: Flash › Update LTE firmware… in the desktop app, or `hwio chester lte flash --guided`.
+
+After a failed step of an LTE update the reset-pin bit of the LTE MCU's reset reason register was set. The details keep the original error (for example `target.program_failed` or `firmware.modem_update_failed`) and the register value. See [The LTE update fails: the LTE MCU was reset](#the-lte-update-fails-the-lte-mcu-was-reset).
 
 <a id="target.protected"></a>
 #### `target.protected`

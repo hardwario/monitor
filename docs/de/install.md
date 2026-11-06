@@ -146,16 +146,65 @@ existiert, ist ein Fehler; HARDWARIO Monitor weicht dann nicht auf die Standardo
 <a id="nordic-nrf-util-lte-modem-firmware-only"></a>
 ## Nordic nRF Util (nur für die LTE-Modem-Firmware)
 
-nRF Util aktualisiert die Modem-Firmware der LTE-MCU. Alles andere funktioniert ohne es. Installieren Sie `nrfutil`
-von Nordic Semiconductor und danach seinen Befehl `device`:
+nRF Util aktualisiert die Modem-Firmware der LTE-MCU. Alles andere funktioniert ohne es. In der App öffnet **Download
+nRF Util ↗** (nRF Util herunterladen) den passenden Download für Ihren Computer.
 
-```sh
-nrfutil install device
-```
+**Windows**
 
-HARDWARIO Monitor sucht es in **Settings → nRF Util → Path** (Einstellungen → nRF Util → Pfad) (oder
-`--nrfutil PATH`, oder `HWIO_NRFUTIL`), dann im `PATH`, dann in `~/.nrfutil/bin` (`%USERPROFILE%\.nrfutil\bin` unter
-Windows) und `/usr/local/bin`. Wenn es zu alt ist: `nrfutil self-upgrade` und `nrfutil upgrade device`.
+1. Laden Sie [nrfutil.exe][nrfutil-win] in Ihren Ordner **Downloads** herunter.
+2. Öffnen Sie PowerShell im Ordner Downloads (`cd $HOME\Downloads`) und führen Sie aus:
+
+   ```powershell
+   .\nrfutil.exe install device
+   ```
+
+Alternativ führen Sie `winget install --id NordicSemiconductor.nrfutil` und danach in einem neuen Terminal
+`nrfutil install device` aus. Meldet Windows, dass `VCRUNTIME140.dll` fehlt (oder beendet sich `nrfutil.exe` ohne
+Ausgabe), installieren Sie das [Microsoft Visual C++ Redistributable (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe) oder verwenden Sie winget, das es
+automatisch installiert.
+
+**macOS**
+
+1. Laden Sie [nrfutil][nrfutil-mac] (eine Datei für Intel und Apple Silicon) in Ihren Ordner **Downloads** herunter.
+2. Öffnen Sie das Terminal und führen Sie aus:
+
+   ```sh
+   cd ~/Downloads
+   chmod +x nrfutil
+   ./nrfutil install device
+   ```
+
+   Meldet macOS, dass nrfutil nicht geöffnet werden kann, öffnen Sie **Systemeinstellungen › Datenschutz & Sicherheit**,
+   klicken Sie bei nrfutil auf **Trotzdem öffnen** und führen Sie `./nrfutil install device` erneut aus. Alternativ
+   führen Sie vorher im selben Terminal `xattr -d com.apple.quarantine nrfutil` aus.
+
+**Linux**
+
+1. Laden Sie nrfutil für [x86-64][nrfutil-linux] oder [ARM64][nrfutil-linux-arm] in Ihren Ordner **Downloads**
+   herunter.
+2. Öffnen Sie ein Terminal und führen Sie aus:
+
+   ```sh
+   cd ~/Downloads
+   chmod +x nrfutil
+   ./nrfutil install device
+   ```
+
+Der erste Start braucht Internet: nrfutil installiert sich selbst und seinen Befehl `device` in `.nrfutil` in Ihrem
+Benutzerordner (`~/.nrfutil/bin`, unter Windows `%USERPROFILE%\.nrfutil\bin`). HARDWARIO Monitor findet es dort von
+selbst; Sie müssen den `PATH` nicht ändern. Klicken Sie danach in **Settings → nRF Util** (Einstellungen → nRF Util)
+auf **Check again** (Erneut prüfen) oder führen Sie `hwio doctor` aus. Die heruntergeladene Datei können Sie danach
+löschen. Andere Systeme: [nRF-Util-Downloadseite][nrfutil-page].
+
+**Für Fortgeschrittene.** HARDWARIO Monitor sucht nRF Util in **Settings → nRF Util → Path** (Einstellungen → nRF Util
+→ Pfad) (oder `--nrfutil PATH`, oder `HWIO_NRFUTIL`), dann im `PATH`, dann in `~/.nrfutil/bin`
+(`%USERPROFILE%\.nrfutil\bin` unter Windows) und `/usr/local/bin`. Wenn es zu alt ist: `~/.nrfutil/bin/nrfutil self-upgrade` / `~/.nrfutil/bin/nrfutil upgrade device` (Windows: `& "$HOME\.nrfutil\bin\nrfutil.exe" self-upgrade` / `& "$HOME\.nrfutil\bin\nrfutil.exe" upgrade device`).
+
+[nrfutil-win]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-pc-windows-msvc/nrfutil.exe
+[nrfutil-mac]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/universal-apple-darwin/nrfutil
+[nrfutil-linux]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil
+[nrfutil-linux-arm]: https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/aarch64-unknown-linux-gnu/nrfutil
+[nrfutil-page]: https://www.nordicsemi.com/Products/Development-tools/nrf-util
 
 ## Installation prüfen
 

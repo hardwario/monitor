@@ -20,7 +20,7 @@ cmake/HWioPackaging.cmake      install rules per OS, HWIO_PACKAGE_KIND, CPack, i
 cmake/HWioDeploy.cmake.in      Qt deployment at install time (Linux: explicit plugin / QML module lists;
                               macOS: macdeployqt; Windows: windeployqt), Qt catalogs of cs/de/pl/sk
 cmake/HWioInstalledTreeTest.cmake  CTest Packaging.InstalledTreeSelfTest
-packaging/common/icons/       the v1 icon (hwio-monitor.icns / .ico from branch main) + hicolor PNGs (extract.sh)
+packaging/common/icons/       app icon: master hwio-monitor-source.png -> .icns / .ico / hicolor PNGs (extract.sh, ADR-0272)
 packaging/common/licenses/    third-party licence texts; licenses.cmake installs them + generated notices
 packaging/linux/              Containerfile, build-packages.sh, build-appimage.sh, check-packages.sh,
                               smoke-clean.sh, desktop file, AppStream metainfo, udev rule, deb/, appimage/AppRun

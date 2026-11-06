@@ -270,7 +270,7 @@ QString LteUpdateWizard::prerequisiteText() const {
     return toQString(problem->message) + QStringLiteral(" ") + toQString(problem->suggestion);
 }
 
-QString LteUpdateWizard::nrfUtilInstallUrl() { return SettingsViewModel::nrfUtilInstallUrl(); }
+QString LteUpdateWizard::nrfUtilDownloadUrl() { return SettingsViewModel::nrfUtilDownloadUrl(); }
 
 bool LteUpdateWizard::firmwareReady() const {
     return m_lteSource->readySource() != nullptr && prerequisiteText().isEmpty() &&

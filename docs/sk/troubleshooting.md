@@ -91,6 +91,13 @@ Karta pracuje s aplikačným MCU. Keď J-Link odpovedá z LTE MCU, karta namiest
 
 Kód chyby: [`target.other_connector`](#target.other_connector).
 
+<a id="the-lte-update-fails-the-lte-mcu-was-reset"></a>
+### Aktualizácia LTE zlyhá: LTE MCU bol resetovaný
+
+Obyčajná aktualizácia LTE (`hwio chester lte flash` alebo balík, firmvér modemu či aplikácie pre LTE MCU) nechá aplikáciu na aplikačnom MCU bežať. Keď LTE MCU chvíľu neodpovedá, aplikačný firmvér CHESTER ho resetuje cez jeho resetovací pin a aktualizácia sa preruší. Aplikácia potom prečíta dôvod resetu LTE MCU a nahlási **The LTE MCU was reset during the update.** Použite namiesto toho sprievodcu: **Update LTE firmware…** na stránke **Flash** alebo `hwio chester lte flash --guided`. Sprievodca uloží kópiu aplikácie, vymaže ju, aktualizuje LTE MCU a aplikáciu zapíše späť. Pozrite si [aktualizáciu LTE firmvéru](flashing.md#aktualizácia-lte-firmvéru).
+
+Kód chyby: [`target.reset_during_update`](#target.reset_during_update).
+
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Firmvér LTE modemu potrebuje nRF Util
 
@@ -460,6 +467,16 @@ Plochý kábel je v konektore druhého MCU (napríklad v konektore LTE, keď nah
 - **What to do:** Move the J-Link cable to the connector of the console's MCU, or update the LTE firmware.
 
 Na zariadení CHESTER správa znie "The J-Link is connected to the LTE MCU.", príčina "The console runs on the application MCU; the J-Link cable is on the other connector." a odporúčanie "Move the J-Link cable to the APP connector, or update the LTE firmware." Desktopová aplikácia ju zobrazí ako banner s tlačidlami **Update LTE firmware…** a **Retry**; relácia sa sama znova nepripojí. Pozrite si [J-Link je na konektore LTE](#j-link-je-na-konektore-lte).
+
+<a id="target.reset_during_update"></a>
+#### `target.reset_during_update`
+
+**The LTE MCU was reset during the update.**
+
+- **Probably:** The application firmware on the application MCU reset the LTE MCU through its reset pin while the LTE MCU was being updated.
+- **What to do:** Use the guided update, which stops the application first: Flash › Update LTE firmware… in the desktop app, or `hwio chester lte flash --guided`.
+
+Po neúspešnom kroku aktualizácie LTE bol v registri dôvodu resetu LTE MCU nastavený bit resetovacieho pinu. Podrobnosti obsahujú pôvodnú chybu (napríklad `target.program_failed` alebo `firmware.modem_update_failed`) a hodnotu registra. Pozrite si [Aktualizácia LTE zlyhá: LTE MCU bol resetovaný](#the-lte-update-fails-the-lte-mcu-was-reset).
 
 <a id="target.protected"></a>
 #### `target.protected`

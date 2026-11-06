@@ -45,7 +45,7 @@ QString readPage(const QString& path) {
 }
 
 bool hasExplicitAnchor(const QString& text, QStringView id) {
-    return text.contains(QStringLiteral("<a id=\"") + id + QStringLiteral("\"></a>"));
+    return text.contains(QStringLiteral("<a id=\"") + id.toString() + QStringLiteral("\"></a>"));
 }
 
 // GitHub's heading slug: lower case, punctuation except '-' and '_' removed, spaces to '-'.

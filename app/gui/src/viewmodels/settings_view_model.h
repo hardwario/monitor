@@ -28,6 +28,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringView>
 #include <QUrl>
 #include <QVariantList>
 #include <QtQmlIntegration>
@@ -108,7 +109,9 @@ class SettingsViewModel : public QObject {
     // 0021 (ADR-0167): the documentation page of application firmware in the UI language.
     Q_PROPERTY(QString catalogUrl READ catalogUrl NOTIFY languageChanged)
     Q_PROPERTY(QString sourceUrl READ sourceUrl CONSTANT)
-    Q_PROPERTY(QString nrfUtilInstallUrl READ nrfUtilInstallUrl CONSTANT)
+    // Plan 0038 A0 (ADR-0263): Nordic's direct nrfutil download for this OS / CPU. "How to install"
+    // opens our docs topic install-nrf-util (AppViewModel.docsLink).
+    Q_PROPERTY(QString nrfUtilDownloadUrl READ nrfUtilDownloadUrl CONSTANT)
 
 public:
     static inline const QString pageId = QStringLiteral("settings");
@@ -181,7 +184,11 @@ public:
     [[nodiscard]] QString documentationUrl() const;
     [[nodiscard]] QString catalogUrl() const;
     [[nodiscard]] static QString sourceUrl();
-    [[nodiscard]] static QString nrfUtilInstallUrl();
+    [[nodiscard]] static QString nrfUtilDownloadUrl();
+    // `os`: the compile-time token of nrfUtilDownloadUrl() ("windows", "macos", "linux", else
+    // "other"); `cpuArch`: QSysInfo::currentCpuArchitecture() ("x86_64", "arm64", ...). Unknown →
+    // Nordic's product page.
+    [[nodiscard]] static QString nrfUtilDownloadUrlFor(QStringView os, QStringView cpuArch);
 
     // The page became visible: detect the tools once (cached afterwards).
     Q_INVOKABLE void pageShown();

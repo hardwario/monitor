@@ -86,12 +86,22 @@ ColumnLayout {
             Layout.fillWidth: true
             spacing: Theme.spacingS
 
+            // Plan 0038 A0 (ADR-0263): Nordic's direct download for this OS, then our guide.
+            HButton {
+                objectName: "nrfUtilDownload"
+                kind: "ghost"
+                visible: section.vm.nrfUtilStatusProblem
+                toolTipText: section.vm ? section.vm.nrfUtilDownloadUrl : ""
+                text: qsTr("Download nRF Util ↗")
+                onClicked: Qt.openUrlExternally(section.vm.nrfUtilDownloadUrl)
+            }
+
             HButton {
                 objectName: "nrfUtilInstall"
                 kind: "ghost"
                 visible: section.vm.nrfUtilStatusProblem
                 text: qsTr("How to install ↗")
-                onClicked: Qt.openUrlExternally(section.vm.nrfUtilInstallUrl)
+                onClicked: Qt.openUrlExternally(AppViewModel.docsLink("install-nrf-util"))
             }
 
             // Amended by 0008: hidden until the setup wizard is registered.

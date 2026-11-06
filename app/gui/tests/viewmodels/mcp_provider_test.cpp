@@ -2,7 +2,8 @@
 // library): ids and the list from the tabs and the probe scanner, connect opens an AI tab with
 // openedBy (appended, the current tab unchanged, not in ui/tabs), connects a user's tab
 // (ADR-0242), the tab limit, disconnect of a user's tab, busy / markers / the command hint, a tab
-// closed while a call holds its session, and Bluetooth tabs (step D1).
+// closed while a call holds its session, and Bluetooth tabs (step D1). Integration with plan 0036:
+// an AI operation blocks the J-Link firmware update; a probe reserved for it refuses connect.
 
 #include "gui_test_support.h"
 #include "hwio/core/error.h"
@@ -19,6 +20,7 @@
 #include "viewmodels/connection_view_model.h"
 #include "viewmodels/device_tab_list_model.h"
 #include "viewmodels/device_tab_view_model.h"
+#include "viewmodels/probe_firmware_view_model.h"
 #include "workers/ble_service.h"
 
 #include <QByteArray>
@@ -34,6 +36,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <expected>
 #include <optional>
 #include <string>
@@ -398,6 +401,81 @@ TEST_F(McpProvider, ClientNameIsSanitised) {
     EXPECT_FALSE(name.contains(QLatin1Char('\n')));
     EXPECT_TRUE(name.startsWith(QStringLiteral("Claude edoC Next line")));
     EXPECT_TRUE(name.endsWith(QChar(0x2026)));
+}
+
+// Plan 0036 (ADR-0105, ADR-0132): while an AI operation runs on a tab of the probe, the J-Link
+// firmware update is blocked with "Used by an AI assistant" (also for the tab's own banner).
+TEST_F(McpProvider, AiOperationBlocksTheFirmwareUpdate) {
+    (void)app();
+    ASSERT_TRUE(open("jlink:801000002").has_value());
+    DeviceTabViewModel* tab = provider().tabFor("jlink:801000002");
+    ASSERT_NE(tab, nullptr);
+    hwio::gui::ProbeFirmwareViewModel& firmware = *app().probeFirmware();
+    const QString aiReason = QStringLiteral("Used by an AI assistant");
+    constexpr std::uint32_t serial = 801000002;
+    EXPECT_FALSE(provider().aiOperationRuns(serial));
+    EXPECT_EQ(firmware.blockedReason(serial, tab), QString()); // the banner's own tab
+    EXPECT_EQ(firmware.blockedReasonFor(QStringLiteral("801000002")),
+              QStringLiteral("Disconnect tab 2 first."));
+
+    ASSERT_TRUE(
+        provider().beginBusy("jlink:801000002", QStringLiteral("AI: Flashing…"), {}).has_value());
+    EXPECT_TRUE(provider().aiOperationRuns(serial));
+    EXPECT_FALSE(provider().aiOperationRuns(801000003));
+    EXPECT_EQ(firmware.blockedReason(serial, tab), aiReason);
+    EXPECT_EQ(firmware.blockedReasonFor(QStringLiteral("801000002")), aiReason);
+    EXPECT_NE(firmware.blockedReason(801000003), aiReason);
+    firmware.requestFromTab(*tab); // ignored: the tab stays connected
+    EXPECT_EQ(firmware.state(), hwio::gui::ProbeFirmwareViewModel::Idle);
+    EXPECT_NE(tab->session(), nullptr);
+    firmware.requestForSerial(QStringLiteral("801000002"));
+    EXPECT_EQ(firmware.state(), hwio::gui::ProbeFirmwareViewModel::Idle);
+    EXPECT_TRUE(app().toasts().contains(aiReason));
+
+    provider().endBusy("jlink:801000002");
+    EXPECT_FALSE(provider().aiOperationRuns(serial));
+    EXPECT_EQ(firmware.blockedReason(serial, tab), QString());
+    // A user operation on the tab keeps its own reason.
+    tab->setBusy(QStringLiteral("flash"), QStringLiteral("Flashing…"), QStringLiteral("?"), {});
+    EXPECT_FALSE(provider().aiOperationRuns(serial));
+    EXPECT_EQ(firmware.blockedReason(serial, tab),
+              QStringLiteral("Wait for the current operation to finish."));
+    tab->clearBusy(QStringLiteral("flash"));
+}
+
+// Plan 0036 (ADR-0257): a probe reserved for a J-Link firmware update refuses the AI's connect
+// with the registry's probe.open_failed, for a new AI tab (closed again) and for a user's tab.
+TEST_F(McpProvider, ReservedProbeRefusesConnect) {
+    (void)app();
+    hwio::gui::ProbeFirmwareViewModel& firmware = *app().probeFirmware();
+    firmware.requestForSerial(QStringLiteral("801000002"));
+    ASSERT_NE(firmware.state(), hwio::gui::ProbeFirmwareViewModel::Idle);
+    ASSERT_TRUE(app().sessionRegistry().reserved(801000002));
+
+    auto refused = open("jlink:801000002");
+    ASSERT_FALSE(refused.has_value());
+    EXPECT_EQ(refused.error().code, hwio::ErrorCode::ProbeOpenFailed);
+    EXPECT_NE(refused.error().message.find("is being updated"), std::string::npos)
+        << refused.error().message;
+    EXPECT_TRUE(waitFor([&] { return app().tabs()->count() == 1; })); // the new tab closed again
+
+    // A user's tab configured for the probe (no session) is not connected either.
+    DeviceTabViewModel* user = app().currentTabViewModel();
+    ASSERT_TRUE(user->configure(QStringLiteral("chester"), QStringLiteral("app"), 801000002,
+                                QStringLiteral("Test Probe")));
+    refused = open("jlink:801000002");
+    ASSERT_FALSE(refused.has_value());
+    EXPECT_EQ(refused.error().code, hwio::ErrorCode::ProbeOpenFailed);
+    EXPECT_EQ(user->session(), nullptr);
+    EXPECT_EQ(app().tabs()->count(), 1);
+
+    // Released when the request ends: connect works again.
+    ASSERT_TRUE(
+        waitFor([&] { return firmware.state() != hwio::gui::ProbeFirmwareViewModel::Reading; }));
+    firmware.cancel();
+    ASSERT_TRUE(waitFor([&] { return !app().sessionRegistry().reserved(801000002); }));
+    EXPECT_TRUE(open("jlink:801000002").has_value());
+    EXPECT_NE(user->session(), nullptr);
 }
 
 TEST(McpProviderIds, ParseIds) {

@@ -26,7 +26,10 @@
 // queued); a tab of the user or of another client (RequestContext::clientKey, ADR-0260) ->
 // mcp.tool_not_allowed (English call-site text, ADR-0103/ADR-0240).
 // beginBusy / endBusy -> DeviceTabViewModel::setBusy("ai", ...) / clearBusy("ai"); a tab a user
-// page holds busy -> internal.busy (review M3); marker() ->
+// page holds busy -> internal.busy (review M3); while an AI operation runs the J-Link firmware
+// update of the probe is blocked ("Used by an AI assistant", aiOperationRuns(), plan 0036); a
+// probe reserved for that update refuses connect with the registry's probe.open_failed ("The
+// firmware of the J-Link %1 is being updated.", SessionRegistry::checkAvailable); marker() ->
 // the tab's ConsoleLog (Shell channel); setAiCommandHint() -> DeviceTabViewModel::aiCommandActive.
 //
 // devicesChanged: a tab was added or removed, a tab's session or configuration changed, the probe
@@ -97,6 +100,9 @@ public:
 
     // The device id of a tab ("jlink:<SN>", "ble:<id>"; "" while choosing or without a device).
     [[nodiscard]] static std::string deviceId(const DeviceTabViewModel& tab);
+    // Plan 0036 hook (ProbeFirmwareViewModel::setAiHoldsProbe, ADR-0105, ADR-0132): an AI
+    // operation runs (busy page "ai") on a J-Link tab of the probe `serial`.
+    [[nodiscard]] bool aiOperationRuns(std::uint32_t serial) const;
     // The configured tab of `id` (with or without a session), or nullptr.
     [[nodiscard]] DeviceTabViewModel* tabFor(std::string_view id) const;
     // "jlink:<serial>" -> the serial (decimal without leading zeros, 1..4294967295).

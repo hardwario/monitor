@@ -138,7 +138,7 @@ cmake/HioPackaging.cmake        install(), deploy scripts, CPack config, package
 - `QGuiApplication::setDesktopFileName("com.hardwario.monitor")` (Wayland icon / taskbar grouping) and
   `setWindowIcon` from the embedded icon; Windows: `SetCurrentProcessExplicitAppUserModelID(L"com.hardwario.monitor")`
   before the first window (in `app/gui/src/platform_win.cpp`).
-- Icons: the v1 icon is reused (decision table): `icons.icns` (master, largest representation) and `icons.ico` from
+- Icons: *(superseded 2026-11-05 by ADR-0272: a new icon from the master PNG `hwio-monitor-source.png`; extract.sh now generates the .icns, .ico and PNGs from it.)* Originally the v1 icon was reused (decision table): `icons.icns` (master, largest representation) and `icons.ico` from
   branch `main`; Linux hicolor PNGs 16…512 px are extracted from the .icns once by a documented script
   (`packaging/common/icons/extract.sh`); all binaries via LFS. A later brand icon replaces these files only. Windows `.rc` with the icon and VERSIONINFO (CompanyName "HARDWARIO a.s.",
   ProductName "HARDWARIO Monitor", FileVersion from `HIO_VERSION_NUMERIC`) for both executables.
@@ -289,7 +289,7 @@ No new `hio::Error` codes at runtime except in 0016. Package-time failures are C
 | Architectures | x64 + mac universal / + Linux arm64 / + Win arm64 | x64 + macOS universal | ADR-0124 |
 | Release trigger | tag → draft / dispatch / release created | tag → draft release | ADR-0125 |
 | macOS library validation | disable-library-validation / re-sign | disable-library-validation | ADR-0126 |
-| App icon source | brand team SVG / reuse v1 icon / drafted SVG | reuse the v1 icon (`icons.icns`, `icons.ico` from `main`) | — |
+| App icon source | brand team SVG / reuse v1 icon / drafted SVG | reuse the v1 icon (`icons.icns`, `icons.ico` from `main`); superseded by ADR-0272 (new icon, 2026-11-05) | ADR-0272 |
 | MCP consent as native notification (ADR-0108 asked M7) | keep own window / + info notification / native with buttons | keep the own window (ADR-0108 unchanged) | ADR-0108 |
 | libstdc++ 13/14 vs `std::expected` meta types (2026-10-26) | `operator==` on the types / require libstdc++ 15 | `operator==` on the types; g++-13 stays | ADR-0177 |
 | Minor defaults: install paths and names above; .deb package `hardwario-monitor`, section `electronics`, maintainer e-mail; udev file `60-hardwario-jlink.rules`; macOS bundle `HARDWARIO Monitor.app`; desktop categories; AppImage tooling (CMake deploy + linuxdeploy without Qt plugin + appimagetool, no zsync); MSVC runtime app-local; WiX ≥ 4 via CPack (CMake ≥ 3.30 for Windows packaging only); desktop shortcut off; crash retention 5 files / report includes 3; `--self-test` hidden GUI option; `"package"` field in `--version --json`; unsigned PR packages, 7-day retention; artifact names above | accept / change | accepted (2026-10-19); the .deb maintainer e-mail is supplied by HARDWARIO | — |

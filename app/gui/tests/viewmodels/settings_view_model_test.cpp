@@ -226,4 +226,25 @@ TEST_F(SettingsTest, ReadOnlySettingsFile) {
     EXPECT_TRUE(settings().restoreTabs());
 }
 
+// Plan 0038 A0 (ADR-0263): Nordic's direct nrfutil downloads per OS / CPU, else the product page.
+TEST(SettingsNrfUtilDownload, UrlPerOsAndArch) {
+    const QString base = QStringLiteral(
+        "https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/");
+    EXPECT_EQ(SettingsViewModel::nrfUtilDownloadUrlFor(u"windows", u"x86_64"),
+              base + QStringLiteral("x86_64-pc-windows-msvc/nrfutil.exe"));
+    EXPECT_EQ(SettingsViewModel::nrfUtilDownloadUrlFor(u"windows", u"arm64"),
+              base + QStringLiteral("x86_64-pc-windows-msvc/nrfutil.exe"));
+    EXPECT_EQ(SettingsViewModel::nrfUtilDownloadUrlFor(u"macos", u"arm64"),
+              base + QStringLiteral("universal-apple-darwin/nrfutil"));
+    EXPECT_EQ(SettingsViewModel::nrfUtilDownloadUrlFor(u"linux", u"x86_64"),
+              base + QStringLiteral("x86_64-unknown-linux-gnu/nrfutil"));
+    EXPECT_EQ(SettingsViewModel::nrfUtilDownloadUrlFor(u"linux", u"arm64"),
+              base + QStringLiteral("aarch64-unknown-linux-gnu/nrfutil"));
+    const QString page =
+        QStringLiteral("https://www.nordicsemi.com/Products/Development-tools/nrf-util");
+    EXPECT_EQ(SettingsViewModel::nrfUtilDownloadUrlFor(u"linux", u"riscv64"), page);
+    EXPECT_EQ(SettingsViewModel::nrfUtilDownloadUrlFor(u"other", u"x86_64"), page);
+    EXPECT_TRUE(SettingsViewModel::nrfUtilDownloadUrl().startsWith(QStringLiteral("https://")));
+}
+
 } // namespace

@@ -768,7 +768,7 @@ void FlashViewModel::triggerErrorAction(int action) {
     }
 }
 
-QString FlashViewModel::nrfUtilInstallUrl() { return SettingsViewModel::nrfUtilInstallUrl(); }
+QString FlashViewModel::nrfUtilDownloadUrl() { return SettingsViewModel::nrfUtilDownloadUrl(); }
 
 // ---- texts
 // ----------------------------------------------------------------------------------------
