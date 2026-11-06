@@ -1047,15 +1047,25 @@ private:
         std::optional<jlink::JLinkProgrammer> programmer;
     };
 
-    // Plan 0039: after an STM32 option-byte reload the chip resets; the target is connected
-    // again, retried until the recover deadline (60 s).
+    // Plan 0039: after an STM32 option-byte reload the chip resets and - after a regression from
+    // RDP level 1 - mass-erases. The probe is opened and connected again until the chip's
+    // identification registers answer, retried until the recover deadline (60 s).
     [[nodiscard]] Status reconnectAfterReload(OperationRun& run) {
         const auto deadline = clock().now() + m_config.timing.programmer.recoverTimeout;
-        Status connected;
+        Status ready;
         while (true) {
-            connected = connectDevice(run.target, run.target.jlinkDevice, run.stop, 1);
-            if (connected || clock().now() >= deadline || run.stop.stop_requested()) {
-                return connected;
+            // HIL 2026-11-06: the library's connection is stale after the chip reset itself (reads
+            // return 0 until the probe is opened again, also on a "successful" JLINKARM_Connect).
+            m_probe->close();
+            m_probeTarget = nullptr;
+            ready = prepareProbe(run.target, true, run.stop);
+            if (ready && run.context.programmer != nullptr) {
+                if (auto chip = run.context.programmer->identify(); !chip) {
+                    ready = std::unexpected(std::move(chip).error());
+                }
+            }
+            if (ready || clock().now() >= deadline || run.stop.stop_requested()) {
+                return ready;
             }
             (void)clock().sleepFor(std::chrono::milliseconds(500), run.stop);
         }

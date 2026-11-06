@@ -231,7 +231,7 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
 - [x] P0.1 Confirm DEV_ID / REV_ID / flash size of the CHESTER-S1 chip with the CPU halted, and which J-Link device
       name programs a whole category / size (one representative name per entry, e.g. `STM32L053R8` for cat. 3 64 KiB);
       check the STM32L0 DEV_ID / flash size table against the ST reference manuals.
-- [ ] P0.2 Same on a Murata ABZ (STM32L072CZ) with the original Murata firmware: RDP level, DEV_ID `0x447`.
+- [x] P0.2 Same on a Murata ABZ (STM32L072CZ) with the original Murata firmware: RDP level, DEV_ID `0x447`.
 - [x] P0.3 Is a halt needed to read the flash size register reliably? Does the halt / read disturb the running
       firmware (CHESTER app talking to the module over UART)?
 - [x] P0.4 RDP 1 → 0: own sequence vs J-Link built-in; how the J-Link library behaves on a secured STM32 in no-GUI
@@ -271,6 +271,17 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
   `eraseCode` writes `0xFF`, which is not the STM32 erased state).
 - **P0.6:** flash 64 KiB, EEPROM 2 KiB and option bytes dumped twice (identical), restored after the tests and
   verified against the dump.
+- **P0.2 (Murata ABZ on CHESTER, 2026-11-06, J-Link EDU Mini):** the module answers on SWD only while the CHESTER
+  application MCU does not drive it (it holds the module's reset / power): after a reset + halt of the nRF52840
+  (APP connector) it answered on the LoRaWAN connector. IDCODE `0x20086447` (DEV_ID `0x447`, REV_ID `0x2008`),
+  F_SIZE `0x00C0` = 192 KiB, **factory RDP level 1** (FLASH_OPTR `0x807000BB`, word `0xFF4400BB`; flash unreadable,
+  no backup possible). Consequence for plan 0040 (cross-target flow) — see 0040 Phase 0.
+- **HIL after Phase A/B (ABZ, with the user's OK):** `hwio stm32 unlock` RDP 1 → 0 worked; the first run reported
+  `target.unlock_failed` because the library's connection is stale after the chip resets itself (reads return 0
+  even after a successful `JLINKARM_Connect`) → the worker now closes and reopens the probe before reconnecting
+  and waits until IDCODE answers (fake J-Link reproduces the stale connection). Second run: unlock + canonical
+  rewrite (word again `0x015500AA` after the regression, as on the S1) in 0.7 s. `hwio stm32 flash` of
+  lora-modem 1.4.1 `chester.hex` (110 280 B) in 7 s; an independent J-Link Commander read-back matched the HEX.
 
 ### Phase A — backend
 
@@ -309,7 +320,7 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
 
 - [ ] D1 Flash, verify, erase, reset the cat. 3 chip from GUI and CLI; restore its original firmware from P0.6.
 - [ ] D2 Wrong chip (choose ABZ, connect cat. 3) → `target.wrong_chip` with **Use …** button.
-- [ ] D3 Unlock on an RDP level 1 chip (ABZ with Murata firmware, plan 0040) — only on a board the user provides for
+- [x] D3 Unlock on an RDP level 1 chip (ABZ with Murata firmware, plan 0040) — only on a board the user provides for
       it.
 
 ## Tests and verification

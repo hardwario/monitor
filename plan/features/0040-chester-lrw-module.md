@@ -1,6 +1,7 @@
 # 0040 — CHESTER LoRaWAN module (`lrw` target, prepared firmware)
 
-- **Status:** Approved (approved by the user 2026-11-06 with all recommended options; D6 stays open)
+- **Status:** Approved (approved by the user 2026-11-06 with all recommended options; D6 stays open); Phase 0
+  partly done during 0039 HIL (2026-11-06), see "Phase 0 results"
 - **Milestone:** 2.0.0-rc.4 (user decision 2026-11-06)
 - **Author:** Matej Strnad (with Claude), 2026-11-06
 - **Related ADRs:** ADR-0037, ADR-0038, ADR-0057, ADR-0077, ADR-0165, ADR-0174, ADR-0274 … ADR-0277; accepted
@@ -106,11 +107,28 @@ version before downloading.
 
 - [ ] P0.1 Where is the module's SWD (own connector / test pads / shared with the app connector)? Photo for the
       connection guide illustration (via Git LFS) — user.
-- [ ] P0.2 DEV_ID `0x447`, flash size 192 KiB, RDP level of a factory module and of a module with lora-modem.
-- [ ] P0.3 Flash lora-modem 1.4.1 with J-Link Commander once by hand (after a backup where readable); confirm the
+- [x] P0.2 DEV_ID `0x447`, flash size 192 KiB, RDP level of a factory module and of a module with lora-modem.
+- [x] P0.3 Flash lora-modem 1.4.1 with J-Link Commander once by hand (after a backup where readable); confirm the
       module works with the CHESTER application afterwards.
 - [ ] P0.4 The application-shell command that proves the module answers (`lrw …`), for D4.
 - [ ] P0.5 Does lora-modem keep anything in data EEPROM (`0x08080000`) that CHESTER needs after a mass erase?
+
+#### Phase 0 results (2026-11-06)
+
+- **Reachability:** the user's board has the module on its own "LoRaWAN" SWD connector. The module did **not**
+  answer (no DAP, also not with connect-under-reset) while the CHESTER application firmware ran; after a reset +
+  halt of the nRF52840 over the APP connector it answered. The application MCU drives the module's reset / power.
+  → The cross-target flow needs the application MCU held (reset + halt) before the module is reached; this
+  changes the UX section ("move the cable") and needs a user decision before Phase B (asked at 0040 start).
+- **P0.2:** factory module = DEV_ID `0x447`, REV_ID `0x2008`, 192 KiB, **RDP level 1** (settles the source
+  disagreement for this board: protected Murata firmware, not "no firmware"). After lora-modem: RDP 0.
+- **P0.3:** unlocked and flashed with `hwio stm32 unlock` / `hwio stm32 flash --chip stm32l0-cat5-192k` (0039
+  CLI) instead of J-Link Commander; read-back matched. lora-modem-1.4.1.chester.hex: 310 263 B, SHA-256
+  `e9215b222b68092c33d9a31330bdec6ebea1afaf1cd1844f74cd8745c46ff2e6`, flash records only (0x08000000-0x0801AEC8).
+- **P0.4 (open):** the CHESTER application's shell has `lrw config|start|join|test`; `lrw test cmd <AT>` talks to
+  the modem but needs `lrw config test true` (a configuration change); the app on this board does not start the
+  LoRaWAN interface by itself (boot log: only `ctr_lrw: init`). Whether the module works with the application was
+  not confirmed yet.
 
 ### Phase A — backend and CLI
 

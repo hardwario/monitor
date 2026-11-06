@@ -94,6 +94,7 @@
 //         "flashSizeReadable": true,                F_SIZE (0x1FF8007C) reads 0 when false
 //         "regressionQuirk": true                   after RDP 1 -> 0 the stored word reads
 //                                                   0x015500AA (Phase 0), else canonical
+//       After OBL_LAUNCH every ReadMemU32 returns 0 until JLINKARM_Open (HIL: a stale connection).
 //       Like J-Link 9.84 on the CHESTER-S1 (Phase 0): Connect on an RDP 1 chip asks the unsecure
 //       hook; YES mass-erases and unlocks, NO connects anyway. IDCODE, F_SIZE and the FLASH
 //       registers stay readable, flash and EEPROM do not; EndDownload and EraseChip fail. The
@@ -266,6 +267,9 @@ struct ChipScenario {
     std::uint32_t sr = 0xC;
     int peKeys = 0;  // PEKEY words written in order
     int optKeys = 0; // OPTKEY words written in order
+    // HIL 2026-11-06: after the chip reset itself (OBL_LAUNCH) the library's connection is stale:
+    // every read returns 0 until the probe is opened again.
+    bool staleConnection = false;
     std::vector<std::uint8_t> eeprom;
     static constexpr std::uint32_t stm32Flash = 0x08000000;
     static constexpr std::uint32_t stm32Eeprom = 0x08080000;
@@ -418,6 +422,7 @@ struct ChipScenario {
                     }
                 }
                 rdpByte = loaded;
+                staleConnection = true;
                 pecr = 0x7;
                 peKeys = 0;
                 optKeys = 0;
@@ -1008,6 +1013,9 @@ HWIO_FAKE_JLINK_EXPORT const char* JLINKARM_Open() {
     }
     s.open = true;
     s.connected = false;
+    if (ProbeScenario* chipProbe = s.probe(); chipProbe != nullptr) {
+        chipProbe->chip.staleConnection = false; // a fresh connection
+    }
     if (!s.everOpened) {
         s.everOpened = true;
         s.openedAt = Clock::now();
@@ -1486,7 +1494,9 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_ReadMemU32(std::uint32_t address, std::uint3
     for (std::uint32_t i = 0; i < count; ++i) {
         const std::uint32_t at = address + (i * 4);
         std::optional<std::uint32_t> value;
-        if (chip.stm32 && chip.stm32Register(at)) {
+        if (chip.stm32 && chip.staleConnection) {
+            value = 0U;
+        } else if (chip.stm32 && chip.stm32Register(at)) {
             value = chip.stm32Register(at);
         } else if (chip.stm32) {
             std::uint32_t word = 0;
