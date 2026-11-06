@@ -8,5 +8,6 @@
 namespace hwio::device::profiles {
 
 extern const DeviceProfile chester;
+extern const DeviceProfile stm32;
 
 } // namespace hwio::device::profiles

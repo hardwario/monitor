@@ -130,6 +130,11 @@ enum class ErrorCode : std::uint8_t {
     TargetOtherConnector,
     // rc.3 HIL H5 (plan/features/0033-rc2-feedback.md, ADR-0273)
     TargetResetDuringUpdate,
+    // rc.4 STM32 flashing (plan/features/0039-stm32-flashing.md, ADR-0275, ADR-0276, ADR-0280)
+    TargetWrongChip,
+    TargetPermanentlyProtected,
+    TargetUnlockFailed,
+    FirmwareBinAddressRequired,
 };
 
 // Wizards the UI can offer to fix an error (M4). Serialized as kebab-case ids.
@@ -410,6 +415,18 @@ inline constexpr std::array errorTable{
     ErrorInfo{.code = ErrorCode::TargetResetDuringUpdate,
               .id = "target.reset_during_update",
               .category = ErrorCategory::Target},
+    ErrorInfo{.code = ErrorCode::TargetWrongChip,
+              .id = "target.wrong_chip",
+              .category = ErrorCategory::Target},
+    ErrorInfo{.code = ErrorCode::TargetPermanentlyProtected,
+              .id = "target.permanently_protected",
+              .category = ErrorCategory::Target},
+    ErrorInfo{.code = ErrorCode::TargetUnlockFailed,
+              .id = "target.unlock_failed",
+              .category = ErrorCategory::Target},
+    ErrorInfo{.code = ErrorCode::FirmwareBinAddressRequired,
+              .id = "firmware.bin_address_required",
+              .category = ErrorCategory::Firmware},
 };
 
 // Compile-time checks of errorTable (ids unique and well-formed, index == enum value, every

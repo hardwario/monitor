@@ -66,7 +66,9 @@ hwio_add_backend_library(hwio_device
     src/probe_tools.cpp
     src/profile.cpp
     src/profiles/chester.cpp
+    src/profiles/stm32.cpp
     src/profiles/profiles.h
+    src/profiles/stm32_parts.h
     src/owner_only.h
     src/session_internal.h
     src/session_registry.cpp

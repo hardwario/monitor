@@ -57,6 +57,8 @@ enum class OperationKind : std::uint8_t {
     WriteFlash,
     // Plan 0033 (ADR-0233, ADR-0234): which MCU of the profile answers through the probe.
     Identify,
+    // Plan 0039 (ADR-0276): STM32 read-out protection level 1 -> 0 (erases the chip).
+    Unlock,
 };
 
 // Plan 0033: what Identify found. `foundTargetId` is the target of the session's profile whose
@@ -137,8 +139,12 @@ struct OperationResult {
 };
 
 struct FlashOptions {
-    bool halt = false;      // leave the CPU halted after programming
-    bool allowUicr = false; // ADR-0036: program the image's UICR records (the PIB is kept)
+    bool halt = false; // leave the CPU halted after programming
+    // ADR-0036: program the image's UICR records (the PIB is kept). STM32 targets (plan 0039):
+    // program the image's data EEPROM records.
+    bool allowUicr = false;
+    // STM32 (plan 0039): erase the whole chip (flash and data EEPROM) before programming.
+    bool eraseAll = false;
 };
 
 // Largest readMemory() (64 KiB).
@@ -163,7 +169,8 @@ inline constexpr std::size_t maxMemoryZones = jlink::maxMemoryZones;
 
 // Stable lowercase ids used in JSON: "flash", "eraseCode", "eraseAll", "recover", "modem",
 // "lteBundle", "reset", "readMemory", "diagnose"; M6: "halt", "go", "targetStatus",
-// "writeMemory", "readRegisters", "memoryZones", "writeFlash"; plan 0033: "identify".
+// "writeMemory", "readRegisters", "memoryZones", "writeFlash"; plan 0033: "identify"; plan 0039:
+// "unlock".
 [[nodiscard]] std::string_view operationKindId(OperationKind kind) noexcept;
 
 } // namespace hwio::device

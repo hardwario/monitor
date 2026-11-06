@@ -274,14 +274,19 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
 
 ### Phase A — backend
 
-- [ ] A1 Profile model: `ChipVendor`, `Stm32Id`, per-part designated firmware, STM32 fields, `checkFlashWrite` rules,
+- [x] A1 Profile model: `ChipVendor`, `Stm32Id`, per-part designated firmware, STM32 fields, `checkFlashWrite` rules,
       profile invariants test.
-- [ ] A2 `stm32_parts.cpp` + profile `stm32`; registration; tests.
-- [ ] A3 `JLinkProgrammer`: STM32 identify, RDP read, `unlock`; fake `IJLinkApi` tests for every path (wrong chip,
+- [x] A2 `stm32_parts.cpp` + profile `stm32`; registration; tests.
+- [x] A3 `JLinkProgrammer`: STM32 identify, RDP read, `unlock`; fake `IJLinkApi` tests for every path (wrong chip,
       level 0/1/2, unlock timeout, unlock success with re-identify).
-- [ ] A4 `FirmwareImage::fromBinary`; tests (bounds, address alignment).
-- [ ] A5 `DeviceSession`: vendor-aware identify, `unlock` operation (target-carrying, ADR-0057), new error codes in
+- [x] A4 `FirmwareImage::fromBinary`; tests (bounds, address alignment).
+- [x] A5 `DeviceSession`: vendor-aware identify, `unlock` operation (target-carrying, ADR-0057), new error codes in
       `hwio::Error` with EN texts.
+      Implementation notes: the part table lives in `profiles/stm32_parts.h` (inline constexpr, so `stm32.cpp` and
+      CHESTER share the objects); the family data type is `jlink::Stm32Protection` (identification addresses + flash
+      interface, ADR-0032 data) on `TargetProfile::stm32`; new `OperationKind::Unlock` / `ProgramPhase::Unlocking`;
+      `IProgrammer::programRdpLevel0()` does one option-word write + reload, the device layer reconnects and
+      re-identifies (`runUnlock`); `firmware::readFirmwareFile()` reads `.hex` / `.bin`.
 
 ### Phase B — CLI and MCP
 

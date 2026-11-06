@@ -32,6 +32,24 @@ std::array<char, 4> littleEndian(std::uint32_t value) {
 
 } // namespace
 
+Result<FirmwareImage> FirmwareImage::fromBinary(std::span<const std::byte> bytes,
+                                                std::uint32_t startAddress) {
+    if (bytes.empty() || bytes.size() > maxBinaryBytes) {
+        return std::unexpected(makeError(
+            ErrorCode::FirmwareInvalidImage,
+            std::format(".bin: {} bytes, allowed 1 to {} bytes", bytes.size(), maxBinaryBytes)));
+    }
+    if (startAddress % 4 != 0) {
+        return std::unexpected(makeError(
+            ErrorCode::UsageInvalidArgument,
+            std::format(".bin start address 0x{:08X} is not 4-byte aligned", startAddress)));
+    }
+    std::vector<Segment> segments;
+    segments.push_back(Segment{.address = startAddress,
+                               .data = std::vector<std::byte>(bytes.begin(), bytes.end())});
+    return fromSegments(std::move(segments));
+}
+
 Result<FirmwareImage> FirmwareImage::fromSegments(std::vector<Segment> segments,
                                                   std::optional<std::uint32_t> startAddress) {
     std::erase_if(segments, [](const Segment& segment) { return segment.data.empty(); });

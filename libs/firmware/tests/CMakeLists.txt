@@ -4,6 +4,7 @@
 # libs/device and CLI tests.
 
 add_executable(hwio_firmware_tests
+    binary_test.cpp
     catalog_test.cpp
     designated_test.cpp
     hex_builder.h

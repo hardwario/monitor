@@ -20,11 +20,29 @@ namespace {
 // FICR INFO.PART values and J-Link device names. The nRF9151 reports 0x9120 (py-hardwario maps
 // the nrfjprog name NRF9120_xxAA to the J-Link name NRF9151_XXCA).
 constexpr std::array appParts{
-    ChipPart{.part = 0x52840, .displayName = "nRF52840", .jlinkDevice = "NRF52840_xxAA"},
+    ChipPart{.part = 0x52840,
+             .displayName = "nRF52840",
+             .jlinkDevice = "NRF52840_xxAA",
+             .stm32 = std::nullopt,
+             .id = "",
+             .hintSourceText = "",
+             .designatedFirmware = std::nullopt},
 };
 constexpr std::array ltePartsList{
-    ChipPart{.part = 0x9120, .displayName = "nRF9151", .jlinkDevice = "NRF9151_XXCA"},
-    ChipPart{.part = 0x9160, .displayName = "nRF9160", .jlinkDevice = "NRF9160_xxAA"},
+    ChipPart{.part = 0x9120,
+             .displayName = "nRF9151",
+             .jlinkDevice = "NRF9151_XXCA",
+             .stm32 = std::nullopt,
+             .id = "",
+             .hintSourceText = "",
+             .designatedFirmware = std::nullopt},
+    ChipPart{.part = 0x9160,
+             .displayName = "nRF9160",
+             .jlinkDevice = "NRF9160_xxAA",
+             .stm32 = std::nullopt,
+             .id = "",
+             .hintSourceText = "",
+             .designatedFirmware = std::nullopt},
 };
 
 // FICR / CTRL-AP (nRF52840 and nRF91 product specifications; AP indexes and CTRL-AP IDR values to
@@ -185,7 +203,10 @@ constexpr std::array chesterTargets{
                   .designatedFirmware = std::nullopt,
                   .sensitiveCommandPrefixes = appSensitiveCommands,
                   .sensitiveOutputKeys = appSensitiveOutput,
-                  .resetReason = std::nullopt},
+                  .resetReason = std::nullopt,
+                  .vendor = ChipVendor::Nordic,
+                  .stm32 = std::nullopt,
+                  .dataEeprom = std::nullopt},
     // LTE modem MCU (nRF9151 or nRF9160). Programming only; no RTT console. Connected with the
     // first part's J-Link name, then with the exact part's name (to confirm in Phase 0). The PIB
     // lies in the UICR OTP area, which a UICR erase does not touch.
@@ -216,7 +237,10 @@ constexpr std::array chesterTargets{
                   .sensitiveOutputKeys = {},
                   // nRF9160 / nRF9151 POWER.RESETREAS (secure alias), bit 0 RESETPIN. HIL H5: the
                   // CHESTER application firmware pin-resets the LTE MCU when it does not answer.
-                  .resetReason = ResetReasonRegister{.address = 0x50005400, .pinMask = 0x1}},
+                  .resetReason = ResetReasonRegister{.address = 0x50005400, .pinMask = 0x1},
+                  .vendor = ChipVendor::Nordic,
+                  .stm32 = std::nullopt,
+                  .dataEeprom = std::nullopt},
 };
 
 // Plan 0028 (ADR-0200): console file names are parsed back by splitting at '-' (the retention's

@@ -9,6 +9,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -23,7 +24,7 @@ TEST(Profiles, ChesterIsRegistered) {
     ASSERT_NE(chester, nullptr);
     EXPECT_EQ(chester->displayName, "CHESTER");
     EXPECT_EQ(ProfileRegistry::find("nope"), nullptr);
-    ASSERT_EQ(ProfileRegistry::all().size(), 1U);
+    ASSERT_EQ(ProfileRegistry::all().size(), 2U); // plan 0039: + stm32
     EXPECT_EQ(ProfileRegistry::all().front(), chester);
 }
 
@@ -124,7 +125,59 @@ TEST(Profiles, FlashLayoutIsConsistent) {
             EXPECT_EQ(target.parts.front().jlinkDevice, target.jlinkDevice) << target.id;
             EXPECT_FALSE(target.flash.empty()) << target.id;
             EXPECT_FALSE(target.uicr.overlaps(target.flash)) << target.id;
-            EXPECT_TRUE(target.uicr.contains(hwio::device::pibRange(target))) << target.id;
+            if (target.vendor == hwio::device::ChipVendor::Nordic) {
+                EXPECT_TRUE(target.uicr.contains(hwio::device::pibRange(target))) << target.id;
+            }
+        }
+    }
+}
+
+// Plan 0039 A1 (ADR-0274): the profile invariants of the two vendors.
+TEST(Profiles, VendorInvariants) {
+    for (const hwio::device::DeviceProfile* profile : ProfileRegistry::all()) {
+        for (const hwio::device::TargetProfile& target : profile->targets) {
+            if (target.vendor == hwio::device::ChipVendor::Nordic) {
+                EXPECT_FALSE(target.stm32.has_value()) << target.id;
+                EXPECT_FALSE(target.dataEeprom.has_value()) << target.id;
+                EXPECT_FALSE(target.chipFamily.name.empty()) << target.id;
+                for (const hwio::device::ChipPart& part : target.parts) {
+                    EXPECT_FALSE(part.stm32.has_value()) << target.id;
+                    EXPECT_NE(part.part, 0U) << target.id;
+                }
+                continue;
+            }
+            // STM32: no UICR / PIB / CTRL-AP data, one part with its STM32 id, mass erase.
+            ASSERT_TRUE(target.stm32.has_value()) << target.id;
+            EXPECT_TRUE(target.chipFamily.name.empty()) << target.id;
+            EXPECT_EQ(target.chipFamily.ficrPart, 0U) << target.id;
+            EXPECT_EQ(target.chipFamily.ctrlApIndex, 0U) << target.id;
+            EXPECT_TRUE(target.uicr.empty()) << target.id;
+            EXPECT_EQ(target.pibOffset, 0U) << target.id;
+            EXPECT_EQ(target.recoverImage, hwio::device::RecoverImage::None) << target.id;
+            EXPECT_EQ(target.defaultErase, hwio::device::EraseScope::All) << target.id;
+            EXPECT_TRUE(target.rttTerminal.empty()) << target.id;
+            ASSERT_EQ(target.parts.size(), 1U) << target.id;
+            const hwio::device::ChipPart& part = target.parts.front();
+            ASSERT_TRUE(part.stm32.has_value()) << target.id;
+            EXPECT_EQ(part.part, 0U) << target.id;
+            EXPECT_EQ(hwio::device::findStm32PartById(part.id), &part) << target.id;
+            // The flash, EEPROM and RAM do not overlap; memory writes never reach the flash
+            // interface (ADR-0160).
+            EXPECT_EQ(target.flash.start, 0x08000000U) << target.id;
+            EXPECT_EQ(target.flash.size(), std::uint64_t{part.stm32->flashSizeKib} * 1024)
+                << target.id;
+            if (target.dataEeprom) {
+                EXPECT_FALSE(target.dataEeprom->overlaps(target.flash)) << target.id;
+                EXPECT_TRUE(target.stm32->dataEepromArea.contains(*target.dataEeprom)) << target.id;
+            }
+            EXPECT_FALSE(target.ram.overlaps(target.flash)) << target.id;
+            const hwio::firmware::AddressRange flashInterface{
+                .start = target.stm32->flashInterface, .end = target.stm32->flashInterface + 4};
+            EXPECT_TRUE(std::ranges::any_of(target.writeDenied,
+                                            [&](const hwio::firmware::AddressRange& range) {
+                                                return range.contains(flashInterface);
+                                            }))
+                << target.id;
         }
     }
 }

@@ -146,6 +146,10 @@ consteval bool isEnumerator(ErrorCode code) {
     case ErrorCode::UsbWorldAccessible:
     case ErrorCode::TargetOtherConnector:
     case ErrorCode::TargetResetDuringUpdate:
+    case ErrorCode::TargetWrongChip:
+    case ErrorCode::TargetPermanentlyProtected:
+    case ErrorCode::TargetUnlockFailed:
+    case ErrorCode::FirmwareBinAddressRequired:
         return true;
     }
     return false;
@@ -1265,6 +1269,63 @@ constexpr std::array defaultTexts{
             "firmware… in the desktop app, or `hwio chester lte flash --guided`.",
             "target.reset_during_update suggestion"),
         .wizard = WizardId::LteUpdate,
+    },
+    // Plan 0039 (ADR-0275): the chip's DBGMCU_IDCODE / flash size is not the chosen STM32 part. The
+    // device layer names both chips.
+    DefaultTexts{
+        .code = ErrorCode::TargetWrongChip,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "The connected chip is not the selected one.",
+                                      "target.wrong_chip message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core", "The probe is connected to another chip, or a different chip was chosen.",
+            "target.wrong_chip cause"),
+        .suggestion = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "Check that the cable is on the right connector, or choose the found chip.",
+            "target.wrong_chip suggestion"),
+        .wizard = std::nullopt,
+    },
+    // Plan 0039 (ADR-0276): STM32 RDP level 2.
+    DefaultTexts{
+        .code = ErrorCode::TargetPermanentlyProtected,
+        .message = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "This chip is permanently locked (RDP level 2) and cannot be reprogrammed.",
+            "target.permanently_protected message"),
+        .cause = QT_TRANSLATE_NOOP3("hwio::core",
+                                    "Its read-out protection was set to level 2, which cannot be "
+                                    "undone.",
+                                    "target.permanently_protected cause"),
+        .suggestion = QT_TRANSLATE_NOOP3("hwio::core", "Replace the chip or the module.",
+                                         "target.permanently_protected suggestion"),
+        .wizard = std::nullopt,
+    },
+    // Plan 0039 (ADR-0276, ADR-0282): the RDP level 1 -> 0 regression did not reach level 0.
+    DefaultTexts{
+        .code = ErrorCode::TargetUnlockFailed,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "Unlocking the chip failed.",
+                                      "target.unlock_failed message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "The read-out protection was not removed in time, or the connection was lost.",
+            "target.unlock_failed cause"),
+        .suggestion = QT_TRANSLATE_NOOP3(
+            "hwio::core", "Power-cycle the board, check the connection and unlock again.",
+            "target.unlock_failed suggestion"),
+        .wizard = WizardId::Troubleshooting,
+    },
+    // Plan 0039 (ADR-0280 D5): a .bin file has no addresses.
+    DefaultTexts{
+        .code = ErrorCode::FirmwareBinAddressRequired,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "A start address is needed for this .bin file.",
+                                      "firmware.bin_address_required message"),
+        .cause = QT_TRANSLATE_NOOP3("hwio::core",
+                                    "A .bin file contains only bytes, not where they belong.",
+                                    "firmware.bin_address_required cause"),
+        .suggestion =
+            QT_TRANSLATE_NOOP3("hwio::core", "Give the start address (for example 0x08000000).",
+                               "firmware.bin_address_required suggestion"),
+        .wizard = std::nullopt,
     },
 };
 

@@ -71,6 +71,7 @@ public:
                 (override));
     MOCK_METHOD(Status, eraseAll, (), (override));
     MOCK_METHOD(Status, recover, (std::stop_token), (override));
+    MOCK_METHOD(Status, programRdpLevel0, (std::stop_token), (override));
     MOCK_METHOD((hwio::Result<std::vector<std::byte>>), readMemory,
                 (std::uint32_t, std::size_t, hwio::jlink::AccessWidth), (override));
     MOCK_METHOD(Status, reset, (ResetMode), (override));
@@ -122,8 +123,9 @@ protected:
         ON_CALL(m_programmer, recover(_)).WillByDefault(Return(Status{}));
     }
 
-    WorkflowContext context(std::string_view targetId = "app") {
-        const auto* profile = ProfileRegistry::find("chester");
+    WorkflowContext context(std::string_view targetId = "app",
+                            std::string_view profileId = "chester") {
+        const auto* profile = ProfileRegistry::find(profileId);
         const auto* target = hwio::device::findTarget(*profile, targetId);
         return WorkflowContext{
             .profile = profile,
@@ -138,7 +140,8 @@ protected:
                     return Status{};
                 },
             .connectedDevice = std::string(target->jlinkDevice),
-            .cpuHalted = false};
+            .cpuHalted = false,
+            .foundChip = std::nullopt};
     }
 
     NiceMock<MockProgrammer>& programmer() { return m_programmer; }
@@ -754,6 +757,217 @@ TEST(OperationReporterTest, PlannedPhasesOfTheTargetOperations) {
     EXPECT_EQ(hwio::device::operationKindId(OperationKind::TargetStatus), "targetStatus");
     EXPECT_EQ(hwio::device::operationKindId(OperationKind::WriteFlash), "writeFlash");
     EXPECT_EQ(hwio::device::operationKindId(OperationKind::MemoryZones), "memoryZones");
+}
+
+// ---- plan 0039: STM32 targets (ADR-0275, ADR-0276, ADR-0282) ------------------------------------
+
+ChipInfo stm32Chip(std::uint16_t devId, std::uint16_t kib, int rdp = 0,
+                   std::uint32_t word = 0xFF5500AA) {
+    ChipInfo info;
+    info.family = "STM32L0";
+    info.devId = devId;
+    info.revId = 0x1038;
+    info.flashSizeKib = kib;
+    info.rdpLevel = rdp;
+    info.protectedChip = rdp >= 1;
+    info.optionWord = word;
+    return info;
+}
+
+class Stm32Workflow : public Workflow {
+protected:
+    Stm32Workflow() {
+        ON_CALL(programmer(), identify()).WillByDefault(Return(stm32Chip(0x417, 64)));
+        ON_CALL(programmer(), programRdpLevel0(_)).WillByDefault(Return(Status{}));
+    }
+    WorkflowContext s1() { return context("stm32l0-cat3-64k", "stm32"); }
+};
+
+TEST_F(Stm32Workflow, FlashSequence) {
+    {
+        InSequence order;
+        EXPECT_CALL(programmer(), identify());
+        EXPECT_CALL(programmer(), reset(ResetMode::Halt));
+        EXPECT_CALL(programmer(), program(_, _, _));
+        EXPECT_CALL(programmer(), verify(_, _, _));
+        EXPECT_CALL(programmer(), reset(ResetMode::Go));
+    }
+    EXPECT_CALL(programmer(), eraseAll()).Times(0);
+    auto ctx = s1();
+    const auto result = hwio::device::detail::runFlash(ctx, image({{0x08000000, 1024}}), {});
+    ASSERT_TRUE(result) << result.error().detail;
+    EXPECT_EQ(result->name, "STM32L0 cat. 3, 64 KiB");
+}
+
+TEST_F(Stm32Workflow, FlashWithEraseAllErasesAfterTheHalt) {
+    {
+        InSequence order;
+        EXPECT_CALL(programmer(), identify());
+        EXPECT_CALL(programmer(), reset(ResetMode::Halt));
+        EXPECT_CALL(programmer(), eraseAll());
+        EXPECT_CALL(programmer(), program(_, _, _));
+        EXPECT_CALL(programmer(), verify(_, _, _));
+        EXPECT_CALL(programmer(), reset(ResetMode::Go));
+    }
+    auto ctx = s1();
+    ASSERT_TRUE(hwio::device::detail::runFlash(
+        ctx, image({{0x08000000, 16}}),
+        FlashOptions{.halt = false, .allowUicr = false, .eraseAll = true}));
+}
+
+TEST_F(Stm32Workflow, WrongChipStopsBeforeAnyWrite) {
+    EXPECT_CALL(programmer(), identify()).WillOnce(Return(stm32Chip(0x447, 192)));
+    EXPECT_CALL(programmer(), reset(_)).Times(0);
+    EXPECT_CALL(programmer(), program(_, _, _)).Times(0);
+    auto ctx = s1();
+    const auto result = hwio::device::detail::runFlash(ctx, image({{0x08000000, 16}}), {});
+    ASSERT_FALSE(result);
+    EXPECT_EQ(result.error().code, ErrorCode::TargetWrongChip);
+    EXPECT_EQ(result.error().message,
+              "The connected chip is STM32L0 cat. 5, 192 KiB (ID 0x447), not the selected "
+              "STM32L0 cat. 3, 64 KiB.");
+    EXPECT_EQ(result.error().suggestion,
+              "Check that the cable is on the right connector, or choose STM32L0 cat. 5, 192 KiB "
+              "as the chip.");
+    EXPECT_NE(result.error().detail.find("found stm32l0-cat5-192k"), std::string::npos);
+    ASSERT_TRUE(ctx.foundChip.has_value());
+    EXPECT_EQ(hwio::device::detail::curatedPartOf(*ctx.foundChip)->id, "stm32l0-cat5-192k");
+}
+
+TEST_F(Stm32Workflow, UnknownChip) {
+    EXPECT_CALL(programmer(), identify()).WillOnce(Return(stm32Chip(0x123, 0)));
+    auto ctx = s1();
+    const auto result = hwio::device::detail::runErase(ctx, hwio::device::EraseScope::All);
+    ASSERT_FALSE(result);
+    EXPECT_EQ(result.error().code, ErrorCode::TargetWrongChip);
+    EXPECT_EQ(result.error().message,
+              "The connected chip is an unknown chip (ID 0x123), not the selected STM32L0 cat. 3, "
+              "64 KiB.");
+    EXPECT_EQ(result.error().suggestion, "Check that the cable is on the right connector.");
+}
+
+// Phase 0 P0.3: F_SIZE not readable while running -> read again after the halt.
+TEST_F(Stm32Workflow, SizeIsCheckedAgainAfterTheHalt) {
+    EXPECT_CALL(programmer(), identify())
+        .WillOnce(Return(stm32Chip(0x417, 0)))
+        .WillOnce(Return(stm32Chip(0x417, 32)));
+    EXPECT_CALL(programmer(), program(_, _, _)).Times(0);
+    auto ctx = s1();
+    const auto result = hwio::device::detail::runFlash(ctx, image({{0x08000000, 16}}), {});
+    ASSERT_FALSE(result);
+    EXPECT_EQ(result.error().code, ErrorCode::TargetWrongChip);
+    EXPECT_EQ(hwio::device::detail::curatedPartOf(*ctx.foundChip)->id, "stm32l0-cat3-32k");
+}
+
+TEST_F(Stm32Workflow, ProtectedChipNamesTheUnlockCommand) {
+    EXPECT_CALL(programmer(), identify()).WillOnce(Return(stm32Chip(0x417, 64, 1, 0xFF4400BB)));
+    EXPECT_CALL(programmer(), program(_, _, _)).Times(0);
+    EXPECT_CALL(programmer(), eraseAll()).Times(0);
+    auto ctx = s1();
+    const auto result = hwio::device::detail::runFlash(ctx, image({{0x08000000, 16}}), {});
+    ASSERT_FALSE(result);
+    EXPECT_EQ(result.error().code, ErrorCode::TargetProtected);
+    EXPECT_EQ(result.error().message,
+              "The chip is read-out protected (RDP level 1). Unlocking erases the whole chip, "
+              "including its data EEPROM.");
+    EXPECT_EQ(result.error().suggestion,
+              "Unlock the chip (this erases it): `hwio stm32 unlock --chip stm32l0-cat3-64k`.");
+}
+
+TEST_F(Stm32Workflow, Level2IsPermanentEvenForUnlock) {
+    EXPECT_CALL(programmer(), identify()).WillRepeatedly(Return(stm32Chip(0x417, 64, 2, 0x3300CC)));
+    EXPECT_CALL(programmer(), programRdpLevel0(_)).Times(0);
+    auto ctx = s1();
+    const auto flashed = hwio::device::detail::runFlash(ctx, image({{0x08000000, 16}}), {});
+    ASSERT_FALSE(flashed);
+    EXPECT_EQ(flashed.error().code, ErrorCode::TargetPermanentlyProtected);
+    const auto unlocked = hwio::device::detail::runUnlock(ctx, [] { return Status{}; });
+    ASSERT_FALSE(unlocked);
+    EXPECT_EQ(unlocked.error().code, ErrorCode::TargetPermanentlyProtected);
+}
+
+TEST_F(Stm32Workflow, EraseIsTheMassEraseEvenForCodeScope) {
+    EXPECT_CALL(programmer(), eraseCode(_, _, _)).Times(0);
+    EXPECT_CALL(programmer(), eraseAll());
+    auto ctx = s1();
+    ASSERT_TRUE(hwio::device::detail::runErase(ctx, hwio::device::EraseScope::Code));
+}
+
+TEST_F(Stm32Workflow, RecoverIsNotForStm32) {
+    EXPECT_CALL(programmer(), recover(_)).Times(0);
+    auto ctx = s1();
+    const auto result = hwio::device::detail::runRecover(ctx, {});
+    ASSERT_FALSE(result);
+    EXPECT_EQ(result.error().code, ErrorCode::UsageInvalidArgument);
+}
+
+TEST_F(Stm32Workflow, UnlockReconnectsAndChecksLevel0) {
+    int reconnects = 0;
+    {
+        InSequence order;
+        EXPECT_CALL(programmer(), identify()).WillOnce(Return(stm32Chip(0x417, 64, 1, 0xFF4400BB)));
+        EXPECT_CALL(programmer(), programRdpLevel0(_));
+        EXPECT_CALL(programmer(), identify()).WillOnce(Return(stm32Chip(0x417, 64, 0)));
+    }
+    auto ctx = s1();
+    const auto result = hwio::device::detail::runUnlock(ctx, [&] {
+        ++reconnects;
+        return Status{};
+    });
+    ASSERT_TRUE(result) << result.error().detail;
+    EXPECT_EQ(result->rdpLevel, 0);
+    EXPECT_EQ(result->name, "STM32L0 cat. 3, 64 KiB");
+    EXPECT_EQ(reconnects, 1);
+}
+
+// ADR-0282 (Phase 0: the regression left 0x015500AA).
+TEST_F(Stm32Workflow, UnlockRewritesANonCanonicalWordOnce) {
+    {
+        InSequence order;
+        EXPECT_CALL(programmer(), identify()).WillOnce(Return(stm32Chip(0x417, 64, 1, 0xFF4400BB)));
+        EXPECT_CALL(programmer(), programRdpLevel0(_));
+        EXPECT_CALL(programmer(), identify()).WillOnce(Return(stm32Chip(0x417, 0, 0, 0x015500AA)));
+        EXPECT_CALL(programmer(), programRdpLevel0(_));
+        EXPECT_CALL(programmer(), identify()).WillOnce(Return(stm32Chip(0x417, 64, 0)));
+    }
+    auto ctx = s1();
+    const auto result = hwio::device::detail::runUnlock(ctx, [] { return Status{}; });
+    ASSERT_TRUE(result) << result.error().detail;
+    EXPECT_EQ(result->optionWord, 0xFF5500AAU);
+}
+
+TEST_F(Stm32Workflow, UnlockOfAnUnprotectedChipDoesNothing) {
+    EXPECT_CALL(programmer(), programRdpLevel0(_)).Times(0);
+    auto ctx = s1();
+    ASSERT_TRUE(hwio::device::detail::runUnlock(ctx, [] { return Status{}; }));
+}
+
+TEST_F(Stm32Workflow, UnlockFailsWhenTheChipStaysProtected) {
+    EXPECT_CALL(programmer(), identify())
+        .WillOnce(Return(stm32Chip(0x417, 64, 1, 0xFF4400BB)))
+        .WillOnce(Return(stm32Chip(0x417, 64, 1, 0xFF4400BB)));
+    auto ctx = s1();
+    const auto result = hwio::device::detail::runUnlock(ctx, [] { return Status{}; });
+    ASSERT_FALSE(result);
+    EXPECT_EQ(result.error().code, ErrorCode::TargetUnlockFailed);
+}
+
+TEST_F(Stm32Workflow, UnlockFailsWhenTheChipDoesNotComeBack) {
+    EXPECT_CALL(programmer(), identify()).WillOnce(Return(stm32Chip(0x417, 64, 1, 0xFF4400BB)));
+    auto ctx = s1();
+    const auto result = hwio::device::detail::runUnlock(
+        ctx, [] { return Status{std::unexpected(hwio::makeError(ErrorCode::Timeout, "60 s"))}; });
+    ASSERT_FALSE(result);
+    EXPECT_EQ(result.error().code, ErrorCode::TargetUnlockFailed);
+}
+
+TEST(OperationKinds, UnlockPhasesAndId) {
+    EXPECT_EQ(hwio::device::operationKindId(OperationKind::Unlock), "unlock");
+    const auto same = hwio::device::plannedPhases(OperationKind::Unlock, false);
+    ASSERT_EQ(same.size(), 2U);
+    EXPECT_EQ(same[1], ProgramPhase::Unlocking);
+    EXPECT_EQ(hwio::device::plannedPhases(OperationKind::Unlock, true).front(),
+              ProgramPhase::SwitchingTarget);
 }
 
 } // namespace

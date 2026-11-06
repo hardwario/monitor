@@ -19,6 +19,7 @@ enum class ProgramPhase : std::uint8_t {
     Modem, // nRF Util modem firmware update
     Recovering,
     Resetting,
+    Unlocking, // plan 0039: STM32 RDP level 1 -> 0 (erases the chip)
     Restoring, // ADR-0057: the probe is moved back to the console target
 };
 

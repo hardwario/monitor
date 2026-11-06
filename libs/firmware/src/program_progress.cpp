@@ -24,6 +24,8 @@ std::string_view phaseId(ProgramPhase phase) noexcept {
         return "resetting";
     case ProgramPhase::Restoring:
         return "restoring";
+    case ProgramPhase::Unlocking:
+        return "unlocking";
     }
     return "connecting";
 }

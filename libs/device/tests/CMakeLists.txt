@@ -22,6 +22,7 @@ add_executable(hwio_device_tests
     pib_test.cpp
     probe_lock_test.cpp
     profile_test.cpp
+    stm32_profile_test.cpp
     scripted_api.h
     session_test_support.h
     target_session_test.cpp

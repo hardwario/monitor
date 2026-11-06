@@ -748,15 +748,21 @@ private:
 
     // The programmer for `target`: its own chip family first, the other targets' after (so that
     // identify() recognizes the other MCU for target.wrong_family).
+    // Plan 0039: an STM32 target gets its family data instead (no FICR families).
     [[nodiscard]] jlink::ProgrammerConfig programmerConfigFor(const TargetProfile& target) const {
         jlink::ProgrammerConfig config;
+        config.timing = m_config.timing.programmer;
+        if (target.vendor == ChipVendor::Stm32) {
+            config.stm32 = target.stm32;
+            return config;
+        }
         config.families.push_back(target.chipFamily);
         for (const TargetProfile& other : m_config.profile->targets) {
-            if (other.chipFamily.ficrPart != target.chipFamily.ficrPart) {
+            if (other.vendor == ChipVendor::Nordic &&
+                other.chipFamily.ficrPart != target.chipFamily.ficrPart) {
                 config.families.push_back(other.chipFamily);
             }
         }
-        config.timing = m_config.timing.programmer;
         return config;
     }
 
@@ -1041,6 +1047,20 @@ private:
         std::optional<jlink::JLinkProgrammer> programmer;
     };
 
+    // Plan 0039: after an STM32 option-byte reload the chip resets; the target is connected
+    // again, retried until the recover deadline (60 s).
+    [[nodiscard]] Status reconnectAfterReload(OperationRun& run) {
+        const auto deadline = clock().now() + m_config.timing.programmer.recoverTimeout;
+        Status connected;
+        while (true) {
+            connected = connectDevice(run.target, run.target.jlinkDevice, run.stop, 1);
+            if (connected || clock().now() >= deadline || run.stop.stop_requested()) {
+                return connected;
+            }
+            (void)clock().sleepFor(std::chrono::milliseconds(500), run.stop);
+        }
+    }
+
     // Connecting (after SwitchingTarget for another target): probe and target ready, programmer
     // created. A target that does not connect may be read-back protected: its CTRL-AP is asked.
     [[nodiscard]] Status prepareOperation(OperationRun& run, bool requireTarget) {
@@ -1130,6 +1150,15 @@ private:
                 return prepared;
             }
             return runReset(run.context, command.reset);
+        case OperationKind::Unlock: {
+            if (Status prepared = prepareOperation(run, true); !prepared) {
+                return prepared;
+            }
+            return keepChip(
+                runUnlock(run.context,
+                          [this, &run]() -> Status { return reconnectAfterReload(run); }),
+                result);
+        }
         case OperationKind::ReadMemory: {
             if (Status prepared = prepareOperation(run, true); !prepared) {
                 return prepared;
@@ -1326,9 +1355,13 @@ private:
                 .log = [this](const std::string& text) { flashLog(text); },
                 .connectAs = {},
                 .connectedDevice = {},
-                .cpuHalted = false},
+                .cpuHalted = false,
+                .foundChip = std::nullopt},
             .programmer = std::nullopt};
         Status outcome = executeOperation(run, result);
+        if (!outcome && run.context.foundChip) {
+            result.chip = run.context.foundChip; // plan 0039: target.wrong_chip names the chip
+        }
         // Cancelled while halted (e.g. during verify): let the CPU run again where possible -
         // also when the session is stopping (review R20).
         if (!outcome && outcome.error().code == ErrorCode::Cancelled && run.context.cpuHalted &&
@@ -1689,7 +1722,8 @@ private:
                     return connectDevice(*run.target, device, run.stop, 1);
                 },
             .connectedDevice = m_connectedDevice,
-            .cpuHalted = false};
+            .cpuHalted = false,
+            .foundChip = std::nullopt};
     }
 
     // Step 4: FICR part and family, protection. Returns true when the MCU is protected.

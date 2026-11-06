@@ -7,6 +7,7 @@ hwio_add_backend_library(hwio_firmware
     include/hwio/firmware/designated_firmware.h
     include/hwio/firmware/firmware_cache.h
     include/hwio/firmware/firmware_catalog.h
+    include/hwio/firmware/firmware_file.h
     include/hwio/firmware/firmware_image.h
     include/hwio/firmware/intel_hex.h
     include/hwio/firmware/lte_input.h
@@ -18,6 +19,7 @@ hwio_add_backend_library(hwio_firmware
     src/file_io.h
     src/firmware_cache.cpp
     src/firmware_catalog.cpp
+    src/firmware_file.cpp
     src/firmware_image.cpp
     src/http_fetch.cpp
     src/http_fetch.h

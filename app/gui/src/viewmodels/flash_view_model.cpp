@@ -787,6 +787,8 @@ QString FlashViewModel::busyText(OperationKind kind) {
         return tr("Erasing…");
     case OperationKind::Recover:
         return tr("Recovering…");
+    case OperationKind::Unlock:
+        return tr("Unlocking…");
     case OperationKind::Reset:
         return tr("Resetting…");
     case OperationKind::ReadMemory:
@@ -820,6 +822,8 @@ QString FlashViewModel::operationTitle() const {
         return tr("Erasing everything on the %1 MCU").arg(mcu);
     case OperationKind::Recover:
         return tr("Recovering the %1 MCU").arg(mcu);
+    case OperationKind::Unlock:
+        return tr("Unlocking the %1").arg(mcu);
     case OperationKind::Reset:
         return tr("Resetting the %1 MCU").arg(mcu);
     case OperationKind::ReadMemory:
@@ -857,6 +861,8 @@ QString FlashViewModel::phaseTitle(ProgramPhase phase) {
         return tr("Resetting");
     case ProgramPhase::Restoring:
         return tr("Restoring console");
+    case ProgramPhase::Unlocking:
+        return tr("Unlocking");
     }
     return {};
 }
@@ -927,6 +933,7 @@ QString FlashViewModel::consoleNote() const {
                       : tr("The console is paused and resumes automatically after flashing.");
     case OperationKind::Reset:
     case OperationKind::Recover:
+    case OperationKind::Unlock:
     case OperationKind::ReadMemory:
     case OperationKind::Diagnose:
     case OperationKind::Halt:
@@ -961,6 +968,8 @@ QString FlashViewModel::resultText() const {
             return tr("Everything on the %1 MCU was erased.").arg(mcu);
         case OperationKind::Recover:
             return tr("The %1 MCU was recovered.").arg(mcu);
+        case OperationKind::Unlock:
+            return tr("The %1 was unlocked; it is now erased.").arg(mcu);
         case OperationKind::Reset:
             return m_resetHalt ? tr("The %1 MCU was reset and halted.").arg(mcu)
                                : tr("The %1 MCU was reset.").arg(mcu);

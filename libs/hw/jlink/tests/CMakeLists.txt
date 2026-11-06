@@ -11,6 +11,7 @@ add_executable(hwio_hw_jlink_tests
     mock_jlink_api.h
     out_handlers_test.cpp
     programmer_test.cpp
+    stm32_programmer_test.cpp
     rtt_channel_test.cpp
     types_test.cpp)
 hwio_apply_target_defaults(hwio_hw_jlink_tests)
