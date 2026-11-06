@@ -1231,7 +1231,10 @@ private:
                 match.foundTargetId = std::string(found->id);
             }
             match.protectedChip = chip->protectedChip;
-            if (chip->part != 0) {
+            if (chip->part != 0 || chip->devId != 0) { // plan 0039: STM32 chips report a DEV_ID
+                if (const ChipPart* part = curatedPartOf(*chip); part != nullptr) {
+                    chip->name = std::string(part->displayName);
+                }
                 result.chip = *chip;
             }
         } else if (chip.error().code == ErrorCode::Cancelled) {

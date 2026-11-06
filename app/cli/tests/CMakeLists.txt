@@ -12,6 +12,7 @@ add_executable(hwio_cli_tests
     exit_codes_test.cpp
     flash_commands_test.cpp
     flash_e2e_test.cpp
+    stm32_e2e_test.cpp
     jlink_e2e_test.cpp
     main.cpp
     mcp_command_test.cpp

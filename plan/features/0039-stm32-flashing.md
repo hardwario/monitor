@@ -290,7 +290,10 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
 
 ### Phase B — CLI and MCP
 
-- [ ] B1 `hwio stm32 chips|info|flash|erase|unlock|reset`; end-to-end tests on the fake J-Link.
+- [x] B1 `hwio stm32 chips|info|flash|erase|unlock|reset`; end-to-end tests on the fake J-Link.
+      Implementation notes: `flash` also takes `--allow-eeprom` (the CLI form of the card's data EEPROM
+      consent) and `--yes` for `--erase-all` (ADR-0038); the fake J-Link library has an STM32L0 model
+      (`"family": "stm32l0"`) that reproduces the Phase 0 behaviour.
 - [ ] B2 MCP tools (if D9 = yes); tests; `plan/0004-mcp.md` tool table.
 
 ### Phase C — GUI

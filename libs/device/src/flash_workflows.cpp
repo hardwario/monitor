@@ -339,8 +339,8 @@ Error wrongChip(const TargetProfile& target, const jlink::ChipInfo& chip) {
         found != nullptr
             ? QCoreApplication::translate("hwio::device",
                                           "Check that the cable is on the right connector, or "
-                                          "choose %1 as the chip.")
-                  .arg(foundName)
+                                          "choose %1 (%2) as the chip.")
+                  .arg(foundName, toQString(found->id))
                   .toStdString()
             : QCoreApplication::translate("hwio::device",
                                           "Check that the cable is on the right connector.")

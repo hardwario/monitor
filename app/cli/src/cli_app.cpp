@@ -12,6 +12,7 @@
 #include "jlink_commands.h"
 #include "mcp_command.h"
 #include "selftest.h"
+#include "stm32_commands.h"
 #include "update_commands.h"
 
 #include <QJsonObject>
@@ -88,6 +89,7 @@ CliApp::CliApp()
     registerSelftestCommands(app, m_slot);
     registerJLinkCommands(app, m_slot, m_options);
     registerChesterCommands(app, m_slot, m_options);
+    registerStm32Commands(app, m_slot, m_options); // plan 0039
     registerBleCommands(app, m_slot, m_options);
     registerConsoleCommands(app, m_slot);
     registerDiagCommands(app, m_slot, m_options);

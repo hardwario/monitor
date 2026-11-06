@@ -828,7 +828,7 @@ TEST_F(Stm32Workflow, WrongChipStopsBeforeAnyWrite) {
               "STM32L0 cat. 3, 64 KiB.");
     EXPECT_EQ(result.error().suggestion,
               "Check that the cable is on the right connector, or choose STM32L0 cat. 5, 192 KiB "
-              "as the chip.");
+              "(stm32l0-cat5-192k) as the chip.");
     EXPECT_NE(result.error().detail.find("found stm32l0-cat5-192k"), std::string::npos);
     ASSERT_TRUE(ctx.foundChip.has_value());
     EXPECT_EQ(hwio::device::detail::curatedPartOf(*ctx.foundChip)->id, "stm32l0-cat5-192k");

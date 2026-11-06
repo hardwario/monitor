@@ -5,6 +5,8 @@
 
 add_library(hwio_cli_impl STATIC
     src/chester_commands.cpp
+    src/stm32_commands.cpp
+    src/stm32_commands.h
     src/chester_commands.h
     src/ble_commands.cpp
     src/ble_commands.h
