@@ -4,7 +4,7 @@
 - **Milestone:** 2.0.0-rc.4 (user decision 2026-11-06)
 - **Author:** Matej Strnad (with Claude), 2026-11-06
 - **Related ADRs:** ADR-0015, ADR-0031, ADR-0032, ADR-0035–ADR-0040, ADR-0050, ADR-0057, ADR-0099, ADR-0160,
-  ADR-0165, ADR-0174; accepted here: ADR-0274 … ADR-0277
+  ADR-0165, ADR-0174; accepted here: ADR-0274 … ADR-0277, ADR-0279
 - **Depends on:** [0003](0003-m2-flashing.md) (flash pipeline), [0006](0006-m3-flash-settings.md) (Flash page),
   [0013](0013-m6-mcp-core-cli.md) (target operations)
 - **Followed by:** [0040](0040-chester-lrw-module.md) (CHESTER LoRaWAN module: `lrw` target, prepared firmware)
@@ -32,12 +32,27 @@ new dependency is needed. Neither py-hardwario nor the old app flash STM32; ther
 | The Murata Type ABZ (CMWX1ZZABZ) contains an STM32L072CZ (192 KiB flash, 20 KiB RAM, 6 KiB data EEPROM; DEV_ID `0x447`). Its original Murata firmware sets read-out protection on first boot; hardwario/lora-modem's flashing guide therefore uses `--unprotect`. | hardwario/lora-modem wiki "Type ABZ Modules", "LoRa Module Firmware Update" (read 2026-11-05); DEV_ID from ST RM0367/RM0377 (from memory, **to confirm in Phase 0**) |
 | STM32L0 read-out protection: RDP byte in FLASH_OPTR (`0xAA` = level 0, `0xCC` = level 2 = permanent, else level 1). Level 1 → 0 ("regression") is done by programming the option bytes with RDP = `0xAA` and reloading them; the chip then **mass-erases flash and data EEPROM**. Level 2 cannot be undone. | ST RM0367 / RM0377, "Flash memory and data EEPROM protections" (from memory, **to confirm in Phase 0**) |
 
+### STM32 chips on HARDWARIO products (known so far)
+
+| Product | Chip | Role | Prepared firmware |
+|---|---|---|---|
+| CHESTER LoRaWAN (Murata Type ABZ) | STM32L072CZ (cat. 5, DEV_ID `0x447`) | LoRaWAN modem, UART AT commands | lora-modem 1.4.1 (plan 0040, ADR-0278) |
+| CHESTER Clime IAQ, second PCB (**CHESTER-S1**) | STM32L0 cat. 3, 64 KiB (DEV_ID `0x417`, measured above) | IAQ sensor board controller on I2C (chester-sdk driver `ctr_s1`): CO₂ (target / ABC calibration), temperature, humidity, illuminance, pressure / altitude, PIR motion, button, RGB LED, buzzer; registers for serial number, HW revision / variant, FW version | **none yet** — the firmware source is unknown (user, 2026-11-06); flashed as a generic STM32L0 part until HARDWARIO provides it |
+| TOWER Core Module (not a CHESTER) | STM32L083CZ (cat. 5) | application MCU | none (out of scope; listed because it is the same family) |
+
+All of them are **STM32L0**: same DBGMCU_IDCODE address, same flash interface, same RDP mechanism and option-byte
+layout. The framework therefore describes the protection and identification **once per family** and the parts as
+small entries (DEV_ID, flash size, J-Link device name, ranges) — ADR-0279.
+
 ## Goals / Non-goals
 
 **Goals**
 
 - G1 Flash, verify, erase, reset an STM32 chip through J-Link from a **curated, compiled-in list of STM32 parts**
-  (ADR-0275). Each part carries its J-Link device name, ID register and expected DEV_ID, flash / EEPROM / RAM ranges
+  (ADR-0275), covering the **whole STM32L0 family** generically (ADR-0279): one part entry per category and flash
+  size — cat. 1 (DEV_ID `0x457`, L011 / L021), cat. 2 (`0x425`, L031 / L041), cat. 3 (`0x417`, L051 / L052 / L053 /
+  L062 / L063), cat. 5 (`0x447`, L071 / L072 / L073 / L081 / L082 / L083), each in its flash sizes (DEV_IDs and the
+  size list from ST RM0377 / RM0367 / RM0451 from memory, **to confirm in Phase 0**). Each part carries its J-Link device name, ID register and expected DEV_ID, flash / EEPROM / RAM ranges
   and its protection data.
 - G2 The user **picks the chip**; after connecting the app reads DBGMCU_IDCODE and **stops with a clear error when it
   is another chip** (`target.wrong_chip`, ADR-0275).
@@ -46,7 +61,11 @@ new dependency is needed. Neither py-hardwario nor the old app flash STM32; ther
 - G4 A generic **STM32** device in Add device (profile `stm32`; one target per curated part) for chips that are not on
   a known HARDWARIO product, flashing the user's own `.hex` / `.bin` file (ADR-0274).
 - G5 CLI `hwio stm32 …` and MCP tools with the same backend (ADR-0277).
-- G6 The profile model supports per-chip prepared firmware so that per-chip plans (0040) only add data.
+- G6 The profile model supports per-chip prepared firmware so that per-chip plans (0040) only add data. Adding the
+  CHESTER-S1 firmware later = one `DesignatedFirmware` entry (and, if wanted, a CHESTER target `s1`) in a small
+  follow-up plan; no framework change.
+- G7 The family data is the extension point: another STM32 family (e.g. STM32WL, STM32G0) later = one family entry
+  (IDCODE address, flash interface, option-byte layout) + its parts, by a new plan (not in rc.4).
 
 **Non-goals**
 
@@ -62,7 +81,10 @@ new dependency is needed. Neither py-hardwario nor the old app flash STM32; ther
 ### Add device (generic STM32)
 
 The Add device picker (ADR-0050) gets a third profile **STM32 chip**. Its target picker becomes **Chip** and lists the
-curated parts ("STM32L072CZ (Murata Type ABZ)", "STM32L0 cat. 3, 64 KiB (STM32L051/52/53/62/63 x8)", …). Connect opens
+curated parts, grouped by family and named by category and flash size with the known HARDWARIO use as a hint
+("STM32L0 cat. 5, 192 KiB — e.g. Murata Type ABZ (CHESTER LoRaWAN)", "STM32L0 cat. 3, 64 KiB — e.g. CHESTER-S1
+(Clime IAQ)", …). Chips of one category and size share a DEV_ID and cannot be told apart by the app; one entry covers
+them. Connect opens
 a tab without a console: the tab shows **Flash** and **Maintenance**; the Console page shows "This chip has no console
 in HARDWARIO Monitor." (decision D8).
 
@@ -196,14 +218,15 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
 | D7 | Unlock implementation | own option-byte sequence / J-Link built-in unsecure | proposed: own sequence, decided by Phase 0 P0.4 | — |
 | D8 | Tab without a console | Flash + Maintenance only, console page explains / hide the console page | proposed: console page with explanation | — |
 | D9 | MCP tools for STM32 | yes (unlock needs confirm + GUI approval) / no MCP | proposed: yes | — |
-| D10 | Which parts are in the first curated list | STM32L072CZ (ABZ) + STM32L0 cat. 3 64 KiB (the measured chip) / more | proposed: these two; more by later plans | — |
+| D10 | Which parts are in the first curated list | the two known chips only / **the whole STM32L0 family, generic, prepared firmware later** | **Generic for the STM32L0 family; prepared firmware is added per part when HARDWARIO has it** (2026-11-06: "do it generically for these chips, we'll get the firmware later; they are similar STM32 everywhere") | ADR-0279 |
 
 ## Implementation steps
 
 ### Phase 0 — HIL spike (J-Link Commander scripts and a throw-away test of the library; nothing committed except notes)
 
-- [ ] P0.1 Confirm DEV_ID / REV_ID / flash size of the measured cat. 3 chip with the CPU halted; record which
-      CHESTER board it is on (user) and its J-Link device name that programs it (`STM32L053R8` vs exact part).
+- [ ] P0.1 Confirm DEV_ID / REV_ID / flash size of the CHESTER-S1 chip with the CPU halted, and which J-Link device
+      name programs a whole category / size (one representative name per entry, e.g. `STM32L053R8` for cat. 3 64 KiB);
+      check the STM32L0 DEV_ID / flash size table against the ST reference manuals.
 - [ ] P0.2 Same on a Murata ABZ (STM32L072CZ) with the original Murata firmware: RDP level, DEV_ID `0x447`.
 - [ ] P0.3 Is a halt needed to read the flash size register reliably? Does the halt / read disturb the running
       firmware (CHESTER app talking to the module over UART)?
@@ -262,6 +285,9 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
   RDP byte to `0xAA` and never to `0xCC`; a unit test asserts that no code path can write `0xCC`.
 - The J-Link library may handle a secured STM32 on its own (dialog or automatic erase); P0.4 must prove it never
   erases without our confirmation.
-- The role of the measured cat. 3 chip on CHESTER is not yet known (open question to the user); it may need its own
-  CHESTER target and prepared firmware (a plan after 0040).
+- The measured cat. 3 chip is the CHESTER-S1 controller (Clime IAQ second PCB). Its firmware source is unknown; until
+  HARDWARIO provides it the chip is flashed only with the user's own file through the generic STM32 device. chester-sdk
+  logs "Legacy protocol version detected" for old S1 firmware, so field updates will be wanted once a firmware exists.
+- Overwriting the S1 firmware without a replacement breaks the Clime IAQ sensors; the HIL steps restore the P0.6
+  backup, and the docs warn to back up first (`hwio stm32 info` + a memory dump on an RDP 0 chip).
 - rc.4 already contains wizards 0035 / 0008–0010 and 0038 A1; this plan plus 0040 is a large addition for one RC.

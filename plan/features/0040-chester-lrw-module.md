@@ -41,7 +41,8 @@ app (2026-11-06).
 
 - No LoRaWAN configuration (keys, region) — that is the application firmware's shell.
 - No Murata original firmware; no UART bootloader path.
-- Other CHESTER STM32 chips (the STM32L0 cat. 3 chip measured in 0039) — a separate plan once its role is known.
+- The CHESTER-S1 IAQ board controller (STM32L0 cat. 3, Clime IAQ second PCB): generic STM32 device only until its
+  firmware is available (ADR-0279).
 
 ## User experience
 
