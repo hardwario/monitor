@@ -126,8 +126,10 @@ TestCase {
         window.height = data.height;
         tryVerify(() => findAll(window.contentItem, "probeRow").filter(effectivelyVisible).length === 2, 5000);
         waitForRendering(window.contentItem);
-        // Plan 0033 (ADR-0233, D1): no target buttons; one profile is shown as its name.
+        // Plan 0033 (ADR-0233, D1): no target buttons; one profile is shown as its name, several
+        // (plan 0039: CHESTER and STM32 chip) as the Device picker.
         const buttons = findAll(window.contentItem, "profileName").filter(effectivelyVisible)
+                        .concat(findAll(window.contentItem, "profileBox").filter(effectivelyVisible))
                         .concat(findAll(window.contentItem, "connectButton").filter(effectivelyVisible));
         verify(buttons.length >= 2, buttons.length);
         checkInside(buttons);

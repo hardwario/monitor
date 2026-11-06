@@ -106,7 +106,7 @@ static_assert(stm32Id.find('-') == std::string_view::npos, "profile ids contain 
 
 constinit const DeviceProfile stm32{
     .id = stm32Id,
-    .displayName = "STM32 chip",
+    .displayName = QT_TRANSLATE_NOOP("hwio::device", "STM32 chip"),
     .targets = stm32Targets,
     .firmwareCatalogUrl = "",
     .powerHintSourceText = QT_TRANSLATE_NOOP(

@@ -16,6 +16,7 @@
 #include <QSignalSpy>
 #include <QString>
 #include <QStringLiteral>
+#include <QVariantList>
 #include <QVariantMap>
 #include <QtContainerFwd>
 #include <QtEnvironmentVariables>
@@ -277,19 +278,48 @@ TEST_F(ProbePickerTest, NoProbes) {
     EXPECT_EQ(picker.libraryVersion(), QStringLiteral("8.10"));
 }
 
-// Plan 0033 (ADR-0233, D1): no target choice; with one J-Link profile its name is shown.
+// Plan 0033 (ADR-0233, D1): no target choice for CHESTER (its console target); plan 0039 adds the
+// STM32 chip device, so the Device picker is shown.
 TEST_F(ProbePickerTest, OneProfileAndTheConsoleTarget) {
     const auto app = makeApp();
     ProbePickerViewModel& picker = *app->currentTabViewModel()->picker();
     EXPECT_EQ(picker.profileId(), QStringLiteral("chester"));
-    ASSERT_EQ(ProbePickerViewModel::profiles().size(), 1);
-    EXPECT_FALSE(ProbePickerViewModel::profileChoice());
+    ASSERT_EQ(ProbePickerViewModel::profiles().size(), 2);
+    EXPECT_TRUE(ProbePickerViewModel::profileChoice());
     EXPECT_EQ(picker.profileName(), QStringLiteral("CHESTER"));
+    EXPECT_EQ(picker.targetId(), QStringLiteral("app"));
+    EXPECT_FALSE(picker.targetChoice());
+    EXPECT_TRUE(picker.targets().isEmpty());
+    picker.setTargetId(QStringLiteral("lte")); // ignored: no target choice (ADR-0233)
     EXPECT_EQ(picker.targetId(), QStringLiteral("app"));
     EXPECT_EQ(ProbePickerViewModel::targetTitle(QStringLiteral("chester"), QStringLiteral("app")),
               QStringLiteral("Application MCU (nRF52840)"));
     EXPECT_EQ(ProbePickerViewModel::targetTitle(QStringLiteral("chester"), QStringLiteral("lte")),
               QStringLiteral("LTE MCU (nRF9151 / nRF9160)"));
+}
+
+// Plan 0039 (ADR-0274): the STM32 chip device has a Chip choice; the first chip by default.
+TEST_F(ProbePickerTest, Stm32DeviceHasAChipChoice) {
+    const auto app = makeApp();
+    ProbePickerViewModel& picker = *app->currentTabViewModel()->picker();
+    picker.setProfileId(QStringLiteral("stm32"));
+    EXPECT_EQ(picker.profileName(), QStringLiteral("STM32 chip"));
+    ASSERT_TRUE(picker.targetChoice());
+    const QVariantList targets = picker.targets();
+    ASSERT_EQ(targets.size(), 9);
+    EXPECT_EQ(picker.targetId(), QStringLiteral("stm32l0-cat1-8k"));
+    const QVariantMap s1 = targets.at(5).toMap();
+    EXPECT_EQ(s1.value(QStringLiteral("id")).toString(), QStringLiteral("stm32l0-cat3-64k"));
+    EXPECT_EQ(s1.value(QStringLiteral("title")).toString(),
+              QStringLiteral("STM32L0 cat. 3, 64 KiB"));
+    EXPECT_TRUE(s1.value(QStringLiteral("hint")).toString().contains(QStringLiteral("CHESTER-S1")));
+    picker.setTargetId(QStringLiteral("stm32l0-cat3-64k"));
+    EXPECT_EQ(picker.targetId(), QStringLiteral("stm32l0-cat3-64k"));
+    EXPECT_EQ(ProbePickerViewModel::targetTitle(QStringLiteral("stm32"),
+                                                QStringLiteral("stm32l0-cat3-64k")),
+              QStringLiteral("STM32L0 cat. 3, 64 KiB"));
+    picker.setProfileId(QStringLiteral("chester")); // another device: its console target again
+    EXPECT_EQ(picker.targetId(), QStringLiteral("app"));
 }
 
 } // namespace

@@ -102,6 +102,13 @@ class FirmwareSourceViewModel : public QObject {
     Q_PROPERTY(QString designatedStatus READ designatedStatus NOTIFY designatedChanged)
     Q_PROPERTY(qreal designatedProgress READ designatedProgress NOTIFY designatedChanged)
     Q_PROPERTY(hwio::gui::ErrorInfo designatedError READ designatedError NOTIFY designatedChanged)
+    // Plan 0039 (ADR-0280 D5): the start address of a .bin file on the STM32 card ("0x08000000"
+    // by default: the chip's flash start), its validation text and whether the field is shown.
+    Q_PROPERTY(QString binAddress READ binAddress WRITE setBinAddress NOTIFY binAddressChanged)
+    Q_PROPERTY(QString binAddressError READ binAddressError NOTIFY binAddressChanged)
+    Q_PROPERTY(bool binAddressVisible READ binAddressVisible NOTIFY sourceChanged)
+    // The image (placed) has data EEPROM records of the STM32 chip.
+    Q_PROPERTY(bool hasEeprom READ hasEeprom NOTIFY sourceChanged)
 
 public:
     // Unscoped: QML compares FirmwareSourceViewModel.AppFirmware etc. with the int properties.
@@ -110,6 +117,8 @@ public:
         // LTE MCU (0021, ADR-0174): the designated LTE firmware, or an own .hex, LTE bundle .zip or
         // modem firmware mfw_nrf91*.zip (the modem through nRF Util)
         LteFirmware,
+        // Plan 0039 (ADR-0274): an STM32 chip (the generic "STM32 chip" device): .hex or .bin
+        Stm32Firmware,
     };
     Q_ENUM(Kind)
 
@@ -146,10 +155,24 @@ public:
     FirmwareSourceViewModel(FirmwareSourceViewModel&&) = delete;
     FirmwareSourceViewModel& operator=(FirmwareSourceViewModel&&) = delete;
 
-    // "app" for AppFirmware, "lte" for LteFirmware.
+    // "app" for AppFirmware, "lte" for LteFirmware; Stm32Firmware: "" (the tab's chip, see
+    // targetId()).
     [[nodiscard]] static QString targetIdFor(Kind kind);
-    // "app", "lte" (flash/recent; stored "modem" entries are read as "lte").
+    // "app", "lte", "stm32" (flash/recent; stored "modem" entries are read as "lte").
     [[nodiscard]] static QString kindId(Kind kind);
+    // The target of the current kind (Stm32Firmware: the chip set by the owner).
+    [[nodiscard]] QString targetId() const;
+    // Plan 0039: the STM32 chip (target id) of the owner's tab; resets the .bin address to the
+    // chip's flash start.
+    void setStm32TargetId(const QString& targetId);
+    [[nodiscard]] QString binAddress() const { return m_binAddress; }
+    void setBinAddress(const QString& text);
+    [[nodiscard]] QString binAddressError() const;
+    [[nodiscard]] bool binAddressVisible() const;
+    [[nodiscard]] bool hasEeprom() const;
+    // The image to flash: the loaded one, a .bin placed at binAddress (nullptr while the address
+    // is invalid or nothing is ready).
+    [[nodiscard]] std::shared_ptr<const firmware::FirmwareImage> flashImage() const;
 
     [[nodiscard]] int kind() const noexcept { return m_kind; }
     // Set by the owner; filters loading, the recent list and the hint.
@@ -220,6 +243,7 @@ signals:
     void catalogInfoChanged();
     void lteSourceChanged();
     void designatedChanged();
+    void binAddressChanged();
 
 private:
     void loadPath(const QString& path);
@@ -238,6 +262,11 @@ private:
     void restoreState();
     // The kind the loaded file belongs to, when it does not fit m_kind.
     [[nodiscard]] std::optional<Kind> mismatch() const;
+    // Plan 0039: a .bin file outside the STM32 card (no kind to switch to).
+    [[nodiscard]] bool binaryElsewhere() const;
+    // The loaded file fits the kind (Ready).
+    [[nodiscard]] bool fits() const { return !mismatch() && !binaryElsewhere(); }
+    [[nodiscard]] std::optional<std::uint32_t> binStart() const;
     [[nodiscard]] const device::TargetProfile* target() const;
     [[nodiscard]] const device::TargetProfile* lteTarget() const;
     [[nodiscard]] QString catalogInfoText() const;
@@ -261,6 +290,9 @@ private:
     std::optional<Error> m_error;
     bool m_allowUicr = false;
     QString m_catalogIdError;
+    // Plan 0039: the STM32 chip of the tab and the .bin start address text.
+    QString m_stm32Target;
+    QString m_binAddress = QStringLiteral("0x08000000");
     // 0021: the designated LTE firmware.
     LteSource m_lteSource = Designated;
     DesignatedState m_designatedState = DesignatedIdle;

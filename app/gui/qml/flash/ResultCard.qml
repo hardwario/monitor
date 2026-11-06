@@ -98,6 +98,9 @@ ColumnLayout {
         error: result.vm ? result.vm.error : result.noError
         primaryAction: result.vm ? result.vm.errorAction : ErrorAction.Dismiss
         secondaryActionText: result.vm ? (result.vm.flashOperation ? qsTr("Back") : "") : ""
+        // Plan 0039: [Unlock…] (protected STM32 chip) or [Use <found chip>] (another chip).
+        customActionText: result.vm ? result.vm.errorCustomActionText : ""
+        onCustomActionTriggered: result.vm.triggerCustomAction()
         onSecondaryActionTriggered: result.vm.dismissResult()
         onActionTriggered: action => result.vm.triggerErrorAction(action)
     }

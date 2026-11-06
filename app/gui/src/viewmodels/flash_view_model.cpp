@@ -99,6 +99,10 @@ FlashViewModel::FlashViewModel(DeviceTabViewModel* tab, FirmwareServices& servic
     connect(m_tab, &DeviceTabViewModel::busyChanged, this, &FlashViewModel::stateChanged);
     connect(m_tab, &DeviceTabViewModel::stateChanged, this, &FlashViewModel::stateChanged);
     connect(m_tab, &DeviceTabViewModel::configurationChanged, this, [this] {
+        m_source->setStm32TargetId(m_tab->consoleTargetId()); // plan 0039: the tab's chip
+        m_eraseChip = false;
+        m_keepEeprom = true;
+        optionsChanged(); // signal
         applyDefaultKind();
         // Another device: the maintenance MCU goes back to the console target and a revealed
         // [Recover…] is hidden again (plan 0033).
@@ -133,6 +137,7 @@ FlashViewModel::FlashViewModel(DeviceTabViewModel* tab, FirmwareServices& servic
     });
     connect(&m_services, &FirmwareServices::languageChanged, this, &FlashViewModel::retranslate);
 
+    m_source->setStm32TargetId(m_tab->consoleTargetId());
     applyDefaultKind();
     m_source->setKind(m_kind);
     m_maintenanceTarget = m_tab->consoleTargetId();
@@ -147,9 +152,19 @@ FlashViewModel::~FlashViewModel() {
 
 // ---- kind ---------------------------------------------------------------------------------------
 
+bool FlashViewModel::kindAllowed(Kind kind) const {
+    // Plan 0039: a device without a console (STM32 chip) has only the STM32 card; the Nordic
+    // devices have the application and LTE cards.
+    const device::DeviceProfile* deviceProfile = profile();
+    const bool chipDevice = deviceProfile != nullptr && !device::hasConsole(*deviceProfile);
+    return chipDevice ? kind == FirmwareSourceViewModel::Stm32Firmware
+                      : kind != FirmwareSourceViewModel::Stm32Firmware;
+}
+
 void FlashViewModel::setKind(int kind) {
     if (kind < FirmwareSourceViewModel::AppFirmware ||
-        kind > FirmwareSourceViewModel::LteFirmware || m_running) {
+        kind > FirmwareSourceViewModel::Stm32Firmware || m_running ||
+        !kindAllowed(static_cast<Kind>(kind))) {
         return;
     }
     m_kindChosen = true;
@@ -166,7 +181,18 @@ void FlashViewModel::setKind(int kind) {
 }
 
 void FlashViewModel::applyDefaultKind() {
-    if (m_kindChosen || m_tab->choosing()) {
+    if (m_tab->choosing()) {
+        return;
+    }
+    if (!kindAllowed(m_kind)) {
+        m_kindChosen = false; // another device: its own cards
+    }
+    if (m_kindChosen) {
+        return;
+    }
+    if (kindAllowed(FirmwareSourceViewModel::Stm32Firmware)) {
+        m_kind = FirmwareSourceViewModel::Stm32Firmware; // plan 0039: the only card
+        m_source->setKind(m_kind);
         return;
     }
     // ADR-0233: a tab always works with the console target (the application MCU), so the default
@@ -176,7 +202,7 @@ void FlashViewModel::applyDefaultKind() {
     m_source->setKind(m_kind);
 }
 
-QString FlashViewModel::targetId() const { return FirmwareSourceViewModel::targetIdFor(m_kind); }
+QString FlashViewModel::targetId() const { return m_source->targetId(); }
 
 const device::DeviceProfile* FlashViewModel::profile() const {
     return device::ProfileRegistry::find(toStdString(m_tab->profileId()));
@@ -188,6 +214,18 @@ const device::TargetProfile* FlashViewModel::targetProfile(const QString& id) co
 }
 
 QVariantList FlashViewModel::kinds() const {
+    if (kindAllowed(FirmwareSourceViewModel::Stm32Firmware)) {
+        // Plan 0039: one card for the tab's chip.
+        const device::TargetProfile* chip = targetProfile(m_tab->consoleTargetId());
+        const QString name = chip != nullptr ? device::targetDisplayName(*chip) : QString();
+        return {QVariantMap{
+            {QStringLiteral("kind"), static_cast<int>(FirmwareSourceViewModel::Stm32Firmware)},
+            {QStringLiteral("title"), tr("Firmware for %1").arg(name)},
+            {QStringLiteral("mcu"), chip != nullptr && !chip->parts.empty()
+                                        ? device::partHint(chip->parts.front())
+                                        : QString()},
+            {QStringLiteral("accepts"), tr(".hex or .bin file")}}};
+    }
     const device::TargetProfile* app = targetProfile(QStringLiteral("app"));
     const device::TargetProfile* lte = targetProfile(QStringLiteral("lte"));
     const auto mcu = [](const QString& title, const device::TargetProfile* target) {
@@ -307,11 +345,24 @@ QString FlashViewModel::cannotFlashReason() const {
     if (m_source->hasUicr() && !m_source->allowUicr()) {
         return tr("The firmware writes the UICR: allow it in Options");
     }
+    if (m_kind == FirmwareSourceViewModel::Stm32Firmware) {
+        if (m_source->binAddressVisible() && !m_source->binAddressError().isEmpty()) {
+            return tr("Enter a valid start address for the .bin file");
+        }
+        if (m_source->hasEeprom() && keepEeprom()) {
+            return tr("The firmware writes the data EEPROM: turn off Keep data EEPROM in Options");
+        }
+    }
     return {};
 }
 
 QString FlashViewModel::flashSummary() const {
-    const QString kindTitle = kinds().at(m_kind).toMap().value(QStringLiteral("title")).toString();
+    QString kindTitle;
+    for (const QVariant& card : kinds()) {
+        if (card.toMap().value(QStringLiteral("kind")).toInt() == m_kind) {
+            kindTitle = card.toMap().value(QStringLiteral("title")).toString();
+        }
+    }
     return m_source->sourceState() == FirmwareSourceViewModel::Ready
                ? QStringLiteral("%1 · %2").arg(kindTitle, m_source->sourceName())
                : kindTitle;
@@ -321,11 +372,29 @@ QString FlashViewModel::flashSummary() const {
 // -----------------------------------------------------------------------------------
 
 void FlashViewModel::flash() {
-    if (!canFlash() || m_kind != FirmwareSourceViewModel::AppFirmware) {
+    if (!canFlash() || (m_kind != FirmwareSourceViewModel::AppFirmware &&
+                        m_kind != FirmwareSourceViewModel::Stm32Firmware)) {
         return;
     }
     const LoadedSource* loaded = m_source->readySource();
     if (loaded == nullptr) {
+        return;
+    }
+    if (m_kind == FirmwareSourceViewModel::Stm32Firmware) {
+        // Plan 0039: a .bin placed at its start address; the data EEPROM only when not kept.
+        LoadedSource placed = *loaded;
+        placed.image = m_source->flashImage();
+        if (!placed.image) {
+            return;
+        }
+        runFlash(FlashRequest{
+            .kind = OperationKind::Flash,
+            .targetId = targetId(),
+            .source = std::move(placed),
+            .options = device::FlashOptions{.halt = m_halt,
+                                            .allowUicr = m_source->hasEeprom() && !keepEeprom(),
+                                            .eraseAll = m_eraseChip},
+            .sourceName = m_source->sourceName()});
         return;
     }
     // 0021 (ADR-0174): the operation follows the classification of the input (ADR-0040).
@@ -404,6 +473,98 @@ void FlashViewModel::runEraseAll(const QString& target) {
           });
 }
 
+void FlashViewModel::runUnlock(const QString& target) {
+    if (!canRunMaintenance() || !isStm32Target(target)) {
+        return;
+    }
+    start(OperationKind::Unlock, target,
+          [targetText = toStdString(target)](device::DeviceSession& session) {
+              return session.unlock(targetText);
+          });
+}
+
+bool FlashViewModel::isStm32Target(const QString& targetId) const {
+    const device::TargetProfile* target = targetProfile(targetId);
+    return target != nullptr && target->vendor == device::ChipVendor::Stm32;
+}
+
+bool FlashViewModel::stm32() const { return isStm32Target(targetId()); }
+
+void FlashViewModel::setEraseChip(bool erase) {
+    if (erase == m_eraseChip) {
+        return;
+    }
+    m_eraseChip = erase;
+    optionsChanged(); // signal
+    stateChanged();   // signal: Keep data EEPROM changes what can be flashed
+}
+
+void FlashViewModel::setKeepEeprom(bool keep) {
+    if (keep == m_keepEeprom) {
+        return;
+    }
+    m_keepEeprom = keep;
+    optionsChanged(); // signal
+    stateChanged();   // signal
+}
+
+QString FlashViewModel::eraseAllText() const {
+    return isStm32Target(m_maintenanceTarget) ? tr("Erase chip…") : tr("Erase everything…");
+}
+
+QString FlashViewModel::recoverText() const {
+    return isStm32Target(m_maintenanceTarget) ? tr("Unlock (erase)…") : tr("Recover…");
+}
+
+const device::TargetProfile* FlashViewModel::foundChipTarget() const {
+    if (!m_error || m_error->code != ErrorCode::TargetWrongChip || !m_chip || m_chip->devId == 0) {
+        return nullptr;
+    }
+    const device::DeviceProfile* deviceProfile = profile();
+    if (deviceProfile == nullptr || device::hasConsole(*deviceProfile)) {
+        return nullptr; // a CHESTER tab never switches its targets (ADR-0233)
+    }
+    for (const device::TargetProfile& target : deviceProfile->targets) {
+        if (device::findStm32Part(target, m_chip->devId, m_chip->flashSizeKib) != nullptr) {
+            return &target;
+        }
+    }
+    return nullptr;
+}
+
+QString FlashViewModel::errorCustomActionText() const {
+    if (m_opState != Failed || !m_error) {
+        return {};
+    }
+    if (m_error->code == ErrorCode::TargetProtected && isStm32Target(m_lastTarget)) {
+        return tr("Unlock…");
+    }
+    if (const device::TargetProfile* found = foundChipTarget()) {
+        return tr("Use %1").arg(device::targetDisplayName(*found));
+    }
+    return {};
+}
+
+void FlashViewModel::triggerCustomAction() {
+    if (m_running || m_opState != Failed || !m_error) {
+        return;
+    }
+    if (m_error->code == ErrorCode::TargetProtected && isStm32Target(m_lastTarget)) {
+        const QString target = m_lastTarget;
+        dismissResult();
+        m_maintenanceTarget = target;
+        m_maintenanceExpanded = true;
+        maintenanceChanged(); // signal
+        requestConfirmation(true);
+        return;
+    }
+    if (const device::TargetProfile* found = foundChipTarget()) {
+        const QString target = toQString(found->id);
+        dismissResult();
+        (void)m_tab->changeTarget(target);
+    }
+}
+
 void FlashViewModel::runRecover(const QString& target) {
     if (!canRunMaintenance() || !recoverAvailable()) {
         return;
@@ -471,7 +632,8 @@ QVariantList FlashViewModel::maintenanceTargets() const {
 }
 
 bool FlashViewModel::recoverAvailable() const {
-    return expertActions() ||
+    // Plan 0039: [Unlock (erase)…] of an STM32 chip is always offered (behind its confirmation).
+    return expertActions() || isStm32Target(m_maintenanceTarget) ||
            (!m_revealedRecover.isEmpty() && m_revealedRecover == m_maintenanceTarget);
 }
 
@@ -811,6 +973,9 @@ QString FlashViewModel::operationTitle() const {
     const QString mcu = target != nullptr ? device::targetDisplayName(*target) : m_lastTarget;
     switch (m_lastKind) {
     case OperationKind::Flash:
+        if (isStm32Target(m_lastTarget)) {
+            return tr("Flashing %1 to the %2").arg(m_lastSourceName, mcu);
+        }
         return tr("Flashing %1 to the %2 MCU").arg(m_lastSourceName, mcu);
     case OperationKind::LteBundle:
         return tr("Flashing the LTE bundle %1").arg(m_lastSourceName);
@@ -819,12 +984,18 @@ QString FlashViewModel::operationTitle() const {
     case OperationKind::EraseCode:
         return tr("Erasing the application firmware of the %1 MCU").arg(mcu);
     case OperationKind::EraseAll:
+        if (isStm32Target(m_lastTarget)) {
+            return tr("Erasing the %1").arg(mcu);
+        }
         return tr("Erasing everything on the %1 MCU").arg(mcu);
     case OperationKind::Recover:
         return tr("Recovering the %1 MCU").arg(mcu);
     case OperationKind::Unlock:
         return tr("Unlocking the %1").arg(mcu);
     case OperationKind::Reset:
+        if (isStm32Target(m_lastTarget)) {
+            return tr("Resetting the %1").arg(mcu);
+        }
         return tr("Resetting the %1 MCU").arg(mcu);
     case OperationKind::ReadMemory:
     case OperationKind::Diagnose:
@@ -965,6 +1136,9 @@ QString FlashViewModel::resultText() const {
         case OperationKind::EraseCode:
             return tr("The application firmware of the %1 MCU was erased.").arg(mcu);
         case OperationKind::EraseAll:
+            if (isStm32Target(m_lastTarget)) {
+                return tr("The %1 was erased (flash and data EEPROM).").arg(mcu);
+            }
             return tr("Everything on the %1 MCU was erased.").arg(mcu);
         case OperationKind::Recover:
             return tr("The %1 MCU was recovered.").arg(mcu);
@@ -1033,6 +1207,9 @@ int FlashViewModel::errorAction() const {
 
 QString FlashViewModel::maintenanceTitle() const {
     const device::TargetProfile* target = targetProfile(m_maintenanceTarget);
+    if (target != nullptr && target->vendor == device::ChipVendor::Stm32) {
+        return tr("Maintenance — %1").arg(device::targetDisplayName(*target));
+    }
     return target != nullptr ? tr("Maintenance — %1 MCU").arg(device::targetDisplayName(*target))
                              : tr("Maintenance");
 }
@@ -1045,6 +1222,22 @@ QVariantMap FlashViewModel::describeErase(bool recover) const {
     // keeps it); the CLI names it for both targets (ADR-0038).
     const QStringList items{tr("Firmware (flash)"), tr("UICR configuration"),
                             tr("Product Information Block (serial number, hardware version, …)")};
+    if (target != nullptr && target->vendor == device::ChipVendor::Stm32) {
+        // Plan 0039 (ADR-0276): the STM32 texts; never shown pre-checked.
+        const QStringList stm32Items{tr("Firmware (flash)"), tr("Data EEPROM")};
+        return QVariantMap{
+            {QStringLiteral("title"),
+             recover ? tr("Unlock the %1?").arg(mcu) : tr("Erase the %1?").arg(mcu)},
+            {QStringLiteral("body"),
+             recover ? tr("Unlocking removes the read-out protection. The chip then erases "
+                          "itself completely; the firmware on it cannot be read or kept. This "
+                          "erases:")
+                     : tr("This erases:")},
+            {QStringLiteral("items"), stm32Items},
+            {QStringLiteral("consequence"), tr("This cannot be undone.")},
+            {QStringLiteral("acceptText"), recover ? tr("Unlock and erase") : tr("Erase chip")},
+        };
+    }
     QString body = tr("This erases:");
     if (recover) {
         body = target != nullptr && target->recoverImage != device::RecoverImage::None
@@ -1086,7 +1279,9 @@ void FlashViewModel::confirm() {
                                    << "refused: the MCU changed to" << m_maintenanceTarget;
         return;
     }
-    if (pending->recover) {
+    if (pending->recover && isStm32Target(pending->targetId)) {
+        runUnlock(pending->targetId); // plan 0039: an STM32 chip is unlocked, not recovered
+    } else if (pending->recover) {
         runRecover(pending->targetId);
     } else {
         runEraseAll(pending->targetId);

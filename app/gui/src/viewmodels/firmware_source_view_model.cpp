@@ -97,11 +97,106 @@ FirmwareSourceViewModel::~FirmwareSourceViewModel() {
 }
 
 QString FirmwareSourceViewModel::targetIdFor(Kind kind) {
-    return kind == AppFirmware ? QStringLiteral("app") : QStringLiteral("lte");
+    switch (kind) {
+    case AppFirmware:
+        return QStringLiteral("app");
+    case LteFirmware:
+        return QStringLiteral("lte");
+    case Stm32Firmware:
+        break;
+    }
+    return {};
 }
 
 QString FirmwareSourceViewModel::kindId(Kind kind) {
-    return kind == AppFirmware ? QStringLiteral("app") : QStringLiteral("lte");
+    switch (kind) {
+    case AppFirmware:
+        return QStringLiteral("app");
+    case LteFirmware:
+        return QStringLiteral("lte");
+    case Stm32Firmware:
+        return QStringLiteral("stm32");
+    }
+    return {};
+}
+
+QString FirmwareSourceViewModel::targetId() const {
+    return m_kind == Stm32Firmware ? m_stm32Target : targetIdFor(m_kind);
+}
+
+void FirmwareSourceViewModel::setStm32TargetId(const QString& targetId) {
+    if (targetId == m_stm32Target) {
+        return;
+    }
+    m_stm32Target = targetId;
+    const device::TargetProfile* chip = target();
+    m_binAddress = hexAddress(chip != nullptr && m_kind == Stm32Firmware
+                                  ? static_cast<std::uint32_t>(chip->flash.start)
+                                  : 0x08000000U);
+    binAddressChanged(); // signal
+    sourceChanged();     // signal
+}
+
+std::optional<std::uint32_t> FirmwareSourceViewModel::binStart() const {
+    bool ok = false;
+    const QString text = m_binAddress.trimmed();
+    const qulonglong value = text.startsWith(QStringLiteral("0x"), Qt::CaseInsensitive)
+                                 ? text.mid(2).toULongLong(&ok, 16)
+                                 : text.toULongLong(&ok, 10);
+    if (!ok || value > 0xFFFFFFFFULL || value % 4 != 0) {
+        return std::nullopt;
+    }
+    return static_cast<std::uint32_t>(value);
+}
+
+void FirmwareSourceViewModel::setBinAddress(const QString& text) {
+    if (text == m_binAddress) {
+        return;
+    }
+    m_binAddress = text;
+    binAddressChanged(); // signal
+    sourceChanged();     // signal: the summary shows the address
+}
+
+QString FirmwareSourceViewModel::binAddressError() const {
+    if (binStart()) {
+        return {};
+    }
+    return tr("Enter an address such as 0x08000000 (a multiple of 4).");
+}
+
+bool FirmwareSourceViewModel::binAddressVisible() const {
+    return m_kind == Stm32Firmware && m_loaded && m_loaded->sourceClass == SourceClass::Binary;
+}
+
+std::shared_ptr<const firmware::FirmwareImage> FirmwareSourceViewModel::flashImage() const {
+    const LoadedSource* source = readySource();
+    if (source == nullptr || !source->image) {
+        return nullptr;
+    }
+    if (source->sourceClass != SourceClass::Binary) {
+        return source->image;
+    }
+    const std::optional<std::uint32_t> start = binStart();
+    if (!start || source->image->segments().empty()) {
+        return nullptr;
+    }
+    auto placed =
+        firmware::FirmwareImage::fromBinary(source->image->segments().front().data, *start);
+    return placed ? std::make_shared<const firmware::FirmwareImage>(std::move(*placed)) : nullptr;
+}
+
+bool FirmwareSourceViewModel::hasEeprom() const {
+    const device::TargetProfile* chip = target();
+    if (m_kind != Stm32Firmware || chip == nullptr || !chip->stm32) {
+        return false;
+    }
+    const auto image = flashImage();
+    return image && image->intersects(chip->dataEeprom.value_or(chip->stm32->dataEepromArea));
+}
+
+bool FirmwareSourceViewModel::binaryElsewhere() const {
+    return m_loaded && m_loaded->sourceClass == SourceClass::Binary && m_kind != Stm32Firmware;
 }
 
 void FirmwareSourceViewModel::setKind(Kind kind) {
@@ -122,15 +217,14 @@ void FirmwareSourceViewModel::setKind(Kind kind) {
     kindChanged(); // signal
     if (m_loaded && (m_state == Ready || m_state == Invalid) && !m_error) {
         // Re-evaluated only: Recent gets an entry on an explicit load or download (review F7).
-        setState(mismatch() ? Invalid : Ready);
+        setState(fits() ? Ready : Invalid);
     }
     sourceChanged(); // signal: hint, UICR of the other target, modem note
 }
 
 const device::TargetProfile* FirmwareSourceViewModel::target() const {
     const device::DeviceProfile* profile = m_profile ? m_profile() : nullptr;
-    return profile != nullptr ? device::findTarget(*profile, toStdString(targetIdFor(m_kind)))
-                              : nullptr;
+    return profile != nullptr ? device::findTarget(*profile, toStdString(targetId())) : nullptr;
 }
 
 const device::TargetProfile* FirmwareSourceViewModel::lteTarget() const {
@@ -210,6 +304,13 @@ QString FirmwareSourceViewModel::sourceSummary() const {
     case SourceClass::LteBundle:
         return tr("%1 · LTE bundle (application + modem firmware) · %2")
             .arg(m_loadedName, sizeText(loaded.fileBytes));
+    case SourceClass::Binary: {
+        const std::uint64_t bytes =
+            loaded.image && !loaded.image->empty() ? loaded.image->totalBytes() : 0;
+        return binStart() ? tr("%1 · binary · %2 · from %3")
+                                .arg(m_loadedName, sizeText(bytes), hexAddress(*binStart()))
+                          : tr("%1 · binary · %2").arg(m_loadedName, sizeText(bytes));
+    }
     case SourceClass::ModemZip: {
         const QString version = modemVersion(m_loadedName);
         return version.isEmpty() ? tr("%1 · Modem firmware (modem only) · %2")
@@ -224,7 +325,9 @@ QString FirmwareSourceViewModel::sourceSummary() const {
 bool FirmwareSourceViewModel::hasUicr() const {
     const LoadedSource* source = readySource();
     const device::TargetProfile* targetProfile = target();
+    // STM32 chips have no UICR (their data EEPROM: hasEeprom()).
     return source != nullptr && source->image && targetProfile != nullptr &&
+           targetProfile->vendor == device::ChipVendor::Nordic &&
            source->image->intersects(targetProfile->uicr);
 }
 
@@ -245,6 +348,7 @@ std::optional<FirmwareSourceViewModel::Kind> FirmwareSourceViewModel::mismatch()
     // cannot tell the MCU of a HEX file).
     switch (m_loaded->sourceClass) {
     case SourceClass::IntelHex:
+    case SourceClass::Binary: // binaryElsewhere(): no kind to switch to
         return std::nullopt;
     case SourceClass::LteBundle:
     case SourceClass::ModemZip:
@@ -256,6 +360,9 @@ std::optional<FirmwareSourceViewModel::Kind> FirmwareSourceViewModel::mismatch()
 QString FirmwareSourceViewModel::kindHint() const {
     if (designatedActive() || m_state != Invalid || m_error || !m_loaded) {
         return {};
+    }
+    if (binaryElsewhere()) {
+        return tr("A .bin file can only be flashed to an STM32 chip.");
     }
     const std::optional<Kind> other = mismatch();
     if (!other) {
@@ -303,6 +410,9 @@ bool FirmwareSourceViewModel::modemNoteVisible() const {
 }
 
 QStringList FirmwareSourceViewModel::nameFilters() const {
+    if (m_kind == Stm32Firmware) {
+        return {tr("STM32 firmware (*.hex *.bin)"), tr("All files (*)")};
+    }
     if (m_kind == AppFirmware) {
         return {tr("Intel HEX files (*.hex)"), tr("All files (*)")};
     }
@@ -310,6 +420,9 @@ QStringList FirmwareSourceViewModel::nameFilters() const {
 }
 
 QString FirmwareSourceViewModel::dropText() const {
+    if (m_kind == Stm32Firmware) {
+        return tr("Drop a .hex or .bin file here");
+    }
     if (m_kind == AppFirmware) {
         return tr("Drop a .hex file here");
     }
@@ -702,9 +815,9 @@ void FirmwareSourceViewModel::setLoaded(LoadedSource loaded, QString recentSourc
     m_error.reset();
     m_allowUicr = false; // never carried over to another image (ADR-0036)
     allowUicrChanged();  // signal
-    const bool fits = !mismatch();
-    setState(fits ? Ready : Invalid);
-    if (fits) {
+    const bool fitting = fits();
+    setState(fitting ? Ready : Invalid);
+    if (fitting) {
         m_recent->add(kindId(m_kind), m_recentSource);
     }
 }
@@ -722,7 +835,7 @@ void FirmwareSourceViewModel::restoreState() {
     if (!m_loaded) {
         setState(None);
     } else {
-        setState(mismatch() ? Invalid : Ready);
+        setState(fits() ? Ready : Invalid);
     }
 }
 

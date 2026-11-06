@@ -123,6 +123,20 @@ class FlashViewModel : public QObject {
     Q_PROPERTY(QString nrfUtilDownloadUrl READ nrfUtilDownloadUrl CONSTANT) // plan 0038 A0
     // The ConfirmDialog texts of the pending erase-all / recover (ADR-0038).
     Q_PROPERTY(QVariantMap confirmation READ confirmation NOTIFY confirmationRequested)
+    // ---- plan 0039 (STM32 chips, ADR-0274 ... ADR-0276) ----
+    // The kind's target is an STM32 chip: the Options show eraseChip and keepEeprom.
+    Q_PROPERTY(bool stm32 READ stm32 NOTIFY kindChanged)
+    // "Erase the whole chip first" (default off).
+    Q_PROPERTY(bool eraseChip READ eraseChip WRITE setEraseChip NOTIFY optionsChanged)
+    // "Keep data EEPROM" (default on; off and disabled while eraseChip).
+    Q_PROPERTY(bool keepEeprom READ keepEeprom WRITE setKeepEeprom NOTIFY optionsChanged)
+    // The texts of [Erase everything…] / [Recover…]: on an STM32 chip "Erase chip…" and
+    // "Unlock (erase)…".
+    Q_PROPERTY(QString eraseAllText READ eraseAllText NOTIFY maintenanceChanged)
+    Q_PROPERTY(QString recoverText READ recoverText NOTIFY maintenanceChanged)
+    // The result ErrorPanel's custom action: "Unlock…" (target.protected on an STM32 chip) or
+    // "Use <found chip>" (target.wrong_chip with a curated chip of the tab's device); "" = none.
+    Q_PROPERTY(QString errorCustomActionText READ errorCustomActionText NOTIFY stateChanged)
 
 public:
     // Unscoped: QML compares FlashViewModel.Running etc. with the int property.
@@ -186,7 +200,10 @@ public:
     // Another MCU than the console target only with the expert actions (ignored otherwise).
     void setMaintenanceTarget(const QString& targetId);
     [[nodiscard]] QVariantList maintenanceTargets() const;
-    [[nodiscard]] bool eraseAllAvailable() const { return expertActions(); }
+    // Plan 0039: [Erase chip…] of an STM32 chip is always offered (behind its confirmation).
+    [[nodiscard]] bool eraseAllAvailable() const {
+        return expertActions() || isStm32Target(m_maintenanceTarget);
+    }
     [[nodiscard]] bool recoverAvailable() const;
     [[nodiscard]] bool maintenanceExpanded() const noexcept { return m_maintenanceExpanded; }
     void setMaintenanceExpanded(bool expanded);
@@ -212,6 +229,17 @@ public:
     Q_INVOKABLE void requestConfirmation(bool recover);
     Q_INVOKABLE void confirm();
     [[nodiscard]] QVariantMap confirmation() const { return m_confirmation; }
+    [[nodiscard]] bool stm32() const;
+    [[nodiscard]] bool eraseChip() const noexcept { return m_eraseChip; }
+    void setEraseChip(bool erase);
+    [[nodiscard]] bool keepEeprom() const noexcept { return m_keepEeprom && !m_eraseChip; }
+    void setKeepEeprom(bool keep);
+    [[nodiscard]] QString eraseAllText() const;
+    [[nodiscard]] QString recoverText() const;
+    [[nodiscard]] QString errorCustomActionText() const;
+    // [Unlock…] opens the unlock confirmation for the failed operation's chip; [Use <found>]
+    // switches the tab to the found chip (DeviceTabViewModel::changeTarget, never silently).
+    Q_INVOKABLE void triggerCustomAction();
     // Back from the result card to the form (the source stays loaded).
     Q_INVOKABLE void dismissResult();
     // [Open console] of the success card.
@@ -237,6 +265,7 @@ signals:
     void settingsRequested(const QString& sectionId);
     void confirmationRequested();
     void maintenanceChanged();
+    void optionsChanged();
     // [Update LTE firmware…] (plan 0033): the tab opens the LTE update wizard.
     void lteUpdateRequested();
     // A text for screen readers (operation started / finished; design system § 6).
@@ -268,6 +297,11 @@ private:
     void runFlash(const FlashRequest& request);
     void runEraseAll(const QString& target);
     void runRecover(const QString& target);
+    void runUnlock(const QString& target);
+    [[nodiscard]] bool isStm32Target(const QString& targetId) const;
+    // Plan 0039: the curated chip of a target.wrong_chip result that the tab's device has.
+    [[nodiscard]] const device::TargetProfile* foundChipTarget() const;
+    [[nodiscard]] bool kindAllowed(FirmwareSourceViewModel::Kind kind) const;
     void start(device::OperationKind kind, const QString& target,
                const std::function<Result<device::OperationId>(device::DeviceSession&)>& run);
     void onSessionChanged();
@@ -297,6 +331,8 @@ private:
     // only); until then it follows the tab's target.
     bool m_kindChosen = false;
     bool m_halt = false;
+    bool m_eraseChip = false;
+    bool m_keepEeprom = true;
     QString m_maintenanceTarget =
         QStringLiteral("app"); // the console target (set in the constructor)
     QString m_revealedRecover; // the MCU whose [Recover…] the hand-off revealed ("" = none)

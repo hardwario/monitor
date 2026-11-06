@@ -138,14 +138,16 @@ Item {
                             SourceCard {
                                 Layout.fillWidth: true
                                 visible: page.model.kind === FirmwareSourceViewModel.AppFirmware
+                                         || page.model.kind === FirmwareSourceViewModel.Stm32Firmware
                                 source: page.model.source
                                 onBrowseRequested: page.browse()
                             }
 
                             OptionsCard {
                                 Layout.fillWidth: true
-                                visible: page.model.kind === FirmwareSourceViewModel.AppFirmware
-                                         && (page.model.haltAvailable || page.model.source.hasUicr)
+                                visible: (page.model.kind === FirmwareSourceViewModel.AppFirmware
+                                          && (page.model.haltAvailable || page.model.source.hasUicr))
+                                         || page.model.kind === FirmwareSourceViewModel.Stm32Firmware
                                 vm: page.model
                             }
 
@@ -206,7 +208,8 @@ Item {
         objectName: "flashDropArea"
         anchors.fill: parent
         enabled: !page.running && !page.showResult && page.model !== null
-                 && page.model.kind === FirmwareSourceViewModel.AppFirmware
+                 && (page.model.kind === FirmwareSourceViewModel.AppFirmware
+                     || page.model.kind === FirmwareSourceViewModel.Stm32Firmware)
         onDropped: drop => page.model.source.loadFile(drop.urls[0])
     }
 

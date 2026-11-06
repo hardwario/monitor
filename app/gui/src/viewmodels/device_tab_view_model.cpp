@@ -168,6 +168,12 @@ QString DeviceTabViewModel::title() const {
     if (m_choosing || !m_serial) {
         return tr("New device");
     }
+    if (m_profile != nullptr && !device::hasConsole(*m_profile)) {
+        // Plan 0039: "STM32L0 cat. 3, 64 KiB · 801000001" (the chip is what the tab is about).
+        if (const auto* target = device::findTarget(*m_profile, toStdString(m_targetId))) {
+            return QStringLiteral("%1 · %2").arg(device::targetDisplayName(*target)).arg(*m_serial);
+        }
+    }
     return QStringLiteral("%1 %2 · %3").arg(name, m_targetId).arg(*m_serial);
 }
 
@@ -254,8 +260,9 @@ bool DeviceTabViewModel::configure(const QString& profileId, const QString& requ
         return false;
     }
     // ADR-0233 (plan 0033): a J-Link tab always uses the profile's console target; a tab saved
-    // with another target (ui/tabs of rc.2) opens on it.
-    const QString targetId = toQString(device::consoleTargetId(*profile));
+    // with another target (ui/tabs of rc.2) opens on it. Plan 0039 (ADR-0274): a profile without
+    // a console (STM32 chip) keeps the chosen chip.
+    const QString targetId = toQString(device::tabTargetId(*profile, toStdString(requestedTarget)));
     if (targetId != requestedTarget) {
         qCInfo(lcGui) << "Tab: target" << requestedTarget << "->" << targetId << "(ADR-0233)";
     }
@@ -282,6 +289,19 @@ bool DeviceTabViewModel::configure(const QString& profileId, const QString& requ
     configurationChanged(); // signal
     updateState();
     return true;
+}
+
+bool DeviceTabViewModel::changeTarget(const QString& targetId) {
+    if (m_profile == nullptr || !m_serial || isBle() || device::hasConsole(*m_profile) ||
+        device::findTarget(*m_profile, toStdString(targetId)) == nullptr || isBusy()) {
+        return false;
+    }
+    if (targetId == m_targetId) {
+        return true;
+    }
+    qCInfo(lcGui) << "Tab: chip" << m_targetId << "->" << targetId;
+    releaseSession();
+    return configure(toQString(m_profile->id), targetId, *m_serial, m_product);
 }
 
 bool DeviceTabViewModel::configureBle(const QString& profileId, const QString& deviceId,

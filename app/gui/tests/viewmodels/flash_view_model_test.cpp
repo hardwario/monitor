@@ -57,6 +57,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <format>
 #include <memory>
 #include <string>
 #include <utility>
@@ -104,10 +105,13 @@ protected:
     }
 
     void start(const std::string& scenario, const QString& target = QStringLiteral("app")) {
+        startWith(scenario, QStringLiteral("chester"), target);
+    }
+    void startWith(const std::string& scenario, const QString& profile, const QString& target) {
         m_scenario = scenario;
         useScenario(m_scenario.c_str());
         m_app = makeApp();
-        tab().configure(QStringLiteral("chester"), target, 801000001, QStringLiteral("Test Probe"));
+        tab().configure(profile, target, 801000001, QStringLiteral("Test Probe"));
     }
 
     [[nodiscard]] AppViewModel& app() { return *m_app; }
@@ -1235,6 +1239,142 @@ TEST_F(FlashTest, TheOtherConnectorBannerOpensTheLteUpdate) {
     ASSERT_TRUE(app().wizard()->isOpen());
     EXPECT_EQ(app().wizard()->wizardId(), QStringLiteral("lte-update"));
     app().wizard()->cancel(false);
+}
+
+// ---- plan 0039: the STM32 chip device (ADR-0274 ... ADR-0276, ADR-0280) -------------------------
+
+std::string stm32Scenario(int rdp, int devId = 0x417, int flashKib = 64) {
+    return std::format(R"({{"probes": [{{"serialNumber": 801000001, "product": "Test Probe",
+        "chip": {{"family": "stm32l0", "devId": {}, "flashKib": {}, "eepromBytes": 2048,
+        "rdp": {}}}}}]}})",
+                       devId, flashKib, rdp);
+}
+
+class Stm32FlashTest : public FlashTest {
+protected:
+    void startChip(const std::string& scenario, const QString& chip) {
+        startWith(scenario, QStringLiteral("stm32"), chip);
+    }
+};
+
+TEST_F(Stm32FlashTest, OneCardForTheChipWithBinAndOptions) {
+    startChip(stm32Scenario(0), QStringLiteral("stm32l0-cat3-64k"));
+    EXPECT_EQ(tab().consoleTargetId(), QStringLiteral("stm32l0-cat3-64k")); // the chosen chip
+    EXPECT_EQ(flash().kind(), FirmwareSourceViewModel::Stm32Firmware);
+    ASSERT_EQ(flash().kinds().size(), 1);
+    EXPECT_EQ(flash().kinds().front().toMap().value(QStringLiteral("title")).toString(),
+              QStringLiteral("Firmware for STM32L0 cat. 3, 64 KiB"));
+    EXPECT_EQ(flash().targetId(), QStringLiteral("stm32l0-cat3-64k"));
+    EXPECT_TRUE(flash().stm32());
+    flash().setKind(FirmwareSourceViewModel::AppFirmware); // no Nordic cards on this device
+    EXPECT_EQ(flash().kind(), FirmwareSourceViewModel::Stm32Firmware);
+    EXPECT_FALSE(flash().eraseChip());
+    EXPECT_TRUE(flash().keepEeprom());
+    flash().setEraseChip(true);
+    EXPECT_FALSE(flash().keepEeprom()); // erasing the chip erases the EEPROM too
+    flash().setEraseChip(false);
+    // A .bin starts at the flash start; the address is validated.
+    ASSERT_TRUE(load(writeFile("fw.bin", QByteArray(1024, '\x5A'))));
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Ready);
+    EXPECT_TRUE(source().binAddressVisible());
+    EXPECT_EQ(source().binAddress(), QStringLiteral("0x08000000"));
+    EXPECT_TRUE(source().sourceSummary().contains(QStringLiteral("from 0x08000000")))
+        << source().sourceSummary().toStdString();
+    source().setBinAddress(QStringLiteral("0x08000002"));
+    EXPECT_FALSE(source().binAddressError().isEmpty()); // not a multiple of 4
+    source().setBinAddress(QStringLiteral("nope"));
+    EXPECT_FALSE(flash().canFlash());
+    source().setBinAddress(QStringLiteral("0x08000400"));
+    EXPECT_TRUE(flash().canFlash()) << flash().cannotFlashReason().toStdString();
+    flash().flash();
+    ASSERT_TRUE(finished());
+    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
+        << flash().error().detail().toStdString();
+    EXPECT_EQ(flash().chipText(), QStringLiteral("Chip: STM32L0 cat. 3, 64 KiB"));
+}
+
+TEST_F(Stm32FlashTest, EepromRecordsNeedKeepEepromOff) {
+    startChip(stm32Scenario(0), QStringLiteral("stm32l0-cat3-64k"));
+    ASSERT_TRUE(load(writeFile("ee.bin", QByteArray(16, '\x01'))));
+    source().setBinAddress(QStringLiteral("0x08080000"));
+    EXPECT_TRUE(source().hasEeprom());
+    EXPECT_FALSE(flash().canFlash());
+    flash().setKeepEeprom(false);
+    EXPECT_TRUE(flash().canFlash()) << flash().cannotFlashReason().toStdString();
+    flash().flash();
+    ASSERT_TRUE(finished());
+    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
+        << flash().error().detail().toStdString();
+}
+
+TEST_F(Stm32FlashTest, ABinOnTheChesterCardIsRefused) {
+    start(probeScenario());
+    ASSERT_TRUE(load(writeFile("fw.bin", QByteArray(64, '\x5A'))));
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Invalid);
+    EXPECT_EQ(source().kindHint(),
+              QStringLiteral("A .bin file can only be flashed to an STM32 chip."));
+    EXPECT_EQ(source().suggestedKind(), -1);
+}
+
+// ADR-0276: target.protected offers [Unlock…]; the confirmation names what is lost.
+TEST_F(Stm32FlashTest, ProtectedChipOffersUnlock) {
+    startChip(stm32Scenario(1), QStringLiteral("stm32l0-cat3-64k"));
+    ASSERT_TRUE(load(writeFile("fw.bin", QByteArray(64, '\x5A'))));
+    flash().flash();
+    ASSERT_TRUE(finished());
+    ASSERT_EQ(flash().opState(), FlashViewModel::Failed);
+    EXPECT_EQ(flash().error().code(), QStringLiteral("target.protected"));
+    EXPECT_EQ(flash().errorCustomActionText(), QStringLiteral("Unlock…"));
+    QSignalSpy requested(&flash(), &FlashViewModel::confirmationRequested);
+    flash().triggerCustomAction();
+    ASSERT_EQ(requested.count(), 1);
+    const QVariantMap confirmation = flash().confirmation();
+    EXPECT_EQ(confirmation.value(QStringLiteral("title")).toString(),
+              QStringLiteral("Unlock the STM32L0 cat. 3, 64 KiB?"));
+    EXPECT_EQ(confirmation.value(QStringLiteral("items")).toStringList(),
+              (QStringList{QStringLiteral("Firmware (flash)"), QStringLiteral("Data EEPROM")}));
+    EXPECT_EQ(confirmation.value(QStringLiteral("acceptText")).toString(),
+              QStringLiteral("Unlock and erase"));
+    flash().confirm();
+    ASSERT_TRUE(finished());
+    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
+        << flash().error().detail().toStdString();
+    EXPECT_EQ(flash().resultText(),
+              QStringLiteral("The STM32L0 cat. 3, 64 KiB was unlocked; it is now erased."));
+}
+
+// ADR-0275: another chip -> [Use <found>] switches the tab's chip (never silently).
+TEST_F(Stm32FlashTest, WrongChipOffersTheFoundChip) {
+    startChip(stm32Scenario(0, 0x447, 192), QStringLiteral("stm32l0-cat3-64k"));
+    ASSERT_TRUE(load(writeFile("fw.bin", QByteArray(64, '\x5A'))));
+    flash().flash();
+    ASSERT_TRUE(finished());
+    ASSERT_EQ(flash().opState(), FlashViewModel::Failed);
+    EXPECT_EQ(flash().error().code(), QStringLiteral("target.wrong_chip"));
+    EXPECT_EQ(tab().consoleTargetId(), QStringLiteral("stm32l0-cat3-64k"));
+    EXPECT_EQ(flash().errorCustomActionText(), QStringLiteral("Use STM32L0 cat. 5, 192 KiB"));
+    flash().triggerCustomAction();
+    EXPECT_EQ(tab().consoleTargetId(), QStringLiteral("stm32l0-cat5-192k"));
+    EXPECT_EQ(flash().targetId(), QStringLiteral("stm32l0-cat5-192k"));
+}
+
+TEST_F(Stm32FlashTest, MaintenanceErasesAndUnlocksTheChip) {
+    startChip(stm32Scenario(0), QStringLiteral("stm32l0-cat3-64k"));
+    EXPECT_FALSE(flash().eraseCodeAvailable());
+    EXPECT_TRUE(flash().eraseAllAvailable()); // without the expert setting
+    EXPECT_TRUE(flash().recoverAvailable());
+    EXPECT_EQ(flash().eraseAllText(), QStringLiteral("Erase chip…"));
+    EXPECT_EQ(flash().recoverText(), QStringLiteral("Unlock (erase)…"));
+    EXPECT_EQ(flash().maintenanceTitle(), QStringLiteral("Maintenance — STM32L0 cat. 3, 64 KiB"));
+    flash().requestConfirmation(false);
+    EXPECT_EQ(flash().confirmation().value(QStringLiteral("acceptText")).toString(),
+              QStringLiteral("Erase chip"));
+    flash().confirm();
+    ASSERT_TRUE(finished());
+    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
+        << flash().error().detail().toStdString();
+    EXPECT_EQ(flash().resultText(),
+              QStringLiteral("The STM32L0 cat. 3, 64 KiB was erased (flash and data EEPROM)."));
 }
 
 } // namespace

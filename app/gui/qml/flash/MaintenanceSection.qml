@@ -4,7 +4,8 @@
 // (ConfirmDialog, ADR-0038, texts of the view model) and the choice Application MCU | LTE MCU
 // above the buttons. [Erase application] exists only where the profile erases code only by
 // default (not on the LTE MCU). The troubleshooting hand-off of target.protected shows [Recover…]
-// once (vm.recoverAvailable) and unfolds the section (vm.maintenanceExpanded).
+// once (vm.recoverAvailable) and unfolds the section (vm.maintenanceExpanded). Plan 0039: on an
+// STM32 chip the two are [Erase chip…] and [Unlock (erase)…], always shown.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -123,7 +124,7 @@ FlashCard {
         HButton {
             objectName: "eraseAllButton"
             visible: card.vm ? card.vm.eraseAllAvailable : false
-            text: qsTr("Erase everything…")
+            text: card.vm ? card.vm.eraseAllText : ""
             enabled: card.vm ? card.vm.canRunMaintenance : false
             onClicked: card.confirmRequested(false)
         }
@@ -131,7 +132,7 @@ FlashCard {
         HButton {
             objectName: "recoverButton"
             visible: card.vm ? card.vm.recoverAvailable : false
-            text: qsTr("Recover…")
+            text: card.vm ? card.vm.recoverText : ""
             enabled: card.vm ? card.vm.canRunMaintenance : false
             onClicked: card.confirmRequested(true)
         }

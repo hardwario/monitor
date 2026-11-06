@@ -330,6 +330,41 @@ FlashCard {
         }
     }
 
+    // Plan 0039 (ADR-0280 D5): the start address of a .bin file (default: the chip's flash start).
+    RowLayout {
+        objectName: "binAddressRow"
+        Layout.fillWidth: true
+        visible: card.source ? card.source.binAddressVisible : false
+        spacing: Theme.spacingS
+
+        Label {
+            text: qsTr("Start address")
+            color: Theme.text
+        }
+
+        TextField {
+            id: binAddressField
+
+            objectName: "binAddressField"
+            Layout.preferredWidth: 160
+            text: card.source ? card.source.binAddress : ""
+            font: Theme.fontMono
+            Accessible.name: qsTr("Start address of the .bin file")
+            onTextEdited: card.source.binAddress = binAddressField.text
+        }
+
+        Label {
+            objectName: "binAddressError"
+            textFormat: Text.PlainText
+            Layout.fillWidth: true
+            visible: card.source ? card.source.binAddressError !== "" : false
+            text: card.source ? card.source.binAddressError : ""
+            font: Theme.fontUiSmall
+            color: Theme.error
+            wrapMode: Text.Wrap
+        }
+    }
+
     // A file of another kind: hint + [Switch] (the kind never changes silently, ADR-0040).
     Rectangle {
         objectName: "kindHint"
@@ -363,6 +398,7 @@ FlashCard {
 
             HButton {
                 objectName: "switchKind"
+                visible: card.source ? card.source.suggestedKind >= 0 : false
                 text: qsTr("Switch")
                 onClicked: card.source.acceptSuggestedKind()
             }

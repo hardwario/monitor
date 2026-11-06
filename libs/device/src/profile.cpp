@@ -232,6 +232,11 @@ QString targetDisplayName(const TargetProfile& target) {
     return QCoreApplication::translate("hwio::device", source.c_str());
 }
 
+QString profileDisplayName(const DeviceProfile& profile) {
+    const std::string source(profile.displayName);
+    return QCoreApplication::translate("hwio::device", source.c_str());
+}
+
 QString guideStepTitle(const ConnectionGuideStep& step) {
     return QCoreApplication::translate("hwio::device", step.titleSourceText);
 }
@@ -445,6 +450,18 @@ Status checkFlashWrite(const TargetProfile& target, std::uint32_t address, std::
                       std::format("UICR 0x{:08X}-0x{:08X}", target.uicr.start, target.uicr.end)));
     }
     return {};
+}
+
+bool hasConsole(const DeviceProfile& profile) noexcept {
+    return std::ranges::any_of(
+        profile.targets, [](const TargetProfile& target) { return !target.rttTerminal.empty(); });
+}
+
+std::string_view tabTargetId(const DeviceProfile& profile, std::string_view requested) noexcept {
+    if (!hasConsole(profile) && findTarget(profile, requested) != nullptr) {
+        return findTarget(profile, requested)->id;
+    }
+    return consoleTargetId(profile);
 }
 
 std::string_view consoleTargetId(const DeviceProfile& profile) noexcept {

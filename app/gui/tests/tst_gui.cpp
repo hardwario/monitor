@@ -142,6 +142,19 @@ public:
                                                 static_cast<std::uint32_t>(serial), product);
     }
 
+    // Plan 0039: a tab of the STM32 chip device on `chip`.
+    Q_INVOKABLE bool configureStm32Tab(int index, const QString& chip, int serial,
+                                       const QString& product) {
+        hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);
+        return tab != nullptr && tab->configure(QStringLiteral("stm32"), chip,
+                                                static_cast<std::uint32_t>(serial), product);
+    }
+
+    // Plan 0039: a raw binary of `size` bytes (0x5A).
+    Q_INVOKABLE [[nodiscard]] QUrl writeBin(const QString& name, int size) const {
+        return write(name, QByteArray(size, '\x5A'));
+    }
+
     // Plan 0012: a Bluetooth tab (as restored: Disconnected).
     Q_INVOKABLE bool configureBleTab(int index, const QString& id, const QString& name) {
         hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);

@@ -474,6 +474,49 @@ Item {
                             }
                         }
 
+                        // Plan 0039 (ADR-0274): a device without a console (STM32 chip) - which
+                        // chip; the hint names the chips the entry covers.
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            visible: page.picker.targetChoice
+                            spacing: Theme.spacingXs
+
+                            Label {
+                                text: qsTr("Chip")
+                                font: Theme.fontUiStrong
+                                color: Theme.text
+                            }
+
+                            ComboBox {
+                                id: chipBox
+
+                                objectName: "chipBox"
+                                Layout.preferredWidth: 320
+                                implicitHeight: Theme.controlHeight
+                                model: page.picker.targets
+                                textRole: "title"
+                                valueRole: "id"
+                                currentIndex: chipBox.indexOfValue(page.picker.targetId)
+                                Accessible.name: qsTr("Chip")
+                                onActivated: page.picker.targetId = chipBox.currentValue
+
+                                FocusRing {
+                                    control: chipBox
+                                    radiusOffset: Theme.radiusS
+                                }
+                            }
+
+                            Label {
+                                objectName: "chipHint"
+                                textFormat: Text.PlainText
+                                Layout.fillWidth: true
+                                text: chipBox.currentIndex >= 0 && page.picker.targets.length > chipBox.currentIndex ? page.picker.targets[chipBox.currentIndex].hint : ""
+                                font: Theme.fontUiSmall
+                                color: Theme.textMuted
+                                wrapMode: Text.Wrap
+                            }
+                        }
+
                         RowLayout {
                             Layout.fillWidth: true
 

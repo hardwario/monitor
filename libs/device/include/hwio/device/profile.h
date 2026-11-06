@@ -199,6 +199,15 @@ struct DeviceProfile {
 // target with an RTT console (CHESTER: app), else the first target; "" for a profile without one.
 [[nodiscard]] std::string_view consoleTargetId(const DeviceProfile& profile) noexcept;
 
+// Plan 0039 (ADR-0274, amends ADR-0233): the target a J-Link tab of `profile` uses. A profile with
+// an RTT console uses its console target whatever was requested; a profile without any console
+// (the "STM32 chip" device: one target per chip) uses the requested target (the chosen chip), or
+// its first target when the request is unknown. "" for a profile without targets.
+[[nodiscard]] std::string_view tabTargetId(const DeviceProfile& profile,
+                                           std::string_view requested) noexcept;
+// The profile has a target with an RTT console.
+[[nodiscard]] bool hasConsole(const DeviceProfile& profile) noexcept;
+
 // Size of the Product Information Block.
 inline constexpr std::uint32_t pibSize = 128;
 
@@ -263,6 +272,9 @@ designatedFirmwareOf(const TargetProfile& target) noexcept;
 
 // The translated display name of `target` (ADR-0027), e.g. "application".
 [[nodiscard]] QString targetDisplayName(const TargetProfile& target);
+// The display name of `profile` for the UI: product names stay as they are ("CHESTER"); a
+// generic device name is translated ("STM32 chip", context "hwio::device", plan 0039).
+[[nodiscard]] QString profileDisplayName(const DeviceProfile& profile);
 
 // The translated title / body of a connection guide step and the translated power hint of a
 // profile (ADR-0077).

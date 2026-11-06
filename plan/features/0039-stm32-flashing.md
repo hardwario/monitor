@@ -312,10 +312,17 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
 
 ### Phase C — GUI
 
-- [ ] C1 Add device: STM32 profile, "Chip" picker.
-- [ ] C2 Flash page: STM32 card, `.bin` address field, protected / wrong-chip states, Unlock confirmation.
-- [ ] C3 Maintenance for STM32; console page text for chips without a console.
-- [ ] C4 Qt Quick tests; screenshots with the fake J-Link kit (`../screenshots-demo`).
+- [x] C1 Add device: STM32 profile, "Chip" picker.
+- [x] C2 Flash page: STM32 card, `.bin` address field, protected / wrong-chip states, Unlock confirmation.
+- [x] C3 Maintenance for STM32; console page text for chips without a console.
+      Implementation notes: a profile without any console keeps the chosen chip as the tab's target
+      (`device::tabTargetId`, amends ADR-0233 for such profiles, as ADR-0274 says); `FirmwareSourceViewModel::Kind`
+      `Stm32Firmware` (`.bin` loaded as `SourceClass::Binary` and placed at the start address when flashed);
+      "Keep data EEPROM" decides `allowUicr` (= allow EEPROM) of the flash; [Unlock…] / [Use <found chip>] are the
+      result ErrorPanel's custom action; `DeviceTabViewModel::changeTarget` switches the chip (session reopened);
+      wizard illustration slot `stm32-swd-cable` (placeholder, LFS).
+- [ ] C4 Qt Quick tests; screenshots with the fake J-Link kit (`../screenshots-demo`). (tests done: `tst_stm32.qml`,
+      `Stm32FlashTest`, `ProbePickerTest.Stm32DeviceHasAChipChoice`; screenshots open)
 - [ ] C5 Translations: `update_translations`, Czech (+ DE / SK / PL per plan 0030) entries; docs page
       "Flashing STM32 chips" (5 languages, plan 0029 structure).
 

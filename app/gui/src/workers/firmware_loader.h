@@ -54,6 +54,9 @@ enum class SourceClass : std::uint8_t {
     IntelHex,  // an application image (app or lte MCU)
     LteBundle, // zip with modem.zip + application.hex
     ModemZip,  // Nordic modem firmware zip (mfw_nrf91*.zip)
+    // Plan 0039 (ADR-0280 D5): a raw binary (.bin); `image` holds its bytes at address 0 and the
+    // flash places them at the chosen start address (FirmwareImage::fromBinary).
+    Binary,
 };
 
 struct LoadedSource {
@@ -162,8 +165,9 @@ private:
     std::jthread m_worker; // last member: started last, joined first
 };
 
-// Loads and classifies `path` (the worker's step; exposed for tests). Errors: those of
-// firmware::classifyLteInput (io.*, firmware.invalid_image, firmware.hex_parse_error).
+// Loads and classifies `path` (the worker's step; exposed for tests): a .bin file as Binary (plan
+// 0039), anything else by firmware::classifyLteInput. Errors: those of classifyLteInput (io.*,
+// firmware.invalid_image, firmware.hex_parse_error) and of firmware::readFirmwareFile.
 [[nodiscard]] Result<LoadedSource> loadFirmwareFile(const std::filesystem::path& path);
 
 } // namespace hwio::gui

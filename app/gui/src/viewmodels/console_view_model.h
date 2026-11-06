@@ -93,6 +93,9 @@ class ConsoleViewModel : public QObject {
     Q_PROPERTY(bool deviceActive READ deviceActive NOTIFY stateChanged)
     // Not connected and no lines: the "Not connected" empty state with [Connect].
     Q_PROPERTY(bool showConnectState READ showConnectState NOTIFY stateChanged)
+    // Plan 0039 (ADR-0280 D8): the tab's target has no console (an STM32 chip): the page explains
+    // it instead of the connect state and the console panes.
+    Q_PROPERTY(bool hasConsole READ targetHasConsole NOTIFY stateChanged)
     Q_PROPERTY(bool canReset READ canReset NOTIFY stateChanged)
     // Plan 0012 (ADR-0079, ADR-0081): the transport can reset the device (not Bluetooth): the
     // Reset action is shown.

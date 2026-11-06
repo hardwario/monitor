@@ -89,7 +89,11 @@ TEST_F(ConsoleTools, RegistersEveryPhaseCTool) {
                                             "flash",
                                             "flash_lte",
                                             "erase",
-                                            "recover"};
+                                            "recover",
+                                            "stm32_info",
+                                            "stm32_flash",
+                                            "stm32_erase",
+                                            "stm32_unlock"};
     EXPECT_EQ(names, expected);
 }
 
