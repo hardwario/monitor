@@ -1,10 +1,10 @@
 # 0039 — STM32 flashing over J-Link (framework, generic STM32 device)
 
-- **Status:** Draft
+- **Status:** Approved (approved by the user 2026-11-06 with all recommended options)
 - **Milestone:** 2.0.0-rc.4 (user decision 2026-11-06)
 - **Author:** Matej Strnad (with Claude), 2026-11-06
 - **Related ADRs:** ADR-0015, ADR-0031, ADR-0032, ADR-0035–ADR-0040, ADR-0050, ADR-0057, ADR-0099, ADR-0160,
-  ADR-0165, ADR-0174; accepted here: ADR-0274 … ADR-0277, ADR-0279
+  ADR-0165, ADR-0174; accepted here: ADR-0274 … ADR-0277, ADR-0279, ADR-0280
 - **Depends on:** [0003](0003-m2-flashing.md) (flash pipeline), [0006](0006-m3-flash-settings.md) (Flash page),
   [0013](0013-m6-mcp-core-cli.md) (target operations)
 - **Followed by:** [0040](0040-chester-lrw-module.md) (CHESTER LoRaWAN module: `lrw` target, prepared firmware)
@@ -213,11 +213,11 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
 | D2 | Which chips can be chosen? | curated list / + free J-Link name / whole J-Link list | **Curated list** (2026-11-06) | ADR-0275 |
 | D3 | Detected chip vs chosen chip | verify, block on mismatch / detect and preselect / warn only | **Verify, block on mismatch** (2026-11-06) | ADR-0275 |
 | D4 | Read-out protection | offer unlock with confirmation / report only | **Offer unlock, never automatic** (2026-11-06) | ADR-0276 |
-| D5 | `.bin` files | accept with address (default flash start) / `.hex` only | proposed: accept, default `0x08000000` | — |
+| D5 | `.bin` files | accept with address (default flash start) / `.hex` only | **Accept `.bin`, default address `0x08000000`** (approved 2026-11-06) | ADR-0280 |
 | D6 | CLI naming | `chester lrw` + `stm32` / `chester lora` + `stm32` | **`hwio chester lrw …` + `hwio stm32 … --chip`** (2026-11-06) | ADR-0277 |
-| D7 | Unlock implementation | own option-byte sequence / J-Link built-in unsecure | proposed: own sequence, decided by Phase 0 P0.4 | — |
-| D8 | Tab without a console | Flash + Maintenance only, console page explains / hide the console page | proposed: console page with explanation | — |
-| D9 | MCP tools for STM32 | yes (unlock needs confirm + GUI approval) / no MCP | proposed: yes | — |
+| D7 | Unlock implementation | own option-byte sequence / J-Link built-in unsecure | **Own option-byte sequence; Phase 0 P0.4 confirms (a change needs a plan update)** (approved 2026-11-06) | ADR-0280 |
+| D8 | Tab without a console | Flash + Maintenance only, console page explains / hide the console page | **Console page with explanation** (approved 2026-11-06) | ADR-0280 |
+| D9 | MCP tools for STM32 | yes (unlock needs confirm + GUI approval) / no MCP | **Yes; unlock needs `confirm: true` + GUI approval** (approved 2026-11-06) | ADR-0280 |
 | D10 | Which parts are in the first curated list | the two known chips only / **the whole STM32L0 family, generic, prepared firmware later** | **Generic for the STM32L0 family; prepared firmware is added per part when HARDWARIO has it** (2026-11-06: "do it generically for these chips, we'll get the firmware later; they are similar STM32 everywhere") | ADR-0279 |
 
 ## Implementation steps

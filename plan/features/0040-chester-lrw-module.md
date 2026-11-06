@@ -1,10 +1,10 @@
 # 0040 — CHESTER LoRaWAN module (`lrw` target, prepared firmware)
 
-- **Status:** Draft
+- **Status:** Approved (approved by the user 2026-11-06 with all recommended options; D6 stays open)
 - **Milestone:** 2.0.0-rc.4 (user decision 2026-11-06)
 - **Author:** Matej Strnad (with Claude), 2026-11-06
 - **Related ADRs:** ADR-0037, ADR-0038, ADR-0057, ADR-0077, ADR-0165, ADR-0174, ADR-0274 … ADR-0277; accepted
-  here: ADR-0278
+  here: ADR-0278, ADR-0281
 - **Depends on:** [0039](0039-stm32-flashing.md) (STM32 framework)
 
 ## Context
@@ -94,10 +94,10 @@ version before downloading.
 | # | Question | Options | Decision (by user) | ADR |
 |---|---|---|---|---|
 | D1 | Prepared firmware for the ABZ module | lora-modem 1.4.1 chester / HARDWARIO-hosted copy / other | **lora-modem 1.4.1 `chester.hex` from the GitHub release** (2026-11-06) | ADR-0278 |
-| D2 | If the downloader cannot follow GitHub's redirect | allow HTTPS cross-host redirects for designated firmware / re-host on docs.hardwario.com | proposed: allow HTTPS → HTTPS redirects to `*.githubusercontent.com` only | — |
-| D3 | Card name | "LoRaWAN module" / "LoRaWAN modem" / "LRW module" | proposed: "LoRaWAN module" | — |
-| D4 | Check module after flashing | offer "Check module" over the app console / no check | proposed: offer it (needs the app's `lrw` command name, P0.4) | — |
-| D5 | Flash wizard (0010) | add the third choice in rc.4 / later | proposed: later (0010 is already in rc.4 scope) | — |
+| D2 | If the downloader cannot follow GitHub's redirect | allow HTTPS cross-host redirects for designated firmware / re-host on docs.hardwario.com | **Allow HTTPS → HTTPS redirects to `*.githubusercontent.com` only** (approved 2026-11-06) | ADR-0281 |
+| D3 | Card name | "LoRaWAN module" / "LoRaWAN modem" / "LRW module" | **"LoRaWAN module"** (approved 2026-11-06) | ADR-0281 |
+| D4 | Check module after flashing | offer "Check module" over the app console / no check | **Offer "Check module"** (approved 2026-11-06; command from P0.4) | ADR-0281 |
+| D5 | Flash wizard (0010) | add the third choice in rc.4 / later | **Later (after rc.4)** (approved 2026-11-06) | ADR-0281 |
 | D6 | CHESTER v2 LoRaWAN module | own part + firmware when known / same part | open: the user to tell which chip `ctr_lrw_v2` uses | — |
 
 ## Implementation steps
