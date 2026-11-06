@@ -14,6 +14,7 @@ add_executable(hwio_mcp_tools_tests
 if(HWIO_TEST_OVERRIDES)
     target_sources(hwio_mcp_tools_tests PRIVATE
         jlink_tools_test.cpp
+        stm32_tools_test.cpp
         owner_thread_test.cpp
         session_provider.h)
     target_include_directories(hwio_mcp_tools_tests PRIVATE

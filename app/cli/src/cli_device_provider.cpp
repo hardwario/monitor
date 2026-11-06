@@ -329,6 +329,8 @@ Result<DeviceRef> CliDeviceProvider::openSession(const hwio::mcp::tools::OpenReq
         options.speedKhz = m_options.speedGiven ? m_options.speedKhz : target->defaultSpeedKhz;
     }
     options.latencyMs = target->defaultLatencyMs;
+    // Plan 0039 (ADR-0280 D8): a chip without a console (STM32) is opened without RTT.
+    options.attachRtt = !target->rttTerminal.empty();
     options.autoReconnect = request.autoReconnect.value_or(m_options.autoReconnect);
     options.consoleLog = consoleLog;
     options.consoleFileDir = m_options.consoleFileDir;

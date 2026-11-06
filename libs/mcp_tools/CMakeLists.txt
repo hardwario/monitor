@@ -21,6 +21,7 @@ hwio_add_backend_library(hwio_mcp_tools
     src/tools/console_tools.cpp
     src/tools/discovery_tools.cpp
     src/tools/firmware_tools.cpp
+    src/tools/stm32_tools.cpp
     src/tools/session_tools.cpp
     src/tools/target_tools.cpp
     src/tools/tools.h)

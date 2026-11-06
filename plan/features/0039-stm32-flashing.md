@@ -305,7 +305,10 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
       Implementation notes: `flash` also takes `--allow-eeprom` (the CLI form of the card's data EEPROM
       consent) and `--yes` for `--erase-all` (ADR-0038); the fake J-Link library has an STM32L0 model
       (`"family": "stm32l0"`) that reproduces the Phase 0 behaviour.
-- [ ] B2 MCP tools (if D9 = yes); tests; `plan/0004-mcp.md` tool table.
+- [x] B2 MCP tools (if D9 = yes); tests; `plan/0004-mcp.md` tool table.
+      Implementation notes: `stm32_flash` with `erase_all` asks flash + erase; `stm32_unlock` validates
+      `confirm == true` in the schema step (JSON-RPC -32602) before any consent; the tools refuse non-STM32 targets;
+      the CLI MCP provider opens console-less targets without RTT.
 
 ### Phase C — GUI
 

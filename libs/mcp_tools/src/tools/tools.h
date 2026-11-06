@@ -26,6 +26,8 @@ namespace hwio::mcp::tools::detail {
 // flash, flash_lte, erase, recover
 [[nodiscard]] hwio::Status registerFirmwareTools(hwio::mcp::Registry& registry,
                                                  ToolsContext& context);
+// stm32_info, stm32_flash, stm32_erase, stm32_unlock (plan 0039 B2)
+[[nodiscard]] hwio::Status registerStm32Tools(hwio::mcp::Registry& registry, ToolsContext& context);
 // debug_device
 [[nodiscard]] hwio::Status registerPrompts(hwio::mcp::Registry& registry);
 [[nodiscard]] QString debugDevicePromptText();
