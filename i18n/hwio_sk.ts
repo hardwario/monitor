@@ -347,7 +347,6 @@
     </message>
     <message>
         <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="122"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="259"/>
         <source>Refresh</source>
         <translation>Obnoviť</translation>
     </message>
@@ -388,48 +387,18 @@
         <translation>Programátory J-Link pripojené k tomuto počítaču. Zoznam sa obnovuje automaticky.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="251"/>
-        <source>Probe</source>
-        <translation>Programátor</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="275"/>
-        <source>Looking for J-Link probes…</source>
-        <translation>Hľadanie programátorov J-Link…</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="381"/>
-        <source>FW %1</source>
-        <translation>FW %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="397"/>
-        <source>Updating firmware…</source>
-        <translation>Aktualizuje sa firmvér…</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="398"/>
-        <source>In use by another program (%1)</source>
-        <translation>Používa ho iný program (%1)</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="399"/>
-        <source>In use (tab %1)</source>
-        <translation>Používa sa (karta %1)</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="437"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="456"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="253"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="272"/>
         <source>Device</source>
         <translation>Zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="483"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="299"/>
         <source>Choose a free probe in the list above.</source>
         <translation>Vyberte v zozname vyššie voľný programátor.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="496"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="312"/>
         <source>Connect</source>
         <translation>Pripojiť</translation>
     </message>
@@ -1956,6 +1925,49 @@
     </message>
 </context>
 <context>
+    <name>ProbeList</name>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="39"/>
+        <source>Probe</source>
+        <translation>Programátor</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="47"/>
+        <source>Refresh</source>
+        <translation>Obnoviť</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="63"/>
+        <source>Looking for J-Link probes…</source>
+        <translation>Hľadanie programátorov J-Link…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="73"/>
+        <source>No J-Link found. Connect the J-Link to a USB port of this computer.</source>
+        <translation>Nenašiel sa žiadny J-Link. Pripojte J-Link do USB portu tohto počítača.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="185"/>
+        <source>FW %1</source>
+        <translation>FW %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="201"/>
+        <source>Updating firmware…</source>
+        <translation>Aktualizuje sa firmvér…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="202"/>
+        <source>In use by another program (%1)</source>
+        <translation>Používa ho iný program (%1)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="203"/>
+        <source>In use (tab %1)</source>
+        <translation>Používa sa (karta %1)</translation>
+    </message>
+</context>
+<context>
     <name>ProgressCard</name>
     <message>
         <location filename="../app/gui/qml/flash/ProgressCard.qml" line="38"/>
@@ -2188,45 +2200,45 @@
         <translation>Vybrať súbor s firmvérom</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="408"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="410"/>
         <source>New device tab</source>
         <translation>Nová karta zariadenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="411"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="413"/>
         <source>Close the device tab</source>
         <translation>Zavrieť kartu zariadenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="414"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="417"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="416"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="419"/>
         <source>Next tab</source>
         <translation>Ďalšia karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="420"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="423"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="422"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="425"/>
         <source>Previous tab</source>
         <translation>Predchádzajúca karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="426"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="428"/>
         <source>Settings</source>
         <translation>Nastavenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="429"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="431"/>
         <source>Connect or disconnect</source>
         <translation>Pripojiť alebo odpojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="432"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="434"/>
         <source>Reconnect</source>
         <translation>Znova pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="435"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="438"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="437"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="440"/>
         <source>Keyboard shortcuts</source>
         <translation>Klávesové skratky</translation>
     </message>
@@ -4823,7 +4835,7 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1174"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1191"/>
         <source>Copied to clipboard.</source>
         <translation>Skopírované do schránky.</translation>
     </message>

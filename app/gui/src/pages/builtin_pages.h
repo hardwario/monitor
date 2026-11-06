@@ -2,7 +2,8 @@
 
 // The built-in pages (plan/features/0004-m3-gui-shell.md, B1): the console page of plan 0005
 // (registerConsolePage) and the Flash page and the global Settings page of plan 0006
-// (registerFlashAndSettingsPages), then MCP in the GUI of plan 0014 (registerMcp, ADR-0243).
+// (registerFlashAndSettingsPages), then MCP in the GUI of plan 0014 (registerMcp, ADR-0243) and the
+// Embedded `probe-picker` wizard step of plan 0035 (registerProbePickerStep, ADR-0252).
 
 namespace hwio::gui {
 

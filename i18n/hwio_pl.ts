@@ -347,7 +347,6 @@
     </message>
     <message>
         <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="122"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="259"/>
         <source>Refresh</source>
         <translation>Odśwież</translation>
     </message>
@@ -388,48 +387,18 @@
         <translation>Programatory J-Link podłączone do tego komputera. Lista odświeża się automatycznie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="251"/>
-        <source>Probe</source>
-        <translation>Programator</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="275"/>
-        <source>Looking for J-Link probes…</source>
-        <translation>Wyszukiwanie programatorów J-Link…</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="381"/>
-        <source>FW %1</source>
-        <translation>FW %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="397"/>
-        <source>Updating firmware…</source>
-        <translation>Aktualizacja firmware…</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="398"/>
-        <source>In use by another program (%1)</source>
-        <translation>Używany przez inny program (%1)</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="399"/>
-        <source>In use (tab %1)</source>
-        <translation>W użyciu (karta %1)</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="437"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="456"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="253"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="272"/>
         <source>Device</source>
         <translation>Urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="483"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="299"/>
         <source>Choose a free probe in the list above.</source>
         <translation>Wybierz wolny programator z powyższej listy.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="496"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="312"/>
         <source>Connect</source>
         <translation>Połącz</translation>
     </message>
@@ -1956,6 +1925,49 @@
     </message>
 </context>
 <context>
+    <name>ProbeList</name>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="39"/>
+        <source>Probe</source>
+        <translation>Programator</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="47"/>
+        <source>Refresh</source>
+        <translation>Odśwież</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="63"/>
+        <source>Looking for J-Link probes…</source>
+        <translation>Wyszukiwanie programatorów J-Link…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="73"/>
+        <source>No J-Link found. Connect the J-Link to a USB port of this computer.</source>
+        <translation>Nie znaleziono J-Linka. Podłącz J-Link do portu USB tego komputera.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="185"/>
+        <source>FW %1</source>
+        <translation>FW %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="201"/>
+        <source>Updating firmware…</source>
+        <translation>Aktualizacja firmware…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="202"/>
+        <source>In use by another program (%1)</source>
+        <translation>Używany przez inny program (%1)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ProbeList.qml" line="203"/>
+        <source>In use (tab %1)</source>
+        <translation>W użyciu (karta %1)</translation>
+    </message>
+</context>
+<context>
     <name>ProgressCard</name>
     <message>
         <location filename="../app/gui/qml/flash/ProgressCard.qml" line="38"/>
@@ -2188,45 +2200,45 @@
         <translation>Wybierz plik firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="408"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="410"/>
         <source>New device tab</source>
         <translation>Nowa karta urządzenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="411"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="413"/>
         <source>Close the device tab</source>
         <translation>Zamknij kartę urządzenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="414"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="417"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="416"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="419"/>
         <source>Next tab</source>
         <translation>Następna karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="420"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="423"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="422"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="425"/>
         <source>Previous tab</source>
         <translation>Poprzednia karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="426"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="428"/>
         <source>Settings</source>
         <translation>Ustawienia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="429"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="431"/>
         <source>Connect or disconnect</source>
         <translation>Połącz lub rozłącz</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="432"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="434"/>
         <source>Reconnect</source>
         <translation>Połącz ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="435"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="438"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="437"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="440"/>
         <source>Keyboard shortcuts</source>
         <translation>Skróty klawiszowe</translation>
     </message>
@@ -4823,7 +4835,7 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1174"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1191"/>
         <source>Copied to clipboard.</source>
         <translation>Skopiowano do schowka.</translation>
     </message>

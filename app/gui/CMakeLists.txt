@@ -27,6 +27,7 @@ set(HWIO_GUI_QML_FILES
     qml/components/Icon.qml
     qml/components/Illustration.qml
     qml/components/PhaseStepper.qml
+    qml/components/ProbeList.qml
     qml/components/ShortcutOverlay.qml
     qml/components/StateDot.qml
     qml/components/StepSpinBox.qml
@@ -76,7 +77,8 @@ set(HWIO_GUI_QML_FILES
     qml/shell/NavRail.qml
     qml/shell/PageHost.qml
     qml/settings/ConsoleSection.qml
-    qml/shell/TabView.qml)
+    qml/shell/TabView.qml
+    qml/wizard/ProbePickerStep.qml)
 set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 file(GLOB HWIO_GUI_ICONS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS
@@ -191,6 +193,8 @@ qt_add_qml_module(hwio_gui
         src/wizard/check_list_model.h
         src/wizard/lte_update_wizard.cpp
         src/wizard/lte_update_wizard.h
+        src/wizard/probe_picker_step.cpp
+        src/wizard/probe_picker_step.h
         src/wizard/report_view_model.cpp
         src/wizard/report_view_model.h
         src/wizard/wizard.cpp

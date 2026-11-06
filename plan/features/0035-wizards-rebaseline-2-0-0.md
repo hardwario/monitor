@@ -1,6 +1,6 @@
 # 0035 — Wizards re-baseline for 2.0.0: probe picker step, amendments to 0008 / 0009 / 0010
 
-- **Status:** Approved (2026-11-04 by Matej Strnad)
+- **Status:** In progress (phase A implemented 2026-11-05; approved 2026-11-04 by Matej Strnad)
 - **Milestone:** 2.0.0 (M4 wizards, re-planned; ADR-0245)
 - **Author:** Matej Strnad (with Claude), 2026-11-04
 - **Related ADRs:** ADR-0245, ADR-0248 (accepted 2026-11-04); ADR-0249, ADR-0250, ADR-0251, ADR-0252, ADR-0253,
@@ -224,11 +224,11 @@ No new error codes. `ble.permission_denied` loses its wizard (ADR-0250, accepted
 ## Implementation steps
 
 Phase A — probe picker (before any wizard)
-- [ ] A0 Prerequisite: this plan and the amended 0008/0009/0010 re-approved; decisions above answered
-- [ ] A1 `ProbeList.qml` extracted; ChooseDevicePage uses it; existing Qt Quick tests (`tst_shell.qml`,
+- [x] A0 Prerequisite: this plan and the amended 0008/0009/0010 re-approved; decisions above answered
+- [x] A1 `ProbeList.qml` extracted; ChooseDevicePage uses it; existing Qt Quick tests (`tst_shell.qml`,
   `tst_screenshots.qml`) green without screenshot changes
-- [ ] A2 `ProbePickerViewModel` wizard mode + `selectedSerial()` + GTest (`probe_picker_view_model_test.cpp`)
-- [ ] A3 `ProbePickerStep.qml`, `registerProbePickerStep`, `AppViewModel::makeProbePicker` + Qt Quick test with the
+- [x] A2 `ProbePickerViewModel` wizard mode + `selectedSerial()` + GTest (`probe_picker_view_model_test.cpp`)
+- [x] A3 `ProbePickerStep.qml`, `registerProbePickerStep`, `AppViewModel::makeProbePicker` + Qt Quick test with the
   test wizard (`app/gui/tests/support/test_wizard.*`)
 
 Phase B — 0008 (parallel with C)
@@ -271,3 +271,17 @@ Phase E — finish
 - **German length:** wizard footers and check rows at 960 × 600; screenshots in DE are part of E1.
 - **Docs drift:** topic texts and `troubleshooting.md` must change together; the 0037 anchor test catches missing
   anchors but not content drift — review rule in `docs/README.md`.
+
+## Implementation notes (phase A, 2026-11-05)
+
+- The GTests are in the existing `app/gui/tests/viewmodels/probe_picker_test.cpp` (no new
+  `probe_picker_view_model_test.cpp`); the Qt Quick tests in `tst_wizard.qml` use the test wizard's
+  `useProbePicker()` hook.
+- `makeProbePicker` sets wizard mode itself, shares the plan 0036 reservation check ("Updating firmware…") and
+  looks up "in use" over all tabs (no own tab). Wizard pickers follow tab changes at once through the new
+  `AppViewModel::probeUsageChanged` signal (emitted where the tabs' pickers are refreshed), not only on the next scan.
+- `registerProbePickerStep` is called from `registerBuiltInPages`.
+- `ProbePickerStep.qml` shows the wizard's `checks` below the list whenever the model has rows; the root is an
+  `Item` + `Column` (a `ColumnLayout` gave "Detected recursive rearrange" with the wrapped check texts).
+- Open for 0008: how the read-only mode reaches the step (`ProbeList.readOnly` and `ProbePickerStep.readOnly`
+  exist, but nothing sets them from a wizard yet).

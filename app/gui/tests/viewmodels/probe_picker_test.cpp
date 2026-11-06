@@ -1,6 +1,7 @@
 // ProbePickerViewModel with the ProbeScanner worker and the fake J-Link library: rows, firmware
 // date, preselection, in use by another tab and by another process (ProbeLock), missing library
-// (plan 0004, B3; ADR-0050, ADR-0058).
+// (plan 0004, B3; ADR-0050, ADR-0058). Plan 0035 (ADR-0252): the wizard mode of a picker made by
+// AppViewModel::makeProbePicker.
 
 #include "gui_test_support.h"
 #include "hwio/device/probe_lock.h"
@@ -9,13 +10,18 @@
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/probe_picker_view_model.h"
+#include "wizard/probe_picker_step.h"
+#include "wizard/wizard_registry.h"
 #include "workers/probe_scanner.h"
 
 #include <QByteArray>
 #include <QModelIndex>
+#include <QObject>
+#include <QPointer>
 #include <QSignalSpy>
 #include <QString>
 #include <QStringLiteral>
+#include <QUrl>
 #include <QVariantMap>
 #include <QtContainerFwd>
 #include <QtEnvironmentVariables>
@@ -27,6 +33,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <system_error>
 
 namespace {
@@ -290,6 +297,98 @@ TEST_F(ProbePickerTest, OneProfileAndTheConsoleTarget) {
               QStringLiteral("Application MCU (nRF52840)"));
     EXPECT_EQ(ProbePickerViewModel::targetTitle(QStringLiteral("chester"), QStringLiteral("lte")),
               QStringLiteral("LTE MCU (nRF9151 / nRF9160)"));
+}
+
+// ---- plan 0035: wizard mode (ADR-0252) ----------------------------------------------------------
+
+TEST_F(ProbePickerTest, WizardStepIsRegistered) {
+    const auto app = makeApp();
+    EXPECT_EQ(app->wizardRegistry().embedded(hwio::gui::probePickerStepName),
+              QUrl(QStringLiteral("qrc:/qt/qml/HardwarioMonitor/qml/wizard/ProbePickerStep.qml")));
+}
+
+TEST_F(ProbePickerTest, WizardModeDisablesProbesOfTabsAndNeverSwitchesTabs) {
+    const auto app = makeApp();
+    ASSERT_TRUE(app->currentTabViewModel()->configure(QStringLiteral("chester"),
+                                                      QStringLiteral("app"), 801000002));
+    app->newTab();
+    const int currentTab = app->currentTab();
+    QObject wizard;
+    ProbePickerViewModel* picker = app->makeProbePicker(&wizard);
+    ASSERT_NE(picker, nullptr);
+    EXPECT_EQ(picker->parent(), &wizard); // Qt parent ownership
+    EXPECT_TRUE(picker->wizardMode());
+    QSignalSpy activate(picker, &ProbePickerViewModel::tabActivationRequested);
+    QSignalSpy connectSpy(picker, &ProbePickerViewModel::connectRequested);
+    EXPECT_FALSE(picker->selectedSerial());
+    picker->setActive(true);
+    ASSERT_TRUE(waitForRows(*picker, 2));
+    // "In use (tab 1)" and disabled; the only free probe is preselected.
+    EXPECT_EQ(role(*picker, 1, ProbePickerViewModel::InUseTabRole).toInt(), 1);
+    EXPECT_FALSE(role(*picker, 1, ProbePickerViewModel::SelectableRole).toBool());
+    EXPECT_TRUE(role(*picker, 0, ProbePickerViewModel::SelectableRole).toBool());
+    EXPECT_EQ(picker->selectedRow(), 0);
+    EXPECT_EQ(picker->selectedSerial(), std::optional<std::uint32_t>(801000001U));
+    picker->choose(1);
+    picker->setSelectedRow(1);
+    EXPECT_EQ(activate.count(), 0);
+    EXPECT_EQ(app->currentTab(), currentTab);
+    EXPECT_EQ(picker->selectedSerial(), std::optional<std::uint32_t>(801000001U));
+    picker->connectSelected(); // no Connect in a wizard
+    EXPECT_EQ(connectSpy.count(), 0);
+    // The tabs' pickers keep their behaviour.
+    ProbePickerViewModel& tabPicker = *app->currentTabViewModel()->picker();
+    EXPECT_FALSE(tabPicker.wizardMode());
+    tabPicker.setActive(true);
+    ASSERT_TRUE(waitForRows(tabPicker, 2));
+    EXPECT_TRUE(role(tabPicker, 1, ProbePickerViewModel::SelectableRole).toBool());
+}
+
+TEST_F(ProbePickerTest, WizardPickerFollowsTabsAndReservations) {
+    const auto app = makeApp();
+    QObject wizard;
+    ProbePickerViewModel* picker = app->makeProbePicker(&wizard);
+    picker->setActive(true);
+    ASSERT_TRUE(waitForRows(*picker, 2));
+    EXPECT_FALSE(picker->selectedSerial()); // two free probes: nothing preselected
+    picker->choose(1);
+    EXPECT_EQ(picker->selectedSerial(), std::optional<std::uint32_t>(801000002U));
+    // A tab (e.g. opened by MCP) takes the selected probe: updated at once, not with the next scan.
+    ASSERT_TRUE(app->currentTabViewModel()->configure(QStringLiteral("chester"),
+                                                      QStringLiteral("app"), 801000002));
+    EXPECT_EQ(role(*picker, 1, ProbePickerViewModel::InUseTabRole).toInt(), 1);
+    EXPECT_EQ(picker->selectedSerial(), std::optional<std::uint32_t>(801000001U)); // the free one
+    // Plan 0036: a probe reserved for a firmware update is not selectable.
+    {
+        const auto reservation = app->sessionRegistry().reserve(801000001);
+        ASSERT_TRUE(reservation.valid());
+        picker->updateFromScanner();
+        EXPECT_TRUE(role(*picker, 0, ProbePickerViewModel::UpdatingFirmwareRole).toBool());
+        EXPECT_FALSE(role(*picker, 0, ProbePickerViewModel::SelectableRole).toBool());
+        EXPECT_FALSE(picker->selectedSerial());
+    }
+    picker->updateFromScanner();
+    EXPECT_EQ(picker->selectedSerial(), std::optional<std::uint32_t>(801000001U));
+}
+
+TEST_F(ProbePickerTest, WizardPickerDestroyedWithAScanPending) {
+    // TSan: the wizard closes while a scan result is on its way to the GUI thread; the picker's
+    // connections end with it and the scanner is released.
+    const auto app = makeApp();
+    hwio::gui::ProbeScanner& scanner = app->probeScanner();
+    for (int i = 0; i < 5; ++i) {
+        auto wizard = std::make_unique<QObject>();
+        QPointer<ProbePickerViewModel> picker = app->makeProbePicker(wizard.get());
+        picker->setActive(true);
+        EXPECT_EQ(scanner.activeCount(), 1);
+        picker->refresh();
+        spin(std::chrono::milliseconds(i * 20));
+        wizard.reset();
+        EXPECT_TRUE(picker.isNull());
+        EXPECT_EQ(scanner.activeCount(), 0);
+    }
+    scanner.scanNow();
+    spin(std::chrono::milliseconds(300));
 }
 
 } // namespace

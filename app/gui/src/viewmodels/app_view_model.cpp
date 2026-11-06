@@ -29,6 +29,7 @@
 #include "viewmodels/page_list_model.h"
 #include "viewmodels/page_registry.h"
 #include "viewmodels/probe_firmware_view_model.h"
+#include "viewmodels/probe_picker_view_model.h"
 #include "viewmodels/shortcut_registry.h"
 #include "viewmodels/update_view_model.h"
 #include "wizard_launcher.h"
@@ -213,6 +214,7 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
         for (int i = 0; i < m_tabs->count(); ++i) {
             m_tabs->at(i)->picker()->updateFromScanner();
         }
+        probeUsageChanged(); // signal
         checkQuit();
     });
     // ADR-0261: a failed update cancels a pending quit (the error stays on screen).
@@ -645,6 +647,7 @@ DeviceTabViewModel* AppViewModel::addTab(std::unique_ptr<DeviceTabViewModel> tab
         for (int i = 0; i < m_tabs->count(); ++i) {
             m_tabs->at(i)->picker()->updateFromScanner();
         }
+        probeUsageChanged(); // signal
     });
     connect(raw, &DeviceTabViewModel::tabActivationRequested, this, &AppViewModel::setCurrentTab);
     connect(raw, &DeviceTabViewModel::closeReady, this, [this, raw] {
@@ -734,6 +737,7 @@ void AppViewModel::removeTab(int index) {
     for (int i = 0; i < m_tabs->count(); ++i) {
         m_tabs->at(i)->picker()->updateFromScanner();
     }
+    probeUsageChanged(); // signal
 }
 
 void AppViewModel::nextTab() {
@@ -814,6 +818,18 @@ void AppViewModel::reconnect() const {
     if (DeviceTabViewModel* tab = currentTabViewModel(); tab != nullptr && !tab->choosing()) {
         tab->reconnect();
     }
+}
+
+ProbePickerViewModel* AppViewModel::makeProbePicker(QObject* parent) {
+    // Qt parent ownership: `parent` (the wizard).
+    auto* picker = new ProbePickerViewModel( // NOLINT(cppcoreguidelines-owning-memory)
+        m_scanner.get(), [this](std::uint32_t serial) { return tabUsingProbe(serial, nullptr); },
+        parent);
+    picker->setReservedCheck([this](std::uint32_t serial) { return m_registry->reserved(serial); });
+    picker->setWizardMode(true);
+    connect(this, &AppViewModel::probeUsageChanged, picker,
+            &ProbePickerViewModel::updateFromScanner);
+    return picker;
 }
 
 int AppViewModel::tabUsingProbe(std::uint32_t serial, const DeviceTabViewModel* self) const {
