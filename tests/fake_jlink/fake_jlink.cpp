@@ -108,7 +108,14 @@
 //         "initial": "app",
 //         "chips": {"app": {<chip>}, "lte": {<chip>}}   the chip behind each connector (each
 //                                                   keeps its own memory); "chip" is ignored
-//       } } ] }
+//       }                                           a chip in "chips" may have
+//         "needsHalted": "app"                      plan 0040: it answers (JLINKARM_Connect)
+//                                                   only while the chip of that connector is
+//                                                   held: halted by JLINKARM_Reset / Halt and
+//                                                   not started by JLINKARM_Go since (a new
+//                                                   library session does not start it; the
+//                                                   CHESTER LoRaWAN module, held by the app MCU)
+//       } ] }
 // A connector change (seen by the next library call) drops the target connection and RTT, like
 // moving the cable: the next JLINKARM_Connect reaches the other chip.
 // Memory: flash 0x0-0x100000 and the UICR page (nRF52: 0x10001000, nRF91: 0x00FF8000; 4 KiB) start
@@ -253,6 +260,11 @@ struct ChipScenario {
     std::vector<ZoneSpec> zones;
     std::uint32_t coreId = 0x2BA01477U;
     bool startHalted = false; // "halted": the CPU state after a boot (review Q10)
+    // Plan 0040 ("needsHalted"): the connector whose chip must be held for this one to answer;
+    // `held`: this CPU was halted by JLINKARM_Reset / Halt and not started by JLINKARM_Go since
+    // (kept across JLINKARM_Open, unlike `halted` of the library state).
+    std::string needsHalted;
+    bool held = false;
     // The FICR page (read-only), filled from part / variant by fillFicr().
     std::vector<std::uint8_t> ficr = std::vector<std::uint8_t>(0x1000, 0xFF);
     // ---- STM32L0 (plan 0039) ----
@@ -583,6 +595,8 @@ ChipScenario readChip(const QJsonObject& object) {
     chip.coreId =
         static_cast<std::uint32_t>(object.value(QStringLiteral("coreId")).toInteger(chip.coreId));
     chip.startHalted = object.value(QStringLiteral("halted")).toBool();
+    chip.held = chip.startHalted;
+    chip.needsHalted = object.value(QStringLiteral("needsHalted")).toString().toStdString();
     chip.fillFicr();
     if (object.value(QStringLiteral("family")).toString() == QStringLiteral("stm32l0")) {
         chip.stm32 = true;
@@ -789,6 +803,15 @@ struct State {
         downloading = false;
         downloadData.clear();
         halted = p.chip.startHalted;
+    }
+
+    // Plan 0040: the chip behind the cable answers ("needsHalted": the other chip is held).
+    [[nodiscard]] static bool reachable(const ProbeScenario& p) {
+        if (p.chip.needsHalted.empty()) {
+            return true;
+        }
+        const auto holder = p.otherChips.find(p.chip.needsHalted);
+        return holder != p.otherChips.end() && holder->second.held;
     }
 
     [[nodiscard]] std::int64_t sinceOpen() const {
@@ -1080,7 +1103,8 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_Connect() {
         return -1;
     }
     ++s.connectCalls;
-    if (probe->chip.stm32Protected() && probe->chip.rdpByte != 0xCC &&
+    const bool reachable = State::reachable(*probe);
+    if (reachable && probe->chip.stm32Protected() && probe->chip.rdpByte != 0xCC &&
         s.connectCalls > probe->connectFailures && s.vtref() >= probe->connectMinMillivolts) {
         // Phase 0 (J-Link 9.84): asked on connect; NO connects anyway.
         const int answer = s.unsecureHook != nullptr
@@ -1096,7 +1120,7 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_Connect() {
             probe->chip.optionWord = 0xFF5500AA;
         }
     }
-    if (probe->chip.protectedChip && s.connectCalls > probe->connectFailures &&
+    if (reachable && probe->chip.protectedChip && s.connectCalls > probe->connectFailures &&
         s.vtref() >= probe->connectMinMillivolts) {
         const int answer = s.unsecureHook != nullptr
                                ? s.unsecureHook("J-Link V9 (fake)", "Unsecure the device?", 0x3U)
@@ -1107,8 +1131,8 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_Connect() {
             probe->chip.protectedChip = false;
         }
     }
-    if (s.connectCalls <= probe->connectFailures || s.vtref() < probe->connectMinMillivolts ||
-        probe->chip.protectedChip) {
+    if (!reachable || s.connectCalls <= probe->connectFailures ||
+        s.vtref() < probe->connectMinMillivolts || probe->chip.protectedChip) {
         s.connected = false;
         State::report(s.errorHandler, "Could not connect to target.");
         return -1;
@@ -1201,6 +1225,9 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_Reset() {
     }
     s.boot();
     s.halted = true; // the IJLinkApi contract: halted after a reset
+    if (ProbeScenario* probe = s.probe()) {
+        probe->chip.held = true;
+    }
     return 0;
 }
 
@@ -1211,6 +1238,9 @@ HWIO_FAKE_JLINK_EXPORT char JLINKARM_Halt() {
         return 1;
     }
     s.halted = true;
+    if (ProbeScenario* probe = s.probe()) {
+        probe->chip.held = true;
+    }
     return 0;
 }
 
@@ -1218,6 +1248,9 @@ HWIO_FAKE_JLINK_EXPORT void JLINKARM_Go() {
     State& s = state();
     const std::scoped_lock lock(s.mutex);
     s.halted = false;
+    if (ProbeScenario* probe = s.probe(); probe != nullptr && s.connected) {
+        probe->chip.held = false;
+    }
 }
 
 HWIO_FAKE_JLINK_EXPORT void JLINKARM_EnableLog(abi::LogHandler handler) {
