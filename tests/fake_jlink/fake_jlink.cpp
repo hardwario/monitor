@@ -1621,7 +1621,9 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_CORESIGHT_ReadAPDPReg(std::uint8_t index, st
         return 0;
     }
     ChipScenario& chip = probe->chip;
-    if ((s.apSelect >> 24U) != chip.ctrlAp()) {
+    // An STM32 has no Nordic CTRL-AP (plan 0040: the APP-connector check of the guided LoRaWAN
+    // flow must not pass while the cable is still on the module).
+    if (chip.stm32 || (s.apSelect >> 24U) != chip.ctrlAp()) {
         if (chip.absentApsReadZero) {
             *data = 0;
             return 0;
@@ -1676,7 +1678,7 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_CORESIGHT_WriteAPDPReg(std::uint8_t index, s
         }
         return 0;
     }
-    if ((s.apSelect >> 24U) != probe->chip.ctrlAp()) {
+    if (probe->chip.stm32 || (s.apSelect >> 24U) != probe->chip.ctrlAp()) {
         return -1;
     }
     if (index == 1 && value == 1 && !s.eraseAllRunning) {
