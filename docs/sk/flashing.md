@@ -15,11 +15,13 @@ Počas nahrávania je konzola karty pozastavená a potom sa sama obnoví.
 |---|---|---|
 | **Application firmware** | aplikačný MCU | súbor `.hex` alebo ID firmvéru z katalógu |
 | **LTE firmware** | LTE MCU a jeho modem | LTE firmvér HARDWARIO alebo váš vlastný `.hex` / `.zip` |
+| **LoRaWAN module** | modul Murata Type ABZ (CHESTER s LoRaWAN) | lora-modem pre CHESTER alebo váš vlastný `.hex` / `.bin` |
 
 Karta zobrazuje firmvér, ktorý je teraz v zariadení, ak ho zariadenie hlási.
 
 Karta vždy pracuje s aplikačným MCU. **LTE firmware** sa z tejto stránky nenahráva: spustí sprievodcu [aktualizáciou
-LTE firmvéru](#aktualizácia-lte-firmvéru), ktorý vám povie, kedy prepojiť kábel J-Linku.
+LTE firmvéru](#aktualizácia-lte-firmvéru), ktorý vám povie, kedy prepojiť kábel J-Linku. **LoRaWAN module** funguje
+rovnako: **Flash** otvorí sprievodcu, ktorý vám povie, kedy prepojiť kábel ([Modul LoRaWAN](#lorawan-module)).
 
 ## 2. Firmvér
 
@@ -115,6 +117,7 @@ nenahráte aplikáciu. Kópia zostane v priečinku `backups` ([Súkromie a ulož
 **Erase everything…**, **Recover…** a údržba **LTE MCU** (voľba **Application MCU | LTE MCU** nad tlačidlami) sa
 zobrazia len so zapnutou voľbou **Settings › Advanced › Show expert maintenance actions** (zobraziť odborné akcie
 údržby), pretože môžu vymazať sériové číslo a konfiguráciu zariadenia. Na LTE MCU potrebujú J-Link na konektore LTE.
+Na CHESTER s LoRaWAN ponúka voľba aj **LoRaWAN module** ([Modul LoRaWAN](#lorawan-module)).
 
 <a id="recover"></a>
 ### Obnovenie
@@ -124,6 +127,52 @@ chybou [target.protected](troubleshooting.md#target.protected). **Recover…** (
 vymazaním MCU vrátane UICR a PIB. Na LTE MCU potom nahrá malý obraz, ktorý ponechá MCU dostupný pre ladenie. Po
 obnovení firmvér znova nahrajte. Obnovenie sa nikdy nespustí samo. Keď vás sprievodca riešením problémov pri chránenom
 MCU pošle na stránku **Flash**, **Recover…** sa tam zobrazí raz, aj bez odborného nastavenia.
+
+<a id="lorawan-module"></a>
+## Modul LoRaWAN
+
+CHESTER s LoRaWAN má modul Murata Type ABZ (STM32L072CZ s rádiom LoRa) s vlastným programovacím konektorom
+**LoRaWAN**. Modul má vlastný firmvér, ktorý HARDWARIO Monitor nahráva cez J-Link. Modul nemá v HARDWARIO Monitor
+konzolu: jeho nastavenia LoRaWAN (kľúče, región, …) sa zadávajú príkazmi `lrw config …` v konzole MCU aplikácie.
+
+**Firmvér:** v kroku 1 zvoľte **LoRaWAN module** (modul LoRaWAN):
+
+- **lora-modem for CHESTER 1.4.1 (recommended)** (odporúčané): otvorený firmvér LoRaWAN modemu od HARDWARIO, projekt
+  [hardwario/lora-modem](https://github.com/hardwario/lora-modem), licencia BSD-3-Clause. Nie je súčasťou HARDWARIO
+  Monitor: aplikácia pri prvom použití stiahne súbor vydania z GitHubu, overí jeho kontrolný súčet SHA-256 a uloží ho
+  do vyrovnávacej pamäte.
+- **Use your own file…** (použiť vlastný súbor): súbor `.hex` alebo `.bin`; súbor `.bin` potrebuje **Start address**
+  (počiatočná adresa, predvolene `0x08000000`).
+
+Voľby **Erase the whole chip first** a **Keep data EEPROM** fungujú ako pri [čipoch STM32](#stm32-chips). Keď na karte
+**Application firmware** zvolíte súbor lora-modem, stránka ponúkne **This is LoRaWAN module firmware — switch?** (toto
+je firmvér modulu LoRaWAN — prepnúť?).
+
+**Prečo sa prepája kábel:** MCU aplikácie ovláda napájanie a reset modulu, takže modul na svojom konektore odpovedá
+len vtedy, keď je MCU aplikácie zastavený. **Flash** preto otvorí sprievodcu, podobne ako aktualizácia LTE firmvéru:
+
+1. **APP connector** (konektor APP): pripojte J-Link ku konektoru APP.
+2. **Stop the application** (zastavenie aplikácie): MCU aplikácie sa resetuje a zostane zastavený.
+3. **LoRaWAN connector** (konektor LoRaWAN): prepojte J-Link ku konektoru LoRaWAN. Sprievodca pokračuje sám, hneď ako
+   modul odpovie.
+4. **Flash** (nahratie): firmvér sa zapíše do modulu a overí sa.
+5. **APP connector**: prepojte J-Link späť; MCU aplikácie sa znova spustí a s ním aj modul.
+6. **Done** (hotovo): **LoRaWAN module flashed with lora-modem for CHESTER 1.4.1.**; konzola sa znova pripojí.
+
+Počas sprievodcu je konzola karty pozastavená (**Paused for the LoRaWAN module**). Zrušiť sa dá, kým sprievodca čaká
+na kábel. Po kroku 2 zostane MCU aplikácie zastavený, kým CHESTER neresetujete alebo nevypnete a znova nezapnete.
+
+**Modul z výroby** má pôvodný firmvér Murata a ochranu proti čítaniu (RDP úroveň 1). V kroku 4 sa potom sprievodca
+najprv opýta **Unlock the LoRaWAN module?** (odomknúť modul LoRaWAN?): **Unlock and erase** (odomknúť a vymazať)
+odstráni ochranu a modul sa celý vymaže. Pôvodný firmvér Murata v module sa odstráni; nedá sa vopred zálohovať a
+HARDWARIO Monitor ho nevie zapísať späť. Po odomknutí nahrávanie pokračuje.
+
+**Údržba:** so zapnutou voľbou **Settings › Advanced › Show expert maintenance actions** ponúka voľba nad tlačidlami
+údržby aj **LoRaWAN module** s akciami **Reset**, **Erase chip…** (vymazať čip: flash pamäť aj dátovú EEPROM) a
+**Unlock (erase)…** (odomknúť a vymazať). Každá z nich spustí rovnakého sprievodcu s prepojením kábla (krok 4 je potom
+**Reset**, **Erase** alebo **Unlock**); vymazanie a odomknutie sa najprv opýtajú.
+
+Na príkazovom riadku: `hwio chester lrw` ([Príkazový riadok](../en/cli.md#lrw)).
 
 <a id="stm32-chips"></a>
 ## Nahrávanie firmvéru do čipov STM32
@@ -192,6 +241,7 @@ hwio chester lte flash mfw_nrf91x1_2.0.2.zip              # a modem firmware zip
 hwio chester lte flash --guided                           # the guided LTE update (as in the app)
 hwio chester app erase --all
 hwio chester app recover
+hwio chester lrw flash                                    # lora-modem for CHESTER (the LoRaWAN module, guided)
 hwio stm32 flash --chip stm32l0-cat3-64k firmware.hex     # an STM32 chip (hwio stm32 chips)
 ```
 

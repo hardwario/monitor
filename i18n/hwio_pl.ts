@@ -1145,27 +1145,27 @@
 <context>
     <name>FlashPage</name>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="109"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="110"/>
         <source>Guide me</source>
         <translation>Poprowadź mnie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="160"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="165"/>
         <source>LTE firmware update</source>
         <translation>Aktualizacja firmware LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="165"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="170"/>
         <source>Updating the LTE MCU needs the J-Link moved between the APP and LTE connectors. The guide stops the application, updates the LTE MCU and puts the application back.</source>
         <translation>Aktualizacja MCU LTE wymaga przełożenia J-Linka między złączami APP i LTE. Kreator zatrzyma aplikację, zaktualizuje MCU LTE i przywróci aplikację.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="173"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="178"/>
         <source>Update LTE firmware…</source>
         <translation>Aktualizuj firmware LTE…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="219"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="225"/>
         <source>Choose a firmware file</source>
         <translation>Wybierz plik firmware</translation>
     </message>
@@ -1342,22 +1342,22 @@
 <context>
     <name>KindCards</name>
     <message>
-        <location filename="../app/gui/qml/flash/KindCards.qml" line="18"/>
+        <location filename="../app/gui/qml/flash/KindCards.qml" line="19"/>
         <source>What do you want to flash?</source>
         <translation>Co chcesz wgrać?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/KindCards.qml" line="178"/>
+        <location filename="../app/gui/qml/flash/KindCards.qml" line="179"/>
         <source>Set path in Settings</source>
         <translation>Ustaw ścieżkę</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/KindCards.qml" line="187"/>
+        <location filename="../app/gui/qml/flash/KindCards.qml" line="188"/>
         <source>Download nRF Util ↗</source>
         <translation>Pobierz nRF Util ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/KindCards.qml" line="194"/>
+        <location filename="../app/gui/qml/flash/KindCards.qml" line="195"/>
         <source>How to install ↗</source>
         <translation>Jak zainstalować ↗</translation>
     </message>
@@ -1432,37 +1432,37 @@
 <context>
     <name>MaintenanceSection</name>
     <message>
-        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="37"/>
+        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="39"/>
         <source>Collapse</source>
         <translation>Zwiń</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="37"/>
+        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="39"/>
         <source>Expand</source>
         <translation>Rozwiń</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="74"/>
+        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="76"/>
         <source>MCU</source>
         <translation>MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="103"/>
+        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="105"/>
         <source>Reset</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="110"/>
+        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="113"/>
         <source>Reset and halt</source>
         <translation>Reset i zatrzymanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="118"/>
+        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="121"/>
         <source>Erase application</source>
         <translation>Wymaż aplikację</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="119"/>
+        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="122"/>
         <source>Erases the firmware only; the UICR configuration and the Product Information Block are kept.</source>
         <translation>Wymazuje tylko firmware; konfiguracja UICR i blok informacji o produkcie (PIB) zostają zachowane.</translation>
     </message>
@@ -1806,38 +1806,38 @@
         <translation>Konsola</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="75"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="78"/>
         <source>Flash</source>
         <translation>Wgraj FW</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="87"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="90"/>
         <location filename="../app/gui/src/viewmodels/device_tab_list_model.cpp" line="34"/>
         <source>Settings</source>
         <translation>Ustawienia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="102"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="105"/>
         <source>General</source>
         <translation>Ogólne</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="107"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="110"/>
         <source>J-Link</source>
         <translation>J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="112"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="115"/>
         <source>nRF Util</source>
         <translation>nRF Util</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="118"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="121"/>
         <source>Advanced</source>
         <translation>Zaawansowane</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="123"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="126"/>
         <source>About</source>
         <translation>O aplikacji</translation>
     </message>
@@ -2214,12 +2214,12 @@
         <translation>Rozmiar czcionki konsoli</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="132"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="135"/>
         <source>Flash</source>
         <translation>Wgrywanie firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="136"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="139"/>
         <source>Choose a firmware file</source>
         <translation>Wybierz plik firmware</translation>
     </message>
@@ -2280,94 +2280,99 @@
 <context>
     <name>SourceCard</name>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="36"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="40"/>
         <source>Firmware</source>
         <translation>Firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="64"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="95"/>
+        <source>Open LoRaWAN modem firmware by HARDWARIO for the Murata module</source>
+        <translation>Otwarty firmware modemu LoRaWAN od HARDWARIO dla modułu Murata</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="96"/>
         <source>LTE application and modem firmware</source>
         <translation>Aplikacja LTE i firmware modemu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="107"/>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="297"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="139"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="329"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="115"/>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="210"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="147"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="242"/>
         <source>Download</source>
         <translation>Pobierz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="133"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="165"/>
         <source>Use your own file…</source>
         <translation>Użyj własnego pliku…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="170"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="202"/>
         <source>Browse…</source>
         <translation>Przeglądaj…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="171"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="203"/>
         <source>Choose a firmware file (%1)</source>
         <translation>Wybierz plik firmware (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="190"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="222"/>
         <source>or firmware ID from the catalog</source>
         <translation>lub ID firmware z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="201"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="233"/>
         <source>e.g. %1</source>
         <translation>np. %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="203"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="235"/>
         <source>Firmware ID from the catalog</source>
         <translation>ID firmware z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="218"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="250"/>
         <source>Find firmware IDs ↗</source>
         <translation>Znajdź ID firmware ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="327"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="359"/>
         <source>Remove the file</source>
         <translation>Usuń plik</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="341"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="373"/>
         <source>Start address</source>
         <translation>Adres początkowy</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="352"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="384"/>
         <source>Start address of the .bin file</source>
         <translation>Adres początkowy pliku .bin</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="402"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="434"/>
         <source>Switch</source>
         <translation>Przełącz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="434"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="466"/>
         <source>Updating the modem takes 1–3 minutes. The console is disconnected meanwhile.</source>
         <translation>Aktualizacja modemu trwa 1–3 minuty. W tym czasie konsola jest rozłączona.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="448"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="480"/>
         <source>Recent</source>
         <translation>Ostatnie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="505"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="537"/>
         <source>Remove from the recent list</source>
         <translation>Usuń z listy ostatnich</translation>
     </message>
@@ -4531,119 +4536,130 @@
         <translation>J-Link %1 jest już używany przez tę aplikację.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="305"/>
+        <location filename="../libs/device/src/profile.cpp" line="306"/>
         <source>The range runs past the end of the address space.</source>
         <translation>Zakres wykracza poza koniec przestrzeni adresowej.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="309"/>
+        <location filename="../libs/device/src/profile.cpp" line="310"/>
         <source>Use a shorter range or a lower address.</source>
         <translation>Użyj krótszego zakresu lub niższego adresu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="325"/>
+        <location filename="../libs/device/src/profile.cpp" line="326"/>
         <source>The range overlaps system or debug registers of the CPU, through which a write could make the device run arbitrary code.</source>
         <translation>Zakres obejmuje rejestry systemowe lub debugowania procesora, przez które zapis mógłby spowodować uruchomienie dowolnego kodu na urządzeniu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="330"/>
+        <location filename="../libs/device/src/profile.cpp" line="331"/>
         <source>The range overlaps the flash controller registers, whose tasks erase flash, UICR and the product information.</source>
         <translation>Zakres obejmuje rejestry kontrolera flash, którego zadania wymazują flash, UICR i informacje o produkcie.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="375"/>
+        <location filename="../libs/device/src/profile.cpp" line="376"/>
         <source>The firmware writes into the data EEPROM of the %1 (address %2).</source>
         <translation>Firmware zapisuje do pamięci EEPROM danych układu %1 (adres %2).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="380"/>
+        <location filename="../libs/device/src/profile.cpp" line="381"/>
         <source>Allow writing the data EEPROM if the file is meant to change it.</source>
         <translation>Zezwól na zapis pamięci EEPROM danych, jeśli plik ma ją zmienić.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="393"/>
+        <location filename="../libs/device/src/profile.cpp" line="394"/>
         <source>Data EEPROM is not supported for the %1 (address %2).</source>
         <translation>Pamięć EEPROM danych nie jest obsługiwana dla układu %1 (adres %2).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="397"/>
+        <location filename="../libs/device/src/profile.cpp" line="398"/>
         <source>The firmware does not fit the %1 (address %2).</source>
         <translation>Firmware nie pasuje do układu %1 (adres %2).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="402"/>
+        <location filename="../libs/device/src/profile.cpp" line="403"/>
         <source>Check that the firmware is for the %1.</source>
         <translation>Sprawdź, czy firmware jest przeznaczony dla układu %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="422"/>
+        <location filename="../libs/device/src/profile.cpp" line="423"/>
         <source>The firmware writes into the Product Information Block (address %1).</source>
         <translation>Firmware zapisuje do bloku informacji o produkcie (PIB) (adres %1).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="437"/>
+        <location filename="../libs/device/src/profile.cpp" line="438"/>
         <source>The firmware does not fit the %1 MCU (address %2).</source>
         <translation>Firmware nie pasuje do MCU %1 (adres %2).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="441"/>
+        <location filename="../libs/device/src/profile.cpp" line="442"/>
         <source>Check that the firmware is for the %1 MCU.</source>
         <translation>Sprawdź, czy firmware jest przeznaczony dla MCU %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="108"/>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="118"/>
-        <location filename="../libs/device/src/profiles/stm32.cpp" line="44"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="109"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="119"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="132"/>
+        <location filename="../libs/device/src/profiles/stm32.cpp" line="28"/>
         <source>Cable</source>
         <translation>Kabel</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="109"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="110"/>
         <source>Connect the J-Link flat cable to the programming connector of the application MCU.</source>
         <translation>Podłącz taśmę J-Linka do złącza programowania MCU aplikacji.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="119"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="120"/>
         <source>Connect the J-Link flat cable to the programming connector of the LTE MCU.</source>
         <translation>Podłącz taśmę J-Linka do złącza programowania MCU LTE.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="130"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="133"/>
+        <source>Connect the J-Link to the programming connector of the LoRaWAN module.</source>
+        <translation>Podłącz J-Link do złącza programowania modułu LoRaWAN.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="144"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="131"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="145"/>
         <source>Make sure the device is powered and its Bluetooth is on.</source>
         <translation>Upewnij się, że urządzenie jest zasilane i ma włączony Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="137"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="151"/>
         <source>Pairing</source>
         <translation>Parowanie</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="138"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="152"/>
         <source>When the system asks for the passkey, enter it in the system dialog.</source>
         <translation>Gdy system poprosi o klucz dostępu, wpisz go w oknie systemowym.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="180"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="210"/>
         <source>application</source>
         <translation>aplikacji</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="214"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="244"/>
         <source>LTE</source>
         <translation>LTE</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="259"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="277"/>
+        <source>LoRaWAN module</source>
+        <translation>Moduł LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="293"/>
         <source>Power CHESTER with batteries or the USB-C power input.</source>
         <translation>Zasilaj CHESTER z baterii lub przez wejście zasilania USB-C.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="268"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="302"/>
         <source>The passkey is 123456 unless it was changed when the device was configured.</source>
         <translation>Klucz dostępu to 123456, chyba że zmieniono go podczas konfiguracji urządzenia.</translation>
     </message>
@@ -4742,170 +4758,253 @@
         <translation>Firmware J-Linka %1 jest właśnie aktualizowane.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32.cpp" line="45"/>
+        <location filename="../libs/device/src/profiles/stm32.cpp" line="29"/>
         <source>Connect the J-Link to the SWD pins of the chip: SWDIO, SWCLK, GND and VTref.</source>
         <translation>Podłącz J-Link do pinów SWD układu: SWDIO, SWCLK, GND i VTref.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32.cpp" line="109"/>
+        <location filename="../libs/device/src/profiles/stm32.cpp" line="54"/>
         <source>STM32 chip</source>
         <translation>Układ STM32</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32.cpp" line="112"/>
+        <location filename="../libs/device/src/profiles/stm32.cpp" line="57"/>
         <source>Power the board of the chip; the J-Link measures its voltage on VTref.</source>
         <translation>Zasil płytkę z układem; J-Link mierzy jej napięcie na VTref.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="97"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="99"/>
         <source>STM32L0 cat. 1, 8 KiB</source>
         <translation>STM32L0 kat. 1, 8 KiB</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="99"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="101"/>
         <source>STM32L011 / L021 with 8 KiB flash. Not for STM32L010.</source>
         <translation>STM32L011 / L021 z 8 KiB pamięci flash. Nie dla STM32L010.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="100"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="102"/>
         <source>STM32L0 cat. 1, 16 KiB</source>
         <translation>STM32L0 kat. 1, 16 KiB</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="102"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="104"/>
         <source>STM32L011 / L021 with 16 KiB flash. Not for STM32L010.</source>
         <translation>STM32L011 / L021 z 16 KiB pamięci flash. Nie dla STM32L010.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="104"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="106"/>
         <source>STM32L0 cat. 2, 16 KiB</source>
         <translation>STM32L0 kat. 2, 16 KiB</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="106"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="108"/>
         <source>STM32L031 / L041 with 16 KiB flash. Not for STM32L010.</source>
         <translation>STM32L031 / L041 z 16 KiB pamięci flash. Nie dla STM32L010.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="108"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="110"/>
         <source>STM32L0 cat. 2, 32 KiB</source>
         <translation>STM32L0 kat. 2, 32 KiB</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="110"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="112"/>
         <source>STM32L031 / L041 with 32 KiB flash. Not for STM32L010.</source>
         <translation>STM32L031 / L041 z 32 KiB pamięci flash. Nie dla STM32L010.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="112"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="114"/>
         <source>STM32L0 cat. 3, 32 KiB</source>
         <translation>STM32L0 kat. 3, 32 KiB</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="114"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="116"/>
         <source>STM32L051 / L052 / L053 with 32 KiB flash. Not for STM32L010.</source>
         <translation>STM32L051 / L052 / L053 z 32 KiB pamięci flash. Nie dla STM32L010.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="116"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="118"/>
         <source>STM32L0 cat. 3, 64 KiB</source>
         <translation>STM32L0 kat. 3, 64 KiB</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="118"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="120"/>
         <source>STM32L051 / L052 / L053 / L062 / L063 with 64 KiB flash, e.g. CHESTER-S1 (Clime IAQ). Not for STM32L010.</source>
         <translation>STM32L051 / L052 / L053 / L062 / L063 z 64 KiB pamięci flash, np. CHESTER-S1 (Clime IAQ). Nie dla STM32L010.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="121"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="123"/>
         <source>STM32L0 cat. 5, 64 KiB</source>
         <translation>STM32L0 kat. 5, 64 KiB</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="123"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="125"/>
         <source>STM32L071 / L072 / L073 / L083 with 64 KiB flash (data EEPROM not supported). Not for STM32L010.</source>
         <translation>STM32L071 / L072 / L073 / L083 z 64 KiB pamięci flash (pamięć EEPROM danych nieobsługiwana). Nie dla STM32L010.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="127"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="129"/>
         <source>STM32L0 cat. 5, 128 KiB</source>
         <translation>STM32L0 kat. 5, 128 KiB</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="129"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="131"/>
         <source>STM32L071 / L072 / L073 / L081 / L082 / L083 with 128 KiB flash. Not for STM32L010.</source>
         <translation>STM32L071 / L072 / L073 / L081 / L082 / L083 z 128 KiB pamięci flash. Nie dla STM32L010.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="132"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="134"/>
         <source>STM32L0 cat. 5, 192 KiB</source>
         <translation>STM32L0 kat. 5, 192 KiB</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/stm32_parts.h" line="134"/>
+        <location filename="../libs/device/src/profiles/stm32_parts.h" line="136"/>
         <source>STM32L071 / L072 / L073 / L081 / L082 / L083 with 192 KiB flash, e.g. Murata Type ABZ (CHESTER LoRaWAN).</source>
         <translation>STM32L071 / L072 / L073 / L081 / L082 / L083 z 192 KiB pamięci flash, np. Murata Type ABZ (CHESTER LoRaWAN).</translation>
     </message>
 </context>
 <context>
-    <name>hwio::device::LteUpdateProcedure</name>
+    <name>hwio::device::LrwUpdateProcedure</name>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="648"/>
-        <source>This is the %1 connector. Move the cable to the %2 connector.</source>
-        <translation>To jest złącze %1. Przełóż kabel do złącza %2.</translation>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="477"/>
+        <source>The LoRaWAN module was flashed with %1 and the application is running again.</source>
+        <translation>Do modułu LoRaWAN wgrano %1, a aplikacja znów działa.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="650"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="480"/>
+        <source>The LoRaWAN module was erased and the application is running again.</source>
+        <translation>Moduł LoRaWAN został wymazany, a aplikacja znów działa.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="482"/>
+        <source>The LoRaWAN module was unlocked and the application is running again.</source>
+        <translation>Moduł LoRaWAN został odblokowany, a aplikacja znów działa.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="484"/>
+        <source>The LoRaWAN module was reset and the application is running again.</source>
+        <translation>Moduł LoRaWAN został zresetowany, a aplikacja znów działa.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="494"/>
         <source>Connect the J-Link cable to the %1 connector.</source>
         <translation>Podłącz kabel J-Linka do złącza %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="653"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="496"/>
+        <source>Stopping the application MCU…</source>
+        <translation>Zatrzymywanie MCU aplikacji…</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="498"/>
+        <source>The application MCU is stopped. Move the J-Link cable to the %1 connector of the LoRaWAN module.</source>
+        <translation>MCU aplikacji jest zatrzymany. Przełóż kabel J-Linka do złącza %1 modułu LoRaWAN.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="502"/>
+        <source>The LoRaWAN module is read-out protected. Unlocking erases it completely; the module&apos;s original Murata firmware is removed.</source>
+        <translation>Moduł LoRaWAN jest zabezpieczony przed odczytem. Odblokowanie wymaże go całkowicie; oryginalny firmware Murata w module zostanie usunięty.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="505"/>
+        <source>Unlocking the LoRaWAN module…</source>
+        <translation>Odblokowywanie modułu LoRaWAN…</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="507"/>
+        <source>Flashing the LoRaWAN module…</source>
+        <translation>Wgrywanie do modułu LoRaWAN…</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="509"/>
+        <source>Erasing the LoRaWAN module…</source>
+        <translation>Wymazywanie modułu LoRaWAN…</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="511"/>
+        <source>Resetting the LoRaWAN module…</source>
+        <translation>Resetowanie modułu LoRaWAN…</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="513"/>
+        <source>Move the J-Link cable back to the %1 connector.</source>
+        <translation>Przełóż kabel J-Linka z powrotem do złącza %1.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="515"/>
+        <source>Starting the application MCU…</source>
+        <translation>Uruchamianie MCU aplikacji…</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="521"/>
+        <source>The LoRaWAN module operation was cancelled. The application MCU stays stopped until CHESTER is reset or powered off and on.</source>
+        <translation>Operacja na module LoRaWAN została anulowana. MCU aplikacji pozostaje zatrzymany do zresetowania CHESTER albo jego wyłączenia i ponownego włączenia.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="523"/>
+        <source>The LoRaWAN module operation was cancelled.</source>
+        <translation>Operacja na module LoRaWAN została anulowana.</translation>
+    </message>
+</context>
+<context>
+    <name>hwio::device::LteUpdateProcedure</name>
+    <message>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="641"/>
+        <source>This is the %1 connector. Move the cable to the %2 connector.</source>
+        <translation>To jest złącze %1. Przełóż kabel do złącza %2.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="643"/>
+        <source>Connect the J-Link cable to the %1 connector.</source>
+        <translation>Podłącz kabel J-Linka do złącza %1.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="646"/>
         <source>Saving a copy of the application…</source>
         <translation>Zapisywanie kopii aplikacji…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="655"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="648"/>
         <source>A copy of the application could not be saved. Without it you will have to flash an application yourself at the end.</source>
         <translation>Nie udało się zapisać kopii aplikacji. Bez niej trzeba będzie na końcu samodzielnie wgrać aplikację.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="658"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="651"/>
         <source>Erasing the application…</source>
         <translation>Wymazywanie aplikacji…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="660"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="653"/>
         <source>Updating the LTE MCU…</source>
         <translation>Aktualizacja MCU LTE…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="662"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="655"/>
         <source>Write back the application that was in the device.</source>
         <translation>Zapisz z powrotem aplikację, która była w urządzeniu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="663"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="656"/>
         <source>Choose the application firmware to flash.</source>
         <translation>Wybierz firmware aplikacji do wgrania.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="665"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="658"/>
         <source>Writing the application…</source>
         <translation>Zapisywanie aplikacji…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="667"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="660"/>
         <source>The LTE firmware was updated and the application is running again.</source>
         <translation>Firmware LTE został zaktualizowany, a aplikacja znów działa.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="671"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="664"/>
         <source>The application MCU is erased. The device will not run until you flash an application.</source>
         <translation>MCU aplikacji jest wymazany. Urządzenie nie będzie działać, dopóki nie wgrasz aplikacji.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="673"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="666"/>
         <source>The LTE firmware update was cancelled.</source>
         <translation>Aktualizacja firmware LTE została anulowana.</translation>
     </message>
@@ -5089,7 +5188,7 @@
 <context>
     <name>hwio::firmware</name>
     <message>
-        <location filename="../libs/firmware/src/firmware_cache.cpp" line="73"/>
+        <location filename="../libs/firmware/src/firmware_cache.cpp" line="86"/>
         <source>A firmware ID has exactly 32 hexadecimal digits.</source>
         <translation>Identyfikator firmware ma dokładnie 32 cyfry szesnastkowe.</translation>
     </message>
@@ -5104,12 +5203,13 @@
         <translation>Nie znaleziono firmware %1 w katalogu.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="250"/>
+        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="275"/>
+        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="333"/>
         <source>The downloaded file is not %1.</source>
         <translation>Pobrany plik nie jest %1.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="265"/>
+        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="290"/>
         <source>Downloading %1 failed.</source>
         <translation>Pobieranie %1 nie powiodło się.</translation>
     </message>
@@ -5733,162 +5833,177 @@
 <context>
     <name>hwio::gui::FirmwareSourceViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="276"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="313"/>
         <source>%1 · LTE bundle (application + modem firmware)</source>
         <translation>%1 · pakiet LTE (aplikacja + firmware modemu)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="280"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="316"/>
         <source>Loading %1…</source>
         <translation>Wczytywanie %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="283"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="319"/>
         <source>Downloading %1…</source>
         <translation>Pobieranie %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="299"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="335"/>
         <source>%1 · LTE application · %2 · %3</source>
         <translation>%1 · aplikacja LTE · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="302"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="338"/>
         <source>%1 · Intel HEX · %2 · %3</source>
         <translation>%1 · Intel HEX · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="305"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="341"/>
         <source>%1 · LTE bundle (application + modem firmware) · %2</source>
         <translation>%1 · pakiet LTE (aplikacja + firmware modemu) · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="316"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="352"/>
         <source>%1 · Modem firmware (modem only) · %2</source>
         <translation>%1 · firmware modemu (tylko modem) · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="318"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="354"/>
         <source>%1 · Modem firmware %2 (modem only) · %3</source>
         <translation>%1 · firmware modemu %2 (tylko modem) · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="373"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="423"/>
         <source>This is LTE firmware — switch to LTE firmware?</source>
         <translation>To jest firmware LTE — przełączyć na firmware LTE?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="417"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="478"/>
         <source>Intel HEX files (*.hex)</source>
         <translation>Pliki Intel HEX (*.hex)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="414"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="417"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="419"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="475"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="478"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="480"/>
         <source>All files (*)</source>
         <translation>Wszystkie pliki (*)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="165"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="182"/>
         <source>Enter an address such as 0x08000000 (a multiple of 4).</source>
         <translation>Wpisz adres, np. 0x08000000 (wielokrotność 4).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="310"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="312"/>
+        <source>%1 · LoRaWAN module firmware</source>
+        <translation>%1 · firmware modułu LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="346"/>
         <source>%1 · binary · %2 · from %3</source>
         <translation>%1 · binarny · %2 · od %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="312"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="348"/>
         <source>%1 · binary · %2</source>
         <translation>%1 · binarny · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="365"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="405"/>
         <source>A .bin file can only be flashed to an STM32 chip.</source>
         <translation>Plik .bin można wgrać tylko do układu STM32.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="414"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="416"/>
+        <source>This is LoRaWAN module firmware — switch?</source>
+        <translation>To jest firmware modułu LoRaWAN — przełączyć?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="418"/>
+        <source>This is not LoRaWAN module firmware — switch to Application firmware?</source>
+        <translation>To nie jest firmware modułu LoRaWAN — przełączyć na firmware aplikacji?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="475"/>
         <source>STM32 firmware (*.hex *.bin)</source>
         <translation>Firmware STM32 (*.hex *.bin)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="419"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="480"/>
         <source>LTE firmware (*.hex *.zip)</source>
         <translation>Firmware LTE (*.hex *.zip)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="424"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="485"/>
         <source>Drop a .hex or .bin file here</source>
         <translation>Upuść tutaj plik .hex lub .bin</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="427"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="488"/>
         <source>Drop a .hex file here</source>
         <translation>Upuść tutaj plik .hex</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="429"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="490"/>
         <source>Drop a .hex file, an LTE bundle .zip or a modem firmware .zip here</source>
         <translation>Upuść tutaj plik .hex, pakiet LTE .zip lub firmware modemu .zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="457"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="535"/>
         <source>%1 %2 (recommended)</source>
         <translation>%1 %2 (zalecane)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="465"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="544"/>
         <source>Downloading… %1 / %2 MB</source>
         <translation>Pobieranie… %1 / %2 MB</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="467"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="546"/>
         <source>Downloading…</source>
         <translation>Pobieranie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="469"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="548"/>
         <source>Ready</source>
         <translation>Gotowe</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="551"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="631"/>
         <source>The downloaded file is damaged. Try again.</source>
         <translation>Pobrany plik jest uszkodzony. Spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="553"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="633"/>
         <source>You can also choose your own file.</source>
         <translation>Możesz też wybrać własny plik.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="592"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="681"/>
         <source>Looking up the firmware…</source>
         <translation>Wyszukiwanie firmware…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="595"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="684"/>
         <source>Unknown firmware — it can still be flashed.</source>
         <translation>Nieznany firmware — mimo to można go wgrać.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="602"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="691"/>
         <source>%1 · uploaded %2</source>
         <translation>%1 · wgrano %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="695"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="714"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="928"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="784"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="803"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="1017"/>
         <source>The ID has 32 characters 0–9 a–f.</source>
         <translation>Identyfikator ma 32 znaki 0–9 a–f.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="730"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="919"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="819"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="1008"/>
         <source>Catalog ID %1</source>
         <translation>ID z katalogu %1</translation>
     </message>
@@ -5896,530 +6011,571 @@
 <context>
     <name>hwio::gui::FlashViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="239"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="254"/>
         <source>Application firmware</source>
         <translation>Firmware aplikacji</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="240"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="255"/>
         <source>Application MCU</source>
         <translation>MCU aplikacji</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="241"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="256"/>
         <source>.hex file or catalog ID</source>
         <translation>plik .hex lub ID z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="245"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="260"/>
         <source>LTE firmware</source>
         <translation>Firmware LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="246"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="261"/>
         <source>%1 + modem</source>
         <translation>%1 + modem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="246"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="261"/>
         <source>LTE MCU</source>
         <translation>MCU LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="247"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="262"/>
         <source>The HARDWARIO LTE firmware or your own .hex / .zip</source>
         <translation>Firmware HARDWARIO LTE lub własny plik .hex / .zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="284"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="332"/>
         <source>nRF Util was not found. It is needed for LTE firmware.</source>
         <translation>Nie znaleziono nRF Util. Jest potrzebny do firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="306"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="354"/>
         <source>Choose a device first</source>
         <translation>Najpierw wybierz urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="310"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="358"/>
         <source>Use Update LTE firmware… above: the J-Link has to be moved between the connectors.</source>
         <translation>Użyj przycisku Aktualizuj firmware LTE… powyżej: J-Link trzeba przełożyć między złączami.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="314"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="362"/>
         <source>Another operation is running</source>
         <translation>Trwa inna operacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="319"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="395"/>
         <source>The LTE firmware is not downloaded yet</source>
         <translation>Firmware LTE nie został jeszcze pobrany</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="322"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="398"/>
         <source>Choose a firmware file</source>
         <translation>Wybierz plik firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="324"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="397"/>
         <source>Choose a firmware file or enter a catalog ID</source>
         <translation>Wybierz plik firmware lub wpisz ID z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="326"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="400"/>
         <source>Loading the firmware file…</source>
         <translation>Wczytywanie pliku firmware…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="328"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="402"/>
         <source>Downloading the firmware…</source>
         <translation>Pobieranie firmware…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="331"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="406"/>
         <source>The LTE firmware could not be downloaded</source>
         <translation>Nie udało się pobrać firmware LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="333"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="408"/>
         <source>The file does not match the chosen kind</source>
         <translation>Plik nie pasuje do wybranego rodzaju firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="334"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="409"/>
         <source>The firmware cannot be used</source>
         <translation>Nie można użyć tego firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="341"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="370"/>
         <source>nRF Util was not found</source>
         <translation>Nie znaleziono nRF Util</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="346"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="273"/>
+        <source>LoRaWAN module</source>
+        <translation>Moduł LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="275"/>
+        <source>Murata Type ABZ</source>
+        <translation>Murata Type ABZ</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="275"/>
+        <source>Murata Type ABZ (%1)</source>
+        <translation>Murata Type ABZ (%1)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="276"/>
+        <source>lora-modem for CHESTER or your own .hex / .bin</source>
+        <translation>lora-modem dla CHESTER lub własny plik .hex / .bin</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="292"/>
+        <source>Flash first asks for the APP connector to stop the application MCU, then for the LoRaWAN module&apos;s connector.</source>
+        <translation>Wgraj najpierw poprosi o złącze APP, aby zatrzymać MCU aplikacji, a potem o złącze modułu LoRaWAN.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="375"/>
         <source>The firmware writes the UICR: allow it in Options</source>
         <translation>Firmware zapisuje UICR: zezwól na to w Opcjach</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="350"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="380"/>
         <source>Enter a valid start address for the .bin file</source>
         <translation>Wpisz prawidłowy adres początkowy pliku .bin</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="353"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="383"/>
         <source>The firmware writes the data EEPROM: turn off Keep data EEPROM in Options</source>
         <translation>Firmware zapisuje pamięć EEPROM danych: wyłącz Zachowaj EEPROM danych w Opcjach</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="512"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="394"/>
+        <source>The LoRaWAN module firmware is not downloaded yet</source>
+        <translation>Firmware modułu LoRaWAN nie został jeszcze pobrany</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="405"/>
+        <source>The LoRaWAN module firmware could not be downloaded</source>
+        <translation>Nie udało się pobrać firmware modułu LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="625"/>
         <source>Erase chip…</source>
         <translation>Wymaż układ…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="512"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="625"/>
         <source>Erase everything…</source>
         <translation>Wymaż wszystko…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="516"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="629"/>
         <source>Unlock (erase)…</source>
         <translation>Odblokuj (wymaż)…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="516"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="629"/>
         <source>Recover…</source>
         <translation>Odzyskaj (recover)…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="540"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="653"/>
         <source>Unlock…</source>
         <translation>Odblokuj…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="543"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="656"/>
         <source>Use %1</source>
         <translation>Użyj %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="629"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="751"/>
         <source>%1 MCU</source>
         <translation>MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="721"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="843"/>
         <source>Flashing is in progress. Cancel it and close the tab?</source>
         <translation>Trwa wgrywanie. Anulować je i zamknąć kartę?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="722"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="844"/>
         <source>An operation is running on this device. Cancel it and close the tab?</source>
         <translation>Na urządzeniu trwa operacja. Anulować ją i zamknąć kartę?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="864"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="986"/>
         <source>In the device: %1</source>
         <translation>W urządzeniu: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="869"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="991"/>
         <source>Now in the device: %1</source>
         <translation>Teraz w urządzeniu: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="944"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1066"/>
         <source>Flashing…</source>
         <translation>Wgrywanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="946"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1068"/>
         <source>Updating the modem…</source>
         <translation>Aktualizacja modemu…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="949"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1071"/>
         <source>Erasing…</source>
         <translation>Wymazywanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="951"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1073"/>
         <source>Recovering…</source>
         <translation>Odzyskiwanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="953"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1075"/>
         <source>Unlocking…</source>
         <translation>Odblokowywanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="955"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1077"/>
         <source>Resetting…</source>
         <translation>Resetowanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="968"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1090"/>
         <source>Working…</source>
         <translation>Trwa…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="977"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1099"/>
         <source>Flashing %1 to the %2</source>
         <translation>Wgrywanie %1 do układu %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="979"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1101"/>
         <source>Flashing %1 to the %2 MCU</source>
         <translation>Wgrywanie %1 do MCU %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="981"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1103"/>
         <source>Flashing the LTE bundle %1</source>
         <translation>Wgrywanie pakietu LTE %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="983"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1105"/>
         <source>Updating the modem firmware with %1</source>
         <translation>Aktualizacja firmware modemu z %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="985"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1107"/>
         <source>Erasing the application firmware of the %1 MCU</source>
         <translation>Wymazywanie firmware aplikacji MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="988"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1110"/>
         <source>Erasing the %1</source>
         <translation>Wymazywanie układu %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="990"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1112"/>
         <source>Erasing everything on the %1 MCU</source>
         <translation>Wymazywanie całego MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="992"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1114"/>
         <source>Recovering the %1 MCU</source>
         <translation>Odzyskiwanie MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="994"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1116"/>
         <source>Unlocking the %1</source>
         <translation>Odblokowywanie układu %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="997"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1119"/>
         <source>Resetting the %1</source>
         <translation>Resetowanie układu %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="999"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1121"/>
         <source>Resetting the %1 MCU</source>
         <translation>Resetowanie MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1018"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1140"/>
         <source>Connecting</source>
         <translation>Łączenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1020"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1142"/>
         <source>Switching MCU</source>
         <translation>Przełączanie MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1022"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1144"/>
         <source>Erasing</source>
         <translation>Wymazywanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1024"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1146"/>
         <source>Programming</source>
         <translation>Programowanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1026"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1148"/>
         <source>Verifying</source>
         <translation>Weryfikacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1028"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1150"/>
         <source>Updating the modem</source>
         <translation>Aktualizacja modemu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1030"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1152"/>
         <source>Recovering</source>
         <translation>Odzyskiwanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1032"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1154"/>
         <source>Resetting</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1034"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1156"/>
         <source>Restoring console</source>
         <translation>Przywracanie konsoli</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1036"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1158"/>
         <source>Unlocking</source>
         <translation>Odblokowywanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1058"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1180"/>
         <source>Step %1 of %2</source>
         <translation>Krok %1 z %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1097"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1219"/>
         <source>The console is disconnected during the modem update and resumes automatically afterwards.</source>
         <translation>Podczas aktualizacji modemu konsola jest rozłączona, a potem automatycznie wznawia działanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1101"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1223"/>
         <source>The console is paused. The erased MCU stays halted: reconnect after flashing.</source>
         <translation>Konsola jest wstrzymana. Wymazany MCU pozostaje zatrzymany: po wgraniu połącz się ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1103"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1225"/>
         <source>The console is paused. The CPU stays halted after flashing.</source>
         <translation>Konsola jest wstrzymana. Procesor po wgraniu pozostaje zatrzymany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1104"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1226"/>
         <source>The console is paused and resumes automatically after flashing.</source>
         <translation>Konsola jest wstrzymana i po wgraniu automatycznie wznowi działanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1120"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1242"/>
         <source>The console is paused and resumes automatically afterwards.</source>
         <translation>Konsola jest wstrzymana i potem automatycznie wznowi działanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1130"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1252"/>
         <source>Firmware flashed and verified in %1 s.</source>
         <translation>Firmware wgrany i zweryfikowany w %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1132"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1254"/>
         <source>LTE modem firmware and LTE firmware flashed in %1 s.</source>
         <translation>Firmware modemu LTE i firmware LTE wgrane w %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1135"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1257"/>
         <source>Modem firmware updated in %1 s.</source>
         <translation>Firmware modemu zaktualizowany w %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1137"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1259"/>
         <source>The application firmware of the %1 MCU was erased.</source>
         <translation>Firmware aplikacji MCU %1 został wymazany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1140"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1262"/>
         <source>The %1 was erased (flash and data EEPROM).</source>
         <translation>Układ %1 został wymazany (flash i EEPROM danych).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1142"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1264"/>
         <source>Everything on the %1 MCU was erased.</source>
         <translation>Cały MCU %1 został wymazany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1144"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1266"/>
         <source>The %1 MCU was recovered.</source>
         <translation>MCU %1 został odzyskany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1146"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1268"/>
         <source>The %1 was unlocked; it is now erased.</source>
         <translation>Układ %1 został odblokowany; jest teraz wymazany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1148"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1270"/>
         <source>The %1 MCU was reset and halted.</source>
         <translation>MCU %1 został zresetowany i zatrzymany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1149"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1271"/>
         <source>The %1 MCU was reset.</source>
         <translation>MCU %1 został zresetowany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1165"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1287"/>
         <source>The modem update was cancelled. Flash the modem firmware again before you use LTE.</source>
         <translation>Aktualizacja modemu została anulowana. Przed użyciem LTE wgraj ponownie firmware modemu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1169"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1291"/>
         <source>Flashing was cancelled. The device may not start until you flash it again.</source>
         <translation>Wgrywanie zostało anulowane. Urządzenie może się nie uruchomić, dopóki nie wgrasz firmware ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1171"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1293"/>
         <source>The operation was cancelled.</source>
         <translation>Operacja została anulowana.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1175"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1297"/>
         <source>Flashing was interrupted. The firmware may be partly written: flash it again.</source>
         <translation>Wgrywanie zostało przerwane. Firmware może być zapisany tylko częściowo: wgraj go ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1191"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1313"/>
         <source>Chip: %1</source>
         <translation>Układ: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1211"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1333"/>
         <source>Maintenance — %1</source>
         <translation>Konserwacja — %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1213"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1335"/>
         <source>Maintenance — %1 MCU</source>
         <translation>Konserwacja — MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1214"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1336"/>
         <source>Maintenance</source>
         <translation>Konserwacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1223"/>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1227"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1345"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1349"/>
         <source>Firmware (flash)</source>
         <translation>Firmware (flash)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1223"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1345"/>
         <source>UICR configuration</source>
         <translation>Konfiguracja UICR</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1224"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1346"/>
         <source>Product Information Block (serial number, hardware version, …)</source>
         <translation>Blok informacji o produkcie (numer seryjny, wersja sprzętu, …)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1227"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1349"/>
         <source>Data EEPROM</source>
         <translation>EEPROM danych</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1230"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1352"/>
+        <source>The module&apos;s original Murata firmware is removed.</source>
+        <translation>Oryginalny firmware Murata w module zostanie usunięty.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1357"/>
         <source>Unlock the %1?</source>
         <translation>Odblokować układ %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1230"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1357"/>
         <source>Erase the %1?</source>
         <translation>Wymazać układ %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1232"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1359"/>
         <source>Unlocking removes the read-out protection. The chip then erases itself completely; the firmware on it cannot be read or kept. This erases:</source>
         <translation>Odblokowanie usuwa zabezpieczenie przed odczytem. Układ następnie całkowicie się wymazuje; firmware na nim nie może zostać odczytany ani zachowany. Zostanie wymazane:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1235"/>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1241"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1362"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1368"/>
         <source>This erases:</source>
         <translation>Zostanie wymazane:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1238"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1365"/>
         <source>Unlock and erase</source>
         <translation>Odblokuj i wymaż</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1238"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1365"/>
         <source>Erase chip</source>
         <translation>Wymaż układ</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1244"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1371"/>
         <source>Recover removes the read-out protection by erasing the %1 MCU completely, then programs a small image that keeps it debuggable. This erases:</source>
         <translation>Odzyskiwanie (recover) usuwa zabezpieczenie przed odczytem przez całkowite wymazanie MCU %1, a następnie wgrywa mały obraz, dzięki któremu MCU pozostaje dostępny do debugowania. Zostanie wymazane:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1247"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1374"/>
         <source>Recover removes the read-out protection by erasing the %1 MCU completely. This erases:</source>
         <translation>Odzyskiwanie (recover) usuwa zabezpieczenie przed odczytem przez całkowite wymazanie MCU %1. Zostanie wymazane:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1252"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1379"/>
         <source>Recover the %1 MCU?</source>
         <translation>Odzyskać MCU %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1253"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1380"/>
         <source>Erase everything on the %1 MCU?</source>
         <translation>Wymazać cały MCU %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1237"/>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1256"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1353"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1354"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1383"/>
         <source>This cannot be undone.</source>
         <translation>Tej operacji nie można cofnąć.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="223"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="238"/>
         <source>Firmware for %1</source>
         <translation>Firmware dla %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="227"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="242"/>
         <source>.hex or .bin file</source>
         <translation>plik .hex lub .bin</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1257"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1384"/>
         <source>Recover</source>
         <translation>Odzyskaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1257"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1384"/>
         <source>Erase everything</source>
         <translation>Wymaż wszystko</translation>
     </message>
@@ -6443,6 +6599,190 @@
         <location filename="../app/gui/src/viewmodels/licenses_model.cpp" line="44"/>
         <source>Third-party notices</source>
         <translation>Licencje stron trzecich</translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::LrwUpdateWizard</name>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="67"/>
+        <source>Flash the LoRaWAN module</source>
+        <translation>Wgrywanie do modułu LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="69"/>
+        <source>Erase the LoRaWAN module</source>
+        <translation>Wymazanie modułu LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="71"/>
+        <source>Unlock the LoRaWAN module</source>
+        <translation>Odblokowanie modułu LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="73"/>
+        <source>Reset the LoRaWAN module</source>
+        <translation>Reset modułu LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="88"/>
+        <source>Start the LoRaWAN module operations on the Flash page.</source>
+        <translation>Uruchom operacje na module LoRaWAN na stronie Wgraj FW.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="125"/>
+        <source>Paused for the LoRaWAN module</source>
+        <translation>Wstrzymano na czas operacji na module LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="126"/>
+        <source>A LoRaWAN module operation is in progress. Cancel it and close the tab?</source>
+        <translation>Trwa operacja na module LoRaWAN. Anulować ją i zamknąć kartę?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="161"/>
+        <source>Flash</source>
+        <translation>Wgrywanie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="164"/>
+        <source>Erase</source>
+        <translation>Wymazanie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="167"/>
+        <source>Unlock</source>
+        <translation>Odblokowanie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="170"/>
+        <source>Reset</source>
+        <translation>Reset</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="173"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="175"/>
+        <source>APP connector</source>
+        <translation>Złącze APP</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="173"/>
+        <source>Stop the application</source>
+        <translation>Zatrzymanie aplikacji</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="174"/>
+        <source>LoRaWAN connector</source>
+        <translation>Złącze LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="175"/>
+        <source>Done</source>
+        <translation>Gotowe</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="250"/>
+        <source>Stopping the application</source>
+        <translation>Zatrzymywanie aplikacji</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="252"/>
+        <source>Unlocking the LoRaWAN module</source>
+        <translation>Odblokowywanie modułu LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="254"/>
+        <source>Flashing the LoRaWAN module</source>
+        <translation>Wgrywanie do modułu LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="256"/>
+        <source>Erasing the LoRaWAN module</source>
+        <translation>Wymazywanie modułu LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="258"/>
+        <source>Resetting the LoRaWAN module</source>
+        <translation>Resetowanie modułu LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="260"/>
+        <source>Starting the application</source>
+        <translation>Uruchamianie aplikacji</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="269"/>
+        <source>LoRaWAN module flashed with %1.</source>
+        <translation>Do modułu LoRaWAN wgrano %1.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="273"/>
+        <source>LoRaWAN module erased.</source>
+        <translation>Moduł LoRaWAN wymazany.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="276"/>
+        <source>LoRaWAN module unlocked.</source>
+        <translation>Moduł LoRaWAN odblokowany.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="279"/>
+        <source>LoRaWAN module reset.</source>
+        <translation>Moduł LoRaWAN zresetowany.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="282"/>
+        <source>The application runs again. The console reconnects.</source>
+        <translation>Aplikacja znów działa. Konsola połączy się ponownie.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="284"/>
+        <source>Open console</source>
+        <translation>Otwórz konsolę</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="299"/>
+        <source>Connect the J-Link to the LoRaWAN connector</source>
+        <translation>Podłącz J-Link do złącza LoRaWAN</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="300"/>
+        <source>Connect the J-Link to the APP connector</source>
+        <translation>Podłącz J-Link do złącza APP</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="306"/>
+        <source>Unlock the LoRaWAN module?</source>
+        <translation>Odblokować moduł LoRaWAN?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="307"/>
+        <source>Unlock and erase</source>
+        <translation>Odblokuj i wymaż</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="310"/>
+        <source>The LoRaWAN module operation failed</source>
+        <translation>Operacja na module LoRaWAN nie powiodła się</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="311"/>
+        <source>Try again</source>
+        <translation>Spróbuj ponownie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="360"/>
+        <source>The application MCU is stopped. It starts again when CHESTER is reset or powered off and on.</source>
+        <translation>MCU aplikacji jest zatrzymany. Uruchomi się ponownie po zresetowaniu CHESTER albo jego wyłączeniu i ponownym włączeniu.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="364"/>
+        <source>Cancel anyway</source>
+        <translation>Anuluj mimo to</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="366"/>
+        <source>Back</source>
+        <translation>Wstecz</translation>
     </message>
 </context>
 <context>
@@ -6986,27 +7326,27 @@
         <translation>Nie można połączyć się z MCU %1 urządzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="138"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="139"/>
         <source>The chip ID could not be read (DBGMCU_IDCODE).</source>
         <translation>Nie udało się odczytać ID układu (DBGMCU_IDCODE).</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="218"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="219"/>
         <source>The MCU type could not be read (FICR).</source>
         <translation>Nie można odczytać typu MCU (FICR).</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="233"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="234"/>
         <source>Programming was interrupted; the firmware may be partly written.</source>
         <translation>Programowanie zostało przerwane; firmware może być zapisany tylko częściowo.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="237"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="238"/>
         <source>Check the cables and power, then flash the firmware again.</source>
         <translation>Sprawdź kable i zasilanie, a następnie wgraj firmware ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="350"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="351"/>
         <source>Verification failed at address %1.</source>
         <translation>Weryfikacja nie powiodła się pod adresem %1.</translation>
     </message>

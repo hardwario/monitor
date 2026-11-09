@@ -15,11 +15,13 @@ While a flash runs, the console of the tab is paused and resumes by itself after
 |---|---|---|
 | **Application firmware** | the application MCU | a `.hex` file or a firmware ID from the catalog |
 | **LTE firmware** | the LTE MCU and its modem | the HARDWARIO LTE firmware, or your own `.hex` / `.zip` |
+| **LoRaWAN module** | the Murata Type ABZ module (CHESTER with LoRaWAN) | lora-modem for CHESTER, or your own `.hex` / `.bin` |
 
 The card shows the firmware that is in the device now, when the device reports it.
 
 A tab always works with the application MCU. **LTE firmware** is not flashed from this page: it starts the guided
-[LTE firmware update](#lte-firmware-update), which tells you when to move the J-Link cable.
+[LTE firmware update](#lte-firmware-update), which tells you when to move the J-Link cable. **LoRaWAN module** works
+the same way: **Flash** opens a guide that tells you when to move the cable ([LoRaWAN module](#lorawan-module)).
 
 ## 2. Firmware
 
@@ -112,7 +114,8 @@ you flash an application. The copy stays in the backups folder ([Privacy and sto
 
 **Erase everything…**, **Recover…** and the maintenance of the **LTE MCU** (a choice **Application MCU | LTE MCU**
 above the buttons) appear only with **Settings › Advanced › Show expert maintenance actions**, because they can erase
-the serial number and the configuration of the device. On the LTE MCU they need the J-Link on the LTE connector.
+the serial number and the configuration of the device. On the LTE MCU they need the J-Link on the LTE connector. On a
+CHESTER with LoRaWAN the choice also lists **LoRaWAN module** ([LoRaWAN module](#lorawan-module)).
 
 <a id="recover"></a>
 ### Recover
@@ -122,6 +125,52 @@ When the MCU is read-back protected (approtect), the J-Link cannot read or write
 completely, including the UICR and the PIB. On the LTE MCU it then programs a small image that keeps the MCU
 debuggable. After a recover, flash the firmware again. Recover never runs by itself. When the troubleshooting guide
 for a protected MCU sends you to the Flash page, **Recover…** is shown there once, without the expert setting.
+
+<a id="lorawan-module"></a>
+## LoRaWAN module
+
+A CHESTER with LoRaWAN has the Murata Type ABZ module (an STM32L072CZ with the LoRa radio) and its own programming
+connector, **LoRaWAN**. The module runs its own firmware, which HARDWARIO Monitor flashes over the J-Link. The module
+has no console in HARDWARIO Monitor: its LoRaWAN settings (keys, region, …) are set with the `lrw config …` commands in
+the console of the application MCU.
+
+**Firmware:** choose **LoRaWAN module** in step 1:
+
+- **lora-modem for CHESTER 1.4.1 (recommended)**: the open LoRaWAN modem firmware by HARDWARIO, project
+  [hardwario/lora-modem](https://github.com/hardwario/lora-modem), licence BSD-3-Clause. It is not part of HARDWARIO
+  Monitor: the app downloads the release file from GitHub on first use, checks its SHA-256 checksum and keeps it in
+  the cache.
+- **Use your own file…**: a `.hex` or `.bin` file; a `.bin` file needs its **Start address** (default `0x08000000`).
+
+The options **Erase the whole chip first** and **Keep data EEPROM** work as for [STM32 chips](#stm32-chips). When you
+choose a lora-modem file on **Application firmware**, the page offers **This is LoRaWAN module firmware — switch?**.
+
+**Why the cable moves:** the application MCU controls the power and the reset of the module, so the module answers on
+its connector only while the application MCU is stopped. **Flash** therefore opens a guide, like the LTE firmware
+update:
+
+1. **APP connector**: connect the J-Link to the APP connector.
+2. **Stop the application**: the application MCU is reset and stays halted.
+3. **LoRaWAN connector**: move the J-Link to the LoRaWAN connector. The guide continues by itself as soon as the
+   module answers.
+4. **Flash**: the module is written and verified.
+5. **APP connector**: move the J-Link back; the application MCU starts again, and with it the module.
+6. **Done**: **LoRaWAN module flashed with lora-modem for CHESTER 1.4.1.**; the console reconnects.
+
+While the guide runs, the tab's console is paused (**Paused for the LoRaWAN module**). Cancel works while the guide
+waits for the cable. After step 2 the application MCU stays stopped until CHESTER is reset or powered off and on.
+
+**A factory module** comes with Murata's original firmware and read-out protection (RDP level 1). In step 4 the
+guide then asks first, **Unlock the LoRaWAN module?**: **Unlock and erase** removes the protection, and the module
+erases itself completely. The module's original Murata firmware is removed; it cannot be backed up first, and
+HARDWARIO Monitor cannot write it back. The flash continues after the unlock.
+
+**Maintenance:** with **Settings › Advanced › Show expert maintenance actions** the choice above the maintenance
+buttons also lists **LoRaWAN module**, with **Reset**, **Erase chip…** (flash and data EEPROM) and **Unlock
+(erase)…**. Each runs the same guide with the cable moves (step 4 is then **Reset**, **Erase** or **Unlock**); erase
+and unlock ask first.
+
+On the command line: `hwio chester lrw` ([Command line](cli.md#lrw)).
 
 <a id="stm32-chips"></a>
 ## Flashing STM32 chips
@@ -190,6 +239,7 @@ hwio chester lte flash mfw_nrf91x1_2.0.2.zip              # a modem firmware zip
 hwio chester lte flash --guided                           # the guided LTE update (as in the app)
 hwio chester app erase --all
 hwio chester app recover
+hwio chester lrw flash                                    # lora-modem for CHESTER (the LoRaWAN module, guided)
 hwio stm32 flash --chip stm32l0-cat3-64k firmware.hex     # an STM32 chip (hwio stm32 chips)
 ```
 

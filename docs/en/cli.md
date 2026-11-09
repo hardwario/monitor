@@ -23,6 +23,7 @@ hwio chester app command "info show"         # one shell command, print the answ
 hwio chester app info                        # firmware name and version, serial number, ...
 hwio chester app flash firmware.hex          # flash the application firmware
 hwio chester lte flash                       # flash the HARDWARIO LTE firmware
+hwio chester lrw flash                       # flash lora-modem to the LoRaWAN module (guided)
 hwio ble scan                                # CHESTER devices nearby
 hwio ble console -a F1:22:33:44:55:66        # the console over Bluetooth
 hwio --json chester app pib read | jq .data  # for scripts
@@ -176,6 +177,55 @@ interactive terminal (not with `--json`). Without `--guided` the command flashes
 `hardwario chester lte flash` does, and leaves the application running; it first warns (human output only) that the
 application firmware can reset the LTE MCU during the update. When that happens the command fails with
 [`target.reset_during_update`](troubleshooting.md#target.reset_during_update): use `--guided`.
+
+<a id="lrw"></a>
+## CHESTER: LoRaWAN module (`hwio chester lrw`)
+
+The Murata Type ABZ module of a CHESTER with LoRaWAN ([LoRaWAN module](flashing.md#lorawan-module)). It has its own
+LoRaWAN connector and answers there only while the application MCU is stopped. It has no console.
+
+| Command | Does | Asks first |
+|---|---|---|
+| `hwio chester lrw info` | Shows DEV_ID, flash size and the read-out protection level (`rdp`) of the module; read only | no |
+| `hwio chester lrw flash [--address ADDR] [--no-cache] [--direct [--halt]] [FILE]` | Flashes lora-modem for CHESTER 1.4.1 (downloaded from [hardwario/lora-modem](https://github.com/hardwario/lora-modem) and SHA-256 verified, then cached) when no FILE is given, or a `.hex` / `.bin` file, and verifies it | only to unlock a protected module (guided) |
+| `hwio chester lrw erase [--yes] [--direct]` | Erases the whole module (flash and data EEPROM) | yes |
+| `hwio chester lrw unlock [--yes] [--direct]` | Removes read-out protection level 1; the module erases its flash and data EEPROM, and the original Murata firmware is lost | yes |
+| `hwio chester lrw reset [--halt]` | Resets the module (`--halt`: and keeps its CPU halted) | no |
+
+| Option | Meaning |
+|---|---|
+| `--address ADDR` | Start address of a `.bin` file (default: the flash start, `0x08000000`) |
+| `--no-cache` | Download the prepared firmware even when it is cached (no effect with a FILE) |
+| `--direct` | No guidance, for scripts: the application MCU is already stopped and the J-Link is on the LoRaWAN connector |
+| `--halt` | `flash`: leave the module halted after flashing (needs `--direct`); `reset`: keep it halted |
+| `--yes` | Do not ask for confirmation |
+
+Without `--direct`, `flash`, `erase` and `unlock` guide you as the app does: start with the J-Link on the APP
+connector; the command stops the application MCU (reset and halt), asks you to move the J-Link to the LoRaWAN
+connector, runs the operation, asks you to move it back and starts the application MCU again. Each step continues by
+itself as soon as the J-Link reaches the right MCU. A module with read-out protection level 1 (a factory module with
+the Murata firmware) is unlocked first after a question (`flash`) or with the erase (`erase`). The guided commands
+need an interactive terminal (not `--json`); in a script they fail with a usage error that names `--direct`. Ctrl+C
+cancels while the command waits for a cable; the application MCU then stays stopped until CHESTER is reset.
+
+`--direct`, `info` and `reset` connect to the module right away. Before them, stop the application MCU and move the
+cable yourself; afterwards start it again:
+
+```sh
+hwio chester app reset --halt              # J-Link on the APP connector: stop the application MCU
+# move the J-Link cable to the LoRaWAN connector
+hwio chester lrw info
+hwio chester lrw unlock --direct --yes     # a factory module (RDP 1) only
+hwio chester lrw flash --direct            # lora-modem for CHESTER 1.4.1
+hwio chester lrw flash --direct lora-modem.bin --address 0x08000000
+# move the J-Link cable back to the APP connector
+hwio chester app reset                     # the application runs again
+```
+
+When the module does not answer ([`target.connect_failed`](troubleshooting.md#target.connect_failed)), the
+application MCU is probably running: the error suggests `hwio chester app reset --halt`. The probe options (`-n`,
+`--jlink-speed`) work as for the other CHESTER commands. The chip of the module is also `stm32l0-cat5-192k` for
+[`hwio stm32`](#stm32).
 
 <a id="stm32"></a>
 ## STM32 chips (`hwio stm32`)

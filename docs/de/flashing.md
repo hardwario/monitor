@@ -16,12 +16,14 @@ Während ein Flash-Vorgang läuft, ist die Konsole des Tabs angehalten und wird 
 |---|---|---|
 | **Application firmware** (Anwendungsfirmware) | die Anwendungs-MCU | eine `.hex`-Datei oder eine Firmware-ID aus dem Katalog |
 | **LTE firmware** (LTE-Firmware) | die LTE-MCU und ihr Modem | die HARDWARIO-LTE-Firmware oder Ihre eigene `.hex` / `.zip` |
+| **LoRaWAN module** (LoRaWAN-Modul) | das Modul Murata Type ABZ (CHESTER mit LoRaWAN) | lora-modem für CHESTER oder Ihre eigene `.hex` / `.bin` |
 
 Die Karte zeigt die Firmware, die sich gerade im Gerät befindet, sofern das Gerät sie meldet.
 
 Ein Tab arbeitet immer mit der Anwendungs-MCU. **LTE firmware** (LTE-Firmware) wird nicht auf dieser Seite geflasht:
 Es startet das geführte [LTE-Firmware-Update](#lte-firmware-update), das Ihnen sagt, wann Sie das J-Link-Kabel
-umstecken.
+umstecken. **LoRaWAN module** (LoRaWAN-Modul) funktioniert genauso: **Flash** öffnet einen Assistenten, der Ihnen
+sagt, wann Sie das Kabel umstecken ([LoRaWAN-Modul](#lorawan-module)).
 
 ## 2. Firmware
 
@@ -129,7 +131,8 @@ Ordner `backups` ([Datenschutz und gespeicherte Daten](privacy.md)).
 **Erase everything…**, **Recover…** und die Wartung der **LTE MCU** (eine Auswahl **Application MCU | LTE MCU** über
 den Schaltflächen) erscheinen nur mit **Settings › Advanced › Show expert maintenance actions**
 (Experten-Wartungsaktionen anzeigen), weil sie die Seriennummer und die Konfiguration des Geräts löschen können. Auf
-der LTE-MCU brauchen sie den J-Link am LTE-Anschluss.
+der LTE-MCU brauchen sie den J-Link am LTE-Anschluss. Bei einem CHESTER mit LoRaWAN bietet die Auswahl auch
+**LoRaWAN module** ([LoRaWAN-Modul](#lorawan-module)).
 
 <a id="recover"></a>
 ### Recover
@@ -140,6 +143,57 @@ die MCU vollständig löscht, einschließlich des UICR und des PIB. Auf der LTE-
 Image, das die MCU debugbar hält. Flashen Sie nach einem Recover die Firmware erneut. Recover läuft nie von selbst.
 Schickt Sie die Fehlerbehebungsanleitung für eine geschützte MCU auf die Seite **Flash**, wird **Recover…** dort
 einmal angezeigt, auch ohne die Experteneinstellung.
+
+<a id="lorawan-module"></a>
+## LoRaWAN-Modul
+
+Ein CHESTER mit LoRaWAN hat das Modul Murata Type ABZ (ein STM32L072CZ mit dem LoRa-Funkteil) mit einem eigenen
+Programmieranschluss, **LoRaWAN**. Das Modul hat seine eigene Firmware, die HARDWARIO Monitor über den J-Link flasht.
+In HARDWARIO Monitor hat das Modul keine Konsole: Seine LoRaWAN-Einstellungen (Schlüssel, Region, …) setzen Sie mit
+den Befehlen `lrw config …` in der Konsole der Anwendungs-MCU.
+
+**Firmware:** Wählen Sie in Schritt 1 **LoRaWAN module** (LoRaWAN-Modul):
+
+- **lora-modem for CHESTER 1.4.1 (recommended)** (empfohlen): die offene LoRaWAN-Modem-Firmware von HARDWARIO, Projekt
+  [hardwario/lora-modem](https://github.com/hardwario/lora-modem), Lizenz BSD-3-Clause. Sie ist nicht Teil von
+  HARDWARIO Monitor: Die App lädt die Release-Datei bei der ersten Verwendung von GitHub herunter, prüft ihre
+  SHA-256-Prüfsumme und legt sie im Cache ab.
+- **Use your own file…** (Eigene Datei verwenden…): eine `.hex`- oder `.bin`-Datei; eine `.bin`-Datei braucht ihre
+  **Start address** (Startadresse, Standard `0x08000000`).
+
+Die Optionen **Erase the whole chip first** und **Keep data EEPROM** wirken wie bei [STM32-Chips](#stm32-chips).
+Wählen Sie auf **Application firmware** eine lora-modem-Datei, bietet die Seite **This is LoRaWAN module firmware —
+switch?** (Dies ist Firmware für das LoRaWAN-Modul — wechseln?) an.
+
+**Warum das Kabel umgesteckt wird:** Die Anwendungs-MCU steuert die Versorgung und den Reset des Moduls, deshalb
+antwortet das Modul an seinem Anschluss nur, solange die Anwendungs-MCU gestoppt ist. **Flash** öffnet daher einen
+Assistenten, wie das LTE-Firmware-Update:
+
+1. **APP connector** (APP-Anschluss): Schließen Sie den J-Link an den APP-Anschluss an.
+2. **Stop the application** (Anwendung stoppen): Die Anwendungs-MCU wird zurückgesetzt und bleibt angehalten.
+3. **LoRaWAN connector** (LoRaWAN-Anschluss): Stecken Sie den J-Link an den LoRaWAN-Anschluss um. Der Assistent geht
+   von selbst weiter, sobald das Modul antwortet.
+4. **Flash** (Flashen): Das Modul wird beschrieben und geprüft.
+5. **APP connector**: Stecken Sie den J-Link zurück; die Anwendungs-MCU startet wieder und mit ihr das Modul.
+6. **Done** (Fertig): **LoRaWAN module flashed with lora-modem for CHESTER 1.4.1.**; die Konsole verbindet sich neu.
+
+Während der Assistent läuft, ist die Konsole des Tabs angehalten (**Paused for the LoRaWAN module**). Abbrechen geht,
+solange der Assistent auf das Kabel wartet. Nach Schritt 2 bleibt die Anwendungs-MCU gestoppt, bis CHESTER
+zurückgesetzt oder aus- und wieder eingeschaltet wird.
+
+**Ein Modul ab Werk** hat die ursprüngliche Murata-Firmware und einen Ausleseschutz (RDP-Stufe 1). In Schritt 4 fragt
+der Assistent dann zuerst **Unlock the LoRaWAN module?** (LoRaWAN-Modul entsperren?): **Unlock and erase** (Entsperren
+und löschen) entfernt den Schutz, und das Modul löscht sich vollständig. Die ursprüngliche Murata-Firmware des Moduls
+wird entfernt; sie lässt sich vorher nicht sichern, und HARDWARIO Monitor kann sie nicht zurückschreiben. Nach dem
+Entsperren geht das Flashen weiter.
+
+**Wartung:** Mit **Settings › Advanced › Show expert maintenance actions** (Experten-Wartungsaktionen anzeigen) bietet
+die Auswahl über den Wartungsschaltflächen auch **LoRaWAN module**, mit **Reset**, **Erase chip…** (Chip löschen:
+Flash und Daten-EEPROM) und **Unlock (erase)…** (Entsperren und löschen). Jede Aktion führt durch denselben
+Assistenten mit dem Umstecken (Schritt 4 heißt dann **Reset**, **Erase** oder **Unlock**); Löschen und Entsperren
+fragen zuerst.
+
+Auf der Kommandozeile: `hwio chester lrw` ([Kommandozeile](../en/cli.md#lrw)).
 
 <a id="stm32-chips"></a>
 ## STM32-Chips flashen
@@ -211,6 +265,7 @@ hwio chester lte flash mfw_nrf91x1_2.0.2.zip              # a modem firmware zip
 hwio chester lte flash --guided                           # the guided LTE update (as in the app)
 hwio chester app erase --all
 hwio chester app recover
+hwio chester lrw flash                                    # lora-modem for CHESTER (the LoRaWAN module, guided)
 hwio stm32 flash --chip stm32l0-cat3-64k firmware.hex     # an STM32 chip (hwio stm32 chips)
 ```
 
