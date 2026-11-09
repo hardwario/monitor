@@ -5,8 +5,10 @@
 #include "hwio/core/json.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
+#include "hwio/device/lrw_update_procedure.h"
 #include "hwio/device/operation.h"
 #include "hwio/device/profile.h"
+#include "hwio/firmware/firmware_image.h"
 #include "hwio/firmware/program_progress.h"
 #include "pages/firmware_services.h"
 #include "settings_store.h"
@@ -17,6 +19,7 @@
 #include "viewmodels/settings_view_model.h"
 #include "workers/firmware_loader.h"
 
+#include <QCoreApplication>
 #include <QLocale>
 #include <QLoggingCategory>
 #include <QObject>
@@ -63,6 +66,12 @@ QString secondsText(std::chrono::milliseconds duration) {
 QString elapsedText(std::chrono::milliseconds elapsed) {
     const auto total = std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
     return QStringLiteral("%1:%2").arg(total / 60).arg(total % 60, 2, 10, QLatin1Char('0'));
+}
+
+// A LoRaWAN module request without firmware (Reset, Erase, Unlock).
+device::LrwUpdateProcedure::Request lrwRequest(device::LrwUpdateProcedure::Action action) {
+    return device::LrwUpdateProcedure::Request{
+        .action = action, .image = nullptr, .name = {}, .options = {}};
 }
 
 QString partNames(const device::TargetProfile& target) {
@@ -157,13 +166,19 @@ bool FlashViewModel::kindAllowed(Kind kind) const {
     // devices have the application and LTE cards.
     const device::DeviceProfile* deviceProfile = profile();
     const bool chipDevice = deviceProfile != nullptr && !device::hasConsole(*deviceProfile);
-    return chipDevice ? kind == FirmwareSourceViewModel::Stm32Firmware
-                      : kind != FirmwareSourceViewModel::Stm32Firmware;
+    if (chipDevice) {
+        return kind == FirmwareSourceViewModel::Stm32Firmware;
+    }
+    if (kind == FirmwareSourceViewModel::LrwFirmware) {
+        // Plan 0040: the third card where the device has the LoRaWAN module.
+        return isGuidedTarget(FirmwareSourceViewModel::targetIdFor(kind));
+    }
+    return kind != FirmwareSourceViewModel::Stm32Firmware;
 }
 
 void FlashViewModel::setKind(int kind) {
     if (kind < FirmwareSourceViewModel::AppFirmware ||
-        kind > FirmwareSourceViewModel::Stm32Firmware || m_running ||
+        kind > FirmwareSourceViewModel::LrwFirmware || m_running ||
         !kindAllowed(static_cast<Kind>(kind))) {
         return;
     }
@@ -233,7 +248,7 @@ QVariantList FlashViewModel::kinds() const {
                    ? QStringLiteral("%1 (%2)").arg(title, partNames(*target))
                    : title;
     };
-    return {
+    QVariantList cards{
         QVariantMap{
             {QStringLiteral("kind"), static_cast<int>(FirmwareSourceViewModel::AppFirmware)},
             {QStringLiteral("title"), tr("Application firmware")},
@@ -246,6 +261,36 @@ QVariantList FlashViewModel::kinds() const {
             {QStringLiteral("mcu"), tr("%1 + modem").arg(mcu(tr("LTE MCU"), lte))},
             {QStringLiteral("accepts"), tr("The HARDWARIO LTE firmware or your own .hex / .zip")}},
     };
+    if (kindAllowed(FirmwareSourceViewModel::LrwFirmware)) {
+        // Plan 0040 (D3, ADR-0281): "LoRaWAN module".
+        const device::TargetProfile* lrw = targetProfile(
+            FirmwareSourceViewModel::targetIdFor(FirmwareSourceViewModel::LrwFirmware));
+        const QString part = lrw != nullptr && !lrw->parts.empty()
+                                 ? toQString(lrw->parts.front().jlinkDevice) // "STM32L072CZ"
+                                 : QString();
+        cards.append(QVariantMap{
+            {QStringLiteral("kind"), static_cast<int>(FirmwareSourceViewModel::LrwFirmware)},
+            {QStringLiteral("title"), tr("LoRaWAN module")},
+            {QStringLiteral("mcu"),
+             part.isEmpty() ? tr("Murata Type ABZ") : tr("Murata Type ABZ (%1)").arg(part)},
+            {QStringLiteral("accepts"), tr("lora-modem for CHESTER or your own .hex / .bin")}});
+    }
+    return cards;
+}
+
+QString FlashViewModel::lrwCableText() const {
+    const device::TargetProfile* lrw =
+        targetProfile(FirmwareSourceViewModel::targetIdFor(FirmwareSourceViewModel::LrwFirmware));
+    if (lrw == nullptr || lrw->connectionGuide.empty()) {
+        return {};
+    }
+    // The connection guide's texts are QT_TRANSLATE_NOOP in context "hwio::device"; the module
+    // answers only while the application MCU is held (ADR-0283).
+    return QCoreApplication::translate("hwio::device",
+                                       lrw->connectionGuide.front().bodySourceText) +
+           QLatin1Char(' ') +
+           tr("Flash first asks for the APP connector to stop the application MCU, then for the "
+              "LoRaWAN module's connector.");
 }
 
 // ---- prerequisites and the Flash bar
@@ -266,6 +311,9 @@ bool FlashViewModel::needsNrfUtil() const {
 }
 
 bool FlashViewModel::haltAvailable() const {
+    if (m_kind == FirmwareSourceViewModel::LrwFirmware) {
+        return false; // plan 0040: the guided flow restarts the application MCU and the module
+    }
     // Not for a modem-only file (nRF Util programs the modem; nothing to halt).
     const LoadedSource* loaded = m_source->loadedSource();
     return m_kind == FirmwareSourceViewModel::AppFirmware || m_source->designatedActive() ||
@@ -313,27 +361,8 @@ QString FlashViewModel::cannotFlashReason() const {
     if (m_running || otherOperationRunning()) {
         return tr("Another operation is running");
     }
-    switch (static_cast<FirmwareSourceViewModel::SourceState>(m_source->sourceState())) {
-    case FirmwareSourceViewModel::None:
-        if (m_source->designatedActive()) {
-            return tr("The LTE firmware is not downloaded yet");
-        }
-        if (!m_source->catalogAvailable()) {
-            return tr("Choose a firmware file");
-        }
-        return tr("Choose a firmware file or enter a catalog ID");
-    case FirmwareSourceViewModel::Loading:
-        return tr("Loading the firmware file…");
-    case FirmwareSourceViewModel::Downloading:
-        return tr("Downloading the firmware…");
-    case FirmwareSourceViewModel::Invalid:
-        if (m_source->designatedActive()) {
-            return tr("The LTE firmware could not be downloaded");
-        }
-        return m_source->suggestedKind() >= 0 ? tr("The file does not match the chosen kind")
-                                              : tr("The firmware cannot be used");
-    case FirmwareSourceViewModel::Ready:
-        break;
+    if (QString problem = sourceProblem(); !problem.isEmpty()) {
+        return problem;
     }
     if (needsNrfUtil()) {
         if (const std::optional<Error>& problem = m_services.dependencies()->nrfUtilProblem()) {
@@ -345,13 +374,41 @@ QString FlashViewModel::cannotFlashReason() const {
     if (m_source->hasUicr() && !m_source->allowUicr()) {
         return tr("The firmware writes the UICR: allow it in Options");
     }
-    if (m_kind == FirmwareSourceViewModel::Stm32Firmware) {
+    if (m_kind == FirmwareSourceViewModel::Stm32Firmware ||
+        m_kind == FirmwareSourceViewModel::LrwFirmware) {
         if (m_source->binAddressVisible() && !m_source->binAddressError().isEmpty()) {
             return tr("Enter a valid start address for the .bin file");
         }
         if (m_source->hasEeprom() && keepEeprom()) {
             return tr("The firmware writes the data EEPROM: turn off Keep data EEPROM in Options");
         }
+    }
+    return {};
+}
+
+QString FlashViewModel::sourceProblem() const {
+    const bool lrw = m_kind == FirmwareSourceViewModel::LrwFirmware;
+    switch (static_cast<FirmwareSourceViewModel::SourceState>(m_source->sourceState())) {
+    case FirmwareSourceViewModel::None:
+        if (m_source->designatedActive()) {
+            return lrw ? tr("The LoRaWAN module firmware is not downloaded yet")
+                       : tr("The LTE firmware is not downloaded yet");
+        }
+        return m_source->catalogAvailable() ? tr("Choose a firmware file or enter a catalog ID")
+                                            : tr("Choose a firmware file");
+    case FirmwareSourceViewModel::Loading:
+        return tr("Loading the firmware file…");
+    case FirmwareSourceViewModel::Downloading:
+        return tr("Downloading the firmware…");
+    case FirmwareSourceViewModel::Invalid:
+        if (m_source->designatedActive()) {
+            return lrw ? tr("The LoRaWAN module firmware could not be downloaded")
+                       : tr("The LTE firmware could not be downloaded");
+        }
+        return m_source->suggestedKind() >= 0 ? tr("The file does not match the chosen kind")
+                                              : tr("The firmware cannot be used");
+    case FirmwareSourceViewModel::Ready:
+        break;
     }
     return {};
 }
@@ -372,8 +429,11 @@ QString FlashViewModel::flashSummary() const {
 // -----------------------------------------------------------------------------------
 
 void FlashViewModel::flash() {
-    if (!canFlash() || (m_kind != FirmwareSourceViewModel::AppFirmware &&
-                        m_kind != FirmwareSourceViewModel::Stm32Firmware)) {
+    if (!canFlash() || m_kind == FirmwareSourceViewModel::LteFirmware) {
+        return;
+    }
+    if (m_kind == FirmwareSourceViewModel::LrwFirmware) {
+        flashLrw();
         return;
     }
     const LoadedSource* loaded = m_source->readySource();
@@ -413,6 +473,45 @@ void FlashViewModel::flash() {
         .sourceName = m_source->sourceName()});
 }
 
+void FlashViewModel::flashLrw() {
+    // Plan 0040 (ADR-0283): the guided procedure; a .bin placed at its start address, the data
+    // EEPROM only when not kept (as on the STM32 card).
+    std::shared_ptr<const firmware::FirmwareImage> image = m_source->flashImage();
+    if (!image) {
+        return;
+    }
+    openLrwWizard(device::LrwUpdateProcedure::Request{
+        .action = device::LrwUpdateProcedure::Action::Flash,
+        .image = std::move(image),
+        .name = toStdString(m_source->sourceName()),
+        .options = device::FlashOptions{.halt = false,
+                                        .allowUicr = m_source->hasEeprom() && !keepEeprom(),
+                                        .eraseAll = m_eraseChip}});
+}
+
+void FlashViewModel::openLrwWizard(device::LrwUpdateProcedure::Request request) {
+    if (m_tab->choosing() || m_running || otherOperationRunning()) {
+        return;
+    }
+    qCInfo(lcGui).noquote() << "Flash page: LoRaWAN module wizard requested";
+    m_lrwRequest = std::move(request);
+    m_tab->openWizard(QStringLiteral("lrw-update"));
+    m_lrwRequest.reset(); // taken by the wizard, or the wizard could not open
+}
+
+std::optional<device::LrwUpdateProcedure::Request> FlashViewModel::takeLrwRequest() {
+    return std::exchange(m_lrwRequest, std::nullopt);
+}
+
+bool FlashViewModel::isGuidedTarget(const QString& targetId) const {
+    const device::DeviceProfile* deviceProfile = profile();
+    return deviceProfile != nullptr && device::hasConsole(*deviceProfile) &&
+           targetId == toQString(device::LrwUpdateProcedure::lrwTargetId) &&
+           targetProfile(targetId) != nullptr;
+}
+
+bool FlashViewModel::resetHaltAvailable() const { return !isGuidedTarget(m_maintenanceTarget); }
+
 void FlashViewModel::runFlash(const FlashRequest& request) {
     m_lastFlash = request;
     m_lastSourceName = request.sourceName;
@@ -441,6 +540,12 @@ void FlashViewModel::reset(bool halt) {
     if (!canRunMaintenance()) {
         return;
     }
+    if (isGuidedTarget(m_maintenanceTarget)) {
+        if (!halt) { // plan 0040 B2: the module is reset by the guided procedure
+            openLrwWizard(lrwRequest(device::LrwUpdateProcedure::Action::Reset));
+        }
+        return;
+    }
     const std::string target = toStdString(m_maintenanceTarget);
     m_resetHalt = halt;
     start(OperationKind::Reset, m_maintenanceTarget,
@@ -467,6 +572,10 @@ void FlashViewModel::runEraseAll(const QString& target) {
     if (!canRunMaintenance() || !eraseAllAvailable()) {
         return;
     }
+    if (isGuidedTarget(target)) {
+        openLrwWizard(lrwRequest(device::LrwUpdateProcedure::Action::Erase));
+        return;
+    }
     start(OperationKind::EraseAll, target,
           [targetText = toStdString(target)](device::DeviceSession& session) {
               return session.erase(targetText, device::EraseScope::All);
@@ -475,6 +584,10 @@ void FlashViewModel::runEraseAll(const QString& target) {
 
 void FlashViewModel::runUnlock(const QString& target) {
     if (!canRunMaintenance() || !isStm32Target(target)) {
+        return;
+    }
+    if (isGuidedTarget(target)) {
+        openLrwWizard(lrwRequest(device::LrwUpdateProcedure::Action::Unlock));
         return;
     }
     start(OperationKind::Unlock, target,
@@ -625,15 +738,17 @@ QVariantList FlashViewModel::maintenanceTargets() const {
     }
     const device::TargetProfile* console = targetProfile(m_tab->consoleTargetId());
     for (const device::TargetProfile& target : deviceProfile->targets) {
-        // Plan 0040 (ADR-0283): the CHESTER LoRaWAN module (an STM32 behind the Nordic console
-        // MCU) answers only while the application MCU is held; its maintenance comes with the
-        // guided flow of the page (0040 B2), not as a plain target here.
-        if (console != nullptr && target.vendor != console->vendor) {
+        // Plan 0040 (B2, ADR-0283): the CHESTER LoRaWAN module (an STM32 behind the Nordic
+        // console MCU) answers only while the application MCU is held: its actions open the
+        // guided LoRaWAN module wizard. Other targets of another vendor are not offered.
+        const bool guided = isGuidedTarget(toQString(target.id));
+        if (console != nullptr && target.vendor != console->vendor && !guided) {
             continue;
         }
-        list.append(QVariantMap{
-            {QStringLiteral("targetId"), toQString(target.id)},
-            {QStringLiteral("title"), tr("%1 MCU").arg(device::targetDisplayName(target))}});
+        list.append(QVariantMap{{QStringLiteral("targetId"), toQString(target.id)},
+                                {QStringLiteral("title"),
+                                 guided ? device::targetDisplayName(target)
+                                        : tr("%1 MCU").arg(device::targetDisplayName(target))}});
     }
     return list;
 }
@@ -1232,6 +1347,11 @@ QVariantMap FlashViewModel::describeErase(bool recover) const {
     if (target != nullptr && target->vendor == device::ChipVendor::Stm32) {
         // Plan 0039 (ADR-0276): the STM32 texts; never shown pre-checked.
         const QStringList stm32Items{tr("Firmware (flash)"), tr("Data EEPROM")};
+        // Plan 0040 (ADR-0276): the factory LoRaWAN module runs Murata's firmware.
+        const QString consequence = recover && isGuidedTarget(m_maintenanceTarget)
+                                        ? tr("The module's original Murata firmware is removed.") +
+                                              QLatin1Char(' ') + tr("This cannot be undone.")
+                                        : tr("This cannot be undone.");
         return QVariantMap{
             {QStringLiteral("title"),
              recover ? tr("Unlock the %1?").arg(mcu) : tr("Erase the %1?").arg(mcu)},
@@ -1241,7 +1361,7 @@ QVariantMap FlashViewModel::describeErase(bool recover) const {
                           "erases:")
                      : tr("This erases:")},
             {QStringLiteral("items"), stm32Items},
-            {QStringLiteral("consequence"), tr("This cannot be undone.")},
+            {QStringLiteral("consequence"), consequence},
             {QStringLiteral("acceptText"), recover ? tr("Unlock and erase") : tr("Erase chip")},
         };
     }

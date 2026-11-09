@@ -169,9 +169,39 @@ version before downloading.
 
 ### Phase B — GUI
 
-- [ ] B1 Third card, kind classification and mismatch hint; cable-move prompts for cross-target `lrw`.
-- [ ] B2 Maintenance for `lrw`; Unlock confirmation text; "Check module" (D4) — hidden in rc.4 (D8, ADR-0283).
+- [x] B1 Third card, kind classification and mismatch hint; cable-move prompts for cross-target `lrw`.
+      Implementation notes: `FirmwareSourceViewModel::Kind::LrwFirmware` (target `lrw`, recent kind
+      "lrw"); the designated-firmware part follows the target of the current kind (LTE or LoRaWAN; a
+      kind with another target forgets the other download), an AppHex download becomes an Intel HEX
+      source. The card (shown where the profile has `lrw`): "lora-modem for CHESTER 1.4.1
+      (recommended)" (the profile's name + version, as the LTE card) or "Use your own file…" (.hex,
+      .bin with the start address); the Options card shows "Erase the whole chip first" / "Keep data
+      EEPROM" (no halt); the source card always shows the `lrw` connection guide's cabling note plus
+      "Flash first asks for the APP connector…". Kind hints by address range: an Intel HEX starting
+      in 0x08000000-0x0FFFFFFF on Application / LTE firmware → "This is LoRaWAN module firmware —
+      switch?"; an nRF HEX on the LoRaWAN card → "This is not LoRaWAN module firmware — switch to
+      Application firmware?"; a .bin on Application / LTE firmware suggests the LoRaWAN card. Flash
+      opens the new wizard `lrw-update` (`WizardId::LrwUpdate`, `LrwUpdateWizard`,
+      `LrwUpdateStep.qml`) with the page's request (`FlashViewModel::takeLrwRequest()`); it starts
+      `LrwUpdateProcedure` at once: APP connector · Stop the application · LoRaWAN connector ·
+      Flash (unlock confirmation of an RDP 1 module: the procedure's text "…the module's original
+      Murata firmware is removed.", [Unlock and erase]) · APP connector · Done ("LoRaWAN module
+      flashed with <name>."). Kind cards: three columns from 1000 px.
+- [x] B2 Maintenance for `lrw`; Unlock confirmation text; "Check module" (D4) — hidden in rc.4 (D8, ADR-0283).
+      Implementation notes: with the expert actions the MCU choice lists "LoRaWAN module"; its
+      [Reset], [Erase chip…] and [Unlock (erase)…] open the `lrw-update` wizard (the ConfirmDialog
+      first for erase / unlock; the unlock's consequence adds "The module's original Murata firmware
+      is removed."); no [Reset and halt] / [Erase application] for it. `LrwUpdateProcedure` gains
+      the action Reset (step ResetModule: reset(lrw, Go) while the application MCU is held; no
+      unlock needed). No "Check module".
 - [ ] B3 Qt Quick tests, screenshots (fake J-Link kit), translations, docs section "LoRaWAN module" (5 languages).
+  - [x] Tests: view-model GTests `LrwFlashTest` (card, designated download + guided flash, kind hints,
+        RDP 1 unlock in the wizard, maintenance actions, wizard without a request), `LrwUpdate.
+        ResetResetsAProtectedModuleWithoutTheUnlock`, Qt Quick `tst_lrw.qml` (fake J-Link board with
+        the APP and LoRaWAN connectors, `"needsHalted": "app"`). Note: the fake's CTRL-AP answers
+        behind any connector, so the wizard's APP-connector check can pass before the cable is back
+        (the tests accept it).
+  - [ ] Screenshots, translations, docs (5 languages).
 
 ### Phase C — HIL
 

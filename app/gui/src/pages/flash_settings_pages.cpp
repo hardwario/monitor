@@ -13,6 +13,7 @@
 #include "viewmodels/page_registry.h"
 #include "viewmodels/settings_view_model.h"
 #include "viewmodels/shortcut_registry.h"
+#include "wizard/lrw_update_wizard.h"
 #include "wizard/lte_update_wizard.h"
 
 #include <QKeySequence>
@@ -69,6 +70,8 @@ void registerFlashAndSettingsPages(AppViewModel& app) {
                      &FirmwareServices::retranslate);
     // Plan 0033 (ADR-0234): the LTE firmware update wizard shares the firmware services.
     registerLteUpdateWizard(app, *services);
+    // Plan 0040 (ADR-0283): the LoRaWAN module wizard, opened by the Flash page.
+    registerLrwUpdateWizard(app, *services);
 
     PageRegistry& pages = app.pageRegistry();
     pages.add(PageDescriptor{.id = FlashViewModel::pageId,

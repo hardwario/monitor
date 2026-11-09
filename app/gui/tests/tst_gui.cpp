@@ -155,6 +155,36 @@ public:
         return write(name, QByteArray(size, '\x5A'));
     }
 
+    // Plan 0040: a CHESTER with the APP and the LoRaWAN connector (moveCable() moves the J-Link);
+    // the module (STM32L072CZ, RDP `rdp`) answers only while the application MCU is held.
+    Q_INVOKABLE [[nodiscard]] bool useLrwBoard(int rdp) const {
+        if (!moveCable(QStringLiteral("app"))) {
+            return false;
+        }
+        const QString json = QStringLiteral(
+                                 R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+                "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted\n"}]},
+                "connectors": {"file": "%1", "initial": "app", "chips": {"app": {},
+                "lrw": {"family": "stm32l0", "devId": 1095, "revId": 8200, "flashKib": 192,
+                        "eepromBytes": 6144, "needsHalted": "app", "rdp": %2}}}}]})")
+                                 .arg(m_dir + QStringLiteral("/connector"))
+                                 .arg(rdp);
+        return useScenario(json);
+    }
+    Q_INVOKABLE [[nodiscard]] bool moveCable(const QString& connector) const {
+        return write(QStringLiteral("connector"), connector.toUtf8()).isValid();
+    }
+    // Plan 0040: an Intel HEX for the LoRaWAN module (STM32 flash at 0x08000000).
+    Q_INVOKABLE [[nodiscard]] QUrl writeModuleHex(const QString& name, int size) const {
+        std::vector<hwio::firmware::Segment> segments;
+        segments.push_back(hwio::firmware::Segment{
+            .address = 0x08000000,
+            .data = std::vector<std::byte>(static_cast<std::size_t>(size), std::byte{0x3C})});
+        const auto image = hwio::firmware::FirmwareImage::fromSegments(std::move(segments));
+        return write(name, image ? QByteArray::fromStdString(hwio::firmware::test::toHex(*image))
+                                 : QByteArray());
+    }
+
     // Plan 0012: a Bluetooth tab (as restored: Disconnected).
     Q_INVOKABLE bool configureBleTab(int index, const QString& id, const QString& name) {
         hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);

@@ -26,6 +26,15 @@
 // upload date; "Unknown firmware" when unreadable) and its SHA-256 verifies the download. docsUrl
 // is the profile's documentation page of application firmware in the UI language.
 //
+// Plan 0040 (B1, ADR-0278, ADR-0283): the LoRaWAN module kind (LrwFirmware, target `lrw`) has the
+// same two sources as the LTE kind: the designated firmware of its target (lora-modem for CHESTER,
+// an Intel HEX: DesignatedDownload::image) or an own .hex / .bin (start address as on the STM32
+// card). The designated part (lteSource, designated*) follows the target of the current kind; a
+// kind with another target forgets the other kind's designated download. Kind hints by address
+// range (ADR-0040 extended): an Intel HEX starting in the STM32 flash (0x08000000) on the
+// application or LTE card, or a .bin there, is LoRaWAN module firmware; an nRF image (below
+// 0x08000000) on the LoRaWAN card is suggested for the application card.
+//
 // Ownership: child of its owner (FlashViewModel, the flash wizard). The catalog operation it holds
 // never outlives FirmwareServices (see firmware_services.h). GUI thread only.
 
@@ -119,10 +128,13 @@ public:
         LteFirmware,
         // Plan 0039 (ADR-0274): an STM32 chip (the generic "STM32 chip" device): .hex or .bin
         Stm32Firmware,
+        // Plan 0040: the CHESTER LoRaWAN module (target lrw): the designated lora-modem firmware
+        // or an own .hex / .bin; flashed by the guided LoRaWAN module procedure
+        LrwFirmware,
     };
     Q_ENUM(Kind)
 
-    // 0021 (ADR-0165).
+    // 0021 (ADR-0165); plan 0040: the source of every kind with designated firmware (LTE, LoRaWAN).
     enum LteSource : quint8 { // NOLINT(cppcoreguidelines-use-enum-class)
         Designated,
         OwnFile,
@@ -155,10 +167,10 @@ public:
     FirmwareSourceViewModel(FirmwareSourceViewModel&&) = delete;
     FirmwareSourceViewModel& operator=(FirmwareSourceViewModel&&) = delete;
 
-    // "app" for AppFirmware, "lte" for LteFirmware; Stm32Firmware: "" (the tab's chip, see
-    // targetId()).
+    // "app" for AppFirmware, "lte" for LteFirmware, "lrw" for LrwFirmware; Stm32Firmware: "" (the
+    // tab's chip, see targetId()).
     [[nodiscard]] static QString targetIdFor(Kind kind);
-    // "app", "lte", "stm32" (flash/recent; stored "modem" entries are read as "lte").
+    // "app", "lte", "stm32", "lrw" (flash/recent; stored "modem" entries are read as "lte").
     [[nodiscard]] static QString kindId(Kind kind);
     // The target of the current kind (Stm32Firmware: the chip set by the owner).
     [[nodiscard]] QString targetId() const;
@@ -205,7 +217,8 @@ public:
     [[nodiscard]] QString designatedStatus() const;
     [[nodiscard]] qreal designatedProgress() const;
     [[nodiscard]] ErrorInfo designatedError() const;
-    // The LTE kind uses the designated firmware now (kind LTE, source Designated, available).
+    // The kind uses its target's designated firmware now (kind LTE or LoRaWAN, source Designated,
+    // available).
     [[nodiscard]] bool designatedActive() const;
 
     Q_INVOKABLE void loadFile(const QUrl& url);
@@ -268,7 +281,14 @@ private:
     [[nodiscard]] bool fits() const { return !mismatch() && !binaryElsewhere(); }
     [[nodiscard]] std::optional<std::uint32_t> binStart() const;
     [[nodiscard]] const device::TargetProfile* target() const;
-    [[nodiscard]] const device::TargetProfile* lteTarget() const;
+    // The target whose designated firmware the kind offers (lte, lrw); nullptr for other kinds.
+    [[nodiscard]] const device::TargetProfile* designatedTarget() const;
+    // Plan 0040: the profile of the owner's tab has the LoRaWAN module target.
+    [[nodiscard]] bool lrwAvailable() const;
+    // The kind the image (Intel HEX) belongs to by its address range, when it is not m_kind.
+    [[nodiscard]] std::optional<Kind> hexMismatch() const;
+    // Forgets the designated download of another target (a kind change).
+    void resetDesignated();
     [[nodiscard]] QString catalogInfoText() const;
     // "hio-chester-push-fm v4.0.1" when the page of `id` was read, else "Catalog ID <id>".
     [[nodiscard]] QString catalogName(const QString& id) const;
@@ -301,6 +321,7 @@ private:
     std::uint64_t m_designatedTotal = 0;
     std::optional<LoadedSource> m_designated; // when DesignatedReady
     std::optional<Error> m_designatedError;
+    QString m_designatedFor; // the target id of the designated state ("" = none yet)
     // 0021: the catalog page of the ID in the field.
     std::unique_ptr<firmware::LookupOperation> m_lookup;
     QString m_lookupId;

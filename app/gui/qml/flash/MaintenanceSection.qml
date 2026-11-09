@@ -5,7 +5,9 @@
 // above the buttons. [Erase application] exists only where the profile erases code only by
 // default (not on the LTE MCU). The troubleshooting hand-off of target.protected shows [Recover…]
 // once (vm.recoverAvailable) and unfolds the section (vm.maintenanceExpanded). Plan 0039: on an
-// STM32 chip the two are [Erase chip…] and [Unlock (erase)…], always shown.
+// STM32 chip the two are [Erase chip…] and [Unlock (erase)…], always shown. Plan 0040: the expert
+// choice includes the CHESTER LoRaWAN module, whose actions open the LoRaWAN module wizard (no
+// [Reset and halt]: the guided flow restarts the module).
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -107,6 +109,7 @@ FlashCard {
 
         HButton {
             objectName: "resetHaltButton"
+            visible: card.vm ? card.vm.resetHaltAvailable : true
             text: qsTr("Reset and halt")
             enabled: card.vm ? card.vm.canRunMaintenance : false
             onClicked: card.vm.reset(true)

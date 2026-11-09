@@ -4,7 +4,8 @@
 // Amended by 0021: LTE firmware offers the designated HARDWARIO LTE firmware (default; downloaded
 // and verified when its row is shown, ADR-0165) or "Use your own file…"; a valid catalog ID shows
 // the firmware's name, version and upload date (ADR-0166); "Find firmware IDs ↗" opens the
-// documentation in the UI language (ADR-0167).
+// documentation in the UI language (ADR-0167). Plan 0040: the LoRaWAN module card offers its
+// designated lora-modem firmware the same way and shows the cabling note (`cableNote`).
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -16,9 +17,12 @@ FlashCard {
     id: card
 
     required property FirmwareSourceViewModel source
+    // A note above the sources (the LoRaWAN module's cabling, plan 0040); "" = none.
+    property string cableNote: ""
     property errorInfo noError // default-constructed: invalid (no error)
     readonly property bool designatedShown: card.source !== null
-                                            && card.source.kind === FirmwareSourceViewModel.LteFirmware
+                                            && (card.source.kind === FirmwareSourceViewModel.LteFirmware
+                                                || card.source.kind === FirmwareSourceViewModel.LrwFirmware)
                                             && card.source.designatedAvailable
     readonly property bool designatedActive: card.designatedShown
                                              && card.source.lteSource === FirmwareSourceViewModel.Designated
@@ -36,6 +40,30 @@ FlashCard {
     title: qsTr("Firmware")
     onWantsDesignatedChanged: if (card.wantsDesignated) card.source.prepareDesignated()
     Component.onCompleted: if (card.wantsDesignated) card.source.prepareDesignated()
+
+    // Plan 0040: the cabling note of the LoRaWAN module.
+    RowLayout {
+        objectName: "cableNote"
+        Layout.fillWidth: true
+        visible: card.cableNote !== ""
+        spacing: Theme.spacingS
+
+        Icon {
+            Layout.alignment: Qt.AlignTop
+            symbol: "info"
+            color: Theme.textMuted
+            size: 18
+        }
+
+        Label {
+            objectName: "cableNoteText"
+            textFormat: Text.PlainText
+            Layout.fillWidth: true
+            text: card.cableNote
+            color: Theme.text
+            wrapMode: Text.Wrap
+        }
+    }
 
     // 0021 (ADR-0165): the designated LTE firmware or an own file.
     ColumnLayout {
@@ -61,7 +89,11 @@ FlashCard {
 
             Label {
                 Layout.fillWidth: true
-                text: qsTr("LTE application and modem firmware")
+                objectName: "designatedDescription"
+                textFormat: Text.PlainText
+                text: card.source && card.source.kind === FirmwareSourceViewModel.LrwFirmware
+                      ? qsTr("Open LoRaWAN modem firmware by HARDWARIO for the Murata module")
+                      : qsTr("LTE application and modem firmware")
                 color: Theme.textMuted
                 wrapMode: Text.Wrap
             }

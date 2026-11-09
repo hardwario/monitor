@@ -204,7 +204,10 @@ TestCase {
     // Flash page step number ("Step 1 of 8" is the wizard's).
     function test_ltePrerequisiteVisible960() {
         AppViewModel.setLanguage("cs");
+        // The kind cards are created again in Czech (plan 0040: three of them): laid out first.
+        waitForRendering(window.contentItem);
         mouseClick(find("kindCard" + FirmwareSourceViewModel.LteFirmware));
+        compare(vm().kind, FirmwareSourceViewModel.LteFirmware);
         mouseClick(find("lteUpdateButton"));
         const dialog = findChild(window, "wizardDialog");
         tryVerify(() => dialog.opened);

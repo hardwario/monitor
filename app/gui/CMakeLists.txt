@@ -46,6 +46,7 @@ set(HWIO_GUI_QML_FILES
     qml/flash/FlashBar.qml
     qml/flash/FlashCard.qml
     qml/flash/KindCards.qml
+    qml/flash/LrwUpdateStep.qml
     qml/flash/LteUpdateStep.qml
     qml/flash/MaintenanceSection.qml
     qml/flash/OptionsCard.qml
@@ -189,6 +190,8 @@ qt_add_qml_module(hwio_gui
         src/viewmodels/update_view_model.h
         src/wizard/check_list_model.cpp
         src/wizard/check_list_model.h
+        src/wizard/lrw_update_wizard.cpp
+        src/wizard/lrw_update_wizard.h
         src/wizard/lte_update_wizard.cpp
         src/wizard/lte_update_wizard.h
         src/wizard/report_view_model.cpp

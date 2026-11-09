@@ -26,9 +26,16 @@
 // choice of the LTE MCU (cross-target, ADR-0057). revealRecover() (the troubleshooting hand-off of
 // target.protected) shows Recover for one MCU once, without changing the setting.
 //
+// Plan 0040 (B1, B2; ADR-0283): the LoRaWAN module kind (LrwFirmware, CHESTER target `lrw`) and the
+// `lrw` maintenance actions (Reset, Erase chip, Unlock) do not run on this page either: the module
+// answers only while the application MCU is held, so they open the LoRaWAN module wizard
+// ("lrw-update", LrwUpdateWizard) with a pending request (takeLrwRequest()) that drives
+// device::LrwUpdateProcedure. The LoRaWAN card shows the connection guide's cabling note.
+//
 // Ownership: child of its DeviceTabViewModel (Qt parent, created by the page registry). GUI thread
 // only.
 
+#include "hwio/device/lrw_update_procedure.h"
 #include "hwio/device/operation.h"
 #include "viewmodels/error_info.h"
 #include "viewmodels/firmware_source_view_model.h"
@@ -137,6 +144,11 @@ class FlashViewModel : public QObject {
     // The result ErrorPanel's custom action: "Unlock…" (target.protected on an STM32 chip) or
     // "Use <found chip>" (target.wrong_chip with a curated chip of the tab's device); "" = none.
     Q_PROPERTY(QString errorCustomActionText READ errorCustomActionText NOTIFY stateChanged)
+    // ---- plan 0040 (the CHESTER LoRaWAN module, ADR-0283) ----
+    // The cabling note of the LoRaWAN card (the `lrw` connection guide, translated).
+    Q_PROPERTY(QString lrwCableText READ lrwCableText NOTIFY textsChanged)
+    // [Reset and halt] (not for the LoRaWAN module: the guided flow restarts it).
+    Q_PROPERTY(bool resetHaltAvailable READ resetHaltAvailable NOTIFY maintenanceChanged)
 
 public:
     // Unscoped: QML compares FlashViewModel.Running etc. with the int property.
@@ -240,6 +252,11 @@ public:
     // [Unlock…] opens the unlock confirmation for the failed operation's chip; [Use <found>]
     // switches the tab to the found chip (DeviceTabViewModel::changeTarget, never silently).
     Q_INVOKABLE void triggerCustomAction();
+    [[nodiscard]] QString lrwCableText() const;
+    [[nodiscard]] bool resetHaltAvailable() const;
+    // Plan 0040: the request the LoRaWAN module wizard runs; set just before the page opens it
+    // (flash() of the LoRaWAN kind, the `lrw` maintenance actions) and taken once by the wizard.
+    [[nodiscard]] std::optional<device::LrwUpdateProcedure::Request> takeLrwRequest();
     // Back from the result card to the form (the source stays loaded).
     Q_INVOKABLE void dismissResult();
     // [Open console] of the success card.
@@ -299,9 +316,16 @@ private:
     void runRecover(const QString& target);
     void runUnlock(const QString& target);
     [[nodiscard]] bool isStm32Target(const QString& targetId) const;
+    // Plan 0040: the CHESTER LoRaWAN module, reached only by the guided procedure (ADR-0283).
+    [[nodiscard]] bool isGuidedTarget(const QString& targetId) const;
+    void flashLrw();
+    // Opens the LoRaWAN module wizard with `request` (pending until the wizard takes it).
+    void openLrwWizard(device::LrwUpdateProcedure::Request request);
     // Plan 0039: the curated chip of a target.wrong_chip result that the tab's device has.
     [[nodiscard]] const device::TargetProfile* foundChipTarget() const;
     [[nodiscard]] bool kindAllowed(FirmwareSourceViewModel::Kind kind) const;
+    // The reason of cannotFlashReason() that comes from the source ("" = ready).
+    [[nodiscard]] QString sourceProblem() const;
     void start(device::OperationKind kind, const QString& target,
                const std::function<Result<device::OperationId>(device::DeviceSession&)>& run);
     void onSessionChanged();
@@ -360,6 +384,8 @@ private:
     bool m_resetHalt = false; // of the last reset (result text)
     QVariantMap m_confirmation;
     std::optional<PendingConfirmation> m_pending; // of the open confirmation
+    // Plan 0040: the request of the LoRaWAN module wizard while it opens.
+    std::optional<device::LrwUpdateProcedure::Request> m_lrwRequest;
     // 0021: the window after an application flash in which `info show` answers.
     QTimer m_deviceInfoDeadline;
     QTimer m_deviceInfoRetry;
