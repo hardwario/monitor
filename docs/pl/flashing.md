@@ -129,6 +129,65 @@ UICR i PIB. W MCU LTE następnie wgrywa mały obraz, który utrzymuje możliwoś
 firmware ponownie. Recover nigdy nie uruchamia się samoczynnie. Gdy przewodnik rozwiązywania problemów dla chronionego
 MCU kieruje na stronę **Flash**, **Recover…** jest tam wyświetlane jeden raz, także bez ustawienia eksperckiego.
 
+<a id="stm32-chips"></a>
+## Wgrywanie firmware do układów STM32
+
+HARDWARIO Monitor wgrywa przez J-Link także firmware do układów STM32L0, na przykład do kontrolera płytki
+rozszerzeń CHESTER.
+
+**Podłączenie:** połącz piny SWD J-Link z układem: **SWDIO**, **SWCLK**, **GND** i **VTref** (napięcie zasilania
+układu, po którym J-Link rozpoznaje, że płytka jest zasilana). Płytka potrzebuje własnego zasilania. W karcie **New
+device** wybierz programator, następnie w sekcji **Device** wybierz **STM32 chip** (układ STM32), w sekcji **Chip**
+wybierz układ i naciśnij **Connect**.
+
+**Chip** zawiera obsługiwane układy STM32L0 według kategorii i rozmiaru pamięci flash, na przykład **STM32L0 cat. 3,
+64 KiB**; podpowiedź wymienia układy, które obejmuje pozycja. Układy jednej kategorii z tym samym rozmiarem pamięci
+flash mają ten sam identyfikator i aplikacja nie potrafi ich odróżnić, dlatego obejmuje je jedna pozycja. Seria
+STM32L010 (value line) nie jest obsługiwana. Listę wypisuje `hwio stm32 chips`.
+
+**Strona Flash:** krok 1 ma jedną kartę, **Firmware for &lt;chip&gt;** (firmware dla układu), która przyjmuje **.hex or
+.bin file** (plik `.hex` lub `.bin`). Plik `.bin` nie zawiera adresów: podaj jego **Start address** (adres
+początkowy; domyślnie `0x08000000`, początek pamięci flash). Opcje:
+
+- **Erase the whole chip first** (najpierw wymaż cały układ): przed zapisem wymazuje pamięć flash i EEPROM danych.
+  Domyślnie wyłączone; zwykłe wgrywanie wymazuje tylko zapisywane sektory.
+- **Keep data EEPROM** (zachowaj EEPROM danych, domyślnie włączone): rekordy EEPROM danych z pliku nie są zapisywane.
+  Wyłącz tę opcję, gdy firmware ma zmienić EEPROM danych.
+- **Halt the CPU after flashing**.
+
+Przed zapisem HARDWARIO Monitor odczytuje identyfikator układu i rozmiar pamięci flash. Gdy podłączony jest inny układ
+niż wybrany, wgrywanie kończy się błędem [target.wrong_chip](troubleshooting.md#target.wrong_chip); jeśli znaleziony
+układ jest na liście, przycisk **Use &lt;found chip&gt;** (użyj znalezionego układu) przełącza na niego kartę.
+
+**Ochrona przed odczytem (RDP):** na poziomie 1 J-Link nie może odczytać ani zapisać pamięci flash, a wgrywanie kończy
+się błędem [target.protected](troubleshooting.md#target.protected) z przyciskiem **Unlock…** (odblokuj). Odblokowanie
+usuwa ochronę, a układ następnie wymazuje się całkowicie, łącznie z EEPROM danych. Tego nie można cofnąć, a firmware
+chronionego układu nie da się wcześniej zarchiwizować. Po odblokowaniu uruchom wgrywanie ponownie. Poziom 2 jest
+trwały: układu nie można już przeprogramować
+([target.permanently_protected](troubleshooting.md#target.permanently_protected)).
+
+Sekcja **Maintenance — &lt;chip&gt;** zawiera **Reset**, **Reset and halt**, **Erase chip…** (wymaż układ: pamięć flash i
+EEPROM danych) i **Unlock (erase)…** (odblokuj i wymaż); dwie ostatnie akcje najpierw pytają. Strona **Console**
+karty informuje, że układ nie ma konsoli w HARDWARIO Monitor.
+
+### CHESTER-S1 (Clime IAQ)
+
+Kontrolerem drugiej płytki CHESTER Clime IAQ (CHESTER-S1) jest **STM32L0 cat. 3, 64 KiB**. HARDWARIO nie ma jeszcze
+dla niego przygotowanego firmware, a bez jego firmware czujniki nie działają: **zrób kopię zapasową przed wgraniem
+lub wymazaniem**. `hwio stm32 info --chip stm32l0-cat3-64k` pokazuje poziom ochrony przed odczytem; przy RDP 0 zapisz
+pamięć flash i EEPROM danych za pomocą J-Link Commander (`JLinkExe`, w Windows `JLink.exe`):
+
+```text
+JLinkExe -device STM32L053R8 -if SWD -speed 4000 -autoconnect 1
+J-Link> halt
+J-Link> savebin s1-flash.bin 0x08000000 0x10000
+J-Link> savebin s1-eeprom.bin 0x08080000 0x800
+J-Link> exit
+```
+
+Przywracanie: `hwio stm32 flash --chip stm32l0-cat3-64k s1-flash.bin`, a następnie
+`hwio stm32 flash --chip stm32l0-cat3-64k --address 0x08080000 --allow-eeprom s1-eeprom.bin`.
+
 ## Wiersz poleceń
 
 ```sh
@@ -140,6 +199,7 @@ hwio chester lte flash mfw_nrf91x1_2.0.2.zip              # a modem firmware zip
 hwio chester lte flash --guided                           # the guided LTE update (as in the app)
 hwio chester app erase --all
 hwio chester app recover
+hwio stm32 flash --chip stm32l0-cat3-64k firmware.hex     # an STM32 chip (hwio stm32 chips)
 ```
 
 Zobacz [Wiersz poleceń](../en/cli.md#flashing).

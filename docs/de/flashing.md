@@ -141,6 +141,65 @@ Image, das die MCU debugbar hält. Flashen Sie nach einem Recover die Firmware e
 Schickt Sie die Fehlerbehebungsanleitung für eine geschützte MCU auf die Seite **Flash**, wird **Recover…** dort
 einmal angezeigt, auch ohne die Experteneinstellung.
 
+<a id="stm32-chips"></a>
+## STM32-Chips flashen
+
+HARDWARIO Monitor flasht über den J-Link auch STM32L0-Chips, zum Beispiel den Controller einer CHESTER-Erweiterungsplatine.
+
+**Anschließen:** Verbinden Sie die SWD-Pins des J-Link mit dem Chip: **SWDIO**, **SWCLK**, **GND** und **VTref** (die
+Versorgungsspannung des Chips, an der der J-Link erkennt, dass die Platine versorgt ist). Die Platine braucht eine
+eigene Stromversorgung. Wählen Sie im Tab **New device** (Neues Gerät) die Probe, dann unter **Device** (Gerät) **STM32
+chip** (STM32-Chip), unter **Chip** den Baustein, und drücken Sie **Connect** (Verbinden).
+
+**Chip** listet die unterstützten STM32L0-Bausteine nach Kategorie und Flash-Größe, zum Beispiel **STM32L0 cat. 3, 64
+KiB**; der Hinweis nennt die Chips, die der Eintrag abdeckt. Chips einer Kategorie mit gleicher Flash-Größe haben
+dieselbe ID und sind für die App nicht unterscheidbar, deshalb deckt ein Eintrag sie alle ab. Die Value Line
+STM32L010 wird nicht abgedeckt. `hwio stm32 chips` gibt die Liste aus.
+
+**Seite Flash:** Schritt 1 hat eine einzige Karte, **Firmware for &lt;chip&gt;** (Firmware für &lt;Chip&gt;), die eine **.hex or
+.bin file** (`.hex`- oder `.bin`-Datei) annimmt. Eine `.bin`-Datei enthält keine Adressen: Geben Sie ihre **Start
+address** (Startadresse) ein (Standard `0x08000000`, der Anfang des Flash). Optionen:
+
+- **Erase the whole chip first** (Zuerst den ganzen Chip löschen): löscht vor dem Schreiben den Flash und das
+  Daten-EEPROM. Standardmäßig aus; ein normaler Flash-Vorgang löscht nur die Sektoren, die er beschreibt.
+- **Keep data EEPROM** (Daten-EEPROM behalten, standardmäßig an): Die Daten-EEPROM-Records der Datei werden nicht
+  geschrieben. Schalten Sie die Option aus, wenn die Firmware das Daten-EEPROM ändern soll.
+- **Halt the CPU after flashing** (CPU nach dem Flashen anhalten).
+
+Vor dem Schreiben liest HARDWARIO Monitor die ID und die Flash-Größe des Chips. Ist es ein anderer Chip als der
+gewählte, bricht das Flashen mit [target.wrong_chip](troubleshooting.md#target.wrong_chip) ab; steht der gefundene Chip
+in der Liste, schaltet **Use &lt;found chip&gt;** (&lt;gefundenen Chip&gt; verwenden) den Tab auf ihn um.
+
+**Ausleseschutz (RDP):** Auf Stufe 1 kann der J-Link den Flash weder lesen noch beschreiben, und das Flashen bricht mit
+[target.protected](troubleshooting.md#target.protected) und einer Schaltfläche **Unlock…** (Entsperren) ab. Das
+Entsperren entfernt den Schutz, und der Chip löscht sich danach vollständig, einschließlich des Daten-EEPROM. Das lässt
+sich nicht rückgängig machen, und die Firmware eines geschützten Chips kann vorher nicht gesichert werden. Starten Sie
+das Flashen nach dem Entsperren erneut. Stufe 2 ist dauerhaft: Der Chip lässt sich nicht mehr neu programmieren
+([target.permanently_protected](troubleshooting.md#target.permanently_protected)).
+
+**Maintenance — &lt;chip&gt;** (Wartung — &lt;Chip&gt;) bietet **Reset**, **Reset and halt**, **Erase chip…** (Chip löschen: Flash
+und Daten-EEPROM) und **Unlock (erase)…** (Entsperren und löschen); die beiden letzten fragen zuerst. Die Seite
+**Console** (Konsole) des Tabs erklärt, dass der Chip in HARDWARIO Monitor keine Konsole hat.
+
+### CHESTER-S1 (Clime IAQ)
+
+Der Controller der zweiten Platine von CHESTER Clime IAQ (CHESTER-S1) ist ein **STM32L0 cat. 3, 64 KiB**. HARDWARIO
+hat dafür noch keine vorbereitete Firmware, und ohne seine Firmware funktionieren die Sensoren nicht: **Sichern Sie
+ihn, bevor Sie ihn flashen oder löschen.** `hwio stm32 info --chip stm32l0-cat3-64k` zeigt die Stufe des
+Ausleseschutzes; bei RDP 0 sichern Sie den Flash und das Daten-EEPROM mit dem J-Link Commander (`JLinkExe`, unter
+Windows `JLink.exe`):
+
+```text
+JLinkExe -device STM32L053R8 -if SWD -speed 4000 -autoconnect 1
+J-Link> halt
+J-Link> savebin s1-flash.bin 0x08000000 0x10000
+J-Link> savebin s1-eeprom.bin 0x08080000 0x800
+J-Link> exit
+```
+
+Wiederherstellen: `hwio stm32 flash --chip stm32l0-cat3-64k s1-flash.bin`, danach
+`hwio stm32 flash --chip stm32l0-cat3-64k --address 0x08080000 --allow-eeprom s1-eeprom.bin`.
+
 ## Kommandozeile
 
 ```sh
@@ -152,6 +211,7 @@ hwio chester lte flash mfw_nrf91x1_2.0.2.zip              # a modem firmware zip
 hwio chester lte flash --guided                           # the guided LTE update (as in the app)
 hwio chester app erase --all
 hwio chester app recover
+hwio stm32 flash --chip stm32l0-cat3-64k firmware.hex     # an STM32 chip (hwio stm32 chips)
 ```
 
 Siehe [Kommandozeile](../en/cli.md#flashing).

@@ -121,6 +121,61 @@ smaže, včetně UICR a PIB. U LTE MCU potom nahraje malý obraz, díky kterému
 znovu naflashujte. Obnovení se nikdy nespouští samo. Když vás průvodce řešením problémů u chráněného MCU pošle na
 stránku **Nahrát FW**, zobrazí se tam **Obnovit (recover)…** jednou, i bez odborného nastavení.
 
+<a id="stm32-chips"></a>
+## Flashování čipů STM32
+
+HARDWARIO Monitor přes J-Link nahrává také čipy STM32L0, například řídicí čip rozšiřující desky CHESTER.
+
+**Připojení:** propojte piny SWD J-Linku s čipem: **SWDIO**, **SWCLK**, **GND** a **VTref** (napájecí napětí čipu,
+podle kterého J-Link pozná, že je deska napájená). Deska potřebuje vlastní napájení. Na kartě **Nové zařízení** vyberte
+programátor, v části **Zařízení** zvolte **Čip STM32**, v části **Čip** vyberte typ a stiskněte **Připojit**.
+
+**Čip** nabízí podporované čipy STM32L0 podle kategorie a velikosti paměti flash, například **STM32L0 cat. 3, 64 KiB**;
+nápověda uvádí čipy, které položka pokrývá. Čipy jedné kategorie se stejnou velikostí paměti flash mají stejné ID a
+aplikace je nerozliší, proto je pokrývá jedna položka. Řada STM32L010 (value line) podporovaná není. Seznam vypíše
+`hwio stm32 chips`.
+
+**Stránka Nahrát FW:** krok 1 má jedinou kartu **Firmware pro &lt;čip&gt;**, která přijímá **soubor .hex nebo .bin**. Soubor
+`.bin` neobsahuje adresy: zadejte jeho **Počáteční adresu** (výchozí `0x08000000`, začátek paměti flash). Možnosti:
+
+- **Nejprve smazat celý čip**: před zápisem smaže paměť flash i datovou EEPROM. Ve výchozím stavu vypnuto; běžné
+  nahrání smaže jen sektory, do kterých zapisuje.
+- **Zachovat datovou EEPROM** (ve výchozím stavu zapnuto): záznamy datové EEPROM ze souboru se nezapíšou. Vypněte ji,
+  když má firmware datovou EEPROM změnit.
+- **Po nahrání zastavit procesor**.
+
+Před zápisem HARDWARIO Monitor přečte ID čipu a velikost paměti flash. Když je připojený jiný čip, než jaký jste
+zvolili, nahrávání skončí chybou [target.wrong_chip](troubleshooting.md#target.wrong_chip); pokud je nalezený čip v
+seznamu, tlačítko **Použít &lt;nalezený čip&gt;** na něj kartu přepne.
+
+**Ochrana proti čtení (RDP):** na úrovni 1 J-Link nemůže paměť flash číst ani zapisovat a nahrávání skončí chybou
+[target.protected](troubleshooting.md#target.protected) s tlačítkem **Odemknout…**. Odemčení ochranu odstraní a čip se
+pak celý smaže, včetně datové EEPROM. To nelze vrátit zpět a firmware chráněného čipu nejde předem zálohovat. Po
+odemčení spusťte nahrávání znovu. Úroveň 2 je trvalá: čip už nejde přeprogramovat
+([target.permanently_protected](troubleshooting.md#target.permanently_protected)).
+
+**Údržba — &lt;čip&gt;** nabízí **Reset**, **Reset a zastavit**, **Smazat čip…** (paměť flash i datová EEPROM) a
+**Odemknout (smazat)…**; poslední dvě akce se nejprve zeptají. Stránka **Konzole** karty uvádí, že čip v HARDWARIO
+Monitor konzoli nemá.
+
+### CHESTER-S1 (Clime IAQ)
+
+Řídicí čip druhé desky CHESTER Clime IAQ (CHESTER-S1) je **STM32L0 cat. 3, 64 KiB**. HARDWARIO pro něj zatím nemá
+připravený firmware a senzory bez jeho firmwaru nefungují: **před nahráním nebo smazáním ho zálohujte**.
+`hwio stm32 info --chip stm32l0-cat3-64k` ukáže úroveň ochrany proti čtení; při RDP 0 uložte paměť flash a datovou
+EEPROM pomocí J-Link Commanderu (`JLinkExe`, ve Windows `JLink.exe`):
+
+```text
+JLinkExe -device STM32L053R8 -if SWD -speed 4000 -autoconnect 1
+J-Link> halt
+J-Link> savebin s1-flash.bin 0x08000000 0x10000
+J-Link> savebin s1-eeprom.bin 0x08080000 0x800
+J-Link> exit
+```
+
+Obnovení: `hwio stm32 flash --chip stm32l0-cat3-64k s1-flash.bin`, potom
+`hwio stm32 flash --chip stm32l0-cat3-64k --address 0x08080000 --allow-eeprom s1-eeprom.bin`.
+
 ## Příkazová řádka
 
 ```sh
@@ -132,6 +187,7 @@ hwio chester lte flash mfw_nrf91x1_2.0.2.zip              # a modem firmware zip
 hwio chester lte flash --guided                           # the guided LTE update (as in the app)
 hwio chester app erase --all
 hwio chester app recover
+hwio stm32 flash --chip stm32l0-cat3-64k firmware.hex     # an STM32 chip (hwio stm32 chips)
 ```
 
 Viz [Příkazová řádka](../en/cli.md#flashing).

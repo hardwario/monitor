@@ -80,9 +80,10 @@ Kódy chyb: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_buffer
 - Zkontrolujte kabely a napájení a potom flashujte znovu.
 - Pokud ověření selhává opakovaně, nastavte nižší rychlost J-Linku.
 - Pokud je MCU chráněný proti čtení, obnovte ho (recover). Obnovení smaže celý MCU, včetně UICR a bloku informací o produktu. Viz [Obnovení (recover)](flashing.md#obnovení-recover).
+- U čipu STM32: pokud je čip chráněný proti čtení (RDP úroveň 1), odemkněte ho; odemčení smaže celý čip, včetně datové EEPROM. Zkontrolujte, že jste zvolili správný čip. Viz [Flashování čipů STM32](flashing.md#stm32-chips).
 - Pokud firmware zapisuje také do UICR, povolte to záměrně: **Povolit zápis UICR** na stránce **Nahrát FW**, nebo `--allow-uicr` v CLI. Viz [UICR a blok informací o produktu](flashing.md#uicr-a-blok-informací-o-produktu).
 
-Kódy chyb: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed).
+Kódy chyb: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed), [`target.wrong_chip`](#target.wrong_chip), [`target.permanently_protected`](#target.permanently_protected), [`target.unlock_failed`](#target.unlock_failed), [`firmware.bin_address_required`](#firmware.bin_address_required).
 
 <a id="the-j-link-is-on-the-lte-connector"></a>
 ### J-Link je na konektoru LTE
@@ -488,6 +489,8 @@ Po neúspěšném kroku aktualizace LTE byl v registru důvodu resetu MCU LTE na
 
 Obnovení (recover) ochranu odstraní, ale MCU úplně smaže, včetně bloku informací o produktu. Viz [Obnovení (recover)](flashing.md#obnovení-recover). U konkrétního MCU zní doporučení „Spusťte `hwio <profile> <target> recover` (vymaže MCU).“; v desktopové aplikaci použijte **Obnovit (recover)…** v části **Údržba** na stránce **Nahrát FW** (zobrazí se s volbou **Nastavení › Pokročilé › Zobrazit odborné akce údržby**, nebo jednou, když vás tam pošle průvodce řešením problémů).
 
+U čipu STM32 (RDP úroveň 1) zní zpráva „Čip je chráněný proti čtení (RDP úroveň 1). Odemčení smaže celý čip, včetně jeho datové EEPROM.“ a doporučení „Odemkněte čip (tím se smaže): `hwio stm32 unlock --chip <chip>`.“ V desktopové aplikaci stiskněte **Odemknout…** v chybě nebo **Odemknout (smazat)…** v části **Údržba**. Firmware v čipu se ztratí a předem ho nejde zálohovat. Viz [Flashování čipů STM32](flashing.md#stm32-chips).
+
 <a id="target.program_failed"></a>
 #### `target.program_failed`
 
@@ -638,6 +641,36 @@ Pochází z `mem read`, `mem write` a ze serveru MCP (`hwio mcp`). Příčina m�
 
 Pochází z `mem read`, `mem write` a ze serveru MCP (`hwio mcp`).
 
+<a id="target.wrong_chip"></a>
+#### `target.wrong_chip`
+
+**Připojený čip není ten zvolený.**
+
+- **Pravděpodobně:** Programátor je připojený k jinému čipu, nebo byl zvolen jiný čip.
+- **Co dělat:** Zkontrolujte, že je kabel na správném konektoru, nebo zvolte nalezený čip.
+
+Čip STM32: jeho ID nebo velikost paměti flash neodpovídá zvolenému čipu. Zpráva uvádí nalezený čip, například „Připojený čip je `<found>` (ID `<0x447>`), ne zvolený `<chip>`.“, a doporučení uvádí jeho ID pro `--chip`. Když je nalezený čip v seznamu, desktopová aplikace nabídne **Použít &lt;nalezený čip&gt;**, které přepne čip karty. Viz [Flashování čipů STM32](flashing.md#stm32-chips).
+
+<a id="target.permanently_protected"></a>
+#### `target.permanently_protected`
+
+**Tento čip je trvale zamčený (RDP úroveň 2) a nelze ho přeprogramovat.**
+
+- **Pravděpodobně:** Jeho ochrana proti čtení byla nastavena na úroveň 2, kterou nelze vrátit.
+- **Co dělat:** Vyměňte čip nebo modul.
+
+RDP úroveň 2 čipu STM32 natrvalo vypne ladicí přístup; nemůže ji odstranit HARDWARIO Monitor ani žádný jiný nástroj.
+
+<a id="target.unlock_failed"></a>
+#### `target.unlock_failed`
+
+**Odemčení čipu selhalo.**
+
+- **Pravděpodobně:** Ochrana proti čtení nebyla odstraněna včas, nebo se ztratilo spojení.
+- **Co dělat:** Vypněte a zapněte napájení desky, zkontrolujte připojení a odemkněte čip znovu.
+
+Odemčení čeká až 60 s, než se čip smaže a vrátí se na RDP úroveň 0. Použijte **Odemknout (smazat)…** v části **Údržba** na stránce **Nahrát FW**, nebo `hwio stm32 unlock`. Viz [Flashování čipů STM32](flashing.md#stm32-chips).
+
 <a id="category-firmware"></a>
 ### Firmware (návratový kód 7)
 
@@ -720,6 +753,16 @@ Firmware modemu LTE zapisuje nRF Util; jeho výstup je v **Podrobnosti**. Viz [N
 - **Co dělat:** Zkuste to znovu; pokud se to opakuje, nahlaste to společnosti HARDWARIO.
 
 Stažený soubor neodpovídal kontrolnímu součtu z katalogu, proto nebyl použit. Desktopová aplikace může ukázat „Stažený soubor je poškozený. Zkuste to znovu.“
+
+<a id="firmware.bin_address_required"></a>
+#### `firmware.bin_address_required`
+
+**Pro tento soubor .bin je potřeba počáteční adresa.**
+
+- **Pravděpodobně:** Soubor .bin obsahuje jen bajty, ne to, kam patří.
+- **Co dělat:** Zadejte počáteční adresu (například 0x08000000).
+
+V desktopové aplikaci zadejte **Počáteční adresu** na kartě firmwaru; v CLI použijte `--address` (`hwio stm32 flash` má výchozí začátek paměti flash, `0x08000000`); přes MCP argument `address`.
 
 <a id="category-network"></a>
 ### Síť (návratový kód 8)

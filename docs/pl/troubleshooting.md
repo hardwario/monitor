@@ -80,9 +80,10 @@ Kody błędów: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_bu
 - Sprawdź kable i zasilanie, a następnie wgraj firmware ponownie.
 - Jeśli weryfikacja wciąż się nie udaje, ustaw niższą prędkość J-Link.
 - Jeśli MCU ma ochronę przed odczytem, wykonaj recover. Recover kasuje całe MCU, łącznie z UICR i blokiem informacji o produkcie (Product Information Block). Zobacz [Odzyskiwanie (Recover)](flashing.md#odzyskiwanie-recover).
+- W układzie STM32: jeśli układ ma ochronę przed odczytem (RDP poziom 1), odblokuj go; odblokowanie wymazuje cały układ, łącznie z EEPROM danych. Sprawdź, czy wybrano właściwy układ. Zobacz [Wgrywanie firmware do układów STM32](flashing.md#stm32-chips).
 - Jeśli firmware zapisuje także UICR, zezwól na to świadomie: **Allow writing UICR** na stronie **Flash** lub `--allow-uicr` w CLI. Zobacz [UICR i blok informacji o produkcie](flashing.md#uicr-i-blok-informacji-o-produkcie).
 
-Kody błędów: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed).
+Kody błędów: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed), [`target.wrong_chip`](#target.wrong_chip), [`target.permanently_protected`](#target.permanently_protected), [`target.unlock_failed`](#target.unlock_failed), [`firmware.bin_address_required`](#firmware.bin_address_required).
 
 <a id="the-j-link-is-on-the-lte-connector"></a>
 ### J-Link jest na złączu LTE
@@ -488,6 +489,8 @@ Po nieudanym kroku aktualizacji LTE w rejestrze przyczyny resetu MCU LTE był us
 
 Recover usuwa ochronę, ale kasuje MCU całkowicie, łącznie z blokiem informacji o produkcie (Product Information Block). Zobacz [Odzyskiwanie (Recover)](flashing.md#odzyskiwanie-recover). Dla konkretnego MCU sugestia brzmi „Run `hwio <profile> <target> recover` (erases the MCU).”; w aplikacji desktopowej użyj **Recover…** w sekcji **Maintenance** na stronie **Flash** (wyświetlane przy włączonym **Settings › Advanced › Show expert maintenance actions** lub jeden raz, gdy przewodnik rozwiązywania problemów tam skieruje).
 
+W układzie STM32 (RDP poziom 1) komunikat brzmi „The chip is read-out protected (RDP level 1). Unlocking erases the whole chip, including its data EEPROM.” a sugestia „Unlock the chip (this erases it): `hwio stm32 unlock --chip <chip>`.” W aplikacji desktopowej naciśnij **Unlock…** w komunikacie błędu lub **Unlock (erase)…** w sekcji **Maintenance**. Firmware w układzie zostaje utracone i nie da się go wcześniej zarchiwizować. Zobacz [Wgrywanie firmware do układów STM32](flashing.md#stm32-chips).
+
 <a id="target.program_failed"></a>
 #### `target.program_failed`
 
@@ -638,6 +641,36 @@ Pochodzi z `mem read`, `mem write` i serwera MCP (`hwio mcp`). Przyczyna może t
 
 Pochodzi z `mem read`, `mem write` i serwera MCP (`hwio mcp`).
 
+<a id="target.wrong_chip"></a>
+#### `target.wrong_chip`
+
+**The connected chip is not the selected one.**
+
+- **Probably:** The probe is connected to another chip, or a different chip was chosen.
+- **What to do:** Check that the cable is on the right connector, or choose the found chip.
+
+Układ STM32: jego identyfikator lub rozmiar pamięci flash nie odpowiada wybranemu układowi. Komunikat podaje znaleziony układ, na przykład „The connected chip is `<found>` (ID `<0x447>`), not the selected `<chip>`.”, a sugestia podaje jego identyfikator dla `--chip`. Gdy znaleziony układ jest na liście, aplikacja desktopowa oferuje **Use &lt;found chip&gt;**, co przełącza układ karty. Zobacz [Wgrywanie firmware do układów STM32](flashing.md#stm32-chips).
+
+<a id="target.permanently_protected"></a>
+#### `target.permanently_protected`
+
+**This chip is permanently locked (RDP level 2) and cannot be reprogrammed.**
+
+- **Probably:** Its read-out protection was set to level 2, which cannot be undone.
+- **What to do:** Replace the chip or the module.
+
+RDP poziom 2 układu STM32 trwale wyłącza dostęp debugowania; nie może go usunąć ani HARDWARIO Monitor, ani żadne inne narzędzie.
+
+<a id="target.unlock_failed"></a>
+#### `target.unlock_failed`
+
+**Unlocking the chip failed.**
+
+- **Probably:** The read-out protection was not removed in time, or the connection was lost.
+- **What to do:** Power-cycle the board, check the connection and unlock again.
+
+Odblokowanie czeka do 60 s, aż układ się wymaże i odpowie z RDP poziom 0. Użyj **Unlock (erase)…** w sekcji **Maintenance** na stronie **Flash** lub `hwio stm32 unlock`. Zobacz [Wgrywanie firmware do układów STM32](flashing.md#stm32-chips).
+
 <a id="category-firmware"></a>
 ### Firmware (kod wyjścia 7)
 
@@ -720,6 +753,16 @@ Firmware modemu LTE zapisuje nRF Util; jego wyjście znajduje się w **Details**
 - **What to do:** Try again; if it repeats, report it to HARDWARIO.
 
 Pobrany plik nie odpowiadał sumie kontrolnej z katalogu, więc nie został użyty. Aplikacja desktopowa może wyświetlić „The downloaded file is damaged. Try again.”
+
+<a id="firmware.bin_address_required"></a>
+#### `firmware.bin_address_required`
+
+**A start address is needed for this .bin file.**
+
+- **Probably:** A .bin file contains only bytes, not where they belong.
+- **What to do:** Give the start address (for example 0x08000000).
+
+W aplikacji desktopowej podaj **Start address** na karcie firmware; w CLI użyj `--address` (`hwio stm32 flash` domyślnie używa początku pamięci flash, `0x08000000`); przez MCP argument `address`.
 
 <a id="category-network"></a>
 ### Sieć (kod wyjścia 8)

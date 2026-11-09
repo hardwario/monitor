@@ -177,6 +177,44 @@ interactive terminal (not with `--json`). Without `--guided` the command flashes
 application firmware can reset the LTE MCU during the update. When that happens the command fails with
 [`target.reset_during_update`](troubleshooting.md#target.reset_during_update): use `--guided`.
 
+<a id="stm32"></a>
+## STM32 chips (`hwio stm32`)
+
+Flashes, erases, unlocks and resets an STM32L0 chip on the J-Link's SWD pins ([Flashing STM32
+chips](flashing.md#stm32-chips)). Every command except `chips` needs `--chip ID`, the chip you expect; when the
+connected chip is another, the command fails with [`target.wrong_chip`](troubleshooting.md#target.wrong_chip) and
+names the chip it found.
+
+| Command | Does | Asks first |
+|---|---|---|
+| `hwio stm32 chips` | Lists the chips that can be chosen: chip ID, name, DEV_ID, data EEPROM size and the chips each entry covers | no |
+| `hwio stm32 info --chip ID` | Shows DEV_ID, REV_ID, flash size and the read-out protection level (`rdp`) of the connected chip; read only, works on a protected chip too | no |
+| `hwio stm32 flash --chip ID [--address ADDR] [--erase-all [--yes]] [--allow-eeprom] [--halt] FILE` | Flashes a `.hex` or `.bin` file and verifies it | with `--erase-all` |
+| `hwio stm32 erase --chip ID [--yes]` | Erases the whole chip (flash and data EEPROM) | yes |
+| `hwio stm32 unlock --chip ID [--yes]` | Removes read-out protection level 1; the chip erases its flash and data EEPROM | yes |
+| `hwio stm32 reset --chip ID [--halt]` | Resets the chip (`--halt`: and keeps the CPU halted) | no |
+
+| Option of `flash` | Meaning |
+|---|---|
+| `--address ADDR` | Start address of a `.bin` file (default: the flash start, `0x08000000`) |
+| `--erase-all` | Erase the whole chip (flash and data EEPROM) first; otherwise only the written sectors are erased |
+| `--allow-eeprom` | Also program the file's data EEPROM records; without it a file that writes the data EEPROM is refused ([`firmware.out_of_range`](troubleshooting.md#firmware.out_of_range)) |
+| `--halt` | Leave the CPU halted after flashing |
+
+Chip IDs are those of `hwio stm32 chips`, for example `stm32l0-cat3-64k` (STM32L0 cat. 3, 64 KiB: STM32L051 / L052 /
+L053 / L062 / L063, the CHESTER-S1 controller) or `stm32l0-cat5-192k` (Murata Type ABZ). On a chip with read-out
+protection level 1, `flash` and `erase` fail with [`target.protected`](troubleshooting.md#target.protected):
+run `hwio stm32 unlock` first. Level 2 ([`target.permanently_protected`](troubleshooting.md#target.permanently_protected))
+cannot be removed. The probe options (`-n`, `--jlink-speed`) work as for the CHESTER commands.
+
+```sh
+hwio stm32 chips
+hwio stm32 info --chip stm32l0-cat3-64k
+hwio stm32 flash --chip stm32l0-cat3-64k firmware.hex
+hwio stm32 flash --chip stm32l0-cat3-64k --address 0x08000000 firmware.bin
+hwio stm32 unlock --chip stm32l0-cat5-192k --yes
+```
+
 ## Bluetooth LE (`hwio ble`)
 
 | Command | Does |
@@ -220,10 +258,11 @@ that of the first failed check.
 
 ## Confirmations
 
-`erase --all`, `lte erase`, `recover`, `mem write`, `flash-write`, `jlink update-firmware` and
-`console history clear` ask `[y/N]` in a terminal. Without a terminal, or with `--json`, they do not ask: add
-`--yes`, otherwise they fail with [usage.confirmation_required](troubleshooting.md#usage.confirmation_required).
-`flash`, `erase` without `--all`, and `reset` never ask.
+`erase --all`, `lte erase`, `recover`, `stm32 erase`, `stm32 unlock`, `stm32 flash --erase-all`, `mem write`,
+`flash-write`, `jlink update-firmware` and `console history clear` ask `[y/N]` in a terminal. Without a terminal, or
+with `--json`, they do not ask: add `--yes`, otherwise they fail with
+[usage.confirmation_required](troubleshooting.md#usage.confirmation_required). `flash` (without `--erase-all`),
+`chester app erase` without `--all`, and `reset` never ask.
 
 <kbd>Ctrl</kbd>+<kbd>C</kbd> cancels a running command cleanly (exit code 130); the probe is released.
 
