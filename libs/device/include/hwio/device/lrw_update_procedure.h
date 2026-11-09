@@ -19,16 +19,18 @@
 //   Unlock            unlock(lrw) - the action Unlock, or before Flash / Erase after the
 //                     confirmation
 //   Flash | Erase     flash(lrw, image) (programs, verifies) | erase(lrw, All)
+//   ResetModule       reset(lrw, Go) - the action Reset (plan 0040 B2: the Flash page's
+//                     maintenance); a protected module needs no unlock for it
 //   ConnectAppAgain   as ConnectApp (the user moves the cable back)
 //   ResetApp          reset(app, Go): the application runs again (and restarts the module)
 //   Done | Failed | Cancelled
 // The session is held (SessionHold, ADR-0234 D4) from start() until Done or Cancelled (and while
 // this object lives): RTT and auto-reconnect are paused; releasing the hold reconnects the
 // console. A failed HoldApp, Unlock, Flash, Erase or ResetApp can be retried (back to the
-// connector step before it); HoldApp and ResetApp that find the other MCU (target.wrong_family:
-// the cable moved after the check) go back to their connector step by themselves. cancel() is
-// refused while an operation other than an identify runs (a flash, erase or unlock is never
-// interrupted here).
+// connector step before it; also ResetModule); HoldApp and ResetApp that find the other MCU
+// (target.wrong_family: the cable moved after the check) go back to their connector step by
+// themselves. cancel() is refused while an operation other than an identify runs (a flash, erase or
+// unlock is never interrupted here).
 //
 // The targets are named (ADR-0283): the session's console target `app` and the profile's target
 // `lrw`; the connector labels are "APP" and "LoRaWAN" (the module's connector on the board).
@@ -72,6 +74,7 @@ public:
         Unlock,
         Flash,
         Erase,
+        ResetModule,
         ConnectAppAgain,
         ResetApp,
         Done,
@@ -79,7 +82,7 @@ public:
         Cancelled,
     };
 
-    enum class Action : std::uint8_t { Flash, Erase, Unlock };
+    enum class Action : std::uint8_t { Flash, Erase, Unlock, Reset };
 
     struct Request {
         Action action = Action::Flash;
@@ -111,9 +114,11 @@ public:
     // NeedsUnlockConfirmation: unlock (the module mass-erases), then the action. Errors:
     // usage.invalid_argument (not waiting for it).
     [[nodiscard]] Status confirmUnlock();
-    // Refused (false) while HoldApp, Unlock, Flash, Erase or ResetApp runs and after the end.
+    // Refused (false) while HoldApp, Unlock, Flash, Erase, ResetModule or ResetApp runs and after
+    // the end.
     bool cancel();
-    // Failed after HoldApp, Unlock, Flash, Erase or ResetApp: back to that step's connector step.
+    // Failed after HoldApp, Unlock, Flash, Erase, ResetModule or ResetApp: back to that step's
+    // connector step.
     void retry();
 
     [[nodiscard]] Step step() const noexcept { return m_step; }

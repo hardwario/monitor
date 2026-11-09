@@ -224,6 +224,8 @@ std::string_view actionId(Procedure::Action action) {
         return "erase";
     case Procedure::Action::Unlock:
         return "unlock";
+    case Procedure::Action::Reset: // not used by the CLI (`chester lrw reset` connects directly)
+        return "reset";
     }
     return "flash";
 }

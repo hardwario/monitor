@@ -74,6 +74,8 @@ std::string_view LrwUpdateProcedure::stepId(Step step) noexcept {
         return "flash";
     case Step::Erase:
         return "erase";
+    case Step::ResetModule:
+        return "reset-module";
     case Step::ConnectAppAgain:
         return "connect-app-again";
     case Step::ResetApp:
@@ -104,6 +106,7 @@ LrwUpdateProcedure::Step LrwUpdateProcedure::connectorStepBefore(Step step) noex
     case Step::Unlock:
     case Step::Flash:
     case Step::Erase:
+    case Step::ResetModule:
         return Step::ConnectLrw;
     default:
         return Step::ConnectAppAgain;
@@ -116,6 +119,7 @@ bool LrwUpdateProcedure::operationRunning() const noexcept {
     case Step::Unlock:
     case Step::Flash:
     case Step::Erase:
+    case Step::ResetModule:
     case Step::ResetApp:
         return true;
     default:
@@ -151,6 +155,8 @@ Status LrwUpdateProcedure::start(Request request) {
         what = QStringLiteral("flash ") + toQString(m_request.name);
     } else if (m_request.action == Action::Erase) {
         what = QStringLiteral("erase");
+    } else if (m_request.action == Action::Reset) {
+        what = QStringLiteral("reset");
     }
     qCInfo(log::lcFlash).noquote() << "LoRaWAN module operation started:" << what;
     startConnectorStep(Step::ConnectApp);
@@ -181,6 +187,7 @@ bool LrwUpdateProcedure::canCancel() const noexcept {
     case Step::Unlock:
     case Step::Flash:
     case Step::Erase:
+    case Step::ResetModule:
     case Step::ResetApp:
     case Step::Done:
     case Step::Cancelled:
@@ -195,6 +202,7 @@ bool LrwUpdateProcedure::canRetry() const noexcept {
     case Step::Unlock:
     case Step::Flash:
     case Step::Erase:
+    case Step::ResetModule:
     case Step::ResetApp:
         return m_step == Step::Failed && !m_session.isNull();
     default:
@@ -315,9 +323,10 @@ void LrwUpdateProcedure::afterConnector(const OperationResult& result) {
         m_module = result.chip;
         qCInfo(log::lcFlash).noquote()
             << "LoRaWAN module found, RDP level" << (m_module ? m_module->rdpLevel : 0);
-        if (m_module && m_module->rdpLevel == 1 && m_request.action != Action::Unlock) {
+        if (m_module && m_module->rdpLevel == 1 &&
+            (m_request.action == Action::Flash || m_request.action == Action::Erase)) {
             // ADR-0276: the unlock erases the module (e.g. the factory Murata firmware); the
-            // owner must confirm it.
+            // owner must confirm it. A reset works on a protected module.
             setStep(Step::NeedsUnlockConfirmation);
             return;
         }
@@ -357,6 +366,10 @@ void LrwUpdateProcedure::startAction() {
         return;
     case Action::Unlock:
         startUnlock();
+        return;
+    case Action::Reset:
+        setStep(Step::ResetModule);
+        (void)startOperation(m_session->reset(lrwTargetId, ResetMode::Go));
         return;
     }
 }
@@ -420,6 +433,7 @@ void LrwUpdateProcedure::onFinished(OperationId id, const OperationResult& resul
         return;
     case Step::Flash:
     case Step::Erase:
+    case Step::ResetModule:
         if (!result.status) {
             fail(result.status.error());
             return;
@@ -466,6 +480,8 @@ QString LrwUpdateProcedure::actionDoneText() const {
         return tr("The LoRaWAN module was erased and the application is running again.");
     case Action::Unlock:
         return tr("The LoRaWAN module was unlocked and the application is running again.");
+    case Action::Reset:
+        return tr("The LoRaWAN module was reset and the application is running again.");
     }
     return {};
 }
@@ -491,6 +507,8 @@ QString LrwUpdateProcedure::promptText() const {
         return tr("Flashing the LoRaWAN module…");
     case Step::Erase:
         return tr("Erasing the LoRaWAN module…");
+    case Step::ResetModule:
+        return tr("Resetting the LoRaWAN module…");
     case Step::ConnectAppAgain:
         return tr("Move the J-Link cable back to the %1 connector.").arg(appConnector());
     case Step::ResetApp:
