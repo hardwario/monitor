@@ -316,11 +316,12 @@ TestCase {
         click(find("railHelp"));
         const menu = findChild(window, "helpMenu");
         tryVerify(() => menu.opened);
-        // Only registered wizards are offered (the test wizard is "connect-device").
+        // Only registered wizards are offered (the test wizard is "connect-device", plus the flash
+        // wizard of plan 0010).
         verify(findChild(menu, "helpConnect").visible);
         verify(findChild(menu, "helpSetup").visible); // plan 0008
         verify(!findChild(menu, "helpTroubleshoot").visible);
-        verify(!findChild(menu, "helpFlash").visible);
+        verify(findChild(menu, "helpFlash").visible); // plan 0010: the flash wizard is registered
         verify(findChild(menu, "helpReport").visible);
         verify(findChild(menu, "helpDocumentation").visible);
         findChild(menu, "helpShortcuts").triggered();

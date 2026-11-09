@@ -78,6 +78,9 @@ set(HWIO_GUI_QML_FILES
     qml/shell/PageHost.qml
     qml/settings/ConsoleSection.qml
     qml/shell/TabView.qml
+    qml/wizard/FirmwareSourceStep.qml
+    qml/wizard/FlashSummaryStep.qml
+    qml/wizard/PhaseProgressStep.qml
     qml/wizard/ProbePickerStep.qml
     qml/wizard/SetupStep.qml)
 set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
@@ -194,6 +197,8 @@ qt_add_qml_module(hwio_gui
         src/viewmodels/update_view_model.h
         src/wizard/check_list_model.cpp
         src/wizard/check_list_model.h
+        src/wizard/flash_wizard.cpp
+        src/wizard/flash_wizard.h
         src/wizard/lte_update_wizard.cpp
         src/wizard/lte_update_wizard.h
         src/wizard/probe_picker_step.cpp

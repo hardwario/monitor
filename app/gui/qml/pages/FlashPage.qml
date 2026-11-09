@@ -101,11 +101,13 @@ Item {
                                 Accessible.role: Accessible.Heading
                             }
 
-                            // Amended by 0010: the flash wizard; hidden until it is registered.
+                            // Amended by 0010: the flash wizard; hidden until it is registered and
+                            // (0035, ADR-0245) shown only while Application firmware is selected.
                             HButton {
                                 objectName: "guideMe"
                                 kind: "ghost"
-                                visible: AppViewModel.launcher.canOpen("flash-firmware")
+                                visible: AppViewModel.launcher.canOpen("flash-firmware") && page.model !== null
+                                         && page.model.kind === FirmwareSourceViewModel.AppFirmware
                                 text: qsTr("Guide me")
                                 onClicked: page.tab.openWizard("flash-firmware")
                             }

@@ -3,6 +3,7 @@
 // with the first wizard (0008) and grows with 0010 and 0009.
 
 #include "hwio/core/error.h"
+#include "wizard/flash_wizard.h"
 #include "wizard/setup_wizard.h"
 
 #include <gtest/gtest.h>
@@ -17,6 +18,7 @@ using hwio::WizardId;
 
 TEST(WizardCoverage, EveryCodeNamingAWizardHasAStartStep) {
     std::size_t firstRunSetup = 0;
+    std::size_t flashFirmware = 0;
     for (const hwio::ErrorInfo& info : hwio::errorTable) {
         const hwio::Error error = hwio::makeError(info.code);
         if (!error.wizard) {
@@ -29,14 +31,23 @@ TEST(WizardCoverage, EveryCodeNamingAWizardHasAStartStep) {
             EXPECT_FALSE(hwio::gui::SetupWizard::startStepFor(info.code).isEmpty())
                 << id << " names the setup wizard but has no start step";
             break;
+        case WizardId::FlashFirmware:
+            // Plan 0010: every FlashFirmware code starts on the Firmware step.
+            ++flashFirmware;
+            EXPECT_EQ(hwio::gui::FlashWizard::startStepFor(info.code),
+                      hwio::gui::FlashWizard::Firmware)
+                << id << " names the flash wizard but does not start on the Firmware step";
+            break;
         default:
-            // BlePairing: not part of 2.0.0 (ADR-0250). ConnectDevice, Troubleshooting,
-            // FlashFirmware: plans 0009 and 0010 add their checks here when their wizards land.
+            // BlePairing: not part of 2.0.0 (ADR-0250). ConnectDevice, Troubleshooting: plan 0009
+            // adds its checks here when its wizard lands.
             // LteUpdate: registered by plan 0033 (target.other_connector).
             break;
         }
     }
     EXPECT_GT(firstRunSetup, 0U);
+    EXPECT_EQ(flashFirmware, 4U);
+    EXPECT_FALSE(hwio::gui::FlashWizard::startStepFor(ErrorCode::ProbeNotFound).has_value());
 }
 
 // ADR-0250: ble.permission_denied names no wizard until the setup wizard's Bluetooth step (0032).
