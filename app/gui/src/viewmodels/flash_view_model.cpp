@@ -20,6 +20,7 @@
 #include "workers/firmware_loader.h"
 
 #include <QCoreApplication>
+#include <QLatin1Char>
 #include <QLocale>
 #include <QLoggingCategory>
 #include <QObject>

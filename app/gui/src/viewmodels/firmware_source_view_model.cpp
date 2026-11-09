@@ -26,6 +26,7 @@
 #include <QUrl>
 #include <QVariantMap>
 #include <QtContainerFwd>
+#include <QtCore/qnamespace.h>
 #include <QtTypes>
 
 #include <cstdint>

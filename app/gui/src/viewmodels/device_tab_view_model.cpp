@@ -299,9 +299,10 @@ bool DeviceTabViewModel::changeTarget(const QString& targetId) {
     if (targetId == m_targetId) {
         return true;
     }
+    const std::uint32_t serial = m_serial.value_or(0); // checked above
     qCInfo(lcGui) << "Tab: chip" << m_targetId << "->" << targetId;
     releaseSession();
-    return configure(toQString(m_profile->id), targetId, *m_serial, m_product);
+    return configure(toQString(m_profile->id), targetId, serial, m_product);
 }
 
 bool DeviceTabViewModel::configureBle(const QString& profileId, const QString& deviceId,
