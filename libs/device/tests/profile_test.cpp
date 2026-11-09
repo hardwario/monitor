@@ -369,9 +369,74 @@ TEST(Profiles, EveryDesignatedFirmwareIsHttps) {
                 EXPECT_TRUE(target.designatedFirmware->url.starts_with("https://")) << target.id;
                 EXPECT_FALSE(target.designatedFirmware->name.empty()) << target.id;
                 EXPECT_FALSE(target.designatedFirmware->version.empty()) << target.id;
+                const std::string_view tag = target.designatedFirmware->cacheTag;
+                EXPECT_TRUE(!tag.empty() && tag.size() <= 8 && std::ranges::all_of(tag, [](char c) {
+                    return c >= 'a' && c <= 'z';
+                })) << target.id;
             }
         }
     }
+}
+
+// Plan 0040 A1 (ADR-0278): the prepared LoRaWAN module firmware, lora-modem 1.4.1 for CHESTER.
+TEST(Profiles, ChesterLrwDesignatedFirmware) {
+    const auto& chester = *ProfileRegistry::find("chester");
+    const auto* lrw = hwio::device::findTarget(chester, "lrw");
+    ASSERT_NE(lrw, nullptr);
+    const auto designated = hwio::device::designatedFirmwareOf(*lrw);
+    ASSERT_TRUE(designated.has_value());
+    const hwio::firmware::DesignatedFirmware entry =
+        designated.value_or(hwio::firmware::DesignatedFirmware{});
+    EXPECT_EQ(entry.name, "lora-modem for CHESTER");
+    EXPECT_EQ(entry.version, "1.4.1");
+    EXPECT_EQ(entry.url, "https://github.com/hardwario/lora-modem/releases/download/v1.4.1/"
+                         "lora-modem-1.4.1.chester.hex");
+    EXPECT_EQ(hwio::firmware::toHex(entry.sha256),
+              "e9215b222b68092c33d9a31330bdec6ebea1afaf1cd1844f74cd8745c46ff2e6");
+    EXPECT_EQ(entry.kind, hwio::firmware::FirmwareKind::AppHex);
+    EXPECT_EQ(entry.cacheTag, "lrw");
+    EXPECT_EQ(lrw->designatedFirmware->cacheTag, "lrw");
+    // The shared part has none: the generic STM32 chip of the same part offers no firmware.
+    EXPECT_FALSE(lrw->parts.front().designatedFirmware.has_value());
+    const auto* generic =
+        hwio::device::findTarget(*ProfileRegistry::find("stm32"), "stm32l0-cat5-192k");
+    ASSERT_NE(generic, nullptr);
+    EXPECT_FALSE(hwio::device::designatedFirmwareOf(*generic).has_value());
+    EXPECT_EQ(hwio::device::findTarget(chester, "lte")->designatedFirmware->cacheTag, "lte");
+}
+
+// Plan 0040 A2 (ADR-0274, ADR-0283): the LoRaWAN module target of CHESTER.
+TEST(Profiles, ChesterLrwTarget) {
+    const auto& chester = *ProfileRegistry::find("chester");
+    ASSERT_EQ(chester.targets.size(), 3U);
+    const auto* lrw = hwio::device::findTarget(chester, "lrw");
+    ASSERT_NE(lrw, nullptr);
+    EXPECT_EQ(hwio::device::targetDisplayName(*lrw), QStringLiteral("LoRaWAN module"));
+    EXPECT_EQ(lrw->vendor, hwio::device::ChipVendor::Stm32);
+    EXPECT_EQ(lrw->jlinkDevice, "STM32L072CZ");
+    ASSERT_EQ(lrw->parts.size(), 1U);
+    // The part is the shared curated entry (described once).
+    EXPECT_EQ(&lrw->parts.front(), hwio::device::findStm32PartById("stm32l0-cat5-192k"));
+    EXPECT_TRUE(lrw->rttTerminal.empty());
+    EXPECT_EQ(lrw->defaultErase, hwio::device::EraseScope::All);
+    EXPECT_EQ(lrw->flash, (hwio::firmware::AddressRange{.start = 0x08000000, .end = 0x08030000}));
+    EXPECT_EQ(lrw->ram, (hwio::firmware::AddressRange{.start = 0x20000000, .end = 0x20005000}));
+    ASSERT_EQ(lrw->connectionGuide.size(), 1U);
+    EXPECT_EQ(lrw->connectionGuide.front().illustrationSlot, "chester-lrw-cable");
+    EXPECT_EQ(
+        hwio::device::guideStepBody(lrw->connectionGuide.front()),
+        QStringLiteral("Connect the J-Link to the programming connector of the LoRaWAN module."));
+    // The memory-write ranges are those of the generic STM32L0 target.
+    const auto* generic =
+        hwio::device::findTarget(*ProfileRegistry::find("stm32"), "stm32l0-cat5-192k");
+    ASSERT_NE(generic, nullptr);
+    EXPECT_TRUE(std::ranges::equal(lrw->peripherals, generic->peripherals));
+    EXPECT_TRUE(std::ranges::equal(lrw->writeDenied, generic->writeDenied));
+    EXPECT_FALSE(hwio::device::checkMemoryWrite(*lrw, 0x40022004, 4));
+    EXPECT_TRUE(hwio::device::checkMemoryWrite(*lrw, 0x20000000, 4));
+    // The console target stays `app` (ADR-0233).
+    EXPECT_TRUE(hwio::device::hasConsole(chester));
+    EXPECT_EQ(chester.ble->consoleTargetId, "app");
 }
 
 TEST(Profiles, ChesterFirmwareDocsUrlPerLanguage) {

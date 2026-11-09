@@ -25,8 +25,9 @@
 // retried (back to its connector step). cancel() is
 // refused while Erase, UpdateLte or Restore runs (a flash is never interrupted here).
 //
-// The two targets: the session's console target (CHESTER app) and the profile's first other
-// target (CHESTER lte); the connector labels are their ids in upper case ("APP", "LTE").
+// The two targets: the session's console target (CHESTER app) and the profile's target `lte`
+// (ADR-0283: named, not "the first other target"; CHESTER also has `lrw`); the connector labels
+// are their ids in upper case ("APP", "LTE").
 //
 // Ownership: a QObject on the session's owner thread; it keeps the session as a QPointer (a closed
 // session ends the procedure as Failed). Bounds: one session operation at a time; the backup is at
@@ -106,7 +107,7 @@ public:
     LteUpdateProcedure& operator=(LteUpdateProcedure&&) = delete;
 
     // Holds the session and waits for the application MCU. Errors: usage.invalid_argument
-    // (already started, an empty source, a profile without a second target), those of hold().
+    // (already started, an empty source, a profile without an `lte` target), those of hold().
     [[nodiscard]] Status start(Source source);
     // BackupFailed: go on without a copy (ChooseApplication then needs an image).
     void continueWithoutBackup();

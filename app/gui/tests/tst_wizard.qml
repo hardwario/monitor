@@ -182,7 +182,7 @@ TestCase {
     }
 
     function test_illustrationSlotsResolve() {
-        for (const slot of ["jlink-usb", "chester-app-cable", "chester-lte-cable", "chester-power", "placeholder"]) {
+        for (const slot of ["jlink-usb", "chester-app-cable", "chester-lte-cable", "chester-lrw-cable", "chester-power", "placeholder"]) {
             const item = createTemporaryObject(illustrationComponent, testCase, { slot: slot });
             verify(String(item.source).endsWith("/" + slot + ".svg"), slot);
             const image = findChild(item, "illustrationImage");

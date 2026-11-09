@@ -623,7 +623,14 @@ QVariantList FlashViewModel::maintenanceTargets() const {
     if (deviceProfile == nullptr || !expertActions()) {
         return list;
     }
+    const device::TargetProfile* console = targetProfile(m_tab->consoleTargetId());
     for (const device::TargetProfile& target : deviceProfile->targets) {
+        // Plan 0040 (ADR-0283): the CHESTER LoRaWAN module (an STM32 behind the Nordic console
+        // MCU) answers only while the application MCU is held; its maintenance comes with the
+        // guided flow of the page (0040 B2), not as a plain target here.
+        if (console != nullptr && target.vendor != console->vendor) {
+            continue;
+        }
         list.append(QVariantMap{
             {QStringLiteral("targetId"), toQString(target.id)},
             {QStringLiteral("title"), tr("%1 MCU").arg(device::targetDisplayName(target))}});

@@ -16,6 +16,7 @@ is a content task for HARDWARIO (ADR-0076, open question 22 for the CHESTER conn
 | `jlink-usb` | J-Link connected to a computer by USB | "Connect the J-Link to your computer with a USB cable." | `probe` |
 | `chester-app-cable` | flat cable to the application MCU's programming connector | from the profile guide (`TargetProfile::connectionGuide`, ADR-0077) | `device` |
 | `chester-lte-cable` | flat cable to the LTE MCU's programming connector | from the profile guide | `device` |
+| `chester-lrw-cable` | J-Link cable to the programming connector of the CHESTER LoRaWAN module (plan 0040) | from the profile guide | `device` |
 | `stm32-swd-cable` | J-Link SWD wires (SWDIO, SWCLK, GND, VTref) to an STM32 chip (plan 0039) | from the profile guide | `device` |
 | `chester-power` | CHESTER with batteries / USB-C power | from the profile power hint (`DeviceProfile::powerHintSourceText`) | `flash` |
 | `placeholder` | neutral frame (fallback for an unknown slot) | — | `placeholder` |

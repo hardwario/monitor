@@ -33,6 +33,9 @@ struct DesignatedFirmware {
     std::string_view url;     // HTTPS download URL
     Sha256 sha256{};          // of the downloaded file
     FirmwareKind kind = FirmwareKind::LteBundle;
+    // The cache file is <cacheTag>-<sha256>.zip (LTE bundle, modem) or .hex (AppHex): lowercase
+    // ASCII letters, 1 to 8 characters (plan 0040: "lte", "lrw").
+    std::string_view cacheTag = "lte";
 };
 
 namespace detail {

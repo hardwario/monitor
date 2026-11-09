@@ -7,7 +7,7 @@
 // HWIO_CATALOG_URL replaces it - test-only override, review R8). QtNetwork on the
 // owner thread (GUI main thread / CLI QCoreApplication thread), asynchronous and cancellable:
 //   - transfer timeout (no data for transferTimeout) -> network.download_failed
-//   - redirects are followed only to https
+//   - redirects are followed only to https (designated firmware: designatedRedirectAllowed())
 //   - HTTP 404 -> firmware.not_found_in_catalog; other non-2xx and network errors ->
 //     network.download_failed (HTTP status and the Qt error in `detail`)
 //   - the body is capped at maxBodyBytes (network.download_failed)
@@ -18,8 +18,9 @@
 // Plan 0021 (ADR-0165, ADR-0166):
 //   - downloadDesignated(): the designated firmware of a target (profile entry), with the same
 //     rules; the SHA-256 is verified before the file is cached or used (firmware.checksum_mismatch,
-//     the file is discarded); cache hits (lte-<sha256>.zip) are re-verified; the file must classify
-//     as the designated kind (ADR-0040; LTE bundle: firmware.invalid_image otherwise).
+//     the file is discarded); cache hits (<tag>-<sha256>.zip / .hex) are re-verified; the file must
+//     classify as the designated kind (ADR-0040; LTE bundle, plan 0040: an Intel HEX for AppHex;
+//     firmware.invalid_image otherwise).
 //   - lookup(): the public catalog page <base>/<id> (lookupTimeout, maxPageBytes) parsed by
 //     parseCatalogPage() into name, version, upload time and the SHA-256 of the HEX.
 //   - download() with DownloadOptions::expectedSha256 (the lookup's hash): the HEX text must have
@@ -80,6 +81,16 @@ struct CatalogOptions {
 [[nodiscard]] QUrl designatedUrl(const DesignatedFirmware& firmware);
 [[nodiscard]] Sha256 designatedSha256(const DesignatedFirmware& firmware);
 
+// ADR-0281 D2 (amends ADR-0037 for designated firmware): a designated download follows a redirect
+// only to an https URL on the same host or on a host ending in ".githubusercontent.com" (GitHub
+// release assets); any other cross-host redirect and every redirect to http fails
+// (network.download_failed). `testHost` (tests only, see designatedRedirectTestHost()): a host
+// whose http and https URLs also count as allowed (the local test server has no TLS).
+[[nodiscard]] bool designatedRedirectAllowed(const QUrl& from, const QUrl& to,
+                                             const QString& testHost = {});
+// "", or HWIO_DESIGNATED_REDIRECT_HOST in HWIO_TEST_OVERRIDES builds (test-only override).
+[[nodiscard]] QString designatedRedirectTestHost();
+
 struct DownloadOptions {
     bool noCache = false; // skip the cache lookup (the download is still stored)
     // Plan 0021 (ADR-0166): the SHA-256 of the HEX text from the catalog page (lookup()).
@@ -105,7 +116,8 @@ inline constexpr std::size_t maxCatalogFieldBytes = 128;
 
 // The result of downloadDesignated().
 struct DesignatedDownload {
-    std::shared_ptr<const LteBundle> bundle;
+    std::shared_ptr<const LteBundle> bundle;    // FirmwareKind::LteBundle
+    std::shared_ptr<const FirmwareImage> image; // FirmwareKind::AppHex (plan 0040)
     std::uint64_t fileBytes = 0;
     bool fromCache = false;
     std::vector<Error> warnings; // e.g. io.write_failed when the cache could not be written
@@ -212,6 +224,7 @@ private:
     QUrl m_url;
     Sha256 m_sha256{};
     FirmwareKind m_kind;
+    std::string_view m_cacheTag; // DesignatedFirmware::cacheTag (profile data, static)
     DownloadProgressFn m_progressFn;
     std::stop_token m_stop;
     std::unique_ptr<detail::HttpFetch> m_fetch;

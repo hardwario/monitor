@@ -17,6 +17,7 @@
 #include <QStringLiteral>
 #include <QTemporaryDir>
 #include <QUrl>
+#include <QtEnvironmentVariables>
 
 #include <gtest/gtest.h>
 
@@ -275,6 +276,143 @@ TEST_F(Designated, CountsAgainstTheCacheLimits) {
     ASSERT_TRUE(waitForDownload(*catalog->downloadDesignated(designated)));
     EXPECT_FALSE(fs::exists(cache.fileFor(id)));
     EXPECT_TRUE(fs::exists(cache.designatedFileFor(designated.sha256)));
+}
+
+// ---- plan 0040: an Intel HEX designated firmware (the LoRaWAN module) ------------------------
+
+TEST_F(Designated, AppHexIsParsedAndCachedAsHex) {
+    FirmwareCache cache(cacheDir());
+    auto catalog = this->catalog(&cache);
+    const QByteArray hex = QByteArray::fromStdString(hexRecord(0, 0, {1, 2, 3}) + eofRecord());
+    serve(QStringLiteral("/chester/lte.zip"), HttpFixture::Response::ok(hex));
+    DesignatedFirmware designated = firmware(hex);
+    designated.name = "lora-modem for CHESTER";
+    designated.kind = FirmwareKind::AppHex;
+    designated.cacheTag = "lrw";
+    const auto result = waitForDownload(*catalog->downloadDesignated(designated));
+    ASSERT_TRUE(result) << result.error().detail;
+    EXPECT_FALSE(result->bundle);
+    ASSERT_TRUE(result->image);
+    EXPECT_EQ(result->image->totalBytes(), 3U);
+    const fs::path cached = cache.designatedFileFor(designated.sha256, "lrw", FirmwareKind::AppHex);
+    EXPECT_EQ(cached.filename().string(), "lrw-" + toHex(designated.sha256) + ".hex");
+    EXPECT_TRUE(fs::exists(cached));
+    EXPECT_FALSE(fs::exists(cache.designatedFileFor(designated.sha256)));
+    // A cache hit (no second request), still an image.
+    const auto hit = waitForDownload(*catalog->downloadDesignated(designated));
+    ASSERT_TRUE(hit) << hit.error().detail;
+    EXPECT_TRUE(hit->fromCache);
+    ASSERT_TRUE(hit->image);
+    EXPECT_EQ(requests(QStringLiteral("/chester/lte.zip")), 1);
+    // The entry counts as a cache entry: a limit of one file evicts it for a newer download.
+    FirmwareCache small(cacheDir(),
+                        hwio::firmware::CacheLimits{.maxFiles = 1, .maxBytes = 1 << 20});
+    const FirmwareId id = *FirmwareId::parse("0123456789abcdef0123456789abcdef");
+    ASSERT_TRUE(small.store(
+        id, std::as_bytes(std::span(hex.constData(), static_cast<std::size_t>(hex.size())))));
+    EXPECT_FALSE(fs::exists(cached));
+}
+
+TEST_F(Designated, AppHexThatDoesNotParseIsInvalid) {
+    auto catalog = this->catalog(nullptr);
+    const QByteArray zip = bundleZip();
+    serve(QStringLiteral("/chester/lte.zip"), HttpFixture::Response::ok(zip));
+    DesignatedFirmware designated = firmware(zip);
+    designated.kind = FirmwareKind::AppHex;
+    designated.cacheTag = "lrw";
+    const auto result = waitForDownload(*catalog->downloadDesignated(designated));
+    ASSERT_FALSE(result);
+    EXPECT_EQ(result.error().code, ErrorCode::FirmwareInvalidImage);
+}
+
+// ---- ADR-0281 D2: redirects of a designated download ------------------------------------------
+
+TEST(DesignatedRedirect, Rule) {
+    using hwio::firmware::designatedRedirectAllowed;
+    const QUrl github(QStringLiteral(
+        "https://github.com/hardwario/lora-modem/releases/download/v1.4.1/x.chester.hex"));
+    EXPECT_TRUE(designatedRedirectAllowed(
+        github, QUrl(QStringLiteral("https://objects.githubusercontent.com/a/b?sig=1"))));
+    EXPECT_TRUE(designatedRedirectAllowed(
+        github, QUrl(QStringLiteral("https://release-assets.githubusercontent.com/a"))));
+    EXPECT_TRUE(designatedRedirectAllowed(
+        github, QUrl(QStringLiteral("https://OBJECTS.GitHubUserContent.com/a"))));
+    EXPECT_TRUE(designatedRedirectAllowed(github, QUrl(QStringLiteral("https://github.com/b"))));
+    // Downgrade to http, also to an allowed host.
+    EXPECT_FALSE(designatedRedirectAllowed(
+        github, QUrl(QStringLiteral("http://objects.githubusercontent.com/a"))));
+    EXPECT_FALSE(designatedRedirectAllowed(github, QUrl(QStringLiteral("http://github.com/b"))));
+    // Other hosts, look-alikes.
+    for (const char* other :
+         {"https://example.com/a", "https://githubusercontent.com/a",
+          "https://evilgithubusercontent.com/a", "https://objects.githubusercontent.com.evil.com/a",
+          "https://api.github.com/a", "ftp://objects.githubusercontent.com/a", "https:///a"}) {
+        EXPECT_FALSE(designatedRedirectAllowed(github, QUrl(QString::fromLatin1(other)))) << other;
+    }
+    // The test host (HWIO_DESIGNATED_REDIRECT_HOST in tests) counts with http too, nothing else.
+    EXPECT_TRUE(designatedRedirectAllowed(github, QUrl(QStringLiteral("http://localhost:1/a")),
+                                          QStringLiteral("localhost")));
+    EXPECT_FALSE(designatedRedirectAllowed(github, QUrl(QStringLiteral("http://127.0.0.1:1/a")),
+                                           QStringLiteral("localhost")));
+}
+
+// Sets an environment variable for the lifetime of the object.
+class ScopedEnv {
+public:
+    ScopedEnv(const char* name, const QByteArray& value) : m_name(name) { qputenv(name, value); }
+    ~ScopedEnv() { qunsetenv(m_name); }
+    ScopedEnv(const ScopedEnv&) = delete;
+    ScopedEnv& operator=(const ScopedEnv&) = delete;
+    ScopedEnv(ScopedEnv&&) = delete;
+    ScopedEnv& operator=(ScopedEnv&&) = delete;
+
+private:
+    const char* m_name;
+};
+
+// The local fixture stands in for the asset host: "localhost" is the allowed host of this test
+// (the request itself goes to 127.0.0.1, so the redirect is cross-host).
+TEST_F(Designated, RedirectToTheAllowedHostIsFollowed) {
+    const ScopedEnv host("HWIO_DESIGNATED_REDIRECT_HOST", "localhost");
+    auto catalog = this->catalog(nullptr);
+    const QByteArray zip = bundleZip();
+    QString asset = baseUrl() + QStringLiteral("/asset.zip");
+    asset.replace(QStringLiteral("127.0.0.1"), QStringLiteral("localhost"));
+    serve(QStringLiteral("/chester/lte.zip"), HttpFixture::Response::redirect(asset.toUtf8()));
+    serve(QStringLiteral("/chester/asset.zip"), HttpFixture::Response::ok(zip));
+    const auto result = waitForDownload(*catalog->downloadDesignated(firmware(zip)));
+    ASSERT_TRUE(result) << result.error().detail;
+    ASSERT_TRUE(result->bundle);
+    EXPECT_EQ(requests(QStringLiteral("/chester/asset.zip")), 1);
+}
+
+TEST_F(Designated, RedirectToAnotherHostFails) {
+    const ScopedEnv host("HWIO_DESIGNATED_REDIRECT_HOST", "localhost");
+    auto catalog = this->catalog(nullptr);
+    const QByteArray zip = bundleZip();
+    serve(QStringLiteral("/chester/lte.zip"),
+          HttpFixture::Response::redirect("https://example.com/asset.zip"));
+    const auto result = waitForDownload(*catalog->downloadDesignated(firmware(zip)));
+    ASSERT_FALSE(result);
+    EXPECT_EQ(result.error().code, ErrorCode::NetworkDownloadFailed);
+    EXPECT_NE(result.error().detail.find("redirect to https://example.com/asset.zip refused"),
+              std::string::npos)
+        << result.error().detail;
+}
+
+TEST_F(Designated, RedirectToHttpFails) {
+    const ScopedEnv host("HWIO_DESIGNATED_REDIRECT_HOST", "localhost");
+    auto catalog = this->catalog(nullptr);
+    const QByteArray zip = bundleZip();
+    // http on the same server under another name than the test host: a downgrade.
+    serve(QStringLiteral("/chester/lte.zip"),
+          HttpFixture::Response::redirect((baseUrl() + QStringLiteral("/asset.zip")).toUtf8()));
+    serve(QStringLiteral("/chester/asset.zip"), HttpFixture::Response::ok(zip));
+    const auto result = waitForDownload(*catalog->downloadDesignated(firmware(zip)));
+    ASSERT_FALSE(result);
+    EXPECT_EQ(result.error().code, ErrorCode::NetworkDownloadFailed);
+    EXPECT_NE(result.error().detail.find("refused"), std::string::npos) << result.error().detail;
+    EXPECT_EQ(requests(QStringLiteral("/chester/asset.zip")), 0);
 }
 
 // ---- catalog page --------------------------------------------------------------------------

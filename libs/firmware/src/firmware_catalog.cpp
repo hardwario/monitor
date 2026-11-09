@@ -107,6 +107,30 @@ Sha256 designatedSha256(const DesignatedFirmware& firmware) {
     return firmware.sha256;
 }
 
+bool designatedRedirectAllowed(const QUrl& from, const QUrl& to, const QString& testHost) {
+    if (!to.isValid() || to.host().isEmpty()) {
+        return false;
+    }
+    if (!testHost.isEmpty() && to.host() == testHost &&
+        (to.scheme() == QStringLiteral("https") || to.scheme() == QStringLiteral("http"))) {
+        return true;
+    }
+    if (to.scheme() != QStringLiteral("https")) {
+        return false; // never to http (ADR-0281 D2)
+    }
+    // QUrl::host() is lowercase (normalized).
+    return to.host() == from.host() || to.host().endsWith(QStringLiteral(".githubusercontent.com"));
+}
+
+QString designatedRedirectTestHost() {
+#ifdef HWIO_TEST_OVERRIDES
+    // Test builds only (CMake option HWIO_TEST_OVERRIDES; like HWIO_DESIGNATED_URL).
+    return qEnvironmentVariable("HWIO_DESIGNATED_REDIRECT_HOST");
+#else
+    return {};
+#endif
+}
+
 // ---- CatalogOperation ----------------------------------------------------------------------
 
 CatalogOperation::CatalogOperation(Passkey /*key*/, FirmwareCatalog& catalog, FirmwareId id,
@@ -203,7 +227,7 @@ DesignatedOperation::DesignatedOperation(Passkey /*key*/, FirmwareCatalog& catal
                                          DownloadProgressFn progressFn, std::stop_token stop)
     : m_catalog(&catalog), m_name(std::format("{} {}", firmware.name, firmware.version)),
       m_url(designatedUrl(firmware)), m_sha256(designatedSha256(firmware)), m_kind(firmware.kind),
-      m_progressFn(std::move(progressFn)), m_stop(std::move(stop)) {}
+      m_cacheTag(firmware.cacheTag), m_progressFn(std::move(progressFn)), m_stop(std::move(stop)) {}
 
 DesignatedOperation::~DesignatedOperation() = default;
 
@@ -212,7 +236,8 @@ void DesignatedOperation::start(QNetworkAccessManager& network) {
         network, m_url,
         detail::FetchLimits{.timeout = m_catalog->options().transferTimeout,
                             .maxBytes = m_catalog->options().maxBodyBytes,
-                            .totalTimeout = m_catalog->options().transferTimeout},
+                            .totalTimeout = m_catalog->options().transferTimeout,
+                            .redirects = detail::RedirectRule::Designated},
         m_stop);
     QObject::connect(m_fetch.get(), &detail::HttpFetch::progress, this,
                      [this](quint64 done, quint64 total) {
@@ -282,7 +307,9 @@ void DesignatedOperation::onFetched() {
     }
     std::vector<Error> warnings;
     if (m_catalog->m_cache != nullptr) {
-        if (const Status stored = m_catalog->m_cache->storeDesignated(m_sha256, bytes); !stored) {
+        if (const Status stored =
+                m_catalog->m_cache->storeDesignated(m_sha256, bytes, m_cacheTag, m_kind);
+            !stored) {
             qCWarning(log::lcFirmware).noquote()
                 << "Firmware not cached:" << toQString(stored.error().detail);
             warnings.push_back(stored.error());
@@ -295,6 +322,27 @@ void DesignatedOperation::onFetched() {
 
 void DesignatedOperation::finishVerified(std::span<const std::byte> bytes, bool fromCache,
                                          std::vector<Error> warnings) {
+    if (m_kind == FirmwareKind::AppHex) {
+        // Plan 0040: an Intel HEX (the prepared LoRaWAN module firmware), parsed from exactly the
+        // verified bytes.
+        auto image = parseIntelHex(bytes, m_name);
+        if (!image) {
+            Error error = std::move(image).error();
+            error.code = ErrorCode::FirmwareInvalidImage;
+            error.message =
+                QCoreApplication::translate("hwio::firmware", "The downloaded file is not %1.")
+                    .arg(toQString(m_name))
+                    .toStdString();
+            finish(std::unexpected(std::move(error)));
+            return;
+        }
+        finish(DesignatedDownload{.bundle = nullptr,
+                                  .image = std::make_shared<const FirmwareImage>(std::move(*image)),
+                                  .fileBytes = static_cast<std::uint64_t>(bytes.size()),
+                                  .fromCache = fromCache,
+                                  .warnings = std::move(warnings)});
+        return;
+    }
     // Review F5: classified from exactly the verified bytes, through a private temporary copy
     // (the cache file may be replaced or evicted by another process meanwhile). The bundle keeps
     // its own extraction directory; the copy is removed after load().
@@ -316,6 +364,7 @@ void DesignatedOperation::finishVerified(std::span<const std::byte> bytes, bool 
         return;
     }
     finish(DesignatedDownload{.bundle = std::move(*bundle),
+                              .image = nullptr,
                               .fileBytes = static_cast<std::uint64_t>(bytes.size()),
                               .fromCache = fromCache,
                               .warnings = std::move(warnings)});
@@ -459,7 +508,8 @@ FirmwareCatalog::downloadDesignated(const DesignatedFirmware& firmware, Download
     auto operation = std::make_unique<DesignatedOperation>(
         DesignatedOperation::Passkey{}, *this, firmware, std::move(progress), std::move(stop));
     if (!options.noCache && m_cache != nullptr) {
-        if (auto verified = m_cache->lookupDesignated(operation->m_sha256)) {
+        if (auto verified =
+                m_cache->lookupDesignated(operation->m_sha256, firmware.cacheTag, firmware.kind)) {
             // Classified from the verified bytes and reported asynchronously, like a download.
             QTimer::singleShot(std::chrono::milliseconds(0), operation.get(),
                                [op = operation.get(), bytes = std::move(*verified)] {

@@ -6,6 +6,7 @@
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/hw/jlink/programmer.h"
 #include "profiles.h"
+#include "stm32_parts.h"
 
 #include <QtTranslation>
 
@@ -122,6 +123,19 @@ constexpr std::array lteGuide{
     },
 };
 
+// Plan 0040 (ADR-0283): the LoRaWAN module (Murata Type ABZ) has its own SWD connector; it answers
+// only while the application MCU is held (reset + halt).
+constexpr std::array lrwGuide{
+    ConnectionGuideStep{
+        .id = "cable",
+        .illustrationSlot = "chester-lrw-cable",
+        .titleSourceText = QT_TRANSLATE_NOOP("hwio::device", "Cable"),
+        .bodySourceText = QT_TRANSLATE_NOOP(
+            "hwio::device",
+            "Connect the J-Link to the programming connector of the LoRaWAN module."),
+    },
+};
+
 // BLE (ADR-0089, plan 0011 decisions Q8): the Zephyr shell over the Nordic UART Service.
 constexpr std::array blePairingGuide{
     ConnectionGuideStep{
@@ -149,6 +163,22 @@ constexpr firmware::DesignatedFirmware lteFirmware{
     .sha256 =
         firmware::sha256FromHex("95d301a11738bcd9a9df4726159361d64fd8f681c3546f479d46b49f4bf0fe49"),
     .kind = firmware::FirmwareKind::LteBundle,
+    .cacheTag = "lte",
+};
+
+// ADR-0278: the prepared firmware of the LoRaWAN module - hardwario/lora-modem v1.4.1, the CHESTER
+// build (BSD-3-Clause; downloaded, not distributed). SHA-256 measured 2026-11-06 (310 263 B, Intel
+// HEX, flash records 0x08000000-0x0801AEC8). The GitHub asset URL redirects to
+// *.githubusercontent.com (ADR-0281 D2). Cached as lrw-<sha256>.hex.
+constexpr firmware::DesignatedFirmware loraModemFirmware{
+    .name = "lora-modem for CHESTER",
+    .version = "1.4.1",
+    .url = "https://github.com/hardwario/lora-modem/releases/download/v1.4.1/"
+           "lora-modem-1.4.1.chester.hex",
+    .sha256 =
+        firmware::sha256FromHex("e9215b222b68092c33d9a31330bdec6ebea1afaf1cd1844f74cd8745c46ff2e6"),
+    .kind = firmware::FirmwareKind::AppHex,
+    .cacheTag = "lrw",
 };
 
 // ADR-0167: the documentation list of application firmware, English first (the fallback).
@@ -241,6 +271,10 @@ constexpr std::array chesterTargets{
                   .vendor = ChipVendor::Nordic,
                   .stm32 = std::nullopt,
                   .dataEeprom = std::nullopt},
+    // LoRaWAN module (plan 0040, ADR-0274, ADR-0283): Murata Type ABZ = STM32L072CZ, the shared
+    // curated part. Programming only; no RTT console (the console target stays `app`, ADR-0233).
+    stm32Target(stm32PartIndex("stm32l0-cat5-192k"), "lrw",
+                QT_TRANSLATE_NOOP("hwio::device", "LoRaWAN module"), lrwGuide, loraModemFirmware),
 };
 
 // Plan 0028 (ADR-0200): console file names are parsed back by splitting at '-' (the retention's

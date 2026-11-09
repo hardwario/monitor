@@ -75,15 +75,8 @@ const TargetProfile* LteUpdateProcedure::appTarget() const {
 }
 
 const TargetProfile* LteUpdateProcedure::lteTarget() const {
-    if (m_session.isNull()) {
-        return nullptr;
-    }
-    for (const TargetProfile& target : m_session->profile().targets) {
-        if (target.id != m_session->consoleTargetId()) {
-            return &target;
-        }
-    }
-    return nullptr;
+    // ADR-0283: the LTE target by its id (CHESTER also has the LoRaWAN module `lrw`).
+    return m_session.isNull() ? nullptr : findTarget(m_session->profile(), "lte");
 }
 
 std::string_view LteUpdateProcedure::appTargetId() const noexcept {
@@ -158,7 +151,7 @@ Status LteUpdateProcedure::start(Source source) {
     }
     if (m_session.isNull() || appTarget() == nullptr || lteTarget() == nullptr) {
         return std::unexpected(
-            makeError(ErrorCode::UsageInvalidArgument, "the device profile has no second target"));
+            makeError(ErrorCode::UsageInvalidArgument, "the device profile has no LTE target"));
     }
     const bool empty = (source.kind == Source::Kind::Image && !source.image) ||
                        (source.kind == Source::Kind::Bundle && !source.bundle) ||

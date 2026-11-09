@@ -293,8 +293,9 @@ QUrl WizardViewModel::illustrationUrl(const QString& slot, bool dark) {
 
 QStringList WizardViewModel::illustrationSlots() {
     return {QStringLiteral("jlink-usb"),         QStringLiteral("chester-app-cable"),
-            QStringLiteral("chester-lte-cable"), QStringLiteral("chester-power"),
-            QStringLiteral("stm32-swd-cable"),   QStringLiteral("placeholder")};
+            QStringLiteral("chester-lte-cable"), QStringLiteral("chester-lrw-cable"),
+            QStringLiteral("chester-power"),     QStringLiteral("stm32-swd-cable"),
+            QStringLiteral("placeholder")};
 }
 
 bool WizardViewModel::hasIllustration(const QString& slot) {

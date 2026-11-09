@@ -1075,6 +1075,7 @@ TEST_F(FlashTest, ExpertActionsAreHiddenUntilTheSettingIsOn) {
     EXPECT_GE(changed.count(), 1);
     EXPECT_TRUE(flash().eraseAllAvailable());
     EXPECT_TRUE(flash().recoverAvailable());
+    // Plan 0040: the LoRaWAN module (`lrw`) is not a plain maintenance target (guided, 0040 B2).
     ASSERT_EQ(flash().maintenanceTargets().size(), 2);
     EXPECT_EQ(flash().maintenanceTargets().at(1).toMap().value(QStringLiteral("title")).toString(),
               QStringLiteral("LTE MCU"));
