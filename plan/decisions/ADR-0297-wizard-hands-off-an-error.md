@@ -1,6 +1,7 @@
 # ADR-0297 — A wizard can hand an error off to the error's own wizard
 
-- **Status:** Accepted (plan 0009; extends the wizard contract of plan 0007 / ADR-0067)
+- **Status:** Accepted (plan 0009; extends the wizard contract of plan 0007 / ADR-0067); refined by ADR-0300: the
+  session is kept only when the error's wizard is a per-tab wizard (not for the setup wizard)
 - **Date:** 2026-11-09
 - **Decided by:** Matej Strnad (2026-11-09, question Q1 of the 0009 implementation)
 

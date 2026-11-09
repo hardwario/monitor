@@ -116,6 +116,9 @@ public:
     [[nodiscard]] CheckListModel* checks() override;
     [[nodiscard]] QObject* embeddedViewModel() override;
     void action(const QString& actionId) override;
+    // Plan 0009 review (decision B): a tab that the wizard returned to its picker and on which
+    // nothing else was chosen gets its original probe back.
+    void aboutToClose() override;
 
     [[nodiscard]] Step step() const;
     [[nodiscard]] Outcome outcome() const;
@@ -158,6 +161,13 @@ private:
     ProbePickerViewModel* m_picker = nullptr;    // child (created for the Probe step)
     std::uint64_t m_probeCheckRun = 0;           // DiagWorker generation (0 = none)
     std::optional<std::uint32_t> m_preferSerial; // preselected on the Probe step
+    struct OriginalProbe {
+        QString profileId;
+        QString targetId;
+        std::uint32_t serial = 0;
+        QString product;
+    };
+    std::optional<OriginalProbe> m_original; // the tab's probe when the wizard started
     bool m_probeStepShown = false;
     bool m_pureCheck = false; // the tab was connected at the start (steps 1–4 skipped)
     bool m_connectRequested = false;

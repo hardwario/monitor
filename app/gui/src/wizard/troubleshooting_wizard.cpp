@@ -98,6 +98,13 @@ TroubleshootingWizard::TroubleshootingWizard(AppViewModel& app, QObject* parent)
     DiagWorker& worker = m_app.diagWorker();
     connect(&worker, &DiagWorker::checkProgress, this, &TroubleshootingWizard::onEnvProgress);
     connect(&worker, &DiagWorker::checksFinished, this, &TroubleshootingWizard::onEnvFinished);
+    // Review 0009 F7: a request replaced by another one (the start-up check) runs again.
+    connect(&worker, &DiagWorker::requestDropped, this, [this](quint64 generation) {
+        if (generation != 0 && generation == m_generation) {
+            m_generation = 0;
+            runCurrent();
+        }
+    });
     connect(&m_app, &AppViewModel::languageChanged, this, &Wizard::changed);
     // ADR-0291: the firmware actions follow the tabs and the update's state.
     connect(&m_app, &AppViewModel::probeUsageChanged, this, &Wizard::changed);
@@ -607,16 +614,18 @@ void TroubleshootingWizard::primary() {
     }
     if (m_index + 1 < m_flow.size()) {
         ++m_index;
+        // Review 0009 F4: the probe step only while the tab has no probe (after Back and Next
+        // the tab has the one chosen there; the wizard picker would show it as in use).
+        if (m_flow.at(m_index).kind == Kind::Picker && hasProbe() && m_index + 1 < m_flow.size()) {
+            ++m_index;
+        }
         enter();
     }
 }
 
 bool TroubleshootingWizard::canBack() const {
-    if (m_index == 0 || running()) {
-        return false;
-    }
-    // The probe step is not shown again (the tab has its probe now).
-    return m_index != 1 || m_flow.at(0).kind != Kind::Picker;
+    // Back never returns to the probe step (back() skips it: the tab has its probe now).
+    return m_index > 0 && !running();
 }
 
 void TroubleshootingWizard::back() {
@@ -728,10 +737,12 @@ void TroubleshootingWizard::useSpeed1000() {
     if (session == nullptr || m_tab->isBusy()) {
         return;
     }
-    if (session->connection().state == device::ConnectionState::ProbeOpen) {
-        m_tab->disconnectDevice();
-    } else {
-        m_tab->disconnectDevice();
+    // The wizards' probe-only session (ADR-0300) is closed; the next Diagnose opens a new one.
+    // Any other session is the tab's connection: it connects again.
+    const bool reconnect = !m_tab->wizardOwnsSession() &&
+                           session->connection().state != device::ConnectionState::ProbeOpen;
+    m_tab->disconnectDevice();
+    if (reconnect) {
         m_tab->connectDevice();
     }
 }
@@ -775,14 +786,12 @@ QStringList TroubleshootingWizard::firmwareCommands() const {
 
 void TroubleshootingWizard::handOffAndClose(const QString& action) {
     if (!action.isEmpty()) {
-        m_runner->keepSession();
         emit handOff(action);
     }
     emit finished(false);
 }
 
 void TroubleshootingWizard::errorHandOffAndClose(const ErrorInfo& error) {
-    m_runner->keepSession();
     emit handOffError(error);
     emit finished(false);
 }

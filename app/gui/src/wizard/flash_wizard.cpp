@@ -7,7 +7,6 @@
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
 #include "hwio/device/profile.h"
-#include "hwio/device/session_events.h"
 #include "hwio/diag/check.h"
 #include "hwio/diag/environment.h"
 #include "hwio/firmware/firmware_image.h"
@@ -154,6 +153,13 @@ FlashWizard::FlashWizard(AppViewModel& app, FirmwareServices& services, QObject*
                 m_probeCheckRun = 0;
                 emit changed();
             });
+    // Review 0009 F7: a request replaced by another one (the start-up check) runs again.
+    connect(&worker, &DiagWorker::requestDropped, this, [this](quint64 generation) {
+        if (generation != 0 && generation == m_probeCheckRun) {
+            m_probeCheckRun = 0;
+            runProbeChecks();
+        }
+    });
     connect(&m_services, &FirmwareServices::languageChanged, this, &FlashWizard::retranslate);
 }
 
@@ -164,8 +170,10 @@ FlashWizard::~FlashWizard() {
     if (m_probeCheckRun != 0) {
         m_app.diagWorker().cancel(m_probeCheckRun);
     }
+    // Review 0009 F1: a Cable-step Diagnose still running is cancelled; the tab releases the
+    // wizards' probe-only session when it has ended (ADR-0300).
+    stopDiagnose();
     releaseTab();
-    releaseProbeOnlySession();
 }
 
 QString FlashWizard::title() const { return tr("Flash application firmware"); }
@@ -511,7 +519,6 @@ void FlashWizard::back() {
         // Another probe: the tab goes back to its picker (the wizard configured it).
         stopDiagnose();
         if (!m_tab.isNull()) {
-            m_openedProbeOnly = false;
             m_tab->chooseAnotherProbe();
         }
         m_cableChecks->reset({}, {});
@@ -555,7 +562,6 @@ void FlashWizard::action(const QString& actionId) {
         // topic), not at its start.
         if (!helpWizard().isEmpty()) {
             const ErrorInfo shown = error();
-            m_keepSession = true;
             releaseTab();
             emit handOffError(shown);
             emit finished(false);
@@ -564,7 +570,6 @@ void FlashWizard::action(const QString& actionId) {
 }
 
 void FlashWizard::handOffAndClose(const QString& actionId) {
-    m_keepSession = true;
     releaseTab();
     emit handOff(actionId);
     emit finished(actionId == QStringLiteral("open-console"));
@@ -613,9 +618,8 @@ void FlashWizard::startDiagnose() {
         }
     }
     m_cableChecks->reset(ids, titles);
-    const bool hadSession = m_tab->session() != nullptr;
     Result<device::OperationId> started = [this]() -> Result<device::OperationId> {
-        if (Status opened = m_tab->ensureSession(false); !opened) {
+        if (Status opened = m_tab->ensureWizardSession(); !opened) {
             return std::unexpected(std::move(opened).error());
         }
         device::DeviceSession* session = m_tab->session();
@@ -626,10 +630,6 @@ void FlashWizard::startDiagnose() {
         // ADR-0296: up to `identify`; the RTT steps are not needed for flashing (plan 0010).
         return session->diagnose(toStdString(targetId()), cableCheckIds.back());
     }();
-    if (!hadSession && m_tab->session() != nullptr &&
-        m_tab->session()->connection().state != device::ConnectionState::Connected) {
-        m_openedProbeOnly = true;
-    }
     watchSession();
     if (!started) {
         // The first row shows why (e.g. internal.busy: another operation runs).
@@ -887,10 +887,9 @@ void FlashWizard::startFlash() {
     m_flashedBytes = imageBytes(*loaded->image);
     const device::FlashOptions options{.halt = false, // expert option, Flash page only (0010)
                                        .allowUicr = m_source->hasUicr() && m_source->allowUicr()};
-    const bool hadSession = m_tab->session() != nullptr;
     // The tab's session, or a probe-only one (operations run on it, ADR-0069).
     Result<device::OperationId> started = [&]() -> Result<device::OperationId> {
-        if (Status opened = m_tab->ensureSession(false); !opened) {
+        if (Status opened = m_tab->ensureWizardSession(); !opened) {
             return std::unexpected(std::move(opened).error());
         }
         device::DeviceSession* session = m_tab->session();
@@ -900,10 +899,6 @@ void FlashWizard::startFlash() {
         }
         return session->flash(toStdString(targetId()), loaded->image, options);
     }();
-    if (!hadSession && m_tab->session() != nullptr &&
-        m_tab->session()->connection().state != device::ConnectionState::Connected) {
-        m_openedProbeOnly = true;
-    }
     watchSession();
     if (!started) {
         m_outcome = Status(std::unexpected(std::move(started).error()));
@@ -1003,22 +998,13 @@ void FlashWizard::releaseTab() {
     m_tabBusy = false;
 }
 
-void FlashWizard::releaseProbeOnlySession() {
-    // A probe-only session the wizard opened is closed when it ends without a hand-off (0009
-    // § Behaviour: probe-only sessions per tab 1); a running operation keeps it.
-    if (!m_openedProbeOnly || m_keepSession || m_tab.isNull() || m_tab->isBusy()) {
-        return;
-    }
-    const device::DeviceSession* session = m_tab->session();
-    if (session == nullptr || session->runningOperation().has_value() ||
-        session->connection().state != device::ConnectionState::ProbeOpen) {
-        return;
-    }
-    m_tab->disconnectDevice();
-}
-
 QString FlashWizard::busyCancelText() const {
-    return m_flash ? tr("Flashing is in progress. Cancel it and close the wizard?") : QString();
+    if (m_flash) {
+        return tr("Flashing is in progress. Cancel it and close the wizard?");
+    }
+    // Review 0009 F1: the Cable step's Diagnose is cancelled before the wizard closes.
+    return m_diagnose ? tr("The connection is being checked. Cancel it and close the wizard?")
+                      : QString();
 }
 
 void FlashWizard::cancelOperation() {

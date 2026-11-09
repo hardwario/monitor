@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QLoggingCategory>
 #include <QObject>
+#include <QPointer>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
@@ -70,6 +71,9 @@ bool WizardViewModel::start(Wizard* wizard, const ErrorInfo& context, DeviceTabV
         });
     }
     qCInfo(lcGui).noquote() << "Wizard" << wizard->id() << "opened";
+    if (tab != nullptr) {
+        emit openedOnTab(tab);
+    }
     wizard->start(context, tab);
     emit openChanged();
     emit changed();
@@ -84,7 +88,9 @@ void WizardViewModel::tabClosing(const DeviceTabViewModel* tab) {
     }
     qCInfo(lcGui).noquote() << "Wizard" << m_wizard->id() << "closed with its tab";
     m_wizard->cancelOperation();
+    m_tabClosing = true;
     close(false); // also when the cancelled operation has not ended yet: the tab goes away
+    m_tabClosing = false;
 }
 
 QString WizardViewModel::wizardId() const {
@@ -356,7 +362,11 @@ void WizardViewModel::close(bool completed) {
     }
     qCInfo(lcGui).noquote() << "Wizard" << m_wizard->id() << (completed ? "completed" : "closed");
     Wizard* wizard = m_wizard.data();
+    if (!m_tabClosing) {
+        wizard->aboutToClose();
+    }
     wizard->disconnect(this);
+    QPointer<DeviceTabViewModel> tab = m_tab;
     if (!m_tab.isNull()) {
         m_tab->disconnect(this);
     }
@@ -365,6 +375,9 @@ void WizardViewModel::close(bool completed) {
     m_tabBound = false;
     m_closing = false;
     wizard->deleteLater(); // never inside its own signal
+    if (!tab.isNull() && !m_tabClosing) {
+        emit closedOnTab(tab.data());
+    }
     emit openChanged();
     emit changed();
 }

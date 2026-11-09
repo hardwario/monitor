@@ -359,7 +359,60 @@ Status DeviceTabViewModel::promoteSession() {
     const device::TargetProfile* target =
         m_profile != nullptr ? device::findTarget(*m_profile, toStdString(m_targetId)) : nullptr;
     const bool attachRtt = target != nullptr && !target->rttTerminal.empty();
-    return m_session->startConnection(attachRtt);
+    Status promoted = m_session->startConnection(attachRtt);
+    if (promoted) {
+        // ADR-0300: a promoted session is the tab's connection, no longer the wizards'.
+        m_wizardSession = false;
+        m_releaseWizardSession = false;
+    }
+    return promoted;
+}
+
+Status DeviceTabViewModel::ensureWizardSession() {
+    const device::DeviceSession* before = m_session.get();
+    if (Status status = ensureSession(false); !status) {
+        return status;
+    }
+    if (m_session && m_session.get() != before) {
+        m_wizardSession = true; // opened probe-only for the wizards (ADR-0300)
+    }
+    return {};
+}
+
+void DeviceTabViewModel::keepWizardSession() {
+    m_releaseWizardSession = false;
+    disconnect(m_releaseWatch);
+}
+
+void DeviceTabViewModel::releaseWizardSessionWhenIdle() {
+    if (!m_wizardSession) {
+        return;
+    }
+    m_releaseWizardSession = true;
+    disconnect(m_releaseWatch);
+    if (m_session) {
+        // Queued: the operation has ended (runningOperation() is empty) when it is delivered.
+        m_releaseWatch = connect(
+            m_session.get(), &device::DeviceSession::operationFinished, this,
+            [this] { tryReleaseWizardSession(); }, Qt::QueuedConnection);
+    }
+    tryReleaseWizardSession();
+}
+
+void DeviceTabViewModel::tryReleaseWizardSession() {
+    if (!m_releaseWizardSession) {
+        return;
+    }
+    if (!m_wizardSession || !m_session) {
+        keepWizardSession(); // nothing (left) to release
+        return;
+    }
+    if (isBusy() || m_session->runningOperation().has_value()) {
+        return; // when idle (busyChanged / operationFinished call again)
+    }
+    keepWizardSession();
+    qCInfo(lcGui) << "Releasing the wizards' probe-only session";
+    disconnectDevice();
 }
 
 void DeviceTabViewModel::openWizard(const QString& wizardId) {
@@ -493,6 +546,8 @@ void DeviceTabViewModel::releaseSession() {
         return;
     }
     session->disconnect(this);
+    m_wizardSession = false; // ADR-0300
+    keepWizardSession();
     m_queries->setSession(nullptr);
     resetInfoWatcher();
     m_connection->setPairingPending(false);
@@ -740,6 +795,7 @@ void DeviceTabViewModel::clearBusy(const QString& pageId) {
     busyChanged(); // signal
     m_connection->refresh();
     updateState();
+    tryReleaseWizardSession(); // ADR-0300: the wizards' session may be released now
     if (m_closePending) {
         // Queued: the page may call clearBusy() inside one of the session's signals.
         QMetaObject::invokeMethod(this, [this] { closeReady(); }, Qt::QueuedConnection);

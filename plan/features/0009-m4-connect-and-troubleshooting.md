@@ -353,3 +353,35 @@ with 0 unfinished cs/de/sk/pl; clang-format-21 clean; `tools/check-lfs.sh --untr
 builds. HIL with CHESTER and the manual checks (Linux, Windows, macOS; Czech at 960 × 600) are open. Screenshots (light/dark, EN/CS, 960 × 600) were generated with
 `HWIO_SCREENSHOT_DIR` and are not in the repository.
 
+
+## Review fixes (2026-11-09, independent review of `strnad/impl-0009`)
+
+Decisions by Matej Strnad (2026-11-09): **A** → ADR-0300 (the tab owns the wizards' probe-only session; it passes
+between wizards chained on the tab and is released when idle after the last one closes without a session-consuming
+hand-off); **B** → the Connect wizard opened from `probe.not_found` gives the tab its original probe back when it is
+closed without another probe chosen.
+
+| # | Finding | Fix | Tests |
+|---|---|---|---|
+| 1 | Flash wizard closed during the Cable-step Diagnose: Diagnose not cancelled, session leaked | The destructor cancels it; `busyCancelText` includes the Cable check (Cancel asks, then cancels); the tab releases the session when the operation has ended (ADR-0300) | `FlashWizardTest.ClosingDuringTheCableCheckCancelsIt` |
+| 2 | A session kept by a hand-off was never closed by the receiving wizard | ADR-0300 (`DeviceTabViewModel::ensureWizardSession`, `releaseWizardSessionWhenIdle`, `keepWizardSession`; `WizardViewModel::openedOnTab` / `closedOnTab`; `AppViewModel::openChainedWizard`) | `FlashWizardTest.HelpMeFixThisOpensTheMatchingTopic`, `.AHandOffToSettingsReleasesTheSession`, `ConnectWizardTest.AChainedWizardTakesOverTheSession`, `.AHandOffToTheSetupWizardReleasesTheSession`, `TroubleshootingWizardTest.ClosingTheLastChainedWizardReleasesTheSession` |
+| 3 | `DiagnoseRunner::keepSession` stayed set after a failed connect | The per-wizard flags are gone (ADR-0300) | `ConnectWizardTest.CheckAgainAfterAFailedConnectionLeavesNoSession` |
+| 4 | Troubleshooting: Next after Back entered the probe step again (own tab "In use") | `primary()` skips the probe step while the tab has a probe; dead `canBack` code removed | `TroubleshootingWizardTest.BackAndNextSkipTheProbeStep` |
+| 5 | A Diagnose step that is not shown failed and the shown row only said "Not checked" | `DiagnoseRunner`: the first shown row it kept from running gets its status, result and error | `TroubleshootingWizardTest.AHiddenFailedStepExplainsTheShownRow` |
+| 6 | `onHandOffError` fell back to the current tab when the source tab had closed | Nothing opens when the source tab is gone | `ConnectWizardTest.AHandOffToAClosedTabOpensNothing` |
+| 7 | `StartupCheck` never decided when a wizard's checks replaced its pending `DiagWorker` request | `DiagWorker::requestDropped(generation)` (queued); the start-up check and the wizards submit a dropped request again | `StartupCheckTest.AReplacedRequestRunsAgain` |
+| 8 | The Done heading used the raw target id | "Connected to CHESTER · Application MCU (nRF52840) · <SN>." (`ProbePickerViewModel::targetTitle`) | `ConnectWizardTest.FullFlowFromAnEmptyTab` |
+| B | — | `Wizard::aboutToClose()` (new, default nothing; not called when the tab closes); `ConnectWizard` reconfigures the tab with its original probe when it is still on its picker | `ConnectWizardTest.CancelRestoresTheTabsProbe` |
+
+Choices: decision B is applied whenever the Connect wizard returned a tab that had a probe at the start to its picker
+(also Back into the Probe step), restoring the probe the tab had when the wizard started. The release waits for the
+tab's busy state and the running operation, and covers a wizards' session in any state other than promoted.
+
+Verification of the review fixes (2026-11-09): linux-debug ctest 1794 tests (1780 passed, 14 skipped); wizard GTests
+4× in a row; `tst_gui.tst_connect_wizard` 3×; full `linux-tidy` zero findings; `all_qmllint` clean;
+`check_translations` 0 unfinished; clang-format clean; LFS check passes. linux-asan: GUI wizard/tab tests (125) and
+device-related unit tests (411) pass. linux-tsan: device-related unit tests (407) and the GUI wizard GTests pass;
+`tst_gui.tst_connect_wizard`, `tst_flash_wizard` and `tst_setup_wizard` report one data race at the end of a
+data-driven test row: the probe scanner thread logs through the Qt Test message handler while `QTestData` is
+destroyed (Qt Test + `ProbeScanner` logging, the same class as review 0005 round 1; `tst_flash_wizard` and
+`tst_setup_wizard` are unchanged by this branch). Not fixed here (open).

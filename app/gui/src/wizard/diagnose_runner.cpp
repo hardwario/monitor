@@ -7,7 +7,6 @@
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
 #include "hwio/device/profile.h"
-#include "hwio/device/session_events.h"
 #include "hwio/diag/check.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "wizard/check_list_model.h"
@@ -38,7 +37,6 @@ DiagnoseRunner::~DiagnoseRunner() {
     }
     cancel();
     clearBusy();
-    releaseProbeOnlySession();
 }
 
 void DiagnoseRunner::setTab(DeviceTabViewModel* tab) {
@@ -67,17 +65,13 @@ Result<device::DeviceSession*> DiagnoseRunner::session() {
     if (m_tab.isNull()) {
         return std::unexpected(makeError(ErrorCode::InternalUnexpected, "the tab was closed"));
     }
-    const bool hadSession = m_tab->session() != nullptr;
-    if (Status opened = m_tab->ensureSession(false); !opened) {
+    if (Status opened = m_tab->ensureWizardSession(); !opened) {
         return std::unexpected(std::move(opened).error());
     }
     device::DeviceSession* session = m_tab->session();
     if (session == nullptr) {
         return std::unexpected(
             makeError(ErrorCode::InternalUnexpected, "no session after ensureSession"));
-    }
-    if (!hadSession && session->connection().state != device::ConnectionState::Connected) {
-        m_opened = session;
     }
     watch(session);
     return session;
@@ -89,6 +83,7 @@ bool DiagnoseRunner::start(const std::vector<std::string>& rows, CheckListModel*
     }
     m_model = model;
     m_startError.reset();
+    m_hiddenFailure.reset();
     // The rows and their titles (the console target's step titles, plan 0007).
     std::vector<std::string> ids = rows;
     if (ids.empty()) {
@@ -211,9 +206,23 @@ void DiagnoseRunner::onStep(device::OperationId id, const device::DiagnoseStep& 
     }
     const auto it = std::ranges::find(m_rows, step.id);
     if (it == m_rows.end()) {
-        return; // a step this check does not show (e.g. `connect` after `power`)
+        // A step this check does not show (e.g. `probe` before `power`, `connect` after it):
+        // when it fails, its reason goes to the next shown row that it keeps from running.
+        if (step.status == diag::CheckStatus::Failed && !m_hiddenFailure) {
+            m_hiddenFailure = step;
+        }
+        return;
     }
-    m_model->update(step);
+    if (step.status == diag::CheckStatus::Skipped && m_hiddenFailure) {
+        // Skipped because a step that is not shown failed: show that step's reason.
+        m_model->update(device::DiagnoseStep{.id = step.id,
+                                             .status = diag::CheckStatus::Failed,
+                                             .result = m_hiddenFailure->result,
+                                             .error = m_hiddenFailure->error});
+        m_hiddenFailure.reset();
+    } else {
+        m_model->update(step);
+    }
     if (std::next(it) != m_rows.end()) {
         m_model->update(device::DiagnoseStep{.id = *std::next(it),
                                              .status = diag::CheckStatus::Running,
@@ -255,9 +264,19 @@ void DiagnoseRunner::end() {
     m_operation.reset();
     clearBusy();
     if (!m_model.isNull()) {
-        // Rows a cancelled or failed Diagnose did not report stay "not checked".
+        // Rows a cancelled or failed Diagnose did not report stay "not checked"; the first of
+        // them shows why when a step that is not shown failed (review 0009 F5).
         for (const std::string& row : m_rows) {
             const diag::CheckStatus status = m_model->status(toQString(row));
+            if ((status == diag::CheckStatus::Pending || status == diag::CheckStatus::Running) &&
+                m_hiddenFailure) {
+                m_model->update(device::DiagnoseStep{.id = row,
+                                                     .status = diag::CheckStatus::Failed,
+                                                     .result = m_hiddenFailure->result,
+                                                     .error = m_hiddenFailure->error});
+                m_hiddenFailure.reset();
+                continue;
+            }
             if (status == diag::CheckStatus::Pending || status == diag::CheckStatus::Running) {
                 m_model->update(device::DiagnoseStep{.id = row,
                                                      .status = diag::CheckStatus::Skipped,
@@ -268,22 +287,6 @@ void DiagnoseRunner::end() {
     }
     emit finished();
     emit changed();
-}
-
-bool DiagnoseRunner::openedProbeOnly() const {
-    return !m_opened.isNull() && !m_tab.isNull() && m_tab->session() == m_opened.data() &&
-           m_opened->connection().state == device::ConnectionState::ProbeOpen;
-}
-
-void DiagnoseRunner::releaseProbeOnlySession() {
-    // A probe-only session the wizard opened is closed when it ends without a hand-off (plan 0009
-    // § Behaviour); a running operation keeps it.
-    if (m_keep || !openedProbeOnly() || m_tab->isBusy() ||
-        m_opened->runningOperation().has_value()) {
-        return;
-    }
-    m_tab->disconnectDevice();
-    m_opened.clear();
 }
 
 void DiagnoseRunner::setBusy() {

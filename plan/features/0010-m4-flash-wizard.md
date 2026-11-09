@@ -278,3 +278,8 @@ Choices made during the implementation (not spelled out in the plan). Decided by
     `WizardCoverage.EveryCodeNamingAWizardHasAStartStep`.
 13. **Plan 0009 (ADR-0297, 2026-11-09):** [Help me fix this] of the failure hands the error itself off
     (`Wizard::handOffError`), so troubleshooting opens at the error's topic (note 6 is amended for this button).
+14. **Plan 0009 review (ADR-0300, 2026-11-09):** the probe-only session belongs to the tab
+    (`ensureWizardSession`); note 1's "released when the wizard closes without a hand-off" is now done by the tab
+    for every wizard, and only `open-console` and hand-offs to per-tab wizards keep it (`open-flash-page:…` and
+    `open-settings:…` release it). Closing the wizard during the Cable check cancels the Diagnose (Cancel asks
+    first).

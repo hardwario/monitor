@@ -22,10 +22,12 @@
 #include "wizard/wizard.h"
 #include "wizard/wizard_launcher.h"
 #include "wizard/wizard_view_model.h"
+#include "workers/diag_worker.h"
 
 #include <QFile>
 #include <QObject>
 #include <QSettings>
+#include <QSignalSpy>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
@@ -594,6 +596,21 @@ TEST_F(StartupCheckTest, WaitsForAnotherWizard) {
     ASSERT_TRUE(waitFor([&] { return check.decision().has_value(); }));
     EXPECT_EQ(check.decision(), std::optional<Decision>(Decision::Welcome));
     EXPECT_EQ(wizard().wizardId(), QStringLiteral("first-run-setup"));
+}
+
+// Review 0009 F7: a wizard's checks may replace the start-up check's pending request; it runs
+// again, so decided() still comes.
+TEST_F(StartupCheckTest, AReplacedRequestRunsAgain) {
+    QSignalSpy dropped(&app().diagWorker(), &hwio::gui::DiagWorker::requestDropped);
+    StartupCheck check(app(), nullptr);
+    // Keep the worker busy so that the check's request is still pending when it is replaced.
+    (void)app().diagWorker().runChecks(
+        hwio::gui::DiagWorker::ChecksRequest{.context = app().diagEnvironment(), .ids = {}});
+    check.run();
+    (void)app().diagWorker().runChecks(hwio::gui::DiagWorker::ChecksRequest{
+        .context = app().diagEnvironment(), .ids = {"jlink-software"}});
+    ASSERT_TRUE(waitFor([&] { return check.decision().has_value(); }, std::chrono::seconds(30)));
+    EXPECT_GE(dropped.count(), 1);
 }
 
 } // namespace

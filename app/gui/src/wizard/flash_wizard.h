@@ -28,11 +28,12 @@
 //     `phase-progress` step with the ErrorPanel: [Try again] and, when the error names another
 //     registered wizard, [Help me fix this]) or cancelled ([Flash again]).
 //
-// Sessions: the tab's session when it has one; otherwise ensureSession(connectTarget = false)
-// opens a probe-only session for Diagnose and the flash (operations run on a probe-only session,
-// ADR-0069; ADR-0295: not promoted before flashing). [Open console] hands off "open-console", which
-// promotes that session with RTT (AppViewModel::onHandOff → connectDevice). A probe-only session
-// the wizard opened is released when the wizard closes without a hand-off.
+// Sessions: the tab's session when it has one; otherwise the tab's wizards' probe-only session
+// (DeviceTabViewModel::ensureWizardSession, ADR-0300) for Diagnose and the flash (operations run
+// on a probe-only session, ADR-0069; ADR-0295: not promoted before flashing). [Open console]
+// hands off "open-console", which promotes that session with RTT (AppViewModel::onHandOff →
+// connectDevice). The tab releases the wizards' session when the last wizard on it closes without
+// a session-consuming hand-off (ADR-0300).
 //
 // Hand-offs to other wizards are "open-wizard:<id>" (AppViewModel opens it on the same tab after
 // this one has closed); the failure's [Help me fix this] hands the error itself off
@@ -228,7 +229,6 @@ private:
     void onDiagnoseDone();
     void handOffAndClose(const QString& action);
     void releaseTab();
-    void releaseProbeOnlySession();
     void retranslate();
     [[nodiscard]] bool hasProbe() const;
     [[nodiscard]] bool firmwareReady() const;
@@ -253,8 +253,6 @@ private:
     Step m_step = Probe;
     bool m_probeStepShown = false;     // the tab had no probe at start: Back from Cable re-chooses
     bool m_skipCableOnPass = false;    // the first Diagnose passes at once -> Firmware
-    bool m_openedProbeOnly = false;    // the wizard opened the tab's probe-only session
-    bool m_keepSession = false;        // a hand-off follows: the session stays
     std::uint64_t m_probeCheckRun = 0; // DiagWorker generation (0 = none)
     std::optional<DiagnoseRun> m_diagnose;
     std::optional<FlashRun> m_flash;

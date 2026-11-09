@@ -104,6 +104,13 @@ SetupWizard::SetupWizard(AppViewModel& app, Options options, QObject* parent)
     }
     connect(&m_app.diagWorker(), &DiagWorker::checkProgress, this, &SetupWizard::onProgress);
     connect(&m_app.diagWorker(), &DiagWorker::checksFinished, this, &SetupWizard::onFinished);
+    // Review 0009 F7: a request replaced by another one runs again.
+    connect(&m_app.diagWorker(), &DiagWorker::requestDropped, this, [this](quint64 generation) {
+        if (generation != 0 && generation == m_generation) {
+            m_generation = 0;
+            runChecks(std::exchange(m_candidate, std::nullopt));
+        }
+    });
     // ADR-0254: the step texts follow a language change at once (they are built by current()).
     connect(&m_app, &AppViewModel::languageChanged, this, [this] {
         if (stepId() == doneStep) {

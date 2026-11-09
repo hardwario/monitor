@@ -127,7 +127,7 @@ TestCase {
         tryVerify(() => wizard.step === ConnectWizard.Done);
         tryCompare(AppViewModel.currentTabViewModel, "state", DeviceTabViewModel.Connected, 20000);
         tryVerify(() => part("wizardPrimary").text === "Open console");
-        verify(part("wizardHeading").text.startsWith("Connected to CHESTER app"));
+        verify(part("wizardHeading").text.startsWith("Connected to CHESTER"));
         compare(part("wizardCancel").text, "Close");
         returnKey();
         tryVerify(() => !AppViewModel.wizard.open);

@@ -328,6 +328,11 @@ private:
     // "open-settings[:<section>]".
     void onHandOff(const QString& action, DeviceTabViewModel* tab);
     void onHandOffError(const ErrorInfo& error, DeviceTabViewModel* tab); // ADR-0297
+    // ADR-0300: opens the per-tab wizard `wizardId` on `tab` after the handing-off one has
+    // closed (the wizards' session passes to it); a failed open releases the session.
+    void openChainedWizard(const QString& wizardId, DeviceTabViewModel* tab,
+                           const ErrorInfo& context);
+    void onWizardClosedOnTab(DeviceTabViewModel* tab);
     [[nodiscard]] QJsonArray tabsJson() const;
 
     AppOptions m_options;
@@ -344,6 +349,9 @@ private:
     std::unique_ptr<BleService> m_ble;
     // M4: filled by registerExtensions; the worker is joined before the registry goes away.
     WizardRegistry m_wizardRegistry;
+    // ADR-0300: the tab on which a hand-off to another per-tab wizard is pending (its wizards'
+    // probe-only session is kept for that wizard).
+    QPointer<DeviceTabViewModel> m_chainTab;
     std::unique_ptr<DiagWorker> m_diagWorker;
     WizardViewModel* m_wizard = nullptr;  // child; deleted first by the destructor
     WizardLauncher* m_launcher = nullptr; // child

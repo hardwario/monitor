@@ -517,6 +517,42 @@ TEST_F(FlashWizardTest, HelpMeFixThisOpensTheMatchingTopic) {
     EXPECT_EQ(troubleshooting->topic()->id, "program-failed");
     EXPECT_EQ(troubleshooting->shownError().code(), QStringLiteral("target.program_failed"));
     EXPECT_FALSE(troubleshooting->shownError().detail().isEmpty()); // the detail is kept
+    // ADR-0300: troubleshooting took over the wizards' session; closing it releases it.
+    app().wizard()->cancel(true);
+    ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }));
+    ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
+}
+
+// ADR-0300: the failure's [Open Settings] hands off to a page: the session is released.
+TEST_F(FlashWizardTest, AHandOffToSettingsReleasesTheSession) {
+    start(probeScenario(R"({"writeFault": true})"));
+    FlashWizard* wizard = toConfirm(hexFile());
+    ASSERT_NE(wizard, nullptr);
+    ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
+    wizard->primary();
+    ASSERT_TRUE(finished(*wizard));
+    ASSERT_EQ(wizard->stage(), FlashWizard::Failed);
+    ASSERT_TRUE(tab().wizardOwnsSession());
+    DeviceTabViewModel* flashed = &tab(); // the Settings page becomes current
+    wizard->triggerErrorAction(hwio::gui::error_action::OpenSettings);
+    EXPECT_FALSE(app().wizard()->isOpen());
+    ASSERT_TRUE(waitFor([flashed] { return flashed->session() == nullptr; }));
+}
+
+// Review 0009 F1: closing during the Cable step's Diagnose cancels it and leaves no session.
+TEST_F(FlashWizardTest, ClosingDuringTheCableCheckCancelsIt) {
+    std::string slow = probeScenario();
+    slow.insert(slow.find(R"("chip": )"), R"("connectDelayMs": 1500, )");
+    start(slow);
+    FlashWizard* wizard = open();
+    ASSERT_NE(wizard, nullptr);
+    ASSERT_EQ(wizard->step(), FlashWizard::Cable);
+    ASSERT_TRUE(wizard->cableRunning());
+    EXPECT_FALSE(app().wizard()->busyCancelText().isEmpty()); // Cancel asks first
+    app().wizard()->cancel(true);
+    ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }, std::chrono::seconds(20)));
+    ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }, std::chrono::seconds(20)));
+    EXPECT_TRUE(tab().busyPage().isEmpty());
 }
 
 TEST_F(FlashWizardTest, FlashAnotherGoesBackToTheFirmware) {

@@ -710,6 +710,9 @@ Plan [0009](0009-m4-connect-and-troubleshooting.md) adds to the contract, with d
   context once this one has closed (`WizardViewModel::handOffError`, `AppViewModel::onHandOffError`,
   `WizardLauncher::openForTab(id, tab, context)`).
 - The Embedded control `wizard-error` (`WizardErrorStep.qml`): an error's cause and suggestion as plain text.
+- Review fixes (2026-11-09): `Wizard::aboutToClose()` (default nothing; not called when the tab closes);
+  `WizardViewModel::openedOnTab` / `closedOnTab`; the tab owns the wizards' probe-only session (ADR-0300);
+  `DiagWorker::requestDropped`.
 
 ## Open findings (independent review round 1, 2026-10-16)
 

@@ -101,6 +101,13 @@ ConnectWizard::ConnectWizard(AppViewModel& app, QObject* parent)
                 m_probeCheckRun = 0;
                 emit changed();
             });
+    // Review 0009 F7: a request replaced by another one (the start-up check) runs again.
+    connect(&worker, &DiagWorker::requestDropped, this, [this](quint64 generation) {
+        if (generation != 0 && generation == m_probeCheckRun) {
+            m_probeCheckRun = 0;
+            runProbeChecks();
+        }
+    });
     connect(&m_app, &AppViewModel::languageChanged, this, &Wizard::changed);
 }
 
@@ -140,6 +147,12 @@ void ConnectWizard::start(const ErrorInfo& context, DeviceTabViewModel* tab) {
     connect(m_tab, &DeviceTabViewModel::sessionChanged, this, &Wizard::changed);
     connect(m_tab, &DeviceTabViewModel::busyChanged, this, &Wizard::changed);
     buildFlow();
+    if (const std::optional<std::uint32_t> serial = m_tab->probeSerial(); hasProbe() && serial) {
+        m_original = OriginalProbe{.profileId = m_tab->profileId(),
+                                   .targetId = m_tab->consoleTargetId(),
+                                   .serial = *serial,
+                                   .product = m_tab->product()};
+    }
     std::optional<Step> startStep;
     if (context.valid()) {
         if (const std::optional<ErrorCode> code = errorCodeFromId(toStdString(context.code()));
@@ -379,7 +392,12 @@ void ConnectWizard::fillDone(WizardStep& step) const {
     const QString serial =
         m_tab->probeSerial() ? QString::number(*m_tab->probeSerial()) : QString();
     // Runtime data: the heading is plain text (ADR-0184).
-    step.heading = tr("Connected to %1 %2 · %3.").arg(device, m_tab->consoleTargetId(), serial);
+    // Review 0009 F8: the target's title as in the picker ("Application MCU (nRF52840)").
+    step.heading =
+        tr("Connected to %1 · %2 · %3.")
+            .arg(device,
+                 ProbePickerViewModel::targetTitle(m_tab->profileId(), m_tab->consoleTargetId()),
+                 serial);
     step.primaryText = tr("Open console");
 }
 
@@ -584,7 +602,6 @@ void ConnectWizard::primary() {
 void ConnectWizard::connectTab() {
     // [Connect]: the probe-only session is promoted (startConnection with RTT; the probe and its
     // lock stay held); a connected tab stays as it is.
-    m_runner->keepSession();
     m_connectRequested = true;
     goToStep(Done);
     if (m_tab->state() != DeviceTabViewModel::Connected) {
@@ -698,15 +715,22 @@ void ConnectWizard::action(const QString& actionId) {
         // ADR-0297: e.g. probe.open_failed → the troubleshooting topic `probe-busy`.
         if (const std::optional<ErrorInfo> error = failedRowError();
             error && !otherWizardFor(*error).isEmpty()) {
-            m_runner->keepSession();
             emit handOffError(*error);
             emit finished(false);
         }
     }
 }
 
+void ConnectWizard::aboutToClose() {
+    // Decision B (2026-11-09): opened from probe.not_found (or Back to the Probe step), cancelled
+    // without choosing another probe: the tab gets its original probe back.
+    if (m_original && !m_tab.isNull() && m_tab->choosing() && !m_tab->isBle()) {
+        (void)m_tab->configure(m_original->profileId, m_original->targetId, m_original->serial,
+                               m_original->product);
+    }
+}
+
 void ConnectWizard::handOffAndClose(const QString& action) {
-    m_runner->keepSession();
     emit handOff(action);
     emit finished(action == QStringLiteral("open-console"));
 }

@@ -114,6 +114,9 @@ public:
     virtual void cancelOperation() {}
     [[nodiscard]] virtual CheckListModel* checks() { return nullptr; }     // Checks steps
     [[nodiscard]] virtual QObject* embeddedViewModel() { return nullptr; } // Embedded steps
+    // The dialog closes (any reason except the tab closing); the wizard may put the tab back as it
+    // found it (plan 0009 review: the Connect wizard restores the tab's probe). Default: nothing.
+    virtual void aboutToClose() {}
     // A button of WizardStep::actions; the default hands the action off to the application.
     virtual void action(const QString& actionId) { emit handOff(actionId); }
 

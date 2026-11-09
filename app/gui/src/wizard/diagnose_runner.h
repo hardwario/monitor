@@ -1,11 +1,12 @@
 #pragma once
 
 // DiagnoseRunner - the session work shared by the Connect and Troubleshooting wizards
-// (plan/features/0009 § Behaviour): runs `Diagnose` (ADR-0069) on the tab's session, or on a
-// probe-only session it opens through the tab (DeviceTabViewModel::ensureSession(false)), and
-// shows the steps the caller asks for in a CheckListModel; runs the manual [Reset]
-// (reset(target, Go)); releases the probe-only session it opened when the wizard ends without a
-// hand-off.
+// (plan/features/0009 § Behaviour): runs `Diagnose` (ADR-0069) on the tab's session, or on the
+// wizards' probe-only session of the tab (DeviceTabViewModel::ensureWizardSession, ADR-0300: the
+// tab owns it and releases it when the last wizard on it closes), and shows the steps the caller
+// asks for in a CheckListModel; runs the manual [Reset] (reset(target, Go)). A step the caller
+// does not show that fails before a shown one gives its reason to the first shown row that it
+// kept from running (review 0009 F5).
 //
 // - Rows: the caller names the Diagnose steps a check shows (empty = all six). Diagnose runs up to
 //   the last of them (ADR-0296); when that is `power`, which is not a stop point, it runs up to
@@ -71,12 +72,6 @@ public:
     [[nodiscard]] const std::optional<Status>& resetResult() const noexcept {
         return m_resetResult;
     }
-    // The session the runner opened (probe-only) is still the tab's.
-    [[nodiscard]] bool openedProbeOnly() const;
-    // A hand-off follows: the session stays for the next owner.
-    void keepSession() noexcept { m_keep = true; }
-    // Closes the probe-only session the runner opened (no running operation, not kept).
-    void releaseProbeOnlySession();
 
     // The ids Diagnose runs for these rows (ADR-0296 stop point): "" = all.
     [[nodiscard]] static std::string lastStepFor(const std::vector<std::string>& rows);
@@ -108,8 +103,7 @@ private:
     bool m_resetting = false;
     std::optional<Error> m_startError;
     std::optional<Status> m_resetResult;
-    QPointer<device::DeviceSession> m_opened; // the probe-only session this runner opened
-    bool m_keep = false;
+    std::optional<device::DiagnoseStep> m_hiddenFailure; // a failed step that is not shown
     bool m_busy = false;
     std::vector<QMetaObject::Connection> m_connections;
     QPointer<device::DeviceSession> m_watched;

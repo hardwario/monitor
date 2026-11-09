@@ -128,6 +128,10 @@ signals:
     void handOff(const QString& action, hwio::gui::DeviceTabViewModel* tab);
     // ADR-0297: Wizard::handOffError with the wizard's tab.
     void handOffError(const hwio::gui::ErrorInfo& error, hwio::gui::DeviceTabViewModel* tab);
+    // ADR-0300: a wizard opened on / closed from `tab` (not emitted for global wizards). `closed`
+    // comes after the wizard's hand-off signals.
+    void openedOnTab(hwio::gui::DeviceTabViewModel* tab);
+    void closedOnTab(hwio::gui::DeviceTabViewModel* tab);
 
 private:
     void close(bool completed);
@@ -139,6 +143,7 @@ private:
     QPointer<DeviceTabViewModel> m_tab;
     bool m_tabBound = false;
     bool m_closing = false;
+    bool m_tabClosing = false; // close() because the tab closes: no aboutToClose()
     // ADR-0290: the control the options were last applied to and the values its optioned
     // properties had before (restored when a step leaves a key out). Bounded by the keys of
     // embeddedOptions.

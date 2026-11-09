@@ -37,6 +37,14 @@ StartupCheck::Decision StartupCheck::decide(bool completed, bool jlinkOk, bool s
 
 StartupCheck::StartupCheck(AppViewModel& app, QObject* parent) : QObject(parent), m_app(app) {
     connect(&m_app.diagWorker(), &DiagWorker::checksFinished, this, &StartupCheck::onFinished);
+    // Review 0009 F7: a wizard's checks may replace this pending request; then it runs again, so
+    // decided() always comes.
+    connect(&m_app.diagWorker(), &DiagWorker::requestDropped, this, [this](quint64 generation) {
+        if (generation != 0 && generation == m_generation) {
+            m_generation = 0;
+            run();
+        }
+    });
 }
 
 void StartupCheck::run() {

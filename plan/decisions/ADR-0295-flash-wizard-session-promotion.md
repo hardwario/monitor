@@ -1,6 +1,7 @@
 # ADR-0295 — The flash wizard flashes on the probe-only session; [Open console] promotes it
 
-- **Status:** Accepted (plan 0010; amends the 0010 text "promotes it with `startConnection(attachRtt = false)`
+- **Status:** Accepted; the session ownership part is refined by ADR-0300 (the tab owns the wizards' probe-only
+  session; only `open-console` / a promotion and hand-offs to per-tab wizards keep it). (plan 0010; amends the 0010 text "promotes it with `startConnection(attachRtt = false)`
   before flashing")
 - **Date:** 2026-11-09
 - **Decided by:** Matej Strnad (2026-11-09, approved the implementation choice)

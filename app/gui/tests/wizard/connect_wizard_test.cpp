@@ -31,6 +31,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 #include <QtContainerFwd>
+#include <QtCore/qtmetamacros.h>
 #include <QtEnvironmentVariables>
 
 #include <gtest/gtest.h>
@@ -177,7 +178,8 @@ TEST_F(ConnectWizardTest, FullFlowFromAnEmptyTab) {
     // The probe lock stayed held across the promotion: nobody else can take the probe.
     EXPECT_FALSE(hwio::device::ProbeLock::acquire(801000001, root() / "locks").has_value());
     EXPECT_EQ(wizard->current().kind, StepKind::Done);
-    EXPECT_EQ(wizard->current().heading, QStringLiteral("Connected to CHESTER app · 801000001."));
+    EXPECT_EQ(wizard->current().heading,
+              QStringLiteral("Connected to CHESTER · Application MCU (nRF52840) · 801000001."));
     EXPECT_EQ(wizard->current().primaryText, QStringLiteral("Open console"));
     EXPECT_FALSE(wizard->canBack());
     QSignalSpy handOff(app().wizard(), &hwio::gui::WizardViewModel::handOff);
@@ -361,6 +363,92 @@ TEST_F(ConnectWizardTest, CancelDuringTheCheckClosesTheProbeOnlySession) {
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }, std::chrono::seconds(20)));
     EXPECT_TRUE(tab().busyPage().isEmpty());
     EXPECT_EQ(tab().state(), DeviceTabViewModel::Disconnected);
+}
+
+// Decision B (2026-11-09): opened from probe.not_found and cancelled without choosing another
+// probe, the tab gets its probe back.
+TEST_F(ConnectWizardTest, CancelRestoresTheTabsProbe) {
+    start(scenario());
+    ConnectWizard* wizard = open(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::ProbeNotFound)));
+    ASSERT_NE(wizard, nullptr);
+    EXPECT_TRUE(tab().choosing());
+    app().wizard()->cancel(false);
+    EXPECT_FALSE(app().wizard()->isOpen());
+    EXPECT_FALSE(tab().choosing());
+    EXPECT_EQ(tab().probeSerial(), std::optional<std::uint32_t>(801000001));
+}
+
+// Review 0009 F3 (ADR-0300): a failed connection, Check again, close: no session is left.
+TEST_F(ConnectWizardTest, CheckAgainAfterAFailedConnectionLeavesNoSession) {
+    start(scenario());
+    ConnectWizard* wizard =
+        open(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetNotConnected)));
+    ASSERT_NE(wizard, nullptr);
+    ASSERT_TRUE(checked(*wizard));
+    wizard->primary(); // [Connect]
+    ASSERT_EQ(wizard->step(), ConnectWizard::Done);
+    tab().disconnectDevice(); // the connection fails
+    ASSERT_TRUE(waitFor([&] { return wizard->connectFailed(); }));
+    EXPECT_EQ(wizard->current().primaryText, QStringLiteral("Check again"));
+    wizard->primary();
+    ASSERT_EQ(wizard->step(), ConnectWizard::Check);
+    ASSERT_TRUE(checked(*wizard));
+    EXPECT_TRUE(tab().wizardOwnsSession());
+    app().wizard()->cancel(false);
+    ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
+}
+
+// Review 0009 F2 (ADR-0300): Connect → [Flash firmware…] → the flash wizard takes over the
+// wizards' session; closing it releases the session.
+TEST_F(ConnectWizardTest, AChainedWizardTakesOverTheSession) {
+    start(scenario({}, "{}", R"({"foundAfterMs": 600000})"));
+    ConnectWizard* wizard =
+        open(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetNotConnected)));
+    ASSERT_NE(wizard, nullptr);
+    ASSERT_TRUE(checked(*wizard, std::chrono::seconds(60)));
+    ASSERT_EQ(wizard->outcome(), Outcome::NoConsole);
+    const hwio::device::DeviceSession* session = tab().session();
+    ASSERT_NE(session, nullptr);
+    wizard->action(QStringLiteral("flash-firmware"));
+    ASSERT_TRUE(waitFor([this] {
+        return app().wizard()->isOpen() &&
+               app().wizard()->wizardId() == QStringLiteral("flash-firmware");
+    }));
+    hwio::gui::test::spin(std::chrono::milliseconds(200));
+    EXPECT_EQ(tab().session(), session); // kept for the flash wizard
+    app().wizard()->cancel(true);
+    ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }, std::chrono::seconds(20)));
+    ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }, std::chrono::seconds(20)));
+}
+
+// ADR-0300: a hand-off to a global wizard (setup) does not keep the session.
+TEST_F(ConnectWizardTest, AHandOffToTheSetupWizardReleasesTheSession) {
+    start(scenario());
+    ConnectWizard* wizard =
+        open(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetNotConnected)));
+    ASSERT_NE(wizard, nullptr);
+    ASSERT_TRUE(checked(*wizard));
+    ASSERT_NE(tab().session(), nullptr);
+    emit wizard->handOffError(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::UsbAccessDenied)));
+    emit wizard->finished(false);
+    ASSERT_TRUE(waitFor([this] {
+        return app().wizard()->isOpen() &&
+               app().wizard()->wizardId() == QStringLiteral("first-run-setup");
+    }));
+    ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
+}
+
+// Review 0009 F6: a hand-off whose tab has closed opens nothing.
+TEST_F(ConnectWizardTest, AHandOffToAClosedTabOpensNothing) {
+    start(scenario());
+    app().newTab();
+    ASSERT_EQ(app().tabs()->count(), 2);
+    DeviceTabViewModel* second = app().currentTabViewModel();
+    emit app().wizard() -> handOffError(
+                  hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetRttNotFound)), second);
+    app().closeTab(1, true);
+    hwio::gui::test::spin(std::chrono::milliseconds(300));
+    EXPECT_FALSE(app().wizard()->isOpen());
 }
 
 } // namespace

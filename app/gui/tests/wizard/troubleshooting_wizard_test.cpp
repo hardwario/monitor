@@ -29,6 +29,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 #include <QtContainerFwd>
+#include <QtCore/qtmetamacros.h>
 #include <QtEnvironmentVariables>
 #include <QtTypes>
 
@@ -387,6 +388,69 @@ TEST_F(TroubleshootingWizardTest, CancelDuringDiagnose) {
     ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }, std::chrono::seconds(20)));
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }, std::chrono::seconds(20)));
     EXPECT_TRUE(tab().busyPage().isEmpty());
+}
+
+// Review 0009 F4: Back and Next after the probe step do not show it again.
+TEST_F(TroubleshootingWizardTest, BackAndNextSkipTheProbeStep) {
+    start(scenario(), false);
+    TroubleshootingWizard* wizard = open(ErrorCode::TargetNoPower);
+    ASSERT_NE(wizard, nullptr);
+    wizard->primary(); // introduction
+    wizard->primary(); // power hint
+    ASSERT_EQ(wizard->stepId(), QStringLiteral("probe"));
+    ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
+    wizard->primary();
+    EXPECT_EQ(wizard->stepId(), QStringLiteral("step-2"));
+    ASSERT_TRUE(idle(*wizard));
+    wizard->back();
+    EXPECT_EQ(wizard->stepId(), QStringLiteral("step-1"));
+    wizard->primary();
+    EXPECT_EQ(wizard->stepId(), QStringLiteral("step-2"));
+    ASSERT_TRUE(idle(*wizard));
+    EXPECT_EQ(wizard->checks()->status(QStringLiteral("power")), CheckStatus::Ok);
+}
+
+// Review 0009 F5: a step that is not shown and fails gives its reason to the shown row.
+TEST_F(TroubleshootingWizardTest, AHiddenFailedStepExplainsTheShownRow) {
+    start(R"({"libraryVersion": 81000, "probes": [{"serialNumber": 801000001,
+        "product": "Test Probe", "chip": {"family": "nrf91"}}]})");
+    TroubleshootingWizard* wizard = open(ErrorCode::TargetRttNotFound);
+    ASSERT_NE(wizard, nullptr);
+    wizard->primary(); // introduction
+    ASSERT_TRUE(idle(*wizard));
+    wizard->primary(); // Diagnose (all) → [Reset]
+    wizard->primary(); // A rtt
+    ASSERT_TRUE(idle(*wizard));
+    ASSERT_EQ(wizard->checks()->count(), 1);
+    const hwio::diag::CheckResult* rtt = wizard->checks()->row(QStringLiteral("rtt"));
+    ASSERT_NE(rtt, nullptr);
+    EXPECT_EQ(rtt->status, CheckStatus::Failed);
+    EXPECT_EQ(rtt->error ? rtt->error->code : ErrorCode::InternalUnexpected,
+              ErrorCode::TargetWrongFamily);
+}
+
+// Review 0009 F2 (ADR-0300, ADR-0297): troubleshooting reached from a failed flash ([Help me fix
+// this]) takes over the wizards' session; closing it leaves no session.
+TEST_F(TroubleshootingWizardTest, ClosingTheLastChainedWizardReleasesTheSession) {
+    start();
+    TroubleshootingWizard* wizard = open(ErrorCode::TargetConnectFailed);
+    ASSERT_NE(wizard, nullptr);
+    wizard->primary();
+    ASSERT_TRUE(idle(*wizard));
+    ASSERT_TRUE(tab().wizardOwnsSession());
+    const hwio::device::DeviceSession* session = tab().session();
+    // [Setup wizard…]-like hand-off to the Connect wizard (per tab): the session is kept.
+    emit wizard->handOffError(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetNoPower)));
+    emit wizard->finished(false);
+    ASSERT_TRUE(waitFor([this] {
+        return app().wizard()->isOpen() &&
+               app().wizard()->wizardId() == QStringLiteral("connect-device");
+    }));
+    hwio::gui::test::spin(std::chrono::milliseconds(200));
+    EXPECT_EQ(tab().session(), session);
+    EXPECT_TRUE(tab().wizardOwnsSession());
+    app().wizard()->cancel(true);
+    ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
 }
 
 } // namespace
