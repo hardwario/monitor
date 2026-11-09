@@ -657,13 +657,43 @@ namespace {
 // ADR-0282: the stored RDP word has its complement in bits 31:16.
 bool canonicalOptionWord(std::uint32_t word) noexcept { return (word >> 16U) == (~word & 0xFFFFU); }
 
+// runUnlock: one option-word write + reload + reconnect + identify; `why` is logged.
+Result<jlink::ChipInfo> writeRdpLevel0(WorkflowContext& context,
+                                       const std::function<Status()>& reconnect,
+                                       std::string_view why) {
+    const DeviceProfile& profile = *context.profile;
+    const TargetProfile& target = *context.target;
+    const auto unlockFailed = [&](std::string detail) {
+        return std::unexpected(forTarget(
+            makeError(ErrorCode::TargetUnlockFailed, std::move(detail)), profile, target));
+    };
+    log(context, std::format("Unlock: writing RDP level 0 ({})", why));
+    context.cpuHalted = true;
+    if (Status written = context.programmer->programRdpLevel0(context.stop); !written) {
+        return std::unexpected(forTarget(std::move(written).error(), profile, target));
+    }
+    if (reconnect) {
+        if (Status connected = reconnect(); !connected) {
+            return unlockFailed("no connection after the option-byte reload: " +
+                                connected.error().detail);
+        }
+    }
+    auto after = context.programmer->identify();
+    if (!after) {
+        return unlockFailed("identify after the option-byte reload: " + after.error().detail);
+    }
+    if (after->rdpLevel != 0 || after->optionError) {
+        return unlockFailed(std::format("RDP level {} after the reload{}", after->rdpLevel,
+                                        after->optionError ? ", OPTVERR set" : ""));
+    }
+    return after;
+}
+
 } // namespace
 
 Result<jlink::ChipInfo> runUnlock(WorkflowContext& context,
                                   const std::function<Status()>& reconnect) {
-    const DeviceProfile& profile = *context.profile;
-    const TargetProfile& target = *context.target;
-    if (target.vendor != ChipVendor::Stm32) {
+    if (context.target->vendor != ChipVendor::Stm32) {
         return std::unexpected(
             makeError(ErrorCode::UsageInvalidArgument, "unlock needs an STM32 target"));
     }
@@ -671,40 +701,14 @@ Result<jlink::ChipInfo> runUnlock(WorkflowContext& context,
     if (!before) {
         return before;
     }
-    const auto unlockFailed = [&](std::string detail) {
-        return std::unexpected(forTarget(
-            makeError(ErrorCode::TargetUnlockFailed, std::move(detail)), profile, target));
-    };
-    // One option-word write + reload + reconnect + identify.
-    const auto writeLevel0 = [&](std::string_view why) -> Result<jlink::ChipInfo> {
-        log(context, std::format("Unlock: writing RDP level 0 ({})", why));
-        context.cpuHalted = true;
-        if (Status written = context.programmer->programRdpLevel0(context.stop); !written) {
-            return std::unexpected(forTarget(std::move(written).error(), profile, target));
-        }
-        if (reconnect) {
-            if (Status connected = reconnect(); !connected) {
-                return unlockFailed("no connection after the option-byte reload: " +
-                                    connected.error().detail);
-            }
-        }
-        auto after = context.programmer->identify();
-        if (!after) {
-            return unlockFailed("identify after the option-byte reload: " + after.error().detail);
-        }
-        if (after->rdpLevel != 0 || after->optionError) {
-            return unlockFailed(std::format("RDP level {} after the reload{}", after->rdpLevel,
-                                            after->optionError ? ", OPTVERR set" : ""));
-        }
-        return after;
-    };
     report(context, ProgramPhase::Unlocking);
     if (before->rdpLevel == 0 && canonicalOptionWord(before->optionWord)) {
         log(context, "Unlock: the chip is not read-out protected; nothing to do");
         return before;
     }
-    auto after = writeLevel0(before->rdpLevel == 0 ? "non-canonical option word"
-                                                   : "RDP level 1, the chip mass-erases");
+    auto after = writeRdpLevel0(context, reconnect,
+                                before->rdpLevel == 0 ? "non-canonical option word"
+                                                      : "RDP level 1, the chip mass-erases");
     if (!after) {
         return after;
     }
@@ -713,7 +717,7 @@ Result<jlink::ChipInfo> runUnlock(WorkflowContext& context,
         // once at level 0, which erases nothing.
         log(context,
             std::format("Unlock: option word 0x{:08X} is not canonical", after->optionWord));
-        after = writeLevel0("canonical option word");
+        after = writeRdpLevel0(context, reconnect, "canonical option word");
         if (!after) {
             return after;
         }

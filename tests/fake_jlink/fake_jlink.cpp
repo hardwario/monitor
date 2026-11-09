@@ -241,6 +241,19 @@ struct ZoneSpec {
 // Bound of the simulated RAM of one chip (scenario sizes beyond it are cut).
 constexpr std::size_t maxRamBytes = 16ULL * 1024 * 1024;
 
+// STM32L0 RDP option byte of a readout-protection level: 0xAA = level 0, 0xCC = level 2,
+// anything else = level 1.
+std::uint8_t rdpByteForLevel(int level) {
+    switch (level) {
+    case 0:
+        return 0xAA;
+    case 2:
+        return 0xCC;
+    default:
+        return 0xBB;
+    }
+}
+
 struct ChipScenario {
     bool nrf91 = false;
     std::uint32_t part = 0x52840;
@@ -389,6 +402,41 @@ struct ChipScenario {
         }
     }
 
+    // A little-endian word of readable memory (flash, UICR, RAM); nullopt = unmapped.
+    [[nodiscard]] std::optional<std::uint32_t> memoryWordAt(std::uint32_t address) {
+        std::uint32_t word = 0;
+        for (std::uint32_t b = 0; b < 4; ++b) {
+            const std::uint8_t* byte = readableAt(std::uint64_t{address} + b);
+            if (byte == nullptr) {
+                return std::nullopt;
+            }
+            word |= std::uint32_t{*byte} << (8U * b);
+        }
+        return word;
+    }
+
+    // A 32-bit read as JLINKARM_ReadMemU32 sees it; nullopt = unmapped (e.g. the FICR address
+    // of the other family).
+    [[nodiscard]] std::optional<std::uint32_t> wordAt(std::uint32_t address) {
+        if (stm32) {
+            if (staleConnection) {
+                return 0U;
+            }
+            if (const auto value = stm32Register(address)) {
+                return value;
+            }
+            return memoryWordAt(address);
+        }
+        if (address == ficrPart()) {
+            return part;
+        }
+        if (address == ficrPart() + 4) {
+            return variant;
+        }
+        // M6: memory units of flash, UICR and RAM; anything else is unmapped.
+        return memoryWordAt(address);
+    }
+
     // A 32-bit write to the FLASH interface or the RDP word; nullopt = not an STM32 register.
     [[nodiscard]] std::optional<int> stm32Write(std::uint32_t address, std::uint32_t value) {
         switch (address) {
@@ -425,7 +473,7 @@ struct ChipScenario {
         case 0x40022004: // PECR
             if ((value & (1U << 18U)) != 0) {
                 // OBL_LAUNCH: load the option bytes (the chip resets: the write fails)
-                const std::uint8_t loaded = static_cast<std::uint8_t>(optionWord & 0xFFU);
+                const auto loaded = static_cast<std::uint8_t>(optionWord & 0xFFU);
                 const bool regression = rdpByte != 0xAA && loaded == 0xAA;
                 if (regression) {
                     eraseAll();
@@ -614,7 +662,7 @@ ChipScenario readChip(const QJsonObject& object) {
         chip.flashSizeReadable = object.value(QStringLiteral("flashSizeReadable")).toBool(true);
         chip.regressionQuirk = object.value(QStringLiteral("regressionQuirk")).toBool(true);
         const int rdp = object.value(QStringLiteral("rdp")).toInt(0);
-        chip.rdpByte = rdp == 0 ? 0xAA : (rdp == 2 ? 0xCC : 0xBB);
+        chip.rdpByte = rdpByteForLevel(rdp);
         const std::uint32_t low = chip.rdpByte;
         chip.optionWord = ((~low & 0xFFFFU) << 16U) | low;
     }
@@ -1525,39 +1573,7 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_ReadMemU32(std::uint32_t address, std::uint3
     ChipScenario& chip = probe->chip;
     const auto out = std::span(data, count);
     for (std::uint32_t i = 0; i < count; ++i) {
-        const std::uint32_t at = address + (i * 4);
-        std::optional<std::uint32_t> value;
-        if (chip.stm32 && chip.staleConnection) {
-            value = 0U;
-        } else if (chip.stm32 && chip.stm32Register(at)) {
-            value = chip.stm32Register(at);
-        } else if (chip.stm32) {
-            std::uint32_t word = 0;
-            for (std::uint32_t b = 0; b < 4; ++b) {
-                const std::uint8_t* byte = chip.readableAt(std::uint64_t{at} + b);
-                if (byte == nullptr) {
-                    return -1;
-                }
-                word |= std::uint32_t{*byte} << (8U * b);
-            }
-            value = word;
-        } else if (at == chip.ficrPart()) {
-            value = chip.part;
-        } else if (at == chip.ficrPart() + 4) {
-            value = chip.variant;
-        } else {
-            // M6: memory units (little-endian) of flash, UICR and RAM; anything else (e.g. the
-            // FICR of the other family) is unmapped.
-            std::uint32_t word = 0;
-            for (std::uint32_t b = 0; b < 4; ++b) {
-                const std::uint8_t* byte = chip.readableAt(std::uint64_t{at} + b);
-                if (byte == nullptr) {
-                    return -1;
-                }
-                word |= std::uint32_t{*byte} << (8U * b);
-            }
-            value = word;
-        }
+        const std::optional<std::uint32_t> value = chip.wordAt(address + (i * 4));
         if (!value) {
             return -1; // unmapped (e.g. the FICR address of the other family)
         }

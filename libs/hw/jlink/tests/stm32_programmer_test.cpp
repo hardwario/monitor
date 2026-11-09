@@ -6,7 +6,6 @@
 #include "hwio/hw/jlink/jlink_api.h"
 #include "hwio/hw/jlink/jlink_probe.h"
 #include "hwio/hw/jlink/programmer.h"
-#include "hwio/hw/jlink/types.h"
 #include "mock_jlink_api.h"
 
 #include <gmock/gmock.h>

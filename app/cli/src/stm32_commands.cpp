@@ -90,6 +90,9 @@ Result<CommandResult> chips() {
     std::vector<std::vector<std::string>> rows;
     for (const device::TargetProfile& target : stm32Profile().targets) {
         const device::ChipPart& part = target.parts.front();
+        if (!target.stm32 || !part.stm32) {
+            continue; // every target of the stm32 profile has both
+        }
         QJsonObject chip;
         chip.insert(QStringLiteral("id"), toQString(part.id));
         chip.insert(QStringLiteral("name"), toQString(part.displayName));
@@ -129,6 +132,18 @@ std::string unlockCommand(const Stm32CommandTarget& target) {
     return target.profile->id == "stm32"
                ? std::format("hwio stm32 unlock --chip {}", target.targetId)
                : std::format("hwio {} {} unlock", target.profile->id, target.targetId);
+}
+
+// The note after the read-out protection level of `stm32 info`.
+std::string rdpNote(int rdpLevel, const Stm32CommandTarget& unlockTarget) {
+    switch (rdpLevel) {
+    case 1:
+        return std::format(" (unlock: `{}`, erases the chip)", unlockCommand(unlockTarget));
+    case 2:
+        return " (permanent)";
+    default:
+        return {};
+    }
 }
 
 } // namespace
@@ -182,10 +197,7 @@ Result<CommandResult> stm32Info(const Context& context, const GlobalOptions& glo
         unlockTarget.targetId = std::string(found->id);
     }
     text += std::format("Read-out protection: level {}{}\n", chip.rdpLevel,
-                        chip.rdpLevel == 1   ? std::format(" (unlock: `{}`, erases the chip)",
-                                                           unlockCommand(unlockTarget))
-                        : chip.rdpLevel == 2 ? std::string(" (permanent)")
-                                             : std::string());
+                        rdpNote(chip.rdpLevel, unlockTarget));
     text += std::format("Selected chip:       {} ({})", target.targetId,
                         matches ? "matches" : "does NOT match the connected chip");
     return CommandResult{.data = data, .humanText = text, .streamed = false};

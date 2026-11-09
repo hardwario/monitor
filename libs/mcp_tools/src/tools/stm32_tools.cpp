@@ -26,6 +26,7 @@
 #include <QJsonValue>
 #include <QString>
 #include <QStringLiteral>
+#include <QtCore/qnamespace.h>
 #include <QtTypes>
 
 #include <cstdint>

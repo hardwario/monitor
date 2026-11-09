@@ -3,6 +3,7 @@
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
 #include "hwio/device/line_assembler.h"
+#include "hwio/firmware/designated_firmware.h"
 #include "hwio/firmware/firmware_image.h"
 #include "profiles/profiles.h"
 

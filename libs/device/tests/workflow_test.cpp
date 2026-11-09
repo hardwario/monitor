@@ -831,7 +831,9 @@ TEST_F(Stm32Workflow, WrongChipStopsBeforeAnyWrite) {
               "(stm32l0-cat5-192k) as the chip.");
     EXPECT_NE(result.error().detail.find("found stm32l0-cat5-192k"), std::string::npos);
     ASSERT_TRUE(ctx.foundChip.has_value());
-    EXPECT_EQ(hwio::device::detail::curatedPartOf(*ctx.foundChip)->id, "stm32l0-cat5-192k");
+    const auto* found = hwio::device::detail::curatedPartOf(ctx.foundChip.value_or(ChipInfo{}));
+    ASSERT_NE(found, nullptr);
+    EXPECT_EQ(found->id, "stm32l0-cat5-192k");
 }
 
 TEST_F(Stm32Workflow, UnknownChip) {
@@ -856,7 +858,9 @@ TEST_F(Stm32Workflow, SizeIsCheckedAgainAfterTheHalt) {
     const auto result = hwio::device::detail::runFlash(ctx, image({{0x08000000, 16}}), {});
     ASSERT_FALSE(result);
     EXPECT_EQ(result.error().code, ErrorCode::TargetWrongChip);
-    EXPECT_EQ(hwio::device::detail::curatedPartOf(*ctx.foundChip)->id, "stm32l0-cat3-32k");
+    const auto* found = hwio::device::detail::curatedPartOf(ctx.foundChip.value_or(ChipInfo{}));
+    ASSERT_NE(found, nullptr);
+    EXPECT_EQ(found->id, "stm32l0-cat3-32k");
 }
 
 TEST_F(Stm32Workflow, ProtectedChipNamesTheUnlockCommand) {

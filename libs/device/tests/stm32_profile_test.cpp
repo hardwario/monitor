@@ -77,23 +77,69 @@ TEST(Stm32Profile, Stm32L0PartTable) {
         std::uint64_t ramKib;
     };
     constexpr std::array table{
-        Expected{"stm32l0-cat1-8k", 0x457, 8, "STM32L011K3", 512, 2},
-        Expected{"stm32l0-cat1-16k", 0x457, 16, "STM32L011K4", 512, 2},
-        Expected{"stm32l0-cat2-16k", 0x425, 16, "STM32L031K4", 1024, 8},
-        Expected{"stm32l0-cat2-32k", 0x425, 32, "STM32L031K6", 1024, 8},
-        Expected{"stm32l0-cat3-32k", 0x417, 32, "STM32L051K6", 2048, 8},
-        Expected{"stm32l0-cat3-64k", 0x417, 64, "STM32L053R8", 2048, 8},
-        Expected{"stm32l0-cat5-64k", 0x447, 64, "STM32L071K8", 0, 20},
-        Expected{"stm32l0-cat5-128k", 0x447, 128, "STM32L072CB", 6144, 20},
-        Expected{"stm32l0-cat5-192k", 0x447, 192, "STM32L072CZ", 6144, 20},
+        Expected{.id = "stm32l0-cat1-8k",
+                 .devId = 0x457,
+                 .kib = 8,
+                 .jlink = "STM32L011K3",
+                 .eeprom = 512,
+                 .ramKib = 2},
+        Expected{.id = "stm32l0-cat1-16k",
+                 .devId = 0x457,
+                 .kib = 16,
+                 .jlink = "STM32L011K4",
+                 .eeprom = 512,
+                 .ramKib = 2},
+        Expected{.id = "stm32l0-cat2-16k",
+                 .devId = 0x425,
+                 .kib = 16,
+                 .jlink = "STM32L031K4",
+                 .eeprom = 1024,
+                 .ramKib = 8},
+        Expected{.id = "stm32l0-cat2-32k",
+                 .devId = 0x425,
+                 .kib = 32,
+                 .jlink = "STM32L031K6",
+                 .eeprom = 1024,
+                 .ramKib = 8},
+        Expected{.id = "stm32l0-cat3-32k",
+                 .devId = 0x417,
+                 .kib = 32,
+                 .jlink = "STM32L051K6",
+                 .eeprom = 2048,
+                 .ramKib = 8},
+        Expected{.id = "stm32l0-cat3-64k",
+                 .devId = 0x417,
+                 .kib = 64,
+                 .jlink = "STM32L053R8",
+                 .eeprom = 2048,
+                 .ramKib = 8},
+        Expected{.id = "stm32l0-cat5-64k",
+                 .devId = 0x447,
+                 .kib = 64,
+                 .jlink = "STM32L071K8",
+                 .eeprom = 0,
+                 .ramKib = 20},
+        Expected{.id = "stm32l0-cat5-128k",
+                 .devId = 0x447,
+                 .kib = 128,
+                 .jlink = "STM32L072CB",
+                 .eeprom = 6144,
+                 .ramKib = 20},
+        Expected{.id = "stm32l0-cat5-192k",
+                 .devId = 0x447,
+                 .kib = 192,
+                 .jlink = "STM32L072CZ",
+                 .eeprom = 6144,
+                 .ramKib = 20},
     };
     ASSERT_EQ(stm32Parts().size(), table.size());
     for (const Expected& row : table) {
         const auto* part = findStm32PartById(row.id);
         ASSERT_NE(part, nullptr) << row.id;
         ASSERT_TRUE(part->stm32.has_value());
-        EXPECT_EQ(part->stm32->devId, row.devId) << row.id;
-        EXPECT_EQ(part->stm32->flashSizeKib, row.kib) << row.id;
+        const hwio::device::Stm32Id id = part->stm32.value_or(hwio::device::Stm32Id{});
+        EXPECT_EQ(id.devId, row.devId) << row.id;
+        EXPECT_EQ(id.flashSizeKib, row.kib) << row.id;
         EXPECT_EQ(part->jlinkDevice, row.jlink) << row.id;
         EXPECT_EQ(findStm32PartByChip(row.devId, row.kib), part) << row.id;
         const auto& target = chip(row.id);
@@ -105,10 +151,12 @@ TEST(Stm32Profile, Stm32L0PartTable) {
         EXPECT_EQ(target.ram.start, 0x20000000U) << row.id;
         EXPECT_EQ(target.ram.size(), row.ramKib * 1024) << row.id;
         ASSERT_TRUE(target.stm32.has_value());
-        EXPECT_EQ(target.stm32->idcodeAddress, 0x40015800U);
-        EXPECT_EQ(target.stm32->flashSizeAddress, 0x1FF8007CU);
-        EXPECT_EQ(target.stm32->flashInterface + target.stm32->optrOffset, 0x4002201CU);
-        EXPECT_EQ(target.stm32->optionBytes, 0x1FF80000U);
+        const hwio::jlink::Stm32Protection stm32 =
+            target.stm32.value_or(hwio::jlink::Stm32Protection{});
+        EXPECT_EQ(stm32.idcodeAddress, 0x40015800U);
+        EXPECT_EQ(stm32.flashSizeAddress, 0x1FF8007CU);
+        EXPECT_EQ(stm32.flashInterface + stm32.optrOffset, 0x4002201CU);
+        EXPECT_EQ(stm32.optionBytes, 0x1FF80000U);
     }
     // Without the flash size the DEV_ID alone is ambiguous inside a category.
     EXPECT_EQ(findStm32PartByChip(0x417, 0), nullptr);

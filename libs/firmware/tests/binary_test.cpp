@@ -13,7 +13,6 @@
 #include <gtest/gtest.h>
 
 #include <cstddef>
-#include <cstdint>
 #include <filesystem>
 #include <optional>
 #include <vector>
@@ -66,7 +65,7 @@ protected:
         QFile file(path);
         EXPECT_TRUE(file.open(QIODevice::WriteOnly));
         file.write(content);
-        return std::filesystem::path(path.toStdString());
+        return {path.toStdString()};
     }
 
 private:

@@ -19,6 +19,7 @@
 #include <QtLogging>
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <chrono>
 #include <cstddef>
@@ -474,75 +475,95 @@ Status JLinkProgrammer::programRdpLevel0(std::stop_token stop) {
         return available;
     }
     const Stm32Protection& stm32 = *m_config.stm32;
-    const std::uint32_t pecr = stm32.flashInterface + stm32.pecrOffset;
-    const std::uint32_t sr = stm32.flashInterface + stm32.srOffset;
-    const auto failed = [this](std::string detail) {
-        return std::unexpected(
-            makeError(ErrorCode::TargetUnlockFailed, libraryDetail(std::move(detail))));
-    };
-    const auto write = [this](std::uint32_t address, std::uint32_t value) {
-        // ADR-0276: RDP level 2 is never programmed by any path.
-        if (address == m_config.stm32->optionBytes && (value & 0xFFU) == stm32RdpLevel2) {
-            return -1;
-        }
-        return m_api.writeU32(address, value);
-    };
     // The CPU is halted so that the firmware cannot touch the flash interface meanwhile.
     if (const int halted = m_api.halt(); halted != 0) {
         qCInfo(log::lcFlash) << "Unlock: halt returned" << halted << "(continuing)";
     }
     const auto optr = m_api.readU32(stm32.flashInterface + stm32.optrOffset);
     if (!optr) {
-        return failed(std::format("FLASH_OPTR read returned {}", optr.error()));
+        return std::unexpected(
+            stm32UnlockFailed(std::format("FLASH_OPTR read returned {}", optr.error())));
     }
-    if (write(sr, stm32.errorMask) != 0) {
-        return failed("clearing FLASH_SR failed");
-    }
-    auto control = m_api.readU32(pecr);
-    if (!control) {
-        return failed(std::format("FLASH_PECR read returned {}", control.error()));
-    }
-    if ((*control & stm32.peLockMask) != 0 &&
-        (write(stm32.flashInterface + stm32.peKeyOffset, stm32.peKeys[0]) != 0 ||
-         write(stm32.flashInterface + stm32.peKeyOffset, stm32.peKeys[1]) != 0)) {
-        return failed("writing the PECR keys failed");
-    }
-    if ((*control & stm32.optLockMask) != 0 &&
-        (write(stm32.flashInterface + stm32.optKeyOffset, stm32.optKeys[0]) != 0 ||
-         write(stm32.flashInterface + stm32.optKeyOffset, stm32.optKeys[1]) != 0)) {
-        return failed("writing the option-byte keys failed");
-    }
-    control = m_api.readU32(pecr);
-    if (!control || (*control & (stm32.peLockMask | stm32.optLockMask)) != 0) {
-        return failed(control ? std::format("FLASH_PECR still locked (0x{:08X})", *control)
-                              : std::format("FLASH_PECR read returned {}", control.error()));
+    if (Status unlocked = unlockStm32Flash(stm32); !unlocked) {
+        return unlocked;
     }
     const std::uint32_t word = stm32Level0OptionWord(*optr);
     qCInfo(log::lcFlash).noquote()
         << QStringLiteral("Unlock: writing the RDP option word 0x%1 (OPTR 0x%2)")
                .arg(word, 8, 16, QLatin1Char('0'))
                .arg(*optr, 8, 16, QLatin1Char('0'));
-    if (const int written = write(stm32.optionBytes, word); written != 0) {
-        return failed(std::format("option word write returned {}", written));
+    if (const int written = writeStm32(stm32.optionBytes, word); written != 0) {
+        return std::unexpected(
+            stm32UnlockFailed(std::format("option word write returned {}", written)));
     }
     // Never interrupted once written: BSY is awaited, then the reload is launched.
+    if (Status done = awaitStm32OptionWrite(stm32); !done) {
+        return done;
+    }
+    // The reload resets the chip at once, so the write itself may report an error.
+    const int launched = writeStm32(stm32.flashInterface + stm32.pecrOffset, stm32.oblLaunchMask);
+    m_api.flushMessages();
+    qCInfo(log::lcFlash) << "Unlock: option-byte reload launched (" << launched << ")";
+    return {};
+}
+
+int JLinkProgrammer::writeStm32(std::uint32_t address, std::uint32_t value) {
+    // ADR-0276: RDP level 2 is never programmed by any path (nor anything without an STM32).
+    if (!m_config.stm32 ||
+        (address == m_config.stm32->optionBytes && (value & 0xFFU) == stm32RdpLevel2)) {
+        return -1;
+    }
+    return m_api.writeU32(address, value);
+}
+
+Error JLinkProgrammer::stm32UnlockFailed(std::string detail) {
+    return makeError(ErrorCode::TargetUnlockFailed, libraryDetail(std::move(detail)));
+}
+
+Status JLinkProgrammer::unlockStm32Flash(const Stm32Protection& stm32) {
+    const std::uint32_t pecr = stm32.flashInterface + stm32.pecrOffset;
+    if (writeStm32(stm32.flashInterface + stm32.srOffset, stm32.errorMask) != 0) {
+        return std::unexpected(stm32UnlockFailed("clearing FLASH_SR failed"));
+    }
+    auto control = m_api.readU32(pecr);
+    if (!control) {
+        return std::unexpected(
+            stm32UnlockFailed(std::format("FLASH_PECR read returned {}", control.error())));
+    }
+    const auto writeKeys = [&](std::uint32_t offset, const std::array<std::uint32_t, 2>& keys) {
+        return writeStm32(stm32.flashInterface + offset, keys[0]) == 0 &&
+               writeStm32(stm32.flashInterface + offset, keys[1]) == 0;
+    };
+    if ((*control & stm32.peLockMask) != 0 && !writeKeys(stm32.peKeyOffset, stm32.peKeys)) {
+        return std::unexpected(stm32UnlockFailed("writing the PECR keys failed"));
+    }
+    if ((*control & stm32.optLockMask) != 0 && !writeKeys(stm32.optKeyOffset, stm32.optKeys)) {
+        return std::unexpected(stm32UnlockFailed("writing the option-byte keys failed"));
+    }
+    control = m_api.readU32(pecr);
+    if (!control || (*control & (stm32.peLockMask | stm32.optLockMask)) != 0) {
+        return std::unexpected(stm32UnlockFailed(
+            control ? std::format("FLASH_PECR still locked (0x{:08X})", *control)
+                    : std::format("FLASH_PECR read returned {}", control.error())));
+    }
+    return {};
+}
+
+Status JLinkProgrammer::awaitStm32OptionWrite(const Stm32Protection& stm32) {
+    const std::uint32_t sr = stm32.flashInterface + stm32.srOffset;
     const auto deadline = m_clock.now() + m_config.timing.optionWriteTimeout;
     while (true) {
         const auto status = m_api.readU32(sr);
         if (status && (*status & stm32.busyMask) == 0) {
-            break;
+            return {};
         }
         if (m_clock.now() >= deadline) {
-            return failed(status ? std::format("FLASH_SR BSY still set (0x{:08X})", *status)
-                                 : std::format("FLASH_SR read returned {}", status.error()));
+            return std::unexpected(stm32UnlockFailed(
+                status ? std::format("FLASH_SR BSY still set (0x{:08X})", *status)
+                       : std::format("FLASH_SR read returned {}", status.error())));
         }
         (void)m_clock.sleepFor(m_config.timing.optionWritePoll, std::stop_token{});
     }
-    // The reload resets the chip at once, so the write itself may report an error.
-    const int launched = write(pecr, stm32.oblLaunchMask);
-    m_api.flushMessages();
-    qCInfo(log::lcFlash) << "Unlock: option-byte reload launched (" << launched << ")";
-    return {};
 }
 
 Status JLinkProgrammer::require(OptionalFunction function) {

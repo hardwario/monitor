@@ -319,6 +319,14 @@ private:
     [[nodiscard]] Status download(const std::vector<firmware::Segment>& segments, bool programsData,
                                   ErrorCode failure, const firmware::ProgressFn& progress,
                                   const std::stop_token& stop);
+    // A 32-bit STM32 write that refuses an RDP level 2 option word (ADR-0276); the vendor code.
+    [[nodiscard]] int writeStm32(std::uint32_t address, std::uint32_t value);
+    // target.unlock_failed with `detail` and the library's last message.
+    [[nodiscard]] Error stm32UnlockFailed(std::string detail);
+    // programRdpLevel0: clears the FLASH_SR error flags and unlocks PECR and the option bytes.
+    [[nodiscard]] Status unlockStm32Flash(const Stm32Protection& stm32);
+    // programRdpLevel0: waits until FLASH_SR BSY clears (optionWriteTimeout).
+    [[nodiscard]] Status awaitStm32OptionWrite(const Stm32Protection& stm32);
     [[nodiscard]] std::string libraryDetail(std::string detail);
     // dependency.jlink_function_missing when `function` is not exported (ADR-0151).
     [[nodiscard]] Status require(OptionalFunction function);
