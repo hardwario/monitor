@@ -156,29 +156,13 @@ Item {
                 }
             }
 
-            // Disabled until the M4 Connect-device wizard exists.
-            Item {
+            // Plan 0009 (0035): the Connect wizard; hidden while it is not registered.
+            HButton {
+                objectName: "noProbesHelp"
                 Layout.alignment: Qt.AlignHCenter
-                implicitWidth: helpButton.implicitWidth
-                implicitHeight: helpButton.implicitHeight
-
-                HButton {
-                    id: helpButton
-
-                    objectName: "noProbesHelp"
-                    enabled: false
-                    text: qsTr("Help me fix this")
-                    Accessible.description: qsTr("Coming soon")
-                }
-
-                HoverHandler {
-                    id: helpHover
-                }
-
-                HToolTip {
-                    visible: helpHover.hovered
-                    text: qsTr("Coming soon")
-                }
+                visible: AppViewModel.launcher.canOpen("connect-device")
+                text: qsTr("Guide me")
+                onClicked: page.tab.openWizard("connect-device")
             }
         }
 
@@ -227,194 +211,10 @@ Item {
                     onActionTriggered: AppViewModel.openSettings("jlink")
                 }
 
-                // Probe list card.
-                Rectangle {
+                ProbeList {
                     Layout.fillWidth: true
                     visible: !page.libraryMissing
-                    implicitHeight: probeCard.implicitHeight + 2 * Theme.spacingL
-                    radius: Theme.radiusM + 2
-                    color: Theme.bg
-                    border.color: Theme.border
-
-                    ColumnLayout {
-                        id: probeCard
-
-                        anchors.fill: parent
-                        anchors.margins: Theme.spacingL
-                        spacing: Theme.spacingM
-
-                        RowLayout {
-                            Layout.fillWidth: true
-
-                            Label {
-                                Layout.fillWidth: true
-                                text: qsTr("Probe")
-                                font: Theme.fontUiStrong
-                                color: Theme.text
-                            }
-
-                            HToolButton {
-                                objectName: "refreshButton"
-                                iconName: "refresh"
-                                text: qsTr("Refresh")
-                                onClicked: page.picker.refresh()
-                            }
-                        }
-
-                        RowLayout {
-                            visible: !page.picker.scanned
-                            spacing: Theme.spacingS
-
-                            BusyIndicator {
-                                running: visible && !AppViewModel.reducedMotion
-                                implicitWidth: 20
-                                implicitHeight: 20
-                            }
-
-                            Label {
-                                text: qsTr("Looking for J-Link probes…")
-                                color: Theme.textMuted
-                            }
-                        }
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            visible: page.picker.count > 0
-                            implicitHeight: probeColumn.implicitHeight + 2
-                            radius: Theme.radiusM
-                            color: "transparent"
-                            border.color: Theme.border
-                            clip: true
-
-                            ColumnLayout {
-                                id: probeColumn
-
-                                anchors.fill: parent
-                                anchors.margins: 1
-                                spacing: 0
-
-                                Repeater {
-                                    model: page.picker
-
-                                    delegate: ItemDelegate {
-                                        id: row
-
-                                        required property int index
-                                        required property string serial
-                                        required property string product
-                                        required property string firmware
-                                        required property int inUseTab
-                                        required property string inUseOther
-                                        required property bool selectable
-                                        required property bool updatingFirmware
-                                        readonly property bool selected: row.index === page.picker.selectedRow
-
-                                        objectName: "probeRow"
-                                        Layout.fillWidth: true
-                                        enabled: row.selectable
-                                        highlighted: row.selected
-                                        focusPolicy: Qt.StrongFocus
-                                        Accessible.role: Accessible.RadioButton
-                                        Accessible.checked: row.selected
-                                        Accessible.name: row.product + " " + row.serial
-                                        Accessible.description: tag.text
-                                        onClicked: page.picker.choose(row.index)
-
-                                        background: Rectangle {
-                                            color: row.selected ? Theme.accentSoft : (row.hovered ? Theme.surface : "transparent")
-
-                                            Rectangle {
-                                                visible: row.index > 0
-                                                anchors.top: parent.top
-                                                width: parent.width
-                                                height: 1
-                                                color: Theme.border
-                                            }
-
-                                            FocusRing {
-                                                control: row
-                                                radiusOffset: 0
-                                            }
-                                        }
-
-                                        contentItem: RowLayout {
-                                            spacing: Theme.spacingM
-                                            opacity: row.enabled ? 1 : 0.6
-
-                                            Rectangle {
-                                                implicitWidth: 16
-                                                implicitHeight: 16
-                                                radius: 8
-                                                color: row.selected ? Theme.accent : "transparent"
-                                                border.width: row.selected ? 4 : 2
-                                                border.color: row.selected ? Theme.accentSoft : Theme.textMuted
-
-                                                Rectangle {
-                                                    anchors.fill: parent
-                                                    radius: 8
-                                                    color: "transparent"
-                                                    border.width: row.selected ? 1 : 0
-                                                    border.color: Theme.accent
-                                                }
-                                            }
-
-                                            Label {
-                                                textFormat: Text.PlainText
-                                                text: row.product
-                                                font: Theme.fontUiStrong
-                                                color: Theme.text
-                                                elide: Text.ElideRight
-                                                Layout.maximumWidth: 220
-                                            }
-
-                                            Label {
-                                                textFormat: Text.PlainText
-                                                objectName: "probeSerial"
-                                                text: row.serial
-                                                font: Theme.fontMono
-                                                color: Theme.text
-                                            }
-
-                                            Label {
-                                                textFormat: Text.PlainText
-                                                visible: row.firmware !== ""
-                                                text: qsTr("FW %1").arg(row.firmware)
-                                                font: Theme.fontUiSmall
-                                                color: Theme.textMuted
-                                            }
-
-                                            Item {
-                                                Layout.fillWidth: true
-                                            }
-
-                                            Label {
-                                                id: tag
-
-                                                textFormat: Text.PlainText
-                                                objectName: "probeInUse"
-                                                visible: tag.text !== ""
-                                                // Plan 0036: reserved for a J-Link firmware update.
-                                                text: row.updatingFirmware ? qsTr("Updating firmware…")
-                                                    : row.inUseOther !== "" ? qsTr("In use by another program (%1)").arg(row.inUseOther)
-                                                    : row.inUseTab > 0 ? qsTr("In use (tab %1)").arg(row.inUseTab) : ""
-                                                font: Theme.fontUiSmall
-                                                color: Theme.textMuted
-                                                elide: Text.ElideRight
-                                                Layout.maximumWidth: 320
-                                                leftPadding: 7
-                                                rightPadding: 7
-                                                background: Rectangle {
-                                                    radius: 10
-                                                    color: Theme.surface
-                                                    border.color: Theme.border
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    picker: page.picker
                 }
 
                 // Device card (ADR-0233: no target choice).
@@ -496,6 +296,28 @@ Item {
                                 text: qsTr("Connect")
                                 onClicked: page.picker.connectSelected()
                             }
+                        }
+
+                        // Plan 0009 (0035): the Connect wizard as a ghost link; hidden until the
+                        // wizard is registered.
+                        HButton {
+                            objectName: "connectGuideLink"
+                            Layout.alignment: Qt.AlignRight
+                            visible: AppViewModel.launcher.canOpen("connect-device")
+                            kind: "ghost"
+                            text: qsTr("Not sure how to connect? Guide me")
+                            onClicked: page.tab.openWizard("connect-device")
+                        }
+
+                        // Plan 0010 (0035): the guided flash, in the J-Link view only; hidden until
+                        // the wizard is registered.
+                        HButton {
+                            objectName: "flashGuideLink"
+                            Layout.alignment: Qt.AlignRight
+                            visible: AppViewModel.launcher.canOpen("flash-firmware")
+                            kind: "ghost"
+                            text: qsTr("Flash firmware with a guide")
+                            onClicked: page.tab.openWizard("flash-firmware")
                         }
                     }
                 }

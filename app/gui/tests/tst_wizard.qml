@@ -1,6 +1,8 @@
 // The wizard dialog with the test wizard (plan/features/0007, C2-C5): every step kind in light and
 // dark, keyboard (Enter, Esc, focus on the heading), busy cancel confirmation, the 960 x 600 window
-// in Czech (geometry, compact step list), the illustration slots and the report dialog.
+// in Czech (geometry, compact step list), the illustration slots and the report dialog. Plan 0035
+// (A3, ADR-0252): the Embedded `probe-picker` step with the test wizard (light/dark, in-use rows,
+// keyboard-only selection).
 import QtQuick
 import QtQuick.Controls
 import QtTest
@@ -204,6 +206,98 @@ TestCase {
         mouseClick(findChild(report, "reportClose"));
         tryVerify(() => !report.visible);
         verify(!AppViewModel.report.open);
+    }
+
+    // ---- plan 0035: the probe-picker step -----------------------------------------------------
+
+    function openProbePickerStep() {
+        openWizard();
+        const wizard = testSupport.openWizard();
+        wizard.useProbePicker();
+        wizard.goTo(4);
+        tryVerify(() => findChild(dialog().contentItem, "probePickerStep") !== null);
+        return wizard;
+    }
+
+    function probeRows() {
+        const list = findChild(dialog().contentItem, "probeList");
+        const rows = [];
+        if (!list)
+            return rows;
+        const visit = item => {
+            for (let i = 0; i < item.children.length; ++i) {
+                const child = item.children[i];
+                if (child.objectName === "probeRow")
+                    rows.push(child);
+                else
+                    visit(child);
+            }
+        };
+        visit(list);
+        return rows;
+    }
+
+    function test_probePickerStep_data() {
+        return [{ tag: "light", theme: "light" }, { tag: "dark", theme: "dark" }];
+    }
+
+    function test_probePickerStep(data) {
+        AppViewModel.theme = data.theme;
+        // Tab 2 uses 801000002: "In use (tab 2)", disabled, no tab switch.
+        AppViewModel.newTab();
+        verify(testSupport.configureTab(1, "app", 801000002, "Test Probe"));
+        AppViewModel.currentTab = 0;
+        const wizard = openProbePickerStep();
+        const step = findChild(dialog().contentItem, "probePickerStep");
+        verify(step.vm !== null);
+        tryVerify(() => probeRows().length === 2, 5000);
+        // No Connect, no J-Link Software error panel in the step.
+        compare(findChild(step, "connectButton"), null);
+        compare(findChild(step, "libraryError"), null);
+        verify(!findChild(step, "probeListEmpty").visible);
+        // The only free probe is preselected; [Flash] (the step's default button) is enabled.
+        tryCompare(wizard, "selectedSerial", "801000001");
+        verify(part("wizardPrimary").enabled);
+        const rows = probeRows();
+        const used = rows.find(row => row.serial === "801000002");
+        verify(used !== undefined);
+        verify(!used.enabled);
+        compare(findChild(used, "probeInUse").text, "In use (tab 2)");
+        mouseClick(used);
+        compare(AppViewModel.currentTab, 0);
+        compare(wizard.selectedSerial, "801000001");
+        // The check rows of the wizard below the list.
+        verify(findChild(step, "probePickerChecks").visible);
+        AppViewModel.wizard.cancel(true);
+        tryVerify(() => !AppViewModel.wizard.open);
+        AppViewModel.theme = "system";
+    }
+
+    function test_probePickerKeyboardSelection() {
+        const wizard = openProbePickerStep();
+        tryVerify(() => probeRows().length === 2, 5000);
+        compare(wizard.selectedSerial, ""); // two free probes: nothing preselected
+        verify(!part("wizardPrimary").enabled);
+        tryVerify(() => part("wizardHeading").activeFocus);
+        let focused = null;
+        for (let i = 0; i < 12 && focused === null; ++i) {
+            keyClick(Qt.Key_Tab);
+            focused = probeRows().find(row => row.activeFocus) || null;
+        }
+        verify(focused !== null, "a probe row is reachable with Tab");
+        keyClick(Qt.Key_Space);
+        compare(wizard.selectedSerial, focused.serial);
+        verify(part("wizardPrimary").enabled);
+    }
+
+    function test_probePickerReleasesTheScanner() {
+        const wizard = openProbePickerStep();
+        const picker = findChild(dialog().contentItem, "probePickerStep").vm;
+        verify(picker.active);
+        wizard.goTo(3); // another step: the scanner is released
+        verify(!picker.active);
+        wizard.goTo(4);
+        verify(picker.active);
     }
 
     name: "Wizard"

@@ -180,10 +180,10 @@ TestCase {
                                             { error: testSupport.error("io.read_failed", false) });
         verify(!findChild(panel, "errorWizard").visible);
         compare(findChild(panel, "errorPrimary").text, "Retry");
-        // A wizard that is not registered (troubleshooting, plan 0009): the button is hidden.
+        // A wizard that is not registered (ble-pairing, ADR-0250): the button is hidden.
         const unregistered = createTemporaryObject(errorPanelComponent, testCase,
-                                                   { error: testSupport.defaultError("probe.open_failed") });
-        compare(unregistered.error.wizard, "troubleshooting");
+                                                   { error: testSupport.defaultError("ble.adapter_off") });
+        compare(unregistered.error.wizard, "ble-pairing");
         verify(!findChild(unregistered, "errorWizard").visible);
         const empty = createTemporaryObject(errorPanelComponent, testCase);
         verify(!empty.visible);

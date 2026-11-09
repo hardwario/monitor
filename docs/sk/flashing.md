@@ -9,6 +9,10 @@ firmware file or enter a catalog ID**.
 
 Počas nahrávania je konzola karty pozastavená a potom sa sama obnoví.
 
+Na nahranie aplikačného firmvéru so sprievodcom (programátor, kontrola kábla, súbor, potvrdenie) použite
+**Pomocník** › **Nahrať firmvér (so sprievodcom)…**, **Previesť ma** na tejto stránke alebo **Nahrať firmvér
+so sprievodcom** na stránke výberu zariadenia.
+
 ## 1. Čo chcete nahrať?
 
 | Voľba | MCU | Firmvér |

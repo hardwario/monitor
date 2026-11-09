@@ -5,9 +5,11 @@
 //
 // One owned std::jthread for the application (owned by AppViewModel). Requests go into a bounded
 // queue (maxQueued = 4): a new request replaces a pending one of the same kind, otherwise a full
-// queue drops the oldest pending request (its generation never gets a result). Every request has
-// a generation (counts from 1); results carry it, so a caller drops stale ones. cancel() stops the
-// running request's stop token (the CheckRunner and the report writer honour it).
+// queue drops the oldest pending request; the dropped request's generation gets no result but
+// requestDropped(generation) (queued), so its caller can submit it again (review 0009 F7). Every
+// request has a generation (counts from 1); results carry it, so a caller drops stale ones.
+// cancel() stops the running request's stop token (the CheckRunner and the report writer honour
+// it).
 //
 // Results are handed over in a mutex-protected, bounded list (maxResults; when full the oldest
 // progress events are dropped, never final results) and the GUI thread is woken with one
@@ -87,6 +89,8 @@ signals:
                          const std::shared_ptr<const hwio::diag::ReportInput>& input,
                          const QString& summary);
     void reportSaved(quint64 generation, const hwio::Result<std::size_t>& bytes);
+    // A pending request was replaced by a newer one of the same kind or dropped from a full queue.
+    void requestDropped(quint64 generation);
 
 private:
     enum class Kind : std::uint8_t { Checks, Collect, Save };

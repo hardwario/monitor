@@ -96,6 +96,7 @@ std::uint64_t DiagWorker::saveReport(SaveRequest request) { return enqueue(std::
 std::uint64_t
 DiagWorker::enqueue(std::variant<ChecksRequest, CollectRequest, SaveRequest> payload) {
     std::uint64_t generation = 0;
+    std::uint64_t dropped = 0;
     {
         const std::scoped_lock lock(m_mutex);
         generation = m_nextGeneration++;
@@ -104,17 +105,24 @@ DiagWorker::enqueue(std::variant<ChecksRequest, CollectRequest, SaveRequest> pay
         const auto same = std::ranges::find_if(
             m_queue, [&request](const Request& queued) { return queued.kind() == request.kind(); });
         if (same != m_queue.end()) {
+            dropped = same->generation;
             *same = std::move(request);
         } else {
             if (m_queue.size() >= maxQueued) {
                 qCWarning(lcGui) << "Diagnostics queue full: request" << m_queue.front().generation
                                  << "dropped";
+                dropped = m_queue.front().generation;
                 m_queue.pop_front();
             }
             m_queue.push_back(std::move(request));
         }
     }
     m_wake.notify_all();
+    if (dropped != 0) {
+        // Queued: the caller of the dropped request learns it after this call has returned.
+        QMetaObject::invokeMethod(
+            this, [this, dropped] { emit requestDropped(dropped); }, Qt::QueuedConnection);
+    }
     return generation;
 }
 

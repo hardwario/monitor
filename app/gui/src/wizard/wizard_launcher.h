@@ -39,8 +39,10 @@ public:
                           int tabIndex = -1);
     // The same without an error (Help menu).
     Q_INVOKABLE bool start(const QString& wizardId, int tabIndex = -1);
-    // For DeviceTabViewModel::openWizard.
-    bool openForTab(const QString& wizardId, DeviceTabViewModel* tab);
+    // For DeviceTabViewModel::openWizard and the hand-offs between wizards (ADR-0297: with the
+    // error as context).
+    bool openForTab(const QString& wizardId, DeviceTabViewModel* tab,
+                    const ErrorInfo& context = ErrorInfo());
 
 private:
     bool launch(const QString& wizardId, const ErrorInfo& context, DeviceTabViewModel* tab);

@@ -184,11 +184,22 @@ Dialog {
                 onClicked: Qt.openUrlExternally(dialog.step.linkUrl)
             }
 
-            CheckList {
-                objectName: "wizardChecks"
+            // A plain Item around the list (plan 0010): its wrapped texts follow the width set
+            // here instead of feeding back into this layout ("Detected recursive rearrange" when
+            // the vertical scroll bar appears, e.g. a Checks step with an illustration).
+            Item {
                 Layout.fillWidth: true
                 visible: dialog.step.kind === StepKind.Checks
-                model: dialog.wizard.checks
+                implicitHeight: checkList.implicitHeight
+
+                CheckList {
+                    id: checkList
+
+                    objectName: "wizardChecks"
+                    width: parent.width
+                    visible: dialog.step.kind === StepKind.Checks
+                    model: dialog.wizard.checks
+                }
             }
 
             ColumnLayout {
@@ -263,15 +274,27 @@ Dialog {
 
                 objectName: "wizardEmbedded"
                 Layout.fillWidth: true
-                active: dialog.step.kind === StepKind.Embedded
+                // Plan 0008: steps of other kinds may name a control too (below their content).
+                active: dialog.step.embedded !== undefined && dialog.step.embedded !== ""
                 visible: embeddedLoader.active
                 source: dialog.wizard.embeddedSource
+                // ADR-0290: the step's embeddedOptions (e.g. readOnly of the probe picker).
+                onLoaded: dialog.wizard.applyEmbeddedOptions(embeddedLoader.item)
 
                 Binding {
                     target: embeddedLoader.item
                     property: "vm"
                     value: dialog.wizard.embedded
                     when: embeddedLoader.status === Loader.Ready
+                }
+
+                Connections {
+                    target: dialog.wizard
+
+                    function onChanged() {
+                        if (embeddedLoader.status === Loader.Ready)
+                            dialog.wizard.applyEmbeddedOptions(embeddedLoader.item);
+                    }
                 }
             }
 
@@ -309,6 +332,8 @@ Dialog {
 
                 objectName: "wizardAction"
                 Layout.bottomMargin: Theme.spacingL
+                // ADR-0291: an action may be shown disabled (its text says why).
+                enabled: modelData.enabled !== false
                 text: modelData.text
                 onClicked: dialog.wizard.action(modelData.id)
             }

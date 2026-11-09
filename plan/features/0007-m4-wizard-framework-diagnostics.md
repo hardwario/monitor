@@ -694,6 +694,26 @@ Plan [0033](0033-rc2-feedback.md) registers the first production wizard on this 
 - The hand-off `open-flash-page:recover:<target>` (0009's `protected` topic, ADR-0236).
 - The LTE update uses the existing WizardStep `illustration` above its Embedded step (the connector pictures).
 
+## Amendment from 0008 (2026-11-06, first-run setup wizard)
+
+Plan [0008](0008-m4-first-run-setup.md) adds to the contract, with defaults that keep every other wizard as it was:
+- `WizardStep::embeddedOptions` (ADR-0290): properties set on the step's Embedded control by
+  `WizardViewModel::applyEmbeddedOptions` (unknown keys and `vm` ignored with a warning; keys left out by a later step
+  get the control's own value back). 0008 step 5: `probe-picker` with `{readOnly: true}`.
+- A step of any kind may name an Embedded control (ADR-0292).
+- `WizardStep::actions` entries may carry `enabled: false` (ADR-0291: a disabled button whose text says why).
+
+## Amendment from 0009 (2026-11-09, connect and troubleshooting wizards)
+
+Plan [0009](0009-m4-connect-and-troubleshooting.md) adds to the contract, with defaults that keep every other wizard as it was:
+- `Wizard::handOffError(ErrorInfo)` (ADR-0297): the wizard the error names opens on the same tab with the error as
+  context once this one has closed (`WizardViewModel::handOffError`, `AppViewModel::onHandOffError`,
+  `WizardLauncher::openForTab(id, tab, context)`).
+- The Embedded control `wizard-error` (`WizardErrorStep.qml`): an error's cause and suggestion as plain text.
+- Review fixes (2026-11-09): `Wizard::aboutToClose()` (default nothing; not called when the tab closes);
+  `WizardViewModel::openedOnTab` / `closedOnTab`; the tab owns the wizards' probe-only session (ADR-0300);
+  `DiagWorker::requestDropped`.
+
 ## Open findings (independent review round 1, 2026-10-16)
 
 Verified state before the review: debug and ASan 742 tests (730 passed, 12 HIL/corpus skipped), TSan 730, tidy 0,

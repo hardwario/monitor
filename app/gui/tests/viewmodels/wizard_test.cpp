@@ -63,11 +63,13 @@ protected:
             .scanInterval = std::chrono::milliseconds(200),
             .registerExtensions =
                 [withWizard](AppViewModel& app) {
-                    hwio::gui::registerBuiltInPages(app);
+                    // The test wizard first: it keeps the id "connect-device" (the first
+                    // registration wins; the real Connect wizard of plan 0009 is then not added).
                     if (withWizard) {
                         hwio::gui::test::registerTestWizard(
                             app, QUrl(QStringLiteral("qrc:/TestEmbedded.qml")));
                     }
+                    hwio::gui::registerBuiltInPages(app);
                 },
             .crashDirectory = {}});
     }
@@ -84,15 +86,18 @@ protected:
 TEST_F(WizardTest, LauncherOffersOnlyRegisteredWizards) {
     const auto app = makeWizardApp();
     EXPECT_TRUE(app->launcher()->canOpen(QStringLiteral("connect-device")));
-    EXPECT_FALSE(app->launcher()->canOpen(QStringLiteral("troubleshooting")));
-    EXPECT_FALSE(app->launcher()->canOpen(QStringLiteral("first-run-setup")));
+    // Plan 0009 registers connect-device and troubleshooting; BlePairing is not (ADR-0250).
+    EXPECT_TRUE(app->launcher()->canOpen(QStringLiteral("troubleshooting")));
+    EXPECT_FALSE(app->launcher()->canOpen(QStringLiteral("ble-pairing")));
+    EXPECT_TRUE(app->launcher()->canOpen(QStringLiteral("first-run-setup"))); // plan 0008
     EXPECT_FALSE(app->launcher()->canOpen(QString()));
     EXPECT_FALSE(app->launcher()->canOpen(QStringLiteral("nonsense")));
-    EXPECT_FALSE(app->launcher()->start(QStringLiteral("troubleshooting")));
+    EXPECT_FALSE(app->launcher()->start(QStringLiteral("ble-pairing")));
     EXPECT_FALSE(app->wizard()->isOpen());
 
+    // Without the test wizard, connect-device is the real Connect wizard (plan 0009).
     const auto without = makeWizardApp(false);
-    EXPECT_FALSE(without->launcher()->canOpen(QStringLiteral("connect-device")));
+    EXPECT_TRUE(without->launcher()->canOpen(QStringLiteral("connect-device")));
 }
 
 TEST_F(WizardTest, NavigationThroughEveryStepKind) {

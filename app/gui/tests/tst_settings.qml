@@ -81,9 +81,9 @@ TestCase {
         verify(!find("readOnlyBanner"));
         tryVerify(() => find("jlinkDetected").text.indexOf("fake_jlink") >= 0, 10000);
         tryCompare(find("nrfUtilDetected"), "text", "Not found — needed only for LTE modem firmware", 10000);
-        // Wired, hidden until the setup wizard (0008) registers.
-        verify(!find("jlinkSetupWizard"));
-        verify(!find("nrfUtilSetupWizard"));
+        // Plan 0008: the setup wizard is registered, the links are shown.
+        verify(find("jlinkSetupWizard"));
+        verify(find("nrfUtilSetupWizard"));
         verify(find("aboutText").text.indexOf("HARDWARIO Monitor") === 0);
     }
 

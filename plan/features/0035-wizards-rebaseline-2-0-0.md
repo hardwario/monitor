@@ -1,6 +1,6 @@
 # 0035 — Wizards re-baseline for 2.0.0: probe picker step, amendments to 0008 / 0009 / 0010
 
-- **Status:** Approved (2026-11-04 by Matej Strnad)
+- **Status:** In progress (phase A implemented 2026-11-05; approved 2026-11-04 by Matej Strnad)
 - **Milestone:** 2.0.0 (M4 wizards, re-planned; ADR-0245)
 - **Author:** Matej Strnad (with Claude), 2026-11-04
 - **Related ADRs:** ADR-0245, ADR-0248 (accepted 2026-11-04); ADR-0249, ADR-0250, ADR-0251, ADR-0252, ADR-0253,
@@ -224,26 +224,32 @@ No new error codes. `ble.permission_denied` loses its wizard (ADR-0250, accepted
 ## Implementation steps
 
 Phase A — probe picker (before any wizard)
-- [ ] A0 Prerequisite: this plan and the amended 0008/0009/0010 re-approved; decisions above answered
-- [ ] A1 `ProbeList.qml` extracted; ChooseDevicePage uses it; existing Qt Quick tests (`tst_shell.qml`,
+- [x] A0 Prerequisite: this plan and the amended 0008/0009/0010 re-approved; decisions above answered
+- [x] A1 `ProbeList.qml` extracted; ChooseDevicePage uses it; existing Qt Quick tests (`tst_shell.qml`,
   `tst_screenshots.qml`) green without screenshot changes
-- [ ] A2 `ProbePickerViewModel` wizard mode + `selectedSerial()` + GTest (`probe_picker_view_model_test.cpp`)
-- [ ] A3 `ProbePickerStep.qml`, `registerProbePickerStep`, `AppViewModel::makeProbePicker` + Qt Quick test with the
+- [x] A2 `ProbePickerViewModel` wizard mode + `selectedSerial()` + GTest (`probe_picker_view_model_test.cpp`)
+- [x] A3 `ProbePickerStep.qml`, `registerProbePickerStep`, `AppViewModel::makeProbePicker` + Qt Quick test with the
   test wizard (`app/gui/tests/support/test_wizard.*`)
 
 Phase B — 0008 (parallel with C)
-- [ ] B1 Implement 0008 as amended (its S0–S5); schema 3; `StartupCheck`; coverage test started
-- [ ] B2 `ble.permission_denied` wizard → none (if ADR-0250 accepted); docs sentence fix in five languages
+- [x] B1 Implement 0008 as amended (its S0–S5); schema 3; `StartupCheck`; coverage test started (2026-11-06,
+  `strnad/impl-0008`; ADR-0290, ADR-0291; manual checks of 0008 open)
+- [x] B2 `ble.permission_denied` wizard → none (if ADR-0250 accepted); docs sentence fix in five languages
 
 Phase C — 0010 (parallel with B)
-- [ ] C1 Implement 0010 as amended (its W0, W2–W5; W1 done)
+- [x] C1 Implement 0010 as amended (its W0, W2–W5; W1 done) — 2026-11-06 on `strnad/impl-0010`; HIL open (0010); ADR-0295 (no promotion before flashing) and ADR-0296 (Diagnose stop point, RTT steps not run in the Cable step) decided 2026-11-09
 
 Phase D — 0009 (after B and C)
-- [ ] D1 Implement 0009 as amended (its T0, T2–T6) with the topic table of § C; coverage test complete
-- [ ] D2 Docs (`getting-started`, `flashing`, `troubleshooting`) in en, cs, de, sk, pl
+- [x] D1 Implement 0009 as amended (its T0, T2–T6) with the topic table of § C; coverage test complete — 2026-11-09 on
+  `strnad/impl-0009` (merged with 0008 and 0010); ADR-0297 (`Wizard::handOffError`), ADR-0298, ADR-0299; 0009 T6
+  (content), the HARDWARIO review of the topic texts and HIL open
+- [x] D2 Docs (`getting-started`, `flashing`, `troubleshooting`) in en, cs, de, sk, pl (2026-11-09: Help menu items,
+  Choose device "Guide me", the guided flash, "Help me fix this")
 
 Phase E — finish
-- [ ] E1 `update_translations`; cs + de + sk + pl 0 unfinished (`check_translations`); screenshots of every new step
+- [ ] E1 (2026-11-09: catalogs fresh, cs + de + sk + pl 0 unfinished; 0009 screenshots EN + CS light/dark taken
+  offscreen, DE screenshots of the new steps still open; DE at 960 × 600 covered by `tst_connect_wizard.qml`)
+  `update_translations`; cs + de + sk + pl 0 unfinished (`check_translations`); screenshots of every new step
   in light/dark, EN + DE (longest) at 960 × 600
 - [ ] E2 Verification below; roadmap and plan statuses updated
 
@@ -271,3 +277,17 @@ Phase E — finish
 - **German length:** wizard footers and check rows at 960 × 600; screenshots in DE are part of E1.
 - **Docs drift:** topic texts and `troubleshooting.md` must change together; the 0037 anchor test catches missing
   anchors but not content drift — review rule in `docs/README.md`.
+
+## Implementation notes (phase A, 2026-11-05)
+
+- The GTests are in the existing `app/gui/tests/viewmodels/probe_picker_test.cpp` (no new
+  `probe_picker_view_model_test.cpp`); the Qt Quick tests in `tst_wizard.qml` use the test wizard's
+  `useProbePicker()` hook.
+- `makeProbePicker` sets wizard mode itself, shares the plan 0036 reservation check ("Updating firmware…") and
+  looks up "in use" over all tabs (no own tab). Wizard pickers follow tab changes at once through the new
+  `AppViewModel::probeUsageChanged` signal (emitted where the tabs' pickers are refreshed), not only on the next scan.
+- `registerProbePickerStep` is called from `registerBuiltInPages`.
+- `ProbePickerStep.qml` shows the wizard's `checks` below the list whenever the model has rows; the root is an
+  `Item` + `Column` (a `ColumnLayout` gave "Detected recursive rearrange" with the wrapped check texts).
+- Open for 0008: how the read-only mode reaches the step (`ProbeList.readOnly` and `ProbePickerStep.readOnly`
+  exist, but nothing sets them from a wizard yet).

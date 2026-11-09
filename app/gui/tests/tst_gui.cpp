@@ -53,6 +53,7 @@
 #include <QStringLiteral>
 #include <QTcpServer>
 #include <QTemporaryDir>
+#include <QThread>
 #include <QUrl>
 #include <QVariant>
 #include <QVariantMap>
@@ -69,12 +70,59 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <iostream>
+#include <mutex>
 #include <optional>
 #include <thread>
 #include <utility>
 #include <vector>
 
 Q_IMPORT_QML_PLUGIN(HardwarioMonitorPlugin)
+
+namespace {
+
+// Review 0009 (TSan): Qt Test's message handler reads the current data row (its tag) for every
+// message, and Qt Test destroys that row's data on the GUI thread when the row ends. A message
+// from a worker thread (the probe scanner loading its library copy, a session worker) can arrive
+// exactly then: a data race inside the handler. Only GUI-thread messages go through Qt Test's
+// handler; the others are written to stderr directly (same format), so no worker thread ever
+// touches Qt Test's per-row state. Qt Test installs its handler when a TestCase starts
+// (QuickTestResult::startLogging, after the engine and the window exist), so a test file installs
+// ours on top of it in initTestCase() (testSupport.routeWorkerThreadMessages()); Qt Test restores
+// its predecessor when the TestCase ends.
+struct MessageRouting {
+    QtMessageHandler qtTestHandler = nullptr; // set and read on the GUI thread
+    std::mutex stderrMutex;                   // serialises the worker threads' lines
+};
+
+MessageRouting& routing() {
+    static MessageRouting instance;
+    return instance;
+}
+
+void threadAwareMessageHandler(QtMsgType type, const QMessageLogContext& context,
+                               const QString& message) {
+    const QCoreApplication* app = QCoreApplication::instance();
+    const bool guiThread = app == nullptr || QThread::currentThread() == app->thread();
+    if ((guiThread || type == QtFatalMsg) && routing().qtTestHandler != nullptr) {
+        routing().qtTestHandler(type, context, message);
+        return;
+    }
+    const QByteArray line = qFormatLogMessage(type, context, message).toLocal8Bit();
+    const std::scoped_lock lock(routing().stderrMutex);
+    std::cerr.write(line.constData(), line.size());
+    std::cerr << '\n';
+    std::cerr.flush();
+}
+
+void installThreadAwareMessageHandler() {
+    const QtMessageHandler previous = qInstallMessageHandler(&threadAwareMessageHandler);
+    if (previous != &threadAwareMessageHandler) {
+        routing().qtTestHandler = previous;
+    }
+}
+
+} // namespace
 
 // Test hooks for the QML tests (context property `testSupport`): things QML must not do in the
 // product (configure a tab without the picker, fabricate errors, reset the tabs).
@@ -91,6 +139,8 @@ class QmlTestSupport : public QObject {
 public:
     QmlTestSupport(hwio::gui::AppViewModel* app, QString directory)
         : m_app(app), m_dir(std::move(directory)) {}
+    // Review 0009 (TSan): from initTestCase(), after Qt Test has installed its message handler.
+    Q_INVOKABLE static void routeWorkerThreadMessages() { installThreadAwareMessageHandler(); }
     [[nodiscard]] static int perfSeconds() {
         return qEnvironmentVariableIntValue("HWIO_CONSOLE_PERF_SECONDS");
     }
@@ -554,6 +604,10 @@ public slots:
     // One AppViewModel per test file (per QML engine): QML bindings of one engine never outlive it
     // on a shared C++ object (seen as leaked binding guards under LeakSanitizer otherwise).
     void createApp() {
+        // Plan 0009: tst_connect_wizard.qml runs against the real Connect wizard.
+        const bool realConnectWizard = QCoreApplication::arguments()
+                                           .join(QLatin1Char(' '))
+                                           .contains(QStringLiteral("tst_connect_wizard"));
         const std::filesystem::path root(m_dir.path().toStdU16String());
         std::optional<hwio::Settings> settings;
         if (auto opened = hwio::Settings::openFile(root / "Monitor.ini"); opened) {
@@ -570,15 +624,20 @@ public slots:
                                                           .consoleDirectory = root / "console"},
                 .scanInterval = std::chrono::milliseconds(300),
                 .registerExtensions =
-                    [](hwio::gui::AppViewModel& app) {
+                    [realConnectWizard](hwio::gui::AppViewModel& app) {
+                        // M4 (plan/features/0007): the test wizard as "connect-device". It is
+                        // registered first, so it keeps that id and plan 0009's Connect wizard is
+                        // not added - except for tst_connect_wizard.qml (one process per test
+                        // file), which tests the real one.
+                        if (!realConnectWizard) {
+                            hwio::gui::test::registerTestWizard(
+                                app, QUrl::fromLocalFile(QStringLiteral(QUICK_TEST_SOURCE_DIR
+                                                                        "/qml/TestEmbedded.qml")));
+                        }
                         hwio::gui::registerBuiltInPages(app);
                         hwio::gui::test::registerTestPage(
                             app, QUrl::fromLocalFile(
                                      QStringLiteral(QUICK_TEST_SOURCE_DIR "/qml/TestPage.qml")));
-                        // M4 (plan/features/0007): the test wizard as "connect-device".
-                        hwio::gui::test::registerTestWizard(
-                            app, QUrl::fromLocalFile(QStringLiteral(QUICK_TEST_SOURCE_DIR
-                                                                    "/qml/TestEmbedded.qml")));
                     },
                 // Plan 0015 B3: the crash notice reads the marker here (testSupport.simulateCrash).
                 .crashDirectory = root / "crashes"},

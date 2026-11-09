@@ -37,6 +37,10 @@ If no probe is found, the page says **No J-Link probe found** and whether the J-
 USB cable, and on Linux the udev rule ([Installing](install.md#usb-access-to-the-j-link)). `hwio doctor` checks all of
 it.
 
+**Guide me** on that page, or **Not sure how to connect? Guide me** below the probe list, opens the Connect
+wizard: it helps you choose the probe, connect the cable and the power, checks the connection and then connects the
+tab.
+
 ### Connection options
 
 **⋯** (**Advanced**) in the device bar holds the options of this probe. HARDWARIO Monitor remembers them per probe
@@ -87,6 +91,10 @@ Changes apply immediately.
 **Help** at the bottom of the rail:
 
 - **Keyboard shortcuts (F1)**: every shortcut of the app (also <kbd>Ctrl</kbd>+<kbd>/</kbd>).
+- **Setup wizard…**: checks the J-Link Software, USB access (Linux), nRF Util and the probes.
+- **Connect a device…**: the Connect wizard (probe, cable, power, a live check, connect).
+- **Troubleshoot connection…**: choose the problem; the wizard runs checks and guides you step by step.
+- **Flash firmware (guided)…**: flashes application firmware step by step ([Flashing](flashing.md)).
 - **Create diagnostic report…**: a zip file for HARDWARIO support ([Privacy](privacy.md#diagnostic-report)).
 - **Documentation ↗**: these pages on GitHub, for the installed version of the app and in the app language (English
   where a page is not translated).

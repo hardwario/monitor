@@ -104,6 +104,12 @@ public:
     // Esc / ×. While busy and !force: cancelConfirmationNeeded(busyCancelText).
     Q_INVOKABLE void cancel(bool force = false);
     Q_INVOKABLE void copyText(const QString& text); // CommandBlock [Copy]
+    // ADR-0290: sets the current step's WizardStep::embeddedOptions on `item` (the loaded Embedded
+    // control; WizardDialog calls it when the control is loaded and on every change). A key that
+    // is not a property of `item`, or "vm" (set by the dialog), is ignored with a warning. A key
+    // set by an earlier step and missing now gets the value the control had before it was first
+    // set (remembered per control object). Null `item` or no wizard: nothing happens.
+    Q_INVOKABLE void applyEmbeddedOptions(QObject* item);
 
     // ADR-0076: the image of an illustration slot: <slot>-dark.svg in the dark theme when it
     // exists, else <slot>.svg, else the placeholder (also for an empty slot id).
@@ -120,6 +126,12 @@ signals:
     // The open wizard should come to the front (another wizard was asked for).
     void raiseRequested();
     void handOff(const QString& action, hwio::gui::DeviceTabViewModel* tab);
+    // ADR-0297: Wizard::handOffError with the wizard's tab.
+    void handOffError(const hwio::gui::ErrorInfo& error, hwio::gui::DeviceTabViewModel* tab);
+    // ADR-0300: a wizard opened on / closed from `tab` (not emitted for global wizards). `closed`
+    // comes after the wizard's hand-off signals.
+    void openedOnTab(hwio::gui::DeviceTabViewModel* tab);
+    void closedOnTab(hwio::gui::DeviceTabViewModel* tab);
 
 private:
     void close(bool completed);
@@ -131,6 +143,12 @@ private:
     QPointer<DeviceTabViewModel> m_tab;
     bool m_tabBound = false;
     bool m_closing = false;
+    bool m_tabClosing = false; // close() because the tab closes: no aboutToClose()
+    // ADR-0290: the control the options were last applied to and the values its optioned
+    // properties had before (restored when a step leaves a key out). Bounded by the keys of
+    // embeddedOptions.
+    QPointer<QObject> m_optionsItem;
+    QVariantMap m_optionsDefaults;
 };
 
 } // namespace hwio::gui

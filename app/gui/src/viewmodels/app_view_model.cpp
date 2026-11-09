@@ -24,13 +24,16 @@
 #include "update_service.h"
 #include "viewmodels/device_tab_list_model.h"
 #include "viewmodels/device_tab_view_model.h"
+#include "viewmodels/error_info.h"
 #include "viewmodels/flash_view_model.h"
 #include "viewmodels/history_store.h"
 #include "viewmodels/page_list_model.h"
 #include "viewmodels/page_registry.h"
 #include "viewmodels/probe_firmware_view_model.h"
+#include "viewmodels/probe_picker_view_model.h"
 #include "viewmodels/shortcut_registry.h"
 #include "viewmodels/update_view_model.h"
+#include "wizard.h"
 #include "wizard_launcher.h"
 #include "wizard_view_model.h"
 #include "workers/diag_worker.h"
@@ -54,6 +57,7 @@
 #include <QMetaType>
 #include <QNetworkAccessManager>
 #include <QObject>
+#include <QPointer>
 #include <QQmlEngine>
 #include <QRect>
 #include <QScreen>
@@ -214,6 +218,7 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
         for (int i = 0; i < m_tabs->count(); ++i) {
             m_tabs->at(i)->picker()->updateFromScanner();
         }
+        probeUsageChanged(); // signal
         checkQuit();
     });
     // ADR-0261: a failed update cancels a pending quit (the error stays on screen).
@@ -222,6 +227,10 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
 
     connect(m_scanner.get(), &ProbeScanner::scanned, this, &AppViewModel::onScan);
     connect(m_wizard, &WizardViewModel::handOff, this, &AppViewModel::onHandOff);
+    connect(m_wizard, &WizardViewModel::handOffError, this, &AppViewModel::onHandOffError);
+    connect(m_wizard, &WizardViewModel::openedOnTab, this,
+            [](DeviceTabViewModel* tab) { tab->keepWizardSession(); });
+    connect(m_wizard, &WizardViewModel::closedOnTab, this, &AppViewModel::onWizardClosedOnTab);
     connect(m_settings, &SettingsStore::valueChanged, this, [this](const QString& key) {
         if (key == QStringLiteral("jlink/libraryPath")) {
             updateLocatorOptions();
@@ -646,6 +655,7 @@ DeviceTabViewModel* AppViewModel::addTab(std::unique_ptr<DeviceTabViewModel> tab
         for (int i = 0; i < m_tabs->count(); ++i) {
             m_tabs->at(i)->picker()->updateFromScanner();
         }
+        probeUsageChanged(); // signal
     });
     connect(raw, &DeviceTabViewModel::tabActivationRequested, this, &AppViewModel::setCurrentTab);
     connect(raw, &DeviceTabViewModel::closeReady, this, [this, raw] {
@@ -735,6 +745,7 @@ void AppViewModel::removeTab(int index) {
     for (int i = 0; i < m_tabs->count(); ++i) {
         m_tabs->at(i)->picker()->updateFromScanner();
     }
+    probeUsageChanged(); // signal
 }
 
 void AppViewModel::nextTab() {
@@ -815,6 +826,18 @@ void AppViewModel::reconnect() const {
     if (DeviceTabViewModel* tab = currentTabViewModel(); tab != nullptr && !tab->choosing()) {
         tab->reconnect();
     }
+}
+
+ProbePickerViewModel* AppViewModel::makeProbePicker(QObject* parent) {
+    // Qt parent ownership: `parent` (the wizard).
+    auto* picker = new ProbePickerViewModel( // NOLINT(cppcoreguidelines-owning-memory)
+        m_scanner.get(), [this](std::uint32_t serial) { return tabUsingProbe(serial, nullptr); },
+        parent);
+    picker->setReservedCheck([this](std::uint32_t serial) { return m_registry->reserved(serial); });
+    picker->setWizardMode(true);
+    connect(this, &AppViewModel::probeUsageChanged, picker,
+            &ProbePickerViewModel::updateFromScanner);
+    return picker;
 }
 
 int AppViewModel::tabUsingProbe(std::uint32_t serial, const DeviceTabViewModel* self) const {
@@ -1295,6 +1318,12 @@ void AppViewModel::onHandOff(const QString& action, DeviceTabViewModel* tab) {
     if (const int index = m_tabs->indexOf(tab); index >= 0) {
         setCurrentTab(index);
     }
+    if (action.startsWith(QStringLiteral("open-wizard:"))) {
+        // Plan 0010 (0035): "open-wizard:<id>" opens another wizard on the same tab once the
+        // handing-off wizard has closed (it emits finished() right after the hand-off).
+        openChainedWizard(action.mid(action.indexOf(QLatin1Char(':')) + 1), tab, ErrorInfo());
+        return;
+    }
     if (action == QStringLiteral("open-console")) {
         if (tab->state() == DeviceTabViewModel::Disconnected) {
             tab->connectDevice(); // also promotes a wizard's probe-only session
@@ -1312,6 +1341,60 @@ void AppViewModel::onHandOff(const QString& action, DeviceTabViewModel* tab) {
             }
         }
     }
+}
+
+void AppViewModel::onHandOffError(const ErrorInfo& error, DeviceTabViewModel* tab) {
+    // ADR-0297: the wizard the error names opens with the error as context (its start step or
+    // topic), once the handing-off wizard has closed.
+    const QString wizardId = error.wizard();
+    qCInfo(lcGui).noquote() << "Wizard hand-off:" << wizardId << "for" << error.code();
+    if (wizardId.isEmpty() || !m_wizardRegistry.has(wizardId)) {
+        return;
+    }
+    if (tab != nullptr) {
+        if (const int index = m_tabs->indexOf(tab); index >= 0) {
+            setCurrentTab(index);
+        }
+    }
+    openChainedWizard(wizardId, tab, error);
+}
+
+void AppViewModel::openChainedWizard(const QString& wizardId, DeviceTabViewModel* tab,
+                                     const ErrorInfo& context) {
+    const WizardDescriptor* descriptor = m_wizardRegistry.find(wizardId);
+    if (descriptor == nullptr) {
+        return;
+    }
+    // ADR-0300: a per-tab wizard on the same tab takes over the wizards' session; a global one
+    // (setup) does not, so the closing wizard's tab releases it.
+    if (descriptor->perTab && tab != nullptr) {
+        m_chainTab = tab;
+    }
+    QMetaObject::invokeMethod(
+        this,
+        [this, wizardId, context, hadTab = tab != nullptr,
+         target = QPointer<DeviceTabViewModel>(tab)] {
+            if (m_chainTab == target) {
+                m_chainTab.clear();
+            }
+            if (hadTab && target.isNull()) {
+                return; // review 0009 F6: the source tab is gone: nothing opens
+            }
+            DeviceTabViewModel* on = target.isNull() ? currentTabViewModel() : target.data();
+            if (!m_launcher->openForTab(wizardId, on, context) && !target.isNull()) {
+                target->releaseWizardSessionWhenIdle();
+            }
+        },
+        Qt::QueuedConnection);
+}
+
+void AppViewModel::onWizardClosedOnTab(DeviceTabViewModel* tab) {
+    // ADR-0300: the last wizard on the tab closed without a hand-off to another per-tab wizard:
+    // the wizards' probe-only session is released when idle (a promoted session is not theirs).
+    if (tab == nullptr || (m_chainTab == tab)) {
+        return;
+    }
+    tab->releaseWizardSessionWhenIdle();
 }
 
 void AppViewModel::retranslate() {

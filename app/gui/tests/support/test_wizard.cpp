@@ -5,7 +5,9 @@
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
+#include "viewmodels/probe_picker_view_model.h"
 #include "wizard/check_list_model.h"
+#include "wizard/probe_picker_step.h"
 #include "wizard/wizard.h"
 #include "wizard/wizard_registry.h"
 
@@ -36,8 +38,8 @@ const std::array<QString, 6> stepIds{QStringLiteral("info"),     QStringLiteral(
 
 } // namespace
 
-TestWizard::TestWizard(QObject* parent)
-    : Wizard(parent),
+TestWizard::TestWizard(AppViewModel& app, QObject* parent)
+    : Wizard(parent), m_app(&app),
       // Qt parent ownership: the check list and the embedded view model are children.
       m_checks(new CheckListModel(this)),        // NOLINT(cppcoreguidelines-owning-memory)
       m_embedded(new TestWizardEmbedded(this)) { // NOLINT(cppcoreguidelines-owning-memory)
@@ -113,7 +115,7 @@ WizardStep TestWizard::current() const {
         break;
     case 4:
         step.kind = StepKind::Embedded;
-        step.embedded = QStringLiteral("test-embedded");
+        step.embedded = m_picker != nullptr ? probePickerStepName : QStringLiteral("test-embedded");
         step.heading = QStringLiteral("Embedded control");
         step.primaryText = QStringLiteral("Flash");
         break;
@@ -186,7 +188,35 @@ void TestWizard::choose(const QString& choiceId) {
 
 bool TestWizard::canBack() const { return m_index > 0 && !m_busy; }
 
-bool TestWizard::canPrimary() const { return !m_busy; }
+bool TestWizard::canPrimary() const {
+    // Plan 0035: the probe step needs a free, selected probe.
+    if (m_index == 4 && m_picker != nullptr && !m_picker->selectedSerial()) {
+        return false;
+    }
+    return !m_busy;
+}
+
+QObject* TestWizard::embeddedViewModel() {
+    if (m_picker != nullptr) {
+        return m_picker;
+    }
+    return m_embedded;
+}
+
+void TestWizard::useProbePicker() {
+    if (m_picker == nullptr) {
+        // Qt parent ownership: this wizard.
+        m_picker = m_app->makeProbePicker(this);
+        connect(m_picker, &ProbePickerViewModel::selectedRowChanged, this, &Wizard::changed);
+        m_picker->setActive(m_index == 4);
+    }
+    emit changed();
+}
+
+QString TestWizard::selectedSerial() const {
+    const auto serial = m_picker != nullptr ? m_picker->selectedSerial() : std::nullopt;
+    return serial ? QString::number(*serial) : QString();
+}
 
 QString TestWizard::busyCancelText() const { return m_busy ? busyText : QString(); }
 
@@ -219,12 +249,18 @@ void TestWizard::finishOperation() {
     }
     if (m_index == 4) {
         m_index = 5;
+        if (m_picker != nullptr) {
+            m_picker->setActive(false);
+        }
     }
     emit changed();
 }
 
 void TestWizard::goTo(int stepIndex) {
     m_index = std::clamp(stepIndex, 0, static_cast<int>(stepIds.size()) - 1);
+    if (m_picker != nullptr) {
+        m_picker->setActive(m_index == 4); // the scanner runs only while the step is shown
+    }
     if (m_index == 2 && m_checks->status(QStringLiteral("probes")) == diag::CheckStatus::Pending) {
         showResults();
     }
@@ -236,8 +272,8 @@ void registerTestWizard(AppViewModel& app, const QUrl& embeddedQml) {
         .id = WizardId::ConnectDevice,
         .perTab = true,
         // Qt parent ownership: the WizardViewModel.
-        .create = [](QObject* parent) -> Wizard* {
-            return new TestWizard(parent); // NOLINT(cppcoreguidelines-owning-memory)
+        .create = [&app](QObject* parent) -> Wizard* {
+            return new TestWizard(app, parent); // NOLINT(cppcoreguidelines-owning-memory)
         }});
     (void)app.wizardRegistry().addEmbedded(QStringLiteral("test-embedded"), embeddedQml);
 }

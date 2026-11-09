@@ -194,6 +194,18 @@ public:
     // (DeviceSession::startConnection, RTT when the target has a console).
     // A Bluetooth tab: usage.invalid_argument ("needs a J-Link"), operations are J-Link only.
     [[nodiscard]] Status ensureSession(bool connectTarget = true);
+    // ADR-0300: the tab is the single owner of the probe-only session that wizards use.
+    // ensureWizardSession() = ensureSession(false); a session it opens is marked as the wizards'
+    // (wizardOwnsSession) and passes between wizards chained on this tab. The mark ends when the
+    // session is promoted (connectDevice / [Connect]) or released.
+    // releaseWizardSessionWhenIdle(): the last wizard on the tab has closed without a
+    // session-consuming hand-off: the wizards' session is closed as soon as the tab is not busy
+    // and no operation runs on it. keepWizardSession(): a wizard opened on the tab (cancels a
+    // pending release).
+    [[nodiscard]] Status ensureWizardSession();
+    [[nodiscard]] bool wizardOwnsSession() const noexcept { return m_wizardSession; }
+    void releaseWizardSessionWhenIdle();
+    void keepWizardSession();
     // M4 (plan/features/0007): opens the wizard `wizardId` for this tab (WizardLauncher).
     Q_INVOKABLE void openWizard(const QString& wizardId);
     [[nodiscard]] const device::DeviceProfile& profile() const;
@@ -313,6 +325,7 @@ private:
     // The session stopped with an error (fatal); see sessionFailed() in the .cpp (S18).
     [[nodiscard]] bool sessionFailed() const;
     void releaseSession();
+    void tryReleaseWizardSession();
     void onConnectionChanged(const device::ConnectionEvent& event);
     void addMarker(const QString& text);
     void updateState();
@@ -342,6 +355,9 @@ private:
     std::vector<std::unique_ptr<device::ConsoleSession>> m_retiredSessions;
     std::optional<BusyState> m_busy;
     bool m_closePending = false;
+    bool m_wizardSession = false;        // ADR-0300: m_session was opened for wizards
+    bool m_releaseWizardSession = false; // ADR-0300: close it when idle
+    QMetaObject::Connection m_releaseWatch;
     State m_state = ChoosingDevice;
     bool m_hasError = false;
     device::ShellQueryQueue* m_queries = nullptr; // child

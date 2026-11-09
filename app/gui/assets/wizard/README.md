@@ -17,6 +17,7 @@ is a content task for HARDWARIO (ADR-0076, open question 22 for the CHESTER conn
 | `chester-app-cable` | flat cable to the application MCU's programming connector | from the profile guide (`TargetProfile::connectionGuide`, ADR-0077) | `device` |
 | `chester-lte-cable` | flat cable to the LTE MCU's programming connector | from the profile guide | `device` |
 | `chester-power` | CHESTER with batteries / USB-C power | from the profile power hint (`DeviceProfile::powerHintSourceText`) | `flash` |
+| `setup-welcome` | CHESTER, a J-Link and a laptop (setup wizard Welcome, plan 0008) | — (decorative) | `placeholder` |
 | `placeholder` | neutral frame (fallback for an unknown slot) | — | `placeholder` |
 
 A Qt Quick Test (`tst_wizard.qml`) and a GTest (`WizardIllustrations`) check that every slot of this table and every

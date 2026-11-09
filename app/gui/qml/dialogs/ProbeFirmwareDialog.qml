@@ -174,10 +174,22 @@ Dialog {
             Layout.fillWidth: true
             visible: dialog.phase === ProbeFirmwareViewModel.Failed && dialog.vm.error.valid
             error: dialog.vm.error
+            // Plan 0036 P5: with the troubleshooting wizard registered (plan 0009), "Help me fix
+            // this" replaces [Close]: the dialog closes first, then the wizard opens with the error.
+            readonly property bool offersWizard: AppViewModel.launcher.canOpen(dialog.vm.error.wizard) && !AppViewModel.wizard.open
+            showWizardButton: false
             // [Close] replaces the primary action; a dependency error keeps [Open Settings].
-            customActionText: dialog.vm.error.primaryAction === ErrorAction.OpenSettings ? "" : qsTr("Close")
+            customActionText: dialog.vm.error.primaryAction === ErrorAction.OpenSettings ? "" : (offersWizard ? qsTr("Help me fix this") : qsTr("Close"))
             secondaryActionText: dialog.vm.error.primaryAction === ErrorAction.OpenSettings ? qsTr("Close") : ""
-            onCustomActionTriggered: dialog.vm.cancel()
+            onCustomActionTriggered: {
+                if (offersWizard) {
+                    const error = dialog.vm.error;
+                    dialog.vm.cancel();
+                    AppViewModel.launcher.open(error.wizard, error, -1);
+                } else {
+                    dialog.vm.cancel();
+                }
+            }
             onSecondaryActionTriggered: dialog.vm.cancel()
             onActionTriggered: action => {
                 if (action === ErrorAction.OpenSettings)

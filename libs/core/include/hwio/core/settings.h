@@ -32,7 +32,8 @@ struct SettingsAccess;
 } // namespace detail
 
 // 2: plan 0025 (console/rememberCommands, ADR-0186).
-inline constexpr int currentSettingsSchema = 2;
+// 3: plan 0008 (setup/completedVersion, setup/showAtStart; no-op migration, 0035 § B).
+inline constexpr int currentSettingsSchema = 3;
 
 template <class T> struct SettingKey {
     std::string_view path; // "group/key"

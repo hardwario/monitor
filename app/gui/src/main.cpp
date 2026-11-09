@@ -28,6 +28,7 @@
 #include "quit_signals.h"
 #include "settings_store.h"
 #include "single_instance.h"
+#include "startup_check.h"
 #include "viewmodels/app_view_model.h"
 #include "workers/probe_scanner.h"
 
@@ -199,6 +200,11 @@ int run(int& argc, char** argv) {
         std::cout << "hwio-monitor self-test: the main window was created\n";
         return 0;
     }
+    // Plan 0008 (ADR-0071): the setup wizard at the first start or when J-Link Software is
+    // missing. Qt parent ownership: the AppViewModel.
+    auto* startupCheck = new hwio::gui::StartupCheck( // NOLINT(cppcoreguidelines-owning-memory)
+        appViewModel, &appViewModel);
+    startupCheck->run();
 #ifndef NDEBUG
     // Plan 0015 manual check: HWIO_TEST_CRASH=1 (debug builds only) aborts 3 s after the start, so
     // that the next start shows the crash notice.

@@ -13,7 +13,13 @@
 //
 // While `active` (the page is visible) the picker holds the scanner (2 s scans).
 //
-// Ownership: child of its DeviceTabViewModel (Qt parent). GUI thread only.
+// Wizard mode (plan 0035, ADR-0252): the picker of a wizard's Embedded `probe-picker` step. Rows
+// used by another tab are not selectable (a modal wizard does not switch tabs), choose() never
+// emits tabActivationRequested and connectSelected() does nothing; the wizard reads
+// selectedSerial().
+//
+// Ownership: child of its DeviceTabViewModel, or of the wizard that created it with
+// AppViewModel::makeProbePicker (Qt parent). GUI thread only.
 
 #include "viewmodels/error_info.h"
 #include "workers/probe_scanner.h"
@@ -39,7 +45,7 @@ namespace hwio::gui {
 class ProbePickerViewModel : public QAbstractListModel {
     Q_OBJECT
     QML_ELEMENT
-    QML_UNCREATABLE("Owned by DeviceTabViewModel")
+    QML_UNCREATABLE("Owned by DeviceTabViewModel or a wizard")
 
     Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged)
     Q_PROPERTY(int count READ count NOTIFY countChanged)
@@ -65,7 +71,7 @@ public:
         FirmwareRole,                  // "2024-03-07" or ""
         InUseTabRole,                  // 1-based tab number, -1 = none
         InUseOtherRole,                // "hwio, PID 1234" or ""
-        SelectableRole,                // false when used by another program
+        SelectableRole,                // false when used by another program (wizard mode: or tab)
         UpdatingFirmwareRole,          // plan 0036: reserved for a J-Link firmware update
     };
     Q_ENUM(Roles)
@@ -98,6 +104,12 @@ public:
     [[nodiscard]] bool canConnect() const;
     [[nodiscard]] ErrorInfo libraryError() const { return m_libraryError; }
     [[nodiscard]] QString libraryVersion() const { return m_libraryVersion; }
+
+    // Wizard mode (ADR-0252): set once by the creator, before the picker is shown.
+    void setWizardMode(bool wizardMode);
+    [[nodiscard]] bool wizardMode() const noexcept { return m_wizardMode; }
+    // The serial number of the selected row; nullopt when none is selected.
+    [[nodiscard]] std::optional<std::uint32_t> selectedSerial() const;
 
     // A click on a row: selects it, or switches to the tab that uses the probe
     // (tabActivationRequested).
@@ -143,6 +155,8 @@ private:
     };
 
     [[nodiscard]] std::vector<Row> rowsOf(const ProbeScan& scan) const;
+    // Not used by another program, not being updated and (wizard mode) not used by another tab.
+    [[nodiscard]] bool selectable(const Row& row) const;
     void setRows(std::vector<Row> rows);
     void restoreSelection();
     void apply(const ProbeScan& scan);
@@ -155,6 +169,7 @@ private:
     std::optional<std::uint32_t> m_selectedSerial;
     int m_selectedRow = -1;
     bool m_active = false;
+    bool m_wizardMode = false;
     bool m_scanned = false;
     std::uint64_t m_scanSequence = 0;
     ErrorInfo m_libraryError;

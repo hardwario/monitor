@@ -32,8 +32,9 @@ bool WizardLauncher::start(const QString& wizardId, int tabIndex) {
     return open(wizardId, ErrorInfo(), tabIndex);
 }
 
-bool WizardLauncher::openForTab(const QString& wizardId, DeviceTabViewModel* tab) {
-    return launch(wizardId, ErrorInfo(), tab);
+bool WizardLauncher::openForTab(const QString& wizardId, DeviceTabViewModel* tab,
+                                const ErrorInfo& context) {
+    return launch(wizardId, context, tab);
 }
 
 bool WizardLauncher::launch(const QString& wizardId, const ErrorInfo& context,
