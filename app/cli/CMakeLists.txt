@@ -40,6 +40,8 @@ add_library(hwio_cli_impl STATIC
     src/flash_commands.h
     src/jlink_commands.cpp
     src/jlink_commands.h
+    src/lrw_commands.cpp
+    src/lrw_commands.h
     src/mcp_command.cpp
     src/mcp_command.h
     src/operation_runner.cpp

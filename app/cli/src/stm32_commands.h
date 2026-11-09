@@ -15,11 +15,15 @@
 #include "cli_app.h"
 #include "hwio/core/result.h"
 #include "hwio/device/profile.h"
+#include "hwio/firmware/firmware_image.h"
 #include "probe_options.h"
+
+#include <QJsonObject>
 
 #include <CLI/App.hpp>
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -38,6 +42,14 @@ struct Stm32CommandTarget {
 [[nodiscard]] Result<CommandResult> stm32Info(const Context& context, const GlobalOptions& globals,
                                               const ProbeOptions& group, const ProbeOptions& own,
                                               const Stm32CommandTarget& target);
+// A prepared firmware (plan 0040: the designated firmware of `chester lrw`), already downloaded
+// and verified: flashed instead of `Stm32FlashOptions::file`.
+struct Stm32PreparedImage {
+    std::shared_ptr<const firmware::FirmwareImage> image;
+    std::string name;    // "lora-modem for CHESTER"
+    std::string version; // "1.4.1"
+    bool cached = false;
+};
 struct Stm32FlashOptions {
     std::string file;                     // "" only with a prepared firmware (chester lrw)
     std::optional<std::uint32_t> address; // .bin start (default: the target's flash start)
@@ -45,7 +57,18 @@ struct Stm32FlashOptions {
     bool allowEeprom = false;
     bool halt = false;
     bool yes = false; // --erase-all without asking (ADR-0038)
+    std::optional<Stm32PreparedImage> prepared = std::nullopt;
 };
+// The image of a flash command: the prepared one, or `file` read (.hex / .bin at `address`) and
+// checked against the target's flash rules (ADR-0275) before any session opens; `json` is the
+// result's "image" object. Errors: those of readFirmwareFile and checkFlashWrite.
+struct Stm32LoadedImage {
+    std::shared_ptr<const firmware::FirmwareImage> image;
+    QJsonObject json;
+    std::string description; // "Firmware <path> (<bytes> bytes[ at ADDR])" (human output)
+};
+[[nodiscard]] Result<Stm32LoadedImage> loadStm32Image(const Stm32CommandTarget& target,
+                                                      const Stm32FlashOptions& options);
 [[nodiscard]] Result<CommandResult>
 stm32FlashFile(const Context& context, const GlobalOptions& globals, const ProbeOptions& group,
                const ProbeOptions& own, const Stm32CommandTarget& target,

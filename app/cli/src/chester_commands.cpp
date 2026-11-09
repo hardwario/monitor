@@ -22,6 +22,7 @@
 #include "hwio/device/shell_query.h"
 #include "hwio/hw/jlink/rtt_channel.h"
 #include "jlink_commands.h"
+#include "lrw_commands.h"
 #include "output.h"
 #include "probe_options.h"
 #include "target_commands.h"
@@ -452,6 +453,7 @@ void registerChesterCommands(CLI::App& app, CommandSlot& slot, const GlobalOptio
     // M6 (plan/features/0013): status, halt, go, regs, zones, mem read|write, flash-write.
     registerTargetCommands(*appGroup, group, slot, globals, "app");
     registerLteCommands(*chester, slot, globals);
+    registerLrwCommands(*chester, slot, globals); // plan 0040
 }
 
 } // namespace hwio::cli

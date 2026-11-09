@@ -9,6 +9,7 @@
 #include "hwio/device/lrw_update_procedure.h"
 #include "hwio/device/operation.h"
 #include "hwio/device/profile.h"
+#include "hwio/device/session_events.h"
 #include "hwio/device/session_registry.h"
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/hw/jlink/library_locator.h"
@@ -26,7 +27,6 @@
 
 #include <chrono>
 #include <cstddef>
-#include <cstdint>
 #include <filesystem>
 #include <format>
 #include <memory>

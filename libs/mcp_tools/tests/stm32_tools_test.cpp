@@ -186,5 +186,50 @@ TEST_F(Stm32Tools, NordicTargetsAreRefused) {
     EXPECT_EQ(info.errorCode(), "usage.invalid_argument");
 }
 
+// Plan 0040: the CHESTER LoRaWAN module (target "lrw") through the STM32 tools and the generic
+// flash / erase tools; the cable is on the module's connector and the application MCU is held.
+TEST_F(Stm32Tools, ChesterLrwTargetIsAccepted) {
+    provider().settings().profile = hwio::device::ProfileRegistry::find("chester");
+    const QString connector = QString::fromStdString((provider().root() / "connector").string());
+    QFile cable(connector);
+    ASSERT_TRUE(cable.open(QIODevice::WriteOnly));
+    cable.write("lrw");
+    cable.close();
+    provider().scenario(QStringLiteral(R"({"probes": [{"serialNumber": 801000001,
+        "product": "Test Probe", "connectors": {"file": "%1", "initial": "app", "chips": {
+          "app": {"halted": true},
+          "lrw": {"family": "stm32l0", "devId": 1095, "flashKib": 192, "eepromBytes": 6144,
+                  "rdp": 0, "needsHalted": "app"}}}}]})")
+                            .arg(connector)
+                            .toUtf8());
+    Harness harness(provider(), hwio::mcp::Limits{});
+    auto call =
+        harness.call(QStringLiteral("connect"), args({{"device", device}, {"profile", "chester"}}));
+    ASSERT_FALSE(call.isError()) << call.errorCode() << " " << call.errorDetail();
+    auto info = harness.call(QStringLiteral("stm32_info"), args({{"target", "lrw"}}), 30s);
+    ASSERT_FALSE(info.isError()) << info.errorCode() << " " << info.errorDetail();
+    EXPECT_EQ(info.structured().value(QStringLiteral("dev_id")).toInt(), 0x447);
+    EXPECT_EQ(info.structured().value(QStringLiteral("chip")).toString(),
+              QStringLiteral("stm32l0-cat5-192k"));
+    EXPECT_TRUE(info.structured().value(QStringLiteral("matches")).toBool());
+    const std::string bin = file("lrw.bin", QByteArray(256, '\x5A'));
+    auto flashed =
+        harness.call(QStringLiteral("stm32_flash"),
+                     args({{"target", "lrw"}, {"path", QString::fromStdString(bin)}}), 30s, true);
+    ASSERT_FALSE(flashed.isError()) << flashed.errorCode() << " " << flashed.errorDetail();
+    const std::string hex =
+        file("lrw.hex", QByteArrayLiteral(":020000040800F2\n:0400000001020304F2\n:00000001FF\n"));
+    auto generic =
+        harness.call(QStringLiteral("flash"),
+                     args({{"target", "lrw"}, {"path", QString::fromStdString(hex)}}), 30s, true);
+    ASSERT_FALSE(generic.isError()) << generic.errorCode() << " " << generic.errorDetail();
+    auto erased = harness.call(QStringLiteral("erase"), args({{"target", "lrw"}}), 30s, true);
+    ASSERT_FALSE(erased.isError()) << erased.errorCode() << " " << erased.errorDetail();
+    EXPECT_EQ(erased.structured().value(QStringLiteral("scope")).toString(), QStringLiteral("all"));
+    auto unlocked = harness.call(QStringLiteral("stm32_unlock"),
+                                 args({{"target", "lrw"}, {"confirm", true}}), 60s, true);
+    EXPECT_FALSE(unlocked.isError()) << unlocked.errorCode() << " " << unlocked.errorDetail();
+}
+
 } // namespace
 } // namespace hwio::mcp::tools::test

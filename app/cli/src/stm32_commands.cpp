@@ -34,7 +34,6 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <system_error>
 #include <utility>
 #include <vector>
 
@@ -192,11 +191,24 @@ Result<CommandResult> stm32Info(const Context& context, const GlobalOptions& glo
     return CommandResult{.data = data, .humanText = text, .streamed = false};
 }
 
-Result<CommandResult> stm32FlashFile(const Context& context, const GlobalOptions& globals,
-                                     const ProbeOptions& group, const ProbeOptions& own,
-                                     const Stm32CommandTarget& target,
-                                     const Stm32FlashOptions& options) {
+Result<Stm32LoadedImage> loadStm32Image(const Stm32CommandTarget& target,
+                                        const Stm32FlashOptions& options) {
     const device::TargetProfile& profileTarget = targetOf(target);
+    if (options.prepared) {
+        const Stm32PreparedImage& prepared = *options.prepared;
+        QJsonObject json;
+        json.insert(QStringLiteral("source"), QStringLiteral("designated"));
+        json.insert(QStringLiteral("name"), toQString(prepared.name));
+        json.insert(QStringLiteral("version"), toQString(prepared.version));
+        json.insert(QStringLiteral("cached"), prepared.cached);
+        json.insert(QStringLiteral("bytes"), static_cast<double>(prepared.image->totalBytes()));
+        json.insert(QStringLiteral("sha256"), toQString(prepared.image->sha256()));
+        return Stm32LoadedImage{.image = prepared.image,
+                                .json = json,
+                                .description =
+                                    std::format("Firmware {} {} ({} bytes)", prepared.name,
+                                                prepared.version, prepared.image->totalBytes())};
+    }
     const std::filesystem::path path(toQString(options.file).toStdU16String());
     const bool binary = firmware::isBinaryFile(path);
     // ADR-0280 D5: a .bin starts at the part's flash start unless --address says otherwise.
@@ -218,9 +230,33 @@ Result<CommandResult> stm32FlashFile(const Context& context, const GlobalOptions
             return std::unexpected(std::move(error));
         }
     }
+    auto shared = std::make_shared<const firmware::FirmwareImage>(std::move(*image));
+    QJsonObject json;
+    json.insert(QStringLiteral("source"), QStringLiteral("file"));
+    json.insert(QStringLiteral("path"), toQString(toUtf8(path)));
+    json.insert(QStringLiteral("bytes"), static_cast<double>(shared->totalBytes()));
+    json.insert(QStringLiteral("sha256"), toQString(shared->sha256()));
+    if (binary) {
+        json.insert(QStringLiteral("address"), toQString(hex(address, 8)));
+    }
+    return Stm32LoadedImage{.image = shared,
+                            .json = json,
+                            .description = std::format(
+                                "Firmware {} ({} bytes{})", toUtf8(path), shared->totalBytes(),
+                                binary ? std::format(" at {}", hex(address, 8)) : std::string())};
+}
+
+Result<CommandResult> stm32FlashFile(const Context& context, const GlobalOptions& globals,
+                                     const ProbeOptions& group, const ProbeOptions& own,
+                                     const Stm32CommandTarget& target,
+                                     const Stm32FlashOptions& options) {
+    const device::TargetProfile& profileTarget = targetOf(target);
+    auto loaded = loadStm32Image(target, options);
+    if (!loaded) {
+        return std::unexpected(std::move(loaded).error());
+    }
     ProgressUi ui(context, std::cerr, stderrIsTerminal());
-    ui.info(std::format("Firmware {} ({} bytes{})", toUtf8(path), image->totalBytes(),
-                        binary ? std::format(" at {}", hex(address, 8)) : std::string()));
+    ui.info(loaded->description);
     if (options.eraseAll) {
         const std::string question = std::format(
             "This erases the whole {} (flash and data EEPROM) before flashing.\nContinue? [y/N] ",
@@ -229,7 +265,7 @@ Result<CommandResult> stm32FlashFile(const Context& context, const GlobalOptions
             return std::unexpected(std::move(confirmed).error());
         }
     }
-    auto shared = std::make_shared<const firmware::FirmwareImage>(std::move(*image));
+    const std::shared_ptr<const firmware::FirmwareImage> shared = loaded->image;
     const device::FlashOptions flash{
         .halt = options.halt, .allowUicr = options.allowEeprom, .eraseAll = options.eraseAll};
     auto outcome =
@@ -240,15 +276,7 @@ Result<CommandResult> stm32FlashFile(const Context& context, const GlobalOptions
         return std::unexpected(std::move(outcome).error());
     }
     QJsonObject data = resultJson(target, outcome->result);
-    QJsonObject imageJson;
-    imageJson.insert(QStringLiteral("source"), QStringLiteral("file"));
-    imageJson.insert(QStringLiteral("path"), toQString(toUtf8(path)));
-    imageJson.insert(QStringLiteral("bytes"), static_cast<double>(shared->totalBytes()));
-    imageJson.insert(QStringLiteral("sha256"), toQString(shared->sha256()));
-    if (binary) {
-        imageJson.insert(QStringLiteral("address"), toQString(hex(address, 8)));
-    }
-    data.insert(QStringLiteral("image"), imageJson);
+    data.insert(QStringLiteral("image"), loaded->json);
     data.insert(QStringLiteral("erasedAll"), options.eraseAll);
     data.insert(QStringLiteral("halted"), options.halt);
     return CommandResult{.data = data, .humanText = std::string(completed), .streamed = false};

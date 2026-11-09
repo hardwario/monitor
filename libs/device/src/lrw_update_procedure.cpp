@@ -7,7 +7,6 @@
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
 #include "hwio/device/profile.h"
-#include "hwio/firmware/firmware_image.h"
 
 #include <QLoggingCategory>
 #include <QObject>
@@ -147,11 +146,13 @@ Status LrwUpdateProcedure::start(Request request) {
     m_hold = std::move(*hold);
     m_request = std::move(request);
     m_request.options.halt = false;
-    qCInfo(log::lcFlash).noquote()
-        << "LoRaWAN module operation started:"
-        << (m_request.action == Action::Flash ? QStringLiteral("flash ") + toQString(m_request.name)
-            : m_request.action == Action::Erase ? QStringLiteral("erase")
-                                                : QStringLiteral("unlock"));
+    QString what = QStringLiteral("unlock");
+    if (m_request.action == Action::Flash) {
+        what = QStringLiteral("flash ") + toQString(m_request.name);
+    } else if (m_request.action == Action::Erase) {
+        what = QStringLiteral("erase");
+    }
+    qCInfo(log::lcFlash).noquote() << "LoRaWAN module operation started:" << what;
     startConnectorStep(Step::ConnectApp);
     return {};
 }

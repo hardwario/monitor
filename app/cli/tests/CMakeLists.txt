@@ -14,6 +14,7 @@ add_executable(hwio_cli_tests
     flash_e2e_test.cpp
     stm32_e2e_test.cpp
     jlink_e2e_test.cpp
+    lrw_e2e_test.cpp
     main.cpp
     mcp_command_test.cpp
     mcp_e2e_test.cpp
@@ -44,7 +45,7 @@ target_compile_definitions(hwio_cli_tests PRIVATE ${HWIO_TEST_OVERRIDES_DEFINE})
 # is uninstrumented Qt code, see libs/firmware/tests/CMakeLists.txt).
 set(_hwio_cli_test_filter "")
 if("thread" IN_LIST HWIO_SANITIZERS)
-    set(_hwio_cli_test_filter TEST_FILTER "-FlashCli.FlashByCatalogId:FlashCli.CatalogNetworkDown:FlashCli.LteFlashDesignatedFirmware:FlashCli.CatalogInfoAndVerifiedIdFlash:UpdateCli.*")
+    set(_hwio_cli_test_filter TEST_FILTER "-FlashCli.FlashByCatalogId:FlashCli.CatalogNetworkDown:FlashCli.LteFlashDesignatedFirmware:FlashCli.CatalogInfoAndVerifiedIdFlash:LrwCli.DirectFlashOfThePreparedFirmware:UpdateCli.*")
 endif()
 gtest_discover_tests(hwio_cli_tests
     DISCOVERY_TIMEOUT 60

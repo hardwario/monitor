@@ -395,14 +395,18 @@ TEST(Profiles, ChesterLrwDesignatedFirmware) {
               "e9215b222b68092c33d9a31330bdec6ebea1afaf1cd1844f74cd8745c46ff2e6");
     EXPECT_EQ(entry.kind, hwio::firmware::FirmwareKind::AppHex);
     EXPECT_EQ(entry.cacheTag, "lrw");
-    EXPECT_EQ(lrw->designatedFirmware->cacheTag, "lrw");
+    EXPECT_EQ(lrw->designatedFirmware.value_or(hwio::firmware::DesignatedFirmware{}).cacheTag,
+              "lrw");
     // The shared part has none: the generic STM32 chip of the same part offers no firmware.
     EXPECT_FALSE(lrw->parts.front().designatedFirmware.has_value());
     const auto* generic =
         hwio::device::findTarget(*ProfileRegistry::find("stm32"), "stm32l0-cat5-192k");
     ASSERT_NE(generic, nullptr);
     EXPECT_FALSE(hwio::device::designatedFirmwareOf(*generic).has_value());
-    EXPECT_EQ(hwio::device::findTarget(chester, "lte")->designatedFirmware->cacheTag, "lte");
+    EXPECT_EQ(hwio::device::findTarget(chester, "lte")
+                  ->designatedFirmware.value_or(hwio::firmware::DesignatedFirmware{})
+                  .cacheTag,
+              "lte");
 }
 
 // Plan 0040 A2 (ADR-0274, ADR-0283): the LoRaWAN module target of CHESTER.
@@ -436,7 +440,8 @@ TEST(Profiles, ChesterLrwTarget) {
     EXPECT_TRUE(hwio::device::checkMemoryWrite(*lrw, 0x20000000, 4));
     // The console target stays `app` (ADR-0233).
     EXPECT_TRUE(hwio::device::hasConsole(chester));
-    EXPECT_EQ(chester.ble->consoleTargetId, "app");
+    ASSERT_TRUE(chester.ble.has_value());
+    EXPECT_EQ(chester.ble.value_or(hwio::device::BleProfile{}).consoleTargetId, "app");
 }
 
 TEST(Profiles, ChesterFirmwareDocsUrlPerLanguage) {

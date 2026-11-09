@@ -134,14 +134,38 @@ version before downloading.
 
 ### Phase A — backend and CLI
 
-- [ ] A1 Download the asset once, measure SHA-256, add `loraModemFirmware` to the profile; unit test for the entry.
-- [ ] A2 Target `lrw` in the CHESTER profile + guide + ranges; profile invariants test (0039 A1) covers it.
-- [ ] A3 Downloader redirect rule (D2) with tests (redirect to an allowed host, to a disallowed host, HTTP).
-- [ ] A4 `hwio chester lrw …`; CLI end-to-end tests on the fake J-Link (prepared firmware from a fake catalog).
+- [x] A1 Download the asset once, measure SHA-256, add `loraModemFirmware` to the profile; unit test for the entry.
+      Implementation notes: the entry is on the `lrw` target (not on the shared part, so the generic STM32
+      chip of the same part offers no firmware); `DesignatedFirmware::cacheTag` ("lte", "lrw") names the
+      cache file (`lrw-<sha256>.hex`, the LTE bundle stays `lte-<sha256>.zip`); a `FirmwareKind::AppHex`
+      designated download yields `DesignatedDownload::image`.
+- [x] A2 Target `lrw` in the CHESTER profile + guide + ranges; profile invariants test (0039 A1) covers it.
+      Implementation notes: `stm32Target()` and the STM32L0 memory-write ranges moved to `stm32_parts.h`
+      (the guide and designated firmware are parameters); placeholder illustration `chester-lrw-cable`
+      (LFS). Places that assumed app + lte: `LteUpdateProcedure` (target `lte` by name), Flash page
+      `maintenanceTargets` (no `lrw` until B2: the module needs the guided flow), wizard illustration list.
+- [x] A3 Downloader redirect rule (D2) with tests (redirect to an allowed host, to a disallowed host, HTTP).
+      Implementation notes: `designatedRedirectAllowed()` (https on the same host or `*.githubusercontent.com`);
+      catalog downloads keep "any https". Test-only `HWIO_DESIGNATED_REDIRECT_HOST` (HWIO_TEST_OVERRIDES) lets
+      the local http fixture stand in for the asset host.
+- [x] A4 `hwio chester lrw …`; CLI end-to-end tests on the fake J-Link (prepared firmware from a fake catalog).
+      Implementation notes: `app/cli/src/lrw_commands.cpp` reuses `stm32_commands` with the target
+      `{chester, lrw}`; flash / erase / unlock are guided (LrwUpdateProcedure) in an interactive terminal,
+      `--direct` otherwise (usage error naming `--direct`); `flash --halt` needs `--direct` (the guided flow
+      restarts the application MCU, which restarts the module); `flash --no-cache`; info / reset /
+      `--direct` failures to reach the module (target.connect_failed) suggest `hwio chester app reset
+      --halt`. The guided erase / unlock ask once (or `--yes`); a protected module before a guided flash
+      asks "Unlock the LoRaWAN module (it is erased)?". MCP: `flash`, `erase` and the `stm32_*` tools
+      accept `target: "lrw"` (test).
 
-- [ ] A5 `LrwUpdateProcedure` (ADR-0283): hold app → cable to LoRaWAN → identify / confirm unlock → flash | erase |
+- [x] A5 `LrwUpdateProcedure` (ADR-0283): hold app → cable to LoRaWAN → identify / confirm unlock → flash | erase |
       unlock → cable back → reset app; used by the GUI card and `hwio chester lrw flash|erase|unlock` (`--direct`
       skips it); `LteUpdateProcedure` names its target `lte`.
+      Implementation notes: steps ConnectApp, HoldApp, ConnectLrw, NeedsUnlockConfirmation (RDP 1 before
+      flash / erase; the action Unlock needs no second confirmation), Unlock, Flash, Erase, ConnectAppAgain,
+      ResetApp; a failed operation step is retryable, cancel only in waiting steps; connector labels "APP"
+      and "LoRaWAN". The fake J-Link's connectors model gains `"needsHalted": "app"` (the module answers only
+      while the app CPU is held; the hold survives a new library session, as on hardware).
 
 ### Phase B — GUI
 
