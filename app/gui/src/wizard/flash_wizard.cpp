@@ -551,9 +551,14 @@ void FlashWizard::action(const QString& actionId) {
         m_outcome.reset();
         goTo(Firmware);
     } else if (actionId == QStringLiteral("help-me-fix-this")) {
-        const QString wizard = helpWizard();
-        if (!wizard.isEmpty()) {
-            handOffAndClose(openWizardPrefix + wizard);
+        // ADR-0297: the error's wizard opens with the error (e.g. the matching troubleshooting
+        // topic), not at its start.
+        if (!helpWizard().isEmpty()) {
+            const ErrorInfo shown = error();
+            m_keepSession = true;
+            releaseTab();
+            emit handOffError(shown);
+            emit finished(false);
         }
     }
 }

@@ -703,6 +703,14 @@ Plan [0008](0008-m4-first-run-setup.md) adds to the contract, with defaults that
 - A step of any kind may name an Embedded control (ADR-0292).
 - `WizardStep::actions` entries may carry `enabled: false` (ADR-0291: a disabled button whose text says why).
 
+## Amendment from 0009 (2026-11-09, connect and troubleshooting wizards)
+
+Plan [0009](0009-m4-connect-and-troubleshooting.md) adds to the contract, with defaults that keep every other wizard as it was:
+- `Wizard::handOffError(ErrorInfo)` (ADR-0297): the wizard the error names opens on the same tab with the error as
+  context once this one has closed (`WizardViewModel::handOffError`, `AppViewModel::onHandOffError`,
+  `WizardLauncher::openForTab(id, tab, context)`).
+- The Embedded control `wizard-error` (`WizardErrorStep.qml`): an error's cause and suggestion as plain text.
+
 ## Open findings (independent review round 1, 2026-10-16)
 
 Verified state before the review: debug and ASan 742 tests (730 passed, 12 HIL/corpus skipped), TSan 730, tidy 0,

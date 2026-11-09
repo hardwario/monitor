@@ -123,6 +123,11 @@ signals:
     // "open-console", "open-flash-page", "open-settings:<id>"; plan 0033: the target.protected
     // topic hands off "open-flash-page:recover:<target>" ([Recover…] shown once, ADR-0236).
     void handOff(const QString& action);
+    // ADR-0297: opens the wizard that `error` names (ErrorInfo::wizard) on the same tab with the
+    // error as its context (detail kept), after this wizard has closed. The wizard emits
+    // finished() right after it (e.g. the flash wizard's [Help me fix this] opens the matching
+    // troubleshooting topic; troubleshooting's failed USB check opens the setup wizard's USB step).
+    void handOffError(const hwio::gui::ErrorInfo& error);
 };
 
 struct WizardDescriptor {

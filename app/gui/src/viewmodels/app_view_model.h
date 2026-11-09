@@ -327,6 +327,7 @@ private:
     // A wizard's hand-off (plan/features/0007): "open-console", "open-flash-page",
     // "open-settings[:<section>]".
     void onHandOff(const QString& action, DeviceTabViewModel* tab);
+    void onHandOffError(const ErrorInfo& error, DeviceTabViewModel* tab); // ADR-0297
     [[nodiscard]] QJsonArray tabsJson() const;
 
     AppOptions m_options;

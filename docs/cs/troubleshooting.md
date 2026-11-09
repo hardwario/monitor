@@ -9,6 +9,9 @@ Tato stránka vám pomůže, když něco nefunguje. Začíná nejčastějšími 
 Každá chyba má krátkou zprávu, pravděpodobnou příčinu a doporučení.
 
 - **Desktopová aplikace (`hwio-monitor`):** panel chyby ukazuje zprávu, **Pravděpodobně:** (příčinu) a **Co dělat:** (doporučení) a tlačítko pro další krok, například **Znovu připojit**, **Otevřít nastavení** nebo **Zkusit znovu**. **Podrobnosti** ukážou kód chyby (například `probe.not_found`) a technické podrobnosti; **Kopírovat** je zkopíruje. **Další informace ↗** otevře popis kódu chyby na této stránce.
+- **Pomozte mi to vyřešit** v panelu chyby otevře průvodce pro danou chybu: průvodce připojením, průvodce
+  nastavením, nahrávání s průvodcem nebo téma řešení potíží pro danou chybu. **Nápověda** › **Řešit potíže s
+  připojením…** nabídne časté problémy.
 - **CLI (`hwio`):** chyba se vypíše na stderr. CLI vypisuje vždy anglicky:
 
   ```text

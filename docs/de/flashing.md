@@ -10,6 +10,10 @@ Katalog-ID eingeben).
 
 Während ein Flash-Vorgang läuft, ist die Konsole des Tabs angehalten und wird danach selbstständig fortgesetzt.
 
+Für ein geführtes Flashen von Anwendungsfirmware (Adapter, Kabelprüfung, Datei, Bestätigung) verwenden Sie
+**Hilfe** › **Firmware flashen (mit Assistent)…**, **Anleitung** auf dieser Seite oder **Firmware mit Assistent
+flashen** auf der Seite zur Geräteauswahl.
+
 ## 1. Was möchten Sie flashen?
 
 | Auswahl | MCU | Firmware |

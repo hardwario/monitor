@@ -41,6 +41,10 @@ Wird keine Probe gefunden, zeigt die Seite **No J-Link probe found** (keine J-Li
 Software gefunden wurde. Prüfen Sie das USB-Kabel und unter Linux die udev-Regel
 ([Installation](install.md#usb-zugriff-auf-den-j-link)). `hwio doctor` prüft all das.
 
+**Anleitung** auf dieser Seite oder **Unsicher beim Verbinden? Anleitung** unter der Liste der
+Programmieradapter öffnet den Verbindungsassistenten: Er hilft beim Wählen des Adapters, beim Anschließen von Kabel und
+Stromversorgung, prüft die Verbindung und verbindet dann den Tab.
+
 ### Verbindungsoptionen
 
 **⋯** (**Advanced**, Erweitert) in der Geräteleiste enthält die Optionen dieser Probe. HARDWARIO Monitor merkt sie
@@ -93,6 +97,11 @@ Es läuft jeweils nur ein Fenster der App. Ein erneuter Start holt das geöffnet
 **Help** (Hilfe) unten in der Leiste:
 
 - **Keyboard shortcuts (F1)**: alle Tastenkürzel der App (auch <kbd>Ctrl</kbd>+<kbd>/</kbd>).
+- **Einrichtungsassistent…**: prüft die J-Link Software, den USB-Zugriff (Linux), nRF Util und die Adapter.
+- **Gerät verbinden…**: der Verbindungsassistent (Adapter, Kabel, Strom, Live-Prüfung, Verbinden).
+- **Verbindungsprobleme beheben…**: Problem wählen; der Assistent führt Prüfungen aus und führt Sie Schritt für
+  Schritt.
+- **Firmware flashen (mit Assistent)…**: flasht Anwendungsfirmware Schritt für Schritt ([Flashen](flashing.md)).
 - **Create diagnostic report…**: eine ZIP-Datei für den HARDWARIO-Support
   ([Datenschutz](privacy.md#diagnosebericht)).
 - **Documentation ↗**: diese Seiten auf GitHub, passend zur installierten Version der App und in der Sprache der App

@@ -126,6 +126,8 @@ signals:
     // The open wizard should come to the front (another wizard was asked for).
     void raiseRequested();
     void handOff(const QString& action, hwio::gui::DeviceTabViewModel* tab);
+    // ADR-0297: Wizard::handOffError with the wizard's tab.
+    void handOffError(const hwio::gui::ErrorInfo& error, hwio::gui::DeviceTabViewModel* tab);
 
 private:
     void close(bool completed);

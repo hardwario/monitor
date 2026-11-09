@@ -276,3 +276,5 @@ Choices made during the implementation (not spelled out in the plan). Decided by
     `flash_wizard_test.cpp`; it moves into `wizard_coverage_test.cpp` when 0008's coverage test is merged.
     Done in the 0008 + 0010 merge (strnad/impl-0009): the check is the `FlashFirmware` case of
     `WizardCoverage.EveryCodeNamingAWizardHasAStartStep`.
+13. **Plan 0009 (ADR-0297, 2026-11-09):** [Help me fix this] of the failure hands the error itself off
+    (`Wizard::handOffError`), so troubleshooting opens at the error's topic (note 6 is amended for this button).

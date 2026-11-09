@@ -57,6 +57,8 @@ bool WizardViewModel::start(Wizard* wizard, const ErrorInfo& context, DeviceTabV
     connect(wizard, &Wizard::finished, this, [this](bool completed) { close(completed); });
     connect(wizard, &Wizard::handOff, this,
             [this](const QString& action) { emit handOff(action, m_tab.data()); });
+    connect(wizard, &Wizard::handOffError, this,
+            [this](const ErrorInfo& error) { emit handOffError(error, m_tab.data()); });
     if (tab != nullptr) {
         // Fallback only: AppViewModel calls tabClosing() before the tab shuts down (review V2).
         // Here the tab is being destroyed already; the wizard's QPointer to it is null.

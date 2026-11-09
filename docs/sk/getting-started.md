@@ -38,6 +38,10 @@ Ak sa nenájde žiadna sonda, stránka zobrazí **No J-Link probe found** a info
 Skontrolujte kábel USB a v Linuxe pravidlo udev ([Inštalácia](install.md#prístup-k-j-linku-cez-usb)). `hwio doctor`
 skontroluje všetko z toho.
 
+**Previesť ma** na tejto stránke alebo **Neviete, ako pripojiť? Previesť ma** pod zoznamom
+programátorov otvorí sprievodcu pripojením: pomôže vybrať programátor, pripojiť kábel a napájanie, skontroluje
+pripojenie a potom kartu pripojí.
+
 ### Možnosti pripojenia
 
 **⋯** (**Advanced**, rozšírené) v lište zariadenia obsahuje možnosti tejto sondy. HARDWARIO Monitor si ich pamätá podľa
@@ -90,6 +94,10 @@ Zmeny sa uplatnia okamžite.
 **Help** (pomocník) v dolnej časti lišty:
 
 - **Keyboard shortcuts (F1)**: všetky klávesové skratky aplikácie (aj <kbd>Ctrl</kbd>+<kbd>/</kbd>).
+- **Sprievodca nastavením…**: skontroluje J-Link Software, prístup k USB (Linux), nRF Util a programátory.
+- **Pripojiť zariadenie…**: sprievodca pripojením (programátor, kábel, napájanie, živá kontrola, pripojenie).
+- **Riešiť problémy s pripojením…**: vyberte problém; sprievodca spustí kontroly a prevedie vás krok za krokom.
+- **Nahrať firmvér (so sprievodcom)…**: nahrá aplikačný firmvér krok za krokom ([Nahrávanie](flashing.md)).
 - **Create diagnostic report…**: súbor zip pre podporu HARDWARIO ([Súkromie](privacy.md#diagnostická-správa)).
 - **Documentation ↗**: tieto stránky na GitHube, pre nainštalovanú verziu aplikácie a v jazyku aplikácie (anglicky,
   ak stránka nie je preložená).

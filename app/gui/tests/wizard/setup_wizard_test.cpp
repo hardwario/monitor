@@ -12,7 +12,6 @@
 #include "hwio/diag/usb_access.h"
 #include "settings_store.h"
 #include "startup_check.h"
-#include "support/test_wizard.h"
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
@@ -280,8 +279,10 @@ TEST_F(SetupWizardTest, DoneWritesTheCompletedVersionAndSummarises) {
     EXPECT_EQ(setting("setup/completedVersion"), AppViewModel::version());
     EXPECT_EQ(wizard().step().value(QStringLiteral("kind")).toInt(), StepKind::Done);
     EXPECT_FALSE(wizard().canBack());
-    // The test wizard is not registered here: no [Connect a device].
-    EXPECT_TRUE(actions().isEmpty());
+    // Plan 0009: the Connect wizard is registered with the built-in pages: [Connect a device].
+    ASSERT_EQ(actions().size(), 1);
+    EXPECT_EQ(actions().at(0).toMap().value(QStringLiteral("id")).toString(),
+              QStringLiteral("connect-device"));
     // ADR-0291: every serial number the `probes` check found.
     const hwio::gui::CheckListModel& summary = *setup()->summary();
     ASSERT_EQ(summary.count(), 4);
@@ -301,8 +302,7 @@ TEST_F(SetupWizardTest, DoneWritesTheCompletedVersionAndSummarises) {
 }
 
 TEST_F(SetupWizardTest, ConnectDeviceHandsOffToTheConnectWizard) {
-    recreateApp();
-    hwio::gui::test::registerTestWizard(app(), QUrl(QStringLiteral("qrc:/TestEmbedded.qml")));
+    recreateApp(); // the Connect wizard of plan 0009 is registered with the built-in pages
     ASSERT_TRUE(open(options(Platform::MacOS)));
     walkTo(QStringLiteral("done"));
     const QVariantList done = actions();
@@ -583,8 +583,7 @@ TEST_F(StartupCheckTest, CompletedWithoutJLinkOpensTheNeededVariantUntilDontShow
 }
 
 TEST_F(StartupCheckTest, WaitsForAnotherWizard) {
-    recreateApp();
-    hwio::gui::test::registerTestWizard(app(), QUrl(QStringLiteral("qrc:/TestEmbedded.qml")));
+    recreateApp(); // the Connect wizard of plan 0009
     ASSERT_TRUE(app().launcher()->start(QStringLiteral("connect-device")));
     StartupCheck check(app(), nullptr);
     check.run();

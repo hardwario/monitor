@@ -317,10 +317,10 @@ TestCase {
         const menu = findChild(window, "helpMenu");
         tryVerify(() => menu.opened);
         // Only registered wizards are offered (the test wizard is "connect-device", plus the flash
-        // wizard of plan 0010).
+        // wizard of plan 0010 and troubleshooting of plan 0009).
         verify(findChild(menu, "helpConnect").visible);
         verify(findChild(menu, "helpSetup").visible); // plan 0008
-        verify(!findChild(menu, "helpTroubleshoot").visible);
+        verify(findChild(menu, "helpTroubleshoot").visible); // plan 0009
         verify(findChild(menu, "helpFlash").visible); // plan 0010: the flash wizard is registered
         verify(findChild(menu, "helpReport").visible);
         verify(findChild(menu, "helpDocumentation").visible);

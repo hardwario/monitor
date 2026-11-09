@@ -35,7 +35,8 @@
 // the wizard opened is released when the wizard closes without a hand-off.
 //
 // Hand-offs to other wizards are "open-wizard:<id>" (AppViewModel opens it on the same tab after
-// this one has closed).
+// this one has closed); the failure's [Help me fix this] hands the error itself off
+// (Wizard::handOffError, ADR-0297), so its wizard opens at the matching step or topic.
 //
 // Ownership: created by the WizardRegistry factory with the WizardViewModel as Qt parent; keeps
 // the tab only as QPointer (wizard contract). GUI thread only. Bounds: one operation at a time

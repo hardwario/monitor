@@ -38,6 +38,10 @@ Jeśli nie znaleziono żadnej sondy, strona wyświetla **No J-Link probe found**
 Software. Sprawdź kabel USB, a w systemie Linux regułę udev ([Instalacja](install.md#dostęp-usb-do-j-link)).
 `hwio doctor` sprawdza to wszystko.
 
+**Poprowadź mnie** na tej stronie lub **Nie wiesz, jak połączyć? Poprowadź mnie** pod listą programatorów
+otwiera kreator połączenia: pomaga wybrać programator, podłączyć kabel i zasilanie, sprawdza połączenie, a potem łączy
+kartę.
+
 ### Opcje połączenia
 
 **⋯** (**Advanced**, zaawansowane) na pasku urządzenia zawiera opcje tej sondy. HARDWARIO Monitor zapamiętuje je
@@ -90,6 +94,11 @@ Zmiany obowiązują natychmiast.
 **Help** (pomoc) na dole paska bocznego:
 
 - **Keyboard shortcuts (F1)**: wszystkie skróty klawiaturowe aplikacji (także <kbd>Ctrl</kbd>+<kbd>/</kbd>).
+- **Kreator konfiguracji…**: sprawdza J-Link Software, dostęp do USB (Linux), nRF Util i programatory.
+- **Połącz urządzenie…**: kreator połączenia (programator, kabel, zasilanie, sprawdzenie na żywo, połączenie).
+- **Rozwiązywanie problemów z połączeniem…**: wybierz problem; kreator uruchomi sprawdzenia i poprowadzi Cię krok
+  po kroku.
+- **Wgraj firmware (z kreatorem)…**: wgrywa firmware aplikacji krok po kroku ([Wgrywanie](flashing.md)).
 - **Create diagnostic report…**: plik zip dla wsparcia technicznego HARDWARIO
   ([Prywatność](privacy.md#raport-diagnostyczny)).
 - **Documentation ↗**: te strony w serwisie GitHub, dla zainstalowanej wersji aplikacji i w języku aplikacji

@@ -9,6 +9,9 @@ Ta strona pomaga, gdy coś nie działa. Zaczyna się od najczęstszych problemó
 Każdy błąd ma krótki komunikat, prawdopodobną przyczynę i sugestię.
 
 - **Aplikacja desktopowa (`hwio-monitor`):** panel błędu pokazuje komunikat, **Probably:** (przyczynę) i **What to do:** (sugestię) oraz przycisk następnego kroku, na przykład **Reconnect**, **Open Settings** lub **Retry**. **Details** pokazuje kod błędu (na przykład `probe.not_found`) i szczegóły techniczne; **Copy** je kopiuje. **Learn more ↗** otwiera opis kodu błędu na tej stronie.
+- **Pomóż mi to rozwiązać** w panelu błędu otwiera kreator dla danego błędu: kreator połączenia, kreator
+  konfiguracji, wgrywanie z kreatorem lub temat rozwiązywania problemów dla danego błędu. **Pomoc** ›
+  **Rozwiązywanie problemów z połączeniem…** wyświetla częste problemy.
 - **CLI (`hwio`):** błąd jest wypisywany na stderr:
 
   ```text

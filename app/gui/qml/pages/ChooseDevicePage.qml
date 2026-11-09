@@ -156,29 +156,13 @@ Item {
                 }
             }
 
-            // Disabled until the M4 Connect-device wizard exists.
-            Item {
+            // Plan 0009 (0035): the Connect wizard; hidden while it is not registered.
+            HButton {
+                objectName: "noProbesHelp"
                 Layout.alignment: Qt.AlignHCenter
-                implicitWidth: helpButton.implicitWidth
-                implicitHeight: helpButton.implicitHeight
-
-                HButton {
-                    id: helpButton
-
-                    objectName: "noProbesHelp"
-                    enabled: false
-                    text: qsTr("Help me fix this")
-                    Accessible.description: qsTr("Coming soon")
-                }
-
-                HoverHandler {
-                    id: helpHover
-                }
-
-                HToolTip {
-                    visible: helpHover.hovered
-                    text: qsTr("Coming soon")
-                }
+                visible: AppViewModel.launcher.canOpen("connect-device")
+                text: qsTr("Guide me")
+                onClicked: page.tab.openWizard("connect-device")
             }
         }
 
@@ -312,6 +296,17 @@ Item {
                                 text: qsTr("Connect")
                                 onClicked: page.picker.connectSelected()
                             }
+                        }
+
+                        // Plan 0009 (0035): the Connect wizard as a ghost link; hidden until the
+                        // wizard is registered.
+                        HButton {
+                            objectName: "connectGuideLink"
+                            Layout.alignment: Qt.AlignRight
+                            visible: AppViewModel.launcher.canOpen("connect-device")
+                            kind: "ghost"
+                            text: qsTr("Not sure how to connect? Guide me")
+                            onClicked: page.tab.openWizard("connect-device")
                         }
 
                         // Plan 0010 (0035): the guided flash, in the J-Link view only; hidden until

@@ -20,6 +20,7 @@
 #include "viewmodels/probe_picker_view_model.h"
 #include "wizard/check_list_model.h"
 #include "wizard/flash_wizard.h"
+#include "wizard/troubleshooting_wizard.h"
 #include "wizard/wizard.h"
 #include "wizard/wizard_view_model.h"
 
@@ -484,11 +485,38 @@ TEST_F(FlashWizardTest, AFailureOffersTryAgain) {
     EXPECT_EQ(step.kind, StepKind::Embedded);
     EXPECT_EQ(step.embedded, QStringLiteral("phase-progress"));
     EXPECT_EQ(step.primaryText, QStringLiteral("Try again"));
-    // target.program_failed names Troubleshooting (0009), not registered yet: no Help me fix this.
-    EXPECT_TRUE(step.actions.isEmpty());
+    // target.program_failed names Troubleshooting (plan 0009): [Help me fix this].
+    ASSERT_EQ(step.actions.size(), 1);
+    EXPECT_EQ(step.actions.at(0).toMap().value(QStringLiteral("id")).toString(),
+              QStringLiteral("help-me-fix-this"));
     EXPECT_TRUE(tab().busyPage().isEmpty());
     wizard->primary();
     EXPECT_EQ(wizard->step(), FlashWizard::Confirm);
+}
+
+// ADR-0297: [Help me fix this] hands the error itself off, so troubleshooting opens at the topic.
+TEST_F(FlashWizardTest, HelpMeFixThisOpensTheMatchingTopic) {
+    start(probeScenario(R"({"writeFault": true})"));
+    FlashWizard* wizard = toConfirm(hexFile());
+    ASSERT_NE(wizard, nullptr);
+    ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
+    wizard->primary();
+    ASSERT_TRUE(finished(*wizard));
+    ASSERT_EQ(wizard->stage(), FlashWizard::Failed);
+    QSignalSpy handOffError(app().wizard(), &hwio::gui::WizardViewModel::handOffError);
+    wizard->action(QStringLiteral("help-me-fix-this"));
+    ASSERT_EQ(handOffError.count(), 1);
+    ASSERT_TRUE(waitFor([this] {
+        return app().wizard()->isOpen() &&
+               app().wizard()->wizardId() == QStringLiteral("troubleshooting");
+    }));
+    const auto* troubleshooting =
+        qobject_cast<hwio::gui::TroubleshootingWizard*>(app().wizard()->wizard());
+    ASSERT_NE(troubleshooting, nullptr);
+    ASSERT_NE(troubleshooting->topic(), nullptr);
+    EXPECT_EQ(troubleshooting->topic()->id, "program-failed");
+    EXPECT_EQ(troubleshooting->shownError().code(), QStringLiteral("target.program_failed"));
+    EXPECT_FALSE(troubleshooting->shownError().detail().isEmpty()); // the detail is kept
 }
 
 TEST_F(FlashWizardTest, FlashAnotherGoesBackToTheFirmware) {

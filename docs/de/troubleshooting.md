@@ -9,6 +9,9 @@ Diese Seite hilft Ihnen, wenn etwas nicht funktioniert. Sie beginnt mit den häu
 Jeder Fehler hat eine kurze Meldung, eine wahrscheinliche Ursache und einen Vorschlag.
 
 - **Desktop-App (`hwio-monitor`):** Der Fehlerbereich zeigt die Meldung, **Probably:** (die Ursache) und **What to do:** (den Vorschlag), mit einer Schaltfläche für den nächsten Schritt, etwa **Reconnect**, **Open Settings** oder **Retry**. **Details** zeigt den Fehlercode (zum Beispiel `probe.not_found`) und technische Details; **Copy** kopiert sie. **Learn more ↗** öffnet den Eintrag des Fehlercodes auf dieser Seite.
+- **Hilfe bei der Behebung** im Fehlerfeld öffnet den Assistenten für den Fehler: den Verbindungsassistenten, den
+  Einrichtungsassistenten, das geführte Flashen oder das Thema der Fehlerbehebung für den Fehler. **Hilfe** ›
+  **Verbindungsprobleme beheben…** listet die häufigen Probleme auf.
 - **CLI (`hwio`):** Der Fehler wird nach stderr geschrieben:
 
   ```text

@@ -554,6 +554,10 @@ public slots:
     // One AppViewModel per test file (per QML engine): QML bindings of one engine never outlive it
     // on a shared C++ object (seen as leaked binding guards under LeakSanitizer otherwise).
     void createApp() {
+        // Plan 0009: tst_connect_wizard.qml runs against the real Connect wizard.
+        const bool realConnectWizard = QCoreApplication::arguments()
+                                           .join(QLatin1Char(' '))
+                                           .contains(QStringLiteral("tst_connect_wizard"));
         const std::filesystem::path root(m_dir.path().toStdU16String());
         std::optional<hwio::Settings> settings;
         if (auto opened = hwio::Settings::openFile(root / "Monitor.ini"); opened) {
@@ -570,15 +574,20 @@ public slots:
                                                           .consoleDirectory = root / "console"},
                 .scanInterval = std::chrono::milliseconds(300),
                 .registerExtensions =
-                    [](hwio::gui::AppViewModel& app) {
+                    [realConnectWizard](hwio::gui::AppViewModel& app) {
+                        // M4 (plan/features/0007): the test wizard as "connect-device". It is
+                        // registered first, so it keeps that id and plan 0009's Connect wizard is
+                        // not added - except for tst_connect_wizard.qml (one process per test
+                        // file), which tests the real one.
+                        if (!realConnectWizard) {
+                            hwio::gui::test::registerTestWizard(
+                                app, QUrl::fromLocalFile(QStringLiteral(QUICK_TEST_SOURCE_DIR
+                                                                        "/qml/TestEmbedded.qml")));
+                        }
                         hwio::gui::registerBuiltInPages(app);
                         hwio::gui::test::registerTestPage(
                             app, QUrl::fromLocalFile(
                                      QStringLiteral(QUICK_TEST_SOURCE_DIR "/qml/TestPage.qml")));
-                        // M4 (plan/features/0007): the test wizard as "connect-device".
-                        hwio::gui::test::registerTestWizard(
-                            app, QUrl::fromLocalFile(QStringLiteral(QUICK_TEST_SOURCE_DIR
-                                                                    "/qml/TestEmbedded.qml")));
                     },
                 // Plan 0015 B3: the crash notice reads the marker here (testSupport.simulateCrash).
                 .crashDirectory = root / "crashes"},

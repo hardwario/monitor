@@ -364,44 +364,43 @@
         <translation>Ist das USB-Kabel angeschlossen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="170"/>
-        <source>Help me fix this</source>
-        <translation>Hilfe bei der Behebung</translation>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="164"/>
+        <source>Guide me</source>
+        <translation>Anleitung</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="171"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="180"/>
-        <source>Coming soon</source>
-        <translation>Demnächst verfügbar</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="208"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="192"/>
         <source>Choose a device to connect</source>
         <translation>Wählen Sie ein Gerät zum Verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="216"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="200"/>
         <source>J-Link probes connected to this computer. The list refreshes automatically.</source>
         <translation>Mit diesem Computer verbundene J-Link-Programmieradapter. Die Liste wird automatisch aktualisiert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="253"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="272"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="237"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="256"/>
         <source>Device</source>
         <translation>Gerät</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="299"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="283"/>
         <source>Choose a free probe in the list above.</source>
         <translation>Wählen Sie oben in der Liste einen freien Programmieradapter.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="312"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="296"/>
         <source>Connect</source>
         <translation>Verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="324"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="308"/>
+        <source>Not sure how to connect? Guide me</source>
+        <translation>Unsicher beim Verbinden? Anleitung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="319"/>
         <source>Flash firmware with a guide</source>
         <translation>Firmware mit Assistent flashen</translation>
     </message>
@@ -1001,87 +1000,87 @@
 <context>
     <name>ErrorPanel</name>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="31"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="33"/>
         <source>Reconnect</source>
         <translation>Neu verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="31"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="33"/>
         <source>Choose another file</source>
         <translation>Andere Datei wählen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="32"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="34"/>
         <source>Open Settings</source>
         <translation>Einstellungen öffnen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="32"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="34"/>
         <source>Retry</source>
         <translation>Erneut versuchen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="32"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="34"/>
         <source>Dismiss</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="102"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="104"/>
         <source>Show less</source>
         <translation>Weniger anzeigen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="102"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="104"/>
         <source>Show more</source>
         <translation>Mehr anzeigen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="113"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="115"/>
         <source>Probably: %1</source>
         <translation>Wahrscheinlich: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="123"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="125"/>
         <source>What to do: %1</source>
         <translation>Was zu tun ist: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="135"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="137"/>
         <source>Learn more ↗</source>
         <translation>Mehr erfahren ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="136"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="138"/>
         <source>Learn more about this error (opens browser)</source>
         <translation>Mehr über diesen Fehler erfahren (öffnet den Browser)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="176"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="178"/>
         <source>Help me fix this</source>
         <translation>Hilfe bei der Behebung</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="185"/>
         <source>Details</source>
         <translation>Details</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="185"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="187"/>
         <source>Expanded</source>
         <translation>Ausgeklappt</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="185"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="187"/>
         <source>Collapsed</source>
         <translation>Eingeklappt</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="215"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="217"/>
         <source>Error details</source>
         <translation>Fehlerdetails</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="221"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="223"/>
         <source>Copy</source>
         <translation>Kopieren</translation>
     </message>
@@ -1961,18 +1960,23 @@
         <translation>HARDWARIO Monitor wird beendet, sobald die Aktualisierung abgeschlossen ist.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="178"/>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="179"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="182"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="183"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="201"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="182"/>
+        <source>Help me fix this</source>
+        <translation>Hilfe bei der Behebung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="213"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="210"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="222"/>
         <source>Update</source>
         <translation>Aktualisieren</translation>
     </message>
@@ -2272,45 +2276,45 @@
         <translation>Firmware-Datei wählen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="412"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="413"/>
         <source>New device tab</source>
         <translation>Neuer Geräte-Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="415"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="416"/>
         <source>Close the device tab</source>
         <translation>Geräte-Tab schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="418"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="421"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="419"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="422"/>
         <source>Next tab</source>
         <translation>Nächster Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="424"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="427"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="425"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="428"/>
         <source>Previous tab</source>
         <translation>Vorheriger Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="430"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="431"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="433"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="434"/>
         <source>Connect or disconnect</source>
         <translation>Verbinden oder trennen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="436"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="437"/>
         <source>Reconnect</source>
         <translation>Neu verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="439"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="442"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="440"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="443"/>
         <source>Keyboard shortcuts</source>
         <translation>Tastenkürzel</translation>
     </message>
@@ -2429,6 +2433,495 @@
     </message>
 </context>
 <context>
+    <name>Troubleshooting</name>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="38"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="75"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="130"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="164"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="226"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="284"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="329"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="386"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="443"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="469"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="506"/>
+        <source>Check</source>
+        <translation>Prüfung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="39"/>
+        <source>Looking for the J-Link</source>
+        <translation>J-Link wird gesucht</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="47"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="97"/>
+        <source>USB</source>
+        <translation>USB</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="48"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="98"/>
+        <source>Reconnect the J-Link</source>
+        <translation>J-Link neu anschließen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="49"/>
+        <source>Unplug the J-Link and connect it again. Try another USB port and another cable. The LED of the J-Link should light up.</source>
+        <translation>Ziehen Sie den J-Link ab und schließen Sie ihn wieder an. Versuchen Sie einen anderen USB-Anschluss und ein anderes Kabel. Die LED des J-Link sollte leuchten.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="59"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="107"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="149"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="193"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="352"/>
+        <source>Check again</source>
+        <translation>Erneut prüfen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="61"/>
+        <source>Looking for the J-Link again</source>
+        <translation>J-Link wird erneut gesucht</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="65"/>
+        <source>Connect</source>
+        <translation>Verbinden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="76"/>
+        <source>Who uses the J-Link?</source>
+        <translation>Wer verwendet den J-Link?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="84"/>
+        <source>Other programs</source>
+        <translation>Andere Programme</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="85"/>
+        <source>Close the other program</source>
+        <translation>Anderes Programm schließen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="86"/>
+        <source>Only one program can use a J-Link at a time. Close the other HARDWARIO Monitor window, the other &lt;b&gt;hwio&lt;/b&gt; command, or debugging tools such as the SEGGER J-Link Commander.</source>
+        <translation>Ein J-Link kann jeweils nur von einem Programm verwendet werden. Schließen Sie das andere HARDWARIO-Monitor-Fenster, den anderen &lt;b&gt;hwio&lt;/b&gt;-Befehl oder Debugging-Werkzeuge wie den SEGGER J-Link Commander.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="100"/>
+        <source>Unplug the J-Link and connect it again.</source>
+        <translation>Ziehen Sie den J-Link ab und schließen Sie ihn wieder an.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="108"/>
+        <source>Opening the J-Link</source>
+        <translation>J-Link wird geöffnet</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="121"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="406"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="433"/>
+        <source>Power</source>
+        <translation>Stromversorgung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="122"/>
+        <source>Power the device</source>
+        <translation>Gerät mit Strom versorgen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="131"/>
+        <source>Measuring the power</source>
+        <translation>Stromversorgung wird gemessen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="139"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="173"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="312"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="478"/>
+        <source>Cable</source>
+        <translation>Kabel</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="140"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="174"/>
+        <source>Check the flat cable</source>
+        <translation>Flachbandkabel prüfen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="141"/>
+        <source>Check that the flat cable is fully inserted at both ends.</source>
+        <translation>Prüfen Sie, ob das Flachbandkabel an beiden Enden vollständig eingesteckt ist.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="151"/>
+        <source>Measuring the power again</source>
+        <translation>Stromversorgung wird erneut gemessen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="165"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="227"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="285"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="387"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="444"/>
+        <source>Checking the connection</source>
+        <translation>Verbindung wird geprüft</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="182"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="266"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="395"/>
+        <source>Speed</source>
+        <translation>Geschwindigkeit</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="183"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="396"/>
+        <source>Lower the J-Link speed</source>
+        <translation>J-Link-Geschwindigkeit senken</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="184"/>
+        <source>A long or poor cable may need a lower speed. Use 1000 kHz for this J-Link, then check again.</source>
+        <translation>Ein langes oder schlechtes Kabel braucht eventuell eine niedrigere Geschwindigkeit. Verwenden Sie für diesen J-Link 1000 kHz und prüfen Sie dann erneut.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="189"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="402"/>
+        <source>Use 1000 kHz</source>
+        <translation>1000 kHz verwenden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="195"/>
+        <source>Checking the connection again</source>
+        <translation>Verbindung wird erneut geprüft</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="207"/>
+        <source>Connector</source>
+        <translation>Anschluss</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="209"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="568"/>
+        <source>The J-Link is on the LTE connector</source>
+        <translation>Der J-Link steckt am LTE-Anschluss</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="210"/>
+        <source>A tab works with the application MCU. Move the cable to the APP connector and press &lt;b&gt;Retry&lt;/b&gt; on the tab, or update the LTE firmware.</source>
+        <translation>Ein Tab arbeitet mit der Anwendungs-MCU. Stecken Sie das Kabel an den APP-Anschluss und drücken Sie im Tab &lt;b&gt;Erneut versuchen&lt;/b&gt;, oder aktualisieren Sie die LTE-Firmware.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="216"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="498"/>
+        <source>Update LTE firmware…</source>
+        <translation>LTE-Firmware aktualisieren…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="235"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="241"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="293"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="299"/>
+        <source>Reset</source>
+        <translation>Reset</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="236"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="294"/>
+        <source>Reset the device</source>
+        <translation>Gerät zurücksetzen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="237"/>
+        <source>A reset starts the firmware again, and with it the console.</source>
+        <translation>Ein Reset startet die Firmware neu und damit auch die Konsole.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="245"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="303"/>
+        <source>Console</source>
+        <translation>Konsole</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="246"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="304"/>
+        <source>Looking for the console</source>
+        <translation>Konsole wird gesucht</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="254"/>
+        <source>Firmware</source>
+        <translation>Firmware</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="256"/>
+        <source>Flash firmware with the console</source>
+        <translation>Firmware mit Konsole flashen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="257"/>
+        <source>The console needs firmware with the CHESTER console (RTT shell). Flash such firmware.</source>
+        <translation>Die Konsole braucht Firmware mit der CHESTER-Konsole (RTT-Shell). Flashen Sie solche Firmware.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="262"/>
+        <source>Flash firmware…</source>
+        <translation>Firmware flashen…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="267"/>
+        <source>Use Automatic speed</source>
+        <translation>Automatische Geschwindigkeit verwenden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="268"/>
+        <source>A very low J-Link speed can also hide the console. Choose &lt;b&gt;Automatic speed&lt;/b&gt; in the ⋯ menu of the device bar.</source>
+        <translation>Auch eine sehr niedrige J-Link-Geschwindigkeit kann die Konsole verbergen. Wählen Sie im ⋯-Menü der Geräteleiste &lt;b&gt;Automatische Geschwindigkeit&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="296"/>
+        <source>The device may be busy or hung.</source>
+        <translation>Das Gerät ist möglicherweise ausgelastet oder hängt.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="313"/>
+        <source>Check the cables</source>
+        <translation>Kabel prüfen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="314"/>
+        <source>Check the USB cable and the flat cable. When auto-reconnect is on, the console reconnects by itself.</source>
+        <translation>Prüfen Sie das USB-Kabel und das Flachbandkabel. Bei aktivierter automatischer Wiederverbindung verbindet sich die Konsole von selbst.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="331"/>
+        <source>Checking the J-Link firmware</source>
+        <translation>J-Link-Firmware wird geprüft</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="339"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="491"/>
+        <source>Update</source>
+        <translation>Aktualisierung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="341"/>
+        <source>Update the J-Link firmware</source>
+        <translation>J-Link-Firmware aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="342"/>
+        <source>Update the firmware here, or run the command below. The J-Link must not be used by a tab. Do not unplug it during the update.</source>
+        <translation>Aktualisieren Sie die Firmware hier oder führen Sie den Befehl unten aus. Der J-Link darf von keinem Tab verwendet werden. Ziehen Sie ihn während der Aktualisierung nicht ab.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="354"/>
+        <source>Checking the J-Link firmware again</source>
+        <translation>J-Link-Firmware wird erneut geprüft</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="367"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="452"/>
+        <source>Recover</source>
+        <translation>Wiederherstellen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="369"/>
+        <source>The MCU is read-back protected</source>
+        <translation>Die MCU ist auslesegeschützt</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="370"/>
+        <source>Recover removes the protection, but it erases the whole MCU, including the UICR and the Product Information Block. Recover is on the Flash page.</source>
+        <translation>Wiederherstellen entfernt den Schutz, löscht aber die ganze MCU einschließlich UICR und Product Information Block. Wiederherstellen finden Sie auf der Seite Flashen.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="376"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="460"/>
+        <source>Open Flash page</source>
+        <translation>Seite Flashen öffnen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="397"/>
+        <source>If verification fails again and again, use 1000 kHz for this J-Link.</source>
+        <translation>Wenn die Überprüfung immer wieder fehlschlägt, verwenden Sie für diesen J-Link 1000 kHz.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="407"/>
+        <source>Keep the power stable</source>
+        <translation>Für stabile Stromversorgung sorgen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="408"/>
+        <source>Make sure the power is stable during flashing: charged batteries or the USB-C power input.</source>
+        <translation>Sorgen Sie beim Flashen für eine stabile Stromversorgung: geladene Batterien oder den USB-C-Stromeingang.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="417"/>
+        <source>Flash</source>
+        <translation>Flashen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="418"/>
+        <source>Flash again</source>
+        <translation>Erneut flashen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="420"/>
+        <source>Check the cables and the power, then flash the firmware again.</source>
+        <translation>Prüfen Sie die Kabel und die Stromversorgung und flashen Sie die Firmware dann erneut.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="424"/>
+        <source>Try again</source>
+        <translation>Erneut versuchen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="434"/>
+        <source>Restart the power</source>
+        <translation>Stromversorgung neu starten</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="435"/>
+        <source>Disconnect the power for 10 seconds, then connect it again.</source>
+        <translation>Trennen Sie die Stromversorgung für 10 Sekunden und schließen Sie sie dann wieder an.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="453"/>
+        <source>Recover again</source>
+        <translation>Erneut wiederherstellen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="454"/>
+        <source>Run Recover again on the Flash page. It erases the whole MCU, including the UICR and the Product Information Block.</source>
+        <translation>Führen Sie Wiederherstellen auf der Seite Flashen erneut aus. Es löscht die ganze MCU einschließlich UICR und Product Information Block.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="470"/>
+        <source>Checking nRF Util</source>
+        <translation>nRF Util wird geprüft</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="480"/>
+        <source>Check the cable and the power</source>
+        <translation>Kabel und Stromversorgung prüfen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="481"/>
+        <source>The modem update takes 1–3 minutes and must not be interrupted. Check the cable and the power before you start it again.</source>
+        <translation>Die Modem-Aktualisierung dauert 1–3 Minuten und darf nicht unterbrochen werden. Prüfen Sie Kabel und Stromversorgung, bevor Sie sie erneut starten.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="492"/>
+        <source>Update the LTE firmware</source>
+        <translation>LTE-Firmware aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="493"/>
+        <source>The guided LTE firmware update moves the J-Link between the connectors and updates the modem.</source>
+        <translation>Die geführte LTE-Firmware-Aktualisierung führt Sie beim Umstecken des J-Link zwischen den Anschlüssen und aktualisiert das Modem.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="507"/>
+        <source>Checking Bluetooth</source>
+        <translation>Bluetooth wird geprüft</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="515"/>
+        <source>Device</source>
+        <translation>Gerät</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="516"/>
+        <source>Prepare the device</source>
+        <translation>Gerät vorbereiten</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="517"/>
+        <source>Turn the device on and bring it closer. Disconnect it from phones and other computers.</source>
+        <translation>Schalten Sie das Gerät ein und bringen Sie es näher. Trennen Sie es von Telefonen und anderen Computern.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="526"/>
+        <source>Pairing</source>
+        <translation>Kopplung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="527"/>
+        <source>Pair again</source>
+        <translation>Erneut koppeln</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="528"/>
+        <source>If pairing fails, remove the device in the system Bluetooth settings and pair again. On Linux, a pairing agent must run to ask for the passkey.</source>
+        <translation>Wenn die Kopplung fehlschlägt, entfernen Sie das Gerät in den Bluetooth-Einstellungen des Systems und koppeln Sie es erneut. Unter Linux muss ein Kopplungsagent laufen, der nach dem Passkey fragt.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="541"/>
+        <source>No J-Link found</source>
+        <translation>Kein J-Link gefunden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="548"/>
+        <source>The J-Link is used by another program</source>
+        <translation>Der J-Link wird von einem anderen Programm verwendet</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="555"/>
+        <source>The device has no power or does not respond</source>
+        <translation>Das Gerät hat keinen Strom oder antwortet nicht</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="561"/>
+        <source>The device does not respond</source>
+        <translation>Das Gerät antwortet nicht</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="574"/>
+        <source>The console stays empty</source>
+        <translation>Die Konsole bleibt leer</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="580"/>
+        <source>The console does not answer</source>
+        <translation>Die Konsole antwortet nicht</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="586"/>
+        <source>Flashing fails</source>
+        <translation>Flashen schlägt fehl</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="592"/>
+        <source>The MCU is protected</source>
+        <translation>Die MCU ist geschützt</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="598"/>
+        <source>Recover fails</source>
+        <translation>Wiederherstellen schlägt fehl</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="604"/>
+        <source>J-Link firmware</source>
+        <translation>J-Link-Firmware</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="610"/>
+        <source>LTE modem firmware</source>
+        <translation>LTE-Modem-Firmware</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="616"/>
+        <source>Bluetooth</source>
+        <translation>Bluetooth</translation>
+    </message>
+</context>
+<context>
     <name>UpdateBanner</name>
     <message>
         <location filename="../app/gui/qml/shell/UpdateBanner.qml" line="58"/>
@@ -2531,6 +3024,19 @@
         <location filename="../app/gui/qml/components/WizardDialog.qml" line="369"/>
         <source>Keep going</source>
         <translation>Fortfahren</translation>
+    </message>
+</context>
+<context>
+    <name>WizardErrorStep</name>
+    <message>
+        <location filename="../app/gui/qml/wizard/WizardErrorStep.qml" line="46"/>
+        <source>Probably: %1</source>
+        <translation>Wahrscheinlich: %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/WizardErrorStep.qml" line="56"/>
+        <source>What to do: %1</source>
+        <translation>Was zu tun ist: %1</translation>
     </message>
 </context>
 <context>
@@ -4930,7 +5436,7 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1192"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1193"/>
         <source>Copied to clipboard.</source>
         <translation>In die Zwischenablage kopiert.</translation>
     </message>
@@ -5002,6 +5508,166 @@
             <numerusform>%n Gerät gefunden</numerusform>
             <numerusform>%n Geräte gefunden</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::ConnectWizard</name>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="112"/>
+        <source>Connect a device</source>
+        <translation>Gerät verbinden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="228"/>
+        <source>Probe</source>
+        <translation>Programmieradapter</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="235"/>
+        <source>Cable</source>
+        <translation>Kabel</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="239"/>
+        <source>Power</source>
+        <translation>Stromversorgung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="243"/>
+        <source>Check</source>
+        <translation>Prüfung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="247"/>
+        <source>Done</source>
+        <translation>Fertig</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="265"/>
+        <source>Choose the J-Link</source>
+        <translation>J-Link wählen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="266"/>
+        <source>Connect the J-Link to your computer with a USB cable.</source>
+        <translation>Verbinden Sie den J-Link über ein USB-Kabel mit Ihrem Computer.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="268"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="283"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="293"/>
+        <source>Next</source>
+        <translation>Weiter</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="271"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="337"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="341"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="345"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="352"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="356"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="366"/>
+        <source>Check again</source>
+        <translation>Erneut prüfen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="276"/>
+        <source>Connect the J-Link to the device</source>
+        <translation>J-Link mit dem Gerät verbinden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="288"/>
+        <source>Power the device</source>
+        <translation>Gerät mit Strom versorgen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="308"/>
+        <source>Checking the connection</source>
+        <translation>Verbindung wird geprüft</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="312"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="316"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="322"/>
+        <source>Connect</source>
+        <translation>Verbinden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="315"/>
+        <source>The device answers</source>
+        <translation>Das Gerät antwortet</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="319"/>
+        <source>The MCU is read-back protected. Recover removes the protection but erases the MCU completely.</source>
+        <translation>Die MCU ist auslesegeschützt. Wiederherstellen entfernt den Schutz, löscht die MCU aber vollständig.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="321"/>
+        <source>Open Flash page</source>
+        <translation>Seite Flashen öffnen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="325"/>
+        <source>The device has no console. It may need firmware with the CHESTER shell.</source>
+        <translation>Das Gerät hat keine Konsole. Es braucht möglicherweise Firmware mit der CHESTER-Shell.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="327"/>
+        <source>Flash firmware…</source>
+        <translation>Firmware flashen…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="329"/>
+        <source>Connect anyway</source>
+        <translation>Trotzdem verbinden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="332"/>
+        <source>The J-Link is on the LTE connector. Move it to the APP connector.</source>
+        <translation>Der J-Link steckt am LTE-Anschluss. Stecken Sie ihn an den APP-Anschluss.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="333"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="340"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="344"/>
+        <source>Show me how</source>
+        <translation>Zeig mir, wie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="335"/>
+        <source>Update LTE firmware…</source>
+        <translation>LTE-Firmware aktualisieren…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="350"/>
+        <source>Help me fix this</source>
+        <translation>Hilfe bei der Behebung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="364"/>
+        <source>Could not connect</source>
+        <translation>Verbindung nicht möglich</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="371"/>
+        <source>Connecting…</source>
+        <translation>Verbinden…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="381"/>
+        <source>Connected to %1 %2 · %3.</source>
+        <translation>Verbunden mit %1 %2 · %3.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="382"/>
+        <source>Open console</source>
+        <translation>Konsole öffnen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="718"/>
+        <source>The connection is being checked. Cancel it and close the wizard?</source>
+        <translation>Die Verbindung wird geprüft. Abbrechen und den Assistenten schließen?</translation>
     </message>
 </context>
 <context>
@@ -5503,6 +6169,25 @@
         <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="738"/>
         <source>— resumed —</source>
         <translation>— fortgesetzt —</translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::DiagnoseRunner</name>
+    <message>
+        <location filename="../app/gui/src/wizard/diagnose_runner.cpp" line="135"/>
+        <location filename="../app/gui/src/wizard/diagnose_runner.cpp" line="263"/>
+        <source>Not checked</source>
+        <translation>Nicht geprüft</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/diagnose_runner.cpp" line="292"/>
+        <source>Checking the connection…</source>
+        <translation>Verbindung wird geprüft…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/diagnose_runner.cpp" line="293"/>
+        <source>The connection is being checked. Cancel the check and close the tab?</source>
+        <translation>Die Verbindung wird geprüft. Prüfung abbrechen und den Tab schließen?</translation>
     </message>
 </context>
 <context>
@@ -6199,109 +6884,109 @@
         <translation>Weitere flashen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="696"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="701"/>
         <source>Not checked</source>
         <translation>Nicht geprüft</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="760"/>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="791"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="765"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="796"/>
         <source>This is LTE firmware. Update it with the LTE firmware update, which moves the J-Link between the connectors.</source>
         <translation>Das ist LTE-Firmware. Spielen Sie sie mit dem LTE-Firmware-Update auf, das Sie durch das Umstecken des J-Link zwischen den Anschlüssen führt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="763"/>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="793"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="768"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="798"/>
         <source>This firmware is for another MCU. Check whether it is application or LTE firmware.</source>
         <translation>Diese Firmware ist für eine andere MCU. Prüfen Sie, ob es Anwendungs- oder LTE-Firmware ist.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="778"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="783"/>
         <source>The file is not a valid HEX file (line %1). Use the .hex file produced by the build, or download it from the catalog again.</source>
         <translation>Die Datei ist keine gültige HEX-Datei (Zeile %1). Verwenden Sie die beim Build erzeugte .hex-Datei oder laden Sie sie erneut aus dem Katalog herunter.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="782"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="787"/>
         <source>The file is not a valid HEX file. Use the .hex file produced by the build, or download it from the catalog again.</source>
         <translation>Die Datei ist keine gültige HEX-Datei. Verwenden Sie die beim Build erzeugte .hex-Datei oder laden Sie sie erneut aus dem Katalog herunter.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="786"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="791"/>
         <source>This file is not CHESTER firmware. Application and LTE firmware are .hex files; LTE bundles and modem firmware are .zip files.</source>
         <translation>Diese Datei ist keine CHESTER-Firmware. Anwendungs- und LTE-Firmware sind .hex-Dateien; LTE-Bundles und Modem-Firmware sind .zip-Dateien.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="797"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="802"/>
         <source>No firmware has this ID. Copy the ID from the firmware catalog again.</source>
         <translation>Keine Firmware hat diese ID. Kopieren Sie die ID erneut aus dem Firmware-Katalog.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="832"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="837"/>
         <source>The device tab was closed</source>
         <translation>Der Geräte-Tab wurde geschlossen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="835"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="840"/>
         <source>Choose a firmware file</source>
         <translation>Firmware-Datei wählen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="838"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="843"/>
         <source>Another operation is running</source>
         <translation>Ein anderer Vorgang läuft</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="857"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="862"/>
         <source>%1 (Intel HEX, %2) → %3 of %4 via J-Link %5.</source>
         <translation>%1 (Intel HEX, %2) → %3 von %4 über J-Link %5.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="863"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="868"/>
         <source>The current application firmware is replaced. The UICR configuration is also written; the Product Information Block is kept.</source>
         <translation>Die aktuelle Anwendungs-Firmware wird ersetzt. Die UICR-Konfiguration wird ebenfalls geschrieben; der Produktinformationsblock (PIB) bleibt erhalten.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="866"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="871"/>
         <source>The current application firmware is replaced. Configuration and the Product Information Block are kept.</source>
         <translation>Die aktuelle Anwendungs-Firmware wird ersetzt. Konfiguration und Produktinformationsblock (PIB) bleiben erhalten.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="915"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="920"/>
         <source>Flashing…</source>
         <translation>Flashen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="916"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="921"/>
         <source>Flashing is in progress. Cancel it and close the tab?</source>
         <translation>Das Flashen läuft. Abbrechen und den Tab schließen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1016"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1021"/>
         <source>Flashing is in progress. Cancel it and close the wizard?</source>
         <translation>Das Flashen läuft. Abbrechen und den Assistenten schließen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1074"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1079"/>
         <source>Flashing %1 to the %2 MCU</source>
         <translation>%1 wird auf die MCU %2 geflasht</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1101"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1106"/>
         <source>Cancelling…</source>
         <translation>Wird abgebrochen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1121"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1126"/>
         <source>Firmware flashed and verified in %1 s.</source>
         <translation>Firmware in %1 s geflasht und verifiziert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1123"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1128"/>
         <source>Chip: %1</source>
         <translation>Chip: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1131"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1136"/>
         <source>Flashing was interrupted. The firmware may be partly written: flash it again.</source>
         <translation>Das Flashen wurde unterbrochen. Die Firmware ist möglicherweise nur teilweise geschrieben: Flashen Sie sie erneut.</translation>
     </message>
@@ -7075,6 +7760,133 @@
     </message>
 </context>
 <context>
+    <name>hwio::gui::TroubleshootingWizard</name>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="89"/>
+        <source>The device was reset.</source>
+        <translation>Das Gerät wurde zurückgesetzt.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="111"/>
+        <source>Troubleshooting</source>
+        <translation>Fehlerbehebung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="332"/>
+        <source>Not checked: no J-Link chosen</source>
+        <translation>Nicht geprüft: kein J-Link gewählt</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="364"/>
+        <source>Problem</source>
+        <translation>Problem</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="369"/>
+        <source>Error</source>
+        <translation>Fehler</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="374"/>
+        <source>Probe</source>
+        <translation>Programmieradapter</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="382"/>
+        <source>Support</source>
+        <translation>Support</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="410"/>
+        <source>The J-Link is on the LTE connector. Move it to the APP connector.</source>
+        <translation>Der J-Link steckt am LTE-Anschluss. Stecken Sie ihn an den APP-Anschluss.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="421"/>
+        <source>Learn more</source>
+        <translation>Mehr erfahren</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="424"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="507"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="518"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="525"/>
+        <source>Next</source>
+        <translation>Weiter</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="433"/>
+        <source>Setup wizard…</source>
+        <translation>Einrichtungsassistent…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="437"/>
+        <source>Found — connect now</source>
+        <translation>Gefunden — jetzt verbinden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="440"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="451"/>
+        <source>Check again</source>
+        <translation>Erneut prüfen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="448"/>
+        <source>Connect a device</source>
+        <translation>Gerät verbinden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="496"/>
+        <source>What is the problem?</source>
+        <translation>Was ist das Problem?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="515"/>
+        <source>Let&apos;s find the cause.</source>
+        <translation>Suchen wir die Ursache.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="523"/>
+        <source>Choose the J-Link</source>
+        <translation>J-Link wählen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="524"/>
+        <source>The checks need a J-Link. Choose the one connected to the device.</source>
+        <translation>Die Prüfungen brauchen einen J-Link. Wählen Sie den, der mit dem Gerät verbunden ist.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="532"/>
+        <source>Still not working?</source>
+        <translation>Funktioniert es immer noch nicht?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="533"/>
+        <source>Create a diagnostic report and send it to HARDWARIO support.</source>
+        <translation>Erstellen Sie einen Diagnosebericht und senden Sie ihn an den HARDWARIO-Support.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="534"/>
+        <source>Create diagnostic report…</source>
+        <translation>Diagnosebericht erstellen…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="721"/>
+        <source>J-Link speed set to 1000 kHz for this probe.</source>
+        <translation>J-Link-Geschwindigkeit für diesen Programmieradapter auf 1000 kHz gesetzt.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="749"/>
+        <source>Update J-Link firmware %1…</source>
+        <translation>J-Link-Firmware %1 aktualisieren…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="786"/>
+        <source>A check is running. Cancel it and close the wizard?</source>
+        <translation>Eine Prüfung läuft. Abbrechen und den Assistenten schließen?</translation>
+    </message>
+</context>
+<context>
     <name>hwio::gui::UpdateViewModel</name>
     <message>
         <location filename="../app/gui/src/viewmodels/update_view_model.cpp" line="88"/>
@@ -7102,12 +7914,12 @@
 <context>
     <name>hwio::gui::WizardViewModel</name>
     <message>
-        <location filename="../app/gui/src/wizard/wizard_view_model.cpp" line="159"/>
+        <location filename="../app/gui/src/wizard/wizard_view_model.cpp" line="161"/>
         <source>Step %1 of %2 · %3</source>
         <translation>Schritt %1 von %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/wizard_view_model.cpp" line="173"/>
+        <location filename="../app/gui/src/wizard/wizard_view_model.cpp" line="175"/>
         <source>Step %1 of %2, %3</source>
         <translation>Schritt %1 von %2, %3</translation>
     </message>

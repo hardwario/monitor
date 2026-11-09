@@ -24,6 +24,7 @@
 #include "update_service.h"
 #include "viewmodels/device_tab_list_model.h"
 #include "viewmodels/device_tab_view_model.h"
+#include "viewmodels/error_info.h"
 #include "viewmodels/flash_view_model.h"
 #include "viewmodels/history_store.h"
 #include "viewmodels/page_list_model.h"
@@ -225,6 +226,7 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
 
     connect(m_scanner.get(), &ProbeScanner::scanned, this, &AppViewModel::onScan);
     connect(m_wizard, &WizardViewModel::handOff, this, &AppViewModel::onHandOff);
+    connect(m_wizard, &WizardViewModel::handOffError, this, &AppViewModel::onHandOffError);
     connect(m_settings, &SettingsStore::valueChanged, this, [this](const QString& key) {
         if (key == QStringLiteral("jlink/libraryPath")) {
             updateLocatorOptions();
@@ -1343,6 +1345,28 @@ void AppViewModel::onHandOff(const QString& action, DeviceTabViewModel* tab) {
             }
         }
     }
+}
+
+void AppViewModel::onHandOffError(const ErrorInfo& error, DeviceTabViewModel* tab) {
+    // ADR-0297: the wizard the error names opens with the error as context (its start step or
+    // topic), once the handing-off wizard has closed.
+    const QString wizardId = error.wizard();
+    qCInfo(lcGui).noquote() << "Wizard hand-off:" << wizardId << "for" << error.code();
+    if (wizardId.isEmpty() || !m_wizardRegistry.has(wizardId)) {
+        return;
+    }
+    if (tab != nullptr) {
+        if (const int index = m_tabs->indexOf(tab); index >= 0) {
+            setCurrentTab(index);
+        }
+    }
+    QMetaObject::invokeMethod(
+        this,
+        [this, wizardId, error, target = QPointer<DeviceTabViewModel>(tab)] {
+            DeviceTabViewModel* on = target.isNull() ? currentTabViewModel() : target.data();
+            (void)m_launcher->openForTab(wizardId, on, error);
+        },
+        Qt::QueuedConnection);
 }
 
 void AppViewModel::retranslate() {

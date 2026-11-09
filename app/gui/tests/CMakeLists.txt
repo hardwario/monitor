@@ -95,8 +95,10 @@ add_executable(hwio_gui_tests
     viewmodels/single_instance_test.cpp
     viewmodels/update_service_test.cpp
     viewmodels/wizard_test.cpp
+    wizard/connect_wizard_test.cpp
     wizard/flash_wizard_test.cpp
     wizard/setup_wizard_test.cpp
+    wizard/troubleshooting_wizard_test.cpp
     wizard/wizard_coverage_test.cpp
     ${HWIO_GUI_TEST_SUPPORT})
 hwio_apply_target_defaults(hwio_gui_tests)

@@ -240,11 +240,16 @@ Phase C — 0010 (parallel with B)
 - [x] C1 Implement 0010 as amended (its W0, W2–W5; W1 done) — 2026-11-06 on `strnad/impl-0010`; HIL open (0010); ADR-0295 (no promotion before flashing) and ADR-0296 (Diagnose stop point, RTT steps not run in the Cable step) decided 2026-11-09
 
 Phase D — 0009 (after B and C)
-- [ ] D1 Implement 0009 as amended (its T0, T2–T6) with the topic table of § C; coverage test complete
-- [ ] D2 Docs (`getting-started`, `flashing`, `troubleshooting`) in en, cs, de, sk, pl
+- [x] D1 Implement 0009 as amended (its T0, T2–T6) with the topic table of § C; coverage test complete — 2026-11-09 on
+  `strnad/impl-0009` (merged with 0008 and 0010); ADR-0297 (`Wizard::handOffError`), ADR-0298, ADR-0299; 0009 T6
+  (content), the HARDWARIO review of the topic texts and HIL open
+- [x] D2 Docs (`getting-started`, `flashing`, `troubleshooting`) in en, cs, de, sk, pl (2026-11-09: Help menu items,
+  Choose device "Guide me", the guided flash, "Help me fix this")
 
 Phase E — finish
-- [ ] E1 `update_translations`; cs + de + sk + pl 0 unfinished (`check_translations`); screenshots of every new step
+- [ ] E1 (2026-11-09: catalogs fresh, cs + de + sk + pl 0 unfinished; 0009 screenshots EN + CS light/dark taken
+  offscreen, DE screenshots of the new steps still open; DE at 960 × 600 covered by `tst_connect_wizard.qml`)
+  `update_translations`; cs + de + sk + pl 0 unfinished (`check_translations`); screenshots of every new step
   in light/dark, EN + DE (longest) at 960 × 600
 - [ ] E2 Verification below; roadmap and plan statuses updated
 
