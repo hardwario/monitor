@@ -1,11 +1,11 @@
 # 0040 — CHESTER LoRaWAN module (`lrw` target, prepared firmware)
 
-- **Status:** Approved (approved by the user 2026-11-06 with all recommended options; D6 stays open); Phase 0
-  partly done during 0039 HIL (2026-11-06), see "Phase 0 results"
+- **Status:** In progress (approved 2026-11-06 with all recommended options; D6 stays open; D7/D8 decided
+  2026-11-09 after Phase 0, ADR-0283)
 - **Milestone:** 2.0.0-rc.4 (user decision 2026-11-06)
 - **Author:** Matej Strnad (with Claude), 2026-11-06
 - **Related ADRs:** ADR-0037, ADR-0038, ADR-0057, ADR-0077, ADR-0165, ADR-0174, ADR-0274 … ADR-0277; accepted
-  here: ADR-0278, ADR-0281
+  here: ADR-0278, ADR-0281, ADR-0283
 - **Depends on:** [0039](0039-stm32-flashing.md) (STM32 framework)
 
 ## Context
@@ -100,6 +100,8 @@ version before downloading.
 | D4 | Check module after flashing | offer "Check module" over the app console / no check | **Offer "Check module"** (approved 2026-11-06; command from P0.4) | ADR-0281 |
 | D5 | Flash wizard (0010) | add the third choice in rc.4 / later | **Later (after rc.4)** (approved 2026-11-06) | ADR-0281 |
 | D6 | CHESTER v2 LoRaWAN module | own part + firmware when known / same part | open: the user to tell which chip `ctr_lrw_v2` uses | — |
+| D7 | Phase 0: the module answers only while the application MCU is held | guided cable moves (as ADR-0234) / flash only, docs explain | **Guided cable moves** (2026-11-09) | ADR-0283 |
+| D8 | Phase 0: "Check module" needs a config change (`lrw config test true`) | hide it in rc.4 / use test mode briefly | **Hidden in rc.4** (2026-11-09; supersedes the D4 "offer" for rc.4) | ADR-0283 |
 
 ## Implementation steps
 
@@ -110,7 +112,7 @@ version before downloading.
 - [x] P0.2 DEV_ID `0x447`, flash size 192 KiB, RDP level of a factory module and of a module with lora-modem.
 - [x] P0.3 Flash lora-modem 1.4.1 with J-Link Commander once by hand (after a backup where readable); confirm the
       module works with the CHESTER application afterwards.
-- [ ] P0.4 The application-shell command that proves the module answers (`lrw …`), for D4.
+- [x] P0.4 The application-shell command that proves the module answers (`lrw …`), for D4.
 - [ ] P0.5 Does lora-modem keep anything in data EEPROM (`0x08080000`) that CHESTER needs after a mass erase?
 
 #### Phase 0 results (2026-11-06)
@@ -137,10 +139,14 @@ version before downloading.
 - [ ] A3 Downloader redirect rule (D2) with tests (redirect to an allowed host, to a disallowed host, HTTP).
 - [ ] A4 `hwio chester lrw …`; CLI end-to-end tests on the fake J-Link (prepared firmware from a fake catalog).
 
+- [ ] A5 `LrwUpdateProcedure` (ADR-0283): hold app → cable to LoRaWAN → identify / confirm unlock → flash | erase |
+      unlock → cable back → reset app; used by the GUI card and `hwio chester lrw flash|erase|unlock` (`--direct`
+      skips it); `LteUpdateProcedure` names its target `lte`.
+
 ### Phase B — GUI
 
 - [ ] B1 Third card, kind classification and mismatch hint; cable-move prompts for cross-target `lrw`.
-- [ ] B2 Maintenance for `lrw`; Unlock confirmation text; "Check module" (D4).
+- [ ] B2 Maintenance for `lrw`; Unlock confirmation text; "Check module" (D4) — hidden in rc.4 (D8, ADR-0283).
 - [ ] B3 Qt Quick tests, screenshots (fake J-Link kit), translations, docs section "LoRaWAN module" (5 languages).
 
 ### Phase C — HIL
