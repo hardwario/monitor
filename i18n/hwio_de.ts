@@ -400,6 +400,11 @@
         <source>Connect</source>
         <translation>Verbinden</translation>
     </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="324"/>
+        <source>Flash firmware with a guide</source>
+        <translation>Firmware mit Assistent flashen</translation>
+    </message>
 </context>
 <context>
     <name>CommandBlock</name>
@@ -1051,34 +1056,73 @@
         <translation>Mehr über diesen Fehler erfahren (öffnet den Browser)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="174"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="176"/>
         <source>Help me fix this</source>
         <translation>Hilfe bei der Behebung</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="181"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
         <source>Details</source>
         <translation>Details</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="185"/>
         <source>Expanded</source>
         <translation>Ausgeklappt</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="185"/>
         <source>Collapsed</source>
         <translation>Eingeklappt</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="213"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="215"/>
         <source>Error details</source>
         <translation>Fehlerdetails</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="219"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="221"/>
         <source>Copy</source>
         <translation>Kopieren</translation>
+    </message>
+</context>
+<context>
+    <name>FirmwareSourceStep</name>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="71"/>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="142"/>
+        <source>Update LTE firmware…</source>
+        <translation>LTE-Firmware aktualisieren…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="81"/>
+        <source>Open firmware catalog ↗</source>
+        <translation>Firmware-Katalog öffnen ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="82"/>
+        <source>Open firmware catalog (opens browser)</source>
+        <translation>Firmware-Katalog öffnen (öffnet den Browser)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="106"/>
+        <source>Allow writing UICR</source>
+        <translation>Schreiben von UICR erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="115"/>
+        <source>The firmware contains UICR configuration. Writing it changes the device configuration; the Product Information Block is kept.</source>
+        <translation>Die Firmware enthält eine UICR-Konfiguration. Das Schreiben ändert die Gerätekonfiguration; der Product Information Block (PIB) bleibt erhalten.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="133"/>
+        <source>Updating the LTE firmware?</source>
+        <translation>LTE-Firmware aktualisieren?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="150"/>
+        <source>Choose a firmware file</source>
+        <translation>Firmware-Datei wählen</translation>
     </message>
 </context>
 <context>
@@ -1092,27 +1136,27 @@
 <context>
     <name>FlashPage</name>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="109"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="111"/>
         <source>Guide me</source>
         <translation>Anleitung</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="158"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="160"/>
         <source>LTE firmware update</source>
         <translation>LTE-Firmware-Update</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="163"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="165"/>
         <source>Updating the LTE MCU needs the J-Link moved between the APP and LTE connectors. The guide stops the application, updates the LTE MCU and puts the application back.</source>
         <translation>Für das Update der LTE-MCU muss der J-Link zwischen den Anschlüssen APP und LTE umgesteckt werden. Der Assistent stoppt die Anwendung, aktualisiert die LTE-MCU und stellt die Anwendung wieder her.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="171"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="173"/>
         <source>Update LTE firmware…</source>
         <translation>LTE-Firmware aktualisieren…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="216"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="218"/>
         <source>Choose a firmware file</source>
         <translation>Firmware-Datei wählen</translation>
     </message>
@@ -1748,38 +1792,38 @@
         <translation>Konsole</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="75"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="78"/>
         <source>Flash</source>
         <translation>Flashen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="87"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="90"/>
         <location filename="../app/gui/src/viewmodels/device_tab_list_model.cpp" line="34"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="102"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="105"/>
         <source>General</source>
         <translation>Allgemein</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="107"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="110"/>
         <source>J-Link</source>
         <translation>J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="112"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="115"/>
         <source>nRF Util</source>
         <translation>nRF Util</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="118"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="121"/>
         <source>Advanced</source>
         <translation>Erweitert</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="123"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="126"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
@@ -2199,55 +2243,55 @@
         <translation>Schriftgröße der Konsole</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="132"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="135"/>
         <source>Flash</source>
         <translation>Firmware flashen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="136"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="139"/>
         <source>Choose a firmware file</source>
         <translation>Firmware-Datei wählen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="411"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="412"/>
         <source>New device tab</source>
         <translation>Neuer Geräte-Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="414"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="415"/>
         <source>Close the device tab</source>
         <translation>Geräte-Tab schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="417"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="420"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="418"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="421"/>
         <source>Next tab</source>
         <translation>Nächster Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="423"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="426"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="424"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="427"/>
         <source>Previous tab</source>
         <translation>Vorheriger Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="429"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="430"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="432"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="433"/>
         <source>Connect or disconnect</source>
         <translation>Verbinden oder trennen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="435"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="436"/>
         <source>Reconnect</source>
         <translation>Neu verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="438"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="441"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="439"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="442"/>
         <source>Keyboard shortcuts</source>
         <translation>Tastenkürzel</translation>
     </message>
@@ -2440,32 +2484,32 @@
     <name>WizardDialog</name>
     <message>
         <location filename="../app/gui/qml/components/WizardDialog.qml" line="88"/>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="331"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="342"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="296"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="307"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="331"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="342"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="341"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="352"/>
         <source>Cancel the wizard?</source>
         <translation>Assistent abbrechen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="343"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="354"/>
         <source>Cancel and close</source>
         <translation>Abbrechen und schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="344"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="355"/>
         <source>Keep going</source>
         <translation>Fortfahren</translation>
     </message>
@@ -4862,7 +4906,7 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1191"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1192"/>
         <source>Copied to clipboard.</source>
         <translation>In die Zwischenablage kopiert.</translation>
     </message>
@@ -5988,6 +6032,254 @@
         <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1055"/>
         <source>Erase everything</source>
         <translation>Alles löschen</translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::FlashWizard</name>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="171"/>
+        <source>Flash application firmware</source>
+        <translation>Anwendungs-Firmware flashen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="250"/>
+        <source>Probe</source>
+        <translation>Programmieradapter</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="250"/>
+        <source>Cable</source>
+        <translation>Kabel</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="250"/>
+        <source>Firmware</source>
+        <translation>Firmware</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="251"/>
+        <source>Confirm</source>
+        <translation>Bestätigen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="251"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="327"/>
+        <source>Flash</source>
+        <translation>Flashen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="251"/>
+        <source>Done</source>
+        <translation>Fertig</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="289"/>
+        <source>Choose the J-Link</source>
+        <translation>J-Link wählen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="290"/>
+        <source>Connect the J-Link to your computer with a USB cable.</source>
+        <translation>Verbinden Sie den J-Link über ein USB-Kabel mit Ihrem Computer.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="291"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="314"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="321"/>
+        <source>Next</source>
+        <translation>Weiter</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="295"/>
+        <source>Connect the J-Link to the device</source>
+        <translation>J-Link mit dem Gerät verbinden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="303"/>
+        <source>The J-Link answers from the LTE MCU. Move the flat cable to the APP connector and check again, or update the LTE firmware.</source>
+        <translation>Der J-Link antwortet von der LTE-MCU. Stecken Sie das Flachbandkabel auf den APP-Anschluss um und prüfen Sie erneut, oder aktualisieren Sie die LTE-Firmware.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="306"/>
+        <source>Update LTE firmware…</source>
+        <translation>LTE-Firmware aktualisieren…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="309"/>
+        <source>The MCU is protected. Flashing removes the protection only through Recover, which erases everything.</source>
+        <translation>Die MCU ist geschützt. Der Schutz lässt sich nur durch Wiederherstellen (Recover) entfernen, wobei alles gelöscht wird.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="312"/>
+        <source>Open Flash page</source>
+        <translation>Seite Flashen öffnen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="314"/>
+        <source>Check again</source>
+        <translation>Erneut prüfen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="320"/>
+        <source>Choose the firmware</source>
+        <translation>Firmware wählen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="326"/>
+        <source>Ready to flash</source>
+        <translation>Bereit zum Flashen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="332"/>
+        <source>Flashing</source>
+        <translation>Flashen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="339"/>
+        <source>Flashing failed</source>
+        <translation>Flashen fehlgeschlagen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="340"/>
+        <source>Try again</source>
+        <translation>Erneut versuchen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="343"/>
+        <source>Help me fix this</source>
+        <translation>Hilfe bei der Behebung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="349"/>
+        <source>Flashing was cancelled</source>
+        <translation>Das Flashen wurde abgebrochen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="350"/>
+        <source>The device may not start until you flash it again.</source>
+        <translation>Das Gerät startet möglicherweise erst wieder, wenn Sie es erneut flashen.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="351"/>
+        <source>Flash again</source>
+        <translation>Erneut flashen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="356"/>
+        <source>Open console</source>
+        <translation>Konsole öffnen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="358"/>
+        <source>Flash another</source>
+        <translation>Weitere flashen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="697"/>
+        <source>Not checked</source>
+        <translation>Nicht geprüft</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="761"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="792"/>
+        <source>This is LTE firmware. Update it with the LTE firmware update, which moves the J-Link between the connectors.</source>
+        <translation>Das ist LTE-Firmware. Spielen Sie sie mit dem LTE-Firmware-Update auf, das Sie durch das Umstecken des J-Link zwischen den Anschlüssen führt.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="764"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="794"/>
+        <source>This firmware is for another MCU. Check whether it is application or LTE firmware.</source>
+        <translation>Diese Firmware ist für eine andere MCU. Prüfen Sie, ob es Anwendungs- oder LTE-Firmware ist.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="779"/>
+        <source>The file is not a valid HEX file (line %1). Use the .hex file produced by the build, or download it from the catalog again.</source>
+        <translation>Die Datei ist keine gültige HEX-Datei (Zeile %1). Verwenden Sie die beim Build erzeugte .hex-Datei oder laden Sie sie erneut aus dem Katalog herunter.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="783"/>
+        <source>The file is not a valid HEX file. Use the .hex file produced by the build, or download it from the catalog again.</source>
+        <translation>Die Datei ist keine gültige HEX-Datei. Verwenden Sie die beim Build erzeugte .hex-Datei oder laden Sie sie erneut aus dem Katalog herunter.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="787"/>
+        <source>This file is not CHESTER firmware. Application and LTE firmware are .hex files; LTE bundles and modem firmware are .zip files.</source>
+        <translation>Diese Datei ist keine CHESTER-Firmware. Anwendungs- und LTE-Firmware sind .hex-Dateien; LTE-Bundles und Modem-Firmware sind .zip-Dateien.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="798"/>
+        <source>No firmware has this ID. Copy the ID from the firmware catalog again.</source>
+        <translation>Keine Firmware hat diese ID. Kopieren Sie die ID erneut aus dem Firmware-Katalog.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="833"/>
+        <source>The device tab was closed</source>
+        <translation>Der Geräte-Tab wurde geschlossen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="836"/>
+        <source>Choose a firmware file</source>
+        <translation>Firmware-Datei wählen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="839"/>
+        <source>Another operation is running</source>
+        <translation>Ein anderer Vorgang läuft</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="858"/>
+        <source>%1 (Intel HEX, %2) → %3 of %4 via J-Link %5.</source>
+        <translation>%1 (Intel HEX, %2) → %3 von %4 über J-Link %5.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="864"/>
+        <source>The current application firmware is replaced. The UICR configuration is also written; the Product Information Block is kept.</source>
+        <translation>Die aktuelle Anwendungs-Firmware wird ersetzt. Die UICR-Konfiguration wird ebenfalls geschrieben; der Produktinformationsblock (PIB) bleibt erhalten.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="867"/>
+        <source>The current application firmware is replaced. Configuration and the Product Information Block are kept.</source>
+        <translation>Die aktuelle Anwendungs-Firmware wird ersetzt. Konfiguration und Produktinformationsblock (PIB) bleiben erhalten.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="916"/>
+        <source>Flashing…</source>
+        <translation>Flashen…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="917"/>
+        <source>Flashing is in progress. Cancel it and close the tab?</source>
+        <translation>Das Flashen läuft. Abbrechen und den Tab schließen?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1017"/>
+        <source>Flashing is in progress. Cancel it and close the wizard?</source>
+        <translation>Das Flashen läuft. Abbrechen und den Assistenten schließen?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1075"/>
+        <source>Flashing %1 to the %2 MCU</source>
+        <translation>%1 wird auf die MCU %2 geflasht</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1102"/>
+        <source>Cancelling…</source>
+        <translation>Wird abgebrochen…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1122"/>
+        <source>Firmware flashed and verified in %1 s.</source>
+        <translation>Firmware in %1 s geflasht und verifiziert.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1124"/>
+        <source>Chip: %1</source>
+        <translation>Chip: %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1132"/>
+        <source>Flashing was interrupted. The firmware may be partly written: flash it again.</source>
+        <translation>Das Flashen wurde unterbrochen. Die Firmware ist möglicherweise nur teilweise geschrieben: Flashen Sie sie erneut.</translation>
     </message>
 </context>
 <context>

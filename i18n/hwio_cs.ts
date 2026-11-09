@@ -402,6 +402,11 @@
         <source>Connect</source>
         <translation>Připojit</translation>
     </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="324"/>
+        <source>Flash firmware with a guide</source>
+        <translation>Nahrát firmware s průvodcem</translation>
+    </message>
 </context>
 <context>
     <name>CommandBlock</name>
@@ -1057,34 +1062,73 @@
         <translation>Další informace o této chybě (otevře prohlížeč)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="174"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="176"/>
         <source>Help me fix this</source>
         <translation>Pomozte mi to vyřešit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="181"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
         <source>Details</source>
         <translation>Podrobnosti</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="185"/>
         <source>Expanded</source>
         <translation>Rozbaleno</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="185"/>
         <source>Collapsed</source>
         <translation>Sbaleno</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="213"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="215"/>
         <source>Error details</source>
         <translation>Podrobnosti chyby</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="219"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="221"/>
         <source>Copy</source>
         <translation>Kopírovat</translation>
+    </message>
+</context>
+<context>
+    <name>FirmwareSourceStep</name>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="71"/>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="142"/>
+        <source>Update LTE firmware…</source>
+        <translation>Aktualizovat firmware LTE…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="81"/>
+        <source>Open firmware catalog ↗</source>
+        <translation>Otevřít katalog firmwaru ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="82"/>
+        <source>Open firmware catalog (opens browser)</source>
+        <translation>Otevřít katalog firmwaru (otevře prohlížeč)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="106"/>
+        <source>Allow writing UICR</source>
+        <translation>Povolit zápis UICR</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="115"/>
+        <source>The firmware contains UICR configuration. Writing it changes the device configuration; the Product Information Block is kept.</source>
+        <translation>Firmware obsahuje konfiguraci UICR. Jejím zápisem se změní konfigurace zařízení; blok informací o produktu (PIB) zůstane zachován.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="133"/>
+        <source>Updating the LTE firmware?</source>
+        <translation>Aktualizujete firmware LTE?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="150"/>
+        <source>Choose a firmware file</source>
+        <translation>Vyberte soubor s firmwarem</translation>
     </message>
 </context>
 <context>
@@ -1098,27 +1142,27 @@
 <context>
     <name>FlashPage</name>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="109"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="111"/>
         <source>Guide me</source>
         <translation>Provést mě</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="158"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="160"/>
         <source>LTE firmware update</source>
         <translation>Aktualizace firmwaru LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="163"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="165"/>
         <source>Updating the LTE MCU needs the J-Link moved between the APP and LTE connectors. The guide stops the application, updates the LTE MCU and puts the application back.</source>
         <translation>Aktualizace LTE MCU vyžaduje přepojit J-Link mezi konektory APP a LTE. Průvodce zastaví aplikaci, aktualizuje LTE MCU a vrátí aplikaci zpět.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="171"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="173"/>
         <source>Update LTE firmware…</source>
         <translation>Aktualizovat firmware LTE…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="216"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="218"/>
         <source>Choose a firmware file</source>
         <translation>Vyberte soubor s firmwarem</translation>
     </message>
@@ -1754,38 +1798,38 @@
         <translation>Konzole</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="75"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="78"/>
         <source>Flash</source>
         <translation>Nahrát FW</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="87"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="90"/>
         <location filename="../app/gui/src/viewmodels/device_tab_list_model.cpp" line="34"/>
         <source>Settings</source>
         <translation>Nastavení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="102"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="105"/>
         <source>General</source>
         <translation>Obecné</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="107"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="110"/>
         <source>J-Link</source>
         <translation>J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="112"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="115"/>
         <source>nRF Util</source>
         <translation>nRF Util</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="118"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="121"/>
         <source>Advanced</source>
         <translation>Pokročilé</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="123"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="126"/>
         <source>About</source>
         <translation>O aplikaci</translation>
     </message>
@@ -2133,45 +2177,45 @@
 <context>
     <name>Shortcuts</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="411"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="412"/>
         <source>New device tab</source>
         <translation>Nová karta zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="414"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="415"/>
         <source>Close the device tab</source>
         <translation>Zavřít kartu zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="417"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="420"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="418"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="421"/>
         <source>Next tab</source>
         <translation>Další karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="423"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="426"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="424"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="427"/>
         <source>Previous tab</source>
         <translation>Předchozí karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="429"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="430"/>
         <source>Settings</source>
         <translation>Nastavení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="432"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="433"/>
         <source>Connect or disconnect</source>
         <translation>Připojit nebo odpojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="435"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="436"/>
         <source>Reconnect</source>
         <translation>Znovu připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="438"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="441"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="439"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="442"/>
         <source>Keyboard shortcuts</source>
         <translation>Klávesové zkratky</translation>
     </message>
@@ -2186,12 +2230,12 @@
         <translation>Obecné</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="132"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="135"/>
         <source>Flash</source>
         <translation>Nahrát firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="136"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="139"/>
         <source>Choose a firmware file</source>
         <translation>Vybrat soubor s firmwarem</translation>
     </message>
@@ -2446,32 +2490,32 @@
     <name>WizardDialog</name>
     <message>
         <location filename="../app/gui/qml/components/WizardDialog.qml" line="88"/>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="331"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="342"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="296"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="307"/>
         <source>Back</source>
         <translation>Zpět</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="331"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="342"/>
         <source>Close</source>
         <translation>Zavřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="341"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="352"/>
         <source>Cancel the wizard?</source>
         <translation>Zrušit průvodce?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="343"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="354"/>
         <source>Cancel and close</source>
         <translation>Zrušit a zavřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="344"/>
+        <location filename="../app/gui/qml/components/WizardDialog.qml" line="355"/>
         <source>Keep going</source>
         <translation>Pokračovat</translation>
     </message>
@@ -4868,7 +4912,7 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1191"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1192"/>
         <source>Copied to clipboard.</source>
         <translation>Zkopírováno do schránky.</translation>
     </message>
@@ -5996,6 +6040,254 @@
         <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1055"/>
         <source>Erase everything</source>
         <translation>Smazat vše</translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::FlashWizard</name>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="171"/>
+        <source>Flash application firmware</source>
+        <translation>Nahrát aplikační firmware</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="250"/>
+        <source>Probe</source>
+        <translation>Programátor</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="250"/>
+        <source>Cable</source>
+        <translation>Kabel</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="250"/>
+        <source>Firmware</source>
+        <translation>Firmware</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="251"/>
+        <source>Confirm</source>
+        <translation>Potvrzení</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="251"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="327"/>
+        <source>Flash</source>
+        <translation>Nahrání</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="251"/>
+        <source>Done</source>
+        <translation>Hotovo</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="289"/>
+        <source>Choose the J-Link</source>
+        <translation>Vyberte J-Link</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="290"/>
+        <source>Connect the J-Link to your computer with a USB cable.</source>
+        <translation>Připojte J-Link k počítači kabelem USB.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="291"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="314"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="321"/>
+        <source>Next</source>
+        <translation>Další</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="295"/>
+        <source>Connect the J-Link to the device</source>
+        <translation>Připojte J-Link k zařízení</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="303"/>
+        <source>The J-Link answers from the LTE MCU. Move the flat cable to the APP connector and check again, or update the LTE firmware.</source>
+        <translation>J-Link odpovídá z LTE MCU. Přepojte plochý kabel na konektor APP a zkontrolujte znovu, nebo aktualizujte firmware LTE.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="306"/>
+        <source>Update LTE firmware…</source>
+        <translation>Aktualizovat firmware LTE…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="309"/>
+        <source>The MCU is protected. Flashing removes the protection only through Recover, which erases everything.</source>
+        <translation>MCU je chráněný. Ochranu lze při nahrávání odstranit jen pomocí Obnovit (recover), které smaže vše.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="312"/>
+        <source>Open Flash page</source>
+        <translation>Otevřít stránku Nahrát</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="314"/>
+        <source>Check again</source>
+        <translation>Zkontrolovat znovu</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="320"/>
+        <source>Choose the firmware</source>
+        <translation>Vyberte firmware</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="326"/>
+        <source>Ready to flash</source>
+        <translation>Připraveno k nahrání</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="332"/>
+        <source>Flashing</source>
+        <translation>Nahrávání</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="339"/>
+        <source>Flashing failed</source>
+        <translation>Nahrávání se nezdařilo</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="340"/>
+        <source>Try again</source>
+        <translation>Zkusit znovu</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="343"/>
+        <source>Help me fix this</source>
+        <translation>Pomozte mi to vyřešit</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="349"/>
+        <source>Flashing was cancelled</source>
+        <translation>Nahrávání bylo zrušeno</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="350"/>
+        <source>The device may not start until you flash it again.</source>
+        <translation>Zařízení se nemusí spustit, dokud firmware znovu nenahrajete.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="351"/>
+        <source>Flash again</source>
+        <translation>Nahrát znovu</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="356"/>
+        <source>Open console</source>
+        <translation>Otevřít konzoli</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="358"/>
+        <source>Flash another</source>
+        <translation>Nahrát další</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="697"/>
+        <source>Not checked</source>
+        <translation>Nezkontrolováno</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="761"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="792"/>
+        <source>This is LTE firmware. Update it with the LTE firmware update, which moves the J-Link between the connectors.</source>
+        <translation>Toto je firmware LTE. Nahrajte ho aktualizací firmwaru LTE, která provede přepojení J-Linku mezi konektory.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="764"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="794"/>
+        <source>This firmware is for another MCU. Check whether it is application or LTE firmware.</source>
+        <translation>Tento firmware je pro jiný MCU. Zkontrolujte, zda jde o aplikační firmware, nebo firmware LTE.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="779"/>
+        <source>The file is not a valid HEX file (line %1). Use the .hex file produced by the build, or download it from the catalog again.</source>
+        <translation>Soubor není platný soubor HEX (řádek %1). Použijte soubor .hex vytvořený sestavením, nebo ho znovu stáhněte z katalogu.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="783"/>
+        <source>The file is not a valid HEX file. Use the .hex file produced by the build, or download it from the catalog again.</source>
+        <translation>Soubor není platný soubor HEX. Použijte soubor .hex vytvořený sestavením, nebo ho znovu stáhněte z katalogu.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="787"/>
+        <source>This file is not CHESTER firmware. Application and LTE firmware are .hex files; LTE bundles and modem firmware are .zip files.</source>
+        <translation>Tento soubor není firmware pro CHESTER. Aplikační firmware a firmware LTE jsou soubory .hex; balíčky LTE a firmware modemu jsou soubory .zip.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="798"/>
+        <source>No firmware has this ID. Copy the ID from the firmware catalog again.</source>
+        <translation>Žádný firmware nemá toto ID. Zkopírujte ID z katalogu firmwaru znovu.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="833"/>
+        <source>The device tab was closed</source>
+        <translation>Karta zařízení byla zavřena</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="836"/>
+        <source>Choose a firmware file</source>
+        <translation>Vyberte soubor s firmwarem</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="839"/>
+        <source>Another operation is running</source>
+        <translation>Probíhá jiná operace</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="858"/>
+        <source>%1 (Intel HEX, %2) → %3 of %4 via J-Link %5.</source>
+        <translation>%1 (Intel HEX, %2) → %3 zařízení %4 přes J-Link %5.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="864"/>
+        <source>The current application firmware is replaced. The UICR configuration is also written; the Product Information Block is kept.</source>
+        <translation>Současný aplikační firmware bude nahrazen. Zapíše se také konfigurace UICR; blok informací o produktu (PIB) zůstane zachován.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="867"/>
+        <source>The current application firmware is replaced. Configuration and the Product Information Block are kept.</source>
+        <translation>Současný aplikační firmware bude nahrazen. Konfigurace a blok informací o produktu (PIB) zůstanou zachovány.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="916"/>
+        <source>Flashing…</source>
+        <translation>Nahrávání…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="917"/>
+        <source>Flashing is in progress. Cancel it and close the tab?</source>
+        <translation>Probíhá nahrávání. Zrušit ho a zavřít kartu?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1017"/>
+        <source>Flashing is in progress. Cancel it and close the wizard?</source>
+        <translation>Probíhá nahrávání. Zrušit ho a zavřít průvodce?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1075"/>
+        <source>Flashing %1 to the %2 MCU</source>
+        <translation>Nahrávání %1 do MCU %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1102"/>
+        <source>Cancelling…</source>
+        <translation>Rušení…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1122"/>
+        <source>Firmware flashed and verified in %1 s.</source>
+        <translation>Firmware nahrán a ověřen za %1 s.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1124"/>
+        <source>Chip: %1</source>
+        <translation>Čip: %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1132"/>
+        <source>Flashing was interrupted. The firmware may be partly written: flash it again.</source>
+        <translation>Nahrávání bylo přerušeno. Firmware může být zapsán jen zčásti: nahrajte ho znovu.</translation>
     </message>
 </context>
 <context>

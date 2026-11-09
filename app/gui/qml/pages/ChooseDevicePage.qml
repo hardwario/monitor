@@ -313,6 +313,17 @@ Item {
                                 onClicked: page.picker.connectSelected()
                             }
                         }
+
+                        // Plan 0010 (0035): the guided flash, in the J-Link view only; hidden until
+                        // the wizard is registered.
+                        HButton {
+                            objectName: "flashGuideLink"
+                            Layout.alignment: Qt.AlignRight
+                            visible: AppViewModel.launcher.canOpen("flash-firmware")
+                            kind: "ghost"
+                            text: qsTr("Flash firmware with a guide")
+                            onClicked: page.tab.openWizard("flash-firmware")
+                        }
                     }
                 }
 

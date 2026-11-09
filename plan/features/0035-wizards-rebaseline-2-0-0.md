@@ -236,7 +236,7 @@ Phase B — 0008 (parallel with C)
 - [ ] B2 `ble.permission_denied` wizard → none (if ADR-0250 accepted); docs sentence fix in five languages
 
 Phase C — 0010 (parallel with B)
-- [ ] C1 Implement 0010 as amended (its W0, W2–W5; W1 done)
+- [x] C1 Implement 0010 as amended (its W0, W2–W5; W1 done) — 2026-11-06 on `strnad/impl-0010`; HIL open (0010)
 
 Phase D — 0009 (after B and C)
 - [ ] D1 Implement 0009 as amended (its T0, T2–T6) with the topic table of § C; coverage test complete

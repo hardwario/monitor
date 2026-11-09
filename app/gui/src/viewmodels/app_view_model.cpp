@@ -55,6 +55,7 @@
 #include <QMetaType>
 #include <QNetworkAccessManager>
 #include <QObject>
+#include <QPointer>
 #include <QQmlEngine>
 #include <QRect>
 #include <QScreen>
@@ -1310,6 +1311,20 @@ void AppViewModel::onHandOff(const QString& action, DeviceTabViewModel* tab) {
     }
     if (const int index = m_tabs->indexOf(tab); index >= 0) {
         setCurrentTab(index);
+    }
+    if (action.startsWith(QStringLiteral("open-wizard:"))) {
+        // Plan 0010 (0035): "open-wizard:<id>" opens another wizard on the same tab once the
+        // handing-off wizard has closed (it emits finished() right after the hand-off).
+        const QString wizardId = action.mid(action.indexOf(QLatin1Char(':')) + 1);
+        QMetaObject::invokeMethod(
+            this,
+            [this, wizardId, target = QPointer<DeviceTabViewModel>(tab)] {
+                if (!target.isNull()) {
+                    (void)m_launcher->openForTab(wizardId, target.data());
+                }
+            },
+            Qt::QueuedConnection);
+        return;
     }
     if (action == QStringLiteral("open-console")) {
         if (tab->state() == DeviceTabViewModel::Disconnected) {

@@ -184,11 +184,22 @@ Dialog {
                 onClicked: Qt.openUrlExternally(dialog.step.linkUrl)
             }
 
-            CheckList {
-                objectName: "wizardChecks"
+            // A plain Item around the list (plan 0010): its wrapped texts follow the width set
+            // here instead of feeding back into this layout ("Detected recursive rearrange" when
+            // the vertical scroll bar appears, e.g. a Checks step with an illustration).
+            Item {
                 Layout.fillWidth: true
                 visible: dialog.step.kind === StepKind.Checks
-                model: dialog.wizard.checks
+                implicitHeight: checkList.implicitHeight
+
+                CheckList {
+                    id: checkList
+
+                    objectName: "wizardChecks"
+                    width: parent.width
+                    visible: dialog.step.kind === StepKind.Checks
+                    model: dialog.wizard.checks
+                }
             }
 
             ColumnLayout {

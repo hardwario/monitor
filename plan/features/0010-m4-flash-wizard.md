@@ -1,6 +1,6 @@
 # 0010 — M4 flash firmware wizard
 
-- **Status:** Approved (re-approved with the [0035](0035-wizards-rebaseline-2-0-0.md) amendments, 2026-11-04). Previously: Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments); amended by 0021 (approved 2026-10-20 by Matej Strnad, implemented under 0021's checklist; the shared `FirmwareSourceViewModel` has the two kinds and the LTE sources since 2026-10-23, the wizard itself is not implemented yet)
+- **Status:** In progress (implemented 2026-11-06 on `strnad/impl-0010`; HIL and the manual checks on Linux, Windows and macOS are open). Approved (re-approved with the [0035](0035-wizards-rebaseline-2-0-0.md) amendments, 2026-11-04). Previously: Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments); amended by 0021 (approved 2026-10-20 by Matej Strnad, implemented under 0021's checklist; the shared `FirmwareSourceViewModel` has the two kinds and the LTE sources since 2026-10-23, the wizard itself is not implemented yet)
 - **Milestone:** M4 (plan 4 of 4, ADR-0065)
 - **Author:** Matej Strnad (with Claude)
 - **Related ADRs:** ADR-0174, ADR-0165, ADR-0166 (0021), ADR-0036, ADR-0037, ADR-0038, ADR-0040, ADR-0049, ADR-0054, ADR-0055, ADR-0057, ADR-0062,
@@ -191,12 +191,14 @@ As 0006 (recent 10, loader queue 4, file limits of M2). One operation per wizard
 
 ## Implementation steps
 
-- [ ] W0 Prerequisite check: 0007 done; 0006 done or in progress with the amendment applied (otherwise stop)
-- [ ] W1 Extract `FirmwareSourceViewModel` from `FlashViewModel` (0006 tests stay green)
-- [ ] W2 `FlashWizard` steps, skip rules, start points per error + GTest
-- [ ] W3 Progress, cancel, result, hand-offs (`open-console`, troubleshooting) + busy integration
-- [ ] W4 Entry points: Flash page "Guide me", Choose-device link, Help menu, registration
-- [ ] W5 Accessibility, Czech translation, `.ts` fresh, screenshots (light/dark, EN/CS, 960 × 600)
+- [x] W0 Prerequisite check: 0007 done; 0006 done or in progress with the amendment applied (otherwise stop)
+- [x] W1 Extract `FirmwareSourceViewModel` from `FlashViewModel` (0006 tests stay green) — done by 0021
+- [x] W2 `FlashWizard` steps, skip rules, start points per error + GTest
+- [x] W3 Progress, cancel, result, hand-offs (`open-console`, troubleshooting) + busy integration
+- [x] W4 Entry points: Flash page "Guide me", Choose-device link, Help menu, registration
+- [x] W5 Accessibility, translations cs + de + sk + pl (0 unfinished), `.ts` fresh, screenshots (light/dark, EN/CS,
+  960 × 600; `tst_flash_wizard.qml` `test_screenshots` with `HWIO_SCREENSHOT_DIR`, images not committed)
+- [ ] HIL (CHESTER + J-Link) and the manual checks on Linux, Windows and macOS (by the user)
 
 ## Tests and verification
 
@@ -215,3 +217,56 @@ As 0006 (recent 10, loader queue 4, file limits of M2). One operation per wizard
 - **Duplicate entry points** (page vs. wizard) can confuse; the page keeps "Guide me" small and the wizard is
   promoted for first-time users from the Choose-device page and the setup wizard's Done step.
 - **Catalog browsing** remains out until the new HARDWARIO system provides an API (open question 15).
+
+## Implementation notes (2026-11-06, `strnad/impl-0010`)
+
+Files: `app/gui/src/wizard/flash_wizard.{h,cpp}` (registered with the Flash services in
+`pages/flash_settings_pages.cpp`), `app/gui/qml/wizard/FirmwareSourceStep.qml` (Embedded `firmware-source`),
+`FlashSummaryStep.qml` (`flash-summary`), `PhaseProgressStep.qml` (`phase-progress`); tests
+`app/gui/tests/wizard/flash_wizard_test.cpp` (GTest, fake J-Link) and `app/gui/tests/tst_flash_wizard.qml`.
+
+Choices made during the implementation (not spelled out in the plan; to be confirmed by the user):
+
+1. **Flash on the probe-only session, promotion on [Open console].** The plan says the wizard promotes its
+   probe-only session with `startConnection(attachRtt = false)` before flashing. With the 0007 reconciliation
+   (`ensureSession(bool)` only) a session promoted without RTT would make [Open console] show no console. The
+   wizard therefore runs Diagnose and the flash on the tab's session or on the probe-only session it opened
+   (operations run on a probe-only session, ADR-0069) and [Open console] hands off `open-console`, which promotes
+   that session with RTT (`AppViewModel::onHandOff` → `connectDevice()`). A probe-only session the wizard opened is
+   released (`disconnectDevice()`) when the wizard closes without a hand-off (as 0009 § Behaviour).
+2. **Diagnose without the RTT steps.** `DeviceSession::diagnose` has no subset; the Cable step shows the rows
+   `probe` … `identify` only and cancels the operation as soon as `identify` is reported (the RTT search honours the
+   stop token), so the RTT steps are skipped in practice. [Next] waits until the operation has ended (the session is
+   free for the flash).
+3. **Cable step skip rule.** The step is skipped when the first Diagnose of a wizard opened on a tab that already
+   has a probe passes (connected or not); after the Probe step it is always shown. Error start points therefore
+   land on Firmware via Cable (they never skip a failing cable check).
+4. **Wrong connector** = the `identify` (or `connect`) row failed with `target.wrong_family` /
+   `target.other_connector` (CHESTER has two MCUs; the found part is not looked up). [Next] stays disabled; the
+   body asks to move the cable to the APP connector, the step action is [Update LTE firmware…].
+5. **`target.protected`** keeps [Next] disabled (flashing would fail) and offers [Open Flash page], handed off as
+   `open-flash-page:recover:app` so that Recover is shown once (plan 0033 E, ADR-0236).
+6. **Hand-offs to other wizards** use the action `open-wizard:<id>`; `AppViewModel::onHandOff` opens that wizard on
+   the same tab (queued, after this wizard has closed). Used for `lte-update` (the Firmware link, the cable step,
+   an LTE image, the kind hint's [Switch] of an LTE bundle / modem zip) and for [Help me fix this] of the failure,
+   which is offered for the error's own wizard when it is registered and is not this one (not only
+   Troubleshooting).
+7. **Images that do not fit the application MCU** (`firmware.out_of_range` caught before flashing,
+   `device::checkFlashWrite` per segment): "This is LTE firmware …" + [Update LTE firmware…] when every segment fits
+   the LTE MCU, else the 0010 text; [Next] disabled. For the start point the image is the Flash page's loaded
+   source.
+8. **Confirm is Embedded (`flash-summary`)** and the failure uses `phase-progress` with the ErrorPanel: the step
+   body is StyledText and must not carry runtime data (ADR-0184). The success Done step has the result and the chip
+   in the heading ("Firmware flashed and verified in 14 s. Chip: nRF52840").
+9. **Firmware-step texts:** a HEX parse error without a line number uses the same sentence without "(line %1)";
+   [Open firmware catalog ↗] opens the source's documentation URL (`docsUrl`, "Find firmware IDs"). [Flash another]
+   clears the source and goes to Firmware; [Flash again] (cancelled) and [Try again] (failed) go to Confirm.
+10. **Probe step checks:** `usb-access` (Linux), `probe-holders`, `probes` run through `DiagWorker` when the picker
+    has scanned and found no probe. Back from Cable (only when the Probe step was shown) returns the tab to its
+    picker (`chooseAnotherProbe()`), so the probe is free in the wizard's list again.
+11. **Shared QML:** the ErrorPanel's "Help me fix this" is hidden while a wizard is open (it could only raise that
+    wizard); `WizardDialog`'s CheckList sits in a plain Item (a Checks step with an illustration gave "Detected
+    recursive rearrange" when the scroll bar appeared). The Flash page "Guide me" is shown for application firmware
+    only; the Choose device page has the ghost link "Flash firmware with a guide" in the J-Link view.
+12. **Coverage (0035 § D):** `FlashWizardCoverage.EveryFlashFirmwareCodeHasAStartStep` lives in
+    `flash_wizard_test.cpp`; it moves into `wizard_coverage_test.cpp` when 0008's coverage test is merged.
