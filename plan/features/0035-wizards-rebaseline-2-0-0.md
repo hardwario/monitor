@@ -232,8 +232,9 @@ Phase A — probe picker (before any wizard)
   test wizard (`app/gui/tests/support/test_wizard.*`)
 
 Phase B — 0008 (parallel with C)
-- [ ] B1 Implement 0008 as amended (its S0–S5); schema 3; `StartupCheck`; coverage test started
-- [ ] B2 `ble.permission_denied` wizard → none (if ADR-0250 accepted); docs sentence fix in five languages
+- [x] B1 Implement 0008 as amended (its S0–S5); schema 3; `StartupCheck`; coverage test started (2026-11-06,
+  `strnad/impl-0008`; ADR-0290, ADR-0291; manual checks of 0008 open)
+- [x] B2 `ble.permission_denied` wizard → none (if ADR-0250 accepted); docs sentence fix in five languages
 
 Phase C — 0010 (parallel with B)
 - [ ] C1 Implement 0010 as amended (its W0, W2–W5; W1 done)

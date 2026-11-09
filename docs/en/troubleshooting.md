@@ -47,7 +47,7 @@ Error codes: [`dependency.jlink_not_found`](#dependency.jlink_not_found), [`depe
 
 ### USB permissions on Linux
 
-On Linux your user account needs access to the J-Link over USB. The `.deb` package installs a udev rule for this; for other installations, install it yourself as described in [USB access to the J-Link](install.md#usb-access-to-the-j-link). Then unplug and reconnect the J-Link and run `hwio doctor`. Some error texts mention a setup wizard; it is not available yet, so follow the install page instead.
+On Linux your user account needs access to the J-Link over USB. The `.deb` package installs a udev rule for this; for other installations, install it yourself as described in [USB access to the J-Link](install.md#usb-access-to-the-j-link). Then unplug and reconnect the J-Link and run `hwio doctor`. In the desktop app, **Help** › **Setup wizard…** checks USB access and shows the commands for the rule.
 
 Error codes: [`usb.access_denied`](#usb.access_denied), [`usb.world_accessible`](#usb.world_accessible).
 
@@ -336,7 +336,7 @@ Happens when the USB connection to the J-Link is lost while the console runs. Au
 - **Probably:** The udev rule for SEGGER devices is missing.
 - **What to do:** Install the udev rule shown in the setup wizard, then reconnect the J-Link. The rule gives access only to the user logged in at this computer; users connected only over SSH need their own udev rule.
 
-Linux only. The setup wizard mentioned in the text is not available yet: install the udev rule as described in [USB access to the J-Link](install.md#usb-access-to-the-j-link), then run `hwio doctor` to check.
+Linux only. In the desktop app, **Help me fix this** or **Help** › **Setup wizard…** opens the setup wizard at its USB access step with the commands; without the app, install the udev rule as described in [USB access to the J-Link](install.md#usb-access-to-the-j-link), then run `hwio doctor` to check.
 
 <a id="probe.held_by_program"></a>
 #### `probe.held_by_program`
@@ -366,7 +366,7 @@ Bluetooth devices are locked like J-Links. The message can name the other progra
 - **Probably:** A udev rule, usually /etc/udev/rules.d/99-jlink.rules from the SEGGER J-Link Software, makes the probe accessible to all accounts.
 - **What to do:** Remove that rule (or its MODE="0666"), install the rule shown in the setup wizard, then reconnect the J-Link. A J-Link Software update may install the rule again.
 
-A Linux warning from `hwio doctor`. The setup wizard mentioned in the text is not available yet: install the rule as described in [USB access to the J-Link](install.md#usb-access-to-the-j-link).
+A Linux warning from `hwio doctor`. In the desktop app, **Help** › **Setup wizard…** shows the commands at its USB access step; without the app, install the rule as described in [USB access to the J-Link](install.md#usb-access-to-the-j-link).
 
 <a id="category-target"></a>
 ### Target (exit code 6)

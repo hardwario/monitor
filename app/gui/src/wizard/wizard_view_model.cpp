@@ -211,9 +211,10 @@ QUrl WizardViewModel::embeddedSource() const {
         return {};
     }
     const WizardStep current = m_wizard->current();
-    if (current.kind != StepKind::Embedded) {
+    if (current.embedded.isEmpty()) {
         return {};
     }
+    // Plan 0008: also for steps of other kinds that name a control (shown below their content).
     return m_registry.embedded(current.embedded);
 }
 
@@ -263,6 +264,44 @@ void WizardViewModel::cancel(bool force) {
     emit changed();
 }
 
+void WizardViewModel::applyEmbeddedOptions(QObject* item) {
+    if (item == nullptr || m_wizard.isNull()) {
+        return;
+    }
+    if (m_optionsItem.data() != item) {
+        m_optionsItem = item; // a new control: its own values are remembered from now on
+        m_optionsDefaults.clear();
+    }
+    const QVariantMap options = m_wizard->current().embeddedOptions;
+    // Keys of an earlier step that this step leaves out: back to the control's own value.
+    for (auto it = m_optionsDefaults.begin(); it != m_optionsDefaults.end();) {
+        if (!options.contains(it.key())) {
+            item->setProperty(it.key().toUtf8().constData(), it.value());
+            it = m_optionsDefaults.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    for (auto it = options.cbegin(); it != options.cend(); ++it) {
+        const QByteArray name = it.key().toUtf8();
+        if (it.key() == QStringLiteral("vm") ||
+            item->metaObject()->indexOfProperty(name.constData()) < 0) {
+            qCWarning(lcGui).noquote()
+                << "Wizard" << m_wizard->id() << "step" << m_wizard->current().id
+                << ": embedded option" << it.key() << "ignored (no such property)";
+            continue;
+        }
+        if (!m_optionsDefaults.contains(it.key())) {
+            m_optionsDefaults.insert(it.key(), item->property(name.constData()));
+        }
+        if (item->property(name.constData()) != it.value() &&
+            !item->setProperty(name.constData(), it.value())) {
+            qCWarning(lcGui).noquote() << "Wizard" << m_wizard->id() << ": embedded option"
+                                       << it.key() << "could not be set";
+        }
+    }
+}
+
 void WizardViewModel::copyText(const QString& text) {
     if (m_copy) {
         m_copy(text); // clipboard + "Copied to clipboard." (ADR-0202)
@@ -292,9 +331,9 @@ QUrl WizardViewModel::illustrationUrl(const QString& slot, bool dark) {
 }
 
 QStringList WizardViewModel::illustrationSlots() {
-    return {QStringLiteral("jlink-usb"), QStringLiteral("chester-app-cable"),
+    return {QStringLiteral("jlink-usb"),         QStringLiteral("chester-app-cable"),
             QStringLiteral("chester-lte-cable"), QStringLiteral("chester-power"),
-            QStringLiteral("placeholder")};
+            QStringLiteral("setup-welcome"),     QStringLiteral("placeholder")};
 }
 
 bool WizardViewModel::hasIllustration(const QString& slot) {

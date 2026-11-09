@@ -78,7 +78,8 @@ set(HWIO_GUI_QML_FILES
     qml/shell/PageHost.qml
     qml/settings/ConsoleSection.qml
     qml/shell/TabView.qml
-    qml/wizard/ProbePickerStep.qml)
+    qml/wizard/ProbePickerStep.qml
+    qml/wizard/SetupStep.qml)
 set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 file(GLOB HWIO_GUI_ICONS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS
@@ -139,6 +140,8 @@ qt_add_qml_module(hwio_gui
         src/settings_store.h
         src/single_instance.cpp
         src/single_instance.h
+        src/startup_check.cpp
+        src/startup_check.h
         src/system_preferences.cpp
         src/system_preferences.h
         src/update_service.cpp
@@ -197,6 +200,8 @@ qt_add_qml_module(hwio_gui
         src/wizard/probe_picker_step.h
         src/wizard/report_view_model.cpp
         src/wizard/report_view_model.h
+        src/wizard/setup_wizard.cpp
+        src/wizard/setup_wizard.h
         src/wizard/wizard.cpp
         src/wizard/wizard.h
         src/wizard/wizard_launcher.cpp

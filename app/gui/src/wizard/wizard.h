@@ -56,15 +56,25 @@ struct WizardStep {
     // never built with .arg() from error details, device names, paths or other runtime data.
     QString body;
     QString illustration; // slot id (ADR-0076) or ""
-    QString embedded;     // Embedded: "probe-picker" | "firmware-source" | "phase-progress"
+    // Embedded: "probe-picker" | "firmware-source" | "phase-progress" | ... (WizardRegistry::
+    // addEmbedded). ADR-0292: a step of another kind may name a control too; WizardDialog shows it
+    // below the step's own content (checks, choices), loaded with `vm` = embeddedViewModel().
+    QString embedded;
+    // ADR-0290: properties set on the loaded control (e.g. {readOnly: true} for the probe picker of
+    // the setup wizard). Applied by WizardViewModel::applyEmbeddedOptions on every change of the
+    // step: an unknown key (no such property, or "vm") is ignored and logged; a key that a later
+    // step of the same control leaves out gets the control's own value back.
+    QVariantMap embeddedOptions;
     QStringList commands; // Commands
     QVariantList choices; // Choice: [{id, title, subtitle, selected}]
     QString primaryText;  // the default button ("Next", "Check again", "Flash", "Finish")
     bool showInStepList = true;
     // Additions to the plan's sketch (documented in plan 0007 Implementation notes):
-    QString linkText;     // Info: an optional link below the body
-    QString linkUrl;      // opened by WizardDialog: a constant URL, never runtime data (ADR-0184)
-    QVariantList actions; // Done (and others): extra buttons [{id, text}] -> Wizard::action
+    QString linkText; // Info: an optional link below the body
+    QString linkUrl;  // opened by WizardDialog: a constant URL, never runtime data (ADR-0184)
+    // Done (and others): extra buttons [{id, text, enabled}] -> Wizard::action; `enabled` is
+    // optional (default true; plan 0008: a disabled button that names why, ADR-0291).
+    QVariantList actions;
 
     // The step for QML (keys as the members; `kind` as int).
     [[nodiscard]] QVariantMap toMap() const;

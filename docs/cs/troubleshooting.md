@@ -47,7 +47,7 @@ Kódy chyb: [`dependency.jlink_not_found`](#dependency.jlink_not_found), [`depen
 
 ### Oprávnění USB v Linuxu
 
-V Linuxu potřebuje váš uživatelský účet přístup k J-Linku přes USB. Balíček `.deb` k tomu instaluje pravidlo udev; u jiných instalací ho nainstalujte sami podle [Přístup k J-Linku přes USB](install.md#přístup-k-j-linku-přes-usb). Potom J-Link odpojte a znovu připojte a spusťte `hwio doctor`. Některé texty chyb zmiňují průvodce nastavením; ten zatím není k dispozici, postupujte proto podle stránky o instalaci.
+V Linuxu potřebuje váš uživatelský účet přístup k J-Linku přes USB. Balíček `.deb` k tomu instaluje pravidlo udev; u jiných instalací ho nainstalujte sami podle [Přístup k J-Linku přes USB](install.md#přístup-k-j-linku-přes-usb). Potom J-Link odpojte a znovu připojte a spusťte `hwio doctor`. V desktopové aplikaci použijte **Nápověda** › **Průvodce nastavením…**: zkontroluje přístup přes USB a ukáže příkazy pro pravidlo.
 
 Kódy chyb: [`usb.access_denied`](#usb.access_denied), [`usb.world_accessible`](#usb.world_accessible).
 
@@ -333,7 +333,7 @@ Nastává, když se během běhu konzole ztratí spojení USB s J-Linkem. Automa
 - **Pravděpodobně:** Chybí pravidlo udev pro zařízení SEGGER.
 - **Co dělat:** Nainstalujte pravidlo udev zobrazené v průvodci nastavením a potom J-Link znovu připojte. Pravidlo dává přístup jen uživateli přihlášenému přímo u tohoto počítače; uživatelé připojení jen přes SSH potřebují vlastní pravidlo udev.
 
-Jen Linux. Průvodce nastavením zmíněný v textu zatím není k dispozici: nainstalujte pravidlo udev podle [Přístup k J-Linku přes USB](install.md#přístup-k-j-linku-přes-usb) a potom to zkontrolujte příkazem `hwio doctor`.
+Jen Linux. V desktopové aplikaci otevře **Pomozte mi to vyřešit** nebo **Nápověda** › **Průvodce nastavením…** průvodce nastavením v kroku Přístup přes USB s příkazy; bez aplikace nainstalujte pravidlo udev podle [Přístup k J-Linku přes USB](install.md#přístup-k-j-linku-přes-usb) a potom to zkontrolujte příkazem `hwio doctor`.
 
 <a id="probe.held_by_program"></a>
 #### `probe.held_by_program`
@@ -363,7 +363,7 @@ Zařízení Bluetooth se zamykají stejně jako J-Linky. Zpráva může uvádět
 - **Pravděpodobně:** Pravidlo udev, obvykle /etc/udev/rules.d/99-jlink.rules ze SEGGER J-Link Software, zpřístupňuje programátor všem účtům.
 - **Co dělat:** Odstraňte toto pravidlo (nebo jeho MODE="0666"), nainstalujte pravidlo zobrazené v průvodci nastavením a potom J-Link znovu připojte. Aktualizace J-Link Software může pravidlo nainstalovat znovu.
 
-Varování z `hwio doctor` v Linuxu. Průvodce nastavením zmíněný v textu zatím není k dispozici: nainstalujte pravidlo podle [Přístup k J-Linku přes USB](install.md#přístup-k-j-linku-přes-usb).
+Varování z `hwio doctor` v Linuxu. V desktopové aplikaci ukáže **Nápověda** › **Průvodce nastavením…** příkazy v kroku Přístup přes USB; bez aplikace nainstalujte pravidlo podle [Přístup k J-Linku přes USB](install.md#přístup-k-j-linku-přes-usb).
 
 <a id="category-target"></a>
 ### Cílové zařízení (návratový kód 6)

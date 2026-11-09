@@ -790,7 +790,9 @@ constexpr std::array defaultTexts{
                                          "Allow Bluetooth for HARDWARIO Monitor (or your terminal) "
                                          "in System Settings → Privacy & Security → Bluetooth.",
                                          "ble.permission_denied suggestion"),
-        .wizard = WizardId::FirstRunSetup,
+        // ADR-0250: no wizard until the setup wizard's Bluetooth step (plan 0032) exists; 0032
+        // restores WizardId::FirstRunSetup.
+        .wizard = std::nullopt,
     },
     DefaultTexts{
         .code = ErrorCode::BleStackUnavailable,

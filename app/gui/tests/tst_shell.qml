@@ -318,7 +318,7 @@ TestCase {
         tryVerify(() => menu.opened);
         // Only registered wizards are offered (the test wizard is "connect-device").
         verify(findChild(menu, "helpConnect").visible);
-        verify(!findChild(menu, "helpSetup").visible);
+        verify(findChild(menu, "helpSetup").visible); // plan 0008
         verify(!findChild(menu, "helpTroubleshoot").visible);
         verify(!findChild(menu, "helpFlash").visible);
         verify(findChild(menu, "helpReport").visible);

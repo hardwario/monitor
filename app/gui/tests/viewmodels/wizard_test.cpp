@@ -85,7 +85,7 @@ TEST_F(WizardTest, LauncherOffersOnlyRegisteredWizards) {
     const auto app = makeWizardApp();
     EXPECT_TRUE(app->launcher()->canOpen(QStringLiteral("connect-device")));
     EXPECT_FALSE(app->launcher()->canOpen(QStringLiteral("troubleshooting")));
-    EXPECT_FALSE(app->launcher()->canOpen(QStringLiteral("first-run-setup")));
+    EXPECT_TRUE(app->launcher()->canOpen(QStringLiteral("first-run-setup"))); // plan 0008
     EXPECT_FALSE(app->launcher()->canOpen(QString()));
     EXPECT_FALSE(app->launcher()->canOpen(QStringLiteral("nonsense")));
     EXPECT_FALSE(app->launcher()->start(QStringLiteral("troubleshooting")));
