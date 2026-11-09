@@ -384,4 +384,10 @@ device-related unit tests (411) pass. linux-tsan: device-related unit tests (407
 `tst_gui.tst_connect_wizard`, `tst_flash_wizard` and `tst_setup_wizard` report one data race at the end of a
 data-driven test row: the probe scanner thread logs through the Qt Test message handler while `QTestData` is
 destroyed (Qt Test + `ProbeScanner` logging, the same class as review 0005 round 1; `tst_flash_wizard` and
-`tst_setup_wizard` are unchanged by this branch). Not fixed here (open).
+`tst_setup_wizard` are unchanged by this branch). Fixed afterwards (2026-11-09): the race is in Qt Test's message
+handler, which reads the current row's tag for every message; on `main` the existing Qt Quick tests (`tst_wizard`,
+`tst_shell`, `tst_components`, `tst_probe_firmware`) do not show it under linux-tsan. `tst_gui` now routes messages
+of worker threads past Qt Test's handler (straight to stderr in Qt's format); GUI-thread messages still go through
+Qt Test. Qt Test installs its handler when a TestCase starts, so the data-driven wizard tests install the routing in
+`initTestCase()` (`testSupport.routeWorkerThreadMessages()`). No TSan suppression. The three tests passed 3× each
+under linux-tsan, all 23 Qt Quick tests once under linux-tsan, the full linux-debug ctest (1794) passed.

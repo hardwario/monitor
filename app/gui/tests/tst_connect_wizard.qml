@@ -60,6 +60,8 @@ TestCase {
     }
 
     function initTestCase() {
+        // Worker-thread log messages bypass Qt Test's per-row handler (TSan, review 0009).
+        testSupport.routeWorkerThreadMessages();
         window = Qt.createComponent("HardwarioMonitor", "Main").createObject(testCase);
         verify(window !== null);
         window.requestActivate();

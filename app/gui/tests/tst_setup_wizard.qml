@@ -14,6 +14,8 @@ TestCase {
     property var window: null
 
     function initTestCase() {
+        // Worker-thread log messages bypass Qt Test's per-row handler (TSan, review 0009).
+        testSupport.routeWorkerThreadMessages();
         window = Qt.createComponent("HardwarioMonitor", "Main").createObject(testCase);
         verify(window !== null);
         // The nRF Util step shows its commands: an nrfutil that does not exist.

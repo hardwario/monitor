@@ -53,6 +53,7 @@
 #include <QStringLiteral>
 #include <QTcpServer>
 #include <QTemporaryDir>
+#include <QThread>
 #include <QUrl>
 #include <QVariant>
 #include <QVariantMap>
@@ -69,12 +70,59 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <iostream>
+#include <mutex>
 #include <optional>
 #include <thread>
 #include <utility>
 #include <vector>
 
 Q_IMPORT_QML_PLUGIN(HardwarioMonitorPlugin)
+
+namespace {
+
+// Review 0009 (TSan): Qt Test's message handler reads the current data row (its tag) for every
+// message, and Qt Test destroys that row's data on the GUI thread when the row ends. A message
+// from a worker thread (the probe scanner loading its library copy, a session worker) can arrive
+// exactly then: a data race inside the handler. Only GUI-thread messages go through Qt Test's
+// handler; the others are written to stderr directly (same format), so no worker thread ever
+// touches Qt Test's per-row state. Qt Test installs its handler when a TestCase starts
+// (QuickTestResult::startLogging, after the engine and the window exist), so a test file installs
+// ours on top of it in initTestCase() (testSupport.routeWorkerThreadMessages()); Qt Test restores
+// its predecessor when the TestCase ends.
+struct MessageRouting {
+    QtMessageHandler qtTestHandler = nullptr; // set and read on the GUI thread
+    std::mutex stderrMutex;                   // serialises the worker threads' lines
+};
+
+MessageRouting& routing() {
+    static MessageRouting instance;
+    return instance;
+}
+
+void threadAwareMessageHandler(QtMsgType type, const QMessageLogContext& context,
+                               const QString& message) {
+    const QCoreApplication* app = QCoreApplication::instance();
+    const bool guiThread = app == nullptr || QThread::currentThread() == app->thread();
+    if ((guiThread || type == QtFatalMsg) && routing().qtTestHandler != nullptr) {
+        routing().qtTestHandler(type, context, message);
+        return;
+    }
+    const QByteArray line = qFormatLogMessage(type, context, message).toLocal8Bit();
+    const std::scoped_lock lock(routing().stderrMutex);
+    std::cerr.write(line.constData(), line.size());
+    std::cerr << '\n';
+    std::cerr.flush();
+}
+
+void installThreadAwareMessageHandler() {
+    const QtMessageHandler previous = qInstallMessageHandler(&threadAwareMessageHandler);
+    if (previous != &threadAwareMessageHandler) {
+        routing().qtTestHandler = previous;
+    }
+}
+
+} // namespace
 
 // Test hooks for the QML tests (context property `testSupport`): things QML must not do in the
 // product (configure a tab without the picker, fabricate errors, reset the tabs).
@@ -91,6 +139,8 @@ class QmlTestSupport : public QObject {
 public:
     QmlTestSupport(hwio::gui::AppViewModel* app, QString directory)
         : m_app(app), m_dir(std::move(directory)) {}
+    // Review 0009 (TSan): from initTestCase(), after Qt Test has installed its message handler.
+    Q_INVOKABLE static void routeWorkerThreadMessages() { installThreadAwareMessageHandler(); }
     [[nodiscard]] static int perfSeconds() {
         return qEnvironmentVariableIntValue("HWIO_CONSOLE_PERF_SECONDS");
     }
