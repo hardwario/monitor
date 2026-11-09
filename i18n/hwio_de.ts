@@ -4193,7 +4193,7 @@
     </message>
     <message>
         <location filename="../libs/device/src/ble_session.cpp" line="369"/>
-        <location filename="../libs/device/src/device_session.cpp" line="80"/>
+        <location filename="../libs/device/src/device_session.cpp" line="81"/>
         <source>No device profile was given.</source>
         <translation>Es wurde kein Geräteprofil angegeben.</translation>
     </message>
@@ -4204,8 +4204,8 @@
     </message>
     <message>
         <location filename="../libs/device/src/ble_session.cpp" line="381"/>
-        <location filename="../libs/device/src/device_session.cpp" line="85"/>
-        <location filename="../libs/device/src/device_session.cpp" line="477"/>
+        <location filename="../libs/device/src/device_session.cpp" line="86"/>
+        <location filename="../libs/device/src/device_session.cpp" line="478"/>
         <source>The device %1 has no target &quot;%2&quot;.</source>
         <translation>Das Gerät %1 hat kein Ziel „%2“.</translation>
     </message>
@@ -4225,79 +4225,84 @@
         <translation>Das Gerät hat sich nicht rechtzeitig verbunden.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="91"/>
-        <location filename="../libs/device/src/device_session.cpp" line="732"/>
+        <location filename="../libs/device/src/device_session.cpp" line="92"/>
+        <location filename="../libs/device/src/device_session.cpp" line="743"/>
         <source>The %1 target of %2 has no console.</source>
         <translation>Das Ziel %1 von %2 hat keine Konsole.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="97"/>
+        <location filename="../libs/device/src/device_session.cpp" line="98"/>
         <source>The J-Link speed must be between %1 and %2 kHz.</source>
         <translation>Die J-Link-Geschwindigkeit muss zwischen %1 und %2 kHz liegen.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="105"/>
+        <location filename="../libs/device/src/device_session.cpp" line="106"/>
         <source>The latency must be between %1 and %2 ms.</source>
         <translation>Die Latenz muss zwischen %1 und %2 ms liegen.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="119"/>
+        <location filename="../libs/device/src/device_session.cpp" line="120"/>
         <source>At this J-Link speed the console may not be found within %1 s. Use auto or %2 kHz or more.</source>
         <translation>Bei dieser J-Link-Geschwindigkeit wird die Konsole möglicherweise nicht innerhalb von %1 s gefunden. Verwenden Sie „auto“ oder mindestens %2 kHz.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="514"/>
+        <location filename="../libs/device/src/device_session.cpp" line="515"/>
         <location filename="../libs/device/src/flash_workflows.cpp" line="165"/>
         <source>The firmware image is empty.</source>
         <translation>Das Firmware-Image ist leer.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="528"/>
+        <location filename="../libs/device/src/device_session.cpp" line="529"/>
         <source>The LTE bundle is incomplete.</source>
         <translation>Das LTE-Paket ist unvollständig.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="556"/>
+        <location filename="../libs/device/src/device_session.cpp" line="557"/>
         <source>No modem firmware file was given.</source>
         <translation>Es wurde keine Modem-Firmware-Datei angegeben.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="582"/>
+        <location filename="../libs/device/src/device_session.cpp" line="583"/>
         <source>A %1 must be between 1 and %2 bytes.</source>
         <translation>Ein %1 muss 1 bis %2 Bytes umfassen.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="588"/>
+        <location filename="../libs/device/src/device_session.cpp" line="589"/>
         <source>With %1-bit units the address and the length must be multiples of %2.</source>
         <translation>Bei %1-Bit-Einheiten müssen Adresse und Länge Vielfache von %2 sein.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="603"/>
+        <location filename="../libs/device/src/device_session.cpp" line="604"/>
         <source>A memory read must be between 1 and %1 bytes.</source>
         <translation>Ein Speicher-Lesevorgang muss 1 bis %1 Bytes umfassen.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="609"/>
+        <location filename="../libs/device/src/device_session.cpp" line="610"/>
         <source>memory read</source>
         <translation>Speicher-Lesevorgang</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="652"/>
+        <location filename="../libs/device/src/device_session.cpp" line="653"/>
         <source>memory write</source>
         <translation>Speicher-Schreibvorgang</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="686"/>
+        <location filename="../libs/device/src/device_session.cpp" line="687"/>
         <source>A flash write must be between 1 and %1 bytes.</source>
         <translation>Ein Flash-Schreibvorgang muss 1 bis %1 Bytes umfassen.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="726"/>
+        <location filename="../libs/device/src/device_session.cpp" line="718"/>
+        <source>Unknown last check &quot;%1&quot;.</source>
+        <translation>Unbekannte letzte Prüfung „%1“.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_session.cpp" line="737"/>
         <source>Only a session with an open probe can be connected.</source>
         <translation>Nur eine Sitzung mit geöffnetem Programmieradapter kann verbunden werden.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="753"/>
+        <location filename="../libs/device/src/device_session.cpp" line="764"/>
         <source>Operation %1 is not running.</source>
         <translation>Die Operation %1 läuft nicht.</translation>
     </message>
@@ -4525,90 +4530,90 @@
     </message>
     <message>
         <location filename="../libs/device/src/session_worker.cpp" line="364"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1545"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1556"/>
         <location filename="../libs/diag/src/environment.cpp" line="298"/>
         <source>The J-Link firmware is newer than the J-Link library.</source>
         <translation>Die J-Link-Firmware ist neuer als die J-Link-Bibliothek.</translation>
     </message>
     <message>
         <location filename="../libs/device/src/session_worker.cpp" line="414"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1829"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1840"/>
         <source>RTT buffer &quot;%1&quot; not found; the device log is not shown.</source>
         <translation>RTT-Puffer „%1“ nicht gefunden; das Geräteprotokoll wird nicht angezeigt.</translation>
     </message>
     <message>
         <location filename="../libs/device/src/session_worker.cpp" line="677"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1565"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1576"/>
         <source>The device has no power (%1 mV).</source>
         <translation>Das Gerät hat keine Stromversorgung (%1 mV).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1443"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1523"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1626"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1630"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1724"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1795"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1454"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1534"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1637"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1641"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1735"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1806"/>
         <source>Cancelled</source>
         <translation>Abgebrochen</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1448"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1459"/>
         <source>Not checked</source>
         <translation>Nicht geprüft</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1461"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1472"/>
         <source>Not checked: the time for the checks ran out</source>
         <translation>Nicht geprüft: Die Zeit für die Prüfungen ist abgelaufen</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1620"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1631"/>
         <source>Not measured by this J-Link</source>
         <translation>Von diesem J-Link nicht gemessen</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1647"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1658"/>
         <source>Only the debug port answers</source>
         <translation>Nur der Debug-Port antwortet</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1658"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1669"/>
         <source>Connected (SWD %1 kHz)</source>
         <translation>Verbunden (SWD %1 kHz)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1660"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1671"/>
         <source>Connected (SWD, automatic speed)</source>
         <translation>Verbunden (SWD, automatische Geschwindigkeit)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1738"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1749"/>
         <source>%1, not protected</source>
         <translation>%1, nicht geschützt</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1760"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1771"/>
         <source>This MCU has no console</source>
         <translation>Diese MCU hat keine Konsole</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1764"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1775"/>
         <source>Not checked: the MCU is protected</source>
         <translation>Nicht geprüft: Die MCU ist geschützt</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1811"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1822"/>
         <source>Found</source>
         <translation>Gefunden</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="2085"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="2108"/>
         <source>Another program opened the J-Link after it was released.</source>
         <translation>Ein anderes Programm hat den J-Link nach seiner Freigabe geöffnet.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="2089"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="2112"/>
         <source>Close the other program, then reacquire the J-Link.</source>
         <translation>Schließen Sie das andere Programm und übernehmen Sie dann den J-Link erneut.</translation>
     </message>
@@ -4684,7 +4689,7 @@
 <context>
     <name>hwio::diag</name>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1485"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1496"/>
         <location filename="../libs/diag/src/check.cpp" line="233"/>
         <location filename="../libs/diag/src/environment.cpp" line="203"/>
         <source>The check &quot;%1&quot; did not finish in time.</source>
@@ -6175,109 +6180,109 @@
         <translation>Weitere flashen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="697"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="696"/>
         <source>Not checked</source>
         <translation>Nicht geprüft</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="761"/>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="792"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="760"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="791"/>
         <source>This is LTE firmware. Update it with the LTE firmware update, which moves the J-Link between the connectors.</source>
         <translation>Das ist LTE-Firmware. Spielen Sie sie mit dem LTE-Firmware-Update auf, das Sie durch das Umstecken des J-Link zwischen den Anschlüssen führt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="764"/>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="794"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="763"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="793"/>
         <source>This firmware is for another MCU. Check whether it is application or LTE firmware.</source>
         <translation>Diese Firmware ist für eine andere MCU. Prüfen Sie, ob es Anwendungs- oder LTE-Firmware ist.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="779"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="778"/>
         <source>The file is not a valid HEX file (line %1). Use the .hex file produced by the build, or download it from the catalog again.</source>
         <translation>Die Datei ist keine gültige HEX-Datei (Zeile %1). Verwenden Sie die beim Build erzeugte .hex-Datei oder laden Sie sie erneut aus dem Katalog herunter.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="783"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="782"/>
         <source>The file is not a valid HEX file. Use the .hex file produced by the build, or download it from the catalog again.</source>
         <translation>Die Datei ist keine gültige HEX-Datei. Verwenden Sie die beim Build erzeugte .hex-Datei oder laden Sie sie erneut aus dem Katalog herunter.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="787"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="786"/>
         <source>This file is not CHESTER firmware. Application and LTE firmware are .hex files; LTE bundles and modem firmware are .zip files.</source>
         <translation>Diese Datei ist keine CHESTER-Firmware. Anwendungs- und LTE-Firmware sind .hex-Dateien; LTE-Bundles und Modem-Firmware sind .zip-Dateien.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="798"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="797"/>
         <source>No firmware has this ID. Copy the ID from the firmware catalog again.</source>
         <translation>Keine Firmware hat diese ID. Kopieren Sie die ID erneut aus dem Firmware-Katalog.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="833"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="832"/>
         <source>The device tab was closed</source>
         <translation>Der Geräte-Tab wurde geschlossen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="836"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="835"/>
         <source>Choose a firmware file</source>
         <translation>Firmware-Datei wählen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="839"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="838"/>
         <source>Another operation is running</source>
         <translation>Ein anderer Vorgang läuft</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="858"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="857"/>
         <source>%1 (Intel HEX, %2) → %3 of %4 via J-Link %5.</source>
         <translation>%1 (Intel HEX, %2) → %3 von %4 über J-Link %5.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="864"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="863"/>
         <source>The current application firmware is replaced. The UICR configuration is also written; the Product Information Block is kept.</source>
         <translation>Die aktuelle Anwendungs-Firmware wird ersetzt. Die UICR-Konfiguration wird ebenfalls geschrieben; der Produktinformationsblock (PIB) bleibt erhalten.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="867"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="866"/>
         <source>The current application firmware is replaced. Configuration and the Product Information Block are kept.</source>
         <translation>Die aktuelle Anwendungs-Firmware wird ersetzt. Konfiguration und Produktinformationsblock (PIB) bleiben erhalten.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="916"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="915"/>
         <source>Flashing…</source>
         <translation>Flashen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="917"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="916"/>
         <source>Flashing is in progress. Cancel it and close the tab?</source>
         <translation>Das Flashen läuft. Abbrechen und den Tab schließen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1017"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1016"/>
         <source>Flashing is in progress. Cancel it and close the wizard?</source>
         <translation>Das Flashen läuft. Abbrechen und den Assistenten schließen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1075"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1074"/>
         <source>Flashing %1 to the %2 MCU</source>
         <translation>%1 wird auf die MCU %2 geflasht</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1102"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1101"/>
         <source>Cancelling…</source>
         <translation>Wird abgebrochen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1122"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1121"/>
         <source>Firmware flashed and verified in %1 s.</source>
         <translation>Firmware in %1 s geflasht und verifiziert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1124"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1123"/>
         <source>Chip: %1</source>
         <translation>Chip: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1132"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1131"/>
         <source>Flashing was interrupted. The firmware may be partly written: flash it again.</source>
         <translation>Das Flashen wurde unterbrochen. Die Firmware ist möglicherweise nur teilweise geschrieben: Flashen Sie sie erneut.</translation>
     </message>

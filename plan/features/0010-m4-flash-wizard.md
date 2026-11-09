@@ -3,7 +3,7 @@
 - **Status:** In progress (implemented 2026-11-06 on `strnad/impl-0010`; HIL and the manual checks on Linux, Windows and macOS are open). Approved (re-approved with the [0035](0035-wizards-rebaseline-2-0-0.md) amendments, 2026-11-04). Previously: Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments); amended by 0021 (approved 2026-10-20 by Matej Strnad, implemented under 0021's checklist; the shared `FirmwareSourceViewModel` has the two kinds and the LTE sources since 2026-10-23, the wizard itself is not implemented yet)
 - **Milestone:** M4 (plan 4 of 4, ADR-0065)
 - **Author:** Matej Strnad (with Claude)
-- **Related ADRs:** ADR-0174, ADR-0165, ADR-0166 (0021), ADR-0036, ADR-0037, ADR-0038, ADR-0040, ADR-0049, ADR-0054, ADR-0055, ADR-0057, ADR-0062,
+- **Related ADRs:** ADR-0295, ADR-0296, ADR-0174, ADR-0165, ADR-0166 (0021), ADR-0036, ADR-0037, ADR-0038, ADR-0040, ADR-0049, ADR-0054, ADR-0055, ADR-0057, ADR-0062,
   ADR-0066, ADR-0067, ADR-0069, ADR-0074, ADR-0076, ADR-0077
 - **Depends on:** [0007](0007-m4-wizard-framework-diagnostics.md) (wizard contract, `Diagnose`, connection guide),
   [0006](0006-m3-flash-settings.md) (`FirmwareLoader`, `RecentSourcesModel`, Flash page). The hand-off to
@@ -155,8 +155,12 @@ app/gui/tests/ wizard/flash_wizard_test.cpp tst_flash_wizard.qml
 - Operation mapping identical to 0006 (§ Operation mapping): `flash` / `flashLteBundle` / `updateModem` on the
   tab's session with the kind's target; the session is ensured with `attachRtt = false` when the tab has none
   (ADR-0057 cross-target rules apply when the console runs on the other MCU).
-- Diagnose (step 3) uses the same session; the wizard opens a probe-only session only when the tab has none and
-  promotes it with `startConnection(attachRtt = false)` before flashing (0007).
+- Diagnose (step 3) uses the same session; the wizard opens a probe-only session only when the tab has none.
+  *Amended by ADR-0295 (2026-11-09):* the session is not promoted before flashing — Diagnose and the flash run on the
+  tab's session or on that probe-only session (operations run on a probe-only session, ADR-0069); [Open console]
+  hands off `open-console`, which promotes it with RTT; a probe-only session the wizard opened is closed when the
+  wizard closes without a hand-off. *ADR-0296:* the Cable step runs Diagnose up to `identify`
+  (`DeviceSession::diagnose(target, "identify")`); the RTT steps never run.
 - `[Open console]`: when the flashed target is the console target, the hand-off asks the tab to connect (or
   re-attach) RTT; otherwise it switches the tab's console target only after the user confirms ("Open the console of
   the LTE MCU?") — the LTE console is out of scope (0002), so for `lte` the button is hidden and [Close] is the
@@ -225,19 +229,19 @@ Files: `app/gui/src/wizard/flash_wizard.{h,cpp}` (registered with the Flash serv
 `FlashSummaryStep.qml` (`flash-summary`), `PhaseProgressStep.qml` (`phase-progress`); tests
 `app/gui/tests/wizard/flash_wizard_test.cpp` (GTest, fake J-Link) and `app/gui/tests/tst_flash_wizard.qml`.
 
-Choices made during the implementation (not spelled out in the plan; to be confirmed by the user):
+Choices made during the implementation (not spelled out in the plan). Decided by Matej Strnad on 2026-11-09: 1 accepted as ADR-0295, 2 replaced by ADR-0296, 3–11 accepted as recorded:
 
-1. **Flash on the probe-only session, promotion on [Open console].** The plan says the wizard promotes its
+1. **Flash on the probe-only session, promotion on [Open console] (ADR-0295).** The plan says the wizard promotes its
    probe-only session with `startConnection(attachRtt = false)` before flashing. With the 0007 reconciliation
    (`ensureSession(bool)` only) a session promoted without RTT would make [Open console] show no console. The
    wizard therefore runs Diagnose and the flash on the tab's session or on the probe-only session it opened
    (operations run on a probe-only session, ADR-0069) and [Open console] hands off `open-console`, which promotes
    that session with RTT (`AppViewModel::onHandOff` → `connectDevice()`). A probe-only session the wizard opened is
    released (`disconnectDevice()`) when the wizard closes without a hand-off (as 0009 § Behaviour).
-2. **Diagnose without the RTT steps.** `DeviceSession::diagnose` has no subset; the Cable step shows the rows
-   `probe` … `identify` only and cancels the operation as soon as `identify` is reported (the RTT search honours the
-   stop token), so the RTT steps are skipped in practice. [Next] waits until the operation has ended (the session is
-   free for the flash).
+2. **Diagnose without the RTT steps (ADR-0296).** `DeviceSession::diagnose(targetId, lastStep)` gained a stop
+   point: the Cable step calls it with `"identify"`, so the RTT steps are neither run nor reported (backend test
+   `Diagnose.ALastStepNeverRunsTheLaterSteps`). No CLI option. [Next] waits until the operation has ended.
+   (First implemented by cancelling after `identify`; replaced on 2026-11-09.)
 3. **Cable step skip rule.** The step is skipped when the first Diagnose of a wizard opened on a tab that already
    has a probe passes (connected or not); after the Probe step it is always shown. Error start points therefore
    land on Firmware via Cable (they never skip a failing cable check).

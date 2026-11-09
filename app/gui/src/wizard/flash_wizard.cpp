@@ -618,7 +618,8 @@ void FlashWizard::startDiagnose() {
             return std::unexpected(
                 makeError(ErrorCode::InternalUnexpected, "no session after ensureSession"));
         }
-        return session->diagnose(toStdString(targetId()));
+        // ADR-0296: up to `identify`; the RTT steps are not needed for flashing (plan 0010).
+        return session->diagnose(toStdString(targetId()), cableCheckIds.back());
     }();
     if (!hadSession && m_tab->session() != nullptr &&
         m_tab->session()->connection().state != device::ConnectionState::Connected) {
@@ -670,9 +671,7 @@ void FlashWizard::onDiagnoseStep(device::OperationId id, const device::DiagnoseS
                                                    .error = std::nullopt});
         return;
     }
-    // `identify` is the last step the flash needs: the RTT steps are not run (cancelled).
-    m_diagnose->identifyReported = true;
-    cancelDiagnose();
+    m_diagnose->identifyReported = true; // the last step of this Diagnose (ADR-0296)
 }
 
 void FlashWizard::cancelDiagnose() {

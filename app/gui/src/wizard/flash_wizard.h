@@ -10,8 +10,8 @@
 //     [Next] configures the tab with the selected probe (DeviceTabViewModel::configure, never
 //     connects).
 //   - Cable: the console target's connection guide (ADR-0077, ADR-0233) and the Diagnose steps
-//     `probe` … `identify` (the RTT steps are not needed for flashing: their rows are not shown
-//     and the operation is cancelled once `identify` has been reported). A J-Link answering from
+//     `probe` … `identify` (the RTT steps are not needed for flashing: Diagnose stops after
+//     `identify`, ADR-0296). A J-Link answering from
 //     the other MCU (target.wrong_family / target.other_connector) asks to move the cable or
 //     offers [Update LTE firmware…]; target.protected is shown as information with
 //     [Open Flash page] (Recover there, ADR-0236). The step is skipped when the first Diagnose of
@@ -30,9 +30,9 @@
 //
 // Sessions: the tab's session when it has one; otherwise ensureSession(connectTarget = false)
 // opens a probe-only session for Diagnose and the flash (operations run on a probe-only session,
-// ADR-0069). [Open console] hands off "open-console", which promotes that session with RTT
-// (AppViewModel::onHandOff → connectDevice). A probe-only session the wizard opened is released
-// when the wizard closes without a hand-off.
+// ADR-0069; ADR-0295: not promoted before flashing). [Open console] hands off "open-console", which
+// promotes that session with RTT (AppViewModel::onHandOff → connectDevice). A probe-only session
+// the wizard opened is released when the wizard closes without a hand-off.
 //
 // Hand-offs to other wizards are "open-wizard:<id>" (AppViewModel opens it on the same tab after
 // this one has closed).
