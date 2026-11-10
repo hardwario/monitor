@@ -1,0 +1,482 @@
+#include "hwio/remote/relay_client.h"
+
+#include "hwio/core/error.h"
+#include "hwio/core/json.h"
+#include "hwio/core/log.h"
+#include "hwio/remote/protocol.h"
+#include "hwio/remote/session_code.h"
+#include "relay_worker.h"
+
+#include <QAbstractSocket>
+#include <QCoreApplication>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QList>
+#include <QLoggingCategory>
+#include <QMetaObject>
+#include <QNetworkProxy>
+#include <QNetworkProxyFactory>
+#include <QNetworkProxyQuery>
+#include <QObject>
+#include <QString>
+#include <QThread>
+#include <QTimer>
+#include <QWebSocket>
+#include <QWebSocketProtocol>
+#include <QtLogging>
+#include <QtTypes>
+
+#include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <format>
+#include <memory>
+#include <string>
+#include <utility>
+
+namespace hwio::remote {
+
+namespace {
+
+// QWebSocket refuses bigger frames (the relay's own maxPayload is 1 MB); smaller ones over
+// maxIncomingEventBytes are dropped by the worker with a warning.
+constexpr qint64 maxSocketMessageBytes = 1024LL * 1024;
+
+Error unreachable(std::string detail) {
+    return makeError(ErrorCode::RemoteRelayUnreachable, std::move(detail));
+}
+
+Error protocol(std::string detail) {
+    return makeError(ErrorCode::RemoteProtocolError, std::move(detail));
+}
+
+} // namespace
+
+namespace detail {
+
+RelayWorker::RelayWorker(RelayConfig config)
+    : m_config(std::move(config)), m_nsp(m_config.code.socketNamespace()) {
+    m_connectTimer.setSingleShot(true);
+    m_pingTimer.setSingleShot(true);
+    m_retryTimer.setSingleShot(true);
+    connect(&m_connectTimer, &QTimer::timeout, this,
+            [this] { lost(unreachable("no connection to the relay within the connect timeout")); });
+    connect(&m_pingTimer, &QTimer::timeout, this,
+            [this] { lost(unreachable("no Engine.IO ping from the relay")); });
+    connect(&m_retryTimer, &QTimer::timeout, this, [this] { openSocket(); });
+}
+
+RelayWorker::~RelayWorker() { destroySocket(); }
+
+void RelayWorker::start() {
+    if (m_phase == Phase::Idle) {
+        openSocket();
+    }
+}
+
+void RelayWorker::openSocket() {
+    destroySocket();
+    m_phase = Phase::Opening;
+    m_engineOpen = false;
+    m_socket = std::make_unique<QWebSocket>(QString(), QWebSocketProtocol::VersionLatest);
+    m_socket->setMaxAllowedIncomingMessageSize(maxSocketMessageBytes);
+    m_socket->setMaxAllowedIncomingFrameSize(maxSocketMessageBytes);
+    const QUrl url = engineIoUrl(m_config.relay);
+    const QList<QNetworkProxy> proxies =
+        QNetworkProxyFactory::systemProxyForQuery(QNetworkProxyQuery(m_config.relay));
+    if (!proxies.isEmpty()) {
+        m_socket->setProxy(proxies.front());
+    }
+    connect(m_socket.get(), &QWebSocket::textMessageReceived, this, &RelayWorker::onTextMessage);
+    connect(m_socket.get(), &QWebSocket::binaryMessageReceived, this,
+            &RelayWorker::onBinaryMessage);
+    connect(m_socket.get(), &QWebSocket::disconnected, this, &RelayWorker::onSocketClosed);
+    connect(m_socket.get(), &QWebSocket::bytesWritten, this, &RelayWorker::onBytesWritten);
+    connect(m_socket.get(), &QWebSocket::errorOccurred, this,
+            [this](QAbstractSocket::SocketError /*error*/) {
+                if (m_socket) {
+                    qCInfo(log::lcRemote).noquote()
+                        << "Relay socket error:" << m_socket->errorString();
+                }
+            });
+    m_connectTimer.start(m_config.limits.connectTimeout);
+    qCInfo(log::lcRemote).noquote()
+        << "Connecting to the relay" << m_config.relay.host() << "namespace" << m_nsp;
+    m_socket->open(url);
+}
+
+void RelayWorker::destroySocket() {
+    m_connectTimer.stop();
+    m_pingTimer.stop();
+    if (m_socket) {
+        // Often called from one of the socket's own signals: never deleted synchronously. A
+        // deleteLater() of the worker thread runs at the latest when the thread finishes.
+        QWebSocket* socket = m_socket.release();
+        socket->disconnect(this);
+        socket->abort();
+        socket->deleteLater();
+    }
+    m_inFlightBytes = 0;
+    m_engineOpen = false;
+}
+
+void RelayWorker::send(const QString& name, const QJsonValue& payload, bool droppable) {
+    if (m_phase == Phase::Ended) {
+        return;
+    }
+    QString text = socketio::encodeEvent(m_nsp, name, payload);
+    const auto bytes = static_cast<std::size_t>(text.toUtf8().size());
+    enqueue(Outgoing{.text = std::move(text), .bytes = bytes, .droppable = droppable});
+    flush();
+}
+
+void RelayWorker::enqueue(Outgoing packet) {
+    const std::size_t limit = m_config.limits.outgoingQueueBytes;
+    std::size_t dropped = 0;
+    while (m_queuedBytes + m_inFlightBytes + packet.bytes > limit) {
+        const auto it =
+            std::ranges::find_if(m_queue, [](const Outgoing& o) { return o.droppable; });
+        if (it == m_queue.end()) {
+            break; // nothing droppable is left; only non-droppable packets exceed the bound
+        }
+        m_queuedBytes -= it->bytes;
+        m_queue.erase(it);
+        ++dropped;
+    }
+    if (packet.droppable && m_queuedBytes + m_inFlightBytes + packet.bytes > limit) {
+        ++dropped; // the new line itself does not fit
+    } else {
+        m_queuedBytes += packet.bytes;
+        m_queue.push_back(std::move(packet));
+    }
+    if (dropped == 0) {
+        return;
+    }
+    m_droppedLines += dropped;
+    QJsonObject notice;
+    notice.insert(QStringLiteral("event"), QStringLiteral("read"));
+    notice.insert(QStringLiteral("data"),
+                  QCoreApplication::translate("hwio::remote", "… %n line(s) dropped …", nullptr,
+                                              static_cast<int>(dropped)));
+    QString text = socketio::encodeEvent(m_nsp, QStringLiteral("at"), notice);
+    const auto bytes = static_cast<std::size_t>(text.toUtf8().size());
+    m_queuedBytes += bytes;
+    m_queue.push_back(Outgoing{.text = std::move(text), .bytes = bytes, .droppable = false});
+    emit warning(makeError(
+        ErrorCode::InternalQueueFull,
+        std::format("{} device lines dropped: the connection to the relay is too slow", dropped)));
+}
+
+void RelayWorker::flush() {
+    if (m_phase != Phase::Connected || !m_socket) {
+        return;
+    }
+    const std::size_t limit = m_config.limits.outgoingQueueBytes;
+    while (!m_queue.empty() &&
+           (m_inFlightBytes == 0 || m_inFlightBytes + m_queue.front().bytes <= limit)) {
+        Outgoing packet = std::move(m_queue.front());
+        m_queue.pop_front();
+        m_queuedBytes -= packet.bytes;
+        m_inFlightBytes += packet.bytes;
+        rawSend(packet.text);
+    }
+}
+
+void RelayWorker::rawSend(const QString& text) {
+    if (m_socket) {
+        m_socket->sendTextMessage(text);
+    }
+}
+
+void RelayWorker::onBytesWritten(qint64 bytes) {
+    const auto written = static_cast<std::size_t>(std::max<qint64>(bytes, 0));
+    m_inFlightBytes = written >= m_inFlightBytes ? 0 : m_inFlightBytes - written;
+    flush();
+}
+
+void RelayWorker::onBinaryMessage() {
+    protocolProblem(protocol("binary WebSocket message from the relay"), false);
+}
+
+void RelayWorker::onTextMessage(const QString& message) {
+    if (m_phase == Phase::Ended) {
+        return;
+    }
+    handleEngineIo(message);
+}
+
+void RelayWorker::handleEngineIo(const QString& message) {
+    auto packet = engineio::parsePacket(message);
+    if (!packet) {
+        protocolProblem(std::move(packet).error(), false);
+        return;
+    }
+    switch (packet->type) {
+    case engineio::PacketType::Open: {
+        auto open = engineio::parseOpen(packet->data);
+        if (!open) {
+            fail(std::move(open).error());
+            return;
+        }
+        m_engineOpen = true;
+        m_pingDeadline = open->pingInterval + open->pingTimeout;
+        armPingTimer();
+        rawSend(socketio::encodeConnect(m_nsp));
+        return;
+    }
+    case engineio::PacketType::Ping:
+        armPingTimer();
+        rawSend(engineio::encode(engineio::PacketType::Pong));
+        return;
+    case engineio::PacketType::Close:
+        lost(unreachable("the relay closed the Engine.IO session"));
+        return;
+    case engineio::PacketType::Message:
+        if (!m_engineOpen) {
+            protocolProblem(protocol("Engine.IO message before the open packet"), false);
+            return;
+        }
+        handleSocketIo(packet->data);
+        return;
+    case engineio::PacketType::Pong:
+    case engineio::PacketType::Upgrade:
+    case engineio::PacketType::Noop:
+        return;
+    }
+}
+
+void RelayWorker::handleSocketIo(const QString& data) {
+    if (static_cast<std::size_t>(data.size()) > maxIncomingEventBytes ||
+        static_cast<std::size_t>(data.toUtf8().size()) > maxIncomingEventBytes) {
+        protocolProblem(
+            protocol(std::format("incoming event of {} characters dropped", data.size())), true);
+        return;
+    }
+    auto packet = socketio::parsePacket(data);
+    if (!packet) {
+        protocolProblem(std::move(packet).error(), false);
+        return;
+    }
+    if (packet->nsp != m_nsp) {
+        protocolProblem(protocol("Socket.IO packet for another namespace"), false);
+        return;
+    }
+    switch (packet->type) {
+    case socketio::PacketType::Connect: {
+        if (m_phase != Phase::Opening) {
+            return;
+        }
+        m_connectTimer.stop();
+        m_phase = Phase::Connected;
+        const bool reconnected = m_everConnected;
+        m_everConnected = true;
+        m_lostAt.reset();
+        m_lostError.reset();
+        m_retryDelay = {};
+        qCInfo(log::lcRemote).noquote() << "Relay namespace connected" << m_nsp;
+        emit connected(reconnected);
+        flush();
+        return;
+    }
+    case socketio::PacketType::ConnectError: {
+        const QString message = packet->data.toObject().value(QStringLiteral("message")).toString();
+        fail(protocol(std::format("the relay refused the session: {}", toStdString(message))));
+        return;
+    }
+    case socketio::PacketType::Disconnect:
+        lost(unreachable("the relay disconnected the session"));
+        return;
+    case socketio::PacketType::Event: {
+        if (m_phase != Phase::Connected) {
+            return;
+        }
+        auto event = socketio::toEvent(*packet);
+        if (!event) {
+            protocolProblem(std::move(event).error(), false);
+            return;
+        }
+        emit eventReceived(event->name, event->payload);
+        return;
+    }
+    case socketio::PacketType::Ack:
+    case socketio::PacketType::BinaryEvent:
+    case socketio::PacketType::BinaryAck:
+        return; // binary types are rejected by parsePacket(); acknowledgements are not used
+    }
+}
+
+void RelayWorker::armPingTimer() { m_pingTimer.start(m_pingDeadline); }
+
+void RelayWorker::onSocketClosed() {
+    if (m_phase == Phase::Ended) {
+        return;
+    }
+    const QString reason = m_socket ? m_socket->errorString() : QString();
+    lost(unreachable(std::format("the connection to the relay closed: {}", toStdString(reason))));
+}
+
+void RelayWorker::lost(Error error) {
+    if (m_phase == Phase::Ended || m_phase == Phase::WaitingRetry) {
+        return;
+    }
+    destroySocket();
+    if (!m_everConnected) {
+        fail(std::move(error)); // the first connect is not retried
+        return;
+    }
+    const auto now = std::chrono::steady_clock::now();
+    if (!m_lostAt) {
+        m_lostAt = now;
+        m_lostError = error;
+        qCInfo(log::lcRemote).noquote() << "Relay connection lost:" << toQString(error.detail);
+        emit connectionLost(error);
+    }
+    if (now - *m_lostAt >= m_config.limits.reconnectBudget) {
+        fail(m_lostError.value_or(std::move(error)));
+        return;
+    }
+    m_retryDelay = m_retryDelay.count() == 0
+                       ? m_config.limits.reconnectFirstDelay
+                       : std::min(m_retryDelay * 2, m_config.limits.reconnectMaxDelay);
+    m_phase = Phase::WaitingRetry;
+    m_retryTimer.start(m_retryDelay);
+}
+
+void RelayWorker::fail(Error error) {
+    if (m_phase == Phase::Ended) {
+        return;
+    }
+    destroySocket();
+    m_retryTimer.stop();
+    m_phase = Phase::Ended;
+    m_queue.clear();
+    m_queuedBytes = 0;
+    qCWarning(log::lcRemote).noquote() << "Relay connection failed:" << toQString(error.detail);
+    emit failed(error);
+}
+
+void RelayWorker::protocolProblem(Error error, bool oversized) {
+    qCWarning(log::lcRemote).noquote() << "Relay protocol problem:" << toQString(error.detail);
+    if (oversized ? ++m_oversized >= m_config.limits.maxOversizedEvents
+                  : ++m_protocolErrors >= m_config.limits.maxProtocolErrors) {
+        fail(std::move(error));
+        return;
+    }
+    emit warning(error);
+}
+
+void RelayWorker::shutdown() {
+    if (m_phase == Phase::Connected && m_socket) {
+        rawSend(socketio::encodeDisconnect(m_nsp));
+        m_socket->flush();
+        m_socket->close(QWebSocketProtocol::CloseCodeNormal);
+    }
+    m_phase = Phase::Ended;
+    m_retryTimer.stop();
+    destroySocket();
+}
+
+} // namespace detail
+
+RelayClient::RelayClient(RelayConfig config, QObject* parent)
+    : QObject(parent), m_config(std::move(config)) {}
+
+RelayClient::~RelayClient() { stop(); }
+
+void RelayClient::start() {
+    if (m_started) {
+        return;
+    }
+    m_started = true;
+    m_thread = std::make_unique<QThread>();
+    m_thread->setObjectName(QStringLiteral("hwio-remote-relay"));
+    m_worker = std::make_unique<detail::RelayWorker>(m_config);
+    m_worker->moveToThread(m_thread.get());
+    connect(
+        m_worker.get(), &detail::RelayWorker::connected, this,
+        [this](bool reconnected) {
+            if (!m_stopped) {
+                m_connected = true;
+                emit connected(reconnected);
+            }
+        },
+        Qt::QueuedConnection);
+    connect(
+        m_worker.get(), &detail::RelayWorker::connectionLost, this,
+        [this](const Error& error) {
+            if (!m_stopped) {
+                m_connected = false;
+                emit connectionLost(error);
+            }
+        },
+        Qt::QueuedConnection);
+    connect(
+        m_worker.get(), &detail::RelayWorker::failed, this,
+        [this](const Error& error) {
+            if (!m_stopped) {
+                m_connected = false;
+                emit failed(error);
+            }
+        },
+        Qt::QueuedConnection);
+    connect(
+        m_worker.get(), &detail::RelayWorker::warning, this,
+        [this](const Error& error) {
+            if (!m_stopped) {
+                emit warning(error);
+            }
+        },
+        Qt::QueuedConnection);
+    connect(m_worker.get(), &detail::RelayWorker::eventReceived, this, &RelayClient::onEvent,
+            Qt::QueuedConnection);
+    m_thread->start();
+    QMetaObject::invokeMethod(m_worker.get(), &detail::RelayWorker::start, Qt::QueuedConnection);
+}
+
+void RelayClient::onEvent(const QString& name, const QJsonValue& payload) {
+    if (m_stopped) {
+        return;
+    }
+    if (name == QStringLiteral("newClient")) {
+        emit newClient();
+    } else if (name == QStringLiteral("at")) {
+        emit atReceived(payload);
+    } else if (name == QStringLiteral("sync")) {
+        emit syncReceived(payload);
+    } else if (name == QStringLiteral("write")) {
+        emit writeReceived(payload);
+    } else {
+        qCDebug(log::lcRemote).noquote() << "Ignored relay event" << name.left(64);
+    }
+}
+
+void RelayClient::emitEvent(const QString& name, const QJsonValue& payload, bool droppable) {
+    if (!m_started || m_stopped) {
+        return;
+    }
+    QMetaObject::invokeMethod(
+        m_worker.get(),
+        [worker = m_worker.get(), name, payload, droppable] {
+            worker->send(name, payload, droppable);
+        },
+        Qt::QueuedConnection);
+}
+
+void RelayClient::stop() {
+    if (m_stopped) {
+        return;
+    }
+    m_stopped = true;
+    m_connected = false;
+    if (!m_started) {
+        return;
+    }
+    QMetaObject::invokeMethod(m_worker.get(), &detail::RelayWorker::shutdown,
+                              Qt::BlockingQueuedConnection);
+    m_thread->quit();
+    m_thread->wait();
+    m_worker.reset(); // its thread has ended
+    m_thread.reset();
+}
+
+} // namespace hwio::remote

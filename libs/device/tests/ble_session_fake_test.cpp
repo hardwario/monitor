@@ -13,6 +13,7 @@
 #include "hwio/hw/ble/ble_host.h"
 #include "session_test_support.h"
 
+#include <QFile>
 #include <QList>
 #include <QObject>
 #include <QTemporaryDir>
@@ -86,6 +87,43 @@ TEST_F(BleSessionFake, CommandIsAnsweredBeforeThePrompt) {
     ASSERT_TRUE(waitFor([&prompts] { return prompts == 1; }));
     EXPECT_EQ(lines, (std::vector<std::string>{"version", "Firmware version: v3.1.0"}));
     EXPECT_EQ((*session)->log().lastSeq(), 2U);
+}
+
+// Plan 0044 (ADR-0333): a remote audit marker in order with the lines and in the console file; the
+// echo of a remote command carries LineSource::Remote.
+TEST_F(BleSessionFake, RemoteEventsAndRemoteCommands) {
+    hwio::device::SessionRegistry registry(registryOptions());
+    hwio::ble::BleHost host(fake("chester.json"));
+    const fs::path file = fs::path(registryOptions().consoleDirectory) / "remote.log";
+    auto session = BleSession::open(registry, host,
+                                    {.profile = hwio::device::ProfileRegistry::find("chester"),
+                                     .deviceId = "F1:22:33:44:55:66",
+                                     .deviceName = "CHESTER-ABC123",
+                                     .autoReconnect = false,
+                                     .consoleFile = file,
+                                     .consoleLog = nullptr});
+    ASSERT_TRUE(session) << session.error().message;
+    std::vector<ConsoleLine> lines;
+    QObject::connect(session->get(), &BleSession::linesReceived, session->get(),
+                     [&lines](const QList<ConsoleLine>& received) {
+                         lines.insert(lines.end(), received.begin(), received.end());
+                     });
+    ASSERT_TRUE(hwio::device::waitUntilConnected(**session, 5s));
+    ASSERT_TRUE((*session)->recordRemoteEvent("Remote: participant allowed"));
+    ASSERT_TRUE((*session)->sendRemoteLine("version"));
+    ASSERT_TRUE(waitFor([&lines] { return lines.size() >= 3; }));
+    EXPECT_EQ(lines[0].dir, hwio::device::Direction::Marker);
+    EXPECT_EQ(lines[0].source, hwio::device::LineSource::Remote);
+    EXPECT_EQ(lines[1].text, "version");
+    EXPECT_EQ(lines[1].source, hwio::device::LineSource::Remote);
+    EXPECT_EQ(lines[2].source, hwio::device::LineSource::Local);
+    (*session)->close();
+    session->reset();
+    QFile written(QString::fromStdString(file.string()));
+    ASSERT_TRUE(waitFor([&written] { return written.exists() && written.size() > 0; }));
+    ASSERT_TRUE(written.open(QIODevice::ReadOnly));
+    const QByteArray text = written.readAll();
+    EXPECT_TRUE(text.contains(" @ Remote: participant allowed")) << text.toStdString();
 }
 
 // close() returns at once; the same device opens again right away (plan 0011 decisions).

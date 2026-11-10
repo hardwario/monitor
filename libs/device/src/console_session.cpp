@@ -70,9 +70,12 @@ void ConsoleSession::setShellCapture(ShellCapture capture) {
     }
     // The held user lines, in order (a full transport queue drops the rest, logged).
     while (!m_held.empty() && !m_capture) {
-        std::string line = std::move(m_held.front());
+        HeldLine held = std::move(m_held.front());
         m_held.pop_front();
-        if (const Status sent = sendLine(std::move(line)); !sent) {
+        m_sendingSource = held.source;
+        const Status sent = sendLine(std::move(held.text));
+        m_sendingSource = LineSource::Local;
+        if (!sent) {
             qCWarning(log::lcDevice).noquote()
                 << "A held command was not sent:" << toQString(sent.error().detail);
         }
@@ -87,6 +90,26 @@ Status ConsoleSession::sendCaptureLine(std::string line, std::uint64_t origin) {
     Status sent = sendLine(std::move(line));
     m_sendingOrigin = 0;
     return sent;
+}
+
+Status ConsoleSession::sendRemoteLine(std::string line) {
+    m_sendingSource = LineSource::Remote;
+    Status sent = sendLine(std::move(line));
+    m_sendingSource = LineSource::Local;
+    return sent;
+}
+
+std::string ConsoleSession::boundedRemoteEvent(std::string text) {
+    if (text.size() <= maxRemoteEventBytes) {
+        return text;
+    }
+    std::size_t end = maxRemoteEventBytes;
+    // Never cut inside a UTF-8 sequence (continuation bytes are 10xxxxxx).
+    while (end > 0 && (static_cast<unsigned char>(text[end]) & 0xC0U) == 0x80U) {
+        --end;
+    }
+    text.resize(end);
+    return text;
 }
 
 std::chrono::milliseconds ConsoleSession::shellBusyFor() const {
@@ -134,7 +157,7 @@ bool ConsoleSession::holdLine(std::string& line, Status& status) {
                       std::format("{} commands wait for a running shell query", m_held.size())));
         return true;
     }
-    m_held.push_back(std::move(line));
+    m_held.push_back(HeldLine{.text = std::move(line), .source = m_sendingSource});
     status = {};
     return true;
 }

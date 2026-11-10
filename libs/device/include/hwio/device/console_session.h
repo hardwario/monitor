@@ -64,6 +64,16 @@ public:
     // Queued for the worker; an Error only when the queue is full (internal.queue_full) or the
     // session is closed (cancelled). Results arrive as events (echo line, warning, connection).
     [[nodiscard]] virtual Status sendLine(std::string line) = 0;
+    // Plan 0044 (ADR-0335): sendLine() for a line of an approved remote support session
+    // participant; its echo carries LineSource::Remote (a held line keeps it).
+    [[nodiscard]] Status sendRemoteLine(std::string line);
+    // Plan 0044 (ADR-0333): an audit line of a remote support session ("Remote: participant
+    // allowed"), queued for the session's worker, which writes it into the console file as an "@"
+    // line and emits it as a Marker line (Shell channel, LineSource::Remote) in order with the
+    // device lines. At most maxRemoteEventBytes (longer text is cut). Errors: internal.queue_full,
+    // cancelled (closed).
+    [[nodiscard]] virtual Status recordRemoteEvent(std::string text) = 0;
+    static constexpr std::size_t maxRemoteEventBytes = 1024;
     [[nodiscard]] virtual Status reconnect() = 0;
     // Stops the session and releases its registry slot and lock. Idempotent: calls closeSession()
     // once.
@@ -152,6 +162,10 @@ protected:
     [[nodiscard]] bool holdLine(std::string& line, Status& status);
     // The origin token for the line sendLine() queues now (0 unless sendCaptureLine() sends it).
     [[nodiscard]] std::uint64_t sendingOrigin() const noexcept { return m_sendingOrigin; }
+    // Plan 0044: the source of the line sendLine() queues now (Remote inside sendRemoteLine()).
+    [[nodiscard]] LineSource sendingSource() const noexcept { return m_sendingSource; }
+    // Plan 0044: `text` cut to maxRemoteEventBytes on a UTF-8 boundary.
+    [[nodiscard]] static std::string boundedRemoteEvent(std::string text);
     // Call after sendLine() queued a line (not held) for the transport.
     void lineQueued();
     [[nodiscard]] std::size_t heldLineCount() const noexcept { return m_held.size(); }
@@ -165,8 +179,13 @@ protected:
 private:
     bool m_closeCalled = false;
     ShellCapture m_capture;
-    std::deque<std::string> m_held; // <= maxHeldLines
+    struct HeldLine {
+        std::string text;
+        LineSource source = LineSource::Local;
+    };
+    std::deque<HeldLine> m_held; // <= maxHeldLines
     std::uint64_t m_sendingOrigin = 0;
+    LineSource m_sendingSource = LineSource::Local;
     std::uint64_t m_nextOrigin = 0;
     // Shell activity for shellBusyFor() (owner thread).
     std::size_t m_unechoed = 0;

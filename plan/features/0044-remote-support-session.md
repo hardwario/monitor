@@ -1,6 +1,6 @@
 # 0044 — Remote support session (HARDWARIO Terminal compatible)
 
-- **Status:** Approved (2026-11-09, Matej Strnad)
+- **Status:** In progress (approved 2026-11-09, Matej Strnad; implementation started 2026-11-10)
 - **Milestone:** 2.1 (after 2.0.0, ADR-0326)
 - **Author:** Matej Strnad, Claude
 - **Related ADRs:** ADR-0334 (strict compatibility with the existing relay, 6-digit code), ADR-0335 (join approval),
