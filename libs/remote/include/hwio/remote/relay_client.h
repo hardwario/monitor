@@ -8,7 +8,7 @@
 // other event (logged).
 //
 // Threading (plan 0044 § Threading): the socket, the Engine.IO / Socket.IO handling and the JSON
-// parsing run on a worker QThread owned by RelayClient (stopped and joined by stop() and the
+// parsing run on a worker std::jthread owned by RelayClient (stopped and joined by stop() and the
 // destructor). RelayClient itself is a QObject facade on the owner thread; every member function
 // is called there and every signal is emitted there (queued, in the worker's order).
 //
@@ -40,8 +40,9 @@
 #include <chrono>
 #include <cstddef>
 #include <memory>
+#include <thread>
 
-class QThread;
+class QEventLoop;
 
 namespace hwio::remote {
 
@@ -125,8 +126,11 @@ private:
     std::unique_ptr<detail::RelayEventQueue> m_events;
     std::unique_ptr<detail::RelaySendQueue> m_sends; // the same, other direction
     std::atomic<bool> m_wakePending{false};
-    std::unique_ptr<QThread> m_thread;             // owned; joined by stop()
-    std::unique_ptr<detail::RelayWorker> m_worker; // lives on m_thread; deleted after the join
+    // Non-owning: the worker and the event loop live on m_thread's stack, valid from start()'s
+    // return until stop()'s join(); the owner only posts queued calls to them.
+    detail::RelayWorker* m_worker = nullptr;
+    QEventLoop* m_loop = nullptr;
+    std::jthread m_thread; // owned; joined by stop() (also from the destructor)
     bool m_started = false;
     bool m_stopped = false;
     bool m_connected = false;

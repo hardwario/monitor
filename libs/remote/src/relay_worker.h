@@ -2,7 +2,7 @@
 
 // The worker-thread half of RelayClient (relay_client.h): the QWebSocket, Engine.IO (open, ping /
 // pong, timeouts), the Socket.IO namespace, reconnect and the bounded outgoing queue. Lives on the
-// RelayClient's QThread; every slot runs there.
+// RelayClient's std::jthread (a Qt-adopted thread with its own QEventLoop); every slot runs there.
 
 #include "hwio/core/bounded_queue.h"
 #include "hwio/core/error.h"
@@ -16,13 +16,11 @@
 
 #include <atomic>
 #include <chrono>
-#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <variant>
 
@@ -86,20 +84,11 @@ public:
     Q_INVOKABLE void drainSends();
     // Owner thread: one coalesced, payload-free queued drainSends().
     void wakeForSends();
-    // DISCONNECT (when connected), close, no more signals. Called blocking from the owner.
+    // DISCONNECT (when connected), close, no more notifications. Queued by the owner's stop(),
+    // followed by a queued quit of the thread's event loop.
     Q_INVOKABLE void shutdown();
-    // Blocks until shutdown() has finished on the worker thread. Called by the owner after the
-    // blocking shutdown() call and before deleting the worker: the BlockingQueuedConnection and
-    // QThread::wait() synchronize through futexes inside uninstrumented libQt6Core, which
-    // ThreadSanitizer cannot see; this std::mutex / std::condition_variable hand-off gives it a
-    // visible happens-before edge between shutdown() and the destructor on the owner's thread.
-    void waitUntilShutDown();
 
 private:
-    std::mutex m_shutdownMutex;           // guards m_shutdownDone
-    std::condition_variable m_shutdownCv; // notified when shutdown() has finished
-    bool m_shutdownDone = false;
-
     enum class Phase : std::uint8_t {
         Idle,
         Opening,      // WebSocket + Engine.IO open + namespace connect

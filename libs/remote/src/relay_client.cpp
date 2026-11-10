@@ -10,6 +10,8 @@
 
 #include <QAbstractSocket>
 #include <QCoreApplication>
+#include <QEvent>
+#include <QEventLoop>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QList>
@@ -35,8 +37,8 @@
 #include <cstdint>
 #include <format>
 #include <functional>
+#include <latch>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -446,16 +448,6 @@ void RelayWorker::shutdown() {
     m_phase = Phase::Ended;
     m_retryTimer.stop();
     destroySocket();
-    // Notify under the lock: the owner deletes this object (and the condition variable) as soon
-    // as it sees the flag.
-    const std::scoped_lock lock(m_shutdownMutex);
-    m_shutdownDone = true;
-    m_shutdownCv.notify_all();
-}
-
-void RelayWorker::waitUntilShutDown() {
-    std::unique_lock lock(m_shutdownMutex);
-    m_shutdownCv.wait(lock, [this] { return m_shutdownDone; });
 }
 
 } // namespace detail
@@ -476,13 +468,23 @@ void RelayClient::start() {
         return;
     }
     m_started = true;
-    m_thread = std::make_unique<QThread>();
-    m_thread->setObjectName(QStringLiteral("hwio-remote-relay"));
-    m_worker =
-        std::make_unique<detail::RelayWorker>(m_config, *m_events, [this] { wakeUp(); }, *m_sends);
-    m_worker->moveToThread(m_thread.get());
-    m_thread->start();
-    QMetaObject::invokeMethod(m_worker.get(), &detail::RelayWorker::start, Qt::QueuedConnection);
+    std::latch ready(1);
+    m_thread = std::jthread([this, &ready] {
+        // A thread Qt adopts: QThread::currentThread() creates its QThread object; the QEventLoop
+        // creates the thread's event dispatcher, before the worker creates its QWebSocket and
+        // timers here, on this thread. Every QObject of the thread is destroyed in this body.
+        QThread::currentThread()->setObjectName(QStringLiteral("hwio-remote-relay"));
+        QEventLoop loop;
+        detail::RelayWorker worker(m_config, *m_events, [this] { wakeUp(); }, *m_sends);
+        m_loop = &loop;
+        m_worker = &worker;
+        ready.count_down(); // m_loop / m_worker are published to the owner
+        worker.start();
+        loop.exec();
+        // The sockets destroySocket() handed to deleteLater().
+        QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+    });
+    ready.wait();
 }
 
 void RelayClient::wakeUp() {
@@ -562,13 +564,13 @@ void RelayClient::stop() {
     if (!m_started) {
         return;
     }
-    QMetaObject::invokeMethod(m_worker.get(), &detail::RelayWorker::shutdown,
-                              Qt::BlockingQueuedConnection);
-    m_worker->waitUntilShutDown(); // a happens-before edge ThreadSanitizer can see (relay_worker.h)
-    m_thread->quit();
-    m_thread->wait();
-    m_worker.reset(); // its thread has ended
-    m_thread.reset();
+    // Both run on the relay thread in this order: the remaining packets and the DISCONNECT, then
+    // the end of its event loop. join() is the happens-before edge ThreadSanitizer sees.
+    QMetaObject::invokeMethod(m_worker, "shutdown", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(m_loop, "quit", Qt::QueuedConnection);
+    m_thread.join();
+    m_worker = nullptr;
+    m_loop = nullptr;
 }
 
 } // namespace hwio::remote
