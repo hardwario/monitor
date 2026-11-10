@@ -29,7 +29,7 @@
 //            stm32ReadAttempts times while it fails or reads 0 (Phase 0 P0.3: a running STM32L0
 //            reads 0 now and then). Readable at RDP level 1 except F_SIZE may not be (0 =
 //            unknown). No halt, no write.
-//   programRdpLevel0 (STM32 only, ADR-0276, ADR-0282): clears the FLASH_SR error flags, unlocks
+//   programRdpLevel0 (STM32 only, ADR-0276, ADR-0353): clears the FLASH_SR error flags, unlocks
 //            PECR and the option bytes, writes the RDP option word with RDP 0xAA (byte 1 kept from
 //            FLASH_OPTR, complement in bits 31:16), waits for BSY and launches the option-byte
 //            reload (the chip resets; at RDP level 1 it mass-erases flash and data EEPROM). 0xCC is

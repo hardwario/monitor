@@ -759,7 +759,7 @@ TEST(OperationReporterTest, PlannedPhasesOfTheTargetOperations) {
     EXPECT_EQ(hwio::device::operationKindId(OperationKind::MemoryZones), "memoryZones");
 }
 
-// ---- plan 0039: STM32 targets (ADR-0275, ADR-0276, ADR-0282) ------------------------------------
+// ---- plan 0039: STM32 targets (ADR-0275, ADR-0276, ADR-0353) ------------------------------------
 
 ChipInfo stm32Chip(std::uint16_t devId, std::uint16_t kib, int rdp = 0,
                    std::uint32_t word = 0xFF5500AA) {
@@ -924,7 +924,7 @@ TEST_F(Stm32Workflow, UnlockReconnectsAndChecksLevel0) {
     EXPECT_EQ(reconnects, 1);
 }
 
-// ADR-0282 (Phase 0: the regression left 0x015500AA).
+// ADR-0353 (Phase 0: the regression left 0x015500AA).
 TEST_F(Stm32Workflow, UnlockRewritesANonCanonicalWordOnce) {
     {
         InSequence order;

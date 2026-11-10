@@ -175,7 +175,7 @@ TEST(Stm32Profile, FindPartOnATarget) {
     EXPECT_EQ(hwio::device::findPart(target, 0), nullptr);
 }
 
-// RDP levels and the canonical level-0 word (ADR-0276, ADR-0282).
+// RDP levels and the canonical level-0 word (ADR-0276, ADR-0353).
 TEST(Stm32Profile, RdpHelpers) {
     EXPECT_EQ(hwio::jlink::stm32RdpLevelOf(0xAA), 0);
     EXPECT_EQ(hwio::jlink::stm32RdpLevelOf(0xBB), 1);

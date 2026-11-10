@@ -5,7 +5,7 @@
 - **Milestone:** 2.0.0-rc.4 (user decision 2026-11-06)
 - **Author:** Matej Strnad (with Claude), 2026-11-06
 - **Related ADRs:** ADR-0015, ADR-0031, ADR-0032, ADR-0035–ADR-0040, ADR-0050, ADR-0057, ADR-0099, ADR-0160,
-  ADR-0165, ADR-0174; accepted here: ADR-0274 … ADR-0277, ADR-0279, ADR-0280, ADR-0282 (Phase 0)
+  ADR-0165, ADR-0174; accepted here: ADR-0274 … ADR-0277, ADR-0279, ADR-0280, ADR-0353 (Phase 0)
 - **Depends on:** [0003](0003-m2-flashing.md) (flash pipeline), [0006](0006-m3-flash-settings.md) (Flash page),
   [0013](0013-m6-mcp-core-cli.md) (target operations)
 - **Followed by:** [0040](0040-chester-lrw-module.md) (CHESTER LoRaWAN module: `lrw` target, prepared firmware)
@@ -31,7 +31,7 @@ new dependency is needed. Neither py-hardwario nor the old app flash STM32; ther
 |---|---|
 | A CHESTER STM32 chip connected over SWD to a J-Link (2026-11-06): CPUID `0x410CC601` (Cortex-M0+ r0p1), DBGMCU_IDCODE @ `0x40015800` = `0x10386417` → **DEV_ID `0x417`** (STM32L0 category 3: L051/L052/L053/L062/L063), REV_ID `0x1038`; FLASH_OPTR @ `0x4002201C` = `0x807000AA` → **RDP level 0**; flash size @ `0x1FF8007C` (16 bit) = `0x0040` → 64 KiB; vector table SP `0x20002000` → 8 KiB RAM; application present (reset vector `0x08005E39`, Phase 0 dump; the first read noted `0x08003AE9`). Running: about 1 in 40 reads of IDCODE and of the flash size register return 0 (P0.3); halted: always correct. | J-Link Commander 9.84, `connect` + `mem32` (read only), developer machine; Phase 0 2026-11-06 |
 | The Murata Type ABZ (CMWX1ZZABZ) contains an STM32L072CZ (192 KiB flash, 20 KiB RAM, 6 KiB data EEPROM; DEV_ID `0x447`). Its original Murata firmware sets read-out protection on first boot; hardwario/lora-modem's flashing guide therefore uses `--unprotect`. | hardwario/lora-modem wiki "Type ABZ Modules", "LoRa Module Firmware Update" (read 2026-11-05); DEV_ID `0x447` confirmed (OpenOCD stm32lx.c; ST cmsis_device_l0), on hardware in P0.2 |
-| STM32L0 read-out protection: RDP byte in FLASH_OPTR (`0xAA` = level 0, `0xCC` = level 2 = permanent, else level 1). Level 1 → 0 ("regression") is done by programming the option bytes with RDP = `0xAA` and reloading them; the chip then **mass-erases flash and data EEPROM**. Level 2 cannot be undone. | Confirmed in Phase 0: ST stm32l0xx_hal_driver (`OB_RDP_LEVEL_0/1/2` = `0xAA`/`0xBB`/`0xCC`, RDP word = value \| ~value << 16), OpenOCD stm32lx.c, and on the S1 (level 1 → 0 erased flash + EEPROM; ADR-0282) |
+| STM32L0 read-out protection: RDP byte in FLASH_OPTR (`0xAA` = level 0, `0xCC` = level 2 = permanent, else level 1). Level 1 → 0 ("regression") is done by programming the option bytes with RDP = `0xAA` and reloading them; the chip then **mass-erases flash and data EEPROM**. Level 2 cannot be undone. | Confirmed in Phase 0: ST stm32l0xx_hal_driver (`OB_RDP_LEVEL_0/1/2` = `0xAA`/`0xBB`/`0xCC`, RDP word = value \| ~value << 16), OpenOCD stm32lx.c, and on the S1 (level 1 → 0 erased flash + EEPROM; ADR-0353) |
 
 ### STM32 chips on HARDWARIO products (known so far)
 
@@ -53,7 +53,7 @@ small entries (DEV_ID, flash size, J-Link device name, ranges) — ADR-0279.
   (ADR-0275), covering the **whole STM32L0 family** generically (ADR-0279): one part entry per category and flash
   size — cat. 1 (DEV_ID `0x457`, L011 / L021), cat. 2 (`0x425`, L031 / L041), cat. 3 (`0x417`, L051 / L052 / L053 /
   L062 / L063), cat. 5 (`0x447`, L071 / L072 / L073 / L081 / L082 / L083), each in its flash sizes (confirmed in
-  Phase 0, see "Phase 0 results"; the STM32L010 value line is only named in the hint, ADR-0282). Each part carries its J-Link device name, ID register and expected DEV_ID, flash / EEPROM / RAM ranges
+  Phase 0, see "Phase 0 results"; the STM32L010 value line is only named in the hint, ADR-0353). Each part carries its J-Link device name, ID register and expected DEV_ID, flash / EEPROM / RAM ranges
   and its protection data.
 - G2 The user **picks the chip**; after connecting the app reads DBGMCU_IDCODE and **stops with a clear error when it
   is another chip** (`target.wrong_chip`, ADR-0275).
@@ -174,7 +174,7 @@ level 1 chip succeeds and reports `"rdp": 1`.
   FLASH_SR error flags, unlock PECR, unlock option bytes, program the RDP word = `0xAA` with byte 1 kept from
   FLASH_OPTR and its complement, launch the option-byte reload), then wait for the probe to re-connect (the chip
   resets) and re-identify (RDP `0xAA`, no OPTVERR); a non-canonical stored word is rewritten once at level 0
-  (ADR-0282); timeout 60 s like `recover`. Own sequence confirmed in P0.4 (D7); the J-Link library's unsecure
+  (ADR-0353); timeout 60 s like `recover`. Own sequence confirmed in P0.4 (D7); the J-Link library's unsecure
   dialog is always answered NO by the existing hook.
 - `program` / `verify` / `eraseAll` reuse the existing J-Link flash-loader path (`BeginDownload` / `WriteMem` /
   `EndDownload`, `JLINK_EraseChip`); the data EEPROM is written through the same loader if J-Link supports it for the
@@ -221,8 +221,8 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
 | D8 | Tab without a console | Flash + Maintenance only, console page explains / hide the console page | **Console page with explanation** (approved 2026-11-06) | ADR-0280 |
 | D9 | MCP tools for STM32 | yes (unlock needs confirm + GUI approval) / no MCP | **Yes; unlock needs `confirm: true` + GUI approval** (approved 2026-11-06) | ADR-0280 |
 | D10 | Which parts are in the first curated list | the two known chips only / **the whole STM32L0 family, generic, prepared firmware later** | **Generic for the STM32L0 family; prepared firmware is added per part when HARDWARIO has it** (2026-11-06: "do it generically for these chips, we'll get the firmware later; they are similar STM32 everywhere") | ADR-0279 |
-| D11 | Phase 0: the RDP word read back non-canonical after the unlock | rewrite it at level 0 / verify FLASH_OPTR only | **Rewrite once at level 0** (2026-11-06) | ADR-0282 |
-| D12 | Phase 0: STM32L010 value line (same DEV_ID, smaller EEPROM) | named in the hint only / own entries | **Hint only: "not for STM32L010"** (2026-11-06) | ADR-0282 |
+| D11 | Phase 0: the RDP word read back non-canonical after the unlock | rewrite it at level 0 / verify FLASH_OPTR only | **Rewrite once at level 0** (2026-11-06) | ADR-0353 |
+| D12 | Phase 0: STM32L010 value line (same DEV_ID, smaller EEPROM) | named in the hint only / own entries | **Hint only: "not for STM32L010"** (2026-11-06) | ADR-0353 |
 
 ## Implementation steps
 
@@ -265,7 +265,7 @@ existing 32 MiB file cap. Unlock timeout 60 s, ID read retries 3.
   in the same connection after the failed download hung > 15 min → the RDP level is checked in identify **before any
   loader call** (as designed). IDCODE and FLASH_OPTR stay readable at level 1, flash / EEPROM do not. The own
   sequence (D7) works (2 runs): the chip mass-erases and is at level 0 after `OBL_LAUNCH`; the stored word was
-  `0x015500AA` → canonical rewrite at level 0 (ADR-0282). Level 1 for the test was set with RDP `0xBB`.
+  `0x015500AA` → canonical rewrite at level 0 (ADR-0353). Level 1 for the test was set with RDP `0xBB`.
 - **P0.5:** the J-Link loader programs the data EEPROM with the plain device name (512 B sectors);
   `JLINK_EraseChip` erases flash **and** data EEPROM. The STM32 "erase" is therefore EraseChip only (the nRF
   `eraseCode` writes `0xFF`, which is not the STM32 erased state).

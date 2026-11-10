@@ -1,4 +1,4 @@
-# ADR-0282 — STM32L0 unlock ends with a canonical RDP word; the L010 value line is only named in the hint
+# ADR-0353 — STM32L0 unlock ends with a canonical RDP word; the L010 value line is only named in the hint
 
 - **Status:** Accepted
 - **Date:** 2026-11-06

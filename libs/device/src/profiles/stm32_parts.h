@@ -10,7 +10,7 @@
 // of one entry share DEV_ID, flash size and J-Link flash banks and cannot be told apart. The
 // J-Link name is the plain one (never "(allow opt. bytes)", which adds the option bytes as a flash
 // bank). The STM32L010 value line shares DEV_IDs but has a smaller data EEPROM: only named in the
-// hint (ADR-0282).
+// hint (ADR-0353).
 
 #include "hwio/device/profile.h"
 #include "hwio/firmware/designated_firmware.h"

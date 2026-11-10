@@ -1300,7 +1300,7 @@ constexpr std::array defaultTexts{
                                          "target.permanently_protected suggestion"),
         .wizard = std::nullopt,
     },
-    // Plan 0039 (ADR-0276, ADR-0282): the RDP level 1 -> 0 regression did not reach level 0.
+    // Plan 0039 (ADR-0276, ADR-0353): the RDP level 1 -> 0 regression did not reach level 0.
     DefaultTexts{
         .code = ErrorCode::TargetUnlockFailed,
         .message = QT_TRANSLATE_NOOP3("hwio::core", "Unlocking the chip failed.",

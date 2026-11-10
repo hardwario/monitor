@@ -23,7 +23,7 @@
 //          the halt when the first (running) read failed (Phase 0 P0.3). Erase is always the
 //          mass erase (JLINK_EraseChip: flash and data EEPROM).
 // Unlock:  Connecting (identify; RDP 1 expected) -> Unlocking (RDP 0xAA, option reload, reconnect,
-//          re-identify: RDP 0; a non-canonical option word is rewritten once at level 0, ADR-0282).
+//          re-identify: RDP 0; a non-canonical option word is rewritten once at level 0, ADR-0353).
 // ReadMemory: Connecting (identify, family check) -> read with the access width (review R7; M6).
 
 #include "hwio/core/error.h"
@@ -87,7 +87,7 @@ runFlash(WorkflowContext& context, const firmware::FirmwareImage& image, FlashOp
 [[nodiscard]] Result<std::optional<jlink::ChipInfo>>
 runRecover(WorkflowContext& context, const std::function<Status()>& reconnect);
 [[nodiscard]] Status runReset(WorkflowContext& context, ResetMode mode);
-// Plan 0039 (ADR-0276, ADR-0282). `reconnect` connects the target again after an option-byte
+// Plan 0039 (ADR-0276, ADR-0353). `reconnect` connects the target again after an option-byte
 // reload (it retries until its own deadline). Returns the chip after the unlock. Errors:
 // usage.invalid_argument (not an STM32 target), target.permanently_protected,
 // target.wrong_chip, target.unlock_failed, those of identify().

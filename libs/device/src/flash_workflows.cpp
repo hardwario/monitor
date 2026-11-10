@@ -654,7 +654,7 @@ Result<std::optional<jlink::ChipInfo>> runRecover(WorkflowContext& context,
 
 namespace {
 
-// ADR-0282: the stored RDP word has its complement in bits 31:16.
+// ADR-0353: the stored RDP word has its complement in bits 31:16.
 bool canonicalOptionWord(std::uint32_t word) noexcept { return (word >> 16U) == (~word & 0xFFFFU); }
 
 // runUnlock: one option-word write + reload + reconnect + identify; `why` is logged.
@@ -713,7 +713,7 @@ Result<jlink::ChipInfo> runUnlock(WorkflowContext& context,
         return after;
     }
     if (!canonicalOptionWord(after->optionWord)) {
-        // ADR-0282: the regression left a non-canonical word (Phase 0: 0x015500AA); rewritten
+        // ADR-0353: the regression left a non-canonical word (Phase 0: 0x015500AA); rewritten
         // once at level 0, which erases nothing.
         log(context,
             std::format("Unlock: option word 0x{:08X} is not canonical", after->optionWord));
