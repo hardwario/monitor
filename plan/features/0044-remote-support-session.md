@@ -255,6 +255,39 @@ stay on the device session's worker (unchanged). No shared mutable state.
 - [ ] D1 Interop with the real relay and web Terminal: the `~/terminal` server run locally (docker compose) for
       repeatable checks, then terminal.hardwario.com. All four host/joiner combinations.
 
+## Implementation notes (2026-11-10)
+
+Details fixed while implementing A1–C3. None changes an ADR; each was reported to the user, who may turn any of them
+into an ADR.
+
+- **Host reconnect needs approval again.** After the host's own relay reconnect, the host asks the join question again
+  (when someone was allowed before). A participant who connected while the host was away was never announced to it
+  (the relay sends `newClient` only to sockets that are connected at that moment). This follows ADR-0335's rule for
+  reconnecting participants.
+- **Test-only http relays.** `parseRelayUrl()` accepts `http://` for loopback hosts only in builds with
+  `HWIO_TEST_OVERRIDES` (Debug and test presets, never shipped), for the in-process `FakeRelay` of the tests.
+  Shipped builds accept https only (ADR-0330).
+- **`SessionKey` unchanged.** `SessionKey` stays `ProbeKey | BleKey`: it names lockable hardware (probe locks, console
+  file retention, the session registry). A remote tab is identified by its session code
+  (`SessionIdentity{Transport::Remote, "<code>"}`) and is never restored.
+- **Secrets toward the relay.** The host sends commands with secret arguments and secret output values redacted, by the
+  same ADR-0186 rules as the console file (`claim token: <redacted>`).
+- **Remote marker = audit marker.** A remote command is shown in the host's console as the audit marker line
+  "— Remote: … —" before its echo (the MCP marker style). The echo itself carries `LineSource::Remote` (JSON, MCP).
+  The audit markers reach the console file as `@` lines through `ConsoleSession::recordRemoteEvent()` (J-Link worker,
+  BLE thread `RecordNote`).
+- **Web Terminal codes.** A joiner normalises the code as the web Terminal does (`Number(code)`): `012345` joins
+  namespace `/12345`; `0` is not a session.
+- **Joiner sees the end only through the relay.** A Monitor host that ends sharing sends nothing (the relay does not
+  announce disconnects and ADR-0336 has no "end" message); the joiner's tab ends when its relay connection fails, and
+  shows the idle notice after 30 min otherwise. Open question to the user: an `end` tunnel message (new ADR).
+- **Limits instead of a fake clock.** Tests shrink `HostLimits` / `RelayLimits` (as libs/mcp does) instead of injecting
+  a clock.
+- **Operation mapping.** Remote erase = `EraseScope::Code` on `app` (UICR and PIB kept) and `EraseScope::All` on `lte`
+  (as `chester lte erase`); reset = `ResetMode::Go`; flash = catalog firmware on `app` only.
+- **No silent queries from remote tabs.** A remote tab never sends `info show` or any other silent shell query (no
+  `DeviceInfoWatcher`, so the command tree is not learned either).
+
 ## Tests and verification
 
 - Unit: `SessionCode` (range, CSPRNG source, link parsing, invalid input); Engine.IO/Socket.IO framing (fuzz-style

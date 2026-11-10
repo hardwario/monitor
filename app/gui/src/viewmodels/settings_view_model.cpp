@@ -7,6 +7,7 @@
 #include "hwio/core/version.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/profile.h"
+#include "hwio/remote/session_code.h"
 #include "install_paths.h"
 #include "pages/firmware_services.h"
 #include "settings_store.h"
@@ -72,7 +73,8 @@ SettingsViewModel::SettingsViewModel(AppViewModel& app, FirmwareServices& servic
             loadSpeed();
             valuesChanged(); // signal
         } else if (key == restoreTabsKey || key == latencyKey || key == autoReconnectKey ||
-                   key == resetOnOpenKey || key == FirmwareServices::expertActionsKey) {
+                   key == resetOnOpenKey || key == FirmwareServices::expertActionsKey ||
+                   key == toQString(remote::relayUrlSetting.path)) {
             valuesChanged(); // signal
         } else if (key == FirmwareServices::jlinkPathKey) {
             jlinkLibraryChanged(); // signal
@@ -292,6 +294,30 @@ void SettingsViewModel::setExpertActions(bool value) {
     if (value != expertActions()) {
         write(FirmwareServices::expertActionsKey, value);
     }
+}
+
+QString SettingsViewModel::relayUrl() const {
+    return m_app.settingsStore()->value(toQString(remote::relayUrlSetting.path)).toString();
+}
+
+QString SettingsViewModel::defaultRelayUrl() { return toQString(remote::defaultRelayUrl); }
+
+QString SettingsViewModel::setRelayUrl(const QString& text) {
+    const QString trimmed = text.trimmed();
+    if (!trimmed.isEmpty()) {
+        auto url = remote::parseRelayUrl(toStdString(trimmed));
+        if (!url) {
+            return toQString(url.error().cause);
+        }
+        if (url->toString() == defaultRelayUrl()) {
+            write(toQString(remote::relayUrlSetting.path), QString());
+            return {};
+        }
+        write(toQString(remote::relayUrlSetting.path), url->toString());
+        return {};
+    }
+    write(toQString(remote::relayUrlSetting.path), QString());
+    return {};
 }
 
 bool SettingsViewModel::autoReconnect() const {

@@ -81,6 +81,9 @@ class SettingsViewModel : public QObject {
 
     // Advanced (plan 0033, ADR-0236): advanced/expertActions.
     Q_PROPERTY(bool expertActions READ expertActions WRITE setExpertActions NOTIFY valuesChanged)
+    // Plan 0044 (ADR-0330): remote/relayUrl, "" = the default server; an https URL.
+    Q_PROPERTY(QString relayUrl READ relayUrl NOTIFY valuesChanged)
+    Q_PROPERTY(QString defaultRelayUrl READ defaultRelayUrl CONSTANT)
 
     // nRF Util
     Q_PROPERTY(QString nrfUtilMode READ nrfUtilMode WRITE setNrfUtilMode NOTIFY nrfUtilChanged)
@@ -160,6 +163,10 @@ public:
     [[nodiscard]] static int maxLatencyMs();
 
     [[nodiscard]] bool expertActions() const;
+    [[nodiscard]] QString relayUrl() const;
+    [[nodiscard]] static QString defaultRelayUrl();
+    // "" when stored (or cleared: the default server), else why the text is not a valid server.
+    Q_INVOKABLE QString setRelayUrl(const QString& text);
     void setExpertActions(bool value);
 
     [[nodiscard]] QString nrfUtilMode() const;

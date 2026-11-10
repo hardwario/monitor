@@ -101,6 +101,16 @@ A plain LTE update (`hwio chester lte flash`, or a bundle, modem or application 
 
 Error code: [`target.reset_during_update`](#target.reset_during_update).
 
+<a id="remote-support-session-problems"></a>
+### Remote support session problems
+
+HARDWARIO Monitor reaches the support server `terminal.hardwario.com` over `wss` (HTTPS, port 443). A firewall or proxy
+that blocks WebSockets prevents sharing and joining. If someone else uses the same session code (very rare), sharing
+ends for safety: start it again to get a new code. A joiner who is not allowed within 2 minutes (or is refused) has to
+ask the customer to share again. See [Remote support](remote-support.md).
+
+Error codes: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error).
+
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### LTE modem firmware needs nRF Util
 
@@ -647,6 +657,14 @@ From `mem read`, `mem write` and the MCP server (`hwio mcp`).
 <a id="category-firmware"></a>
 ### Firmware (exit code 7)
 
+<a id="remote.firmware_not_in_catalog"></a>
+#### `remote.firmware_not_in_catalog`
+
+**This firmware is not in the HARDWARIO catalog.**
+
+- **Probably:** Remote flashing accepts only firmware from the HARDWARIO firmware catalog, identified by its ID.
+- **What to do:** Check the firmware ID, or ask the customer to flash a file locally.
+
 <a id="firmware.hex_parse_error"></a>
 #### `firmware.hex_parse_error`
 
@@ -739,6 +757,42 @@ The downloaded file did not match the checksum from the catalog, so it was not u
 - **What to do:** Check the internet connection and try again.
 
 The message can name the firmware, as in "Downloading firmware `<id>` failed." or "Downloading `<name>` failed." In the desktop app you can also choose your own file instead.
+
+<a id="remote.relay_unreachable"></a>
+#### `remote.relay_unreachable`
+
+**Cannot reach the support server.**
+
+- **Probably:** The network, a proxy or a firewall blocks the connection to the support server (wss://terminal.hardwario.com).
+- **What to do:** Check the internet connection or try another network.
+
+From a remote support session (Share with support, Join support session, `hwio remote`). The connection is retried for 5 minutes after it was lost. See [Remote support session problems](#remote-support-session-problems).
+
+<a id="remote.code_collision"></a>
+#### `remote.code_collision`
+
+**Another device is using this session code.**
+
+- **Probably:** Someone else shares a console under the same session code. The session was ended for safety.
+- **What to do:** Start sharing again to get a new code.
+
+<a id="remote.host_ended"></a>
+#### `remote.host_ended`
+
+**The remote session ended.**
+
+- **Probably:** The customer ended sharing, or their device or HARDWARIO Monitor disconnected.
+- **What to do:** Ask the customer to share the console again if you need more time.
+
+Seen by the joiner when the connection to the server ended for good.
+
+<a id="remote.protocol_error"></a>
+#### `remote.protocol_error`
+
+**Unexpected data in the remote session.**
+
+- **Probably:** The support server or the other participant sent data that HARDWARIO Monitor does not understand. It was ignored, or the session was ended for safety.
+- **What to do:** Report the issue with a diagnostic report.
 
 <a id="update.network"></a>
 #### `update.network`
@@ -896,6 +950,24 @@ CLI only, with `-o FILE --force`.
 
 The message usually says exactly which value is wrong, for example a bad option (the suggestion is then "Run `hwio --help`."), an unknown device profile or target, a J-Link speed or latency out of range, a bad address or length, a firmware ID that does not have 32 hexadecimal digits, or several Bluetooth devices matching `--name` (use `--address`). In the desktop app it also covers console batch files that are too large, contain a command that is too long, or contain no commands. See [CLI](cli.md).
 
+<a id="remote.code_invalid"></a>
+#### `remote.code_invalid`
+
+**The session code is not valid.**
+
+- **Probably:** The session code must be a number: 6 digits from HARDWARIO Monitor, up to 6 digits from the web Terminal.
+- **What to do:** Check the code and type it again.
+
+<a id="remote.operation_unsupported_peer"></a>
+#### `remote.operation_unsupported_peer`
+
+**The customer's application supports only the console.**
+
+- **Probably:** The customer uses the web Terminal, which cannot flash, erase, recover or reset the device remotely.
+- **What to do:** Ask the customer to share the console from HARDWARIO Monitor.
+
+Also when the customer shares a Bluetooth console, which has no flashing.
+
 <a id="usage.confirmation_required"></a>
 #### `usage.confirmation_required`
 
@@ -1006,6 +1078,22 @@ A warning from `hwio doctor` or the diagnostic report. The message can name the 
 - **What to do:** Run the operation again if needed.
 
 Appears when you press Ctrl+C or **Cancel**, answer No to a confirmation, or close the device. The variant "The output was closed." means the program reading the output of `hwio` stopped, for example `hwio ... --json | head`.
+
+<a id="remote.join_not_allowed"></a>
+#### `remote.join_not_allowed`
+
+**The customer did not allow you to join.**
+
+- **Probably:** The customer ended the session instead of allowing you, or did not answer within 2 minutes.
+- **What to do:** Ask the customer to share the console again and to allow you when you join.
+
+<a id="remote.operation_denied"></a>
+#### `remote.operation_denied`
+
+**The customer denied the request.**
+
+- **Probably:** The customer denied the operation, or did not answer within 60 seconds.
+- **What to do:** Ask the customer to allow the operation and try again.
 
 <a id="mcp.consent_denied"></a>
 #### `mcp.consent_denied`

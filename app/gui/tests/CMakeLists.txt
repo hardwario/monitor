@@ -17,7 +17,8 @@ target_include_directories(tst_gui PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
     # hex_builder.h, zip_builder.h (plan 0006 test files)
     "${PROJECT_SOURCE_DIR}/libs/firmware/tests")
-target_link_libraries(tst_gui PRIVATE hwio_gui hwio_guiplugin hwio::miniz Qt6::QuickTest Qt6::QuickControls2)
+target_link_libraries(tst_gui PRIVATE hwio_gui hwio_guiplugin hwio::miniz Qt6::QuickTest Qt6::QuickControls2
+    hwio_remote_fake_relay) # plan 0044: the fake relay of tst_remote
 target_compile_definitions(tst_gui PRIVATE
     "QUICK_TEST_SOURCE_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\""
     "HWIO_FAKE_JLINK_LIBRARY=\"$<TARGET_FILE:hwio_fake_jlink>\"")

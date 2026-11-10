@@ -4,6 +4,7 @@
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/result.h"
+#include "hwio/core/version.h"
 #include "hwio/device/ble_session.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
@@ -18,11 +19,15 @@
 #include "hwio/hw/ble/types.h"
 #include "hwio/hw/jlink/library_locator.h"
 #include "hwio/hw/nrfutil/nrfutil.h"
+#include "hwio/remote/remote_console_session.h"
+#include "hwio/remote/session_code.h"
 #include "settings_store.h"
 #include "viewmodels/ble_picker_view_model.h"
 #include "viewmodels/connection_view_model.h"
 #include "viewmodels/page_registry.h"
 #include "viewmodels/probe_picker_view_model.h"
+#include "viewmodels/remote_join_view_model.h"
+#include "viewmodels/remote_share_view_model.h"
 #include "workers/ble_service.h"
 
 #include <QDesktopServices>
@@ -37,6 +42,7 @@
 #include <QtContainerFwd>
 #include <QtCore/qnamespace.h>
 
+#include <chrono>
 #include <cstdint>
 #include <expected>
 #include <filesystem>
@@ -107,6 +113,9 @@ DeviceTabViewModel::DeviceTabViewModel(TabContext context, QObject* parent)
     // A dismissed error clears the tab's red dot too (S10).
     connect(m_connection, &ConnectionViewModel::errorChanged, this,
             &DeviceTabViewModel::updateState);
+    // Plan 0044: sharing this console / the joiner state (children, Qt parent ownership).
+    m_remoteShare = new RemoteShareViewModel(this); // NOLINT(cppcoreguidelines-owning-memory)
+    m_remoteJoin = new RemoteJoinViewModel(this);   // NOLINT(cppcoreguidelines-owning-memory)
 
     if (m_context.pages != nullptr) {
         for (const PageDescriptor& page : m_context.pages->pages()) {
@@ -160,6 +169,14 @@ DeviceTabViewModel::State DeviceTabViewModel::state() const { return m_state; }
 bool DeviceTabViewModel::hasError() const { return m_hasError; }
 
 QString DeviceTabViewModel::title() const {
+    if (!m_choosing && isRemote()) {
+        // "CHESTER-M 1234567890 — remote", "Session 482 913 — web Terminal".
+        if (m_remoteSession) {
+            return m_remoteSession->title();
+        }
+        const auto code = remote::SessionCode::parse(toStdString(m_remoteCode));
+        return tr("Session %1").arg(code ? toQString(code->grouped()) : m_remoteCode);
+    }
     const QString name = m_profile != nullptr ? toQString(m_profile->displayName) : QString();
     if (!m_choosing && isBle() && !m_bleId.isEmpty()) {
         // ADR-0081: "CHESTER · CHESTER-ABC123".
@@ -189,6 +206,7 @@ void DeviceTabViewModel::setTransport(const QString& transport) {
 }
 
 QString DeviceTabViewModel::pageDisabledReason(const QString& pageId) const {
+    // Plan 0044: a remote tab's Flash page offers the remote operations (RemoteJoinViewModel).
     if (!isBle() || m_context.pages == nullptr) {
         return {};
     }
@@ -230,7 +248,14 @@ device::ConsoleSession* DeviceTabViewModel::consoleSession() const {
     if (m_session) {
         return m_session.get();
     }
+    if (m_remoteSession) {
+        return m_remoteSession.get();
+    }
     return m_bleSession.get();
+}
+
+remote::RemoteConsoleSession* DeviceTabViewModel::remoteSession() const {
+    return m_remoteSession.get();
 }
 
 const device::DeviceProfile& DeviceTabViewModel::profile() const { return *m_profile; }
@@ -259,7 +284,7 @@ bool DeviceTabViewModel::configure(const QString& profileId, const QString& requ
     if (targetId != requestedTarget) {
         qCInfo(lcGui) << "Tab: target" << requestedTarget << "->" << targetId << "(ADR-0233)";
     }
-    if ((m_session && m_serial != serial) || m_bleSession) {
+    if ((m_session && m_serial != serial) || m_bleSession || m_remoteSession) {
         releaseSession();
     }
     m_profile = profile;
@@ -293,7 +318,8 @@ bool DeviceTabViewModel::configureBle(const QString& profileId, const QString& d
         qCWarning(lcGui) << "Tab: unknown Bluetooth configuration" << profileId << deviceId;
         return false;
     }
-    if (m_session || (m_bleSession && !ble::sameDeviceId(toStdString(m_bleId), toStdString(id)))) {
+    if (m_session || m_remoteSession ||
+        (m_bleSession && !ble::sameDeviceId(toStdString(m_bleId), toStdString(id)))) {
         releaseSession();
     }
     m_profile = profile;
@@ -327,6 +353,38 @@ bool DeviceTabViewModel::configureBle(const QString& profileId, const QString& d
     return true;
 }
 
+bool DeviceTabViewModel::configureRemote(const QString& code, const QUrl& relay) {
+    const auto parsed = remote::SessionCode::parse(toStdString(code));
+    const auto relayUrl = remote::parseRelayUrl(toStdString(relay.toString()));
+    const device::DeviceProfile* profile = device::ProfileRegistry::find("chester");
+    if (!parsed || !relayUrl || profile == nullptr) {
+        qCWarning(lcGui) << "Tab: invalid remote session" << code << relay;
+        return false;
+    }
+    releaseSession();
+    m_profile = profile;
+    m_targetId = toQString(device::consoleTargetId(*profile));
+    m_serial.reset();
+    m_product.clear();
+    m_bleId.clear();
+    m_bleName.clear();
+    m_remoteCode = toQString(parsed->text());
+    m_remoteRelay = *relayUrl;
+    if (m_transport != remoteTransport()) {
+        m_transport = remoteTransport();
+        transportChanged(); // signal
+    }
+    m_choosing = false;
+    m_lastIdentity.reset();
+    m_connection->setOpenError(std::nullopt);
+    m_picker->setActive(false);
+    m_blePicker->setActive(false);
+    titleChanged();         // signal
+    configurationChanged(); // signal (a remote tab is never saved in ui/tabs)
+    updateState();
+    return true;
+}
+
 bool DeviceTabViewModel::sessionFailed() const {
     // Stopped with an error = a fatal error (dead). Stopped without one is a deliberate suspend()
     // and still a working session (review S18).
@@ -336,6 +394,10 @@ bool DeviceTabViewModel::sessionFailed() const {
 }
 
 Status DeviceTabViewModel::ensureSession(bool connectTarget) {
+    if (isRemote()) {
+        return std::unexpected(makeError(ErrorCode::UsageInvalidArgument,
+                                         "operations of a remote tab go through the host"));
+    }
     if (isBle()) {
         return std::unexpected(
             makeError(ErrorCode::UsageInvalidArgument, "operations need a J-Link (Bluetooth tab)"));
@@ -371,6 +433,9 @@ void DeviceTabViewModel::openWizard(const QString& wizardId) {
 Status DeviceTabViewModel::openSession(bool connectTarget) {
     if (isBle()) {
         return openBleSession();
+    }
+    if (isRemote()) {
+        return openRemoteSession();
     }
     if (m_choosing || !m_serial || m_profile == nullptr) {
         return std::unexpected(makeError(ErrorCode::UsageInvalidArgument, "no probe chosen"));
@@ -459,14 +524,44 @@ Status DeviceTabViewModel::openBleSession() {
     return {};
 }
 
+Status DeviceTabViewModel::openRemoteSession() {
+    if (m_choosing || m_remoteCode.isEmpty()) {
+        return std::unexpected(makeError(ErrorCode::UsageInvalidArgument, "no session code"));
+    }
+    auto code = remote::SessionCode::parse(toStdString(m_remoteCode));
+    if (!code) {
+        return std::unexpected(std::move(code).error());
+    }
+    m_remoteSession = std::make_unique<remote::RemoteConsoleSession>(
+        remote::JoinOptions{.relay = m_remoteRelay,
+                            .code = *code,
+                            .appVersion = std::string(buildInfo().version),
+                            .relayLimits = {},
+                            .transcript = {},
+                            .idleNoticeAfter = std::chrono::minutes(30),
+                            .consoleLog = m_consoleLog});
+    connect(m_remoteSession.get(), &remote::RemoteConsoleSession::transcriptReplaced, this,
+            &DeviceTabViewModel::consoleReplaced);
+    connect(m_remoteSession.get(), &remote::RemoteConsoleSession::hostHelloReceived, this,
+            &DeviceTabViewModel::titleChanged);
+    connect(m_remoteSession.get(), &remote::RemoteConsoleSession::joinStateChanged, this,
+            &DeviceTabViewModel::titleChanged);
+    adoptSession(*m_remoteSession);
+    return {};
+}
+
 void DeviceTabViewModel::adoptSession(device::ConsoleSession& session) {
-    m_queries->setSession(&session);
-    // Plan 0028 (D7): `info show` on every Connected (0021 ADR-0166), the console file name.
-    m_infoWatcher = std::make_unique<device::DeviceInfoWatcher>(session, *m_queries);
-    connect(m_infoWatcher.get(), &device::DeviceInfoWatcher::infoChanged, this,
-            &DeviceTabViewModel::deviceInfoChanged);
-    connect(m_infoWatcher.get(), &device::DeviceInfoWatcher::answered, this,
-            &DeviceTabViewModel::deviceInfoQueried);
+    // Plan 0044: never a silent shell query to a remote host's device (no `info show`, so the
+    // command tree is never learned either).
+    if (!isRemote()) {
+        m_queries->setSession(&session);
+        // Plan 0028 (D7): `info show` on every Connected (0021 ADR-0166), the console file name.
+        m_infoWatcher = std::make_unique<device::DeviceInfoWatcher>(session, *m_queries);
+        connect(m_infoWatcher.get(), &device::DeviceInfoWatcher::infoChanged, this,
+                &DeviceTabViewModel::deviceInfoChanged);
+        connect(m_infoWatcher.get(), &device::DeviceInfoWatcher::answered, this,
+                &DeviceTabViewModel::deviceInfoQueried);
+    }
     // Review round 1 (R6): the identity the session adopted (`info show` or the boot banner).
     connect(&session, &device::ConsoleSession::firmwareIdentityAdopted, this, [this] {
         if (const device::ConsoleSession* current = consoleSession()) {
@@ -489,6 +584,8 @@ void DeviceTabViewModel::releaseSession() {
         session = std::move(m_session);
     } else if (m_bleSession) {
         session = std::move(m_bleSession);
+    } else if (m_remoteSession) {
+        session = std::move(m_remoteSession);
     } else {
         return;
     }
@@ -583,6 +680,11 @@ void DeviceTabViewModel::chooseAnotherProbe() {
     m_connection->setOpenError(std::nullopt);
     m_pairing = false;
     m_choosing = true;
+    if (isRemote()) { // plan 0044: back to the picker of a local device
+        m_transport = jlinkTransport();
+        m_remoteCode.clear();
+        transportChanged(); // signal
+    }
     titleChanged();         // signal
     configurationChanged(); // signal
     updateState();
@@ -594,7 +696,9 @@ void DeviceTabViewModel::onConnectionChanged(const device::ConnectionEvent& even
     switch (event.state) {
     case device::ConnectionState::Connected:
         m_connection->setPairingPending(false);
-        addMarker(isBle() ? tr("— connected (Bluetooth) —") : tr("— connected —"));
+        addMarker(isBle()      ? tr("— connected (Bluetooth) —")
+                  : isRemote() ? tr("— connected (remote) —")
+                               : tr("— connected —"));
         consoleAttached(); // signal (`info show`: m_infoWatcher, plan 0028)
         break;
     case device::ConnectionState::Disconnected:
@@ -609,7 +713,8 @@ void DeviceTabViewModel::onConnectionChanged(const device::ConnectionEvent& even
         break;
     }
     updateState();
-    if (event.state == device::ConnectionState::Stopped && event.error) {
+    // Plan 0044: an ended remote session stays (read-only: its log can still be saved).
+    if (event.state == device::ConnectionState::Stopped && event.error && !isRemote()) {
         // A fatally stopped session is released on the next event-loop turn (never inside its own
         // signal): the probe lock, the library copy and the registry slot are freed, so another
         // program (hwio) can use the probe. Its error stays in the ConnectionViewModel (S18).
@@ -703,7 +808,7 @@ void DeviceTabViewModel::addMarker(const QString& text) {
     m_consoleLog->appendMarker(device::Channel::Shell, toStdString(text));
     // Plan 0012 (ADR-0082): a Bluetooth console has no log channel; its pane stays hidden while
     // the channel is empty, so the markers go to the shell only.
-    if (!isBle()) {
+    if (!isBle() && !isRemote()) {
         m_consoleLog->appendMarker(device::Channel::Log, toStdString(text));
     }
 }
@@ -819,13 +924,15 @@ void DeviceTabViewModel::shutdown() {
     if (m_blePicker != nullptr) {
         m_blePicker->setActive(false);
     }
-    if (m_session || m_bleSession) {
+    if (m_session || m_bleSession || m_remoteSession) {
         // Pages drop their pointers on sessionChanged (contract), before the session is deleted.
         std::unique_ptr<device::ConsoleSession> session;
         if (m_session) {
             session = std::move(m_session);
-        } else {
+        } else if (m_bleSession) {
             session = std::move(m_bleSession);
+        } else {
+            session = std::move(m_remoteSession);
         }
         session->disconnect(this);
         m_queries->setSession(nullptr);

@@ -101,6 +101,37 @@ TEST_F(SettingsTest, ExpertActionsSwitchIsStored) {
     EXPECT_FALSE(app().settingsStore()->value(QStringLiteral("advanced/expertActions")).toBool());
 }
 
+// Plan 0044 (ADR-0330): Settings → Advanced → Support server: https only, "" = the default server;
+// the Join dialog compares a link's server with it.
+TEST_F(SettingsTest, SupportServerIsValidatedAndUsedByTheJoinDialog) {
+    EXPECT_EQ(settings().relayUrl(), QString());
+    EXPECT_EQ(app().relayUrl().toString(), QStringLiteral("https://terminal.hardwario.com"));
+    EXPECT_FALSE(settings().setRelayUrl(QStringLiteral("http://example.com")).isEmpty());
+    EXPECT_FALSE(settings().setRelayUrl(QStringLiteral("example.com")).isEmpty());
+    EXPECT_EQ(settings().relayUrl(), QString());
+    EXPECT_TRUE(settings().setRelayUrl(QStringLiteral("https://staging.example.com/")).isEmpty());
+    EXPECT_EQ(settings().relayUrl(), QStringLiteral("https://staging.example.com"));
+    EXPECT_EQ(app().relayUrl().host(), QStringLiteral("staging.example.com"));
+
+    QVariantMap check = app().checkJoinInput(QStringLiteral("482 913"));
+    EXPECT_TRUE(check.value(QStringLiteral("valid")).toBool());
+    EXPECT_EQ(check.value(QStringLiteral("code")).toString(), QStringLiteral("482 913"));
+    EXPECT_EQ(check.value(QStringLiteral("foreignRelay")).toString(), QString());
+    check = app().checkJoinInput(QStringLiteral("https://terminal.hardwario.com/?session=012345"));
+    EXPECT_TRUE(check.value(QStringLiteral("valid")).toBool());
+    EXPECT_EQ(check.value(QStringLiteral("codeValue")).toString(), QStringLiteral("12345"));
+    EXPECT_EQ(check.value(QStringLiteral("foreignRelay")).toString(),
+              QStringLiteral("https://terminal.hardwario.com"));
+    EXPECT_FALSE(
+        app().checkJoinInput(QStringLiteral("12a")).value(QStringLiteral("valid")).toBool());
+    // A foreign server is not joined without the confirmation.
+    EXPECT_FALSE(app().joinRemoteSession(
+        QStringLiteral("https://terminal.hardwario.com/?session=482913"), false));
+
+    EXPECT_TRUE(settings().setRelayUrl(QStringLiteral("https://terminal.hardwario.com")).isEmpty());
+    EXPECT_EQ(settings().relayUrl(), QString()); // the default is stored as ""
+}
+
 TEST_F(SettingsTest, GeneralItemsApplyImmediately) {
     settings().setTheme(QStringLiteral("dark"));
     EXPECT_EQ(app().theme(), QStringLiteral("dark")); // live

@@ -62,3 +62,13 @@ change a term here should change it in the whole catalog.
 | Copy / Copied to clipboard. | Kopírovat / Zkopírováno do schránky. | Kopieren / In die Zwischenablage kopiert. | Kopiuj / Skopiowano do schowka. | Kopírovať / Skopírované do schránky. |
 | Cancel / Close / Retry | Zrušit / Zavřít / Zkusit znovu | Abbrechen / Schließen / Erneut versuchen | Anuluj / Zamknij / Spróbuj ponownie | Zrušiť / Zavrieť / Skúsiť znova |
 | System (language/theme) | Systém | System | Systemowy | Systém |
+| remote support (session) (plan 0044) | vzdálená podpora (relace) | Fernsupport (Sitzung) | zdalne wsparcie (sesja) | vzdialená podpora (relácia) |
+| share (a console) / sharing | sdílet / sdílení | freigeben / Freigabe | udostępnić / udostępnianie | zdieľať / zdieľanie |
+| join (a session) | připojit se (k relaci) | (einer Sitzung) beitreten | dołączyć (do sesji) | pripojiť sa (k relácii) |
+| session code | kód relace | Sitzungscode | kod sesji | kód relácie |
+| support server (relay) | server podpory | Support-Server | serwer wsparcia | server podpory |
+| customer / support (roles) | zákazník / podpora | Kunde / Support | klient / wsparcie | zákazník / podpora |
+| participant | účastník | Teilnehmer | uczestnik | účastník |
+| allow / deny | povolit / zamítnout | erlauben / ablehnen | zezwól / odmów | povoliť / zamietnuť |
+| End sharing / End session | Ukončit sdílení / Ukončit relaci | Freigabe beenden / Sitzung beenden | Zakończ udostępnianie / Zakończ sesję | Ukončiť zdieľanie / Ukončiť reláciu |
+| web Terminal | webový Terminal | Web-Terminal | Terminal webowy | webový Terminal |

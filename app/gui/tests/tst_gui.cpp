@@ -5,6 +5,7 @@
 // so the user's files are never touched), the built-in pages plus the contract test page
 // (qml/TestPage.qml), the fake J-Link library with two probes, and a LanguageManager.
 
+#include "fake_relay.h"
 #include "fonts.h"
 #include "hex_builder.h"
 #include "http_fixture.h"
@@ -17,11 +18,13 @@
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/mcp/activity.h"
 #include "hwio/mcp/consent.h"
+#include "hwio/remote/tunnel.h"
 #include "language_manager.h"
 #include "mcp/activity_model.h"
 #include "mcp/gui_device_provider.h"
 #include "mcp/mcp_controller.h"
 #include "pages/builtin_pages.h"
+#include "remote_test_support.h"
 #include "support/fake_jlink_scenario.h"
 #include "support/test_page_view_model.h"
 #include "support/test_wizard.h"
@@ -42,6 +45,7 @@
 #include <QFile>
 #include <QHostAddress>
 #include <QIODevice>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QObject>
 #include <QQmlContext>
@@ -69,6 +73,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <memory>
 #include <optional>
 #include <thread>
 #include <utility>
@@ -146,6 +151,74 @@ public:
     Q_INVOKABLE bool configureBleTab(int index, const QString& id, const QString& name) {
         hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);
         return tab != nullptr && tab->configureBle(QStringLiteral("chester"), id, name);
+    }
+
+    // ---- plan 0044: remote support sessions -------------------------------------------------
+    // A fake relay (libs/remote/tests FakeRelay); the setting remote/relayUrl points to it.
+    Q_INVOKABLE bool startFakeRelay() {
+        m_participant.reset();
+        m_relay = std::make_unique<hwio::remote::testing::FakeRelay>();
+        return m_app->settingsStore()
+            ->setValue(QStringLiteral("remote/relayUrl"), m_relay->url().toString())
+            .has_value();
+    }
+    Q_INVOKABLE void stopFakeRelay() {
+        m_participant.reset();
+        m_relay.reset();
+        static_cast<void>(
+            m_app->settingsStore()->setValue(QStringLiteral("remote/relayUrl"), QString()));
+    }
+    // A raw Socket.IO participant (the web Terminal) on session `code` ("482 913" or "482913").
+    Q_INVOKABLE bool remoteJoin(const QString& code) {
+        if (!m_relay) {
+            return false;
+        }
+        QString digits = code;
+        digits.remove(QLatin1Char(' '));
+        m_participant = std::make_unique<hwio::remote::testing::RawParticipant>(
+            m_relay->url(), QStringLiteral("/") + QString::number(digits.toUInt()));
+        return true;
+    }
+    // The participant sends `write` (a shell line) / an operation request (tunnel object).
+    Q_INVOKABLE void remoteWrite(const QString& line) const {
+        if (m_participant) {
+            m_participant->emitEvent(QStringLiteral("write"), line);
+        }
+    }
+    Q_INVOKABLE void remoteRequest(const QString& kind, const QString& target) const {
+        if (m_participant) {
+            m_participant->emitEvent(
+                QStringLiteral("write"),
+                hwio::remote::tunnel::encodeJoiner(hwio::remote::tunnel::OpRequest{
+                    .id = "qml-op",
+                    .kind = *hwio::remote::tunnel::kindFromId(kind.toStdString()),
+                    .target = *hwio::remote::tunnel::targetFromId(target.toStdString()),
+                    .firmwareId = std::nullopt}));
+        }
+    }
+    // Events of `name` the participant received ("sync", "at", ...).
+    Q_INVOKABLE [[nodiscard]] int remoteReceived(const QString& name) const {
+        return m_participant ? static_cast<int>(m_participant->named(name).size()) : 0;
+    }
+    // The participant acts as a web Terminal host: a sync with `line` as device output (the web
+    // host sends one on every newClient), then at/read lines with remoteHostRead().
+    Q_INVOKABLE void remoteHostSync(const QString& line) const {
+        if (!m_participant) {
+            return;
+        }
+        QJsonObject response;
+        response.insert(QStringLiteral("outputs"), QJsonArray{line});
+        response.insert(QStringLiteral("result"), 0);
+        QJsonObject entry;
+        entry.insert(QStringLiteral("id"), QStringLiteral("system-2026-11-10T10:00:00.000Z"));
+        entry.insert(QStringLiteral("timestamp"), QStringLiteral("2026-11-10T10:00:00.000Z"));
+        entry.insert(QStringLiteral("command"), QStringLiteral("(device output)"));
+        entry.insert(QStringLiteral("index"), 0);
+        entry.insert(QStringLiteral("response"), response);
+        QJsonObject sync;
+        sync.insert(QStringLiteral("state"), QStringLiteral("connected"));
+        sync.insert(QStringLiteral("commands"), QJsonArray{entry});
+        m_participant->emitEvent(QStringLiteral("sync"), sync);
     }
 
     // Keeps one Choose device tab (busy pages are finished first).
@@ -494,10 +567,12 @@ private:
 
     hwio::gui::AppViewModel* m_app;
     QString m_dir;
-    QStringList m_openedUrls;      // interceptConsoleUrls()
-    QTcpServer m_blocker;          // blockPort()
-    QStringList m_consentOutcomes; // requestConsent()
-    bool m_aiCancelled = false;    // setAiBusy()
+    std::unique_ptr<hwio::remote::testing::FakeRelay> m_relay;            // plan 0044
+    std::unique_ptr<hwio::remote::testing::RawParticipant> m_participant; // declared after it
+    QStringList m_openedUrls;                                             // interceptConsoleUrls()
+    QTcpServer m_blocker;                                                 // blockPort()
+    QStringList m_consentOutcomes;                                        // requestConsent()
+    bool m_aiCancelled = false;                                           // setAiBusy()
 };
 
 class Setup : public QObject {

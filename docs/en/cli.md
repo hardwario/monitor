@@ -189,6 +189,28 @@ application firmware can reset the LTE MCU during the update. When that happens 
 `-a`/`--address ID` is the Bluetooth address (on macOS the device UUID shown by `hwio ble scan`); `--name N` is a part
 of the advertised name, which exactly one device found by a 5-second scan must match. See [Bluetooth LE](bluetooth.md).
 
+<a id="remote-support-hwio-remote"></a>
+## Remote support (`hwio remote`)
+
+| Command | Does |
+|---|---|
+| `hwio remote host [-n SN] [--jlink-speed S] [--latency MS] [--console-file PATH] [--auto-reconnect] [--relay URL] [--deny-operations]` | Shares the CHESTER console over J-Link with HARDWARIO Support: prints the 6-digit session code and the link, then streams the console |
+| `hwio remote host --ble (-a ID \| --name N) [...]` | The same for a Bluetooth console (no operations) |
+| `hwio remote join CODE\|LINK [--relay URL] [--linger S]` | Joins a session: the console (interactive on a terminal, plain lines or `--json` NDJSON otherwise) |
+| `hwio remote join CODE\|LINK --command CMD [-t S]` | One command after the customer allowed you; the response as in `chester app command` |
+| `hwio remote join CODE\|LINK --flash ID \| --erase \| --recover \| --reset [--target app\|lte]` | Asks the customer's HARDWARIO Monitor for one operation (flash: catalog firmware ID, application core only) |
+
+`hwio remote host` asks on the terminal (stderr, answer `y` to allow) before it allows a join or an operation, and any
+other input line keeps sharing after the idle warning. Without a terminal on stdin joins are never allowed: the session
+ends at the first join. `--deny-operations` denies every operation request without asking. Ctrl+C ends sharing
+(exit code 130). With `--json` the host prints `{"type":"remote","event":"sharing","code","link","relay"}`, the
+questions (`"event":"question"`) and `{"type":"remote","event":"ended","error"}` between the console events.
+
+The server is `https://terminal.hardwario.com` unless the setting `remote/relayUrl` or `--relay URL` names another one
+(https only). A link to another server needs confirmation on a terminal and is refused without one. A denied request or
+a join that was not allowed exits with 130 (`remote.operation_denied`, `remote.join_not_allowed`). See
+[Remote support](remote-support.md).
+
 ## Other commands
 
 | Command | Does |

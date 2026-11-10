@@ -27,6 +27,13 @@
 // J-Link DeviceSession, nullptr in a Bluetooth tab, for operations). Its pages that need operations
 // (PageDescriptor::needsOperations) are disabled with pageDisabledReason().
 //
+// Plan 0044 (ADR-0325): a third transport "remote": the tab joined a remote support session and
+// owns a RemoteConsoleSession (consoleSession()); never restored, no `info show` and no other
+// silent shell query is ever sent to the customer's device, the Flash page shows the remote
+// operations (RemoteJoinViewModel). An ended session stays (read-only) so the log can be saved.
+// Every tab has a RemoteShareViewModel (sharing its J-Link or BLE console) and a
+// RemoteJoinViewModel (the joiner state of a remote tab).
+//
 // Ownership: child of DeviceTabListModel (Qt parent). GUI thread only.
 
 #include "hwio/core/result.h"
@@ -38,6 +45,8 @@
 #include "viewmodels/ble_picker_view_model.h"
 #include "viewmodels/connection_view_model.h"
 #include "viewmodels/probe_picker_view_model.h"
+#include "viewmodels/remote_join_view_model.h"
+#include "viewmodels/remote_share_view_model.h"
 
 #include <QObject>
 #include <QString>
@@ -58,6 +67,14 @@
 namespace hwio::jlink {
 struct LocatorOptions;
 } // namespace hwio::jlink
+
+namespace hwio::firmware {
+class FirmwareCache;
+} // namespace hwio::firmware
+
+namespace hwio::remote {
+class RemoteConsoleSession;
+} // namespace hwio::remote
 
 namespace hwio::device {
 class BleSession;
@@ -102,6 +119,8 @@ struct TabContext {
     std::function<void(const QUrl& url)> openUrl;
     // Plan 0036: the J-Link firmware update (AppViewModel's); may be null (no banner action).
     ProbeFirmwareViewModel* probeFirmware = nullptr; // outlives the tabs
+    // Plan 0044: the firmware cache of remote flash requests (AppViewModel's); may be null.
+    firmware::FirmwareCache* firmwareCache = nullptr; // outlives the tabs
 };
 
 class DeviceTabViewModel : public QObject {
@@ -131,6 +150,9 @@ class DeviceTabViewModel : public QObject {
     // console input hint, ADR-0105).
     Q_PROPERTY(QString openedBy READ openedBy NOTIFY aiStateChanged)
     Q_PROPERTY(bool aiCommandActive READ aiCommandActive NOTIFY aiStateChanged)
+    // Plan 0044: sharing this console with support / the joiner state of a remote tab.
+    Q_PROPERTY(hwio::gui::RemoteShareViewModel* remoteShare READ remoteShare CONSTANT)
+    Q_PROPERTY(hwio::gui::RemoteJoinViewModel* remoteJoin READ remoteJoin CONSTANT)
 
 public:
     // Unscoped: QML compares DeviceTabViewModel.Connected etc. with the int property.
@@ -163,6 +185,9 @@ public:
     void setTransport(const QString& transport);
     [[nodiscard]] static QString jlinkTransport() { return QStringLiteral("jlink"); }
     [[nodiscard]] static QString bleTransport() { return QStringLiteral("ble"); }
+    // Plan 0044.
+    [[nodiscard]] static QString remoteTransport() { return QStringLiteral("remote"); }
+    [[nodiscard]] bool isRemote() const { return m_transport == remoteTransport(); }
     // Plan 0012: why a page cannot be used in this tab ("" = it can): pages with
     // PageDescriptor::needsOperations in a Bluetooth tab.
     Q_INVOKABLE [[nodiscard]] QString pageDisabledReason(const QString& pageId) const;
@@ -182,6 +207,12 @@ public:
     [[nodiscard]] device::ConsoleSession* consoleSession() const;
     // Plan 0012: the Bluetooth session; nullptr in a J-Link tab or while none.
     [[nodiscard]] device::BleSession* bleSession() const;
+    // Plan 0044: the remote session of a remote tab; nullptr otherwise or while none.
+    [[nodiscard]] remote::RemoteConsoleSession* remoteSession() const;
+    [[nodiscard]] RemoteShareViewModel* remoteShare() const { return m_remoteShare; }
+    [[nodiscard]] RemoteJoinViewModel* remoteJoin() const { return m_remoteJoin; }
+    [[nodiscard]] firmware::FirmwareCache* firmwareCache() const { return m_context.firmwareCache; }
+    [[nodiscard]] SettingsStore* settingsStore() const { return m_context.settings; }
     // Opens the tab's session when none exists: always on the console target, with RTT when the
     // target has an RTT console. Operations carry their own target (ADR-0057), so a page never
     // opens a session on another target (review S2). No-op when a working session exists; a
@@ -220,6 +251,9 @@ public:
     // Plan 0012: the Bluetooth variant (restore or the Bluetooth picker); never connects. Returns
     // false when the profile is unknown or has no Bluetooth, or the id is empty.
     bool configureBle(const QString& profileId, const QString& deviceId, const QString& name);
+    // Plan 0044: a remote tab joining session `code` on `relay` (an https relay URL); never
+    // connects. Returns false for an invalid code or relay.
+    bool configureRemote(const QString& code, const QUrl& relay);
     [[nodiscard]] QString bleDeviceId() const { return m_bleId; }
     [[nodiscard]] QString bleDeviceName() const { return m_bleName; }
     // Plan 0012 (ADR-0227): app-initiated pairing of the tab's Bluetooth device (Linux, Windows);
@@ -294,6 +328,9 @@ signals:
     void consoleAttached();
     // Plan 0014: openedBy or aiCommandActive changed.
     void aiStateChanged();
+    // Plan 0044: the remote session replaced the log with the host's history (the console views
+    // reload their rows).
+    void consoleReplaced();
 
 private:
     struct BusyState {
@@ -306,6 +343,7 @@ private:
 
     [[nodiscard]] Status openSession(bool connectTarget = true);
     [[nodiscard]] Status openBleSession();
+    [[nodiscard]] Status openRemoteSession(); // plan 0044
     void createBlePicker();
     // Connects the signals of a new session (either transport) and publishes it.
     void adoptSession(device::ConsoleSession& session);
@@ -337,6 +375,11 @@ private:
     std::shared_ptr<device::ConsoleLog> m_consoleLog;
     std::unique_ptr<device::DeviceSession> m_session;
     std::unique_ptr<device::BleSession> m_bleSession; // plan 0012; never together with m_session
+    std::unique_ptr<remote::RemoteConsoleSession> m_remoteSession; // plan 0044; alone too
+    QString m_remoteCode; // plan 0044: the session code ("482913")
+    QUrl m_remoteRelay;
+    RemoteShareViewModel* m_remoteShare = nullptr; // child (plan 0044)
+    RemoteJoinViewModel* m_remoteJoin = nullptr;   // child (plan 0044)
     // Closed sessions, deleted on the next event-loop turn (a session is never deleted inside one
     // of its own signals).
     std::vector<std::unique_ptr<device::ConsoleSession>> m_retiredSessions;
