@@ -207,9 +207,11 @@ it shows the dialog. The firmware is downloaded **by the host** from the catalog
 
 ### Threading
 
-Each `RemoteHost` / `RemoteConsoleSession` owns one worker `QThread` (explicit stop + join) for the socket and the
-JSON parsing. It talks to the `ConsoleSession` / operation runner only through queued signals. All vendor calls
-stay on the device session's worker (unchanged). No shared mutable state.
+Each `RemoteHost` / `RemoteConsoleSession` owns one relay worker thread, an owned `std::jthread` running a
+`QEventLoop` (explicit stop + join; ADR-0357), for the socket and the JSON parsing. The worker and its `RelayClient`
+exchange data only through two `BoundedQueue`s and payload-free wake-ups (ADR-0357, the ADR-0031 pattern). The
+`RelayClient` talks to the `ConsoleSession` / operation runner on the owner's thread. All vendor calls stay on the
+device session's worker (unchanged). No other shared mutable state.
 
 ### Limits (all bounded)
 
@@ -218,6 +220,7 @@ stay on the device session's worker (unchanged). No shared mutable state.
 | Incoming event size | 64 KiB (larger → dropped, `remote.protocol_error` warning; repeated → session ends) |
 | Remote `write` line | 512 bytes, max 20 lines/s (excess dropped, info line on the host) |
 | Outgoing queue to relay | 1 MiB. On overflow the oldest `read` lines are dropped and a "lines dropped" line is sent |
+| Relay thread hand-off (ADR-0357) | 4096 incoming events (full: warnings dropped, otherwise `remote.protocol_error`), 4096 outgoing sends (full: the oldest droppable send is dropped) |
 | `sync` snapshot | last 500 transcript entries / 256 KiB |
 | Joiner transcript from `sync` | 500 entries / 256 KiB (larger → truncated, oldest first) |
 | Join approval | 2 min, then the session ends |
