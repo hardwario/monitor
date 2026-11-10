@@ -1608,6 +1608,25 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_CORESIGHT_Configure(const char* /*config*/) 
     return 0;
 }
 
+namespace {
+
+// The selected AP is the chip's Nordic CTRL-AP. An STM32 has none (plan 0040: the APP-connector
+// check of the guided LoRaWAN flow must not pass while the cable is still on the module).
+bool selectsCtrlAp(const ChipScenario& chip, std::uint32_t apSelect) {
+    return !chip.stm32 && (apSelect >> 24U) == chip.ctrlAp();
+}
+
+// A read of an AP that is not modelled: 0 or an error (absentApsReadZero).
+int readAbsentAp(const ChipScenario& chip, std::uint32_t* data) {
+    if (chip.absentApsReadZero) {
+        *data = 0;
+        return 0;
+    }
+    return -1; // only the CTRL-AP is modelled
+}
+
+} // namespace
+
 HWIO_FAKE_JLINK_EXPORT int JLINKARM_CORESIGHT_ReadAPDPReg(std::uint8_t index, std::uint8_t ap,
                                                           std::uint32_t* data) {
     State& s = state();
@@ -1621,14 +1640,8 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_CORESIGHT_ReadAPDPReg(std::uint8_t index, st
         return 0;
     }
     ChipScenario& chip = probe->chip;
-    // An STM32 has no Nordic CTRL-AP (plan 0040: the APP-connector check of the guided LoRaWAN
-    // flow must not pass while the cable is still on the module).
-    if (chip.stm32 || (s.apSelect >> 24U) != chip.ctrlAp()) {
-        if (chip.absentApsReadZero) {
-            *data = 0;
-            return 0;
-        }
-        return -1; // only the CTRL-AP is modelled
+    if (!selectsCtrlAp(chip, s.apSelect)) {
+        return readAbsentAp(chip, data);
     }
     switch (index) {
     case 0:
