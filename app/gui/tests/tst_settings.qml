@@ -101,6 +101,24 @@ TestCase {
         compare(sw.checked, false);
     }
 
+    // Plan 0044 (ADR-0330): Settings → Advanced → "Support server", https only.
+    function test_relayUrlField() {
+        const field = find("relayUrlField");
+        verify(field !== null);
+        const vm = AppViewModel.globalPageViewModel("settings");
+        compare(field.placeholderText, vm.defaultRelayUrl);
+        field.text = "http://relay.example.com";
+        field.editingFinished();
+        tryVerify(() => find("relayUrlError") !== null);
+        compare(vm.relayUrl, "");
+        field.text = "https://relay.example.com";
+        field.editingFinished();
+        tryVerify(() => find("relayUrlError") === null);
+        compare(vm.relayUrl, "https://relay.example.com");
+        compare(vm.setRelayUrl(""), "");
+        compare(field.text, "");
+    }
+
     function test_themeIsLive() {
         const box = find("themeSelector");
         box.activated(2);

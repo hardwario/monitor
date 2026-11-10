@@ -22,7 +22,7 @@ z webového Terminalu (len konzola) alebo z HARDWARIO Monitor.
    príkazy do zariadenia?* Kliknite na **Povoliť** len vtedy, keď vám podpora HARDWARIO práve povedala, že sa
    pripája. **Ukončiť reláciu** (predvolená voľba) ukončí reláciu pre všetkých. Bez odpovede sa relácia po 2 minútach
    ukončí.
-5. Príkazy od podpory sa zobrazujú v konzole a predchádza im riadok **Vzdialené**.
+5. Príkazy od podpory sa zobrazujú v konzole a každému z nich predchádza riadok *— Vzdialené: <príkaz> —*.
 6. Ak vás podpora požiada o nahranie firmvéru, vymazanie, obnovenie alebo reset zariadenia, uvidíte, o čo presne žiada,
    napríklad *Podpora žiada o nahranie firmvéru CHESTER Clime v3.2.1 (ID …) do aplikačného jadra.* **Zamietnuť** je
    predvolená voľba; žiadosť bez odpovede sa po 60 sekundách zamietne. Firmvér pochádza len z katalógu HARDWARIO a váš
@@ -51,8 +51,9 @@ vzdialený príkaz a každá žiadosť o operáciu s jej výsledkom. Pozrite si 
 1. Na stránke **Vyberte zariadenie** v karte kliknite na **Pripojiť sa k relácii podpory…**.
 2. Napíšte kód, ktorý vám zákazník prečíta (medzery sú povolené), alebo vložte odkaz. Odkaz na iný server, ako je
    nastavený, potrebuje ďalšie potvrdenie.
-3. Otvorí sa nová karta typu **Vzdialené**. Kým vás zákazník nepovolí, lišta zobrazuje *Čaká sa, kým vás zákazník
-   povolí…*. Živý výstup sa už môže zobrazovať.
+3. Otvorí sa nová karta s názvom **Relácia 482 913** a potom *CHESTER-M 2159018247 — na diaľku* (alebo *Relácia 482 913
+   — web Terminal*, keď zákazník používa web Terminal). Kým vás zákazník nepovolí, lišta zobrazuje *Čaká sa, kým vás
+   zákazník povolí…*. Živý výstup sa už môže zobrazovať.
 4. Po povolení dostanete históriu konzoly zákazníka a môžete s konzolou pracovať ako zvyčajne: história, vyhľadávanie,
    filter a uloženie zobrazenia.
 5. So zákazníkom, ktorý používa HARDWARIO Monitor, ponúka stránka **Nahrávanie firmvéru** voľby **Požiadať o nahranie**

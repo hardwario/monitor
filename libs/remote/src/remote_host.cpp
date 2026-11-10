@@ -26,6 +26,7 @@
 #include <QTimer>
 #include <QUrl>
 #include <QtCore/qtmetamacros.h>
+#include <QtCore/qttranslation.h>
 #include <QtLogging>
 
 #include <algorithm>
@@ -43,6 +44,7 @@ namespace hwio::remote {
 namespace {
 
 // Not tr(): inside the QObject members that would be QObject::tr with the class as context.
+// Callers pass QT_TRANSLATE_NOOP / QT_TRANSLATE_N_NOOP literals so lupdate extracts them.
 QString trRemote(const char* text) { return QCoreApplication::translate("hwio::remote", text); }
 QString trRemoteN(const char* text, int n) {
     return QCoreApplication::translate("hwio::remote", text, nullptr, n);
@@ -85,7 +87,7 @@ RemoteHost::RemoteHost(device::ConsoleSession& session, ConsentProvider& consent
         if (m_state == HostState::Connecting && !m_everShared) {
             m_everShared = true;
             m_state = HostState::Sharing;
-            audit(trRemote("Sharing started, session %1 (%2).")
+            audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Sharing started, session %1 (%2)."))
                       .arg(toQString(m_code.grouped()), m_options.relay.host()));
             sendAt(QStringLiteral("state"), m_deviceState, false);
             m_lifetimeTimer.start(m_options.limits.maxLifetime);
@@ -94,7 +96,8 @@ RemoteHost::RemoteHost(device::ConsoleSession& session, ConsentProvider& consent
         }
     });
     connect(&m_joinTimer, &QTimer::timeout, this, [this] {
-        audit(trRemote("The join question was not answered within 2 minutes."));
+        audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                         "The join question was not answered within 2 minutes.")));
         finish(makeError(ErrorCode::RemoteJoinNotAllowed, "join approval timed out"));
     });
     connect(&m_operationTimer, &QTimer::timeout, this, [this] {
@@ -105,8 +108,10 @@ RemoteHost::RemoteHost(device::ConsoleSession& session, ConsentProvider& consent
             const std::string id = m_operation->request.id;
             const QString summary = operationSummary(m_operation->question);
             m_operation.reset();
-            denyOperation(id, ErrorCode::RemoteOperationDenied,
-                          trRemote("%1: denied (no answer within 60 s).").arg(summary));
+            denyOperation(
+                id, ErrorCode::RemoteOperationDenied,
+                trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: denied (no answer within 60 s)."))
+                    .arg(summary));
         }
     });
     connect(&m_idleWarningTimer, &QTimer::timeout, this, [this] {
@@ -114,26 +119,38 @@ RemoteHost::RemoteHost(device::ConsoleSession& session, ConsentProvider& consent
             std::chrono::duration_cast<std::chrono::seconds>(m_options.limits.idleWarningBefore));
     });
     connect(&m_idleTimer, &QTimer::timeout, this, [this] {
-        audit(trRemote("Sharing ended after 30 minutes without activity."));
+        audit(trRemote(
+            QT_TRANSLATE_NOOP("hwio::remote", "Sharing ended after 30 minutes without activity.")));
         Error error = makeError(ErrorCode::Timeout, "remote session idle");
-        error.message = trRemote("Sharing ended after 30 minutes without activity.").toStdString();
+        error.message =
+            trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                       "Sharing ended after 30 minutes without activity."))
+                .toStdString();
         error.cause.clear();
         error.suggestion =
-            trRemote("Start sharing again if support still needs the console.").toStdString();
+            trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                       "Start sharing again if support still needs the console."))
+                .toStdString();
         finish(std::move(error));
     });
     connect(&m_lifetimeTimer, &QTimer::timeout, this, [this] {
-        audit(trRemote("Sharing ended after the maximum of 8 hours."));
+        audit(trRemote(
+            QT_TRANSLATE_NOOP("hwio::remote", "Sharing ended after the maximum of 8 hours.")));
         Error error = makeError(ErrorCode::Timeout, "remote session lifetime");
-        error.message = trRemote("Sharing ended after the maximum of 8 hours.").toStdString();
+        error.message = trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                                   "Sharing ended after the maximum of 8 hours."))
+                            .toStdString();
         error.cause.clear();
         error.suggestion =
-            trRemote("Start sharing again if support still needs the console.").toStdString();
+            trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                       "Start sharing again if support still needs the console."))
+                .toStdString();
         finish(std::move(error));
     });
     connect(&m_helloTimer, &QTimer::timeout, this, [this] {
         if (m_peerApp.empty() && m_allowed) {
-            audit(trRemote("Participant app: web Terminal or unknown."));
+            audit(trRemote(
+                QT_TRANSLATE_NOOP("hwio::remote", "Participant app: web Terminal or unknown.")));
         }
     });
     connect(&session, &device::ConsoleSession::linesReceived, this, &RemoteHost::onLines);
@@ -189,7 +206,8 @@ void RemoteHost::onRelayConnected(bool reconnected) {
     }
     if (reconnected) {
         emit connectionRestored();
-        audit(trRemote("Connection to the support server restored."));
+        audit(trRemote(
+            QT_TRANSLATE_NOOP("hwio::remote", "Connection to the support server restored.")));
         sendAt(QStringLiteral("state"), m_deviceState, false);
         if (m_allowed) {
             // A participant that joined while the host was away was never announced: ask again.
@@ -214,7 +232,9 @@ void RemoteHost::onAtOrSync() {
         return;
     }
     if (m_everShared) {
-        audit(trRemote("Another device uses this session code; the session was ended for safety."));
+        audit(trRemote(QT_TRANSLATE_NOOP(
+            "hwio::remote",
+            "Another device uses this session code; the session was ended for safety.")));
     }
     finish(makeError(ErrorCode::RemoteCodeCollision, "at or sync received by the host"));
 }
@@ -227,7 +247,7 @@ void RemoteHost::onNewClient() {
         m_ownNewClientPending = false; // the host's own connect
         return;
     }
-    audit(trRemote("Someone joined the session."));
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Someone joined the session.")));
     askJoin();
 }
 
@@ -246,7 +266,8 @@ void RemoteHost::askJoin() {
         const QString summary = operationSummary(m_operation->question);
         m_operation.reset();
         denyOperation(id, ErrorCode::InternalBusy,
-                      trRemote("%1: denied (someone joined).").arg(summary));
+                      trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: denied (someone joined)."))
+                          .arg(summary));
     }
     emit participantsChanged();
     const std::uint64_t token = ++m_joinToken;
@@ -268,18 +289,23 @@ void RemoteHost::answerJoin(bool allowed) {
     m_joinWithdraw = {};
     m_joinPending = false;
     if (m_droppedWhilePending > 0) {
-        audit(trRemoteN("%n remote command(s) were dropped while waiting for your answer.",
-                        static_cast<int>(m_droppedWhilePending)));
+        audit(trRemoteN(
+            QT_TRANSLATE_N_NOOP("hwio::remote",
+                                "%n remote command(s) were dropped while waiting for your answer."),
+            static_cast<int>(m_droppedWhilePending)));
         m_droppedWhilePending = 0;
     }
     if (!allowed) {
-        audit(trRemote("You ended the session instead of allowing the participant."));
+        audit(trRemote(QT_TRANSLATE_NOOP(
+            "hwio::remote", "You ended the session instead of allowing the participant.")));
         finish(makeError(ErrorCode::RemoteJoinNotAllowed, "the host ended the session"));
         return;
     }
     m_allowed = true;
-    audit(m_peerApp.empty() ? trRemote("Participant allowed.")
-                            : trRemote("Participant allowed (%1).").arg(toQString(m_peerApp)));
+    audit(m_peerApp.empty()
+              ? trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Participant allowed."))
+              : trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Participant allowed (%1)."))
+                    .arg(toQString(m_peerApp)));
     sendSync();
     sendHello();
     if (m_peerApp.empty()) {
@@ -359,7 +385,9 @@ void RemoteHost::onRemoteLine(const QString& text) {
         return;
     }
     if (line.size() > m_options.limits.maxRemoteLineBytes || hasControlCharacters(line)) {
-        audit(trRemote("A remote command was dropped (too long or with control characters)."));
+        audit(trRemote(QT_TRANSLATE_NOOP(
+            "hwio::remote",
+            "A remote command was dropped (too long or with control characters).")));
         return;
     }
     const auto now = std::chrono::steady_clock::now();
@@ -369,7 +397,8 @@ void RemoteHost::onRemoteLine(const QString& text) {
     if (std::cmp_greater_equal(m_recentLines.size(), m_options.limits.remoteLinesPerSecond)) {
         if (now - m_lastRateAudit >= std::chrono::seconds(1)) {
             m_lastRateAudit = now;
-            audit(trRemote("Remote commands dropped: more than %1 per second.")
+            audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                             "Remote commands dropped: more than %1 per second."))
                       .arg(m_options.limits.remoteLinesPerSecond));
         }
         return;
@@ -378,7 +407,8 @@ void RemoteHost::onRemoteLine(const QString& text) {
     if (!m_session) {
         return;
     }
-    audit(trRemote("Remote command: %1").arg(redactedCommand(line)));
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Remote command: %1"))
+              .arg(redactedCommand(line)));
     if (Status sent = m_session->sendRemoteLine(line); !sent) {
         emit warning(sent.error());
     }
@@ -396,7 +426,9 @@ void RemoteHost::onTunnel(const QJsonValue& payload) {
         if (const auto* request = std::get_if<tunnel::OpRequest>(&*message)) {
             denyOperation(
                 request->id, ErrorCode::RemoteOperationDenied,
-                trRemote("An operation request was refused: the participant is not allowed."));
+                trRemote(QT_TRANSLATE_NOOP(
+                    "hwio::remote",
+                    "An operation request was refused: the participant is not allowed.")));
         }
         return;
     }
@@ -405,7 +437,8 @@ void RemoteHost::onTunnel(const QJsonValue& payload) {
         if (app != m_peerApp) {
             m_peerApp = app;
             m_helloTimer.stop();
-            audit(trRemote("Participant app: %1.").arg(toQString(app)));
+            audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Participant app: %1."))
+                      .arg(toQString(app)));
             emit participantsChanged();
         }
         return;
@@ -425,21 +458,26 @@ void RemoteHost::onOperationRequest(const tunnel::OpRequest& request) {
                                .firmwareName = {},
                                .firmwareVersion = {}};
     const QString summary = operationSummary(question);
-    audit(trRemote("Support asks: %1.").arg(summary));
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Support asks: %1.")).arg(summary));
     if (m_operations == nullptr || !m_helloSent) {
         denyOperation(request.id, ErrorCode::RemoteOperationUnsupportedPeer,
-                      trRemote("%1: refused (this console has no operations).").arg(summary));
+                      trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                                 "%1: refused (this console has no operations)."))
+                          .arg(summary));
         return;
     }
     if (m_operation || m_joinPending) {
-        denyOperation(
-            request.id, ErrorCode::InternalBusy,
-            trRemote("%1: refused (another request or operation is in progress).").arg(summary));
+        denyOperation(request.id, ErrorCode::InternalBusy,
+                      trRemote(QT_TRANSLATE_NOOP(
+                                   "hwio::remote",
+                                   "%1: refused (another request or operation is in progress)."))
+                          .arg(summary));
         return;
     }
     if (Status valid = m_operations->validate(request); !valid) {
         denyOperation(request.id, ErrorCode::RemoteProtocolError,
-                      trRemote("%1: refused (%2).").arg(summary, toQString(valid.error().detail)));
+                      trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: refused (%2)."))
+                          .arg(summary, toQString(valid.error().detail)));
         return;
     }
     m_operation = PendingOperation{
@@ -462,7 +500,8 @@ void RemoteHost::onOperationRequest(const tunnel::OpRequest& request) {
                                        : info.error().code;
             m_operation.reset();
             denyOperation(id, code,
-                          trRemote("%1: refused (%2).").arg(text, toQString(info.error().message)));
+                          trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: refused (%2)."))
+                              .arg(text, toQString(info.error().message)));
             return;
         }
         m_operation->question.firmwareName = info->name;
@@ -487,8 +526,9 @@ void RemoteHost::askOperation(PendingOperation pending) {
                 const std::string id = m_operation->request.id;
                 const QString summary = operationSummary(m_operation->question);
                 m_operation.reset();
-                denyOperation(id, ErrorCode::RemoteOperationDenied,
-                              trRemote("%1: denied by you.").arg(summary));
+                denyOperation(
+                    id, ErrorCode::RemoteOperationDenied,
+                    trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: denied by you.")).arg(summary));
                 return;
             }
             startOperation();
@@ -507,7 +547,7 @@ void RemoteHost::startOperation() {
     operation.accepted = true;
     const QString summary = operationSummary(operation.question);
     const std::string id = operation.request.id;
-    audit(trRemote("%1: allowed by you.").arg(summary));
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: allowed by you.")).arg(summary));
     sendHost(tunnel::OpAccepted{.id = id});
     emit operationStarted(summary);
     m_lastProgress = {};
@@ -551,12 +591,14 @@ void RemoteHost::finishOperation(const Status& status) {
     m_operation.reset();
     activity();
     if (status) {
-        audit(trRemote("%1: done.").arg(summary));
+        audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: done.")).arg(summary));
         sendHost(tunnel::OpResult{.id = id, .ok = true, .code = std::nullopt});
-        emit operationFinished(true, trRemote("%1: done.").arg(summary));
+        emit operationFinished(
+            true, trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: done.")).arg(summary));
         return;
     }
-    audit(trRemote("%1: failed: %2").arg(summary, toQString(status.error().message)));
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: failed: %2"))
+              .arg(summary, toQString(status.error().message)));
     sendHost(
         tunnel::OpResult{.id = id, .ok = false, .code = std::string(idOf(status.error().code))});
     emit operationFinished(false, toQString(status.error().message));
@@ -609,7 +651,7 @@ void RemoteHost::audit(const QString& text) {
     if (!m_session) {
         return;
     }
-    const QString line = trRemote("— Remote: %1 —").arg(text);
+    const QString line = trRemote(QT_TRANSLATE_NOOP("hwio::remote", "— Remote: %1 —")).arg(text);
     if (Status recorded = m_session->recordRemoteEvent(toStdString(line)); !recorded) {
         qCWarning(log::lcRemote).noquote()
             << "Audit line not recorded:" << toQString(recorded.error().detail);
@@ -642,7 +684,7 @@ void RemoteHost::end() {
     if (m_state == HostState::Ended) {
         return;
     }
-    audit(trRemote("You ended sharing."));
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "You ended sharing.")));
     finish(std::nullopt);
 }
 
@@ -678,8 +720,9 @@ void RemoteHost::finish(std::optional<Error> error, bool notify) {
     }
     if (m_everShared && m_session) {
         const QString reason = m_endError ? toQString(m_endError->message) : QString();
-        audit(reason.isEmpty() ? trRemote("Sharing ended.")
-                               : trRemote("Sharing ended: %1").arg(reason));
+        audit(reason.isEmpty()
+                  ? trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Sharing ended."))
+                  : trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Sharing ended: %1")).arg(reason));
     }
     if (notify) {
         emit participantsChanged();

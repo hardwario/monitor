@@ -25,6 +25,7 @@
 #include <QString>
 #include <QTimer>
 #include <QtCore/qtmetamacros.h>
+#include <QtCore/qttranslation.h>
 #include <QtLogging>
 
 #include <chrono>
@@ -40,6 +41,7 @@ namespace hwio::remote {
 
 namespace {
 
+// Callers pass QT_TRANSLATE_NOOP / QT_TRANSLATE_N_NOOP literals so lupdate extracts them.
 QString trRemote(const char* text) { return QCoreApplication::translate("hwio::remote", text); }
 
 } // namespace
@@ -62,7 +64,10 @@ RemoteConsoleSession::RemoteConsoleSession(JoinOptions options)
             setState(JoinState::Waiting);
             setConnection(device::ConnectionState::Connecting);
             if (Status recorded = recordRemoteEvent(
-                    trRemote("— Connection restored; waiting for the customer to allow you again —")
+                    trRemote(
+                        QT_TRANSLATE_NOOP(
+                            "hwio::remote",
+                            "— Connection restored; waiting for the customer to allow you again —"))
                         .toStdString());
                 !recorded) {
                 qCWarning(log::lcRemote).noquote()
@@ -108,9 +113,11 @@ Status RemoteConsoleSession::sendLine(std::string line) {
     }
     if (line.size() > maxLineBytes) {
         Error error = makeError(ErrorCode::UsageInvalidArgument, std::to_string(line.size()));
-        error.message = trRemote("A command line must not be longer than %1 bytes.")
-                            .arg(maxLineBytes)
-                            .toStdString();
+        error.message =
+            trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                       "A command line must not be longer than %1 bytes."))
+                .arg(maxLineBytes)
+                .toStdString();
         return std::unexpected(std::move(error));
     }
     for (const char c : line) {
@@ -170,16 +177,18 @@ Status RemoteConsoleSession::setFirmwareIdentity(std::optional<FirmwareIdentity>
 }
 
 QString RemoteConsoleSession::title() const {
-    QString session = trRemote("Session %1").arg(toQString(m_options.code.grouped()));
+    QString session = trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Session %1"))
+                          .arg(toQString(m_options.code.grouped()));
     if (m_hostHello) {
         QString device = toQString(m_hostHello->device.name);
         if (!m_hostHello->device.serial.empty()) {
             device += QLatin1Char(' ') + toQString(m_hostHello->device.serial);
         }
-        return trRemote("%1 — remote").arg(device.isEmpty() ? session : device);
+        return trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1 — remote"))
+            .arg(device.isEmpty() ? session : device);
     }
     if (m_syncSeen) {
-        return trRemote("%1 — web Terminal").arg(session);
+        return trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1 — web Terminal")).arg(session);
     }
     return session;
 }
@@ -230,7 +239,9 @@ void RemoteConsoleSession::onTunnelAt(const QJsonValue& payload) {
                            false);
         if (first) {
             if (Status recorded = recordRemoteEvent(
-                    trRemote("— Connected to HARDWARIO Monitor %1 of the customer —")
+                    trRemote(
+                        QT_TRANSLATE_NOOP("hwio::remote",
+                                          "— Connected to HARDWARIO Monitor %1 of the customer —"))
                         .arg(toQString(hello->version))
                         .toStdString());
                 !recorded) {
@@ -274,7 +285,9 @@ void RemoteConsoleSession::onAt(const QJsonValue& payload) {
         } else if (state == QStringLiteral("disconnected")) {
             Error error =
                 makeError(ErrorCode::TargetNotConnected, "the host's device disconnected");
-            error.message = trRemote("The customer's device is disconnected.").toStdString();
+            error.message = trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                                       "The customer's device is disconnected."))
+                                .toStdString();
             setConnection(device::ConnectionState::Disconnected, std::move(error));
         }
         return;
@@ -315,9 +328,11 @@ void RemoteConsoleSession::onSync(const QJsonValue& payload) {
         line.source = device::LineSource::Remote;
         return line;
     };
-    lines.append(marker(trRemote("— Session history from the customer —")));
+    lines.append(marker(
+        trRemote(QT_TRANSLATE_NOOP("hwio::remote", "— Session history from the customer —"))));
     if (transcript->truncated()) {
-        lines.append(marker(trRemote("— Older history of the session was left out —")));
+        lines.append(marker(trRemote(
+            QT_TRANSLATE_NOOP("hwio::remote", "— Older history of the session was left out —"))));
     }
     for (const TranscriptEntry& entry : transcript->entries()) {
         if (entry.command != QString::fromLatin1(deviceOutputCommand) || entry.index != 0) {

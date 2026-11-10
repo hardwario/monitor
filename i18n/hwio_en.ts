@@ -112,5 +112,13 @@
             <numerusform>… %n lines dropped …</numerusform>
         </translation>
     </message>
+    <message numerus="yes">
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="273"/>
+        <source>%n remote command(s) were dropped while waiting for your answer.</source>
+        <translation>
+            <numerusform>%n remote command was dropped while waiting for your answer.</numerusform>
+            <numerusform>%n remote commands were dropped while waiting for your answer.</numerusform>
+        </translation>
+    </message>
 </context>
 </TS>

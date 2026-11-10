@@ -21,7 +21,7 @@ Andere Sprachen: [English](../en/remote-support.md) · [Čeština](../cs/remote-
    an das Gerät zu senden?* Klicken Sie nur dann auf **Erlauben**, wenn Ihnen der HARDWARIO-Support gerade gesagt hat,
    dass er beitritt. **Sitzung beenden** (die Vorgabe) beendet die Sitzung für alle. Ohne Antwort endet die Sitzung
    nach 2 Minuten.
-5. Befehle des Supports erscheinen in der Konsole mit einer vorangestellten Zeile **Remote**.
+5. Befehle des Supports erscheinen in der Konsole, jeweils mit einer vorangestellten Zeile *— Remote: <Befehl> —*.
 6. Bittet der Support darum, das Gerät zu flashen, zu löschen, wiederherzustellen oder zurückzusetzen, sehen Sie genau,
    worum er bittet, zum Beispiel *Der Support bittet darum, die Firmware CHESTER Clime v3.2.1 (ID …) in den
    Anwendungskern zu flashen.* **Ablehnen** ist die Vorgabe; eine Anfrage ohne Antwort wird nach 60 Sekunden
@@ -53,8 +53,9 @@ und Ihre Antwort, jeder entfernte Befehl und jede Anfrage nach einer Aktion mit 
 1. Klicken Sie auf der Seite **Gerät wählen** eines Tabs auf **Support-Sitzung beitreten…**.
 2. Geben Sie den Code ein, den Ihnen der Kunde vorliest (Leerzeichen sind erlaubt), oder fügen Sie den Link ein. Ein
    Link zu einem anderen als dem eingestellten Server erfordert eine zusätzliche Bestätigung.
-3. Ein neuer Tab vom Typ **Remote** öffnet sich. Bis der Kunde es Ihnen erlaubt, zeigt das Banner *Warten, bis der
-   Kunde es Ihnen erlaubt…*. Die Live-Ausgabe kann bereits erscheinen.
+3. Ein neuer Tab öffnet sich mit dem Titel **Sitzung 482 913** und danach *CHESTER-M 2159018247 — remote* (oder *Sitzung
+   482 913 — web Terminal*, wenn der Kunde das web Terminal verwendet). Bis der Kunde es Ihnen erlaubt, zeigt das Banner
+   *Warten, bis der Kunde es Ihnen erlaubt…*. Die Live-Ausgabe kann bereits erscheinen.
 4. Sobald es Ihnen erlaubt ist, erhalten Sie den Konsolenverlauf des Kunden und können wie gewohnt in der Konsole
    arbeiten: Verlauf, Suche, Filter und Ansicht speichern.
 5. Bei einem Kunden mit HARDWARIO Monitor bietet die Seite **Flashen** **Flashen anfragen** (eine Firmware-ID aus dem

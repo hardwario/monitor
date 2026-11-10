@@ -21,7 +21,7 @@ Další jazyky: [English](../en/remote-support.md) · [Deutsch](../de/remote-sup
 4. Když se někdo připojí, HARDWARIO Monitor se zeptá: *K relaci 482 913 se někdo připojil. Povolit mu posílat příkazy
    do zařízení?* Klikněte na **Povolit** jen tehdy, když vám podpora HARDWARIO právě řekla, že se připojuje.
    **Ukončit relaci** (výchozí volba) ukončí relaci pro všechny. Bez odpovědi relace skončí po 2 minutách.
-5. Příkazy od podpory se v konzoli zobrazí s řádkem **Vzdáleně** před nimi.
+5. Příkazy od podpory se v konzoli zobrazí a každému z nich předchází řádek *— Vzdáleně: <příkaz> —*.
 6. Pokud podpora požádá o nahrání firmwaru, smazání, obnovení (recover) nebo reset zařízení, uvidíte, o co přesně
    žádá, například *Podpora žádá o nahrání firmwaru CHESTER Clime v3.2.1 (ID …) do aplikačního jádra.* Výchozí volba je
    **Zamítnout**; žádost bez odpovědi se po 60 sekundách zamítne. Firmware pochází jen z katalogu HARDWARIO a stáhne
@@ -50,8 +50,9 @@ příkaz a každá žádost o operaci s jejím výsledkem. Viz [Soubory konzole]
 1. Na stránce **Vyberte zařízení** karty klikněte na **Připojit se k relaci podpory…**.
 2. Napište kód, který vám zákazník přečte (mezery jsou povolené), nebo vložte odkaz. Odkaz na jiný server, než je
    nastavený, vyžaduje další potvrzení.
-3. Otevře se nová karta typu **Vzdálená**. Dokud vám to zákazník nepovolí, banner ukazuje *Čeká se, až vám to zákazník
-   povolí…*. Živý výstup se může zobrazovat už teď.
+3. Otevře se nová karta s názvem **Relace 482 913** a potom *CHESTER-M 2159018247 — vzdáleně* (nebo *Relace 482 913 —
+   web Terminal*, když zákazník používá web Terminal). Dokud vám to zákazník nepovolí, banner ukazuje *Čeká se, až vám
+   to zákazník povolí…*. Živý výstup se může zobrazovat už teď.
 4. Po povolení dostanete historii konzole zákazníka a můžete v konzoli pracovat jako obvykle: historie, hledání, filtr
    a uložení výpisu.
 5. Se zákazníkem, který používá HARDWARIO Monitor, nabízí stránka **Nahrát FW** volby **Požádat o nahrání** (ID

@@ -19,7 +19,7 @@ Other languages: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-
 4. When someone joins, HARDWARIO Monitor asks: *Someone joined session 482 913. Allow them to send commands to the
    device?* Click **Allow** only if HARDWARIO Support has just told you they are joining. **End session** (the default)
    ends the session for everyone. Without an answer the session ends after 2 minutes.
-5. Commands from support appear in the console with a **Remote** line before them.
+5. Commands from support appear in the console, and a line *— Remote: <command> —* precedes each of them.
 6. If support asks to flash, erase, recover or reset the device, you see what exactly they ask for, for example
    *Support asks to flash firmware CHESTER Clime v3.2.1 (ID …) to the application core.* **Deny** is the default; a
    request without an answer is denied after 60 seconds. Firmware comes only from the HARDWARIO catalog, and your
@@ -49,8 +49,9 @@ remote command, and every operation request with its result. See [Console files]
 1. On the **Choose a device** page of a tab, click **Join support session…**.
 2. Type the code the customer reads to you (spaces are allowed) or paste the link. A link to another server than the
    configured one needs an extra confirmation.
-3. A new tab of the type **Remote** opens. Until the customer allows you, the banner says *Waiting for the customer to
-   allow you…*. The live output may already appear.
+3. A new tab opens, titled **Session 482 913** and then *CHESTER-M 2159018247 — remote* (or *Session 482 913 — web
+   Terminal* when the customer uses the web Terminal). Until the customer allows you, the banner says *Waiting for the
+   customer to allow you…*. The live output may already appear.
 4. Once allowed, you get the customer's console history and can work in the console as usual: history, search,
    filter and save view.
 5. With a HARDWARIO Monitor customer, the **Flash** page offers **Ask to flash** (a catalog firmware ID), **Ask to
