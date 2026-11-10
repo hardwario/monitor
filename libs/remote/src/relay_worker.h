@@ -4,6 +4,7 @@
 // pong, timeouts), the Socket.IO namespace, reconnect and the bounded outgoing queue. Lives on the
 // RelayClient's QThread; every slot runs there.
 
+#include "hwio/core/bounded_queue.h"
 #include "hwio/core/error.h"
 #include "hwio/remote/relay_client.h"
 
@@ -13,24 +14,66 @@
 #include <QTimer>
 #include <QtTypes>
 
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <variant>
 
 class QWebSocket;
 
 namespace hwio::remote::detail {
 
+// Worker -> RelayClient notifications (ADR-0357). They travel through a BoundedQueue owned by
+// RelayClient (std::mutex, visible to ThreadSanitizer) followed by a payload-free queued wake-up,
+// so no QString / QJsonValue / Error crosses threads inside Qt's queued-call machinery.
+struct RelayConnected {
+    bool reconnected = false;
+};
+struct RelayConnectionLost {
+    Error error;
+};
+struct RelayFailed {
+    Error error;
+};
+struct RelayWarning {
+    Error error;
+};
+struct RelayIncomingEvent {
+    QString name;
+    QJsonValue payload;
+};
+using RelayEvent = std::variant<RelayConnected, RelayConnectionLost, RelayFailed, RelayWarning,
+                                RelayIncomingEvent>;
+struct RelayEventQueue : BoundedQueue<RelayEvent> {
+    using BoundedQueue::BoundedQueue;
+};
+
+// RelayClient -> worker: events to send (ADR-0357, same hand-off in the other direction). The
+// worker moves them into its byte-bounded outgoing queue (enqueue()) on every drain.
+struct RelaySend {
+    QString name;
+    QJsonValue payload;
+    bool droppable = false;
+};
+struct RelaySendQueue : BoundedQueue<RelaySend> {
+    using BoundedQueue::BoundedQueue;
+};
+
 class RelayWorker : public QObject {
     Q_OBJECT
 
 public:
-    explicit RelayWorker(RelayConfig config);
+    // `events` is owned by the RelayClient and outlives the worker (the owner deletes the worker
+    // after joining its thread); `wake` is called on the worker thread after every push.
+    RelayWorker(RelayConfig config, RelayEventQueue& events, std::function<void()> wake,
+                RelaySendQueue& sends);
     ~RelayWorker() override;
     RelayWorker(const RelayWorker&) = delete;
     RelayWorker& operator=(const RelayWorker&) = delete;
@@ -38,7 +81,11 @@ public:
     RelayWorker& operator=(RelayWorker&&) = delete;
 
     Q_INVOKABLE void start();
-    Q_INVOKABLE void send(const QString& name, const QJsonValue& payload, bool droppable);
+    // Worker thread: invoked (queued, by name, coalesced) by RelayClient::emitEvent(); sends what
+    // waits in the send queue.
+    Q_INVOKABLE void drainSends();
+    // Owner thread: one coalesced, payload-free queued drainSends().
+    void wakeForSends();
     // DISCONNECT (when connected), close, no more signals. Called blocking from the owner.
     Q_INVOKABLE void shutdown();
     // Blocks until shutdown() has finished on the worker thread. Called by the owner after the
@@ -47,13 +94,6 @@ public:
     // ThreadSanitizer cannot see; this std::mutex / std::condition_variable hand-off gives it a
     // visible happens-before edge between shutdown() and the destructor on the owner's thread.
     void waitUntilShutDown();
-
-signals:
-    void connected(bool reconnected);
-    void connectionLost(const hwio::Error& error);
-    void failed(const hwio::Error& error);
-    void eventReceived(const QString& name, const QJsonValue& payload);
-    void warning(const hwio::Error& error);
 
 private:
     std::mutex m_shutdownMutex;           // guards m_shutdownDone
@@ -73,6 +113,11 @@ private:
         bool droppable = false;
     };
 
+    // Pushes to the owner's event queue and wakes it. Overflow (ADR-0357): warnings are dropped
+    // when the queue is full; any other event ends the connection with remote.protocol_error
+    // (the queue keeps one slot in reserve for that final RelayFailed).
+    void post(RelayEvent event);
+    void send(const QString& name, const QJsonValue& payload, bool droppable);
     void openSocket();
     void destroySocket();
     void onTextMessage(const QString& message);
@@ -90,6 +135,11 @@ private:
     void armPingTimer();
 
     RelayConfig m_config;
+    RelayEventQueue& m_events; // owned by RelayClient
+    std::function<void()> m_wake;
+    RelaySendQueue& m_sends; // owned by RelayClient
+    std::atomic<bool> m_sendWakePending{false};
+    std::uint64_t m_reportedSendDrops = 0;
     QString m_nsp;
     Phase m_phase = Phase::Idle;
     bool m_everConnected = false;

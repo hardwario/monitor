@@ -1,5 +1,6 @@
 #include "hwio/remote/relay_client.h"
 
+#include "hwio/core/bounded_queue.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/log.h"
@@ -31,10 +32,15 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <format>
+#include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <type_traits>
 #include <utility>
+#include <variant>
 
 namespace hwio::remote {
 
@@ -56,8 +62,10 @@ Error protocol(std::string detail) {
 
 namespace detail {
 
-RelayWorker::RelayWorker(RelayConfig config)
-    : m_config(std::move(config)), m_nsp(m_config.code.socketNamespace()) {
+RelayWorker::RelayWorker(RelayConfig config, RelayEventQueue& events, std::function<void()> wake,
+                         RelaySendQueue& sends)
+    : m_config(std::move(config)), m_events(events), m_wake(std::move(wake)), m_sends(sends),
+      m_nsp(m_config.code.socketNamespace()) {
     m_connectTimer.setSingleShot(true);
     m_pingTimer.setSingleShot(true);
     m_retryTimer.setSingleShot(true);
@@ -69,6 +77,24 @@ RelayWorker::RelayWorker(RelayConfig config)
 }
 
 RelayWorker::~RelayWorker() { destroySocket(); }
+
+void RelayWorker::post(RelayEvent event) {
+    // The only producer is this thread and the owner only removes entries, so the size check
+    // cannot be overtaken. The queue's capacity is the bound + 1: the last slot is reserved for
+    // the RelayFailed that ends the connection on overflow.
+    const std::size_t bound = m_events.capacity() - 1;
+    if (m_events.size() >= bound && !std::holds_alternative<RelayFailed>(event)) {
+        if (std::holds_alternative<RelayWarning>(event)) {
+            qCWarning(log::lcRemote) << "Relay warning dropped: the event queue is full";
+            return;
+        }
+        fail(protocol(std::format("more than {} relay events waiting to be handled", bound)));
+        return;
+    }
+    if (m_events.push(std::move(event))) {
+        m_wake();
+    }
+}
 
 void RelayWorker::start() {
     if (m_phase == Phase::Idle) {
@@ -122,6 +148,35 @@ void RelayWorker::destroySocket() {
     m_engineOpen = false;
 }
 
+void RelayWorker::wakeForSends() {
+    if (!m_sendWakePending.exchange(true)) {
+        QMetaObject::invokeMethod(this, "drainSends", Qt::QueuedConnection);
+    }
+}
+
+void RelayWorker::drainSends() {
+    m_sendWakePending.store(false);
+    const std::uint64_t dropped = m_sends.droppedCount();
+    if (dropped != m_reportedSendDrops && m_phase != Phase::Ended) {
+        const std::uint64_t count = dropped - m_reportedSendDrops;
+        m_reportedSendDrops = dropped;
+        post(RelayWarning{makeError(
+            ErrorCode::InternalQueueFull,
+            std::format("{} events to the relay dropped: too many waiting to be sent", count))});
+    }
+    const std::size_t budget = m_sends.capacity();
+    for (std::size_t i = 0; i < budget; ++i) {
+        auto item = m_sends.pop({}, std::chrono::milliseconds(0));
+        if (!item) {
+            return;
+        }
+        send(item->name, item->payload, item->droppable);
+    }
+    if (m_sends.size() > 0) {
+        wakeForSends();
+    }
+}
+
 void RelayWorker::send(const QString& name, const QJsonValue& payload, bool droppable) {
     if (m_phase == Phase::Ended) {
         return;
@@ -164,9 +219,9 @@ void RelayWorker::enqueue(Outgoing packet) {
     const auto bytes = static_cast<std::size_t>(text.toUtf8().size());
     m_queuedBytes += bytes;
     m_queue.push_back(Outgoing{.text = std::move(text), .bytes = bytes, .droppable = false});
-    emit warning(makeError(
+    post(RelayWarning{makeError(
         ErrorCode::InternalQueueFull,
-        std::format("{} device lines dropped: the connection to the relay is too slow", dropped)));
+        std::format("{} device lines dropped: the connection to the relay is too slow", dropped))});
 }
 
 void RelayWorker::flush() {
@@ -276,7 +331,7 @@ void RelayWorker::handleSocketIo(const QString& data) {
         m_lostError.reset();
         m_retryDelay = {};
         qCInfo(log::lcRemote).noquote() << "Relay namespace connected" << m_nsp;
-        emit connected(reconnected);
+        post(RelayConnected{reconnected});
         flush();
         return;
     }
@@ -297,7 +352,8 @@ void RelayWorker::handleSocketIo(const QString& data) {
             protocolProblem(std::move(event).error(), false);
             return;
         }
-        emit eventReceived(event->name, event->payload);
+        post(RelayIncomingEvent{.name = std::move(event->name),
+                                .payload = std::move(event->payload)});
         return;
     }
     case socketio::PacketType::Ack:
@@ -331,7 +387,7 @@ void RelayWorker::lost(Error error) {
         m_lostAt = now;
         m_lostError = error;
         qCInfo(log::lcRemote).noquote() << "Relay connection lost:" << toQString(error.detail);
-        emit connectionLost(error);
+        post(RelayConnectionLost{error});
     }
     if (now - m_lostAt.value_or(now) >= m_config.limits.reconnectBudget) {
         fail(m_lostError.value_or(std::move(error)));
@@ -354,7 +410,7 @@ void RelayWorker::fail(const Error& error) {
     m_queue.clear();
     m_queuedBytes = 0;
     qCWarning(log::lcRemote).noquote() << "Relay connection failed:" << toQString(error.detail);
-    emit failed(error);
+    post(RelayFailed{error});
 }
 
 void RelayWorker::protocolProblem(const Error& error, bool oversized) {
@@ -364,10 +420,15 @@ void RelayWorker::protocolProblem(const Error& error, bool oversized) {
         fail(error);
         return;
     }
-    emit warning(error);
+    post(RelayWarning{error});
 }
 
 void RelayWorker::shutdown() {
+    // emitEvent() calls made before stop() go out first, as with the queued calls before
+    // (e.g. the tunnel `end`, ADR-0354).
+    while (auto item = m_sends.pop({}, std::chrono::milliseconds(0))) {
+        send(item->name, item->payload, item->droppable);
+    }
     if (m_phase == Phase::Connected && m_socket) {
         // Packets still waiting behind in-flight bytes (e.g. the tunnel `end`, ADR-0354) go out
         // before the disconnect; droppable ones may be lost. The queue is bounded (enqueue).
@@ -400,7 +461,13 @@ void RelayWorker::waitUntilShutDown() {
 } // namespace detail
 
 RelayClient::RelayClient(RelayConfig config, QObject* parent)
-    : QObject(parent), m_config(std::move(config)) {}
+    : QObject(parent), m_config(std::move(config)),
+      m_events(std::make_unique<detail::RelayEventQueue>(
+          std::max<std::size_t>(m_config.limits.incomingEventQueue, 1) + 1,
+          OverflowPolicy::Reject)),
+      m_sends(std::make_unique<detail::RelaySendQueue>(
+          std::max<std::size_t>(m_config.limits.outgoingSendQueue, 1),
+          [](const detail::RelaySend& item) { return item.droppable; })) {}
 
 RelayClient::~RelayClient() { stop(); }
 
@@ -411,47 +478,52 @@ void RelayClient::start() {
     m_started = true;
     m_thread = std::make_unique<QThread>();
     m_thread->setObjectName(QStringLiteral("hwio-remote-relay"));
-    m_worker = std::make_unique<detail::RelayWorker>(m_config);
+    m_worker =
+        std::make_unique<detail::RelayWorker>(m_config, *m_events, [this] { wakeUp(); }, *m_sends);
     m_worker->moveToThread(m_thread.get());
-    connect(
-        m_worker.get(), &detail::RelayWorker::connected, this,
-        [this](bool reconnected) {
-            if (!m_stopped) {
-                m_connected = true;
-                emit connected(reconnected);
-            }
-        },
-        Qt::QueuedConnection);
-    connect(
-        m_worker.get(), &detail::RelayWorker::connectionLost, this,
-        [this](const Error& error) {
-            if (!m_stopped) {
-                m_connected = false;
-                emit connectionLost(error);
-            }
-        },
-        Qt::QueuedConnection);
-    connect(
-        m_worker.get(), &detail::RelayWorker::failed, this,
-        [this](const Error& error) {
-            if (!m_stopped) {
-                m_connected = false;
-                emit failed(error);
-            }
-        },
-        Qt::QueuedConnection);
-    connect(
-        m_worker.get(), &detail::RelayWorker::warning, this,
-        [this](const Error& error) {
-            if (!m_stopped) {
-                emit warning(error);
-            }
-        },
-        Qt::QueuedConnection);
-    connect(m_worker.get(), &detail::RelayWorker::eventReceived, this, &RelayClient::onEvent,
-            Qt::QueuedConnection);
     m_thread->start();
     QMetaObject::invokeMethod(m_worker.get(), &detail::RelayWorker::start, Qt::QueuedConnection);
+}
+
+void RelayClient::wakeUp() {
+    // Worker thread. One coalesced queued call by name, without a payload (ADR-0357, as
+    // DeviceSession::wakeUp(), ADR-0031).
+    if (!m_wakePending.exchange(true)) {
+        QMetaObject::invokeMethod(this, "drainEvents", Qt::QueuedConnection);
+    }
+}
+
+void RelayClient::drainEvents() {
+    m_wakePending.store(false);
+    // Bounded per call; anything left is drained by the next (rescheduled) call.
+    const std::size_t budget = m_events->capacity();
+    for (std::size_t i = 0; i < budget && !m_stopped; ++i) {
+        auto event = m_events->pop({}, std::chrono::milliseconds(0));
+        if (!event) {
+            break;
+        }
+        std::visit(
+            [this]<class E>(E& item) {
+                if constexpr (std::is_same_v<E, detail::RelayConnected>) {
+                    m_connected = true;
+                    emit connected(item.reconnected);
+                } else if constexpr (std::is_same_v<E, detail::RelayConnectionLost>) {
+                    m_connected = false;
+                    emit connectionLost(item.error);
+                } else if constexpr (std::is_same_v<E, detail::RelayFailed>) {
+                    m_connected = false;
+                    emit failed(item.error);
+                } else if constexpr (std::is_same_v<E, detail::RelayWarning>) {
+                    emit warning(item.error);
+                } else {
+                    onEvent(item.name, item.payload);
+                }
+            },
+            *event);
+    }
+    if (!m_stopped && m_events->size() > 0) {
+        wakeUp();
+    }
 }
 
 void RelayClient::onEvent(const QString& name, const QJsonValue& payload) {
@@ -475,12 +547,10 @@ void RelayClient::emitEvent(const QString& name, const QJsonValue& payload, bool
     if (!m_started || m_stopped) {
         return;
     }
-    QMetaObject::invokeMethod(
-        m_worker.get(),
-        [worker = m_worker.get(), name, payload, droppable] {
-            worker->send(name, payload, droppable);
-        },
-        Qt::QueuedConnection);
+    if (m_sends->push(
+            detail::RelaySend{.name = name, .payload = payload, .droppable = droppable})) {
+        m_worker->wakeForSends();
+    }
 }
 
 void RelayClient::stop() {

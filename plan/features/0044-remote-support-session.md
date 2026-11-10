@@ -9,7 +9,9 @@
   ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0326 (2.1),
   ADR-0328 (limits), ADR-0329 (TLS only), ADR-0330 (relay URL), ADR-0331 (CLI), ADR-0332 (no MCP),
   ADR-0333 (audit in the console file), ADR-0354 (tunnel `end`, amends ADR-0336), ADR-0355 (approval again after
-  the host's reconnect, amends ADR-0335), ADR-0356 (secrets redacted toward the relay, amends ADR-0329); superseded: ADR-0320, ADR-0327; builds on ADR-0004, ADR-0007, ADR-0037
+  the host's reconnect, amends ADR-0335), ADR-0356 (secrets redacted toward the relay, amends ADR-0329),
+  ADR-0357 (relay events through a BoundedQueue, amends ADR-0321); superseded: ADR-0320, ADR-0327; builds on
+  ADR-0004, ADR-0007, ADR-0037
 - **Depends on:** 0013 (operations), 0037 firmware catalog. Nothing on the relay or the web Terminal (ADR-0334).
 
 ## Context

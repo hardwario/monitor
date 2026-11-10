@@ -21,7 +21,10 @@
 // (the queue may exceed the bound by the non-droppable packets only). Reconnect after a lost
 // connection: 1 s, doubling up to 30 s, for at most 5 min after the loss, then failed()
 // (remote.relay_unreachable). The first connect is not retried: it fails within connectTimeout.
-// The system proxy (QNetworkProxyFactory) of the relay URL is used.
+// The system proxy (QNetworkProxyFactory) of the relay URL is used. Worker -> owner notifications
+// (events, connection changes, warnings) wait in a queue of at most incomingEventQueue entries
+// (ADR-0357): when it is full a new warning is dropped (logged) and any other notification ends
+// the connection with failed() (remote.protocol_error).
 
 #include "hwio/core/error.h"
 #include "hwio/device/session_events.h" // Q_DECLARE_METATYPE(hwio::Error)
@@ -33,6 +36,7 @@
 #include <QUrl>
 #include <QtTypes>
 
+#include <atomic>
 #include <chrono>
 #include <cstddef>
 #include <memory>
@@ -49,6 +53,13 @@ struct RelayLimits {
     std::size_t outgoingQueueBytes = 1024ULL * 1024;
     int maxOversizedEvents = 3;
     int maxProtocolErrors = 10;
+    // Notifications of the worker not yet handled on the owner thread (ADR-0357). Values < 1
+    // count as 1.
+    std::size_t incomingEventQueue = 4096;
+    // emitEvent() calls not yet taken over by the worker (ADR-0357). When full, the oldest
+    // droppable one is dropped (the oldest of any kind when none is droppable), reported by a
+    // warning. Values < 1 count as 1.
+    std::size_t outgoingSendQueue = 4096;
 };
 
 struct RelayConfig {
@@ -59,6 +70,8 @@ struct RelayConfig {
 
 namespace detail {
 class RelayWorker;
+struct RelayEventQueue; // relay_worker.h
+struct RelaySendQueue;  // relay_worker.h
 } // namespace detail
 
 class RelayClient : public QObject {
@@ -102,8 +115,16 @@ signals:
 
 private:
     void onEvent(const QString& name, const QJsonValue& payload);
+    // Owner thread: invoked (queued, by name) by wakeUp(); emits the queued notifications.
+    Q_INVOKABLE void drainEvents();
+    // Worker thread: one coalesced, payload-free queued drainEvents() (ADR-0357).
+    void wakeUp();
 
     RelayConfig m_config;
+    // Owned here, shared with the worker by reference (it is deleted after the worker).
+    std::unique_ptr<detail::RelayEventQueue> m_events;
+    std::unique_ptr<detail::RelaySendQueue> m_sends; // the same, other direction
+    std::atomic<bool> m_wakePending{false};
     std::unique_ptr<QThread> m_thread;             // owned; joined by stop()
     std::unique_ptr<detail::RelayWorker> m_worker; // lives on m_thread; deleted after the join
     bool m_started = false;

@@ -56,19 +56,3 @@ race:libglib-2.0.so
 # Same glib worker threads, GIO side: the gdbus thread's sendmsg() (g_socket_send_message_with_timeout)
 # reads a g_realloc()ed GIO buffer filled by libgio on the relay thread; only GIO touches it.
 race:libgio-2.0.so
-
-# Arguments of queued signals: Qt copies them into the posted event on the sending thread and
-# destroys them with QMetaType::destroy() inside uninstrumented libQt6Core on the receiving thread
-# after QCoreApplicationPrivate::sendPostedEvents(); the posted-event queue is guarded by a
-# futex-based QMutex, so TSan misses the happens-before edge and reports the implicitly shared
-# QString's refcount drop on the sender vs. the free on the receiver. Seen with
-# RelayWorker::eventReceived (libs/remote, socketio::Event payloads, plan/features/0044) in
-# hwio_remote_tests. Matches only reports with a frame inside Qt's QMetaType::destroy().
-race:QMetaType::destroy
-
-# Queued functor calls (QMetaObject::invokeMethod with a lambda): the QMetaCallEvent and the lambda's
-# captures (e.g. the QString name in RelayClient::emitEvent, libs/remote) are allocated on the
-# sending thread and destroyed in ~QMetaCallEvent() inside uninstrumented libQt6Core on the
-# receiving thread, behind the futex-based QMutex of the posted-event queue, so TSan misses the
-# happens-before edge. Seen in hwio_remote_tests (RelayClient.FullOutgoingQueueDropsTheOldestDeviceLines).
-race:QMetaCallEvent::~QMetaCallEvent
