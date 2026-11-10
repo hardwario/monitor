@@ -1,6 +1,7 @@
 #include "hwio/core/error.h"
 #include "hwio/remote/tunnel.h"
 
+#include <QByteArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -8,6 +9,8 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
+#include <optional>
 #include <variant>
 
 namespace hwio::remote::tunnel {
@@ -16,7 +19,7 @@ namespace {
 QJsonValue json(const char* text) { return QJsonDocument::fromJson(QByteArray(text)).object(); }
 
 TEST(Tunnel, HostMessagesRoundTrip) {
-    const HostMessage messages[] = {
+    const std::array<HostMessage, 8> messages = {
         HostHello{.app = "hwio-monitor",
                   .version = "2.1.0",
                   .device = {.name = "CHESTER",
@@ -30,6 +33,8 @@ TEST(Tunnel, HostMessagesRoundTrip) {
             .id = "op-1", .phase = "programming", .step = 1, .steps = 2, .done = 5, .total = 10},
         OpResult{.id = "op-1", .ok = false, .code = "firmware.verify_failed"},
         OpResult{.id = "op-1", .ok = true, .code = std::nullopt},
+        HostEnd{},
+        HostEnd{.code = "remote.code_collision"},
     };
     for (const HostMessage& message : messages) {
         const QJsonObject at = encodeHost(message);
@@ -42,6 +47,9 @@ TEST(Tunnel, HostMessagesRoundTrip) {
     const auto hello = std::get<HostHello>(*decodeHost(encodeHost(messages[0])));
     EXPECT_TRUE(hello.ops);
     EXPECT_EQ(hello.device.firmware, "Clime v3");
+    EXPECT_EQ(std::get<HostEnd>(*decodeHost(encodeHost(messages[7]))).code,
+              "remote.code_collision");
+    EXPECT_EQ(std::get<HostEnd>(*decodeHost(encodeHost(messages[6]))).code, "cancelled");
 }
 
 TEST(Tunnel, JoinerMessagesRoundTrip) {
@@ -99,6 +107,8 @@ TEST(Tunnel, RejectsInvalidHostMessages) {
             R"({"event":"hwio","data":{"v":1,"type":"op-progress","id":"a","step":0,"steps":1,"done":0,"total":0}})",
             R"({"event":"hwio","data":{"v":1,"type":"op-progress","id":"a","step":1,"steps":1,"done":-1,"total":0}})",
             R"({"event":"hwio","data":{"v":1,"type":"hello","app":"hwio-monitor","version":"1","ops":true}})",
+            R"({"event":"hwio","data":{"v":1,"type":"end","code":"made.up"}})",
+            R"({"event":"hwio","data":{"v":1,"type":"end","code":7}})",
             R"({"event":"read","data":"x"})",
         }) {
         EXPECT_FALSE(decodeHost(json(text)).has_value()) << text;

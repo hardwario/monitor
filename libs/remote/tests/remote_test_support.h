@@ -86,10 +86,12 @@ public:
         return out;
     }
 
+    // NOLINTBEGIN(cppcoreguidelines-non-private-member-variables-in-classes)
     bool connected = false;
     bool closed = false;
     QString connectError;
     QList<Received> received;
+    // NOLINTEND(cppcoreguidelines-non-private-member-variables-in-classes)
 
 private:
     void onText(const QString& text) {

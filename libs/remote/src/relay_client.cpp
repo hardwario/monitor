@@ -23,6 +23,8 @@
 #include <QTimer>
 #include <QWebSocket>
 #include <QWebSocketProtocol>
+#include <QtCore/qnamespace.h>
+#include <QtCore/qtmetamacros.h>
 #include <QtLogging>
 #include <QtTypes>
 
@@ -246,8 +248,8 @@ void RelayWorker::handleEngineIo(const QString& message) {
 }
 
 void RelayWorker::handleSocketIo(const QString& data) {
-    if (static_cast<std::size_t>(data.size()) > maxIncomingEventBytes ||
-        static_cast<std::size_t>(data.toUtf8().size()) > maxIncomingEventBytes) {
+    if (std::cmp_greater(data.size(), maxIncomingEventBytes) ||
+        std::cmp_greater(data.toUtf8().size(), maxIncomingEventBytes)) {
         protocolProblem(
             protocol(std::format("incoming event of {} characters dropped", data.size())), true);
         return;
@@ -321,7 +323,7 @@ void RelayWorker::lost(Error error) {
     }
     destroySocket();
     if (!m_everConnected) {
-        fail(std::move(error)); // the first connect is not retried
+        fail(error); // the first connect is not retried
         return;
     }
     const auto now = std::chrono::steady_clock::now();
@@ -331,7 +333,7 @@ void RelayWorker::lost(Error error) {
         qCInfo(log::lcRemote).noquote() << "Relay connection lost:" << toQString(error.detail);
         emit connectionLost(error);
     }
-    if (now - *m_lostAt >= m_config.limits.reconnectBudget) {
+    if (now - m_lostAt.value_or(now) >= m_config.limits.reconnectBudget) {
         fail(m_lostError.value_or(std::move(error)));
         return;
     }
@@ -342,7 +344,7 @@ void RelayWorker::lost(Error error) {
     m_retryTimer.start(m_retryDelay);
 }
 
-void RelayWorker::fail(Error error) {
+void RelayWorker::fail(const Error& error) {
     if (m_phase == Phase::Ended) {
         return;
     }
@@ -355,11 +357,11 @@ void RelayWorker::fail(Error error) {
     emit failed(error);
 }
 
-void RelayWorker::protocolProblem(Error error, bool oversized) {
+void RelayWorker::protocolProblem(const Error& error, bool oversized) {
     qCWarning(log::lcRemote).noquote() << "Relay protocol problem:" << toQString(error.detail);
     if (oversized ? ++m_oversized >= m_config.limits.maxOversizedEvents
                   : ++m_protocolErrors >= m_config.limits.maxProtocolErrors) {
-        fail(std::move(error));
+        fail(error);
         return;
     }
     emit warning(error);
@@ -367,6 +369,15 @@ void RelayWorker::protocolProblem(Error error, bool oversized) {
 
 void RelayWorker::shutdown() {
     if (m_phase == Phase::Connected && m_socket) {
+        // Packets still waiting behind in-flight bytes (e.g. the tunnel `end`, ADR-0354) go out
+        // before the disconnect; droppable ones may be lost. The queue is bounded (enqueue).
+        for (const Outgoing& packet : m_queue) {
+            if (!packet.droppable) {
+                rawSend(packet.text);
+            }
+        }
+        m_queue.clear();
+        m_queuedBytes = 0;
         rawSend(socketio::encodeDisconnect(m_nsp));
         m_socket->flush();
         m_socket->close(QWebSocketProtocol::CloseCodeNormal);

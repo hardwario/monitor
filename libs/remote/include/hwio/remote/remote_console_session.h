@@ -133,12 +133,13 @@ protected:
 
 private:
     void onAt(const QJsonValue& payload);
+    void onTunnelAt(const QJsonValue& payload); // a hwio tunnel object (ADR-0336)
     void onSync(const QJsonValue& payload);
     void appendLines(QList<device::ConsoleLine> lines);
     void setConnection(device::ConnectionState state, std::optional<Error> error = std::nullopt);
     void setState(JoinState state);
     void hostActivity();
-    void end(std::optional<Error> error);
+    void end(const std::optional<Error>& error);
     [[nodiscard]] static device::ConsoleLine makeLine(device::Direction dir, const QString& text);
 
     JoinOptions m_options;

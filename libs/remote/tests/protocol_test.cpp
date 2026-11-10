@@ -4,11 +4,13 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLatin1Char>
 #include <QString>
+#include <QtTypes>
 
 #include <gtest/gtest.h>
 
-#include <chrono>
+#include <cstdint>
 
 namespace hwio::remote {
 namespace {
@@ -126,11 +128,12 @@ TEST(SocketIo, SurvivesGarbage) {
             text.append(alphabet.at(static_cast<qsizetype>((state >> 16) % alphabet.size())));
         }
         state = (state * 1103515245U) + 12345U;
-        static_cast<void>(engineio::parsePacket(text));
+        // Only "does not crash" is tested: the results are not looked at.
+        [[maybe_unused]] const auto engineIoPacket = engineio::parsePacket(text);
         if (auto packet = socketio::parsePacket(text)) {
-            static_cast<void>(socketio::toEvent(*packet));
+            [[maybe_unused]] const auto event = socketio::toEvent(*packet);
         }
-        static_cast<void>(engineio::parseOpen(text));
+        [[maybe_unused]] const auto open = engineio::parseOpen(text);
     }
 }
 

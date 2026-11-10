@@ -226,6 +226,111 @@ firmware::CatalogOptions chesterCatalogOptions() {
                                     .maxPageBytes = 1024ULL * 1024};
 }
 
+// The shared console session of `remote host`: J-Link by default, BLE with --ble. The members
+// are declared in destruction order.
+struct HostSession {
+    std::unique_ptr<device::SessionRegistry> registry;
+    std::unique_ptr<device::DeviceSession> jlinkSession;
+    std::optional<OpenedBleSession> bleSession;
+    device::ConsoleSession* session = nullptr;
+    std::chrono::milliseconds connectTimeout{95000};
+};
+
+Result<HostSession> openHostSession(const Context& context, const GlobalOptions& globals,
+                                    const ProbeOptions& group, const HostCommandOptions& options) {
+    HostSession opened;
+    if (options.ble) {
+        auto ble = openBleSession(
+            context, options.bleDevice, options.autoReconnect,
+            options.consoleFileGiven
+                ? std::optional<fs::path>(fs::path(toQString(options.consoleFile).toStdU16String()))
+                : std::nullopt,
+            [&context](std::string_view text) { status(context, std::string(text)); });
+        if (!ble) {
+            return std::unexpected(std::move(ble).error());
+        }
+        opened.bleSession.emplace(std::move(*ble));
+        opened.session = opened.bleSession->session.get();
+        status(context, std::format("Connecting to {}...", opened.bleSession->description));
+        return opened;
+    }
+    auto location = locateJLinkLibrary(globals);
+    if (!location) {
+        return std::unexpected(std::move(location).error());
+    }
+    auto sessionOptions =
+        appConsoleSessionOptions(group, options.probe, options.latencyMs, options.autoReconnect,
+                                 false, options.consoleFile, options.consoleFileGiven);
+    if (!sessionOptions) {
+        return std::unexpected(std::move(sessionOptions).error());
+    }
+    opened.connectTimeout = device::connectTimeoutForSpeed(sessionOptions->speedKhz);
+    opened.registry = std::make_unique<device::SessionRegistry>();
+    auto jlink =
+        device::DeviceSession::open(*opened.registry, *location, std::move(*sessionOptions));
+    if (!jlink) {
+        return std::unexpected(std::move(jlink).error());
+    }
+    opened.jlinkSession = std::move(*jlink);
+    opened.session = opened.jlinkSession.get();
+    status(context, "Connecting to the CHESTER application core...");
+    return opened;
+}
+
+// The status lines and JSON events of `remote host`.
+void connectHostStatus(const Context& context, remote::RemoteHost& host) {
+    QObject::connect(&host, &remote::RemoteHost::sharingStarted, &host, [&context, &host] {
+        status(context,
+               std::format("Sharing with support. Session code: {}", host.code().grouped()));
+        status(context, std::format("Link: {}", toStdString(host.link().toString())));
+        status(context, "Read the code only to HARDWARIO Support: anyone who knows it sees the "
+                        "console output. Press Ctrl+C to end sharing.");
+        QJsonObject sharing;
+        sharing.insert(QStringLiteral("event"), QStringLiteral("sharing"));
+        sharing.insert(QStringLiteral("code"), toQString(host.code().text()));
+        sharing.insert(QStringLiteral("link"), host.link().toString());
+        sharing.insert(QStringLiteral("relay"), host.relay().host());
+        event(context, sharing);
+    });
+    QObject::connect(&host, &remote::RemoteHost::idleWarning, &host,
+                     [&context](std::chrono::seconds remaining) {
+                         status(context, std::format("Sharing ends in {} s without activity. "
+                                                     "Press Enter to keep sharing.",
+                                                     remaining.count()));
+                     });
+    QObject::connect(&host, &remote::RemoteHost::connectionLost, &host, [&context] {
+        status(context, "Connection to the support server lost, reconnecting...");
+    });
+    QObject::connect(&host, &remote::RemoteHost::warning, &host, [](const Error& error) {
+        qCWarning(lcCli).noquote()
+            << "Remote:" << toQString(error.message) << toQString(error.detail);
+    });
+    QObject::connect(
+        &host, &remote::RemoteHost::operationStarted, &host,
+        [&context](const QString& summary) { status(context, toStdString(summary) + "..."); });
+    QObject::connect(
+        &host, &remote::RemoteHost::operationFinished, &host,
+        [&context](bool /*ok*/, const QString& message) { status(context, toStdString(message)); });
+}
+
+// Reads the host's pending stdin lines: consent answers, else keep-alive input.
+void pumpHostInput(StdinLineReader* reader, bool& inputEnded, CliConsent& consent,
+                   remote::RemoteHost& host) {
+    while (reader != nullptr && !inputEnded) {
+        auto item = reader->poll();
+        if (!item) {
+            return;
+        }
+        if (!*item) {
+            inputEnded = true; // Ctrl+D: keep sharing until Ctrl+C
+            return;
+        }
+        if (!consent.answer(**item)) {
+            host.keepSharing(); // ADR-0328: any input extends idle
+        }
+    }
+}
+
 Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
                            const ProbeOptions& group, const HostCommandOptions& options) {
     auto relay = relayOf(options.relay);
@@ -239,46 +344,14 @@ Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
     Context hostContext = context;
     hostContext.stop = consoleStop.get_token();
 
-    // The session (J-Link by default, BLE with --ble). Declared in destruction order.
-    std::unique_ptr<device::SessionRegistry> registry;
-    std::unique_ptr<device::DeviceSession> jlinkSession;
-    std::optional<OpenedBleSession> bleSession;
-    device::ConsoleSession* session = nullptr;
-    std::chrono::milliseconds connectTimeout{95000};
-    if (options.ble) {
-        auto opened = openBleSession(
-            context, options.bleDevice, options.autoReconnect,
-            options.consoleFileGiven
-                ? std::optional<fs::path>(fs::path(toQString(options.consoleFile).toStdU16String()))
-                : std::nullopt,
-            [&context](std::string_view text) { status(context, std::string(text)); });
-        if (!opened) {
-            return std::unexpected(std::move(opened).error());
-        }
-        bleSession.emplace(std::move(*opened));
-        session = bleSession->session.get();
-        status(context, std::format("Connecting to {}...", bleSession->description));
-    } else {
-        auto location = locateJLinkLibrary(globals);
-        if (!location) {
-            return std::unexpected(std::move(location).error());
-        }
-        auto sessionOptions =
-            appConsoleSessionOptions(group, options.probe, options.latencyMs, options.autoReconnect,
-                                     false, options.consoleFile, options.consoleFileGiven);
-        if (!sessionOptions) {
-            return std::unexpected(std::move(sessionOptions).error());
-        }
-        connectTimeout = device::connectTimeoutForSpeed(sessionOptions->speedKhz);
-        registry = std::make_unique<device::SessionRegistry>();
-        auto opened = device::DeviceSession::open(*registry, *location, std::move(*sessionOptions));
-        if (!opened) {
-            return std::unexpected(std::move(opened).error());
-        }
-        jlinkSession = std::move(*opened);
-        session = jlinkSession.get();
-        status(context, "Connecting to the CHESTER application core...");
+    auto opened = openHostSession(context, globals, group, options);
+    if (!opened) {
+        return std::unexpected(std::move(opened).error());
     }
+    HostSession& hostSession = *opened;
+    device::ConsoleSession* session = hostSession.session;
+    const std::unique_ptr<device::DeviceSession>& jlinkSession = hostSession.jlinkSession;
+    const std::chrono::milliseconds connectTimeout = hostSession.connectTimeout;
     ConsoleView view(hostContext, *session, false, jlinkSession != nullptr);
     view.setOutputClosedHandler([&consoleStop] { consoleStop.request_stop(); });
     if (const Status connected = waitForConsoleConnection(hostContext, *session, view,
@@ -314,38 +387,7 @@ Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
                                                 .appVersion = std::string(buildInfo().version),
                                                 .code = std::nullopt});
     bool ended = false;
-    QObject::connect(&host, &remote::RemoteHost::sharingStarted, &host, [&] {
-        status(context,
-               std::format("Sharing with support. Session code: {}", host.code().grouped()));
-        status(context, std::format("Link: {}", toStdString(host.link().toString())));
-        status(context, "Read the code only to HARDWARIO Support: anyone who knows it sees the "
-                        "console output. Press Ctrl+C to end sharing.");
-        QJsonObject sharing;
-        sharing.insert(QStringLiteral("event"), QStringLiteral("sharing"));
-        sharing.insert(QStringLiteral("code"), toQString(host.code().text()));
-        sharing.insert(QStringLiteral("link"), host.link().toString());
-        sharing.insert(QStringLiteral("relay"), host.relay().host());
-        event(context, sharing);
-    });
-    QObject::connect(&host, &remote::RemoteHost::idleWarning, &host,
-                     [&](std::chrono::seconds remaining) {
-                         status(context, std::format("Sharing ends in {} s without activity. "
-                                                     "Press Enter to keep sharing.",
-                                                     remaining.count()));
-                     });
-    QObject::connect(&host, &remote::RemoteHost::connectionLost, &host, [&] {
-        status(context, "Connection to the support server lost, reconnecting...");
-    });
-    QObject::connect(&host, &remote::RemoteHost::warning, &host, [](const Error& error) {
-        qCWarning(lcCli).noquote()
-            << "Remote:" << toQString(error.message) << toQString(error.detail);
-    });
-    QObject::connect(
-        &host, &remote::RemoteHost::operationStarted, &host,
-        [&](const QString& summary) { status(context, toStdString(summary) + "..."); });
-    QObject::connect(
-        &host, &remote::RemoteHost::operationFinished, &host,
-        [&](bool /*ok*/, const QString& message) { status(context, toStdString(message)); });
+    connectHostStatus(context, host);
     QObject::connect(&host, &remote::RemoteHost::ended, &host, [&] { ended = true; });
     status(context,
            std::format("Connecting to the support server {}...", toStdString(relay->host())));
@@ -358,19 +400,7 @@ Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
     bool inputEnded = false;
     const Status loop = runUntil(
         [&] {
-            while (reader && !inputEnded) {
-                auto item = reader->poll();
-                if (!item) {
-                    break;
-                }
-                if (!*item) {
-                    inputEnded = true; // Ctrl+D: keep sharing until Ctrl+C
-                    break;
-                }
-                if (!cliConsent.answer(**item)) {
-                    host.keepSharing(); // ADR-0328: any input extends idle
-                }
-            }
+            pumpHostInput(reader.get(), inputEnded, cliConsent, host);
             return ended || view.fatalError().has_value();
         },
         std::nullopt, hostContext.stop);
@@ -463,9 +493,10 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
     if (!target) {
         return std::unexpected(makeError(ErrorCode::UsageInvalidArgument, options.core));
     }
-    // A Monitor host sends its hello right after the sync.
-    static_cast<void>(
-        runUntil([&] { return session.hostHello().has_value(); }, helloWait, context.stop));
+    // A Monitor host sends its hello right after the sync; a missing hello (also after a timeout
+    // or Ctrl+C) is reported just below.
+    [[maybe_unused]] const Status helloWaited =
+        runUntil([&] { return session.hostHello().has_value(); }, helloWait, context.stop);
     if (!session.hostHello() || !session.hostHello()->ops) {
         return std::unexpected(makeError(ErrorCode::RemoteOperationUnsupportedPeer,
                                          session.hostHello() ? "ops: false" : "no hello"));
@@ -493,6 +524,9 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
     ui.finish();
     if (!waited) {
         return std::unexpected(waited.error());
+    }
+    if (!outcome) { // runUntil() returns success only once the outcome is set
+        return std::unexpected(makeError(ErrorCode::RemoteHostEnded));
     }
     if (!outcome->first) {
         return std::unexpected(outcome->second);

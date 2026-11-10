@@ -8,8 +8,10 @@
 
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLatin1StringView>
 #include <QString>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <expected>
@@ -104,6 +106,83 @@ Result<QJsonObject> openEnvelope(const QJsonValue& value) {
     return data;
 }
 
+Result<HostMessage> decodeHostHello(const QJsonObject& data) {
+    HostHello hello;
+    auto app = text(data, "app");
+    auto ver = text(data, "version");
+    if (!app || !ver) {
+        return bad("invalid hello");
+    }
+    if (*app != appId) {
+        return bad("hello from an unknown application");
+    }
+    const QJsonValue deviceValue = data.value(QStringLiteral("device"));
+    const QJsonValue ops = data.value(QStringLiteral("ops"));
+    if (!deviceValue.isObject() || !ops.isBool()) {
+        return bad("invalid hello");
+    }
+    const QJsonObject device = deviceValue.toObject();
+    auto name = text(device, "name");
+    auto serial = text(device, "serial");
+    auto transport = text(device, "transport");
+    auto firmware = text(device, "firmware");
+    if (!name || !serial || !transport || !firmware) {
+        return bad("invalid hello device");
+    }
+    hello.app = *app;
+    hello.version = *ver;
+    hello.device = DeviceInfo{
+        .name = *name, .serial = *serial, .transport = *transport, .firmware = *firmware};
+    hello.ops = ops.toBool();
+    return hello;
+}
+
+Result<HostMessage> decodeOpDenied(const QJsonObject& data, const std::string& messageId) {
+    auto code = errorCode(data);
+    if (!code) {
+        return std::unexpected(std::move(code).error());
+    }
+    return OpDenied{.id = messageId, .code = *code};
+}
+
+Result<HostMessage> decodeOpProgress(const QJsonObject& data, const std::string& messageId) {
+    auto phase = text(data, "phase", false);
+    auto step = count(data, "step");
+    auto steps = count(data, "steps");
+    auto done = count(data, "done");
+    auto total = count(data, "total");
+    if (!phase || !step || !steps || !done || !total || *step < 1 || *steps < *step ||
+        *steps > 16) {
+        return bad("invalid progress");
+    }
+    return OpProgress{.id = messageId,
+                      .phase = *phase,
+                      .step = static_cast<int>(*step),
+                      .steps = static_cast<int>(*steps),
+                      .done = *done,
+                      .total = *total};
+}
+
+Result<HostMessage> decodeOpResult(const QJsonObject& data, const std::string& messageId) {
+    const QJsonValue ok = data.value(QStringLiteral("ok"));
+    if (!ok.isBool()) {
+        return bad("invalid result");
+    }
+    OpResult result{.id = messageId, .ok = ok.toBool(), .code = std::nullopt};
+    if (!result.ok) {
+        const QJsonValue error = data.value(QStringLiteral("error"));
+        if (!error.isObject()) {
+            return bad("failed result without an error");
+        }
+        auto code = errorCode(error.toObject());
+        if (!code) {
+            return std::unexpected(std::move(code).error());
+        }
+        result.code = *code;
+    }
+    return result;
+}
+
 } // namespace
 
 std::string_view kindId(OpKind kind) noexcept {
@@ -147,14 +226,10 @@ bool validId(std::string_view id) noexcept {
     if (id.empty() || id.size() > maxIdBytes) {
         return false;
     }
-    for (const char c : id) {
-        const bool ok = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-                        (c >= '0' && c <= '9') || c == '-' || c == '_';
-        if (!ok) {
-            return false;
-        }
-    }
-    return true;
+    return std::ranges::all_of(id, [](const char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
+               c == '-' || c == '_';
+    });
 }
 
 QJsonObject encodeHost(const HostMessage& message) {
@@ -203,6 +278,11 @@ QJsonObject encodeHost(const HostMessage& message) {
                                error.insert(QStringLiteral("code"), q(*result.code));
                                d.insert(QStringLiteral("error"), error);
                            }
+                           return d;
+                       },
+                       [](const HostEnd& end) {
+                           QJsonObject d = envelope("end");
+                           d.insert(QStringLiteral("code"), q(end.code));
                            return d;
                        },
                    },
@@ -254,34 +334,14 @@ Result<HostMessage> decodeHost(const QJsonValue& payload) {
     }
     const QString type = data->value(QStringLiteral("type")).toString();
     if (type == QStringLiteral("hello")) {
-        HostHello hello;
-        auto app = text(*data, "app");
-        auto ver = text(*data, "version");
-        if (!app || !ver) {
-            return bad("invalid hello");
+        return decodeHostHello(*data);
+    }
+    if (type == QStringLiteral("end")) {
+        auto code = errorCode(*data);
+        if (!code) {
+            return std::unexpected(std::move(code).error());
         }
-        if (*app != appId) {
-            return bad("hello from an unknown application");
-        }
-        const QJsonValue deviceValue = data->value(QStringLiteral("device"));
-        const QJsonValue ops = data->value(QStringLiteral("ops"));
-        if (!deviceValue.isObject() || !ops.isBool()) {
-            return bad("invalid hello");
-        }
-        const QJsonObject device = deviceValue.toObject();
-        auto name = text(device, "name");
-        auto serial = text(device, "serial");
-        auto transport = text(device, "transport");
-        auto firmware = text(device, "firmware");
-        if (!name || !serial || !transport || !firmware) {
-            return bad("invalid hello device");
-        }
-        hello.app = *app;
-        hello.version = *ver;
-        hello.device = DeviceInfo{
-            .name = *name, .serial = *serial, .transport = *transport, .firmware = *firmware};
-        hello.ops = ops.toBool();
-        return hello;
+        return HostEnd{.code = *code};
     }
     auto messageId = id(*data);
     if (!messageId) {
@@ -291,47 +351,13 @@ Result<HostMessage> decodeHost(const QJsonValue& payload) {
         return OpAccepted{.id = *messageId};
     }
     if (type == QStringLiteral("op-denied")) {
-        auto code = errorCode(*data);
-        if (!code) {
-            return std::unexpected(std::move(code).error());
-        }
-        return OpDenied{.id = *messageId, .code = *code};
+        return decodeOpDenied(*data, *messageId);
     }
     if (type == QStringLiteral("op-progress")) {
-        auto phase = text(*data, "phase", false);
-        auto step = count(*data, "step");
-        auto steps = count(*data, "steps");
-        auto done = count(*data, "done");
-        auto total = count(*data, "total");
-        if (!phase || !step || !steps || !done || !total || *step < 1 || *steps < *step ||
-            *steps > 16) {
-            return bad("invalid progress");
-        }
-        return OpProgress{.id = *messageId,
-                          .phase = *phase,
-                          .step = static_cast<int>(*step),
-                          .steps = static_cast<int>(*steps),
-                          .done = *done,
-                          .total = *total};
+        return decodeOpProgress(*data, *messageId);
     }
     if (type == QStringLiteral("op-result")) {
-        const QJsonValue ok = data->value(QStringLiteral("ok"));
-        if (!ok.isBool()) {
-            return bad("invalid result");
-        }
-        OpResult result{.id = *messageId, .ok = ok.toBool(), .code = std::nullopt};
-        if (!result.ok) {
-            const QJsonValue error = data->value(QStringLiteral("error"));
-            if (!error.isObject()) {
-                return bad("failed result without an error");
-            }
-            auto code = errorCode(error.toObject());
-            if (!code) {
-                return std::unexpected(std::move(code).error());
-            }
-            result.code = *code;
-        }
-        return result;
+        return decodeOpResult(*data, *messageId);
     }
     return bad("unknown host message type");
 }

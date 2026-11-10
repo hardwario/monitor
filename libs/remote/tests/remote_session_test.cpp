@@ -4,9 +4,12 @@
 #include "fake_console.h"
 #include "fake_relay.h"
 #include "hwio/core/error.h"
+#include "hwio/core/firmware_identity.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
+#include "hwio/device/console_session.h"
 #include "hwio/device/session_events.h"
+#include "hwio/remote/host_operations.h"
 #include "hwio/remote/remote_console_session.h"
 #include "hwio/remote/remote_host.h"
 #include "hwio/remote/remote_operation_client.h"
@@ -19,13 +22,18 @@
 #include <QJsonValue>
 #include <QObject>
 #include <QString>
+#include <QtTypes>
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <chrono>
+#include <cstdint>
+#include <expected>
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace hwio::remote {
@@ -84,7 +92,7 @@ TEST(RemoteSession, MonitorToMonitorConsole) {
     RemoteConsoleSession joiner(joinFor(relay));
     EXPECT_EQ(joiner.identity().transport, device::Transport::Remote);
     ASSERT_TRUE(runUntil([&] { return static_cast<bool>(consent.pendingJoin); }));
-    EXPECT_EQ(joiner.joinState(), JoinState::Waiting);
+    ASSERT_TRUE(runUntil([&] { return joiner.joinState() == JoinState::Waiting; }));
     EXPECT_EQ(joiner.title(), QStringLiteral("Session 482 913"));
     console.shell("live before approval"); // the relay broadcasts it anyway (ADR-0335)
     ASSERT_TRUE(runUntil([&] { return !texts(joiner.log(), device::Direction::Out).empty(); }));
@@ -96,7 +104,7 @@ TEST(RemoteSession, MonitorToMonitorConsole) {
         runUntil([&] { return joiner.joinState() == JoinState::Allowed && joiner.hostHello(); }));
     EXPECT_TRUE(replaced);
     EXPECT_EQ(joiner.title(), QStringLiteral("CHESTER 2159018247 — remote"));
-    EXPECT_FALSE(joiner.hostHello()->ops);
+    EXPECT_TRUE(joiner.hostHello().has_value() && !joiner.hostHello()->ops);
     EXPECT_FALSE(joiner.capabilities().testFlag(device::Capability::Operations));
     const auto out = texts(joiner.log(), device::Direction::Out);
     ASSERT_GE(out.size(), 2U);
@@ -113,12 +121,9 @@ TEST(RemoteSession, MonitorToMonitorConsole) {
     }));
     console.logLine("[00:00:02.000,000] <wrn> app: low battery");
     ASSERT_TRUE(runUntil([&] {
-        for (const auto& line : joiner.log().linesSince(0)) {
-            if (line.channel == device::Channel::Log && line.level == device::LogLevel::Warning) {
-                return true;
-            }
-        }
-        return false;
+        return std::ranges::any_of(joiner.log().linesSince(0), [](const device::ConsoleLine& line) {
+            return line.channel == device::Channel::Log && line.level == device::LogLevel::Warning;
+        });
     }));
     EXPECT_FALSE(joiner.sendLine(std::string(600, 'x')).has_value());
     EXPECT_FALSE(joiner.sendLine("a\rb").has_value());
@@ -161,7 +166,7 @@ TEST(RemoteSession, MonitorToMonitorOperation) {
     ASSERT_TRUE(runUntil([&] { return !progress.empty(); }));
     operations.finished(std::unexpected(makeError(ErrorCode::FirmwareVerifyFailed)));
     ASSERT_TRUE(runUntil([&] { return ok.has_value(); }));
-    EXPECT_FALSE(*ok);
+    EXPECT_FALSE(ok.value_or(true));
     EXPECT_EQ(error.code, ErrorCode::FirmwareVerifyFailed);
     EXPECT_NE(error.message.find("Reported by the customer's Monitor"), std::string::npos);
 
@@ -193,7 +198,7 @@ TEST(RemoteSession, OperationClientTimesOutWithoutAnAnswer) {
         QStringLiteral("at"),
         tunnel::encodeHost(tunnel::OpDenied{.id = "other", .code = "remote.operation_denied"}));
     ASSERT_TRUE(runUntil([&] { return error.has_value(); }));
-    EXPECT_EQ(error->code, ErrorCode::Timeout);
+    EXPECT_EQ(error.value_or(Error{}).code, ErrorCode::Timeout);
 }
 
 // The web Terminal host, scripted from console.tsx: on newClient it emits sync {state, commands};
@@ -268,8 +273,39 @@ TEST(RemoteSession, JoinerIdleNoticeAndRelayFailureEndsTheSession) {
     ASSERT_TRUE(runUntil([&] { return joiner.joinState() == JoinState::Ended; }));
     EXPECT_EQ(joiner.connection().state, device::ConnectionState::Stopped);
     ASSERT_TRUE(joiner.connection().error.has_value());
-    EXPECT_EQ(joiner.connection().error->code, ErrorCode::RemoteHostEnded);
+    EXPECT_EQ(joiner.connection().error.value_or(Error{}).code, ErrorCode::RemoteHostEnded);
     EXPECT_EQ(joiner.sendLine("x").error().code, ErrorCode::RemoteHostEnded);
+}
+
+// ADR-0354: End sharing on the host sends `end`; the joiner's session ends right away.
+TEST(RemoteSession, HostEndEndsTheJoinerSession) {
+    FakeRelay relay;
+    FakeConsole console;
+    ScriptedConsent consent;
+    RemoteHost host(console, consent, nullptr, hostFor(relay));
+    host.start();
+    ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
+    JoinOptions options = joinFor(relay);
+    options.relayLimits.reconnectBudget = 60s; // only `end` can end the session in time
+    RemoteConsoleSession joiner(options);
+    ASSERT_TRUE(
+        runUntil([&] { return joiner.joinState() == JoinState::Allowed && joiner.hostHello(); }));
+    host.end();
+    ASSERT_TRUE(runUntil([&] { return joiner.joinState() == JoinState::Ended; }, 2s));
+    EXPECT_EQ(joiner.connection().state, device::ConnectionState::Stopped);
+    EXPECT_EQ(joiner.connection().error.value_or(Error{}).code, ErrorCode::RemoteHostEnded);
+}
+
+// An `end` object before the host's hello is not from a Monitor host: ignored (ADR-0336).
+TEST(RemoteSession, HostEndBeforeHelloIsIgnored) {
+    FakeRelay relay;
+    RawParticipant webHost(relay.url(), QStringLiteral("/12345"));
+    ASSERT_TRUE(webHost.waitConnected());
+    RemoteConsoleSession joiner(joinFor(relay, 12345));
+    ASSERT_TRUE(runUntil([&] { return webHost.named(QStringLiteral("newClient")).size() == 2; }));
+    webHost.emitEvent(QStringLiteral("at"), tunnel::encodeHost(tunnel::HostEnd{}));
+    runFor(200ms);
+    EXPECT_NE(joiner.joinState(), JoinState::Ended);
 }
 
 TEST(RemoteSession, JoinerRelayUnreachable) {
@@ -283,7 +319,7 @@ TEST(RemoteSession, JoinerRelayUnreachable) {
     options.code = *SessionCode::fromValue(482913);
     RemoteConsoleSession joiner(options);
     ASSERT_TRUE(runUntil([&] { return joiner.joinState() == JoinState::Ended; }));
-    EXPECT_EQ(joiner.connection().error->code, ErrorCode::RemoteRelayUnreachable);
+    EXPECT_EQ(joiner.connection().error.value_or(Error{}).code, ErrorCode::RemoteRelayUnreachable);
 }
 
 } // namespace

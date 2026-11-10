@@ -1,6 +1,7 @@
 #include "hwio/remote/remote_console_session.h"
 
 #include "hwio/core/error.h"
+#include "hwio/core/firmware_identity.h"
 #include "hwio/core/json.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
@@ -23,12 +24,12 @@
 #include <QObject>
 #include <QString>
 #include <QTimer>
+#include <QtCore/qtmetamacros.h>
 #include <QtLogging>
 
 #include <chrono>
 #include <cstdint>
 #include <expected>
-#include <format>
 #include <memory>
 #include <optional>
 #include <string>
@@ -60,9 +61,13 @@ RemoteConsoleSession::RemoteConsoleSession(JoinOptions options)
             // The host sees a new join: it asks the customer again (ADR-0335).
             setState(JoinState::Waiting);
             setConnection(device::ConnectionState::Connecting);
-            (void)recordRemoteEvent(
-                trRemote("Connection restored; waiting for the customer to allow you again.")
-                    .toStdString());
+            if (Status recorded = recordRemoteEvent(
+                    trRemote("— Connection restored; waiting for the customer to allow you again —")
+                        .toStdString());
+                !recorded) {
+                qCWarning(log::lcRemote).noquote()
+                    << "Remote event not recorded:" << toQString(recorded.error().detail);
+            }
         } else {
             setState(JoinState::Waiting);
         }
@@ -165,7 +170,7 @@ Status RemoteConsoleSession::setFirmwareIdentity(std::optional<FirmwareIdentity>
 }
 
 QString RemoteConsoleSession::title() const {
-    const QString session = trRemote("Session %1").arg(toQString(m_options.code.grouped()));
+    QString session = trRemote("Session %1").arg(toQString(m_options.code.grouped()));
     if (m_hostHello) {
         QString device = toQString(m_hostHello->device.name);
         if (!m_hostHello->device.serial.empty()) {
@@ -200,7 +205,7 @@ device::ConsoleLine RemoteConsoleSession::makeLine(device::Direction dir, const 
     line.dir = dir;
     line.time = std::chrono::system_clock::now();
     line.text = sanitizeDeviceText(toStdString(text));
-    line.source = device::LineSource::Remote;
+    // The device lines of the host (LineSource::Remote marks only this session's own markers).
     if (dir == device::Direction::Out) {
         line.level = device::parseZephyrLevel(line.text);
         line.channel =
@@ -209,36 +214,52 @@ device::ConsoleLine RemoteConsoleSession::makeLine(device::Direction dir, const 
     return line;
 }
 
+void RemoteConsoleSession::onTunnelAt(const QJsonValue& payload) {
+    auto message = tunnel::decodeHost(payload);
+    if (!message) {
+        emit warning(message.error());
+        return;
+    }
+    if (const auto* hello = std::get_if<tunnel::HostHello>(&*message)) {
+        const bool first = !m_hostHello;
+        m_hostHello = *hello;
+        // ADR-0336: our tunnel objects only after the host's hello.
+        m_relay->emitEvent(QStringLiteral("write"),
+                           tunnel::encodeJoiner(tunnel::JoinerHello{
+                               .app = std::string(tunnel::appId), .version = m_options.appVersion}),
+                           false);
+        if (first) {
+            if (Status recorded = recordRemoteEvent(
+                    trRemote("— Connected to HARDWARIO Monitor %1 of the customer —")
+                        .arg(toQString(hello->version))
+                        .toStdString());
+                !recorded) {
+                qCWarning(log::lcRemote).noquote()
+                    << "Remote event not recorded:" << toQString(recorded.error().detail);
+            }
+        }
+        emit hostHelloReceived();
+        return;
+    }
+    if (!m_hostHello) {
+        return; // ADR-0336: host objects count only after the host's hello
+    }
+    if (std::holds_alternative<tunnel::HostEnd>(*message)) {
+        // ADR-0354: the host ended sharing on purpose.
+        end(makeError(ErrorCode::RemoteHostEnded,
+                      "the host ended the session: " + std::get<tunnel::HostEnd>(*message).code));
+        return;
+    }
+    emit hostMessage(*message);
+}
+
 void RemoteConsoleSession::onAt(const QJsonValue& payload) {
     if (m_state == JoinState::Ended) {
         return;
     }
     hostActivity();
     if (tunnel::isTunnelAt(payload)) {
-        auto message = tunnel::decodeHost(payload);
-        if (!message) {
-            emit warning(message.error());
-            return;
-        }
-        if (const auto* hello = std::get_if<tunnel::HostHello>(&*message)) {
-            const bool first = !m_hostHello;
-            m_hostHello = *hello;
-            // ADR-0336: our tunnel objects only after the host's hello.
-            m_relay->emitEvent(
-                QStringLiteral("write"),
-                tunnel::encodeJoiner(tunnel::JoinerHello{.app = std::string(tunnel::appId),
-                                                         .version = m_options.appVersion}),
-                false);
-            if (first) {
-                (void)recordRemoteEvent(
-                    trRemote("Connected to HARDWARIO Monitor %1 of the customer.")
-                        .arg(toQString(hello->version))
-                        .toStdString());
-            }
-            emit hostHelloReceived();
-            return;
-        }
-        emit hostMessage(*message);
+        onTunnelAt(payload);
         return;
     }
     const QJsonObject at = payload.toObject();
@@ -294,9 +315,9 @@ void RemoteConsoleSession::onSync(const QJsonValue& payload) {
         line.source = device::LineSource::Remote;
         return line;
     };
-    lines.append(marker(trRemote("Session history from the customer:")));
+    lines.append(marker(trRemote("— Session history from the customer —")));
     if (transcript->truncated()) {
-        lines.append(marker(trRemote("Older history of the session was left out.")));
+        lines.append(marker(trRemote("— Older history of the session was left out —")));
     }
     for (const TranscriptEntry& entry : transcript->entries()) {
         if (entry.command != QString::fromLatin1(deviceOutputCommand) || entry.index != 0) {
@@ -367,7 +388,7 @@ void RemoteConsoleSession::hostActivity() {
     }
 }
 
-void RemoteConsoleSession::end(std::optional<Error> error) {
+void RemoteConsoleSession::end(const std::optional<Error>& error) {
     if (m_state == JoinState::Ended) {
         return;
     }

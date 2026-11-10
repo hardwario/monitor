@@ -13,6 +13,7 @@
 #include "hwio/hw/ble/ble_host.h"
 #include "session_test_support.h"
 
+#include <QByteArray>
 #include <QFile>
 #include <QList>
 #include <QObject>
@@ -119,11 +120,13 @@ TEST_F(BleSessionFake, RemoteEventsAndRemoteCommands) {
     EXPECT_EQ(lines[2].source, hwio::device::LineSource::Local);
     (*session)->close();
     session->reset();
-    QFile written(QString::fromStdString(file.string()));
-    ASSERT_TRUE(waitFor([&written] { return written.exists() && written.size() > 0; }));
-    ASSERT_TRUE(written.open(QIODevice::ReadOnly));
-    const QByteArray text = written.readAll();
-    EXPECT_TRUE(text.contains(" @ Remote: participant allowed")) << text.toStdString();
+    // The BLE thread closes the link (and flushes the file) after close() returned.
+    const auto fileText = [&file] {
+        QFile written(QString::fromStdString(file.string()));
+        return written.open(QIODevice::ReadOnly) ? written.readAll() : QByteArray();
+    };
+    EXPECT_TRUE(waitFor([&] { return fileText().contains(" @ Remote: participant allowed"); }))
+        << fileText().toStdString();
 }
 
 // close() returns at once; the same device opens again right away (plan 0011 decisions).

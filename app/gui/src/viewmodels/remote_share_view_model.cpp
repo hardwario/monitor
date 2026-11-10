@@ -19,6 +19,7 @@
 #include <QLoggingCategory>
 #include <QObject>
 #include <QString>
+#include <QtCore/qnamespace.h>
 
 #include <chrono>
 #include <memory>

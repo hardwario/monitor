@@ -6,6 +6,7 @@
 #include "hwio/core/error.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/session_events.h"
+#include "hwio/remote/host_operations.h"
 #include "hwio/remote/remote_host.h"
 #include "hwio/remote/session_code.h"
 #include "hwio/remote/tunnel.h"
@@ -20,10 +21,13 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <chrono>
+#include <expected>
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 
 namespace hwio::remote {
 namespace {
@@ -99,16 +103,18 @@ TEST(RemoteHost, SharesAfterTheCollisionWindowAndStreamsTheConsole) {
         atEvents(web, QStringLiteral("read")).front().value(QStringLiteral("data")).toString(),
         QStringLiteral("hello"));
     f.console.setState(device::ConnectionState::Disconnected);
-    ASSERT_TRUE(runUntil([&] { return !atEvents(web, QStringLiteral("state")).isEmpty(); }));
-    EXPECT_EQ(
-        atEvents(web, QStringLiteral("state")).back().value(QStringLiteral("data")).toString(),
-        QStringLiteral("disconnected"));
+    // A "connected" state for the join may come first.
+    ASSERT_TRUE(runUntil([&] {
+        const auto states = atEvents(web, QStringLiteral("state"));
+        return !states.isEmpty() && states.back().value(QStringLiteral("data")).toString() ==
+                                        QStringLiteral("disconnected");
+    }));
     // Audit markers are not sent.
     for (const auto& r : web.named(QStringLiteral("at"))) {
         EXPECT_FALSE(r.payload.toObject()
                          .value(QStringLiteral("data"))
                          .toString()
-                         .startsWith(QStringLiteral("Remote:")));
+                         .contains(QStringLiteral("Remote:")));
     }
 }
 
@@ -179,7 +185,7 @@ TEST(RemoteHost, EndSessionAnswerOrTimeoutEndsTheSession) {
     ASSERT_TRUE(runUntil([&] { return f.consent.joinQuestions == 1; }));
     ASSERT_TRUE(runUntil([&] { return f.ended; }));
     ASSERT_TRUE(f.host.endError().has_value());
-    EXPECT_EQ(f.host.endError()->code, ErrorCode::RemoteJoinNotAllowed);
+    EXPECT_EQ(f.host.endError().value_or(Error{}).code, ErrorCode::RemoteJoinNotAllowed);
     EXPECT_EQ(f.consent.withdrawn, 1); // the timeout withdraws the question
     EXPECT_TRUE(runUntil([&] { return relay.clientCount(nsp) == 1; }));
 }
@@ -192,7 +198,7 @@ TEST(RemoteHost, DeniedJoinEndsTheSession) {
     ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
     RawParticipant web(relay.url(), nsp);
     ASSERT_TRUE(runUntil([&] { return f.ended; }));
-    EXPECT_EQ(f.host.endError()->code, ErrorCode::RemoteJoinNotAllowed);
+    EXPECT_EQ(f.host.endError().value_or(Error{}).code, ErrorCode::RemoteJoinNotAllowed);
     EXPECT_TRUE(web.named(QStringLiteral("sync")).isEmpty());
 }
 
@@ -240,7 +246,7 @@ TEST(RemoteHost, CollisionLaterEndsTheSession) {
     ASSERT_TRUE(other.waitConnected());
     other.emitEvent(QStringLiteral("at"), at(QStringLiteral("read"), QStringLiteral("x")));
     ASSERT_TRUE(runUntil([&] { return f.ended; }));
-    EXPECT_EQ(f.host.endError()->code, ErrorCode::RemoteCodeCollision);
+    EXPECT_EQ(f.host.endError().value_or(Error{}).code, ErrorCode::RemoteCodeCollision);
     EXPECT_TRUE(f.console.hasEvent("Another device uses this session code"));
 }
 
@@ -292,7 +298,7 @@ TEST(RemoteHost, IdleWarningKeepSharingAndTimeout) {
     runFor(400ms);
     EXPECT_FALSE(f.ended);
     ASSERT_TRUE(runUntil([&] { return f.ended; }));
-    EXPECT_EQ(f.host.endError()->code, ErrorCode::Timeout);
+    EXPECT_EQ(f.host.endError().value_or(Error{}).code, ErrorCode::Timeout);
     EXPECT_TRUE(f.console.hasEvent("30 minutes without activity"));
 }
 
@@ -308,7 +314,7 @@ TEST(RemoteHost, MaxLifetimeEndsTheSession) {
         runFor(60ms);
     }
     ASSERT_TRUE(runUntil([&] { return f.ended; }));
-    EXPECT_EQ(f.host.endError()->code, ErrorCode::Timeout);
+    EXPECT_EQ(f.host.endError().value_or(Error{}).code, ErrorCode::Timeout);
 }
 
 TEST(RemoteHost, HostReconnectNeedsApprovalAgain) {
@@ -337,7 +343,7 @@ TEST(RemoteHost, EndSharingAndClosedConsole) {
     ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
     console.reset(); // the tab closed
     ASSERT_TRUE(ended);
-    EXPECT_EQ(host.endError()->code, ErrorCode::RemoteHostEnded);
+    EXPECT_EQ(host.endError().value_or(Error{}).code, ErrorCode::RemoteHostEnded);
     EXPECT_TRUE(runUntil([&] { return relay.clientCount(nsp) == 0; }));
 }
 
@@ -397,7 +403,7 @@ TEST(RemoteHostOperations, FlashAllowedRunsAndReportsTheResult) {
     RawParticipant monitor(relay.url(), nsp);
     ASSERT_TRUE(runUntil([&] { return o.f.host.commandsAllowed(); }));
     ASSERT_TRUE(runUntil([&] { return o.last<tunnel::HostHello>().has_value(); }));
-    EXPECT_TRUE(o.last<tunnel::HostHello>()->ops);
+    EXPECT_TRUE(o.last<tunnel::HostHello>().value_or(tunnel::HostHello{}).ops);
 
     o.requestOp(tunnel::OpRequest{.id = "op1",
                                   .kind = tunnel::OpKind::Flash,
@@ -411,7 +417,7 @@ TEST(RemoteHostOperations, FlashAllowedRunsAndReportsTheResult) {
     ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpProgress>().has_value(); }));
     o.operations.finished(Status{});
     ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpResult>().has_value(); }));
-    EXPECT_TRUE(o.last<tunnel::OpResult>()->ok);
+    EXPECT_TRUE(o.last<tunnel::OpResult>().value_or(tunnel::OpResult{}).ok);
     EXPECT_TRUE(o.f.console.hasEvent("allowed by you"));
     EXPECT_TRUE(o.f.console.hasEvent(": done."));
 }
@@ -430,21 +436,25 @@ TEST(RemoteHostOperations, DeniedTimeoutNotInCatalogBusyAndInvalid) {
                                   .target = tunnel::OpTarget::App,
                                   .firmwareId = std::nullopt});
     ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpDenied>().has_value(); }));
-    EXPECT_EQ(o.last<tunnel::OpDenied>()->code, "remote.operation_denied");
+    EXPECT_EQ(o.last<tunnel::OpDenied>().value_or(tunnel::OpDenied{}).code,
+              "remote.operation_denied");
 
     o.operations.catalogKnows = false;
     o.requestOp(tunnel::OpRequest{.id = "b",
                                   .kind = tunnel::OpKind::Flash,
                                   .target = tunnel::OpTarget::App,
                                   .firmwareId = fwId});
-    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpDenied>()->id == "b"; }));
-    EXPECT_EQ(o.last<tunnel::OpDenied>()->code, "remote.firmware_not_in_catalog");
+    ASSERT_TRUE(runUntil(
+        [&] { return o.last<tunnel::OpDenied>().value_or(tunnel::OpDenied{}).id == "b"; }));
+    EXPECT_EQ(o.last<tunnel::OpDenied>().value_or(tunnel::OpDenied{}).code,
+              "remote.firmware_not_in_catalog");
 
     o.requestOp(tunnel::OpRequest{.id = "c",
                                   .kind = tunnel::OpKind::Flash,
                                   .target = tunnel::OpTarget::Lte,
                                   .firmwareId = fwId});
-    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpDenied>()->id == "c"; }));
+    ASSERT_TRUE(runUntil(
+        [&] { return o.last<tunnel::OpDenied>().value_or(tunnel::OpDenied{}).id == "c"; }));
 
     o.f.consent.operations = ScriptedConsent::Mode::Manual;
     o.requestOp(tunnel::OpRequest{.id = "d",
@@ -456,15 +466,17 @@ TEST(RemoteHostOperations, DeniedTimeoutNotInCatalogBusyAndInvalid) {
                                   .kind = tunnel::OpKind::Reset,
                                   .target = tunnel::OpTarget::App,
                                   .firmwareId = std::nullopt});
-    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpDenied>()->id == "e"; }));
-    EXPECT_EQ(o.last<tunnel::OpDenied>()->code, "internal.busy");
+    ASSERT_TRUE(runUntil(
+        [&] { return o.last<tunnel::OpDenied>().value_or(tunnel::OpDenied{}).id == "e"; }));
+    EXPECT_EQ(o.last<tunnel::OpDenied>().value_or(tunnel::OpDenied{}).code, "internal.busy");
     std::exchange(o.f.consent.pendingOperation, {})(true);
     ASSERT_TRUE(runUntil([&] { return o.operations.started.size() == 1; }));
     EXPECT_EQ(o.operations.started.front().id, "d");
     o.operations.finished(std::unexpected(makeError(ErrorCode::TargetConnectFailed)));
     ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpResult>().has_value(); }));
-    EXPECT_FALSE(o.last<tunnel::OpResult>()->ok);
-    EXPECT_EQ(o.last<tunnel::OpResult>()->code, "target.connect_failed");
+    EXPECT_FALSE(o.last<tunnel::OpResult>().value_or(tunnel::OpResult{}).ok);
+    EXPECT_EQ(o.last<tunnel::OpResult>().value_or(tunnel::OpResult{}).code,
+              "target.connect_failed");
 }
 
 TEST(RemoteHostOperations, OperationQuestionTimesOut) {
@@ -507,15 +519,12 @@ TEST(RemoteHostOperations, NoOperationsWithoutHostOperationsOrBeforeApproval) {
     ASSERT_TRUE(runUntil([&] { return f.host.commandsAllowed(); }));
     monitor.emitEvent(QStringLiteral("write"), request);
     ASSERT_TRUE(runUntil([&] {
-        for (const auto& a : atEvents(monitor, QStringLiteral("hwio"))) {
-            if (a.value(QStringLiteral("data"))
-                    .toObject()
-                    .value(QStringLiteral("code"))
-                    .toString() == QStringLiteral("remote.operation_unsupported_peer")) {
-                return true;
-            }
-        }
-        return false;
+        return std::ranges::any_of(atEvents(monitor, QStringLiteral("hwio")), [](const auto& a) {
+            return a.value(QStringLiteral("data"))
+                       .toObject()
+                       .value(QStringLiteral("code"))
+                       .toString() == QStringLiteral("remote.operation_unsupported_peer");
+        });
     }));
     EXPECT_TRUE(f.console.sent.empty());
 }

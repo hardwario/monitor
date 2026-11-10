@@ -3,7 +3,7 @@
 // TunnelCodec - the Monitor-only messages of a remote support session tunneled in the events the
 // relay passes on (plan/features/0044 § Wire protocol, ADR-0336):
 //   host → joiners   at    {event: "hwio", data: {v: 1, type: "hello"|"op-accepted"|"op-denied"|
-//                                                  "op-progress"|"op-result", …}}
+//                                                  "op-progress"|"op-result"|"end", …}}
 //   joiner → host    write {hwio: {v: 1, type: "hello"|"op-request", …}}   (a JSON object, never a
 //                                                                          string)
 // The web Terminal ignores an `at` whose event is not state / write / read; a web Terminal host
@@ -12,6 +12,8 @@
 //
 // Decoding validates every field (version 1, known type, enum values, id and text lengths, the
 // firmware ID format, `firmwareId` only and always for flash) and fails with remote.protocol_error.
+// `end` (ADR-0354): the host ends the session; `code` is the hwio::Error id of the reason.
+//
 // Text fields shown to the user are sanitised (control characters removed, length bounded). Pure
 // functions, any thread.
 
@@ -75,7 +77,12 @@ struct OpResult {
     bool ok = false;
     std::optional<std::string> code; // a hwio::Error id when !ok
 };
-using HostMessage = std::variant<HostHello, OpAccepted, OpDenied, OpProgress, OpResult>;
+// The host ends the session (ADR-0354): sent before it disconnects from the relay.
+struct HostEnd {
+    std::string code =
+        "cancelled"; // a hwio::Error id: "cancelled" (End sharing), "remote.idle", ...
+};
+using HostMessage = std::variant<HostHello, OpAccepted, OpDenied, OpProgress, OpResult, HostEnd>;
 
 // ---- joiner → host ----
 struct JoinerHello {

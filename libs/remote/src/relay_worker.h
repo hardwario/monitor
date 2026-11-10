@@ -70,8 +70,8 @@ private:
     void handleEngineIo(const QString& message);
     void handleSocketIo(const QString& data);
     void lost(Error error);
-    void fail(Error error);
-    void protocolProblem(Error error, bool oversized);
+    void fail(const Error& error);
+    void protocolProblem(const Error& error, bool oversized);
     void enqueue(Outgoing packet);
     void flush();
     void rawSend(const QString& text);

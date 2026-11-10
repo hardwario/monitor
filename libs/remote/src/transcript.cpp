@@ -11,6 +11,8 @@
 #include <QString>
 #include <QStringList>
 #include <QTimeZone>
+#include <QtCore/qnamespace.h>
+#include <QtTypes>
 
 #include <chrono>
 #include <cstddef>
@@ -138,7 +140,7 @@ Result<Transcript> Transcript::fromJson(const QJsonValue& commands, TranscriptLi
                                        .toObject()
                                        .value(QStringLiteral("outputs"))
                                        .toArray();
-        for (const QJsonValue& output : outputs) {
+        for (const auto& output : outputs) {
             if (output.isString()) {
                 const QString line = sanitizeDeviceText(output.toString());
                 entry.bytes += utf8Bytes(line);

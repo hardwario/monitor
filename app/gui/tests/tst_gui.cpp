@@ -47,6 +47,7 @@
 #include <QIODevice>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QLatin1Char>
 #include <QObject>
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -165,8 +166,9 @@ public:
     Q_INVOKABLE void stopFakeRelay() {
         m_participant.reset();
         m_relay.reset();
-        static_cast<void>(
-            m_app->settingsStore()->setValue(QStringLiteral("remote/relayUrl"), QString()));
+        if (!m_app->settingsStore()->setValue(QStringLiteral("remote/relayUrl"), QString())) {
+            qWarning() << "stopFakeRelay: the relay URL setting was not cleared";
+        }
     }
     // A raw Socket.IO participant (the web Terminal) on session `code` ("482 913" or "482913").
     Q_INVOKABLE bool remoteJoin(const QString& code) {
@@ -186,14 +188,15 @@ public:
         }
     }
     Q_INVOKABLE void remoteRequest(const QString& kind, const QString& target) const {
-        if (m_participant) {
-            m_participant->emitEvent(
-                QStringLiteral("write"),
-                hwio::remote::tunnel::encodeJoiner(hwio::remote::tunnel::OpRequest{
-                    .id = "qml-op",
-                    .kind = *hwio::remote::tunnel::kindFromId(kind.toStdString()),
-                    .target = *hwio::remote::tunnel::targetFromId(target.toStdString()),
-                    .firmwareId = std::nullopt}));
+        const auto opKind = hwio::remote::tunnel::kindFromId(kind.toStdString());
+        const auto opTarget = hwio::remote::tunnel::targetFromId(target.toStdString());
+        if (m_participant && opKind && opTarget) {
+            m_participant->emitEvent(QStringLiteral("write"), hwio::remote::tunnel::encodeJoiner(
+                                                                  hwio::remote::tunnel::OpRequest{
+                                                                      .id = "qml-op",
+                                                                      .kind = *opKind,
+                                                                      .target = *opTarget,
+                                                                      .firmwareId = std::nullopt}));
         }
     }
     // Events of `name` the participant received ("sync", "at", ...).

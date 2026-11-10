@@ -6,6 +6,8 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdint>
+#include <optional>
 #include <set>
 
 namespace hwio::remote {
@@ -89,9 +91,13 @@ TEST(JoinInput, CodeOrLink) {
     auto link = parseJoinInput("https://terminal.hardwario.com/?session=482913");
     ASSERT_TRUE(link.has_value());
     EXPECT_EQ(link->code.value(), 482913U);
+    const QUrl linkRelay = link->relay.value_or(QUrl());
     ASSERT_TRUE(link->relay.has_value());
-    EXPECT_TRUE(sameRelay(*link->relay, *parseRelayUrl("https://TERMINAL.hardwario.com")));
-    EXPECT_FALSE(sameRelay(*link->relay, *parseRelayUrl("https://evil.example.com")));
+    const auto official = parseRelayUrl("https://TERMINAL.hardwario.com");
+    const auto evil = parseRelayUrl("https://evil.example.com");
+    ASSERT_TRUE(official.has_value() && evil.has_value());
+    EXPECT_TRUE(sameRelay(linkRelay, official.value_or(QUrl())));
+    EXPECT_FALSE(sameRelay(linkRelay, evil.value_or(QUrl())));
 }
 
 TEST(JoinInput, Invalid) {

@@ -170,7 +170,7 @@ private:
     void onNewClient();
     void onAtOrSync();
     void onWrite(const QJsonValue& payload);
-    void onRemoteLine(const QString& line);
+    void onRemoteLine(const QString& text);
     void onTunnel(const QJsonValue& payload);
     void onOperationRequest(const tunnel::OpRequest& request);
     void askOperation(PendingOperation pending);

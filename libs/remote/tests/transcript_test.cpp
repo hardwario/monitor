@@ -1,5 +1,7 @@
 #include "hwio/remote/transcript.h"
 
+#include <QByteArray>
+#include <QChar>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -8,6 +10,7 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
+#include <cstdint>
 
 namespace hwio::remote {
 namespace {

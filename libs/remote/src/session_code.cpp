@@ -13,6 +13,7 @@
 #include <QString>
 #include <QUrl>
 #include <QUrlQuery>
+#include <QtCore/qnamespace.h>
 #include <QtLogging>
 
 #include <cstdint>
@@ -21,6 +22,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace hwio::remote {
 

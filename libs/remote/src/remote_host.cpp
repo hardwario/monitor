@@ -8,6 +8,7 @@
 #include "hwio/device/console_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
+#include "hwio/firmware/firmware_catalog.h"
 #include "hwio/remote/consent.h"
 #include "hwio/remote/host_operations.h"
 #include "hwio/remote/relay_client.h"
@@ -24,11 +25,13 @@
 #include <QString>
 #include <QTimer>
 #include <QUrl>
+#include <QtCore/qtmetamacros.h>
 #include <QtLogging>
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
-#include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -60,13 +63,10 @@ QString stateOf(device::ConnectionState state) {
 }
 
 bool hasControlCharacters(std::string_view line) {
-    for (const char c : line) {
+    return std::ranges::any_of(line, [](const char c) {
         const auto byte = static_cast<unsigned char>(c);
-        if ((byte < 0x20 && byte != '\t') || byte == 0x7F) {
-            return true;
-        }
-    }
-    return false;
+        return (byte < 0x20 && byte != '\t') || byte == 0x7F;
+    });
 }
 
 } // namespace
@@ -500,16 +500,20 @@ void RemoteHost::askOperation(PendingOperation pending) {
 }
 
 void RemoteHost::startOperation() {
-    m_operation->accepted = true;
-    const QString summary = operationSummary(m_operation->question);
-    const std::string id = m_operation->request.id;
+    if (!m_operation) {
+        return;
+    }
+    PendingOperation& operation = *m_operation;
+    operation.accepted = true;
+    const QString summary = operationSummary(operation.question);
+    const std::string id = operation.request.id;
     audit(trRemote("%1: allowed by you.").arg(summary));
     sendHost(tunnel::OpAccepted{.id = id});
     emit operationStarted(summary);
     m_lastProgress = {};
     const std::uint64_t token = m_operationToken;
     Status started = m_operations->start(
-        m_operation->request,
+        operation.request,
         [this, token](const OperationUpdate& update) {
             if (token != m_operationToken || !m_operation) {
                 return;
@@ -539,6 +543,9 @@ void RemoteHost::startOperation() {
 }
 
 void RemoteHost::finishOperation(const Status& status) {
+    if (!m_operation) {
+        return;
+    }
     const QString summary = operationSummary(m_operation->question);
     const std::string id = m_operation->request.id;
     m_operation.reset();
@@ -602,7 +609,7 @@ void RemoteHost::audit(const QString& text) {
     if (!m_session) {
         return;
     }
-    const QString line = trRemote("Remote: %1").arg(text);
+    const QString line = trRemote("— Remote: %1 —").arg(text);
     if (Status recorded = m_session->recordRemoteEvent(toStdString(line)); !recorded) {
         qCWarning(log::lcRemote).noquote()
             << "Audit line not recorded:" << toQString(recorded.error().detail);
@@ -662,6 +669,11 @@ void RemoteHost::finish(std::optional<Error> error, bool notify) {
         m_operations->abandon();
     }
     if (m_relay) {
+        if (m_helloSent && m_relay->isConnected()) {
+            // ADR-0354: tell the joiner that the session ended on purpose.
+            sendHost(tunnel::HostEnd{.code = m_endError ? std::string(idOf(m_endError->code))
+                                                        : std::string("cancelled")});
+        }
         m_relay->stop();
     }
     if (m_everShared && m_session) {

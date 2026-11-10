@@ -696,9 +696,13 @@ void DeviceTabViewModel::onConnectionChanged(const device::ConnectionEvent& even
     switch (event.state) {
     case device::ConnectionState::Connected:
         m_connection->setPairingPending(false);
-        addMarker(isBle()      ? tr("— connected (Bluetooth) —")
-                  : isRemote() ? tr("— connected (remote) —")
-                               : tr("— connected —"));
+        if (isBle()) {
+            addMarker(tr("— connected (Bluetooth) —"));
+        } else if (isRemote()) {
+            addMarker(tr("— connected (remote) —"));
+        } else {
+            addMarker(tr("— connected —"));
+        }
         consoleAttached(); // signal (`info show`: m_infoWatcher, plan 0028)
         break;
     case device::ConnectionState::Disconnected:

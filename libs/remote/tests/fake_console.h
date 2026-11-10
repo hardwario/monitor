@@ -19,6 +19,7 @@
 
 #include <QList>
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
@@ -98,18 +99,15 @@ public:
 
     [[nodiscard]] std::vector<std::string> sentLines() const {
         std::vector<std::string> out;
+        out.reserve(sent.size());
         for (const Sent& s : sent) {
             out.push_back(s.line);
         }
         return out;
     }
     [[nodiscard]] bool hasEvent(std::string_view part) const {
-        for (const std::string& e : events) {
-            if (e.find(part) != std::string::npos) {
-                return true;
-            }
-        }
-        return false;
+        return std::ranges::any_of(
+            events, [part](const std::string& e) { return e.find(part) != std::string::npos; });
     }
 
 protected:

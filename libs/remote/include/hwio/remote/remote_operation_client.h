@@ -59,7 +59,7 @@ signals:
 
 private:
     void onMessage(const tunnel::HostMessage& message);
-    void finish(std::optional<Error> error);
+    void finish(const std::optional<Error>& error);
 
     QPointer<RemoteConsoleSession> m_session;
     RemoteOperationLimits m_limits;

@@ -9,12 +9,13 @@
 #include <QObject>
 #include <QRandomGenerator>
 #include <QTimer>
+#include <QtCore/qtmetamacros.h>
 
-#include <cstdint>
 #include <expected>
 #include <format>
 #include <optional>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <variant>
 
@@ -70,8 +71,8 @@ Result<std::string> RemoteOperationClient::request(tunnel::OpKind kind, tunnel::
         return std::unexpected(makeError(ErrorCode::UsageInvalidArgument,
                                          "a firmware ID goes with flash, and only with flash"));
     }
-    const std::string id = std::format("op-{:08x}{:08x}", QRandomGenerator::system()->generate(),
-                                       QRandomGenerator::system()->generate());
+    std::string id = std::format("op-{:08x}{:08x}", QRandomGenerator::system()->generate(),
+                                 QRandomGenerator::system()->generate());
     const tunnel::OpRequest request{
         .id = id, .kind = kind, .target = target, .firmwareId = std::move(firmwareId)};
     if (Status sent = m_session->sendTunnel(request); !sent) {
@@ -91,8 +92,9 @@ void RemoteOperationClient::onMessage(const tunnel::HostMessage& message) {
     std::visit(
         [this](const auto& m) {
             using T = std::decay_t<decltype(m)>;
-            if constexpr (std::is_same_v<T, tunnel::HostHello>) {
-                return;
+            if constexpr (std::is_same_v<T, tunnel::HostHello> ||
+                          std::is_same_v<T, tunnel::HostEnd>) {
+                return; // the session handles these; HostEnd ends it (joinStateChanged)
             } else {
                 if (m.id != *m_pending) {
                     return;
@@ -120,7 +122,7 @@ void RemoteOperationClient::onMessage(const tunnel::HostMessage& message) {
         message);
 }
 
-void RemoteOperationClient::finish(std::optional<Error> error) {
+void RemoteOperationClient::finish(const std::optional<Error>& error) {
     if (!m_pending) {
         return;
     }

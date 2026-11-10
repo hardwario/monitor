@@ -5,20 +5,23 @@
 #include "hwio/core/result.h"
 
 #include <QByteArray>
+#include <QChar>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
 #include <QJsonValue>
+#include <QLatin1Char>
 #include <QString>
 #include <QStringView>
+#include <QtTypes>
 
 #include <chrono>
-#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <format>
 #include <string>
+#include <utility>
 
 namespace hwio::remote {
 
@@ -101,7 +104,7 @@ QString encode(PacketType type, QStringView data) {
 namespace socketio {
 
 Result<Packet> parsePacket(QStringView text) {
-    if (static_cast<std::size_t>(text.size()) > maxIncomingEventBytes) {
+    if (std::cmp_greater(text.size(), maxIncomingEventBytes)) {
         return protocolError(std::format("Socket.IO packet of {} characters", text.size()));
     }
     if (text.isEmpty()) {

@@ -15,10 +15,14 @@
 #include <QWebSocket>
 #include <QWebSocketProtocol>
 #include <QWebSocketServer>
+#include <QtCore/qtmetamacros.h>
+#include <QtLogging>
+#include <QtTypes>
 
 #include <algorithm>
 #include <memory>
 #include <utility>
+#include <vector>
 
 namespace hwio::remote::testing {
 
@@ -59,7 +63,7 @@ FakeRelay::~FakeRelay() {
 }
 
 QUrl FakeRelay::url() const {
-    return QUrl(QStringLiteral("http://127.0.0.1:%1").arg(m_server->serverPort()));
+    return {QStringLiteral("http://127.0.0.1:%1").arg(m_server->serverPort())};
 }
 
 quint16 FakeRelay::port() const { return m_server->serverPort(); }
@@ -203,6 +207,7 @@ void FakeRelay::sendBinary(const QString& nsp) {
 
 void FakeRelay::dropAll() {
     std::vector<QWebSocket*> sockets;
+    sockets.reserve(m_clients.size());
     for (const auto& client : m_clients) {
         sockets.push_back(client->socket.get());
     }

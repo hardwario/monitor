@@ -6,14 +6,17 @@
 
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLatin1Char>
 #include <QList>
 #include <QObject>
 #include <QString>
 #include <QUrl>
+#include <QtTypes>
 
 #include <gtest/gtest.h>
 
 #include <chrono>
+#include <cstdint>
 #include <memory>
 #include <optional>
 
@@ -127,7 +130,7 @@ TEST(RelayClient, FirstConnectFailureIsFinal) {
     Recorder events(client);
     client.start();
     ASSERT_TRUE(runUntil([&] { return events.failed.has_value(); }));
-    EXPECT_EQ(events.failed->code, ErrorCode::RemoteRelayUnreachable);
+    EXPECT_EQ(events.failed.value_or(Error{}).code, ErrorCode::RemoteRelayUnreachable);
     EXPECT_EQ(events.connects, 0);
 }
 
@@ -154,7 +157,7 @@ TEST(RelayClient, PingTimeoutLosesTheConnectionAndItReconnects) {
     EXPECT_FALSE(events.lost.has_value());
     relay.setPingsPaused(true);
     ASSERT_TRUE(runUntil([&] { return events.lost.has_value(); }));
-    EXPECT_EQ(events.lost->code, ErrorCode::RemoteRelayUnreachable);
+    EXPECT_EQ(events.lost.value_or(Error{}).code, ErrorCode::RemoteRelayUnreachable);
     relay.setPingsPaused(false);
     ASSERT_TRUE(runUntil([&] { return events.connects >= 2; }));
     EXPECT_FALSE(events.failed.has_value());
@@ -170,7 +173,7 @@ TEST(RelayClient, ReconnectBudgetEndsTheConnection) {
     ASSERT_TRUE(runUntil([&] { return events.connects == 1; }));
     relay.reset(); // the relay is gone for good
     ASSERT_TRUE(runUntil([&] { return events.failed.has_value(); }));
-    EXPECT_EQ(events.failed->code, ErrorCode::RemoteRelayUnreachable);
+    EXPECT_EQ(events.failed.value_or(Error{}).code, ErrorCode::RemoteRelayUnreachable);
     EXPECT_TRUE(events.lost.has_value());
 }
 
@@ -186,7 +189,7 @@ TEST(RelayClient, OversizedAndMalformedEventsAreDroppedThenEndTheSession) {
     ASSERT_TRUE(runUntil([&] { return events.warnings.size() == 2; }));
     EXPECT_EQ(events.warnings.front().code, ErrorCode::RemoteProtocolError);
     const QString big = QStringLiteral("42/482913,[\"at\",{\"event\":\"read\",\"data\":\"%1\"}]")
-                            .arg(QString(70 * 1024, QLatin1Char('x')));
+                            .arg(QString(qsizetype{70} * 1024, QLatin1Char('x')));
     relay.sendRaw(nsp, big);
     relay.sendRaw(nsp, big);
     ASSERT_TRUE(runUntil([&] { return events.warnings.size() == 4; }));
@@ -194,7 +197,7 @@ TEST(RelayClient, OversizedAndMalformedEventsAreDroppedThenEndTheSession) {
     EXPECT_TRUE(events.at.isEmpty());
     relay.sendRaw(nsp, big); // the third oversized event
     ASSERT_TRUE(runUntil([&] { return events.failed.has_value(); }));
-    EXPECT_EQ(events.failed->code, ErrorCode::RemoteProtocolError);
+    EXPECT_EQ(events.failed.value_or(Error{}).code, ErrorCode::RemoteProtocolError);
 }
 
 TEST(RelayClient, InvalidNamespaceIsRefusedByTheRelay) {

@@ -5,7 +5,8 @@
 #include "cli_process.h"
 #include "fake_console.h"
 #include "fake_relay.h"
-#include "hwio/device/session_events.h"
+#include "hwio/device/console_line.h"
+#include "hwio/remote/host_operations.h"
 #include "hwio/remote/remote_host.h"
 #include "hwio/remote/session_code.h"
 #include "hwio/remote/tunnel.h"
@@ -17,16 +18,17 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QList>
 #include <QObject>
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QString>
 #include <QStringList>
+#include <QtContainerFwd>
 
 #include <gtest/gtest.h>
 
 #include <chrono>
-#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -94,7 +96,7 @@ public:
     // The data of the first `remote` event `name`.
     [[nodiscard]] std::optional<QJsonObject> remoteEvent(const QString& name) const {
         for (const QJsonObject& envelope : envelopes()) {
-            const QJsonObject data = envelope.value(QStringLiteral("data")).toObject();
+            QJsonObject data = envelope.value(QStringLiteral("data")).toObject();
             if (data.value(QStringLiteral("type")) == QStringLiteral("remote") &&
                 data.value(QStringLiteral("event")) == name) {
                 return data;
@@ -169,7 +171,8 @@ TEST_F(RemoteCli, HostSharesAndWithoutATerminalEndsAtTheFirstJoin) {
     ASSERT_TRUE(
         runUntil([&] { return child.remoteEvent(QStringLiteral("sharing")).has_value(); }, 30s))
         << child.err();
-    const QJsonObject sharing = *child.remoteEvent(QStringLiteral("sharing"));
+    const QJsonObject sharing =
+        child.remoteEvent(QStringLiteral("sharing")).value_or(QJsonObject());
     const QString code = sharing.value(QStringLiteral("code")).toString();
     EXPECT_EQ(code.size(), 6);
     EXPECT_TRUE(sharing.value(QStringLiteral("link"))
@@ -370,6 +373,23 @@ TEST_F(RemoteCli, JoinConsoleShowsTheHostConsole) {
     EXPECT_NE(child.out().find("before join"), std::string::npos);
     child.terminate();
     ASSERT_TRUE(child.finish());
+}
+
+// ADR-0354: the host's End sharing ends `remote join` with remote.host_ended.
+TEST_F(RemoteCli, JoinEndsWhenTheHostEndsSharing) {
+    FakeRelay relay;
+    InProcessHost host(relay, nullptr);
+    ASSERT_TRUE(runUntil([&] { return host.host.state() == hwio::remote::HostState::Sharing; }));
+    QStringList args{QStringLiteral("--json"), QStringLiteral("remote"),   QStringLiteral("join"),
+                     QStringLiteral("482913"), QStringLiteral("--linger"), QStringLiteral("0")};
+    args << relayArgs(relay);
+    Child child(args, fakeEnvironment());
+    ASSERT_TRUE(runUntil([&] { return host.host.commandsAllowed(); }, 30s)) << child.err();
+    runFor(200ms); // the joiner has the host's hello
+    host.host.end();
+    ASSERT_TRUE(child.finish(10s)) << child.err();
+    EXPECT_NE(child.exitCode(), 0);
+    EXPECT_EQ(child.lastErrorCode(), QStringLiteral("remote.host_ended")) << child.out();
 }
 
 } // namespace

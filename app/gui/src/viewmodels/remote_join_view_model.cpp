@@ -15,6 +15,7 @@
 #include <QString>
 #include <QUrl>
 #include <QVariantMap>
+#include <QtContainerFwd>
 
 #include <memory>
 #include <optional>
