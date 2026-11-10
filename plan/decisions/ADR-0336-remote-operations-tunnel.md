@@ -1,6 +1,6 @@
 # ADR-0336 — Remote operations tunneled in at and write
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0354)
 - **Date:** 2026-11-09
 - **Decided by:** Matej Strnad (remote support session planning, plan [0044](../features/0044-remote-support-session.md))
 

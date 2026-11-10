@@ -8,7 +8,8 @@
   ADR-0322 (scope: console + flash/erase/recover/reset), ADR-0323 (firmware by catalog ID only),
   ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0326 (2.1),
   ADR-0328 (limits), ADR-0329 (TLS only), ADR-0330 (relay URL), ADR-0331 (CLI), ADR-0332 (no MCP),
-  ADR-0333 (audit in the console file); superseded: ADR-0320, ADR-0327; builds on ADR-0004, ADR-0007, ADR-0037
+  ADR-0333 (audit in the console file), ADR-0354 (tunnel `end`, amends ADR-0336), ADR-0355 (approval again after
+  the host's reconnect, amends ADR-0335), ADR-0356 (secrets redacted toward the relay, amends ADR-0329); superseded: ADR-0320, ADR-0327; builds on ADR-0004, ADR-0007, ADR-0037
 - **Depends on:** 0013 (operations), 0037 firmware catalog. Nothing on the relay or the web Terminal (ADR-0334).
 
 ## Context
@@ -106,8 +107,8 @@ join before that participant's commands reach the device. Each flash, erase, rec
    Erase / Recover / Reset. Each one shows "Waiting for the customer's confirmation…", then progress and the
    result as reported by the host. With a web Terminal host the Flash page explains that only the console is
    available.
-5. Host ends (the socket stays but nothing arrives, or the relay connection drops) → banner "The session ended." The
-   tab stays read-only so the log can be saved. With a web Terminal host, Monitor can't tell "ended" from "quiet",
+5. Host ends (a Monitor host sends the tunnel `end`, ADR-0354, or the relay connection drops) → banner "The session
+   ended." The tab stays read-only so the log can be saved. With a web Terminal host, Monitor can't tell "ended" from "quiet",
    so after the idle limit it shows "No activity from the customer for 30 min" and offers to leave.
 
 ### Error messages (all via `hwio::Error`, translated)
@@ -183,7 +184,7 @@ has none).
 | `newClient` | relay → all in namespace | `null` | Host: the first one after its own connect is its own and is ignored. Every later one starts join approval. |
 | `at` | host → others | `{event: "state", data: "disconnected"\|"connection"\|"connected"}` | web-compatible |
 | `at` | host → others | `{event: "write", data: <line>}` / `{event: "read", data: <line>}` | web-compatible; also sent to participants not yet allowed (relay broadcast) |
-| `at` | host → others | `{event: "hwio", data: {v: 1, type: "hello"\|"op-accepted"\|"op-denied"\|"op-progress"\|"op-result", …}}` | Monitor only; the web Terminal ignores it |
+| `at` | host → others | `{event: "hwio", data: {v: 1, type: "hello"\|"op-accepted"\|"op-denied"\|"op-progress"\|"op-result"\|"end", …}}` | Monitor only; the web Terminal ignores it |
 | `sync` | host → others | `{state, commands: [{id, timestamp, command, index, response: {outputs, result: 0}}]}` | sent only after a join is allowed |
 | `write` | joiner → others | `<line>` (string) | shell line; the Monitor host passes it to the device only in the allowed state |
 | `write` | Monitor joiner → others | `{hwio: {v: 1, type: "hello"\|"op-request", …}}` (object) | only after the host's `hello`; never a string |
@@ -192,6 +193,11 @@ has none).
 `hello` (joiner): `{app: "hwio-monitor", version}`.
 `op-request`: `{id, kind: "flash"|"erase"|"recover"|"reset", target: "app"|"lte", firmwareId?}`.
 `op-result`: `{id, ok, error?: {code}}` (the joiner translates from `code`).
+`end` (host, ADR-0354): `{code}`, the hwio::Error id of the reason (`cancelled` for End sharing); sent before the host
+disconnects. A Monitor joiner ends its session ("The session ended."), accepted only after the host's `hello`.
+
+Everything the host sends to the relay (`at` write/read lines, the `sync` transcript, audit marker texts) has secret
+command arguments and secret output values redacted by the ADR-0186 rules (ADR-0356).
 
 Only one operation runs at a time. Requests during an operation, a consent dialog or a join approval are denied with
 `busy`. The host validates every field (enum values, firmware ID format, target allowed by the device profile) before
@@ -216,7 +222,7 @@ stay on the device session's worker (unchanged). No shared mutable state.
 | Operation confirmation | 60 s, then deny |
 | Idle / lifetime | 30 min idle (warning at 28 min), 8 h max, enforced by Monitor (ADR-0328, ADR-0334) |
 | Collision check | 2 s after connect, max 3 new codes |
-| Reconnect | Engine.IO reconnect with backoff 1 s → 30 s, max 5 min, then end. The host's own reconnect causes a `newClient` that it ignores; the others see a join, which a Monitor host on their side doesn't have. |
+| Reconnect | Engine.IO reconnect with backoff 1 s → 30 s, max 5 min, then end. The host's own reconnect causes a `newClient` that it ignores; the others see a join, which a Monitor host on their side doesn't have. After its own reconnect the host asks the join question again (ADR-0355). |
 
 ## Decisions requiring user confirmation
 
@@ -257,10 +263,10 @@ stay on the device session's worker (unchanged). No shared mutable state.
 
 ## Implementation notes (2026-11-10)
 
-Details fixed while implementing A1–C3. None changes an ADR; each was reported to the user, who may turn any of them
-into an ADR.
+Details fixed while implementing A1–C3, all confirmed by the user on 2026-11-10. Those that change security
+behaviour became ADRs (ADR-0355, ADR-0356); ADR-0354 adds the tunnel `end`.
 
-- **Host reconnect needs approval again.** After the host's own relay reconnect, the host asks the join question again
+- **Host reconnect needs approval again (ADR-0355).** After the host's own relay reconnect, the host asks the join question again
   (when someone was allowed before). A participant who connected while the host was away was never announced to it
   (the relay sends `newClient` only to sockets that are connected at that moment). This follows ADR-0335's rule for
   reconnecting participants.
@@ -270,7 +276,7 @@ into an ADR.
 - **`SessionKey` unchanged.** `SessionKey` stays `ProbeKey | BleKey`: it names lockable hardware (probe locks, console
   file retention, the session registry). A remote tab is identified by its session code
   (`SessionIdentity{Transport::Remote, "<code>"}`) and is never restored.
-- **Secrets toward the relay.** The host sends commands with secret arguments and secret output values redacted, by the
+- **Secrets toward the relay (ADR-0356).** The host sends commands with secret arguments and secret output values redacted, by the
   same ADR-0186 rules as the console file (`claim token: <redacted>`).
 - **Remote marker = audit marker.** A remote command is shown in the host's console as the audit marker line
   "— Remote: … —" before its echo (the MCP marker style). The echo itself carries `LineSource::Remote` (JSON, MCP).
@@ -278,9 +284,9 @@ into an ADR.
   BLE thread `RecordNote`).
 - **Web Terminal codes.** A joiner normalises the code as the web Terminal does (`Number(code)`): `012345` joins
   namespace `/12345`; `0` is not a session.
-- **Joiner sees the end only through the relay.** A Monitor host that ends sharing sends nothing (the relay does not
-  announce disconnects and ADR-0336 has no "end" message); the joiner's tab ends when its relay connection fails, and
-  shows the idle notice after 30 min otherwise. Open question to the user: an `end` tunnel message (new ADR).
+- **The joiner learns the end from the tunnel `end` (ADR-0354).** The relay does not announce disconnects, so a
+  Monitor host sends `end` before it disconnects. With a web Terminal host the joiner's tab ends when its relay
+  connection fails, and shows the idle notice after 30 min otherwise.
 - **Limits instead of a fake clock.** Tests shrink `HostLimits` / `RelayLimits` (as libs/mcp does) instead of injecting
   a clock.
 - **Operation mapping.** Remote erase = `EraseScope::Code` on `app` (UICR and PIB kept) and `EraseScope::All` on `lte`
@@ -317,6 +323,7 @@ into an ADR.
 - The protocol and transcript format belong to the web Terminal. A change in `~/terminal` breaks interop. A short
   interop note in the Terminal repository (with its owners' agreement) and the D1 check before each Monitor release
   reduce the risk.
-- With a web Terminal host, Monitor can't detect the session end except by the connection dropping. The idle notice
+- With a web Terminal host, Monitor can't detect the session end except by the connection dropping (a Monitor host
+  sends `end`, ADR-0354). The idle notice
   covers that case.
 - QtWebSockets is a new Qt module in the packages (LGPL, dynamic). It must be added to deployment (0015) on all OSes.
