@@ -28,8 +28,12 @@ module's reset / power. A reset + halt over the APP connector, then moving the c
   application MCU and the cable is on the LoRaWAN connector). `hwio chester lrw info` and `reset` connect directly
   and, when the module does not answer, say how to hold the application MCU.
 - No "Check module" button in rc.4; a later plan adds it when a read-only modem query exists.
+- Amended 2026-11-10 (plan 0040 D9, user): the GUI offers no guided Reset of the module; the final application
+  reset restarts it anyway (the CLI `hwio chester lrw reset` stays, connecting directly).
 
 ## Consequences
 
 - Supplements ADR-0234 (the LTE procedure now names its targets: `lte` / `lrw`, not "the first other target").
 - Amends plan 0040 UX ("cable-move prompts"), D4 (hidden) and G5.
+- Amended 2026-11-10: `LrwUpdateProcedure` has no Reset action; the `lrw` maintenance shows Erase chip… and
+  Unlock (erase)… only.

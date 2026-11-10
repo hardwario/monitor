@@ -168,9 +168,10 @@ odstráni ochranu a modul sa celý vymaže. Pôvodný firmvér Murata v module s
 HARDWARIO Monitor ho nevie zapísať späť. Po odomknutí nahrávanie pokračuje.
 
 **Údržba:** so zapnutou voľbou **Settings › Advanced › Show expert maintenance actions** ponúka voľba nad tlačidlami
-údržby aj **LoRaWAN module** s akciami **Reset**, **Erase chip…** (vymazať čip: flash pamäť aj dátovú EEPROM) a
-**Unlock (erase)…** (odomknúť a vymazať). Každá z nich spustí rovnakého sprievodcu s prepojením kábla (krok 4 je potom
-**Reset**, **Erase** alebo **Unlock**); vymazanie a odomknutie sa najprv opýtajú.
+údržby aj **LoRaWAN module** s akciami **Erase chip…** (vymazať čip: flash pamäť aj dátovú EEPROM) a **Unlock
+(erase)…** (odomknúť a vymazať). Každá z nich spustí rovnakého sprievodcu s prepojením kábla (krok 4 je potom **Erase**
+alebo **Unlock**) a najprv sa opýta. **Reset** modulu sa neponúka: posledný krok sprievodcu znova spustí MCU aplikácie,
+a tým sa reštartuje aj modul.
 
 Na príkazovom riadku: `hwio chester lrw` ([Príkazový riadok](../en/cli.md#lrw)).
 

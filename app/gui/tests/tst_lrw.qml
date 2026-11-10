@@ -176,6 +176,7 @@ TestCase {
         mouseClick(find("maintenanceTarget_lrw"));
         compare(flash.maintenanceTarget, "lrw");
         tryVerify(() => !find("resetHaltButton"));
+        verify(!find("resetButton")); // plan 0040 D9: no guided Reset of the module
         verify(!find("eraseCodeButton"));
         compare(find("eraseAllButton").text, "Erase chip…");
         mouseClick(find("recoverButton"));
@@ -185,10 +186,12 @@ TestCase {
         compare(confirm.consequence, "The module's original Murata firmware is removed. This cannot be undone.");
         keyClick(Qt.Key_Escape);
         tryVerify(() => !confirm.visible);
-        mouseClick(find("resetButton"));
+        mouseClick(find("eraseAllButton"));
+        tryVerify(() => confirm.opened);
+        mouseClick(findChild(confirm, "dialogAccept"));
         const dialog = findChild(window, "wizardDialog");
         tryVerify(() => dialog.opened);
         compare(AppViewModel.wizard.wizardId, "lrw-update");
-        compare(AppViewModel.wizard.title, "Reset the LoRaWAN module");
+        compare(AppViewModel.wizard.title, "Erase the LoRaWAN module");
     }
 }

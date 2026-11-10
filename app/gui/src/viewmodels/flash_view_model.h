@@ -27,7 +27,7 @@
 // target.protected) shows Recover for one MCU once, without changing the setting.
 //
 // Plan 0040 (B1, B2; ADR-0283): the LoRaWAN module kind (LrwFirmware, CHESTER target `lrw`) and the
-// `lrw` maintenance actions (Reset, Erase chip, Unlock) do not run on this page either: the module
+// `lrw` maintenance actions (Erase chip, Unlock) do not run on this page either: the module
 // answers only while the application MCU is held, so they open the LoRaWAN module wizard
 // ("lrw-update", LrwUpdateWizard) with a pending request (takeLrwRequest()) that drives
 // device::LrwUpdateProcedure. The LoRaWAN card shows the connection guide's cabling note.
@@ -147,8 +147,9 @@ class FlashViewModel : public QObject {
     // ---- plan 0040 (the CHESTER LoRaWAN module, ADR-0283) ----
     // The cabling note of the LoRaWAN card (the `lrw` connection guide, translated).
     Q_PROPERTY(QString lrwCableText READ lrwCableText NOTIFY textsChanged)
-    // [Reset and halt] (not for the LoRaWAN module: the guided flow restarts it).
-    Q_PROPERTY(bool resetHaltAvailable READ resetHaltAvailable NOTIFY maintenanceChanged)
+    // [Reset] and [Reset and halt] (not for the LoRaWAN module: the final reset of the
+    // application MCU in the guided flow restarts it; plan 0040 D9).
+    Q_PROPERTY(bool resetAvailable READ resetAvailable NOTIFY maintenanceChanged)
 
 public:
     // Unscoped: QML compares FlashViewModel.Running etc. with the int property.
@@ -253,7 +254,7 @@ public:
     // switches the tab to the found chip (DeviceTabViewModel::changeTarget, never silently).
     Q_INVOKABLE void triggerCustomAction();
     [[nodiscard]] QString lrwCableText() const;
-    [[nodiscard]] bool resetHaltAvailable() const;
+    [[nodiscard]] bool resetAvailable() const;
     // Plan 0040: the request the LoRaWAN module wizard runs; set just before the page opens it
     // (flash() of the LoRaWAN kind, the `lrw` maintenance actions) and taken once by the wizard.
     [[nodiscard]] std::optional<device::LrwUpdateProcedure::Request> takeLrwRequest();

@@ -102,6 +102,7 @@ version before downloading.
 | D6 | CHESTER v2 LoRaWAN module | own part + firmware when known / same part | open: the user to tell which chip `ctr_lrw_v2` uses | — |
 | D7 | Phase 0: the module answers only while the application MCU is held | guided cable moves (as ADR-0234) / flash only, docs explain | **Guided cable moves** (2026-11-09) | ADR-0283 |
 | D8 | Phase 0: "Check module" needs a config change (`lrw config test true`) | hide it in rc.4 / use test mode briefly | **Hidden in rc.4** (2026-11-09; supersedes the D4 "offer" for rc.4) | ADR-0283 |
+| D9 | Guided Reset of the LoRaWAN module in the GUI | keep [Reset] in the `lrw` maintenance / drop | **Drop** (2026-11-10, user): the final reset of the application MCU in the guided flow restarts the module anyway; the CLI `hwio chester lrw reset` stays (direct) | ADR-0283 (amended) |
 
 ## Implementation steps
 
@@ -189,15 +190,17 @@ version before downloading.
       flashed with <name>."). Kind cards: three columns from 1000 px.
 - [x] B2 Maintenance for `lrw`; Unlock confirmation text; "Check module" (D4) — hidden in rc.4 (D8, ADR-0283).
       Implementation notes: with the expert actions the MCU choice lists "LoRaWAN module"; its
-      [Reset], [Erase chip…] and [Unlock (erase)…] open the `lrw-update` wizard (the ConfirmDialog
+      [Erase chip…] and [Unlock (erase)…] open the `lrw-update` wizard (the ConfirmDialog
       first for erase / unlock; the unlock's consequence adds "The module's original Murata firmware
-      is removed."); no [Reset and halt] / [Erase application] for it. `LrwUpdateProcedure` gains
-      the action Reset (step ResetModule: reset(lrw, Go) while the application MCU is held; no
-      unlock needed). No "Check module".
+      is removed."); no [Reset] / [Reset and halt] / [Erase application] for it. No "Check module".
+      2026-11-10 (D9, user): the guided [Reset] of the module (action Reset, step ResetModule of
+      `LrwUpdateProcedure`, its wizard texts and test) was removed again: the final reset of the
+      application MCU restarts the module; `FlashViewModel::resetAvailable` hides both reset buttons
+      for `lrw`. The CLI `hwio chester lrw reset` never used it (it connects directly).
 - [ ] B3 Qt Quick tests, screenshots (fake J-Link kit), translations, docs section "LoRaWAN module" (5 languages).
   - [x] Tests: view-model GTests `LrwFlashTest` (card, designated download + guided flash, kind hints,
-        RDP 1 unlock in the wizard, maintenance actions, wizard without a request), `LrwUpdate.
-        ResetResetsAProtectedModuleWithoutTheUnlock`, Qt Quick `tst_lrw.qml` (fake J-Link board with
+        RDP 1 unlock in the wizard, maintenance actions, wizard without a request), `LrwUpdate.*`
+        (the module Reset test was removed with D9), Qt Quick `tst_lrw.qml` (fake J-Link board with
         the APP and LoRaWAN connectors, `"needsHalted": "app"`). Note: the fake's CTRL-AP answers
         behind any connector, so the wizard's APP-connector check can pass before the cable is back
         (the tests accept it).

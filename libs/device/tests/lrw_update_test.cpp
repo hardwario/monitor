@@ -301,25 +301,6 @@ TEST_F(LrwUpdate, EraseErasesTheModule) {
     EXPECT_EQ(moduleBytes(4), std::vector<std::byte>(4, std::byte{0x00})); // STM32 erased
 }
 
-// Plan 0040 B2: the Flash page's [Reset] of the module; a protected module needs no unlock for it.
-TEST_F(LrwUpdate, ResetResetsAProtectedModuleWithoutTheUnlock) {
-    useBoard(1);
-    DeviceSession& session = open();
-    ASSERT_TRUE(hwio::device::waitUntilConnected(session, 10s));
-    LrwUpdateProcedure& update = procedure();
-    ASSERT_TRUE(update.start(request(Action::Reset)));
-    ASSERT_TRUE(reach(Step::ConnectLrw));
-    moveCable("lrw");
-    ASSERT_TRUE(reach(Step::ConnectAppAgain));
-    EXPECT_FALSE(update.unlocked());
-    EXPECT_EQ(update.module().value_or(hwio::jlink::ChipInfo{}).rdpLevel, 1);
-    moveCable("app");
-    ASSERT_TRUE(reach(Step::Done));
-    EXPECT_EQ(update.promptText(), QStringLiteral("The LoRaWAN module was reset and the "
-                                                  "application is running again."));
-    EXPECT_EQ(LrwUpdateProcedure::stepId(Step::ResetModule), "reset-module");
-}
-
 TEST_F(LrwUpdate, AFailedFlashCanBeRetriedAndNothingIsCancelledDuringIt) {
     useBoard(0, R"(, "writeFault": true, "downloadDelayMs": 300)");
     DeviceSession& session = open();

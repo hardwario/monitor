@@ -166,9 +166,9 @@ erases itself completely. The module's original Murata firmware is removed; it c
 HARDWARIO Monitor cannot write it back. The flash continues after the unlock.
 
 **Maintenance:** with **Settings › Advanced › Show expert maintenance actions** the choice above the maintenance
-buttons also lists **LoRaWAN module**, with **Reset**, **Erase chip…** (flash and data EEPROM) and **Unlock
-(erase)…**. Each runs the same guide with the cable moves (step 4 is then **Reset**, **Erase** or **Unlock**); erase
-and unlock ask first.
+buttons also lists **LoRaWAN module**, with **Erase chip…** (flash and data EEPROM) and **Unlock (erase)…**. Each
+runs the same guide with the cable moves (step 4 is then **Erase** or **Unlock**) and asks first. There is no
+**Reset** for the module: the guide's last step starts the application MCU again, which restarts the module.
 
 On the command line: `hwio chester lrw` ([Command line](cli.md#lrw)).
 

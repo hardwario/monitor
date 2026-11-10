@@ -511,7 +511,7 @@ bool FlashViewModel::isGuidedTarget(const QString& targetId) const {
            targetProfile(targetId) != nullptr;
 }
 
-bool FlashViewModel::resetHaltAvailable() const { return !isGuidedTarget(m_maintenanceTarget); }
+bool FlashViewModel::resetAvailable() const { return !isGuidedTarget(m_maintenanceTarget); }
 
 void FlashViewModel::runFlash(const FlashRequest& request) {
     m_lastFlash = request;
@@ -538,13 +538,7 @@ void FlashViewModel::runFlash(const FlashRequest& request) {
 }
 
 void FlashViewModel::reset(bool halt) {
-    if (!canRunMaintenance()) {
-        return;
-    }
-    if (isGuidedTarget(m_maintenanceTarget)) {
-        if (!halt) { // plan 0040 B2: the module is reset by the guided procedure
-            openLrwWizard(lrwRequest(device::LrwUpdateProcedure::Action::Reset));
-        }
+    if (!canRunMaintenance() || !resetAvailable()) { // plan 0040 D9: no reset of the module
         return;
     }
     const std::string target = toStdString(m_maintenanceTarget);

@@ -188,10 +188,10 @@ wird entfernt; sie lässt sich vorher nicht sichern, und HARDWARIO Monitor kann 
 Entsperren geht das Flashen weiter.
 
 **Wartung:** Mit **Settings › Advanced › Show expert maintenance actions** (Experten-Wartungsaktionen anzeigen) bietet
-die Auswahl über den Wartungsschaltflächen auch **LoRaWAN module**, mit **Reset**, **Erase chip…** (Chip löschen:
-Flash und Daten-EEPROM) und **Unlock (erase)…** (Entsperren und löschen). Jede Aktion führt durch denselben
-Assistenten mit dem Umstecken (Schritt 4 heißt dann **Reset**, **Erase** oder **Unlock**); Löschen und Entsperren
-fragen zuerst.
+die Auswahl über den Wartungsschaltflächen auch **LoRaWAN module**, mit **Erase chip…** (Chip löschen: Flash und
+Daten-EEPROM) und **Unlock (erase)…** (Entsperren und löschen). Jede Aktion führt durch denselben Assistenten mit dem
+Umstecken (Schritt 4 heißt dann **Erase** oder **Unlock**) und fragt zuerst. Ein **Reset** des Moduls gibt es nicht:
+Der letzte Schritt des Assistenten startet die Anwendungs-MCU wieder, und damit startet auch das Modul neu.
 
 Auf der Kommandozeile: `hwio chester lrw` ([Kommandozeile](../en/cli.md#lrw)).
 

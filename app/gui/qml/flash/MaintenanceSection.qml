@@ -102,6 +102,7 @@ FlashCard {
 
         HButton {
             objectName: "resetButton"
+            visible: card.vm ? card.vm.resetAvailable : true
             text: qsTr("Reset")
             enabled: card.vm ? card.vm.canRunMaintenance : false
             onClicked: card.vm.reset(false)
@@ -109,7 +110,7 @@ FlashCard {
 
         HButton {
             objectName: "resetHaltButton"
-            visible: card.vm ? card.vm.resetHaltAvailable : true
+            visible: card.vm ? card.vm.resetAvailable : true
             text: qsTr("Reset and halt")
             enabled: card.vm ? card.vm.canRunMaintenance : false
             onClicked: card.vm.reset(true)

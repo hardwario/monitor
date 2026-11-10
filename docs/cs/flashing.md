@@ -163,9 +163,9 @@ Murata v modulu se odstraní; nejde ho předem zálohovat a HARDWARIO Monitor ho
 pokračuje.
 
 **Údržba:** se zapnutou volbou **Nastavení › Pokročilé › Zobrazit odborné akce údržby** nabízí volba nad tlačítky
-údržby také **Modul LoRaWAN** s akcemi **Reset**, **Smazat čip…** (paměť flash i datová EEPROM) a **Odemknout
-(smazat)…**. Každá z nich spustí stejného průvodce s přepojením kabelu (krok 4 je pak **Reset**, **Smazání** nebo
-**Odemčení**); smazání a odemčení se nejprve zeptají.
+údržby také **Modul LoRaWAN** s akcemi **Smazat čip…** (paměť flash i datová EEPROM) a **Odemknout (smazat)…**.
+Každá z nich spustí stejného průvodce s přepojením kabelu (krok 4 je pak **Smazání** nebo **Odemčení**) a nejprve se
+zeptá. **Reset** modulu nabízen není: poslední krok průvodce znovu spustí MCU aplikace, a tím se restartuje i modul.
 
 Na příkazové řádce: `hwio chester lrw` ([Příkazová řádka](../en/cli.md#lrw)).
 

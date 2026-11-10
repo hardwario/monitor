@@ -1447,22 +1447,22 @@
         <translation>MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="105"/>
+        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="106"/>
         <source>Reset</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="113"/>
+        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="114"/>
         <source>Reset and halt</source>
         <translation>Reset a zastaviť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="121"/>
+        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="122"/>
         <source>Erase application</source>
         <translation>Vymazať aplikáciu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="122"/>
+        <location filename="../app/gui/qml/flash/MaintenanceSection.qml" line="123"/>
         <source>Erases the firmware only; the UICR configuration and the Product Information Block are kept.</source>
         <translation>Vymaže iba firmvér; konfigurácia UICR a blok informácií o produkte (PIB) zostanú zachované.</translation>
     </message>
@@ -4866,82 +4866,72 @@
 <context>
     <name>hwio::device::LrwUpdateProcedure</name>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="477"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="464"/>
         <source>The LoRaWAN module was flashed with %1 and the application is running again.</source>
         <translation>Do modulu LoRaWAN bol nahraný %1 a aplikácia znova beží.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="480"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="467"/>
         <source>The LoRaWAN module was erased and the application is running again.</source>
         <translation>Modul LoRaWAN bol vymazaný a aplikácia znova beží.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="482"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="469"/>
         <source>The LoRaWAN module was unlocked and the application is running again.</source>
         <translation>Modul LoRaWAN bol odomknutý a aplikácia znova beží.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="484"/>
-        <source>The LoRaWAN module was reset and the application is running again.</source>
-        <translation>Modul LoRaWAN bol resetovaný a aplikácia znova beží.</translation>
-    </message>
-    <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="494"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="479"/>
         <source>Connect the J-Link cable to the %1 connector.</source>
         <translation>Pripojte kábel J-Linku ku konektoru %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="496"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="481"/>
         <source>Stopping the application MCU…</source>
         <translation>Zastavuje sa MCU aplikácie…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="498"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="483"/>
         <source>The application MCU is stopped. Move the J-Link cable to the %1 connector of the LoRaWAN module.</source>
         <translation>MCU aplikácie je zastavený. Prepojte kábel J-Linku ku konektoru %1 modulu LoRaWAN.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="502"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="487"/>
         <source>The LoRaWAN module is read-out protected. Unlocking erases it completely; the module&apos;s original Murata firmware is removed.</source>
         <translation>Modul LoRaWAN je chránený proti čítaniu. Odomknutie ho celý vymaže; pôvodný firmvér Murata v module sa odstráni.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="505"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="490"/>
         <source>Unlocking the LoRaWAN module…</source>
         <translation>Odomyká sa modul LoRaWAN…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="507"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="492"/>
         <source>Flashing the LoRaWAN module…</source>
         <translation>Nahráva sa do modulu LoRaWAN…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="509"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="494"/>
         <source>Erasing the LoRaWAN module…</source>
         <translation>Vymazáva sa modul LoRaWAN…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="511"/>
-        <source>Resetting the LoRaWAN module…</source>
-        <translation>Resetuje sa modul LoRaWAN…</translation>
-    </message>
-    <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="513"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="496"/>
         <source>Move the J-Link cable back to the %1 connector.</source>
         <translation>Prepojte kábel J-Linku späť ku konektoru %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="515"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="498"/>
         <source>Starting the application MCU…</source>
         <translation>Spúšťa sa MCU aplikácie…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="521"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="504"/>
         <source>The LoRaWAN module operation was cancelled. The application MCU stays stopped until CHESTER is reset or powered off and on.</source>
         <translation>Operácia s modulom LoRaWAN bola zrušená. MCU aplikácie zostane zastavený, kým CHESTER neresetujete alebo nevypnete a znova nezapnete.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="523"/>
+        <location filename="../libs/device/src/lrw_update_procedure.cpp" line="506"/>
         <source>The LoRaWAN module operation was cancelled.</source>
         <translation>Operácia s modulom LoRaWAN bola zrušená.</translation>
     </message>
@@ -5780,34 +5770,34 @@
         <translation>Nahrávanie firmvéru vyžaduje J-Link. Na nahratie do tohto zariadenia otvorte kartu s J-Linkom.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="562"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="624"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="563"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="625"/>
         <source>— disconnected: %1 —</source>
         <translation>— odpojené: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="576"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="625"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="577"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="626"/>
         <source>— disconnected —</source>
         <translation>— odpojené —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="617"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="618"/>
         <source>— connected —</source>
         <translation>— pripojené —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="617"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="618"/>
         <source>— connected (Bluetooth) —</source>
         <translation>— pripojené (Bluetooth) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="745"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="746"/>
         <source>— paused: %1 —</source>
         <translation>— pozastavené: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="758"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="759"/>
         <source>— resumed —</source>
         <translation>— obnovené —</translation>
     </message>
@@ -5833,177 +5823,177 @@
 <context>
     <name>hwio::gui::FirmwareSourceViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="313"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="314"/>
         <source>%1 · LTE bundle (application + modem firmware)</source>
         <translation>%1 · LTE balík (aplikácia + firmvér modemu)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="316"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="317"/>
         <source>Loading %1…</source>
         <translation>Načítava sa %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="319"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="320"/>
         <source>Downloading %1…</source>
         <translation>Sťahuje sa %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="335"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="336"/>
         <source>%1 · LTE application · %2 · %3</source>
         <translation>%1 · aplikácia LTE · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="338"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="339"/>
         <source>%1 · Intel HEX · %2 · %3</source>
         <translation>%1 · Intel HEX · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="341"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="342"/>
         <source>%1 · LTE bundle (application + modem firmware) · %2</source>
         <translation>%1 · LTE balík (aplikácia + firmvér modemu) · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="352"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="353"/>
         <source>%1 · Modem firmware (modem only) · %2</source>
         <translation>%1 · firmvér modemu (len modem) · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="354"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="355"/>
         <source>%1 · Modem firmware %2 (modem only) · %3</source>
         <translation>%1 · firmvér modemu %2 (len modem) · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="423"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="424"/>
         <source>This is LTE firmware — switch to LTE firmware?</source>
         <translation>Toto je firmvér LTE — prepnúť na firmvér LTE?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="478"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="479"/>
         <source>Intel HEX files (*.hex)</source>
         <translation>Súbory Intel HEX (*.hex)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="475"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="478"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="480"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="476"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="479"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="481"/>
         <source>All files (*)</source>
         <translation>Všetky súbory (*)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="182"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="183"/>
         <source>Enter an address such as 0x08000000 (a multiple of 4).</source>
         <translation>Zadajte adresu, napr. 0x08000000 (násobok 4).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="312"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="313"/>
         <source>%1 · LoRaWAN module firmware</source>
         <translation>%1 · firmvér modulu LoRaWAN</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="346"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="347"/>
         <source>%1 · binary · %2 · from %3</source>
         <translation>%1 · binárny · %2 · od %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="348"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="349"/>
         <source>%1 · binary · %2</source>
         <translation>%1 · binárny · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="405"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="406"/>
         <source>A .bin file can only be flashed to an STM32 chip.</source>
         <translation>Súbor .bin možno nahrať len do čipu STM32.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="416"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="417"/>
         <source>This is LoRaWAN module firmware — switch?</source>
         <translation>Toto je firmvér modulu LoRaWAN — prepnúť?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="418"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="419"/>
         <source>This is not LoRaWAN module firmware — switch to Application firmware?</source>
         <translation>Toto nie je firmvér modulu LoRaWAN — prepnúť na aplikačný firmvér?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="475"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="476"/>
         <source>STM32 firmware (*.hex *.bin)</source>
         <translation>Firmvér STM32 (*.hex *.bin)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="480"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="481"/>
         <source>LTE firmware (*.hex *.zip)</source>
         <translation>Firmvér LTE (*.hex *.zip)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="485"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="486"/>
         <source>Drop a .hex or .bin file here</source>
         <translation>Pretiahnite sem súbor .hex alebo .bin</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="488"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="489"/>
         <source>Drop a .hex file here</source>
         <translation>Pretiahnite sem súbor .hex</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="490"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="491"/>
         <source>Drop a .hex file, an LTE bundle .zip or a modem firmware .zip here</source>
         <translation>Sem pretiahnite súbor .hex, LTE balík .zip alebo firmvér modemu .zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="535"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="536"/>
         <source>%1 %2 (recommended)</source>
         <translation>%1 %2 (odporúčané)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="544"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="545"/>
         <source>Downloading… %1 / %2 MB</source>
         <translation>Sťahovanie… %1 / %2 MB</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="546"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="547"/>
         <source>Downloading…</source>
         <translation>Sťahovanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="548"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="549"/>
         <source>Ready</source>
         <translation>Pripravené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="631"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="632"/>
         <source>The downloaded file is damaged. Try again.</source>
         <translation>Stiahnutý súbor je poškodený. Skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="633"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="634"/>
         <source>You can also choose your own file.</source>
         <translation>Môžete tiež vybrať vlastný súbor.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="681"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="682"/>
         <source>Looking up the firmware…</source>
         <translation>Vyhľadávanie firmvéru…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="684"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="685"/>
         <source>Unknown firmware — it can still be flashed.</source>
         <translation>Neznámy firmvér — napriek tomu ho možno nahrať.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="691"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="692"/>
         <source>%1 · uploaded %2</source>
         <translation>%1 · nahrané %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="784"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="803"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="1017"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="785"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="804"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="1018"/>
         <source>The ID has 32 characters 0–9 a–f.</source>
         <translation>ID má 32 znakov 0–9 a–f.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="819"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="1008"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="820"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="1009"/>
         <source>Catalog ID %1</source>
         <translation>ID z katalógu %1</translation>
     </message>
@@ -6011,571 +6001,571 @@
 <context>
     <name>hwio::gui::FlashViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="254"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="255"/>
         <source>Application firmware</source>
         <translation>Aplikačný firmvér</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="255"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="256"/>
         <source>Application MCU</source>
         <translation>Aplikačný MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="256"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="257"/>
         <source>.hex file or catalog ID</source>
         <translation>súbor .hex alebo ID z katalógu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="260"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="261"/>
         <source>LTE firmware</source>
         <translation>Firmvér LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="261"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="262"/>
         <source>%1 + modem</source>
         <translation>%1 + modem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="261"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="262"/>
         <source>LTE MCU</source>
         <translation>LTE MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="262"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="263"/>
         <source>The HARDWARIO LTE firmware or your own .hex / .zip</source>
         <translation>Firmvér HARDWARIO LTE alebo vlastný .hex / .zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="332"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="333"/>
         <source>nRF Util was not found. It is needed for LTE firmware.</source>
         <translation>nRF Util sa nenašiel. Je potrebný pre firmvér LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="354"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="355"/>
         <source>Choose a device first</source>
         <translation>Najprv vyberte zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="358"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="359"/>
         <source>Use Update LTE firmware… above: the J-Link has to be moved between the connectors.</source>
         <translation>Použite Aktualizovať firmvér LTE… vyššie: J-Link je potrebné prepojiť medzi konektormi.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="362"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="363"/>
         <source>Another operation is running</source>
         <translation>Prebieha iná operácia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="395"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="396"/>
         <source>The LTE firmware is not downloaded yet</source>
         <translation>Firmvér LTE ešte nie je stiahnutý</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="398"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="399"/>
         <source>Choose a firmware file</source>
         <translation>Vyberte súbor s firmvérom</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="397"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="398"/>
         <source>Choose a firmware file or enter a catalog ID</source>
         <translation>Vyberte súbor s firmvérom alebo zadajte ID z katalógu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="400"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="401"/>
         <source>Loading the firmware file…</source>
         <translation>Načítava sa súbor s firmvérom…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="402"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="403"/>
         <source>Downloading the firmware…</source>
         <translation>Sťahuje sa firmvér…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="406"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="407"/>
         <source>The LTE firmware could not be downloaded</source>
         <translation>Firmvér LTE sa nepodarilo stiahnuť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="408"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="409"/>
         <source>The file does not match the chosen kind</source>
         <translation>Súbor nezodpovedá zvolenému druhu firmvéru</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="409"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="410"/>
         <source>The firmware cannot be used</source>
         <translation>Firmvér sa nedá použiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="370"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="371"/>
         <source>nRF Util was not found</source>
         <translation>nRF Util sa nenašiel</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="273"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="274"/>
         <source>LoRaWAN module</source>
         <translation>Modul LoRaWAN</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="275"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="276"/>
         <source>Murata Type ABZ</source>
         <translation>Murata Type ABZ</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="275"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="276"/>
         <source>Murata Type ABZ (%1)</source>
         <translation>Murata Type ABZ (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="276"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="277"/>
         <source>lora-modem for CHESTER or your own .hex / .bin</source>
         <translation>lora-modem pre CHESTER alebo vlastný .hex / .bin</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="292"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="293"/>
         <source>Flash first asks for the APP connector to stop the application MCU, then for the LoRaWAN module&apos;s connector.</source>
         <translation>Nahrať najprv požiada o konektor APP kvôli zastaveniu MCU aplikácie, potom o konektor modulu LoRaWAN.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="375"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="376"/>
         <source>The firmware writes the UICR: allow it in Options</source>
         <translation>Firmvér zapisuje UICR: povoľte to v Možnostiach</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="380"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="381"/>
         <source>Enter a valid start address for the .bin file</source>
         <translation>Zadajte platnú počiatočnú adresu súboru .bin</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="383"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="384"/>
         <source>The firmware writes the data EEPROM: turn off Keep data EEPROM in Options</source>
         <translation>Firmvér zapisuje dátovú EEPROM: vypnite Zachovať dátovú EEPROM v Možnostiach</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="394"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="395"/>
         <source>The LoRaWAN module firmware is not downloaded yet</source>
         <translation>Firmvér modulu LoRaWAN ešte nie je stiahnutý</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="405"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="406"/>
         <source>The LoRaWAN module firmware could not be downloaded</source>
         <translation>Firmvér modulu LoRaWAN sa nepodarilo stiahnuť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="625"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="620"/>
         <source>Erase chip…</source>
         <translation>Vymazať čip…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="625"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="620"/>
         <source>Erase everything…</source>
         <translation>Vymazať všetko…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="629"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="624"/>
         <source>Unlock (erase)…</source>
         <translation>Odomknúť (vymazať)…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="629"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="624"/>
         <source>Recover…</source>
         <translation>Obnoviť (recover)…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="653"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="648"/>
         <source>Unlock…</source>
         <translation>Odomknúť…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="656"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="651"/>
         <source>Use %1</source>
         <translation>Použiť %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="751"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="746"/>
         <source>%1 MCU</source>
         <translation>MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="843"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="838"/>
         <source>Flashing is in progress. Cancel it and close the tab?</source>
         <translation>Prebieha nahrávanie. Zrušiť ho a zavrieť kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="844"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="839"/>
         <source>An operation is running on this device. Cancel it and close the tab?</source>
         <translation>Na zariadení prebieha operácia. Zrušiť ju a zavrieť kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="986"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="981"/>
         <source>In the device: %1</source>
         <translation>V zariadení: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="991"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="986"/>
         <source>Now in the device: %1</source>
         <translation>Teraz v zariadení: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1066"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1061"/>
         <source>Flashing…</source>
         <translation>Nahrávanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1068"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1063"/>
         <source>Updating the modem…</source>
         <translation>Aktualizácia modemu…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1071"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1066"/>
         <source>Erasing…</source>
         <translation>Mazanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1073"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1068"/>
         <source>Recovering…</source>
         <translation>Obnovovanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1075"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1070"/>
         <source>Unlocking…</source>
         <translation>Odomykanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1077"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1072"/>
         <source>Resetting…</source>
         <translation>Resetovanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1090"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1085"/>
         <source>Working…</source>
         <translation>Prebieha…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1099"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1094"/>
         <source>Flashing %1 to the %2</source>
         <translation>Nahrávanie %1 do čipu %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1101"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1096"/>
         <source>Flashing %1 to the %2 MCU</source>
         <translation>Nahrávanie %1 do MCU %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1103"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1098"/>
         <source>Flashing the LTE bundle %1</source>
         <translation>Nahrávanie LTE balíka %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1105"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1100"/>
         <source>Updating the modem firmware with %1</source>
         <translation>Aktualizácia firmvéru modemu z %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1107"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1102"/>
         <source>Erasing the application firmware of the %1 MCU</source>
         <translation>Mazanie aplikačného firmvéru MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1110"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1105"/>
         <source>Erasing the %1</source>
         <translation>Mazanie čipu %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1112"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1107"/>
         <source>Erasing everything on the %1 MCU</source>
         <translation>Mazanie všetkého v MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1114"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1109"/>
         <source>Recovering the %1 MCU</source>
         <translation>Obnovovanie MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1116"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1111"/>
         <source>Unlocking the %1</source>
         <translation>Odomykanie čipu %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1119"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1114"/>
         <source>Resetting the %1</source>
         <translation>Resetovanie čipu %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1121"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1116"/>
         <source>Resetting the %1 MCU</source>
         <translation>Resetovanie MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1140"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1135"/>
         <source>Connecting</source>
         <translation>Pripájanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1142"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1137"/>
         <source>Switching MCU</source>
         <translation>Prepnutie MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1144"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1139"/>
         <source>Erasing</source>
         <translation>Mazanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1146"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1141"/>
         <source>Programming</source>
         <translation>Programovanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1148"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1143"/>
         <source>Verifying</source>
         <translation>Overovanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1150"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1145"/>
         <source>Updating the modem</source>
         <translation>Aktualizácia modemu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1152"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1147"/>
         <source>Recovering</source>
         <translation>Obnovenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1154"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1149"/>
         <source>Resetting</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1156"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1151"/>
         <source>Restoring console</source>
         <translation>Obnovenie konzoly</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1158"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1153"/>
         <source>Unlocking</source>
         <translation>Odomykanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1180"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1175"/>
         <source>Step %1 of %2</source>
         <translation>Krok %1 z %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1219"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1214"/>
         <source>The console is disconnected during the modem update and resumes automatically afterwards.</source>
         <translation>Konzola je počas aktualizácie modemu odpojená a potom sa automaticky obnoví.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1223"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1218"/>
         <source>The console is paused. The erased MCU stays halted: reconnect after flashing.</source>
         <translation>Konzola je pozastavená. Vymazaný MCU zostane zastavený: po nahratí sa znova pripojte.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1225"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1220"/>
         <source>The console is paused. The CPU stays halted after flashing.</source>
         <translation>Konzola je pozastavená. Procesor po nahratí zostane zastavený.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1226"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1221"/>
         <source>The console is paused and resumes automatically after flashing.</source>
         <translation>Konzola je pozastavená a po nahratí sa automaticky obnoví.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1242"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1237"/>
         <source>The console is paused and resumes automatically afterwards.</source>
         <translation>Konzola je pozastavená a potom sa automaticky obnoví.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1252"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1247"/>
         <source>Firmware flashed and verified in %1 s.</source>
         <translation>Firmvér nahraný a overený za %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1254"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1249"/>
         <source>LTE modem firmware and LTE firmware flashed in %1 s.</source>
         <translation>Firmvér LTE modemu a LTE firmvér nahrané za %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1257"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1252"/>
         <source>Modem firmware updated in %1 s.</source>
         <translation>Firmvér modemu aktualizovaný za %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1259"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1254"/>
         <source>The application firmware of the %1 MCU was erased.</source>
         <translation>Aplikačný firmvér MCU %1 bol vymazaný.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1262"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1257"/>
         <source>The %1 was erased (flash and data EEPROM).</source>
         <translation>Čip %1 bol vymazaný (flash aj dátová EEPROM).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1264"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1259"/>
         <source>Everything on the %1 MCU was erased.</source>
         <translation>Všetko v MCU %1 bolo vymazané.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1266"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1261"/>
         <source>The %1 MCU was recovered.</source>
         <translation>MCU %1 bol obnovený.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1268"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1263"/>
         <source>The %1 was unlocked; it is now erased.</source>
         <translation>Čip %1 bol odomknutý; teraz je vymazaný.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1270"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1265"/>
         <source>The %1 MCU was reset and halted.</source>
         <translation>MCU %1 bol resetovaný a zastavený.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1271"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1266"/>
         <source>The %1 MCU was reset.</source>
         <translation>MCU %1 bol resetovaný.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1287"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1282"/>
         <source>The modem update was cancelled. Flash the modem firmware again before you use LTE.</source>
         <translation>Aktualizácia modemu bola zrušená. Skôr než začnete používať LTE, nahrajte firmvér modemu znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1291"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1286"/>
         <source>Flashing was cancelled. The device may not start until you flash it again.</source>
         <translation>Nahrávanie bolo zrušené. Zariadenie sa nemusí spustiť, kým firmvér znova nenahráte.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1293"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1288"/>
         <source>The operation was cancelled.</source>
         <translation>Operácia bola zrušená.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1297"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1292"/>
         <source>Flashing was interrupted. The firmware may be partly written: flash it again.</source>
         <translation>Nahrávanie bolo prerušené. Firmvér môže byť zapísaný len čiastočne: nahrajte ho znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1313"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1308"/>
         <source>Chip: %1</source>
         <translation>Čip: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1333"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1328"/>
         <source>Maintenance — %1</source>
         <translation>Údržba — %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1335"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1330"/>
         <source>Maintenance — %1 MCU</source>
         <translation>Údržba — MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1336"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1331"/>
         <source>Maintenance</source>
         <translation>Údržba</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1345"/>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1349"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1340"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1344"/>
         <source>Firmware (flash)</source>
         <translation>Firmvér (flash)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1345"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1340"/>
         <source>UICR configuration</source>
         <translation>Konfigurácia UICR</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1346"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1341"/>
         <source>Product Information Block (serial number, hardware version, …)</source>
         <translation>Blok informácií o produkte (sériové číslo, verzia hardvéru, …)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1349"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1344"/>
         <source>Data EEPROM</source>
         <translation>Dátová EEPROM</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1352"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1347"/>
         <source>The module&apos;s original Murata firmware is removed.</source>
         <translation>Pôvodný firmvér Murata v module sa odstráni.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1357"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1352"/>
         <source>Unlock the %1?</source>
         <translation>Odomknúť čip %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1357"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1352"/>
         <source>Erase the %1?</source>
         <translation>Vymazať čip %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1359"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1354"/>
         <source>Unlocking removes the read-out protection. The chip then erases itself completely; the firmware on it cannot be read or kept. This erases:</source>
         <translation>Odomknutie odstráni ochranu proti čítaniu. Čip sa potom celý vymaže; firmvér v ňom nemožno prečítať ani zachovať. Vymaže sa:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1362"/>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1368"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1357"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1363"/>
         <source>This erases:</source>
         <translation>Vymaže sa:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1365"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1360"/>
         <source>Unlock and erase</source>
         <translation>Odomknúť a vymazať</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1365"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1360"/>
         <source>Erase chip</source>
         <translation>Vymazať čip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1371"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1366"/>
         <source>Recover removes the read-out protection by erasing the %1 MCU completely, then programs a small image that keeps it debuggable. This erases:</source>
         <translation>Obnovenie (recover) odstráni ochranu proti čítaniu úplným vymazaním MCU %1 a potom nahrá malý obraz, vďaka ktorému zostane MCU laditeľný. Vymaže sa:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1374"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1369"/>
         <source>Recover removes the read-out protection by erasing the %1 MCU completely. This erases:</source>
         <translation>Obnovenie (recover) odstráni ochranu proti čítaniu úplným vymazaním MCU %1. Vymaže sa:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1379"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1374"/>
         <source>Recover the %1 MCU?</source>
         <translation>Obnoviť MCU %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1380"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1375"/>
         <source>Erase everything on the %1 MCU?</source>
         <translation>Vymazať všetko v MCU %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1353"/>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1354"/>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1383"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1348"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1349"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1378"/>
         <source>This cannot be undone.</source>
         <translation>Túto akciu nemožno vrátiť späť.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="238"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="239"/>
         <source>Firmware for %1</source>
         <translation>Firmvér pre %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="242"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="243"/>
         <source>.hex or .bin file</source>
         <translation>súbor .hex alebo .bin</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1384"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1379"/>
         <source>Recover</source>
         <translation>Obnoviť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1384"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1379"/>
         <source>Erase everything</source>
         <translation>Vymazať všetko</translation>
     </message>
@@ -6619,168 +6609,148 @@
         <translation>Odomknutie modulu LoRaWAN</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="73"/>
-        <source>Reset the LoRaWAN module</source>
-        <translation>Reset modulu LoRaWAN</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="88"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="86"/>
         <source>Start the LoRaWAN module operations on the Flash page.</source>
         <translation>Operácie s modulom LoRaWAN spustite na stránke Nahrať FW.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="125"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="123"/>
         <source>Paused for the LoRaWAN module</source>
         <translation>Pozastavené kvôli modulu LoRaWAN</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="126"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="124"/>
         <source>A LoRaWAN module operation is in progress. Cancel it and close the tab?</source>
         <translation>Prebieha operácia s modulom LoRaWAN. Zrušiť ju a zavrieť kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="161"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="159"/>
         <source>Flash</source>
         <translation>Nahratie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="164"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="162"/>
         <source>Erase</source>
         <translation>Vymazanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="167"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="165"/>
         <source>Unlock</source>
         <translation>Odomknutie</translation>
     </message>
     <message>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="168"/>
         <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="170"/>
-        <source>Reset</source>
-        <translation>Reset</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="173"/>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="175"/>
         <source>APP connector</source>
         <translation>Konektor APP</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="173"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="168"/>
         <source>Stop the application</source>
         <translation>Zastavenie aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="174"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="169"/>
         <source>LoRaWAN connector</source>
         <translation>Konektor LoRaWAN</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="175"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="170"/>
         <source>Done</source>
         <translation>Hotovo</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="250"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="243"/>
         <source>Stopping the application</source>
         <translation>Zastavenie aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="252"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="245"/>
         <source>Unlocking the LoRaWAN module</source>
         <translation>Odomykanie modulu LoRaWAN</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="254"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="247"/>
         <source>Flashing the LoRaWAN module</source>
         <translation>Nahrávanie do modulu LoRaWAN</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="256"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="249"/>
         <source>Erasing the LoRaWAN module</source>
         <translation>Mazanie modulu LoRaWAN</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="258"/>
-        <source>Resetting the LoRaWAN module</source>
-        <translation>Resetovanie modulu LoRaWAN</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="260"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="251"/>
         <source>Starting the application</source>
         <translation>Spustenie aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="269"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="260"/>
         <source>LoRaWAN module flashed with %1.</source>
         <translation>Do modulu LoRaWAN je nahraný %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="273"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="264"/>
         <source>LoRaWAN module erased.</source>
         <translation>Modul LoRaWAN je vymazaný.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="276"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="267"/>
         <source>LoRaWAN module unlocked.</source>
         <translation>Modul LoRaWAN je odomknutý.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="279"/>
-        <source>LoRaWAN module reset.</source>
-        <translation>Modul LoRaWAN je resetovaný.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="282"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="270"/>
         <source>The application runs again. The console reconnects.</source>
         <translation>Aplikácia znova beží. Konzola sa znova pripojí.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="284"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="272"/>
         <source>Open console</source>
         <translation>Otvoriť konzolu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="299"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="287"/>
         <source>Connect the J-Link to the LoRaWAN connector</source>
         <translation>Pripojte J-Link ku konektoru LoRaWAN</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="300"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="288"/>
         <source>Connect the J-Link to the APP connector</source>
         <translation>Pripojte J-Link ku konektoru APP</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="306"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="294"/>
         <source>Unlock the LoRaWAN module?</source>
         <translation>Odomknúť modul LoRaWAN?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="307"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="295"/>
         <source>Unlock and erase</source>
         <translation>Odomknúť a vymazať</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="310"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="298"/>
         <source>The LoRaWAN module operation failed</source>
         <translation>Operácia s modulom LoRaWAN zlyhala</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="311"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="299"/>
         <source>Try again</source>
         <translation>Skúsiť znova</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="360"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="348"/>
         <source>The application MCU is stopped. It starts again when CHESTER is reset or powered off and on.</source>
         <translation>MCU aplikácie je zastavený. Znova sa spustí, keď CHESTER resetujete alebo vypnete a znova zapnete.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="364"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="352"/>
         <source>Cancel anyway</source>
         <translation>Napriek tomu zrušiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="366"/>
+        <location filename="../app/gui/src/wizard/lrw_update_wizard.cpp" line="354"/>
         <source>Back</source>
         <translation>Späť</translation>
     </message>

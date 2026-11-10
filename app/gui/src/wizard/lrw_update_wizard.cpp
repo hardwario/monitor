@@ -69,8 +69,6 @@ QString LrwUpdateWizard::title() const {
         return tr("Erase the LoRaWAN module");
     case Action::Unlock:
         return tr("Unlock the LoRaWAN module");
-    case Action::Reset:
-        return tr("Reset the LoRaWAN module");
     }
     return {};
 }
@@ -166,9 +164,6 @@ std::vector<WizardStep> LrwUpdateWizard::plannedSteps() const {
     case Action::Unlock:
         module = tr("Unlock");
         break;
-    case Action::Reset:
-        module = tr("Reset");
-        break;
     }
     const std::array titles{tr("APP connector"),     tr("Stop the application"),
                             tr("LoRaWAN connector"), module,
@@ -200,7 +195,6 @@ int LrwUpdateWizard::stepIndex() const {
     case Step::Unlock:
     case Step::Flash:
     case Step::Erase:
-    case Step::ResetModule:
         return 3;
     case Step::ConnectAppAgain:
     case Step::ResetApp:
@@ -230,7 +224,6 @@ int LrwUpdateWizard::stage() const {
     case Step::Unlock:
     case Step::Flash:
     case Step::Erase:
-    case Step::ResetModule:
     case Step::ResetApp:
         return Working;
     case Step::NeedsUnlockConfirmation:
@@ -254,8 +247,6 @@ QString LrwUpdateWizard::workingHeading() const {
         return tr("Flashing the LoRaWAN module");
     case Step::Erase:
         return tr("Erasing the LoRaWAN module");
-    case Step::ResetModule:
-        return tr("Resetting the LoRaWAN module");
     default:
         return tr("Starting the application");
     }
@@ -274,9 +265,6 @@ WizardStep LrwUpdateWizard::doneStep(WizardStep step) const {
         break;
     case Action::Unlock:
         step.heading = tr("LoRaWAN module unlocked.");
-        break;
-    case Action::Reset:
-        step.heading = tr("LoRaWAN module reset.");
         break;
     }
     step.body = tr("The application runs again. The console reconnects.");

@@ -5,12 +5,12 @@
 // WizardId::LrwUpdate "lrw-update").
 //
 // A thin adapter: the Flash page chooses what to do (the LoRaWAN card's Flash: the designated
-// lora-modem firmware or an own file; the `lrw` maintenance actions Reset, Erase chip, Unlock) and
+// lora-modem firmware or an own file; the `lrw` maintenance actions Erase chip, Unlock) and
 // opens this wizard with a pending request (FlashViewModel::takeLrwRequest()). start() runs
 // device::LrwUpdateProcedure on the tab's session at once; the wizard only shows the procedure's
 // step, prompt, progress and error. Steps:
-//   1 APP connector · 2 Stop the application · 3 LoRaWAN connector · 4 Flash | Erase | Unlock |
-//   Reset (with the unlock confirmation of a read-out protected module) · 5 APP connector · 6 Done
+//   1 APP connector · 2 Stop the application · 3 LoRaWAN connector · 4 Flash | Erase | Unlock
+//   (with the unlock confirmation of a read-out protected module) · 5 APP connector · 6 Done
 // Every step but Done is an Embedded step "lrw-update" (LrwUpdateStep.qml) bound to this object.
 // While the procedure runs the tab is busy ("Paused for the LoRaWAN module"; the session is held
 // by the procedure). Cancel: not while an operation runs (canCancel); while the application MCU

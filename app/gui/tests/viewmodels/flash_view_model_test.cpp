@@ -1609,15 +1609,19 @@ TEST_F(LrwFlashTest, MaintenanceOfTheModuleOpensTheGuidedWizard) {
               QStringLiteral("lrw"));
     EXPECT_EQ(targets.at(2).toMap().value(QStringLiteral("title")).toString(),
               QStringLiteral("LoRaWAN module"));
-    EXPECT_TRUE(flash().resetHaltAvailable());
+    EXPECT_TRUE(flash().resetAvailable());
     flash().setMaintenanceTarget(QStringLiteral("lrw"));
     EXPECT_EQ(flash().maintenanceTitle(), QStringLiteral("Maintenance — LoRaWAN module"));
-    EXPECT_FALSE(flash().resetHaltAvailable());
+    EXPECT_FALSE(flash().resetAvailable());
     EXPECT_FALSE(flash().eraseCodeAvailable());
     EXPECT_EQ(flash().eraseAllText(), QStringLiteral("Erase chip…"));
     EXPECT_EQ(flash().recoverText(), QStringLiteral("Unlock (erase)…"));
-    flash().reset(true); // no [Reset and halt] for the module
+    // Plan 0040 D9: no [Reset] / [Reset and halt] for the module (the guided flow's final reset
+    // of the application MCU restarts it).
+    flash().reset(false);
+    flash().reset(true);
     EXPECT_FALSE(app().wizard()->isOpen());
+    EXPECT_EQ(flash().opState(), FlashViewModel::Idle);
 
     // [Unlock (erase)…]: the confirmation names the Murata firmware; the wizard unlocks.
     flash().requestConfirmation(true);
@@ -1648,19 +1652,6 @@ TEST_F(LrwFlashTest, MaintenanceOfTheModuleOpensTheGuidedWizard) {
     EXPECT_EQ(wizard->procedure()->request().action, LrwAction::Erase);
     app().wizard()->cancel(true);
     ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }));
-
-    // [Reset]: runs to the end.
-    ASSERT_TRUE(waitFor([this] { return flash().canRunMaintenance(); }));
-    flash().reset(false);
-    wizard = lrwWizard();
-    ASSERT_NE(wizard, nullptr);
-    EXPECT_EQ(wizard->procedure()->request().action, LrwAction::Reset);
-    ASSERT_TRUE(reachLrw(*wizard, LrwStep::ConnectLrw));
-    moveCableLater("lrw");
-    ASSERT_TRUE(reachAppAgain(*wizard));
-    moveCableLater("app");
-    ASSERT_TRUE(reachLrw(*wizard, LrwStep::Done));
-    EXPECT_EQ(wizard->current().heading, QStringLiteral("LoRaWAN module reset."));
 }
 
 TEST_F(LrwFlashTest, TheWizardWithoutARequestSaysWhereToStart) {

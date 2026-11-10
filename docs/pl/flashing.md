@@ -176,9 +176,10 @@ wcześniej zarchiwizować, a HARDWARIO Monitor nie potrafi zapisać go z powrote
 kontynuowane.
 
 **Konserwacja:** przy włączonym **Settings › Advanced › Show expert maintenance actions** wybór nad przyciskami
-konserwacji zawiera też **LoRaWAN module** z akcjami **Reset**, **Erase chip…** (wymaż układ: pamięć flash i EEPROM
-danych) i **Unlock (erase)…** (odblokuj i wymaż). Każda z nich uruchamia ten sam kreator z przekładaniem kabla (krok 4
-to wtedy **Reset**, **Erase** lub **Unlock**); wymazanie i odblokowanie najpierw pytają.
+konserwacji zawiera też **LoRaWAN module** z akcjami **Erase chip…** (wymaż układ: pamięć flash i EEPROM danych) i
+**Unlock (erase)…** (odblokuj i wymaż). Każda z nich uruchamia ten sam kreator z przekładaniem kabla (krok 4 to wtedy
+**Erase** lub **Unlock**) i najpierw pyta. Modułu nie resetuje się osobno (**Reset**): ostatni krok kreatora ponownie
+uruchamia MCU aplikacji, co restartuje także moduł.
 
 W wierszu poleceń: `hwio chester lrw` ([Wiersz poleceń](../en/cli.md#lrw)).
 
