@@ -286,6 +286,18 @@ void RemoteConsoleSession::onSync(const QJsonValue& payload) {
     m_syncSeen = true;
     m_log->clear(device::ChannelMask::All);
     QList<device::ConsoleLine> lines;
+    const auto marker = [](const QString& text) {
+        device::ConsoleLine line;
+        line.dir = device::Direction::Marker;
+        line.time = std::chrono::system_clock::now();
+        line.text = toStdString(text);
+        line.source = device::LineSource::Remote;
+        return line;
+    };
+    lines.append(marker(trRemote("Session history from the customer:")));
+    if (transcript->truncated()) {
+        lines.append(marker(trRemote("Older history of the session was left out.")));
+    }
     for (const TranscriptEntry& entry : transcript->entries()) {
         if (entry.command != QString::fromLatin1(deviceOutputCommand) || entry.index != 0) {
             lines.append(makeLine(device::Direction::In, entry.command));
@@ -294,17 +306,12 @@ void RemoteConsoleSession::onSync(const QJsonValue& payload) {
             lines.append(makeLine(device::Direction::Out, output));
         }
     }
+    // The views reload the replaced log (transcriptReplaced); consumers that only follow
+    // linesReceived (the CLI) get the history as new lines.
     for (device::ConsoleLine& line : lines) {
         line.seq = m_log->append(line);
     }
-    if (transcript->truncated()) {
-        device::ConsoleLine marker;
-        marker.dir = device::Direction::Marker;
-        marker.time = std::chrono::system_clock::now();
-        marker.text = trRemote("Older history of the session was left out.").toStdString();
-        marker.source = device::LineSource::Remote;
-        marker.seq = m_log->append(marker);
-    }
+    emit linesReceived(lines);
     const QString state = sync.value(QStringLiteral("state")).toString();
     if (state == QStringLiteral("connected")) {
         setConnection(device::ConnectionState::Connected);
