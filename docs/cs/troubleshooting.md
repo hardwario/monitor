@@ -98,6 +98,13 @@ Obyčejná aktualizace LTE (`hwio chester lte flash`, nebo balíček, firmware m
 
 Kód chyby: [`target.reset_during_update`](#target.reset_during_update).
 
+<a id="remote-support-session-problems"></a>
+### Problémy s relací vzdálené podpory
+
+HARDWARIO Monitor se k serveru podpory `terminal.hardwario.com` připojuje přes `wss` (HTTPS, port 443). Firewall nebo proxy, které blokují WebSockety, znemožní sdílení i připojení k relaci. Pokud stejný kód relace používá někdo jiný (velmi vzácné), sdílení se z bezpečnostních důvodů ukončí: zahajte ho znovu a dostanete nový kód. Kdo se připojí a do 2 minut nedostane povolení (nebo je odmítnut), musí zákazníka požádat, aby sdílení zahájil znovu. Viz [Vzdálená podpora](remote-support.md).
+
+Kódy chyb: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error).
+
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Firmware modemu LTE potřebuje nRF Util
 
@@ -641,6 +648,14 @@ Pochází z `mem read`, `mem write` a ze serveru MCP (`hwio mcp`).
 <a id="category-firmware"></a>
 ### Firmware (návratový kód 7)
 
+<a id="remote.firmware_not_in_catalog"></a>
+#### `remote.firmware_not_in_catalog`
+
+**Tento firmware není v katalogu HARDWARIO.**
+
+- **Pravděpodobně:** Vzdálené nahrání přijímá jen firmware z katalogu firmwaru HARDWARIO, určený jeho ID.
+- **Co dělat:** Zkontrolujte ID firmwaru, nebo požádejte zákazníka, aby soubor nahrál sám u sebe.
+
 <a id="firmware.hex_parse_error"></a>
 #### `firmware.hex_parse_error`
 
@@ -733,6 +748,42 @@ Stažený soubor neodpovídal kontrolnímu součtu z katalogu, proto nebyl použ
 - **Co dělat:** Zkontrolujte připojení k internetu a zkuste to znovu.
 
 Zpráva může uvádět firmware, například „Stažení firmwaru `<id>` selhalo.“ nebo „Stažení `<name>` selhalo.“ V desktopové aplikaci můžete místo toho zvolit také vlastní soubor.
+
+<a id="remote.relay_unreachable"></a>
+#### `remote.relay_unreachable`
+
+**Nelze se spojit se serverem podpory.**
+
+- **Pravděpodobně:** Spojení se serverem podpory (wss://terminal.hardwario.com) blokuje síť, proxy nebo firewall.
+- **Co dělat:** Zkontrolujte připojení k internetu nebo zkuste jinou síť.
+
+Pochází z relace vzdálené podpory (Sdílet s podporou, Připojit se k relaci podpory, `hwio remote`). Po ztrátě spojení se aplikace 5 minut pokouší spojení obnovit. Viz [Problémy s relací vzdálené podpory](#remote-support-session-problems).
+
+<a id="remote.code_collision"></a>
+#### `remote.code_collision`
+
+**Tento kód relace používá jiné zařízení.**
+
+- **Pravděpodobně:** Někdo jiný sdílí konzoli pod stejným kódem relace. Relace byla z bezpečnostních důvodů ukončena.
+- **Co dělat:** Zahajte sdílení znovu a dostanete nový kód.
+
+<a id="remote.host_ended"></a>
+#### `remote.host_ended`
+
+**Vzdálená relace skončila.**
+
+- **Pravděpodobně:** Zákazník ukončil sdílení, nebo se odpojilo jeho zařízení či HARDWARIO Monitor.
+- **Co dělat:** Pokud potřebujete více času, požádejte zákazníka, aby konzoli sdílel znovu.
+
+Vidí ji ten, kdo se k relaci připojil, když spojení se serverem definitivně skončilo.
+
+<a id="remote.protocol_error"></a>
+#### `remote.protocol_error`
+
+**Neočekávaná data ve vzdálené relaci.**
+
+- **Pravděpodobně:** Server podpory nebo druhý účastník poslal data, kterým HARDWARIO Monitor nerozumí. Byla ignorována, nebo byla relace z bezpečnostních důvodů ukončena.
+- **Co dělat:** Nahlaste problém s diagnostickou zprávou.
 
 <a id="update.network"></a>
 #### `update.network`
@@ -890,6 +941,24 @@ Jen CLI, s `-o FILE --force`.
 
 Zpráva obvykle přesně uvádí, která hodnota je chybná, například chybná volba (doporučení pak zní "Run `hwio --help`."), neznámý profil zařízení nebo cíl, rychlost J-Linku nebo latence mimo rozsah, chybná adresa nebo délka, ID firmwaru, které nemá 32 šestnáctkových číslic, nebo více zařízení Bluetooth odpovídajících `--name` (použijte `--address`). V desktopové aplikaci zahrnuje také dávkové soubory konzole, které jsou příliš velké, obsahují příliš dlouhý příkaz nebo neobsahují žádné příkazy. Viz [CLI](../en/cli.md).
 
+<a id="remote.code_invalid"></a>
+#### `remote.code_invalid`
+
+**Kód relace není platný.**
+
+- **Pravděpodobně:** Kód relace musí být číslo: 6 číslic z HARDWARIO Monitor, až 6 číslic z webového Terminalu.
+- **Co dělat:** Zkontrolujte kód a zadejte ho znovu.
+
+<a id="remote.operation_unsupported_peer"></a>
+#### `remote.operation_unsupported_peer`
+
+**Aplikace zákazníka podporuje jen konzoli.**
+
+- **Pravděpodobně:** Zákazník používá webový Terminal, který nemůže zařízení vzdáleně flashovat, smazat, obnovit (recover) ani resetovat.
+- **Co dělat:** Požádejte zákazníka, aby konzoli sdílel z aplikace HARDWARIO Monitor.
+
+Také když zákazník sdílí konzoli přes Bluetooth, která flashování nemá.
+
 <a id="usage.confirmation_required"></a>
 #### `usage.confirmation_required`
 
@@ -1000,6 +1069,22 @@ Varování z `hwio doctor` nebo z diagnostické zprávy. Zpráva může uvádět
 - **Co dělat:** V případě potřeby operaci spusťte znovu.
 
 Zobrazí se, když stisknete Ctrl+C nebo **Zrušit**, odpovíte Ne na potvrzení, nebo zavřete zařízení. Varianta „Výstup byl uzavřen.“ znamená, že program, který čte výstup `hwio`, skončil, například `hwio ... --json | head`.
+
+<a id="remote.join_not_allowed"></a>
+#### `remote.join_not_allowed`
+
+**Zákazník vám nepovolil připojení.**
+
+- **Pravděpodobně:** Zákazník místo povolení relaci ukončil, nebo neodpověděl do 2 minut.
+- **Co dělat:** Požádejte zákazníka, aby konzoli sdílel znovu a po vašem připojení vám ho povolil.
+
+<a id="remote.operation_denied"></a>
+#### `remote.operation_denied`
+
+**Zákazník žádost zamítl.**
+
+- **Pravděpodobně:** Zákazník operaci zamítl, nebo neodpověděl do 60 sekund.
+- **Co dělat:** Požádejte zákazníka, aby operaci povolil, a zkuste to znovu.
 
 <a id="mcp.consent_denied"></a>
 #### `mcp.consent_denied`

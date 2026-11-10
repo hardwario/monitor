@@ -14,8 +14,9 @@ Andere Sprachen: [English](../en/index.md) · [Čeština](../cs/index.md) · [Sl
 3. [Konsole](console.md): Shell und Log, Suchen und Filtern, Verlauf, Batch-Dateien, Konsolendateien
 4. [Flashen](flashing.md): Anwendungs- und LTE-Firmware, Katalog-IDs, UICR, Löschen, Recover
 5. [Bluetooth LE](bluetooth.md): die Konsole über Bluetooth, Kopplung
-6. [Fehlerbehebung](troubleshooting.md): häufige Probleme und alle Fehlercodes
-7. [Datenschutz und gespeicherte Daten](privacy.md): Update-Prüfung, Diagnosebericht, wo Daten gespeichert werden
+6. [Fernsupport](remote-support.md): die Konsole für den HARDWARIO-Support freigeben, einer Sitzung beitreten
+7. [Fehlerbehebung](troubleshooting.md): häufige Probleme und alle Fehlercodes
+8. [Datenschutz und gespeicherte Daten](privacy.md): Update-Prüfung, Diagnosebericht, wo Daten gespeichert werden
 
 ## Referenz (nur auf Englisch)
 
