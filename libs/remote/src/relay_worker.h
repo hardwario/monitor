@@ -14,10 +14,12 @@
 #include <QtTypes>
 
 #include <chrono>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <memory>
+#include <mutex>
 #include <optional>
 
 class QWebSocket;
@@ -39,6 +41,12 @@ public:
     Q_INVOKABLE void send(const QString& name, const QJsonValue& payload, bool droppable);
     // DISCONNECT (when connected), close, no more signals. Called blocking from the owner.
     Q_INVOKABLE void shutdown();
+    // Blocks until shutdown() has finished on the worker thread. Called by the owner after the
+    // blocking shutdown() call and before deleting the worker: the BlockingQueuedConnection and
+    // QThread::wait() synchronize through futexes inside uninstrumented libQt6Core, which
+    // ThreadSanitizer cannot see; this std::mutex / std::condition_variable hand-off gives it a
+    // visible happens-before edge between shutdown() and the destructor on the owner's thread.
+    void waitUntilShutDown();
 
 signals:
     void connected(bool reconnected);
@@ -48,6 +56,10 @@ signals:
     void warning(const hwio::Error& error);
 
 private:
+    std::mutex m_shutdownMutex;           // guards m_shutdownDone
+    std::condition_variable m_shutdownCv; // notified when shutdown() has finished
+    bool m_shutdownDone = false;
+
     enum class Phase : std::uint8_t {
         Idle,
         Opening,      // WebSocket + Engine.IO open + namespace connect

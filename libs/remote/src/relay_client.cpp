@@ -385,6 +385,16 @@ void RelayWorker::shutdown() {
     m_phase = Phase::Ended;
     m_retryTimer.stop();
     destroySocket();
+    // Notify under the lock: the owner deletes this object (and the condition variable) as soon
+    // as it sees the flag.
+    const std::scoped_lock lock(m_shutdownMutex);
+    m_shutdownDone = true;
+    m_shutdownCv.notify_all();
+}
+
+void RelayWorker::waitUntilShutDown() {
+    std::unique_lock lock(m_shutdownMutex);
+    m_shutdownCv.wait(lock, [this] { return m_shutdownDone; });
 }
 
 } // namespace detail
@@ -484,6 +494,7 @@ void RelayClient::stop() {
     }
     QMetaObject::invokeMethod(m_worker.get(), &detail::RelayWorker::shutdown,
                               Qt::BlockingQueuedConnection);
+    m_worker->waitUntilShutDown(); // a happens-before edge ThreadSanitizer can see (relay_worker.h)
     m_thread->quit();
     m_thread->wait();
     m_worker.reset(); // its thread has ended
