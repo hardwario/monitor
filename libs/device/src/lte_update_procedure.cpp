@@ -75,7 +75,7 @@ const TargetProfile* LteUpdateProcedure::appTarget() const {
 }
 
 const TargetProfile* LteUpdateProcedure::lteTarget() const {
-    // ADR-0283: the LTE target by its id (CHESTER also has the LoRaWAN module `lrw`).
+    // ADR-0352: the LTE target by its id (CHESTER also has the LoRaWAN module `lrw`).
     return m_session.isNull() ? nullptr : findTarget(m_session->profile(), "lte");
 }
 

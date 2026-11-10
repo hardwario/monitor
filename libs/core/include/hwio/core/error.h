@@ -145,7 +145,7 @@ enum class WizardId : std::uint8_t {
     Troubleshooting,
     BlePairing,
     LteUpdate, // plan 0033 (ADR-0234): the guided LTE firmware update
-    LrwUpdate, // plan 0040 (ADR-0283): the guided LoRaWAN module operations (GUI)
+    LrwUpdate, // plan 0040 (ADR-0352): the guided LoRaWAN module operations (GUI)
 };
 
 struct ErrorInfo {

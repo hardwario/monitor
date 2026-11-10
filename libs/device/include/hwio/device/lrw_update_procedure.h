@@ -1,7 +1,7 @@
 #pragma once
 
 // LrwUpdateProcedure - the guided operations on the CHESTER LoRaWAN module (plan/features/
-// 0040-chester-lrw-module.md A5, ADR-0283). The module (Murata Type ABZ, STM32L072CZ, target `lrw`)
+// 0040-chester-lrw-module.md A5, ADR-0352). The module (Murata Type ABZ, STM32L072CZ, target `lrw`)
 // answers on its own SWD connector only while the application MCU (target `app`) is held in reset
 // + halt: the running application drives the module's reset / power. A headless state machine on
 // the owner thread of a J-Link DeviceSession, modelled on LteUpdateProcedure; the GUI LoRaWAN card
@@ -30,7 +30,7 @@
 // themselves. cancel() is refused while an operation other than an identify runs (a flash, erase or
 // unlock is never interrupted here).
 //
-// The targets are named (ADR-0283): the session's console target `app` and the profile's target
+// The targets are named (ADR-0352): the session's console target `app` and the profile's target
 // `lrw`; the connector labels are "APP" and "LoRaWAN" (the module's connector on the board).
 //
 // Ownership: a QObject on the session's owner thread; it keeps the session as a QPointer (a closed

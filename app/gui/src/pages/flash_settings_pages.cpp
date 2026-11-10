@@ -70,7 +70,7 @@ void registerFlashAndSettingsPages(AppViewModel& app) {
                      &FirmwareServices::retranslate);
     // Plan 0033 (ADR-0234): the LTE firmware update wizard shares the firmware services.
     registerLteUpdateWizard(app, *services);
-    // Plan 0040 (ADR-0283): the LoRaWAN module wizard, opened by the Flash page.
+    // Plan 0040 (ADR-0352): the LoRaWAN module wizard, opened by the Flash page.
     registerLrwUpdateWizard(app, *services);
 
     PageRegistry& pages = app.pageRegistry();

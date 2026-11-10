@@ -286,7 +286,7 @@ QString FlashViewModel::lrwCableText() const {
         return {};
     }
     // The connection guide's texts are QT_TRANSLATE_NOOP in context "hwio::device"; the module
-    // answers only while the application MCU is held (ADR-0283).
+    // answers only while the application MCU is held (ADR-0352).
     return QCoreApplication::translate("hwio::device",
                                        lrw->connectionGuide.front().bodySourceText) +
            QLatin1Char(' ') +
@@ -475,7 +475,7 @@ void FlashViewModel::flash() {
 }
 
 void FlashViewModel::flashLrw() {
-    // Plan 0040 (ADR-0283): the guided procedure; a .bin placed at its start address, the data
+    // Plan 0040 (ADR-0352): the guided procedure; a .bin placed at its start address, the data
     // EEPROM only when not kept (as on the STM32 card).
     std::shared_ptr<const firmware::FirmwareImage> image = m_source->flashImage();
     if (!image) {
@@ -733,7 +733,7 @@ QVariantList FlashViewModel::maintenanceTargets() const {
     }
     const device::TargetProfile* console = targetProfile(m_tab->consoleTargetId());
     for (const device::TargetProfile& target : deviceProfile->targets) {
-        // Plan 0040 (B2, ADR-0283): the CHESTER LoRaWAN module (an STM32 behind the Nordic
+        // Plan 0040 (B2, ADR-0352): the CHESTER LoRaWAN module (an STM32 behind the Nordic
         // console MCU) answers only while the application MCU is held: its actions open the
         // guided LoRaWAN module wizard. Other targets of another vendor are not offered.
         const bool guided = isGuidedTarget(toQString(target.id));

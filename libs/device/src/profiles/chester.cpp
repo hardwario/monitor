@@ -123,7 +123,7 @@ constexpr std::array lteGuide{
     },
 };
 
-// Plan 0040 (ADR-0283): the LoRaWAN module (Murata Type ABZ) has its own SWD connector; it answers
+// Plan 0040 (ADR-0352): the LoRaWAN module (Murata Type ABZ) has its own SWD connector; it answers
 // only while the application MCU is held (reset + halt).
 constexpr std::array lrwGuide{
     ConnectionGuideStep{
@@ -271,7 +271,7 @@ constexpr std::array chesterTargets{
                   .vendor = ChipVendor::Nordic,
                   .stm32 = std::nullopt,
                   .dataEeprom = std::nullopt},
-    // LoRaWAN module (plan 0040, ADR-0274, ADR-0283): Murata Type ABZ = STM32L072CZ, the shared
+    // LoRaWAN module (plan 0040, ADR-0274, ADR-0352): Murata Type ABZ = STM32L072CZ, the shared
     // curated part. Programming only; no RTT console (the console target stays `app`, ADR-0233).
     stm32Target(stm32PartIndex("stm32l0-cat5-192k"), "lrw",
                 QT_TRANSLATE_NOOP("hwio::device", "LoRaWAN module"), lrwGuide, loraModemFirmware),

@@ -1,4 +1,4 @@
-# ADR-0283 — CHESTER LoRaWAN module: guided flow with the application MCU held; no "Check module" in rc.4
+# ADR-0352 — CHESTER LoRaWAN module: guided flow with the application MCU held; no "Check module" in rc.4
 
 - **Status:** Accepted
 - **Date:** 2026-11-09

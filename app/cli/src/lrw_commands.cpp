@@ -268,7 +268,7 @@ Result<CommandResult> guidedResult(const Procedure& procedure, const QJsonObject
     return std::unexpected(std::move(error));
 }
 
-// Runs the guided procedure on a session of the application MCU (ADR-0283).
+// Runs the guided procedure on a session of the application MCU (ADR-0352).
 Result<CommandResult> runGuided(const Context& context, const GlobalOptions& globals,
                                 const ProbeOptions& group, const ProbeOptions& own, ProgressUi& ui,
                                 Procedure::Request request, const QJsonObject& image,

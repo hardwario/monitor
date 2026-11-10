@@ -1,7 +1,7 @@
 #pragma once
 
 // LrwUpdateWizard - the guided operations on the CHESTER LoRaWAN module of a J-Link tab
-// (plan/features/0040-chester-lrw-module.md B1, B2; ADR-0283; wizard framework of plan 0007,
+// (plan/features/0040-chester-lrw-module.md B1, B2; ADR-0352; wizard framework of plan 0007,
 // WizardId::LrwUpdate "lrw-update").
 //
 // A thin adapter: the Flash page chooses what to do (the LoRaWAN card's Flash: the designated

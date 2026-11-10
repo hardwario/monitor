@@ -26,7 +26,7 @@
 // refused while Erase, UpdateLte or Restore runs (a flash is never interrupted here).
 //
 // The two targets: the session's console target (CHESTER app) and the profile's target `lte`
-// (ADR-0283: named, not "the first other target"; CHESTER also has `lrw`); the connector labels
+// (ADR-0352: named, not "the first other target"; CHESTER also has `lrw`); the connector labels
 // are their ids in upper case ("APP", "LTE").
 //
 // Ownership: a QObject on the session's owner thread; it keeps the session as a QPointer (a closed

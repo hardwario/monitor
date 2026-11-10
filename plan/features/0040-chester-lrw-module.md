@@ -1,11 +1,11 @@
 # 0040 — CHESTER LoRaWAN module (`lrw` target, prepared firmware)
 
 - **Status:** In progress (approved 2026-11-06 with all recommended options; D6 stays open; D7/D8 decided
-  2026-11-09 after Phase 0, ADR-0283)
+  2026-11-09 after Phase 0, ADR-0352)
 - **Milestone:** 2.0.0-rc.4 (user decision 2026-11-06)
 - **Author:** Matej Strnad (with Claude), 2026-11-06
 - **Related ADRs:** ADR-0037, ADR-0038, ADR-0057, ADR-0077, ADR-0165, ADR-0174, ADR-0274 … ADR-0277; accepted
-  here: ADR-0278, ADR-0281, ADR-0283
+  here: ADR-0278, ADR-0281, ADR-0352
 - **Depends on:** [0039](0039-stm32-flashing.md) (STM32 framework)
 
 ## Context
@@ -100,9 +100,9 @@ version before downloading.
 | D4 | Check module after flashing | offer "Check module" over the app console / no check | **Offer "Check module"** (approved 2026-11-06; command from P0.4) | ADR-0281 |
 | D5 | Flash wizard (0010) | add the third choice in rc.4 / later | **Later (after rc.4)** (approved 2026-11-06) | ADR-0281 |
 | D6 | CHESTER v2 LoRaWAN module | own part + firmware when known / same part | open: the user to tell which chip `ctr_lrw_v2` uses | — |
-| D7 | Phase 0: the module answers only while the application MCU is held | guided cable moves (as ADR-0234) / flash only, docs explain | **Guided cable moves** (2026-11-09) | ADR-0283 |
-| D8 | Phase 0: "Check module" needs a config change (`lrw config test true`) | hide it in rc.4 / use test mode briefly | **Hidden in rc.4** (2026-11-09; supersedes the D4 "offer" for rc.4) | ADR-0283 |
-| D9 | Guided Reset of the LoRaWAN module in the GUI | keep [Reset] in the `lrw` maintenance / drop | **Drop** (2026-11-10, user): the final reset of the application MCU in the guided flow restarts the module anyway; the CLI `hwio chester lrw reset` stays (direct) | ADR-0283 (amended) |
+| D7 | Phase 0: the module answers only while the application MCU is held | guided cable moves (as ADR-0234) / flash only, docs explain | **Guided cable moves** (2026-11-09) | ADR-0352 |
+| D8 | Phase 0: "Check module" needs a config change (`lrw config test true`) | hide it in rc.4 / use test mode briefly | **Hidden in rc.4** (2026-11-09; supersedes the D4 "offer" for rc.4) | ADR-0352 |
+| D9 | Guided Reset of the LoRaWAN module in the GUI | keep [Reset] in the `lrw` maintenance / drop | **Drop** (2026-11-10, user): the final reset of the application MCU in the guided flow restarts the module anyway; the CLI `hwio chester lrw reset` stays (direct) | ADR-0352 (amended) |
 
 ## Implementation steps
 
@@ -159,7 +159,7 @@ version before downloading.
       asks "Unlock the LoRaWAN module (it is erased)?". MCP: `flash`, `erase` and the `stm32_*` tools
       accept `target: "lrw"` (test).
 
-- [x] A5 `LrwUpdateProcedure` (ADR-0283): hold app → cable to LoRaWAN → identify / confirm unlock → flash | erase |
+- [x] A5 `LrwUpdateProcedure` (ADR-0352): hold app → cable to LoRaWAN → identify / confirm unlock → flash | erase |
       unlock → cable back → reset app; used by the GUI card and `hwio chester lrw flash|erase|unlock` (`--direct`
       skips it); `LteUpdateProcedure` names its target `lte`.
       Implementation notes: steps ConnectApp, HoldApp, ConnectLrw, NeedsUnlockConfirmation (RDP 1 before
@@ -188,7 +188,7 @@ version before downloading.
       Flash (unlock confirmation of an RDP 1 module: the procedure's text "…the module's original
       Murata firmware is removed.", [Unlock and erase]) · APP connector · Done ("LoRaWAN module
       flashed with <name>."). Kind cards: three columns from 1000 px.
-- [x] B2 Maintenance for `lrw`; Unlock confirmation text; "Check module" (D4) — hidden in rc.4 (D8, ADR-0283).
+- [x] B2 Maintenance for `lrw`; Unlock confirmation text; "Check module" (D4) — hidden in rc.4 (D8, ADR-0352).
       Implementation notes: with the expert actions the MCU choice lists "LoRaWAN module"; its
       [Erase chip…] and [Unlock (erase)…] open the `lrw-update` wizard (the ConfirmDialog
       first for erase / unlock; the unlock's consequence adds "The module's original Murata firmware

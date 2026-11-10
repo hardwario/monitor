@@ -26,7 +26,7 @@
 // upload date; "Unknown firmware" when unreadable) and its SHA-256 verifies the download. docsUrl
 // is the profile's documentation page of application firmware in the UI language.
 //
-// Plan 0040 (B1, ADR-0278, ADR-0283): the LoRaWAN module kind (LrwFirmware, target `lrw`) has the
+// Plan 0040 (B1, ADR-0278, ADR-0352): the LoRaWAN module kind (LrwFirmware, target `lrw`) has the
 // same two sources as the LTE kind: the designated firmware of its target (lora-modem for CHESTER,
 // an Intel HEX: DesignatedDownload::image) or an own .hex / .bin (start address as on the STM32
 // card). The designated part (lteSource, designated*) follows the target of the current kind; a

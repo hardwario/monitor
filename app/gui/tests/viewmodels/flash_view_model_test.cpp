@@ -1381,7 +1381,7 @@ TEST_F(Stm32FlashTest, MaintenanceErasesAndUnlocksTheChip) {
               QStringLiteral("The STM32L0 cat. 3, 64 KiB was erased (flash and data EEPROM)."));
 }
 
-// ---- plan 0040: the CHESTER LoRaWAN module (ADR-0283)
+// ---- plan 0040: the CHESTER LoRaWAN module (ADR-0352)
 // --------------------------------------------
 
 using LrwStep = hwio::device::LrwUpdateProcedure::Step;

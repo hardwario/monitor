@@ -1,5 +1,5 @@
 // The Embedded step "lrw-update" of the LoRaWAN module wizard (plan/features/0040-chester-lrw-module
-// .md B1, B2; ADR-0283), bound to LrwUpdateWizard (`vm`). Shows by `vm.stage`: a connector prompt
+// .md B1, B2; ADR-0352), bound to LrwUpdateWizard (`vm`). Shows by `vm.stage`: a connector prompt
 // (the dialog shows the picture), the running operation (prompt + PhaseStepper), the unlock
 // confirmation of a read-out protected module or the failure. Presentation only.
 pragma ComponentBehavior: Bound

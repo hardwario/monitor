@@ -1,4 +1,4 @@
-// Plan 0040 A5 (ADR-0283): LrwUpdateProcedure through the real session against the fake J-Link
+// Plan 0040 A5 (ADR-0352): LrwUpdateProcedure through the real session against the fake J-Link
 // library with a two-connector CHESTER ("connectors": app = nRF52840, lrw = STM32L0 cat. 5 192 KiB
 // that answers only while the app chip is halted, "needsHalted"; the test moves the cable by
 // writing the connector file): hold the app MCU, flash / erase / unlock the module, the unlock

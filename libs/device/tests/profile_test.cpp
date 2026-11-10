@@ -409,7 +409,7 @@ TEST(Profiles, ChesterLrwDesignatedFirmware) {
               "lte");
 }
 
-// Plan 0040 A2 (ADR-0274, ADR-0283): the LoRaWAN module target of CHESTER.
+// Plan 0040 A2 (ADR-0274, ADR-0352): the LoRaWAN module target of CHESTER.
 TEST(Profiles, ChesterLrwTarget) {
     const auto& chester = *ProfileRegistry::find("chester");
     ASSERT_EQ(chester.targets.size(), 3U);

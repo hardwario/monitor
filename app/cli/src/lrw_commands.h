@@ -1,7 +1,7 @@
 #pragma once
 
 // CHESTER LoRaWAN module commands (plan/features/0040-chester-lrw-module.md A4, ADR-0277,
-// ADR-0283):
+// ADR-0352):
 //   hwio chester lrw info
 //   hwio chester lrw flash [FILE] [--address ADDR] [--no-cache] [--direct [--halt]]
 //   hwio chester lrw erase [--yes] [--direct]

@@ -26,7 +26,7 @@
 // choice of the LTE MCU (cross-target, ADR-0057). revealRecover() (the troubleshooting hand-off of
 // target.protected) shows Recover for one MCU once, without changing the setting.
 //
-// Plan 0040 (B1, B2; ADR-0283): the LoRaWAN module kind (LrwFirmware, CHESTER target `lrw`) and the
+// Plan 0040 (B1, B2; ADR-0352): the LoRaWAN module kind (LrwFirmware, CHESTER target `lrw`) and the
 // `lrw` maintenance actions (Erase chip, Unlock) do not run on this page either: the module
 // answers only while the application MCU is held, so they open the LoRaWAN module wizard
 // ("lrw-update", LrwUpdateWizard) with a pending request (takeLrwRequest()) that drives
@@ -144,7 +144,7 @@ class FlashViewModel : public QObject {
     // The result ErrorPanel's custom action: "Unlock…" (target.protected on an STM32 chip) or
     // "Use <found chip>" (target.wrong_chip with a curated chip of the tab's device); "" = none.
     Q_PROPERTY(QString errorCustomActionText READ errorCustomActionText NOTIFY stateChanged)
-    // ---- plan 0040 (the CHESTER LoRaWAN module, ADR-0283) ----
+    // ---- plan 0040 (the CHESTER LoRaWAN module, ADR-0352) ----
     // The cabling note of the LoRaWAN card (the `lrw` connection guide, translated).
     Q_PROPERTY(QString lrwCableText READ lrwCableText NOTIFY textsChanged)
     // [Reset] and [Reset and halt] (not for the LoRaWAN module: the final reset of the
@@ -317,7 +317,7 @@ private:
     void runRecover(const QString& target);
     void runUnlock(const QString& target);
     [[nodiscard]] bool isStm32Target(const QString& targetId) const;
-    // Plan 0040: the CHESTER LoRaWAN module, reached only by the guided procedure (ADR-0283).
+    // Plan 0040: the CHESTER LoRaWAN module, reached only by the guided procedure (ADR-0352).
     [[nodiscard]] bool isGuidedTarget(const QString& targetId) const;
     void flashLrw();
     // Opens the LoRaWAN module wizard with `request` (pending until the wizard takes it).

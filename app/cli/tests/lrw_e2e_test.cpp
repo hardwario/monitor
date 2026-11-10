@@ -1,4 +1,4 @@
-// End-to-end tests of `hwio chester lrw` (plan/features/0040 A4, ADR-0277, ADR-0283): the real
+// End-to-end tests of `hwio chester lrw` (plan/features/0040 A4, ADR-0277, ADR-0352): the real
 // `hwio` executable with the fake J-Link library on a two-connector CHESTER (app = nRF52840,
 // lrw = STM32L0 cat. 5 192 KiB that answers only while the app chip is held, "needsHalted"), the
 // prepared firmware from a local HTTP fixture (test-only HWIO_DESIGNATED_URL / _SHA256).
