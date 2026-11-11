@@ -104,7 +104,7 @@ void FakeRelay::onNewConnection() {
     }
 }
 
-FakeRelay::Client* FakeRelay::find(QWebSocket* socket) {
+FakeRelay::Client* FakeRelay::find(const QWebSocket* socket) {
     const auto it = std::ranges::find_if(m_clients, [socket](const std::unique_ptr<Client>& c) {
         return c->socket.get() == socket;
     });
@@ -123,6 +123,7 @@ void FakeRelay::onText(Client& client, const QString& text) {
     static const QRegularExpression namespacePattern(QStringLiteral("^/\\d+$"));
     switch (sio->type) {
     case socketio::PacketType::Connect: {
+        dispatchPending(); // the next tick runs before the reply goes out
         if (!namespacePattern.match(sio->nsp).hasMatch()) {
             client.socket->sendTextMessage(
                 QStringLiteral("44%1,{\"message\":\"Invalid namespace\"}").arg(sio->nsp));
@@ -155,24 +156,27 @@ void FakeRelay::onText(Client& client, const QString& text) {
         }
         // Socket.IO 4 dispatches a received event on the next tick (socket.dispatch():
         // process.nextTick) and ignores it when the socket has disconnected by then: a DISCONNECT
-        // or a WebSocket close read in the same batch (both handled at once) loses it.
-        QMetaObject::invokeMethod(
-            this,
-            [this, socket = client.socket.get(), nsp = client.nsp, name = event->name,
-             payload = event->payload] {
-                Client* sender = find(socket);
-                if (sender == nullptr || sender->nsp != nsp) {
-                    return; // "ignore packet received after disconnection"
-                }
-                m_relayed.push_back(RelayedEvent{.nsp = nsp, .name = name, .payload = payload});
-                if (m_relayed.size() > maxRecorded) {
-                    m_relayed.pop_front();
-                }
-                // socket.broadcast.emit(name, data): every other socket of the namespace.
-                broadcast(nsp, socketio::encodeEvent(nsp, name, payload), sender);
-                emit eventRelayed(nsp, name);
-            },
-            Qt::QueuedConnection);
+        // or a WebSocket close read in the same batch (both handled at once) loses it. Node drains
+        // the nextTick queue before its next I/O read; Qt may process a socket read before a
+        // posted event (Windows), so the pending dispatches are also drained before every reply
+        // (dispatchPending()): what a client sends after a reply always comes in a later read.
+        if (m_pending.size() >= maxPending) {
+            m_pending.pop_front(); // bounded; the tests never come close
+        }
+        m_pending.push_back(Pending{.socket = client.socket.get(),
+                                    .nsp = client.nsp,
+                                    .name = event->name,
+                                    .payload = event->payload});
+        if (!m_dispatchPosted) {
+            m_dispatchPosted = true;
+            QMetaObject::invokeMethod(
+                this,
+                [this] {
+                    m_dispatchPosted = false;
+                    dispatchPending();
+                },
+                Qt::QueuedConnection);
+        }
         return;
     }
     case socketio::PacketType::Ack:
@@ -180,6 +184,25 @@ void FakeRelay::onText(Client& client, const QString& text) {
     case socketio::PacketType::BinaryEvent:
     case socketio::PacketType::BinaryAck:
         return;
+    }
+}
+
+void FakeRelay::dispatchPending() {
+    while (!m_pending.empty()) {
+        Pending item = std::move(m_pending.front());
+        m_pending.pop_front();
+        Client* sender = find(item.socket);
+        if (sender == nullptr || sender->nsp != item.nsp) {
+            continue; // "ignore packet received after disconnection"
+        }
+        m_relayed.push_back(
+            RelayedEvent{.nsp = item.nsp, .name = item.name, .payload = item.payload});
+        if (m_relayed.size() > maxRecorded) {
+            m_relayed.pop_front();
+        }
+        // socket.broadcast.emit(name, data): every other socket of the namespace.
+        broadcast(item.nsp, socketio::encodeEvent(item.nsp, item.name, item.payload), sender);
+        emit eventRelayed(item.nsp, item.name);
     }
 }
 

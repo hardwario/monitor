@@ -85,13 +85,27 @@ private:
     void onText(Client& client, const QString& text);
     void remove(QWebSocket* socket);
     void broadcast(const QString& nsp, const QString& text, const Client* except);
-    Client* find(QWebSocket* socket);
+    void dispatchPending();
+
+    // An event received and waiting for its dispatch ("next tick"); `socket` is only compared,
+    // never dereferenced (the client may be gone by then).
+    struct Pending {
+        const QWebSocket* socket = nullptr;
+        QString nsp;
+        QString name;
+        QJsonValue payload;
+    };
+    // Received events not dispatched yet; at most maxPending (oldest dropped).
+    static constexpr std::size_t maxPending = 10000;
+    Client* find(const QWebSocket* socket);
 
     Options m_options;
     std::unique_ptr<QWebSocketServer> m_server;
     std::vector<std::unique_ptr<Client>> m_clients;
     std::deque<RelayedEvent> m_relayed;
     QList<QString> m_dropped;
+    std::deque<Pending> m_pending;
+    bool m_dispatchPosted = false;
     QTimer m_pingTimer{this};
     bool m_pingsPaused = false;
     int m_nextSid = 1;

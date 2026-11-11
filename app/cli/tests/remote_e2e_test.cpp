@@ -76,7 +76,19 @@ public:
     Child& operator=(Child&&) = delete;
 
     void closeInput() { m_process.closeWriteChannel(); }
+#ifndef _WIN32
+    // SIGTERM: the CLI handles it like Ctrl+C (exit status 130).
     void terminate() { m_process.terminate(); }
+#endif
+    // Ends the child for cleanup: SIGTERM on POSIX; on Windows QProcess::terminate() only posts
+    // WM_CLOSE, which a console program never sees, so the child is killed (no exit status).
+    void stop() {
+#ifdef _WIN32
+        m_process.kill();
+#else
+        m_process.terminate();
+#endif
+    }
     bool finish(std::chrono::milliseconds timeout = 30s) {
         return runUntil([this] { return m_process.state() == QProcess::NotRunning; }, timeout);
     }
@@ -188,6 +200,9 @@ TEST_F(RemoteCli, HostSharesAndWithoutATerminalEndsAtTheFirstJoin) {
     EXPECT_TRUE(web.named(QStringLiteral("sync")).isEmpty());
 }
 
+// Ctrl+C (SIGTERM) and exit status 130: POSIX only, a test cannot send a console Ctrl+C to a
+// child on Windows (as mcp_e2e_test.cpp / e2e_test.cpp).
+#ifndef _WIN32
 TEST_F(RemoteCli, HostStreamsTheConsoleAndCtrlCEndsSharing) {
     FakeRelay relay;
     QStringList args{QStringLiteral("--json"), QStringLiteral("remote"), QStringLiteral("host")};
@@ -220,6 +235,7 @@ TEST_F(RemoteCli, HostCtrlCPrintsSharingEndedWithoutError) {
     EXPECT_EQ(child.err().find("Error:"), std::string::npos) << child.err();
     EXPECT_EQ(child.err().find("Cancelled by user."), std::string::npos) << child.err();
 }
+#endif // _WIN32
 
 TEST_F(RemoteCli, HostOverBluetooth) {
     FakeRelay relay;
@@ -231,7 +247,7 @@ TEST_F(RemoteCli, HostOverBluetooth) {
     ASSERT_TRUE(
         runUntil([&] { return child.remoteEvent(QStringLiteral("sharing")).has_value(); }, 30s))
         << child.err();
-    child.terminate();
+    child.stop();
     ASSERT_TRUE(child.finish());
 }
 
@@ -287,9 +303,11 @@ TEST_F(RemoteCli, JoinNotAllowed) {
     // timeout. End it sooner by stopping the relay.
     ASSERT_TRUE(runUntil([&] { return host.host.state() == hwio::remote::HostState::Ended; }));
     EXPECT_TRUE(host.console.sent.empty());
-    child.terminate();
+    child.stop();
     ASSERT_TRUE(child.finish());
-    EXPECT_EQ(child.exitCode(), 130);
+#ifndef _WIN32
+    EXPECT_EQ(child.exitCode(), 130); // SIGTERM as Ctrl+C; killed on Windows
+#endif
 }
 
 TEST_F(RemoteCli, JoinRequestsAResetAndTheCustomerAllows) {
@@ -391,8 +409,9 @@ TEST_F(RemoteCli, JoinConsoleShowsTheHostConsole) {
     ASSERT_TRUE(runUntil([&] { return child.out().find("live line") != std::string::npos; }, 10s))
         << child.out();
     EXPECT_NE(child.out().find("before join"), std::string::npos);
-    child.terminate();
-    ASSERT_TRUE(child.finish());
+    child.closeInput(); // the end of input ends the console (--linger 0)
+    ASSERT_TRUE(child.finish()) << child.err();
+    EXPECT_EQ(child.exitCode(), 0) << child.err();
 }
 
 // ADR-0354: the host's End sharing ends `remote join` with remote.host_ended.
