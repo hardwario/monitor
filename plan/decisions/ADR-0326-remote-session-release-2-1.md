@@ -1,6 +1,6 @@
 # ADR-0326 — Remote support session ships after 2.0.0
 
-- **Status:** Accepted
+- **Status:** Superseded by ADR-0337
 - **Date:** 2026-11-06
 - **Decided by:** Matej Strnad (remote support session planning, plan [0044](../features/0044-remote-support-session.md))
 

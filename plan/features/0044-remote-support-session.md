@@ -1,12 +1,12 @@
 # 0044 — Remote support session (HARDWARIO Terminal compatible)
 
 - **Status:** Approved (2026-11-09, Matej Strnad)
-- **Milestone:** 2.1 (after 2.0.0, ADR-0326)
+- **Milestone:** 2.0.0-rc.4 (ADR-0337, supersedes ADR-0326)
 - **Author:** Matej Strnad, Claude
 - **Related ADRs:** ADR-0334 (strict compatibility with the existing relay, 6-digit code), ADR-0335 (join approval),
   ADR-0336 (operations tunneled in `at` / `write`), ADR-0321 (QtWebSockets + own Socket.IO client),
   ADR-0322 (scope: console + flash/erase/recover/reset), ADR-0323 (firmware by catalog ID only),
-  ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0326 (2.1),
+  ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0337 (2.0.0-rc.4; supersedes ADR-0326),
   ADR-0328 (limits), ADR-0329 (TLS only), ADR-0330 (relay URL), ADR-0331 (CLI), ADR-0332 (no MCP),
   ADR-0333 (audit in the console file); superseded: ADR-0320, ADR-0327; builds on ADR-0004, ADR-0007, ADR-0037
 - **Depends on:** 0013 (operations), 0037 firmware catalog. Nothing on the relay or the web Terminal (ADR-0334).
@@ -228,7 +228,7 @@ stay on the device session's worker (unchanged). No shared mutable state.
 | D-0d | Firmware source | catalog ID / + file upload | catalog ID only | ADR-0323 |
 | D-0e | Consent | commands free + ops confirmed / once at start / everything | ops confirmed each; commands → see D-8 | ADR-0324 |
 | D-0f | Transports, roles | J-Link + BLE, host + join | J-Link + BLE, host + join | ADR-0325 |
-| D-0g | Release | 2.1 / 2.0.0 | 2.1 | ADR-0326 |
+| D-0g | Release | 2.1 / 2.0.0 | 2.0.0-rc.4 (2026-11-11) | ADR-0326 → ADR-0337 |
 | D-1 | Relay hardening spec | as proposed / adjust | dropped: relay stays unchanged | ADR-0327 → ADR-0334 |
 | D-2 | Idle timeout / max lifetime | 30 min / 8 h; 15 min / 2 h; none / 24 h | 30 min idle, 8 h max | ADR-0328 |
 | D-3 | Relay sees plaintext console | TLS only / E2E | TLS only (E2E impossible while compatible) | ADR-0329 |
