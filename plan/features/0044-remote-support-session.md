@@ -252,19 +252,24 @@ device session's worker (unchanged). No other shared mutable state.
 
 ## Implementation steps
 
-- [ ] A1 `libs/remote`: Engine.IO / Socket.IO client + fake relay for tests (`QWebSocketServer` copying
+- [x] A1 `libs/remote`: Engine.IO / Socket.IO client + fake relay for tests (`QWebSocketServer` copying
       `server/index.js`: namespace regex, `newClient` to all, broadcast to others, other events dropped)
-- [ ] A2 `RelayClient`, `SessionCode`, error mapping
-- [ ] A3 `RemoteHost`: console mapping, join approval, sync snapshot, collision detection, origin marker, limits,
+- [x] A2 `RelayClient`, `SessionCode`, error mapping
+- [x] A3 `RemoteHost`: console mapping, join approval, sync snapshot, collision detection, origin marker, limits,
       idle/lifetime timers, audit lines
-- [ ] A4 `RemoteConsoleSession` + `Transport::Remote`
-- [ ] A5 `TunnelCodec`, operation protocol, `ConsentProvider`, `RemoteOperationClient`
-- [ ] B1 CLI `remote host` / `remote join` (+ `--json`), CLI e2e tests against the fake relay
-- [ ] C1 GUI: Share dialog + banner with the code + remote markers; join-approval dialog; Join dialog + remote tab
-- [ ] C2 GUI: operation dialog, remote Flash page (catalog only)
-- [ ] C3 Translations (all languages, 0 unfinished), user docs `docs/<lang>/remote-support.md`
+- [x] A4 `RemoteConsoleSession` + `Transport::Remote`
+- [x] A5 `TunnelCodec`, operation protocol, `ConsentProvider`, `RemoteOperationClient`
+- [x] B1 CLI `remote host` / `remote join` (+ `--json`), CLI e2e tests against the fake relay
+- [x] C1 GUI: Share dialog + banner with the code + remote markers; join-approval dialog; Join dialog + remote tab
+- [x] C2 GUI: operation dialog, remote Flash page (catalog only)
+- [x] C3 Translations (all languages, 0 unfinished), user docs `docs/<lang>/remote-support.md`
 - [ ] D1 Interop with the real relay and web Terminal: the `~/terminal` server run locally (docker compose) for
       repeatable checks, then terminal.hardwario.com. All four host/joiner combinations.
+
+Automated verification passed on 2026-11-11 (7276fe4): linux-debug build and ctest (1796 tests), linux-tidy zero
+findings, all_qmllint, clang-format-21, check-lfs, check-includes, check_translations (0 unfinished), ASan remote and
+tst_gui tests (90), full linux-tsan (1737 tests, no suppression for Qt queued calls or our code). D1 is manual
+(checklist: [0044-d1-interop-checklist.md](0044-d1-interop-checklist.md)); the status becomes Done after it.
 
 ## Implementation notes (2026-11-10)
 
