@@ -105,7 +105,7 @@
 <context>
     <name>hwio::remote</name>
     <message numerus="yes">
-        <location filename="../../../libs/remote/src/relay_client.cpp" line="225"/>
+        <location filename="../../../libs/remote/src/relay_client.cpp" line="56"/>
         <source>… %n line(s) dropped …</source>
         <translation>
             <numerusform>… %n line dropped …</numerusform>
@@ -113,7 +113,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../libs/remote/src/remote_host.cpp" line="293"/>
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="294"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n remote command was dropped while waiting for your answer.</numerusform>

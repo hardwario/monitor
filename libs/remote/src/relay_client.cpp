@@ -50,6 +50,11 @@ namespace hwio::remote {
 
 namespace {
 
+// lupdate 6.8 does not extract plural QCoreApplication::translate() calls, so the text is marked
+// with QT_TRANSLATE_N_NOOP.
+constexpr const char* kDroppedLinesText =
+    QT_TRANSLATE_N_NOOP("hwio::remote", "… %n line(s) dropped …");
+
 // QWebSocket refuses bigger frames (the relay's own maxPayload is 1 MB); smaller ones over
 // maxIncomingEventBytes are dropped by the worker with a warning.
 constexpr qint64 maxSocketMessageBytes = 1024LL * 1024;
@@ -223,7 +228,7 @@ void RelayWorker::enqueue(Outgoing packet) {
     QJsonObject notice;
     notice.insert(QStringLiteral("event"), QStringLiteral("read"));
     notice.insert(QStringLiteral("data"),
-                  QCoreApplication::translate("hwio::remote", "… %n line(s) dropped …", nullptr,
+                  QCoreApplication::translate("hwio::remote", kDroppedLinesText, nullptr,
                                               static_cast<int>(dropped)));
     QString text = socketio::encodeEvent(m_nsp, QStringLiteral("at"), notice);
     const auto bytes = static_cast<std::size_t>(text.toUtf8().size());
