@@ -268,10 +268,12 @@ device session's worker (unchanged). No other shared mutable state.
 - [ ] D1 Interop with the real relay and web Terminal: the `~/terminal` server run locally (docker compose) for
       repeatable checks, then terminal.hardwario.com. All four host/joiner combinations.
 
-Automated verification passed on 2026-11-11 (7276fe4): linux-debug build and ctest (1796 tests), linux-tidy zero
+Automated verification passed on 2026-11-11 (9b34806): linux-debug build and ctest (1798 tests), linux-tidy zero
 findings, all_qmllint, clang-format-21, check-lfs, check-includes, check_translations (0 unfinished), ASan remote and
-tst_gui tests (90), full linux-tsan (1737 tests, no suppression for Qt queued calls or our code). D1 is manual
-(checklist: [0044-d1-interop-checklist.md](0044-d1-interop-checklist.md)); the status becomes Done after it.
+tst_gui tests (92), full linux-tsan (1739 tests, no suppression for Qt queued calls or our code). D1 local part done on
+a real CHESTER (CLI and GUI, both directions); the terminal.hardwario.com, web Terminal, second-machine and
+macOS/Windows checks remain (checklist: [0044-d1-interop-checklist.md](0044-d1-interop-checklist.md)); the status
+becomes Done after them.
 
 ## Implementation notes (2026-11-10)
 
