@@ -330,6 +330,7 @@ public:
     // probe(); a continuation file (.partN.log) replaces the name. Owner thread only.
     [[nodiscard]] std::filesystem::path consoleFile() const override;
     // Plan 0028: queued like setRttAddress(); the worker renames the console file.
+    [[nodiscard]] Status recordRemoteEvent(std::string text) override; // plan 0044
     [[nodiscard]] Status setFirmwareIdentity(std::optional<FirmwareIdentity> identity,
                                              std::uint64_t attach) override;
     // The last reported connection event (Connecting before the first one).

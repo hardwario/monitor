@@ -1,6 +1,6 @@
 # 0044 — Remote support session (HARDWARIO Terminal compatible)
 
-- **Status:** Approved (2026-11-09, Matej Strnad)
+- **Status:** In progress (approved 2026-11-09, Matej Strnad; implementation started 2026-11-10)
 - **Milestone:** 2.0.0-rc.4 (ADR-0337, supersedes ADR-0326)
 - **Author:** Matej Strnad, Claude
 - **Related ADRs:** ADR-0334 (strict compatibility with the existing relay, 6-digit code), ADR-0335 (join approval),
@@ -8,7 +8,10 @@
   ADR-0322 (scope: console + flash/erase/recover/reset), ADR-0323 (firmware by catalog ID only),
   ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0337 (2.0.0-rc.4; supersedes ADR-0326),
   ADR-0328 (limits), ADR-0329 (TLS only), ADR-0330 (relay URL), ADR-0331 (CLI), ADR-0332 (no MCP),
-  ADR-0333 (audit in the console file); superseded: ADR-0320, ADR-0327; builds on ADR-0004, ADR-0007, ADR-0037
+  ADR-0333 (audit in the console file), ADR-0354 (tunnel `end`, amends ADR-0336), ADR-0355 (approval again after
+  the host's reconnect, amends ADR-0335), ADR-0356 (secrets redacted toward the relay, amends ADR-0329),
+  ADR-0357 (relay events through a BoundedQueue, amends ADR-0321), ADR-0358 (delivery confirmed before the host
+  disconnects, amends ADR-0354); superseded: ADR-0320, ADR-0327; builds on ADR-0004, ADR-0007, ADR-0037
 - **Depends on:** 0013 (operations), 0037 firmware catalog. Nothing on the relay or the web Terminal (ADR-0334).
 
 ## Context
@@ -106,8 +109,8 @@ join before that participant's commands reach the device. Each flash, erase, rec
    Erase / Recover / Reset. Each one shows "Waiting for the customer's confirmation…", then progress and the
    result as reported by the host. With a web Terminal host the Flash page explains that only the console is
    available.
-5. Host ends (the socket stays but nothing arrives, or the relay connection drops) → banner "The session ended." The
-   tab stays read-only so the log can be saved. With a web Terminal host, Monitor can't tell "ended" from "quiet",
+5. Host ends (a Monitor host sends the tunnel `end`, ADR-0354, or the relay connection drops) → banner "The session
+   ended." The tab stays read-only so the log can be saved. With a web Terminal host, Monitor can't tell "ended" from "quiet",
    so after the idle limit it shows "No activity from the customer for 30 min" and offers to leave.
 
 ### Error messages (all via `hwio::Error`, translated)
@@ -183,7 +186,7 @@ has none).
 | `newClient` | relay → all in namespace | `null` | Host: the first one after its own connect is its own and is ignored. Every later one starts join approval. |
 | `at` | host → others | `{event: "state", data: "disconnected"\|"connection"\|"connected"}` | web-compatible |
 | `at` | host → others | `{event: "write", data: <line>}` / `{event: "read", data: <line>}` | web-compatible; also sent to participants not yet allowed (relay broadcast) |
-| `at` | host → others | `{event: "hwio", data: {v: 1, type: "hello"\|"op-accepted"\|"op-denied"\|"op-progress"\|"op-result", …}}` | Monitor only; the web Terminal ignores it |
+| `at` | host → others | `{event: "hwio", data: {v: 1, type: "hello"\|"op-accepted"\|"op-denied"\|"op-progress"\|"op-result"\|"end", …}}` | Monitor only; the web Terminal ignores it |
 | `sync` | host → others | `{state, commands: [{id, timestamp, command, index, response: {outputs, result: 0}}]}` | sent only after a join is allowed |
 | `write` | joiner → others | `<line>` (string) | shell line; the Monitor host passes it to the device only in the allowed state |
 | `write` | Monitor joiner → others | `{hwio: {v: 1, type: "hello"\|"op-request", …}}` (object) | only after the host's `hello`; never a string |
@@ -192,6 +195,12 @@ has none).
 `hello` (joiner): `{app: "hwio-monitor", version}`.
 `op-request`: `{id, kind: "flash"|"erase"|"recover"|"reset", target: "app"|"lte", firmwareId?}`.
 `op-result`: `{id, ok, error?: {code}}` (the joiner translates from `code`).
+`end` (host, ADR-0354): `{code}`, the hwio::Error id of the reason (`cancelled` for End sharing); sent before the host
+disconnects; it confirms delivery by a refused CONNECT to `/hwio-end` before the DISCONNECT (ADR-0358, at most 2 s).
+A Monitor joiner ends its session ("The session ended."), accepted only after the host's `hello`.
+
+Everything the host sends to the relay (`at` write/read lines, the `sync` transcript, audit marker texts) has secret
+command arguments and secret output values redacted by the ADR-0186 rules (ADR-0356).
 
 Only one operation runs at a time. Requests during an operation, a consent dialog or a join approval are denied with
 `busy`. The host validates every field (enum values, firmware ID format, target allowed by the device profile) before
@@ -199,9 +208,11 @@ it shows the dialog. The firmware is downloaded **by the host** from the catalog
 
 ### Threading
 
-Each `RemoteHost` / `RemoteConsoleSession` owns one worker `QThread` (explicit stop + join) for the socket and the
-JSON parsing. It talks to the `ConsoleSession` / operation runner only through queued signals. All vendor calls
-stay on the device session's worker (unchanged). No shared mutable state.
+Each `RemoteHost` / `RemoteConsoleSession` owns one relay worker thread, an owned `std::jthread` running a
+`QEventLoop` (explicit stop + join; ADR-0357), for the socket and the JSON parsing. The worker and its `RelayClient`
+exchange data only through two `BoundedQueue`s and payload-free wake-ups (ADR-0357, the ADR-0031 pattern). The
+`RelayClient` talks to the `ConsoleSession` / operation runner on the owner's thread. All vendor calls stay on the
+device session's worker (unchanged). No other shared mutable state.
 
 ### Limits (all bounded)
 
@@ -210,13 +221,15 @@ stay on the device session's worker (unchanged). No shared mutable state.
 | Incoming event size | 64 KiB (larger → dropped, `remote.protocol_error` warning; repeated → session ends) |
 | Remote `write` line | 512 bytes, max 20 lines/s (excess dropped, info line on the host) |
 | Outgoing queue to relay | 1 MiB. On overflow the oldest `read` lines are dropped and a "lines dropped" line is sent |
+| Relay thread hand-off (ADR-0357) | 4096 incoming events (full: warnings dropped, otherwise `remote.protocol_error`), 4096 outgoing sends (full: the oldest droppable send is dropped) |
+| Delivery before disconnect (ADR-0358) | the refused `/hwio-end` CONNECT is awaited at most 2 s (`RelayLimits::closeTimeout`), then the socket closes anyway |
 | `sync` snapshot | last 500 transcript entries / 256 KiB |
 | Joiner transcript from `sync` | 500 entries / 256 KiB (larger → truncated, oldest first) |
 | Join approval | 2 min, then the session ends |
 | Operation confirmation | 60 s, then deny |
 | Idle / lifetime | 30 min idle (warning at 28 min), 8 h max, enforced by Monitor (ADR-0328, ADR-0334) |
 | Collision check | 2 s after connect, max 3 new codes |
-| Reconnect | Engine.IO reconnect with backoff 1 s → 30 s, max 5 min, then end. The host's own reconnect causes a `newClient` that it ignores; the others see a join, which a Monitor host on their side doesn't have. |
+| Reconnect | Engine.IO reconnect with backoff 1 s → 30 s, max 5 min, then end. The host's own reconnect causes a `newClient` that it ignores; the others see a join, which a Monitor host on their side doesn't have. After its own reconnect the host asks the join question again (ADR-0355). |
 
 ## Decisions requiring user confirmation
 
@@ -241,19 +254,59 @@ stay on the device session's worker (unchanged). No shared mutable state.
 
 ## Implementation steps
 
-- [ ] A1 `libs/remote`: Engine.IO / Socket.IO client + fake relay for tests (`QWebSocketServer` copying
+- [x] A1 `libs/remote`: Engine.IO / Socket.IO client + fake relay for tests (`QWebSocketServer` copying
       `server/index.js`: namespace regex, `newClient` to all, broadcast to others, other events dropped)
-- [ ] A2 `RelayClient`, `SessionCode`, error mapping
-- [ ] A3 `RemoteHost`: console mapping, join approval, sync snapshot, collision detection, origin marker, limits,
+- [x] A2 `RelayClient`, `SessionCode`, error mapping
+- [x] A3 `RemoteHost`: console mapping, join approval, sync snapshot, collision detection, origin marker, limits,
       idle/lifetime timers, audit lines
-- [ ] A4 `RemoteConsoleSession` + `Transport::Remote`
-- [ ] A5 `TunnelCodec`, operation protocol, `ConsentProvider`, `RemoteOperationClient`
-- [ ] B1 CLI `remote host` / `remote join` (+ `--json`), CLI e2e tests against the fake relay
-- [ ] C1 GUI: Share dialog + banner with the code + remote markers; join-approval dialog; Join dialog + remote tab
-- [ ] C2 GUI: operation dialog, remote Flash page (catalog only)
-- [ ] C3 Translations (all languages, 0 unfinished), user docs `docs/<lang>/remote-support.md`
+- [x] A4 `RemoteConsoleSession` + `Transport::Remote`
+- [x] A5 `TunnelCodec`, operation protocol, `ConsentProvider`, `RemoteOperationClient`
+- [x] B1 CLI `remote host` / `remote join` (+ `--json`), CLI e2e tests against the fake relay
+- [x] C1 GUI: Share dialog + banner with the code + remote markers; join-approval dialog; Join dialog + remote tab
+- [x] C2 GUI: operation dialog, remote Flash page (catalog only)
+- [x] C3 Translations (all languages, 0 unfinished), user docs `docs/<lang>/remote-support.md`
 - [ ] D1 Interop with the real relay and web Terminal: the `~/terminal` server run locally (docker compose) for
       repeatable checks, then terminal.hardwario.com. All four host/joiner combinations.
+
+Automated verification passed on 2026-11-11 (9b34806): linux-debug build and ctest (1798 tests), linux-tidy zero
+findings, all_qmllint, clang-format-21, check-lfs, check-includes, check_translations (0 unfinished), ASan remote and
+tst_gui tests (92), full linux-tsan (1739 tests, no suppression for Qt queued calls or our code). D1 local part done on
+a real CHESTER (CLI and GUI, both directions); the terminal.hardwario.com, web Terminal, second-machine and
+macOS/Windows checks remain (checklist: [0044-d1-interop-checklist.md](0044-d1-interop-checklist.md)); the status
+becomes Done after them.
+
+## Implementation notes (2026-11-10)
+
+Details fixed while implementing A1–C3, all confirmed by the user on 2026-11-10. Those that change security
+behaviour became ADRs (ADR-0355, ADR-0356); ADR-0354 adds the tunnel `end`.
+
+- **Host reconnect needs approval again (ADR-0355).** After the host's own relay reconnect, the host asks the join question again
+  (when someone was allowed before). A participant who connected while the host was away was never announced to it
+  (the relay sends `newClient` only to sockets that are connected at that moment). This follows ADR-0335's rule for
+  reconnecting participants.
+- **Test-only http relays.** `parseRelayUrl()` accepts `http://` for loopback hosts only in builds with
+  `HWIO_TEST_OVERRIDES` (Debug and test presets, never shipped), for the in-process `FakeRelay` of the tests.
+  Shipped builds accept https only (ADR-0330).
+- **`SessionKey` unchanged.** `SessionKey` stays `ProbeKey | BleKey`: it names lockable hardware (probe locks, console
+  file retention, the session registry). A remote tab is identified by its session code
+  (`SessionIdentity{Transport::Remote, "<code>"}`) and is never restored.
+- **Secrets toward the relay (ADR-0356).** The host sends commands with secret arguments and secret output values redacted, by the
+  same ADR-0186 rules as the console file (`claim token: <redacted>`).
+- **Remote marker = audit marker.** A remote command is shown in the host's console as the audit marker line
+  "— Remote: … —" before its echo (the MCP marker style). The echo itself carries `LineSource::Remote` (JSON, MCP).
+  The audit markers reach the console file as `@` lines through `ConsoleSession::recordRemoteEvent()` (J-Link worker,
+  BLE thread `RecordNote`).
+- **Web Terminal codes.** A joiner normalises the code as the web Terminal does (`Number(code)`): `012345` joins
+  namespace `/12345`; `0` is not a session.
+- **The joiner learns the end from the tunnel `end` (ADR-0354).** The relay does not announce disconnects, so a
+  Monitor host sends `end` before it disconnects. With a web Terminal host the joiner's tab ends when its relay
+  connection fails, and shows the idle notice after 30 min otherwise.
+- **Limits instead of a fake clock.** Tests shrink `HostLimits` / `RelayLimits` (as libs/mcp does) instead of injecting
+  a clock.
+- **Operation mapping.** Remote erase = `EraseScope::Code` on `app` (UICR and PIB kept) and `EraseScope::All` on `lte`
+  (as `chester lte erase`); reset = `ResetMode::Go`; flash = catalog firmware on `app` only.
+- **No silent queries from remote tabs.** A remote tab never sends `info show` or any other silent shell query (no
+  `DeviceInfoWatcher`, so the command tree is not learned either).
 
 ## Tests and verification
 
@@ -284,6 +337,7 @@ stay on the device session's worker (unchanged). No shared mutable state.
 - The protocol and transcript format belong to the web Terminal. A change in `~/terminal` breaks interop. A short
   interop note in the Terminal repository (with its owners' agreement) and the D1 check before each Monitor release
   reduce the risk.
-- With a web Terminal host, Monitor can't detect the session end except by the connection dropping. The idle notice
+- With a web Terminal host, Monitor can't detect the session end except by the connection dropping (a Monitor host
+  sends `end`, ADR-0354). The idle notice
   covers that case.
 - QtWebSockets is a new Qt module in the packages (LGPL, dynamic). It must be added to deployment (0015) on all OSes.

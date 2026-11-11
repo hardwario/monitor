@@ -135,7 +135,7 @@ set(HWIO_LINUX_QML_MODULES
 
 # Qt translation catalogs deployed for each UI language other than English (ADR-0027, ADR-0211);
 # missing catalogs (e.g. qtdeclarative_cs, qtconnectivity_sk in some Qt versions) are skipped.
-set(HWIO_QT_CATALOGS qtbase qtdeclarative qtconnectivity)
+set(HWIO_QT_CATALOGS qtbase qtdeclarative qtconnectivity qtwebsockets)
 set(HWIO_QT_LOCALES cs de pl sk)
 
 function(hwio_generate_package_kind_header)

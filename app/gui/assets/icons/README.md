@@ -47,6 +47,7 @@ these files. SVG is text and is not stored in Git LFS. The icons are compiled in
 | `resume.svg` | `play_arrow` | paused console view | `56b40dffbc6830b7b506f42e6f6e230189d52924bca018ae8ac8f99c4110cd85` |
 | `save.svg` | `save` | Save view… (console) | `3d34bab9e571f0fc0f840662d178377237f5906e87e8ff295dd04e07b8ceea35` |
 | `settings.svg` | `settings` | Settings page | `6aebb4a88b40a5bf1ce378ca532e4a885aedc402a0574562c6ed4ded03360fd2` |
+| `share.svg` | `share` | Share with support, remote session banner (0044) | `a117c58801f1690ef8bc642fa9ce135d44f36c5c36e158f05891e462ff204e24` |
 | `signal_0.svg` | `signal_cellular_0_bar` | Bluetooth signal level 0 (0 = unknown, 0012) | `0ae47ea10ab4546e2a6d854fb3a7986b4b4ba6a5c891d8b4aea0b856c1548720` |
 | `signal_1.svg` | `signal_cellular_1_bar` | Bluetooth signal level 1 (0 = unknown, 0012) | `53530300b9b7c248f8becdb0fae7cb1bf36c9c960c784bf06e311f8fe65b446d` |
 | `signal_2.svg` | `signal_cellular_2_bar` | Bluetooth signal level 2 (0 = unknown, 0012) | `70d120b077bad173f142276d19f1aa104965118df7959fb2fce1ab7d2492e1f3` |

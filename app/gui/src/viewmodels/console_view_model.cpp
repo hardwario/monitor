@@ -128,6 +128,12 @@ ConsoleViewModel::ConsoleViewModel(DeviceTabViewModel* tab, ConsoleContext conte
     connect(m_batch, &BatchRunner::finished, this, &ConsoleViewModel::onBatchFinished);
 
     connect(m_tab, &DeviceTabViewModel::sessionChanged, this, &ConsoleViewModel::attachSession);
+    // Plan 0044: a remote session replaced the log with the host's history.
+    connect(m_tab, &DeviceTabViewModel::consoleReplaced, this, [this] {
+        m_shell->reloadRows();
+        m_log->reloadRows();
+        scheduleRefresh();
+    });
     connect(m_tab, &DeviceTabViewModel::stateChanged, this, [this] {
         stateChanged(); // signal
         scheduleRefresh();

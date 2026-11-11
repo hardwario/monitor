@@ -14,8 +14,9 @@ Inne języki: [Čeština](../cs/index.md) · [Deutsch](../de/index.md) · [Slove
 3. [Konsola](console.md): powłoka i log, wyszukiwanie i filtrowanie, historia, pliki wsadowe, pliki konsoli
 4. [Wgrywanie firmware](flashing.md): firmware aplikacji i LTE, identyfikatory z katalogu, UICR, kasowanie, recover
 5. [Bluetooth LE](bluetooth.md): konsola przez Bluetooth, parowanie
-6. [Rozwiązywanie problemów](troubleshooting.md): typowe problemy i wszystkie kody błędów
-7. [Prywatność i przechowywane dane](privacy.md): sprawdzanie aktualizacji, raport diagnostyczny, miejsca przechowywania danych
+6. [Zdalne wsparcie](remote-support.md): udostępnianie konsoli wsparciu HARDWARIO, dołączanie do sesji
+7. [Rozwiązywanie problemów](troubleshooting.md): typowe problemy i wszystkie kody błędów
+8. [Prywatność i przechowywane dane](privacy.md): sprawdzanie aktualizacji, raport diagnostyczny, miejsca przechowywania danych
 
 ## Dokumentacja referencyjna (tylko po angielsku)
 

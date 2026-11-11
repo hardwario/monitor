@@ -130,6 +130,16 @@ enum class ErrorCode : std::uint8_t {
     TargetOtherConnector,
     // rc.3 HIL H5 (plan/features/0033-rc2-feedback.md, ADR-0273)
     TargetResetDuringUpdate,
+    // Remote support session (plan/features/0044-remote-support-session.md, ADR-0334..0336)
+    RemoteRelayUnreachable,
+    RemoteCodeInvalid,
+    RemoteCodeCollision,
+    RemoteJoinNotAllowed,
+    RemoteHostEnded,
+    RemoteOperationDenied,
+    RemoteOperationUnsupportedPeer,
+    RemoteFirmwareNotInCatalog,
+    RemoteProtocolError,
 };
 
 // Wizards the UI can offer to fix an error (M4). Serialized as kebab-case ids.
@@ -410,6 +420,33 @@ inline constexpr std::array errorTable{
     ErrorInfo{.code = ErrorCode::TargetResetDuringUpdate,
               .id = "target.reset_during_update",
               .category = ErrorCategory::Target},
+    ErrorInfo{.code = ErrorCode::RemoteRelayUnreachable,
+              .id = "remote.relay_unreachable",
+              .category = ErrorCategory::Network},
+    ErrorInfo{.code = ErrorCode::RemoteCodeInvalid,
+              .id = "remote.code_invalid",
+              .category = ErrorCategory::Usage},
+    ErrorInfo{.code = ErrorCode::RemoteCodeCollision,
+              .id = "remote.code_collision",
+              .category = ErrorCategory::Network},
+    ErrorInfo{.code = ErrorCode::RemoteJoinNotAllowed,
+              .id = "remote.join_not_allowed",
+              .category = ErrorCategory::Cancelled},
+    ErrorInfo{.code = ErrorCode::RemoteHostEnded,
+              .id = "remote.host_ended",
+              .category = ErrorCategory::Network},
+    ErrorInfo{.code = ErrorCode::RemoteOperationDenied,
+              .id = "remote.operation_denied",
+              .category = ErrorCategory::Cancelled},
+    ErrorInfo{.code = ErrorCode::RemoteOperationUnsupportedPeer,
+              .id = "remote.operation_unsupported_peer",
+              .category = ErrorCategory::Usage},
+    ErrorInfo{.code = ErrorCode::RemoteFirmwareNotInCatalog,
+              .id = "remote.firmware_not_in_catalog",
+              .category = ErrorCategory::Firmware},
+    ErrorInfo{.code = ErrorCode::RemoteProtocolError,
+              .id = "remote.protocol_error",
+              .category = ErrorCategory::Network},
 };
 
 // Compile-time checks of errorTable (ids unique and well-formed, index == enum value, every

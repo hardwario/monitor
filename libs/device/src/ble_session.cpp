@@ -280,6 +280,16 @@ void BleConsoleHandler::onLineWritten(std::string line) {
     emitLine(std::move(echo)); // only after it was written (ADR-0082)
 }
 
+void BleConsoleHandler::onNote(std::string text) {
+    ConsoleLine marker;
+    marker.channel = Channel::Shell;
+    marker.dir = Direction::Marker;
+    marker.time = std::chrono::system_clock::now();
+    marker.text = std::move(text);
+    marker.source = LineSource::Remote;
+    emitLine(std::move(marker));
+}
+
 void BleConsoleHandler::onLineRejected(std::string /*line*/, Error error) {
     emitEvent(BleLineRejected{});
     if (error.code == ErrorCode::TargetNotConnected && m_config.autoReconnect && !m_fatal) {
@@ -536,10 +546,11 @@ Status BleSession::sendLine(std::string line) {
         return held; // plan 0021: a shell query runs (ADR-0175)
     }
     const std::uint64_t origin = sendingOrigin();
+    const LineSource source = sendingSource();
     Status posted =
         m_host->post(ble::SendLine{.client = m_internals->client, .line = std::move(line)});
     if (posted) {
-        m_linesInFlight.push_back(origin);
+        m_linesInFlight.push_back(LineInFlight{.origin = origin, .source = source});
         lineQueued();
     }
     return posted;
@@ -578,6 +589,14 @@ const DeviceProfile& BleSession::profile() const noexcept { return *m_internals-
 std::string_view BleSession::consoleTargetId() const { return m_internals->target->id; }
 
 std::filesystem::path BleSession::consoleFile() const { return m_consoleFile; }
+
+Status BleSession::recordRemoteEvent(std::string text) {
+    if (m_closed) {
+        return fail(ErrorCode::Cancelled);
+    }
+    return m_host->post(ble::RecordNote{.client = m_internals->client,
+                                        .text = boundedRemoteEvent(std::move(text))});
+}
 
 Status BleSession::setFirmwareIdentity(std::optional<FirmwareIdentity> identity,
                                        std::uint64_t attach) {
@@ -729,7 +748,9 @@ bool BleSession::handleEvent(detail::BleSessionEvent& event, QList<ConsoleLine>&
     std::visit(Overloaded{
                    [&](ConsoleLine& line) {
                        if (line.dir == Direction::In && !m_linesInFlight.empty()) {
-                           line.origin = m_linesInFlight.front(); // the echo: written (B4)
+                           // The echo: written (B4).
+                           line.origin = m_linesInFlight.front().origin;
+                           line.source = m_linesInFlight.front().source;
                            m_linesInFlight.pop_front();
                        }
                        if (captureLine(line)) {

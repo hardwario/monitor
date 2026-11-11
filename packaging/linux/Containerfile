@@ -6,7 +6,7 @@
 #     packages are built against (.deb: libstdc++6 >= 13). libstdc++ 13 is also the regression check
 #     of ADR-0177 (meta-registered std::expected types need operator==); do not raise it to 15.
 #   - CMake >= 3.28 from the Kitware APT repository, Ninja,
-#   - Qt 6.8.3 linux_gcc_64 + qtconnectivity installed by aqtinstall (pinned) into /opt/qt,
+#   - Qt 6.8.3 linux_gcc_64 + qtconnectivity + qtwebsockets installed by aqtinstall (pinned) into /opt/qt,
 #   - packaging tools: dpkg-dev, lintian, desktop-file-utils, appstream, file, patchelf,
 #   - linuxdeploy, appimagetool and the type-2 runtime (pinned releases, SHA-256 checked),
 #   - a UTF-8 locale (the tests need it).
@@ -66,7 +66,7 @@ RUN curl -fsSL --retry 5 --retry-delay 10 --retry-all-errors https://apt.llvm.or
 RUN python3 -m venv /opt/aqt \
     && /opt/aqt/bin/pip install --no-cache-dir "aqtinstall==${AQT_VERSION}" \
     && /opt/aqt/bin/aqt install-qt linux desktop "${QT_VERSION}" linux_gcc_64 \
-        -m qtconnectivity -O /opt/qt \
+        -m qtconnectivity qtwebsockets -O /opt/qt \
     && rm -rf /root/.cache aqtinstall.log
 ENV QT_ROOT_DIR=/opt/qt/${QT_VERSION}/gcc_64
 

@@ -1,6 +1,6 @@
 # ADR-0321 — QtWebSockets in the backend, own Engine.IO / Socket.IO client
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0357)
 - **Date:** 2026-11-06
 - **Decided by:** Matej Strnad (remote support session planning, plan [0044](../features/0044-remote-support-session.md))
 

@@ -59,6 +59,11 @@ set(HWIO_GUI_QML_FILES
     qml/pages/FlashPage.qml
     qml/pages/PlaceholderPage.qml
     qml/pages/SettingsPage.qml
+    qml/remote/JoinDialog.qml
+    qml/remote/RemoteBanner.qml
+    qml/remote/RemoteFlashCard.qml
+    qml/remote/RemoteSessionDialogs.qml
+    qml/remote/ShareDialog.qml
     qml/settings/AboutSection.qml
     qml/settings/AdvancedSection.qml
     qml/settings/GeneralSection.qml
@@ -179,6 +184,10 @@ qt_add_qml_module(hwio_gui
         src/viewmodels/probe_firmware_view_model.h
         src/viewmodels/probe_picker_view_model.cpp
         src/viewmodels/probe_picker_view_model.h
+        src/viewmodels/remote_join_view_model.cpp
+        src/viewmodels/remote_join_view_model.h
+        src/viewmodels/remote_share_view_model.cpp
+        src/viewmodels/remote_share_view_model.h
         src/viewmodels/recent_sources_model.cpp
         src/viewmodels/recent_sources_model.h
         src/viewmodels/settings_view_model.cpp
@@ -229,6 +238,7 @@ target_link_libraries(hwio_gui PUBLIC
     hwio::firmware
     hwio::mcp
     hwio::mcp_tools
+    hwio::remote
     hwio::update
     Qt6::Core
     Qt6::Gui

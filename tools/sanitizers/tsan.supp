@@ -44,3 +44,15 @@ race:tzset_internal
 # Not a suppression: the tests that use QNetworkAccessManager (firmware catalog) are not run under
 # TSan at all - see libs/firmware/tests/CMakeLists.txt and app/cli/tests/CMakeLists.txt (Qt's HTTP
 # thread is uninstrumented; plan/features/0003, review R11).
+
+# glib/GIO worker threads of the system Qt (libQt6Network's proxy / network-information setup through
+# GSettings/dconf, started when RelayWorker::start() creates a QWebSocket, plan/features/0044): glib's
+# 'dconf worker' thread g_malloc()s data that the 'gdbus' thread later frees. glib synchronizes the
+# hand-off with its own GMutex/GCond futexes inside uninstrumented libglib-2.0, so TSan misses the
+# happens-before edge. Both access stacks are entirely inside libglib-2.0 (our code appears only in
+# the thread-creation stack); seen in hwio_remote_tests (RelayClient, RemoteHost, RemoteSession),
+# hwio_cli_tests and hwio (RemoteCli.*). Matches only reports with a frame inside libglib-2.0.
+race:libglib-2.0.so
+# Same glib worker threads, GIO side: the gdbus thread's sendmsg() (g_socket_send_message_with_timeout)
+# reads a g_realloc()ed GIO buffer filled by libgio on the relay thread; only GIO touches it.
+race:libgio-2.0.so

@@ -34,6 +34,15 @@ enum class LogLevel : std::uint8_t {
     Hexdump,
 };
 
+// Plan 0044 (ADR-0333, ADR-0335): who caused a line. Remote = a command a remote support session
+// participant sent (its echo) or an audit marker of a remote session (ConsoleSession::
+// recordRemoteEvent()); Local for everything else. Shown as the remote marker in the GUI, visible
+// to MCP with the line; console files get the audit markers as "@" lines.
+enum class LineSource : std::uint8_t {
+    Local,
+    Remote,
+};
+
 struct ConsoleLine {
     std::uint64_t seq = 0; // position in the ConsoleLog (assigned by ConsoleLog::append)
     Channel channel = Channel::Shell;
@@ -46,6 +55,7 @@ struct ConsoleLine {
     // recognises its own echo by origin, not by text; 0 for every other line. Not stored in
     // console files or JSON.
     std::uint64_t origin = 0;
+    LineSource source = LineSource::Local; // plan 0044
 };
 
 // Stable lowercase ids used in JSON and console files.
@@ -53,6 +63,8 @@ struct ConsoleLine {
 [[nodiscard]] std::string_view directionId(Direction direction) noexcept; // "out", "in", "marker"
 // "dbg", "inf", "wrn", "err", "hex" (ADR-0171), or none.
 [[nodiscard]] std::optional<std::string_view> levelId(LogLevel level) noexcept;
+// "local", "remote" (plan 0044, JSON).
+[[nodiscard]] std::string_view lineSourceId(LineSource source) noexcept;
 
 } // namespace hwio::device
 

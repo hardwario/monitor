@@ -34,6 +34,15 @@ race:QObject::moveToThread
 race:QMetaObject::invokeMethod
 # glibc tzset_internal under Qt's environmentMutex: see tsan.supp (plan/features/0019).
 race:tzset_internal
+# glib/GIO worker threads of the system Qt ('dconf worker' / 'gdbus', started when RelayWorker::start()
+# creates a QWebSocket, plan/features/0044): data g_malloc()ed on one glib thread is freed on another,
+# synchronized by GMutex/GCond futexes inside uninstrumented libglib-2.0, so TSan misses the
+# happens-before edge. Both access stacks are entirely inside libglib-2.0; see tsan.supp. Seen in
+# tst_gui.tst_remote. Matches only reports with a frame inside libglib-2.0.
+race:libglib-2.0.so
+# Same glib worker threads, GIO side: the gdbus thread's sendmsg() (g_socket_send_message_with_timeout)
+# reads a g_realloc()ed GIO buffer filled by libgio on the relay thread; only GIO touches it.
+race:libgio-2.0.so
 
 # The QML type loader thread registers the metatype converters of our value types
 # (QList<ErrorInfo>, ...) while the GUI thread reads the registry; QMetaType's registry is

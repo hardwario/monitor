@@ -146,6 +146,15 @@ consteval bool isEnumerator(ErrorCode code) {
     case ErrorCode::UsbWorldAccessible:
     case ErrorCode::TargetOtherConnector:
     case ErrorCode::TargetResetDuringUpdate:
+    case ErrorCode::RemoteRelayUnreachable:
+    case ErrorCode::RemoteCodeInvalid:
+    case ErrorCode::RemoteCodeCollision:
+    case ErrorCode::RemoteJoinNotAllowed:
+    case ErrorCode::RemoteHostEnded:
+    case ErrorCode::RemoteOperationDenied:
+    case ErrorCode::RemoteOperationUnsupportedPeer:
+    case ErrorCode::RemoteFirmwareNotInCatalog:
+    case ErrorCode::RemoteProtocolError:
         return true;
     }
     return false;
@@ -1265,6 +1274,114 @@ constexpr std::array defaultTexts{
             "firmware… in the desktop app, or `hwio chester lte flash --guided`.",
             "target.reset_during_update suggestion"),
         .wizard = WizardId::LteUpdate,
+    },
+    DefaultTexts{
+        .code = ErrorCode::RemoteRelayUnreachable,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "Cannot reach the support server.",
+                                      "remote.relay_unreachable message"),
+        .cause = QT_TRANSLATE_NOOP3("hwio::core",
+                                    "The network, a proxy or a firewall blocks the connection to "
+                                    "the support server (wss://terminal.hardwario.com).",
+                                    "remote.relay_unreachable cause"),
+        .suggestion = QT_TRANSLATE_NOOP3("hwio::core",
+                                         "Check the internet connection or try another network.",
+                                         "remote.relay_unreachable suggestion"),
+    },
+    DefaultTexts{
+        .code = ErrorCode::RemoteCodeInvalid,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "The session code is not valid.",
+                                      "remote.code_invalid message"),
+        .cause = QT_TRANSLATE_NOOP3("hwio::core",
+                                    "The session code must be a number: 6 digits from HARDWARIO "
+                                    "Monitor, up to 6 digits from the web Terminal.",
+                                    "remote.code_invalid cause"),
+        .suggestion = QT_TRANSLATE_NOOP3("hwio::core", "Check the code and type it again.",
+                                         "remote.code_invalid suggestion"),
+    },
+    DefaultTexts{
+        .code = ErrorCode::RemoteCodeCollision,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "Another device is using this session code.",
+                                      "remote.code_collision message"),
+        .cause = QT_TRANSLATE_NOOP3("hwio::core",
+                                    "Someone else shares a console under the same session code. "
+                                    "The session was ended for safety.",
+                                    "remote.code_collision cause"),
+        .suggestion = QT_TRANSLATE_NOOP3("hwio::core", "Start sharing again to get a new code.",
+                                         "remote.code_collision suggestion"),
+    },
+    DefaultTexts{
+        .code = ErrorCode::RemoteJoinNotAllowed,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "The customer did not allow you to join.",
+                                      "remote.join_not_allowed message"),
+        .cause = QT_TRANSLATE_NOOP3("hwio::core",
+                                    "The customer ended the session instead of allowing you, or "
+                                    "did not answer within 2 minutes.",
+                                    "remote.join_not_allowed cause"),
+        .suggestion = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "Ask the customer to share the console again and to allow you when you join.",
+            "remote.join_not_allowed suggestion"),
+    },
+    DefaultTexts{
+        .code = ErrorCode::RemoteHostEnded,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "The remote session ended.",
+                                      "remote.host_ended message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "The customer ended sharing, or their device or HARDWARIO Monitor disconnected.",
+            "remote.host_ended cause"),
+        .suggestion = QT_TRANSLATE_NOOP3(
+            "hwio::core", "Ask the customer to share the console again if you need more time.",
+            "remote.host_ended suggestion"),
+    },
+    DefaultTexts{
+        .code = ErrorCode::RemoteOperationDenied,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "The customer denied the request.",
+                                      "remote.operation_denied message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core", "The customer denied the operation, or did not answer within 60 seconds.",
+            "remote.operation_denied cause"),
+        .suggestion = QT_TRANSLATE_NOOP3("hwio::core",
+                                         "Ask the customer to allow the operation and try again.",
+                                         "remote.operation_denied suggestion"),
+    },
+    DefaultTexts{
+        .code = ErrorCode::RemoteOperationUnsupportedPeer,
+        .message = QT_TRANSLATE_NOOP3("hwio::core",
+                                      "The customer's application supports only the console.",
+                                      "remote.operation_unsupported_peer message"),
+        .cause = QT_TRANSLATE_NOOP3("hwio::core",
+                                    "The customer uses the web Terminal, which cannot flash, "
+                                    "erase, recover or reset the device remotely.",
+                                    "remote.operation_unsupported_peer cause"),
+        .suggestion = QT_TRANSLATE_NOOP3(
+            "hwio::core", "Ask the customer to share the console from HARDWARIO Monitor.",
+            "remote.operation_unsupported_peer suggestion"),
+    },
+    DefaultTexts{
+        .code = ErrorCode::RemoteFirmwareNotInCatalog,
+        .message =
+            QT_TRANSLATE_NOOP3("hwio::core", "This firmware is not in the HARDWARIO catalog.",
+                               "remote.firmware_not_in_catalog message"),
+        .cause = QT_TRANSLATE_NOOP3("hwio::core",
+                                    "Remote flashing accepts only firmware from the HARDWARIO "
+                                    "firmware catalog, identified by its ID.",
+                                    "remote.firmware_not_in_catalog cause"),
+        .suggestion = QT_TRANSLATE_NOOP3(
+            "hwio::core", "Check the firmware ID, or ask the customer to flash a file locally.",
+            "remote.firmware_not_in_catalog suggestion"),
+    },
+    DefaultTexts{
+        .code = ErrorCode::RemoteProtocolError,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "Unexpected data in the remote session.",
+                                      "remote.protocol_error message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "The support server or the other participant sent data that HARDWARIO Monitor does not "
+            "understand. It was ignored, or the session was ended for safety.",
+            "remote.protocol_error cause"),
+        .suggestion = QT_TRANSLATE_NOOP3("hwio::core", "Report the issue with a diagnostic report.",
+                                         "remote.protocol_error suggestion"),
     },
 };
 

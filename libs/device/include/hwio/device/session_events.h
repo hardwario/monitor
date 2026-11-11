@@ -17,8 +17,9 @@
 
 namespace hwio::device {
 
-// The transport of a console session (ADR-0079).
-enum class Transport : std::uint8_t { JLink, Ble };
+// The transport of a console session (ADR-0079). Remote (plan 0044, ADR-0325): the joiner side of
+// a remote support session (hwio::remote::RemoteConsoleSession), no hardware of its own.
+enum class Transport : std::uint8_t { JLink, Ble, Remote };
 
 enum class ConnectionState : std::uint8_t {
     Connecting, // the worker loads the library, opens the probe, connects and attaches RTT
@@ -74,7 +75,7 @@ using SessionEvent = std::variant<ConsoleLine, ConnectionEvent, LinesDropped, Wa
 
 // "connecting", "probeOpen", "connected", "disconnected", "stopped" (JSON).
 [[nodiscard]] std::string_view connectionStateId(ConnectionState state) noexcept;
-// "jlink", "ble" (JSON).
+// "jlink", "ble", "remote" (JSON).
 [[nodiscard]] std::string_view transportId(Transport transport) noexcept;
 
 } // namespace hwio::device

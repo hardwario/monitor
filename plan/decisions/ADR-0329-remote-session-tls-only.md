@@ -1,6 +1,6 @@
 # ADR-0329 — Remote session: TLS to the relay, no end-to-end encryption in protocol 2
 
-- **Status:** Accepted; amended by ADR-0334 (E2E impossible while compatible; no protocol numbers)
+- **Status:** Accepted; amended by ADR-0334 (E2E impossible while compatible; no protocol numbers) and ADR-0356 (secrets redacted toward the relay)
 - **Date:** 2026-11-06
 - **Decided by:** Matej Strnad (remote support session planning, plan [0044](../features/0044-remote-support-session.md))
 

@@ -62,6 +62,10 @@ class QNetworkAccessManager;
 class QQmlEngine;
 class QWindow;
 
+namespace hwio::firmware {
+class FirmwareCache;
+} // namespace hwio::firmware
+
 namespace hwio::gui {
 
 class DeviceTabViewModel;
@@ -208,6 +212,15 @@ public:
 
     // --- tabs ---
     Q_INVOKABLE void newTab();
+    // Plan 0044: the Join support session dialog. checkJoinInput(): {valid, code ("482 913"),
+    // codeValue, foreignRelay ("" or the link's server), error}. joinRemoteSession(): a remote
+    // tab (the current tab while it chooses a device, else a new tab) joins the session on the
+    // configured relay, or on the link's server when `allowForeignRelay` (ADR-0330). False when
+    // the input is invalid, a foreign server is not allowed, or the tab limit is reached.
+    Q_INVOKABLE [[nodiscard]] QVariantMap checkJoinInput(const QString& text) const;
+    Q_INVOKABLE bool joinRemoteSession(const QString& text, bool allowForeignRelay);
+    // The configured relay (setting remote/relayUrl or the default) as a URL.
+    [[nodiscard]] QUrl relayUrl() const;
     // Plan 0014 (ADR-0244): a Choose-device tab at the end without switching to it (MCP connect);
     // nullptr when the tab limit is reached.
     DeviceTabViewModel* appendTab();
@@ -366,6 +379,8 @@ private:
     // Plan 0036: child; deleted by the destructor after the tabs, before the registry and the
     // scanner (its reservation and scanner suspension); waits for a running update.
     ProbeFirmwareViewModel* m_probeFirmware = nullptr;
+    // Plan 0044: remote flash requests download into the firmware cache (ADR-0037).
+    std::unique_ptr<firmware::FirmwareCache> m_firmwareCache;
 };
 
 } // namespace hwio::gui
