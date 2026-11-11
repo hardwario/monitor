@@ -32,9 +32,11 @@ release notes or the HIL results.
       127.0.0.1 → **Start sharing** → banner "Shared with support — code 387 763"; the join dialog "Someone joined your
       session" → **Allow** → the joiner's `app config show` answered; the console file has every "— Remote: … —"
       line; **End sharing** → the joiner ends 0.4 s later with `remote.host_ended`.
-- [ ] GUI **Join support session…** with **Settings › Advanced › Support server** = `http://127.0.0.1:5000`: not
-      automatable here (synthetic keyboard input does not reach the window on Wayland/XWayland); needs a person to
-      type the code.
+- [x] CLI host (CHESTER) ↔ GUI joiner, 2026-11-11 (the code typed by hand, the rest over AT-SPI): **Join support
+      session…** → tab "CHESTER — remote, Connected" with the live CHESTER output; the Flash page shows **Remote
+      operations** (Ask to flash / erase / recover / reset); **Ask to reset** denied on the host → "The customer
+      denied the request."; Ctrl+C on the host → the tab "Disconnected — The remote session ended." and the banner "The
+      session ended. The console stays here so that you can save it."
 - [x] Relay log (`docker logs`): only `at` / `sync` / `write` are relayed; payloads appear only at debug level
       (level 20). Checked 2026-11-11.
 
