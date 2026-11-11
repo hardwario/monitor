@@ -51,7 +51,7 @@ RemoteOperationClient::RemoteOperationClient(RemoteConsoleSession& session,
     });
     connect(&session, &RemoteConsoleSession::hostMessage, this, &RemoteOperationClient::onMessage);
     connect(&session, &RemoteConsoleSession::joinStateChanged, this, [this] {
-        if (m_session && m_session->joinState() == JoinState::Ended) {
+        if (!m_session.isNull() && m_session->joinState() == JoinState::Ended) {
             finish(makeError(ErrorCode::RemoteHostEnded));
         }
     });
@@ -64,7 +64,7 @@ Result<std::string> RemoteOperationClient::request(tunnel::OpKind kind, tunnel::
     if (m_pending) {
         return std::unexpected(makeError(ErrorCode::InternalBusy, "a remote operation is pending"));
     }
-    if (!m_session) {
+    if (m_session.isNull()) {
         return std::unexpected(makeError(ErrorCode::RemoteHostEnded));
     }
     if ((kind == tunnel::OpKind::Flash) != firmwareId.has_value()) {

@@ -326,7 +326,7 @@ void RemoteHost::sendSync() {
 }
 
 void RemoteHost::sendHello() {
-    if (!m_session) {
+    if (m_session.isNull()) {
         return;
     }
     const device::SessionIdentity identity = m_session->identity();
@@ -405,7 +405,7 @@ void RemoteHost::onRemoteLine(const QString& text) {
         return;
     }
     m_recentLines.push_back(now);
-    if (!m_session) {
+    if (m_session.isNull()) {
         return;
     }
     audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "command %1")).arg(redactedCommand(line)));
@@ -648,7 +648,7 @@ void RemoteHost::keepSharing() { activity(); }
 
 void RemoteHost::audit(const QString& text) {
     qCInfo(log::lcRemote).noquote() << "Audit:" << text;
-    if (!m_session) {
+    if (m_session.isNull()) {
         return;
     }
     const QString line = trRemote(QT_TRANSLATE_NOOP("hwio::remote", "— Remote: %1 —")).arg(text);
@@ -659,7 +659,7 @@ void RemoteHost::audit(const QString& text) {
 }
 
 QString RemoteHost::redactedCommand(const std::string& line) const {
-    if (m_session) {
+    if (!m_session.isNull()) {
         const auto prefixes =
             device::sensitivePrefixesOf(m_session->profile().id, m_session->consoleTargetId());
         if (const auto prefix = device::matchSensitiveCommand(line, prefixes)) {
@@ -670,7 +670,7 @@ QString RemoteHost::redactedCommand(const std::string& line) const {
 }
 
 QString RemoteHost::redactedOutput(const std::string& line) const {
-    if (m_session) {
+    if (!m_session.isNull()) {
         const auto keys =
             device::sensitiveOutputKeysOf(m_session->profile().id, m_session->consoleTargetId());
         if (const auto key = device::matchSensitiveOutput(line, keys)) {
@@ -718,7 +718,7 @@ void RemoteHost::finish(std::optional<Error> error, bool notify) {
         }
         m_relay->stop();
     }
-    if (m_everShared && m_session) {
+    if (m_everShared && !m_session.isNull()) {
         const QString reason = m_endError ? toQString(m_endError->message) : QString();
         audit(reason.isEmpty()
                   ? trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Sharing ended."))
