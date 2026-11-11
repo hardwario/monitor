@@ -246,7 +246,9 @@ function(_hwio_add_installed_tree_tests)
             -P "${PROJECT_SOURCE_DIR}/cmake/HWioInstalledTreeTest.cmake")
     set_tests_properties(Packaging.InstalledTreeSelfTest PROPERTIES
         LABELS "package"
-        TIMEOUT 300
+        # Deploy + self-test of the bundle: 260 s on main and 286 s with Qt WebSockets on the
+        # slow macOS CI runners (one run hit the old 300 s limit).
+        TIMEOUT 600
         RUN_SERIAL TRUE)
     if(APPLE)
         # ADR-0126 / plan 0015 D2: the installed bundle signed ad hoc, inside-out, with the

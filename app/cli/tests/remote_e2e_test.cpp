@@ -25,6 +25,7 @@
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
+#include <QVariantList>
 #include <QtContainerFwd>
 
 #include <gtest/gtest.h>
@@ -400,18 +401,46 @@ TEST_F(RemoteCli, JoinConsoleShowsTheHostConsole) {
     InProcessHost host(relay, nullptr);
     ASSERT_TRUE(runUntil([&] { return host.host.state() == hwio::remote::HostState::Sharing; }));
     host.console.shell("before join");
-    QStringList args{QStringLiteral("--json"), QStringLiteral("remote"),   QStringLiteral("join"),
-                     QStringLiteral("482913"), QStringLiteral("--linger"), QStringLiteral("0")};
+    // Diagnostics for macOS / Windows CI, where stdout once stayed empty after the join was
+    // allowed: the child logs hwio.remote (and hwio.cli) debug messages on stderr.
+    QStringList args{QStringLiteral("--json"),   QStringLiteral("--log-level"),
+                     QStringLiteral("debug"),    QStringLiteral("remote"),
+                     QStringLiteral("join"),     QStringLiteral("482913"),
+                     QStringLiteral("--linger"), QStringLiteral("0")};
     args << relayArgs(relay);
-    Child child(args, fakeEnvironment());
-    ASSERT_TRUE(runUntil([&] { return host.host.commandsAllowed(); }, 30s)) << child.err();
+    QProcessEnvironment env = fakeEnvironment();
+    env.insert(QStringLiteral("QT_LOGGING_RULES"),
+               QStringLiteral("hwio.*.debug=false;hwio.remote.debug=true;hwio.cli.debug=true"));
+    Child child(args, env);
+    const auto diagnostics = [&] {
+        std::string text = "--- child stdout:\n" + child.out() + "\n--- child stderr:\n" +
+                           child.err() + "\n--- host state " +
+                           std::to_string(static_cast<int>(host.host.state())) +
+                           ", commandsAllowed " + (host.host.commandsAllowed() ? "1" : "0") +
+                           "\n--- relayed (" + std::to_string(relay.relayed().size()) + "):\n";
+        for (const auto& event : relay.relayed()) {
+            QByteArray payload = QJsonDocument::fromVariant(QVariantList{event.payload.toVariant()})
+                                     .toJson(QJsonDocument::Compact);
+            if (payload.size() > 200) {
+                payload = payload.left(200) + "...";
+            }
+            text +=
+                (event.nsp + QStringLiteral(" ") + event.name + QStringLiteral(" ")).toStdString() +
+                payload.toStdString() + "\n";
+        }
+        for (const QString& name : relay.droppedEvents()) {
+            text += "dropped: " + name.toStdString() + "\n";
+        }
+        return text;
+    };
+    ASSERT_TRUE(runUntil([&] { return host.host.commandsAllowed(); }, 30s)) << diagnostics();
     host.console.shell("live line");
     ASSERT_TRUE(runUntil([&] { return child.out().find("live line") != std::string::npos; }, 10s))
-        << child.out();
-    EXPECT_NE(child.out().find("before join"), std::string::npos);
+        << diagnostics();
+    EXPECT_NE(child.out().find("before join"), std::string::npos) << diagnostics();
     child.closeInput(); // the end of input ends the console (--linger 0)
-    ASSERT_TRUE(child.finish()) << child.err();
-    EXPECT_EQ(child.exitCode(), 0) << child.err();
+    ASSERT_TRUE(child.finish()) << diagnostics();
+    EXPECT_EQ(child.exitCode(), 0) << diagnostics();
 }
 
 // ADR-0354: the host's End sharing ends `remote join` with remote.host_ended.
