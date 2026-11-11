@@ -223,7 +223,7 @@ void RelayWorker::enqueue(Outgoing packet) {
     QJsonObject notice;
     notice.insert(QStringLiteral("event"), QStringLiteral("read"));
     notice.insert(QStringLiteral("data"),
-                  QCoreApplication::translate("hwio::remote", "… %n line(s) dropped …", nullptr,
+                  QCoreApplication::translate("hwio::remote", "… %n line(s) dropped …", "",
                                               static_cast<int>(dropped)));
     QString text = socketio::encodeEvent(m_nsp, QStringLiteral("at"), notice);
     const auto bytes = static_cast<std::size_t>(text.toUtf8().size());
