@@ -68,6 +68,38 @@ if(CMAKE_SCRIPT_MODE_FILE)
     endif()
 
     if(_stale)
+        # Show what differs (CI may run another lupdate than the developer), at most ~150 lines each.
+        find_program(_git git)
+        foreach(_name IN LISTS _stale)
+            file(READ "${HWIO_COMMITTED_DIR}/${_name}" _committed)
+            file(READ "${HWIO_GENERATED_DIR}/check_${_name}" _generated)
+            set(_base "${HWIO_GENERATED_DIR}/stale_${_name}")
+            foreach(_var _committed _generated)
+                string(REGEX REPLACE "[ \t]*<location[^>]*/>\r?\n" "" ${_var} "${${_var}}")
+            endforeach()
+            file(WRITE "${_base}.committed" "${_committed}")
+            file(WRITE "${_base}.generated" "${_generated}")
+            if(_git)
+                execute_process(
+                    COMMAND "${_git}" diff --no-index --no-color -U2 "${_base}.committed" "${_base}.generated"
+                    OUTPUT_VARIABLE _diff)
+                string(REGEX MATCHALL "[^\n]*\n" _lines "${_diff}")
+                list(LENGTH _lines _line_count)
+                if(_line_count GREATER 150)
+                    list(SUBLIST _lines 0 150 _lines)
+                endif()
+                string(JOIN "" _diff ${_lines})
+                string(LENGTH "${_diff}" _length)
+                if(_length GREATER 12000)
+                    string(SUBSTRING "${_diff}" 0 12000 _diff)
+                endif()
+                message(STATUS "Translations: ${_name} differs from the regenerated catalog "
+                               "(${_line_count} diff lines, <location/> lines ignored):\n${_diff}")
+            else()
+                message(STATUS "Translations: ${_name} differs; compare ${_base}.committed "
+                               "with ${_base}.generated")
+            endif()
+        endforeach()
         message(FATAL_ERROR
             "Stale translation catalogs: ${_stale}. User-visible strings changed; run "
             "'cmake --build --preset <preset> --target update_translations', translate the new "
