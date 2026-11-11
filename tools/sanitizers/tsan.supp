@@ -56,3 +56,9 @@ race:libglib-2.0.so
 # Same glib worker threads, GIO side: the gdbus thread's sendmsg() (g_socket_send_message_with_timeout)
 # reads a g_realloc()ed GIO buffer filled by libgio on the relay thread; only GIO touches it.
 race:libgio-2.0.so
+# System OpenSSL (libcrypto, loaded by Qt's TLS backend for QWebSocket) is not instrumented, so TSan
+# does not see its internal synchronisation. Seen: memcpy in libcrypto under RelayWorker::openSocket()
+# (QWebSocket construction on the relay thread, libs/remote/src/relay_client.cpp:119) vs. memcmp in
+# libcrypto on the main thread, in RemoteSession.OperationClientTimesOutWithoutAnAnswer
+# (plan/features/0044). Matches only reports with a frame inside libcrypto.
+race:libcrypto.so
