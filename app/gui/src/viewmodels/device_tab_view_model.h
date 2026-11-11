@@ -50,6 +50,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringLiteral>
 #include <QUrl>
 #include <QVariantMap>
 #include <QtCore/qobjectdefs.h>

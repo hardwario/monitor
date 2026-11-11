@@ -18,6 +18,7 @@
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/mcp/activity.h"
 #include "hwio/mcp/consent.h"
+#include "hwio/remote/session_code.h"
 #include "hwio/remote/tunnel.h"
 #include "language_manager.h"
 #include "mcp/activity_model.h"
@@ -159,6 +160,13 @@ public:
     Q_INVOKABLE bool startFakeRelay() {
         m_participant.reset();
         m_relay = std::make_unique<hwio::remote::testing::FakeRelay>();
+        // A build that rejects the fake relay's plain-http loopback URL would fall back to the
+        // real relay: fail instead of ever contacting it.
+        if (!hwio::remote::parseRelayUrl(m_relay->url().toString().toStdString())) {
+            qWarning() << "startFakeRelay: this build does not accept the fake relay URL";
+            m_relay.reset();
+            return false;
+        }
         return m_app->settingsStore()
             ->setValue(QStringLiteral("remote/relayUrl"), m_relay->url().toString())
             .has_value();

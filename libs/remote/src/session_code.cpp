@@ -5,12 +5,14 @@
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
+#include "quoted.h"
 
 #include <QCoreApplication>
 #include <QHostAddress>
 #include <QLoggingCategory>
 #include <QRandomGenerator>
 #include <QString>
+#include <QStringLiteral>
 #include <QUrl>
 #include <QUrlQuery>
 #include <QtCore/qnamespace.h>
@@ -73,7 +75,8 @@ Result<SessionCode> SessionCode::parse(std::string_view text) {
             continue; // "482 913"
         }
         if (c < '0' || c > '9') {
-            return std::unexpected(invalidCode(std::format("not a digit in the code: {:?}", text)));
+            return std::unexpected(
+                invalidCode(std::format("not a digit in the code: {}", detail::quoted(text))));
         }
         if (++digits > 6) {
             return std::unexpected(invalidCode("more than 6 digits"));
@@ -109,7 +112,8 @@ Result<QUrl> parseRelayUrl(std::string_view text) {
     QUrl url(toQString(text), QUrl::StrictMode);
     if (!url.isValid() || url.host().isEmpty() || !url.userInfo().isEmpty() || url.hasQuery() ||
         url.hasFragment()) {
-        return std::unexpected(invalidRelay(std::format("not a valid relay URL: {:?}", text)));
+        return std::unexpected(
+            invalidRelay(std::format("not a valid relay URL: {}", detail::quoted(text))));
     }
     const QString scheme = url.scheme().toLower();
     bool allowed = scheme == QStringLiteral("https");
@@ -120,7 +124,8 @@ Result<QUrl> parseRelayUrl(std::string_view text) {
     static_cast<void>(&isLoopbackHost);
 #endif
     if (!allowed) {
-        return std::unexpected(invalidRelay(std::format("relay URL must be https: {:?}", text)));
+        return std::unexpected(
+            invalidRelay(std::format("relay URL must be https: {}", detail::quoted(text))));
     }
     url.setScheme(scheme);
     QString path = url.path();

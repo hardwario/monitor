@@ -23,6 +23,7 @@
 #include <QLoggingCategory>
 #include <QObject>
 #include <QString>
+#include <QStringLiteral>
 #include <QTimer>
 #include <QtCore/qtmetamacros.h>
 #include <QtCore/qttranslation.h>

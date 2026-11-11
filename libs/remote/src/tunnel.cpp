@@ -10,6 +10,7 @@
 #include <QJsonValue>
 #include <QLatin1StringView>
 #include <QString>
+#include <QStringLiteral>
 
 #include <algorithm>
 #include <cmath>

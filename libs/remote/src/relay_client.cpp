@@ -22,6 +22,7 @@
 #include <QNetworkProxyQuery>
 #include <QObject>
 #include <QString>
+#include <QStringLiteral>
 #include <QStringView>
 #include <QThread>
 #include <QTimer>

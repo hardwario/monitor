@@ -22,6 +22,7 @@
 #include <QJsonValue>
 #include <QObject>
 #include <QString>
+#include <QStringLiteral>
 #include <QtTypes>
 
 #include <gtest/gtest.h>

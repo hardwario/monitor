@@ -10,6 +10,7 @@
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <QStringLiteral>
 #include <QUrl>
 #include <QtTypes>
 

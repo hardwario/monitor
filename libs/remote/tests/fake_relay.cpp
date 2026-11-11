@@ -10,6 +10,7 @@
 #include <QObject>
 #include <QRegularExpression>
 #include <QString>
+#include <QStringLiteral>
 #include <QTimer>
 #include <QUrl>
 #include <QWebSocket>

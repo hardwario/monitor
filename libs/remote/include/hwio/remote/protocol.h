@@ -14,6 +14,7 @@
 
 #include <QJsonValue>
 #include <QString>
+#include <QStringLiteral>
 #include <QStringView>
 
 #include <chrono>

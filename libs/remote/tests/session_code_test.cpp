@@ -2,6 +2,7 @@
 #include "hwio/remote/session_code.h"
 
 #include <QString>
+#include <QStringLiteral>
 #include <QUrl>
 
 #include <gtest/gtest.h>
@@ -9,6 +10,8 @@
 #include <cstdint>
 #include <optional>
 #include <set>
+#include <string>
+#include <string_view>
 
 namespace hwio::remote {
 namespace {
@@ -46,6 +49,16 @@ TEST(SessionCode, RejectsInvalidCodes) {
         ASSERT_FALSE(code.has_value()) << text;
         EXPECT_EQ(code.error().code, ErrorCode::RemoteCodeInvalid) << text;
     }
+}
+
+TEST(SessionCode, ErrorDetailQuotesAndEscapesTheInput) {
+    // The portable replacement of std::format's debug spec (libstdc++ 14 lacks it).
+    const auto code = SessionCode::parse("1\"2\\3\n4\x7f");
+    ASSERT_FALSE(code.has_value());
+    EXPECT_EQ(code.error().detail, R"(not a digit in the code: "1\"2\\3\x0a4\x7f")");
+    const auto relay = parseRelayUrl("ftp://x");
+    ASSERT_FALSE(relay.has_value());
+    EXPECT_NE(relay.error().detail.find(R"("ftp://x")"), std::string::npos) << relay.error().detail;
 }
 
 TEST(RelayUrl, HttpsOnly) {

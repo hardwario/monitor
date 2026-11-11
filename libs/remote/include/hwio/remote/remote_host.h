@@ -60,6 +60,7 @@
 #include <QObject>
 #include <QPointer>
 #include <QString>
+#include <QStringLiteral>
 #include <QTimer>
 #include <QUrl>
 

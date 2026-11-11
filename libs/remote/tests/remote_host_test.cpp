@@ -18,6 +18,7 @@
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <QStringLiteral>
 
 #include <gtest/gtest.h>
 

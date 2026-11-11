@@ -6,6 +6,7 @@
 #include <QJsonValue>
 #include <QLatin1Char>
 #include <QString>
+#include <QStringLiteral>
 #include <QtTypes>
 
 #include <gtest/gtest.h>

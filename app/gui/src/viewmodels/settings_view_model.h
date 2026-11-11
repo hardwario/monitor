@@ -28,6 +28,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringLiteral>
 #include <QStringView>
 #include <QUrl>
 #include <QVariantList>

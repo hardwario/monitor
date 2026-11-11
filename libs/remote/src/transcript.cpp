@@ -10,6 +10,7 @@
 #include <QJsonValue>
 #include <QString>
 #include <QStringList>
+#include <QStringLiteral>
 #include <QTimeZone>
 #include <QtCore/qnamespace.h>
 #include <QtTypes>

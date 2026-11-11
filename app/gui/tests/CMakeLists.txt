@@ -57,7 +57,9 @@ foreach(_test IN LISTS _hwio_gui_qml_tests)
     # builds); without it the check would ask the real GitHub API.
     # tst_ble (plan 0012) needs the fake BLE API, also a HWIO_TEST_OVERRIDES-only switch (ADR-0087);
     # without it the shell talks to the runner's real Bluetooth stack.
-    if(NOT HWIO_TEST_OVERRIDES AND _name MATCHES "^tst_(update|ble)$")
+    # tst_remote (plan 0044): the fake relay is plain http on loopback, accepted only by test
+    # builds; without it the GUI would fall back to the real relay.
+    if(NOT HWIO_TEST_OVERRIDES AND _name MATCHES "^tst_(update|ble|remote)$")
         continue()
     endif()
     add_test(NAME "tst_gui.${_name}"

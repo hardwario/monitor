@@ -3,6 +3,7 @@
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/result.h"
+#include "quoted.h"
 
 #include <QByteArray>
 #include <QChar>
@@ -13,6 +14,7 @@
 #include <QJsonValue>
 #include <QLatin1Char>
 #include <QString>
+#include <QStringLiteral>
 #include <QStringView>
 #include <QtTypes>
 
@@ -41,8 +43,8 @@ Result<Packet> parsePacket(QStringView text) {
     }
     const QChar first = text.front();
     if (first < QLatin1Char('0') || first > QLatin1Char('6')) {
-        return protocolError(
-            std::format("unknown Engine.IO packet type {:?}", toStdString(QString(first))));
+        return protocolError(std::format("unknown Engine.IO packet type {}",
+                                         detail::quoted(toStdString(QString(first)))));
     }
     return Packet{.type = static_cast<PacketType>(first.unicode() - u'0'),
                   .data = text.mid(1).toString()};

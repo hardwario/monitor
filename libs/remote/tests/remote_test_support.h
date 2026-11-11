@@ -14,6 +14,7 @@
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <QStringLiteral>
 #include <QThread>
 #include <QUrl>
 #include <QWebSocket>
