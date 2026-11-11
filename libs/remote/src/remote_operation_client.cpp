@@ -64,7 +64,7 @@ Result<std::string> RemoteOperationClient::request(tunnel::OpKind kind, tunnel::
     if (m_pending) {
         return std::unexpected(makeError(ErrorCode::InternalBusy, "a remote operation is pending"));
     }
-    if (!m_session) {
+    if (m_session.isNull()) {
         return std::unexpected(makeError(ErrorCode::RemoteHostEnded));
     }
     if ((kind == tunnel::OpKind::Flash) != firmwareId.has_value()) {
