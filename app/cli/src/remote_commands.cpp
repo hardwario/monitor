@@ -11,6 +11,8 @@
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
 #include "hwio/core/version.h"
+#include "hwio/device/console_line.h"
+#include "hwio/device/console_log.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/profile.h"
@@ -33,6 +35,7 @@
 #include <QEventLoop>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QList>
 #include <QLoggingCategory>
 #include <QObject>
 #include <QString>
@@ -55,6 +58,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace hwio::cli {
 
@@ -627,8 +631,16 @@ Result<CommandResult> join(const Context& context, const JoinCommandOptions& opt
             view.printStatus(std::format("Joined: {}", toStdString(session.title())));
         }
     });
-    view.printStatus("Waiting for the customer to allow you... (the live output may already "
-                     "appear)");
+    // The wait for the relay above runs the event loop: the host's sync (the history) and live
+    // lines may already have arrived before the view existed. They are in the session's log.
+    const std::vector<device::ConsoleLine> earlier = session.log().linesSince(0);
+    view.printLines(QList<device::ConsoleLine>(earlier.begin(), earlier.end()));
+    if (session.joinState() == remote::JoinState::Allowed) {
+        view.printStatus(std::format("Joined: {}", toStdString(session.title())));
+    } else {
+        view.printStatus("Waiting for the customer to allow you... (the live output may already "
+                         "appear)");
+    }
     ConsoleUiOptions ui;
     ui.interactive = interactive;
     ui.linger =

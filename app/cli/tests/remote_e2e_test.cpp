@@ -407,8 +407,8 @@ TEST_F(RemoteCli, JoinConsoleShowsTheHostConsole) {
     ASSERT_TRUE(runUntil([&] { return host.host.commandsAllowed(); }, 30s)) << child.err();
     host.console.shell("live line");
     ASSERT_TRUE(runUntil([&] { return child.out().find("live line") != std::string::npos; }, 10s))
-        << child.out();
-    EXPECT_NE(child.out().find("before join"), std::string::npos);
+        << child.out() << child.err();
+    EXPECT_NE(child.out().find("before join"), std::string::npos) << child.out() << child.err();
     child.closeInput(); // the end of input ends the console (--linger 0)
     ASSERT_TRUE(child.finish()) << child.err();
     EXPECT_EQ(child.exitCode(), 0) << child.err();

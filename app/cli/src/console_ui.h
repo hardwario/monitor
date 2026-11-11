@@ -63,6 +63,8 @@ public:
     // through replxx; `showEcho` = false hides the echo of sent commands (replxx shows them).
     void setPrinter(Printer printer, bool showEcho);
     void printStatus(std::string_view text); // human mode only
+    // Prints lines the session received before this view was created (as linesReceived would).
+    void printLines(const QList<device::ConsoleLine>& lines) { onLines(lines); }
     // The final {"type":"connection","state":"stopped"} event (--json); skipped when the last
     // connection event printed was already Stopped (review R28).
     void printStopped();
