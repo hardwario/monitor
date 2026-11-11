@@ -6835,62 +6835,62 @@
 <context>
     <name>hwio::gui::RemoteJoinViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="58"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="59"/>
         <source>The customer allowed it. Running on the customer&apos;s side…</source>
         <translation>Zákazník to povolil. Probíhá na straně zákazníka…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="67"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="68"/>
         <source>Running on the customer&apos;s side: %1</source>
         <translation>Probíhá na straně zákazníka: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="74"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="75"/>
         <source>Done (reported by the customer&apos;s Monitor).</source>
         <translation>Hotovo (hlášeno Monitorem zákazníka).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="106"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="107"/>
         <source>Connecting to the support server…</source>
         <translation>Připojování k serveru podpory…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="109"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="110"/>
         <source>Waiting for the customer to allow you… The live output may already appear.</source>
         <translation>Čeká se, až vám to zákazník povolí… Živý výstup se může zobrazovat už teď.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="112"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="113"/>
         <source>No activity from the customer for 30 min. The session may have ended.</source>
         <translation>Žádná aktivita od zákazníka po 30 min. Relace možná skončila.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="115"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="116"/>
         <source>The session ended. The console stays here so that you can save it.</source>
         <translation>Relace skončila. Konzole tu zůstává, abyste ji mohli uložit.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="129"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="130"/>
         <source>Operations are available once the customer has allowed you.</source>
         <translation>Operace jsou k dispozici, jakmile vám to zákazník povolí.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="132"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="133"/>
         <source>The customer uses the web Terminal, which supports only the console. Ask them to use HARDWARIO Monitor for flashing.</source>
         <translation>Zákazník používá webový Terminal, který podporuje jen konzoli. Pro nahrání firmwaru ho požádejte, aby použil HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="135"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="136"/>
         <source>The customer&apos;s console (Bluetooth) has no flashing.</source>
         <translation>Konzole zákazníka (Bluetooth) nahrávání firmwaru nepodporuje.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="160"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="161"/>
         <source>The firmware ID must be 32 hexadecimal digits from the HARDWARIO catalog.</source>
         <translation>ID firmwaru musí mít 32 šestnáctkových číslic z katalogu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="169"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="170"/>
         <source>Waiting for the customer&apos;s confirmation…</source>
         <translation>Čeká se na potvrzení zákazníka…</translation>
     </message>
@@ -6898,7 +6898,7 @@
 <context>
     <name>hwio::gui::RemoteShareViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="78"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="79"/>
         <source>Support will see this console and can send commands after you allow them. They can also ask to flash, erase, recover or reset the device; each request needs your confirmation.
 
 The session passes through the HARDWARIO server %1.
@@ -6915,27 +6915,27 @@ Kdokoli, kdo zná kód, vidí výstup konzole. Kód čtěte jen podpoře HARDWAR
 Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="136"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="137"/>
         <source>%1…</source>
         <translation>%1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="144"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="145"/>
         <source>Remote operation: %1 %2 %</source>
         <translation>Vzdálená operace: %1 %2 %</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="159"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="160"/>
         <source>Sharing ended: %1</source>
         <translation>Sdílení skončilo: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="197"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="198"/>
         <source>Link copied to the clipboard.</source>
         <translation>Odkaz zkopírován do schránky.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="204"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="205"/>
         <source>Code copied to the clipboard.</source>
         <translation>Kód zkopírován do schránky.</translation>
     </message>
@@ -7234,7 +7234,7 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         <translation>Reset %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/relay_client.cpp" line="225"/>
+        <location filename="../libs/remote/src/relay_client.cpp" line="226"/>
         <source>… %n line(s) dropped …</source>
         <translation>
             <numerusform>… %n řádek zahozen …</numerusform>
@@ -7253,125 +7253,125 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         <translation>Monitor zákazníka neodpověděl včas.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/session_code.cpp" line="38"/>
+        <location filename="../libs/remote/src/session_code.cpp" line="40"/>
         <source>The support server address is not valid.</source>
         <translation>Adresa serveru podpory není platná.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/session_code.cpp" line="41"/>
+        <location filename="../libs/remote/src/session_code.cpp" line="43"/>
         <source>The address must start with https:// and name a server, for example https://terminal.hardwario.com.</source>
         <translation>Adresa musí začínat https:// a uvádět server, například https://terminal.hardwario.com.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/session_code.cpp" line="46"/>
+        <location filename="../libs/remote/src/session_code.cpp" line="48"/>
         <source>Correct the support server address, or clear it to use the default server.</source>
         <translation>Opravte adresu serveru podpory, nebo ji vymažte, aby se použil výchozí server.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="68"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="69"/>
         <source>— Connection restored; waiting for the customer to allow you again —</source>
         <translation>— Spojení obnoveno; čeká se, až vás zákazník znovu povolí —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="117"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="118"/>
         <source>A command line must not be longer than %1 bytes.</source>
         <translation>Řádek příkazu nesmí být delší než %1 bajtů.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="180"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="181"/>
         <source>Session %1</source>
         <translation>Relace %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="187"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="188"/>
         <source>%1 — remote</source>
         <translation>%1 — vzdáleně</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="191"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="192"/>
         <source>%1 — web Terminal</source>
         <translation>%1 — web Terminal</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="243"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="244"/>
         <source>— Connected to HARDWARIO Monitor %1 of the customer —</source>
         <translation>— Připojeno k HARDWARIO Monitor %1 zákazníka —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="288"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="289"/>
         <source>The customer&apos;s device is disconnected.</source>
         <translation>Zařízení zákazníka je odpojeno.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="332"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="333"/>
         <source>— Session history from the customer —</source>
         <translation>— Historie relace od zákazníka —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="335"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="336"/>
         <source>— Older history of the session was left out —</source>
         <translation>— Starší historie relace byla vynechána —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="90"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="91"/>
         <source>Sharing started, session %1 (%2).</source>
         <translation>Sdílení zahájeno, relace %1 (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="99"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="100"/>
         <source>The join question was not answered within 2 minutes.</source>
         <translation>Na dotaz na připojení nikdo neodpověděl do 2 minut.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="113"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="114"/>
         <source>%1: denied (no answer within 60 s).</source>
         <translation>%1: zamítnuto (žádná odpověď do 60 s).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="123"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="126"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="124"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="127"/>
         <source>Sharing ended after 30 minutes without activity.</source>
         <translation>Sdílení skončilo po 30 minutách bez aktivity.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="131"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="145"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="132"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="146"/>
         <source>Start sharing again if support still needs the console.</source>
         <translation>Pokud podpora konzoli stále potřebuje, spusťte sdílení znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="138"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="140"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="139"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="141"/>
         <source>Sharing ended after the maximum of 8 hours.</source>
         <translation>Sdílení skončilo po maximální době 8 hodin.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="153"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="154"/>
         <source>Participant app: web Terminal or unknown.</source>
         <translation>Aplikace účastníka: web Terminal nebo neznámá.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="210"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="211"/>
         <source>Connection to the support server restored.</source>
         <translation>Spojení se serverem podpory obnoveno.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="235"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="236"/>
         <source>Another device uses this session code; the session was ended for safety.</source>
         <translation>Tento kód relace používá jiné zařízení; relace byla z bezpečnostních důvodů ukončena.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="250"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="251"/>
         <source>Someone joined the session.</source>
         <translation>Někdo se připojil k relaci.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="269"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="270"/>
         <source>%1: denied (someone joined).</source>
         <translation>%1: zamítnuto (někdo se připojil).</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="293"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="294"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n vzdálený příkaz byl zahozen během čekání na vaši odpověď.</numerusform>
@@ -7380,32 +7380,32 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="299"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="300"/>
         <source>You ended the session instead of allowing the participant.</source>
         <translation>Místo povolení účastníka jste relaci ukončili.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="306"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="307"/>
         <source>Participant allowed.</source>
         <translation>Účastník povolen.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="307"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="308"/>
         <source>Participant allowed (%1).</source>
         <translation>Účastník povolen (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="388"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="389"/>
         <source>A remote command was dropped (too long or with control characters).</source>
         <translation>Vzdálený příkaz byl zahozen (příliš dlouhý nebo s řídicími znaky).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="400"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="401"/>
         <source>Remote commands dropped: more than %1 per second.</source>
         <translation>Vzdálené příkazy zahozeny: více než %1 za sekundu.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="410"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="411"/>
         <source>command %1</source>
         <translation>příkaz %1</translation>
     </message>
