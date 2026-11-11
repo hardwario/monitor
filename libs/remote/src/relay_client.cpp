@@ -30,6 +30,7 @@
 #include <QWebSocketProtocol>
 #include <QtCore/qnamespace.h>
 #include <QtCore/qtmetamacros.h>
+#include <QtCore/qttranslation.h>
 #include <QtLogging>
 #include <QtTypes>
 
