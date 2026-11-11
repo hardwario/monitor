@@ -1,6 +1,6 @@
 # ADR-0354 — Remote session: the host announces the end with a tunnel "end" message
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0358)
 - **Date:** 2026-11-10
 - **Decided by:** Matej Strnad (plan [0044](../features/0044-remote-support-session.md) implementation, asked by the
   implementing agent)

@@ -10,8 +10,8 @@
   ADR-0328 (limits), ADR-0329 (TLS only), ADR-0330 (relay URL), ADR-0331 (CLI), ADR-0332 (no MCP),
   ADR-0333 (audit in the console file), ADR-0354 (tunnel `end`, amends ADR-0336), ADR-0355 (approval again after
   the host's reconnect, amends ADR-0335), ADR-0356 (secrets redacted toward the relay, amends ADR-0329),
-  ADR-0357 (relay events through a BoundedQueue, amends ADR-0321); superseded: ADR-0320, ADR-0327; builds on
-  ADR-0004, ADR-0007, ADR-0037
+  ADR-0357 (relay events through a BoundedQueue, amends ADR-0321), ADR-0358 (delivery confirmed before the host
+  disconnects, amends ADR-0354); superseded: ADR-0320, ADR-0327; builds on ADR-0004, ADR-0007, ADR-0037
 - **Depends on:** 0013 (operations), 0037 firmware catalog. Nothing on the relay or the web Terminal (ADR-0334).
 
 ## Context
@@ -196,7 +196,8 @@ has none).
 `op-request`: `{id, kind: "flash"|"erase"|"recover"|"reset", target: "app"|"lte", firmwareId?}`.
 `op-result`: `{id, ok, error?: {code}}` (the joiner translates from `code`).
 `end` (host, ADR-0354): `{code}`, the hwio::Error id of the reason (`cancelled` for End sharing); sent before the host
-disconnects. A Monitor joiner ends its session ("The session ended."), accepted only after the host's `hello`.
+disconnects; it confirms delivery by a refused CONNECT to `/hwio-end` before the DISCONNECT (ADR-0358, at most 2 s).
+A Monitor joiner ends its session ("The session ended."), accepted only after the host's `hello`.
 
 Everything the host sends to the relay (`at` write/read lines, the `sync` transcript, audit marker texts) has secret
 command arguments and secret output values redacted by the ADR-0186 rules (ADR-0356).
@@ -221,6 +222,7 @@ device session's worker (unchanged). No other shared mutable state.
 | Remote `write` line | 512 bytes, max 20 lines/s (excess dropped, info line on the host) |
 | Outgoing queue to relay | 1 MiB. On overflow the oldest `read` lines are dropped and a "lines dropped" line is sent |
 | Relay thread hand-off (ADR-0357) | 4096 incoming events (full: warnings dropped, otherwise `remote.protocol_error`), 4096 outgoing sends (full: the oldest droppable send is dropped) |
+| Delivery before disconnect (ADR-0358) | the refused `/hwio-end` CONNECT is awaited at most 2 s (`RelayLimits::closeTimeout`), then the socket closes anyway |
 | `sync` snapshot | last 500 transcript entries / 256 KiB |
 | Joiner transcript from `sync` | 500 entries / 256 KiB (larger → truncated, oldest first) |
 | Join approval | 2 min, then the session ends |

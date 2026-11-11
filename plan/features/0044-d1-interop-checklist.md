@@ -19,9 +19,17 @@ release notes or the HIL results.
 - [x] `hwio remote host` (fake J-Link) ↔ `hwio remote join --command` through the local real relay
       (`server/index.js` in Docker): code, join approval, command, response. Done 2026-11-10 (see the result in
       the hand-over note).
-- [ ] The same with real hardware: `hwio remote host -n <SN> --relay http://127.0.0.1:5000` and the GUI
-      **Join support session…** with **Settings › Advanced › Support server** = `http://127.0.0.1:5000`.
-- [ ] Relay log (`docker logs`): only `at` / `sync` / `write` are relayed; payloads appear only at debug level.
+- [x] The same with real hardware (CLI only): `hwio remote host -n <SN> --relay http://127.0.0.1:5000` ↔
+      `hwio remote join`, one machine, one CHESTER (J-Link EDU Mini), HEAD 7276fe4, 2026-11-11: code after the
+      collision window; join question answered "y" → `app config show` response at the joiner; `--reset --target app`
+      allowed → "reset done" and the CHESTER restarted; denied → `remote.operation_denied` at the joiner; the host's
+      audit lines ("— Remote: … —") for every join, command, request and answer.
+      **Found:** a live joiner never received the host's tunnel `end` (the real relay drops an event that arrives
+      together with the disconnect). Fixed in 0c5101c (ADR-0358); re-checked on the CHESTER: Ctrl+C on the host →
+      the joiner ends 0.6 s later with `remote.host_ended`, the relay log shows the `end`.
+- [ ] The GUI **Join support session…** with **Settings › Advanced › Support server** = `http://127.0.0.1:5000`.
+- [x] Relay log (`docker logs`): only `at` / `sync` / `write` are relayed; payloads appear only at debug level
+      (level 20). Checked 2026-11-11.
 
 ## 2. The four combinations on terminal.hardwario.com
 
