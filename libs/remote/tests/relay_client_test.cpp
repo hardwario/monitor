@@ -249,5 +249,22 @@ TEST(RelayClient, StopDisconnectsAndEmitsNothingMore) {
     client.reset();
 }
 
+// ADR-0354: an event emitted right before stop() (the tunnel `end`) still reaches the other
+// participants; the relay drops the events of a socket that sent a DISCONNECT in the same batch.
+TEST(RelayClient, StopDeliversTheLastEventFirst) {
+    FakeRelay relay;
+    RawParticipant joiner(relay.url(), QStringLiteral("/482913"));
+    ASSERT_TRUE(joiner.waitConnected());
+    auto client = std::make_unique<RelayClient>(configFor(relay));
+    Recorder events(*client);
+    client->start();
+    ASSERT_TRUE(runUntil([&] { return events.connects == 1; }));
+    client->emitEvent(QStringLiteral("at"), atRead(QStringLiteral("the end")));
+    client->stop();
+    ASSERT_TRUE(runUntil([&] { return !joiner.named(QStringLiteral("at")).isEmpty(); }));
+    ASSERT_TRUE(runUntil([&] { return relay.clientCount(QStringLiteral("/482913")) == 1; }));
+    client.reset();
+}
+
 } // namespace
 } // namespace hwio::remote

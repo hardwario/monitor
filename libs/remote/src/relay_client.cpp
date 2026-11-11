@@ -22,6 +22,7 @@
 #include <QNetworkProxyQuery>
 #include <QObject>
 #include <QString>
+#include <QStringView>
 #include <QThread>
 #include <QTimer>
 #include <QWebSocket>
@@ -52,6 +53,10 @@ namespace {
 // maxIncomingEventBytes are dropped by the worker with a warning.
 constexpr qint64 maxSocketMessageBytes = 1024LL * 1024;
 
+// shutdown(): a CONNECT the relay refuses (no ^/\d+$ namespace) with a CONNECT_ERROR, without
+// side effects; its answer tells that the relay has read (and dispatched) every packet before.
+constexpr QStringView flushNamespace = u"/hwio-end";
+
 Error unreachable(std::string detail) {
     return makeError(ErrorCode::RemoteRelayUnreachable, std::move(detail));
 }
@@ -71,11 +76,13 @@ RelayWorker::RelayWorker(RelayConfig config, RelayEventQueue& events, std::funct
     m_connectTimer.setSingleShot(true);
     m_pingTimer.setSingleShot(true);
     m_retryTimer.setSingleShot(true);
+    m_closeTimer.setSingleShot(true);
     connect(&m_connectTimer, &QTimer::timeout, this,
             [this] { lost(unreachable("no connection to the relay within the connect timeout")); });
     connect(&m_pingTimer, &QTimer::timeout, this,
             [this] { lost(unreachable("no Engine.IO ping from the relay")); });
     connect(&m_retryTimer, &QTimer::timeout, this, [this] { openSocket(); });
+    connect(&m_closeTimer, &QTimer::timeout, this, &RelayWorker::finishShutdown);
 }
 
 RelayWorker::~RelayWorker() { destroySocket(); }
@@ -258,6 +265,17 @@ void RelayWorker::onBinaryMessage() {
 }
 
 void RelayWorker::onTextMessage(const QString& message) {
+    if (m_closing) {
+        // shutdown(): only the relay's answer to the flush CONNECT matters now.
+        const auto eio = engineio::parsePacket(message);
+        if (eio && eio->type == engineio::PacketType::Message) {
+            const auto sio = socketio::parsePacket(eio->data);
+            if (sio && sio->nsp == flushNamespace) {
+                closeSocket();
+            }
+        }
+        return;
+    }
     if (m_phase == Phase::Ended) {
         return;
     }
@@ -431,23 +449,52 @@ void RelayWorker::shutdown() {
     while (auto item = m_sends.pop({}, std::chrono::milliseconds(0))) {
         send(item->name, item->payload, item->droppable);
     }
-    if (m_phase == Phase::Connected && m_socket) {
-        // Packets still waiting behind in-flight bytes (e.g. the tunnel `end`, ADR-0354) go out
-        // before the disconnect; droppable ones may be lost. The queue is bounded (enqueue).
-        for (const Outgoing& packet : m_queue) {
-            if (!packet.droppable) {
-                rawSend(packet.text);
-            }
-        }
-        m_queue.clear();
-        m_queuedBytes = 0;
-        rawSend(socketio::encodeDisconnect(m_nsp));
-        m_socket->flush();
-        m_socket->close(QWebSocketProtocol::CloseCodeNormal);
-    }
-    m_phase = Phase::Ended;
+    const bool connected = m_phase == Phase::Connected && m_socket;
+    m_phase = Phase::Ended; // no more notifications, onSocketClosed() included
     m_retryTimer.stop();
+    m_connectTimer.stop();
+    m_pingTimer.stop();
+    if (!connected) {
+        finishShutdown();
+        return;
+    }
+    // Packets still waiting behind in-flight bytes (e.g. the tunnel `end`, ADR-0354) go out
+    // before the disconnect; droppable ones may be lost. The queue is bounded (enqueue).
+    for (const Outgoing& packet : m_queue) {
+        if (!packet.droppable) {
+            rawSend(packet.text);
+        }
+    }
+    m_queue.clear();
+    m_queuedBytes = 0;
+    // The relay (Socket.IO 4) dispatches a received event on the next tick and drops it when the
+    // socket has disconnected (DISCONNECT or a closed WebSocket) by then: a close read together
+    // with the `end` would lose the `end`. So the close waits for the answer to a CONNECT the
+    // relay refuses (closeSocket()); the relay has dispatched every earlier packet by then. At
+    // the latest after closeTimeout the socket is aborted (finishShutdown()).
+    m_closing = true;
+    rawSend(socketio::encodeConnect(flushNamespace));
+    m_closeTimer.start(m_config.limits.closeTimeout);
+}
+
+void RelayWorker::closeSocket() {
+    if (!m_closing || !m_socket) {
+        return;
+    }
+    m_closing = false;
+    rawSend(socketio::encodeDisconnect(m_nsp));
+    // Not aborted before Qt has written everything and closed (disconnected).
+    connect(m_socket.get(), &QWebSocket::disconnected, this, &RelayWorker::finishShutdown);
+    m_socket->flush();
+    m_socket->close(QWebSocketProtocol::CloseCodeNormal);
+}
+
+void RelayWorker::finishShutdown() {
+    m_closing = false;
+    m_closeTimer.stop();
+    m_phase = Phase::Ended;
     destroySocket();
+    emit shutdownFinished();
 }
 
 } // namespace detail
@@ -476,9 +523,9 @@ void RelayClient::start() {
         QThread::currentThread()->setObjectName(QStringLiteral("hwio-remote-relay"));
         QEventLoop loop;
         detail::RelayWorker worker(m_config, *m_events, [this] { wakeUp(); }, *m_sends);
-        m_loop = &loop;
+        QObject::connect(&worker, &detail::RelayWorker::shutdownFinished, &loop, &QEventLoop::quit);
         m_worker = &worker;
-        ready.count_down(); // m_loop / m_worker are published to the owner
+        ready.count_down(); // m_worker is published to the owner
         worker.start();
         loop.exec();
         // The sockets destroySocket() handed to deleteLater().
@@ -564,13 +611,12 @@ void RelayClient::stop() {
     if (!m_started) {
         return;
     }
-    // Both run on the relay thread in this order: the remaining packets and the DISCONNECT, then
-    // the end of its event loop. join() is the happens-before edge ThreadSanitizer sees.
+    // On the relay thread: the remaining packets and the DISCONNECT, the graceful close (at most
+    // closeTimeout), then the end of its event loop (shutdownFinished). join() is the
+    // happens-before edge ThreadSanitizer sees.
     QMetaObject::invokeMethod(m_worker, "shutdown", Qt::QueuedConnection);
-    QMetaObject::invokeMethod(m_loop, "quit", Qt::QueuedConnection);
     m_thread.join();
     m_worker = nullptr;
-    m_loop = nullptr;
 }
 
 } // namespace hwio::remote

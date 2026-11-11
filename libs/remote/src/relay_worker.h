@@ -84,9 +84,16 @@ public:
     Q_INVOKABLE void drainSends();
     // Owner thread: one coalesced, payload-free queued drainSends().
     void wakeForSends();
-    // DISCONNECT (when connected), close, no more notifications. Queued by the owner's stop(),
-    // followed by a queued quit of the thread's event loop.
+    // The remaining packets, then (when connected) a CONNECT the relay refuses; its answer
+    // (closeSocket()) means the relay has dispatched the packets before, the tunnel `end`
+    // (ADR-0354) included, and only then DISCONNECT and the WebSocket close follow. No more
+    // notifications. Queued by the owner's stop(). shutdownFinished() follows when the socket has
+    // closed, at the latest after closeTimeout (RelayLimits; then the socket is aborted).
     Q_INVOKABLE void shutdown();
+
+signals:
+    // The worker is done; the thread body quits its event loop.
+    void shutdownFinished();
 
 private:
     enum class Phase : std::uint8_t {
@@ -122,6 +129,8 @@ private:
     void flush();
     void rawSend(const QString& text);
     void armPingTimer();
+    void closeSocket();
+    void finishShutdown();
 
     RelayConfig m_config;
     RelayEventQueue& m_events; // owned by RelayClient
@@ -133,11 +142,13 @@ private:
     Phase m_phase = Phase::Idle;
     bool m_everConnected = false;
     bool m_engineOpen = false;
+    bool m_closing = false; // shutdown(): waiting for the answer to the flush CONNECT
     std::unique_ptr<QWebSocket> m_socket;
     // Children of the worker, so that moveToThread() moves them along.
     QTimer m_connectTimer{this}; // the open phase
     QTimer m_pingTimer{this};    // pingInterval + pingTimeout without a ping: lost
     QTimer m_retryTimer{this};
+    QTimer m_closeTimer{this}; // shutdown(): the relay's side of the close
     std::chrono::milliseconds m_pingDeadline{45000};
     std::chrono::milliseconds m_retryDelay{};
     std::optional<std::chrono::steady_clock::time_point> m_lostAt;

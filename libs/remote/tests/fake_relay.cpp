@@ -15,6 +15,7 @@
 #include <QWebSocket>
 #include <QWebSocketProtocol>
 #include <QWebSocketServer>
+#include <QtCore/qnamespace.h>
 #include <QtCore/qtmetamacros.h>
 #include <QtLogging>
 #include <QtTypes>
@@ -151,15 +152,26 @@ void FakeRelay::onText(Client& client, const QString& text) {
             m_dropped.append(event->name);
             return;
         }
-        m_relayed.push_back(
-            RelayedEvent{.nsp = client.nsp, .name = event->name, .payload = event->payload});
-        if (m_relayed.size() > maxRecorded) {
-            m_relayed.pop_front();
-        }
-        // socket.broadcast.emit(name, data): every other socket of the namespace.
-        const QString nsp = client.nsp;
-        broadcast(nsp, socketio::encodeEvent(nsp, event->name, event->payload), &client);
-        emit eventRelayed(nsp, event->name);
+        // Socket.IO 4 dispatches a received event on the next tick (socket.dispatch():
+        // process.nextTick) and ignores it when the socket has disconnected by then: a DISCONNECT
+        // or a WebSocket close read in the same batch (both handled at once) loses it.
+        QMetaObject::invokeMethod(
+            this,
+            [this, socket = client.socket.get(), nsp = client.nsp, name = event->name,
+             payload = event->payload] {
+                Client* sender = find(socket);
+                if (sender == nullptr || sender->nsp != nsp) {
+                    return; // "ignore packet received after disconnection"
+                }
+                m_relayed.push_back(RelayedEvent{.nsp = nsp, .name = name, .payload = payload});
+                if (m_relayed.size() > maxRecorded) {
+                    m_relayed.pop_front();
+                }
+                // socket.broadcast.emit(name, data): every other socket of the namespace.
+                broadcast(nsp, socketio::encodeEvent(nsp, name, payload), sender);
+                emit eventRelayed(nsp, name);
+            },
+            Qt::QueuedConnection);
         return;
     }
     case socketio::PacketType::Ack:

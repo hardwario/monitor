@@ -42,8 +42,6 @@
 #include <memory>
 #include <thread>
 
-class QEventLoop;
-
 namespace hwio::remote {
 
 struct RelayLimits {
@@ -61,6 +59,9 @@ struct RelayLimits {
     // droppable one is dropped (the oldest of any kind when none is droppable), reported by a
     // warning. Values < 1 count as 1.
     std::size_t outgoingSendQueue = 4096;
+    // stop(): how long the relay may take to confirm it has read the last packets (the tunnel
+    // `end`) and the socket to close, before it is aborted (stop() blocks at most this long).
+    std::chrono::milliseconds closeTimeout{2000};
 };
 
 struct RelayConfig {
@@ -126,10 +127,9 @@ private:
     std::unique_ptr<detail::RelayEventQueue> m_events;
     std::unique_ptr<detail::RelaySendQueue> m_sends; // the same, other direction
     std::atomic<bool> m_wakePending{false};
-    // Non-owning: the worker and the event loop live on m_thread's stack, valid from start()'s
-    // return until stop()'s join(); the owner only posts queued calls to them.
+    // Non-owning: the worker lives on m_thread's stack, valid from start()'s
+    // return until stop()'s join(); the owner only posts queued calls to it.
     detail::RelayWorker* m_worker = nullptr;
-    QEventLoop* m_loop = nullptr;
     std::jthread m_thread; // owned; joined by stop() (also from the destructor)
     bool m_started = false;
     bool m_stopped = false;

@@ -5,8 +5,9 @@
 // pings), Socket.IO v5 namespaces matching ^/\d+$ (others get CONNECT_ERROR "Invalid namespace"),
 // `newClient` (null) to every socket of the namespace when one connects (the new one included),
 // `at`, `sync` and `write` passed to every other socket of the namespace, every other event
-// dropped. No authentication. Plain ws:// on 127.0.0.1 (the test builds accept http relays on
-// loopback).
+// dropped; like Socket.IO 4, an event is dispatched on the next tick and dropped when its socket
+// left the namespace (DISCONNECT, close) before. No authentication. Plain ws:// on 127.0.0.1 (the
+// test builds accept http relays on loopback).
 //
 // Test hooks: the events it relayed (recorded, bounded), raw text to one socket, dropping a
 // socket, pausing pings. Lives on the thread that creates it (its event loop must run).
