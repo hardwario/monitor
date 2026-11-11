@@ -21,7 +21,7 @@ Inne języki: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-sup
 4. Gdy ktoś dołączy, HARDWARIO Monitor zapyta: *Ktoś dołączył do sesji 482 913. Zezwolić mu na wysyłanie poleceń do
    urządzenia?* Kliknij **Zezwól** tylko wtedy, gdy wsparcie HARDWARIO właśnie powiedziało Ci, że dołącza.
    **Zakończ sesję** (domyślnie) kończy sesję dla wszystkich. Bez odpowiedzi sesja kończy się po 2 minutach.
-5. Polecenia od wsparcia pojawiają się w konsoli, a każde z nich poprzedza wiersz *— Zdalnie: <polecenie> —*.
+5. Polecenia od wsparcia pojawiają się w konsoli, a każde z nich poprzedza wiersz *— Zdalnie: polecenie <polecenie> —*.
 6. Jeśli wsparcie poprosi o wgranie firmware, skasowanie, odblokowanie (recover) lub zresetowanie urządzenia, zobaczysz,
    o co dokładnie prosi, na przykład *Wsparcie prosi o wgranie firmware CHESTER Clime v3.2.1 (ID …) do rdzenia
    aplikacji.* Domyślna jest odpowiedź **Odmów**; prośba bez odpowiedzi zostaje odrzucona po 60 sekundach. Firmware

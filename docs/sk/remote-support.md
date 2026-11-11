@@ -22,7 +22,7 @@ z webového Terminalu (len konzola) alebo z HARDWARIO Monitor.
    príkazy do zariadenia?* Kliknite na **Povoliť** len vtedy, keď vám podpora HARDWARIO práve povedala, že sa
    pripája. **Ukončiť reláciu** (predvolená voľba) ukončí reláciu pre všetkých. Bez odpovede sa relácia po 2 minútach
    ukončí.
-5. Príkazy od podpory sa zobrazujú v konzole a každému z nich predchádza riadok *— Vzdialené: <príkaz> —*.
+5. Príkazy od podpory sa zobrazujú v konzole a každému z nich predchádza riadok *— Vzdialené: príkaz <príkaz> —*.
 6. Ak vás podpora požiada o nahranie firmvéru, vymazanie, obnovenie alebo reset zariadenia, uvidíte, o čo presne žiada,
    napríklad *Podpora žiada o nahranie firmvéru CHESTER Clime v3.2.1 (ID …) do aplikačného jadra.* **Zamietnuť** je
    predvolená voľba; žiadosť bez odpovede sa po 60 sekundách zamietne. Firmvér pochádza len z katalógu HARDWARIO a váš

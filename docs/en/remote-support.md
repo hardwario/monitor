@@ -19,7 +19,7 @@ Other languages: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-
 4. When someone joins, HARDWARIO Monitor asks: *Someone joined session 482 913. Allow them to send commands to the
    device?* Click **Allow** only if HARDWARIO Support has just told you they are joining. **End session** (the default)
    ends the session for everyone. Without an answer the session ends after 2 minutes.
-5. Commands from support appear in the console, and a line *— Remote: <command> —* precedes each of them.
+5. Commands from support appear in the console, and a line *— Remote: command <command> —* precedes each of them.
 6. If support asks to flash, erase, recover or reset the device, you see what exactly they ask for, for example
    *Support asks to flash firmware CHESTER Clime v3.2.1 (ID …) to the application core.* **Deny** is the default; a
    request without an answer is denied after 60 seconds. Firmware comes only from the HARDWARIO catalog, and your

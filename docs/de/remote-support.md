@@ -21,7 +21,7 @@ Andere Sprachen: [English](../en/remote-support.md) · [Čeština](../cs/remote-
    an das Gerät zu senden?* Klicken Sie nur dann auf **Erlauben**, wenn Ihnen der HARDWARIO-Support gerade gesagt hat,
    dass er beitritt. **Sitzung beenden** (die Vorgabe) beendet die Sitzung für alle. Ohne Antwort endet die Sitzung
    nach 2 Minuten.
-5. Befehle des Supports erscheinen in der Konsole, jeweils mit einer vorangestellten Zeile *— Remote: <Befehl> —*.
+5. Befehle des Supports erscheinen in der Konsole, jeweils mit einer vorangestellten Zeile *— Remote: Befehl <Befehl> —*.
 6. Bittet der Support darum, das Gerät zu flashen, zu löschen, wiederherzustellen oder zurückzusetzen, sehen Sie genau,
    worum er bittet, zum Beispiel *Der Support bittet darum, die Firmware CHESTER Clime v3.2.1 (ID …) in den
    Anwendungskern zu flashen.* **Ablehnen** ist die Vorgabe; eine Anfrage ohne Antwort wird nach 60 Sekunden

@@ -422,6 +422,12 @@ Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
         return std::unexpected(*view.fatalError());
     }
     if (!loop) {
+        if (loop.error().code == ErrorCode::Cancelled && context.mode == OutputMode::Human) {
+            // Ctrl+C is the normal end of sharing: "Sharing ended." above is the whole human
+            // output, the exit status stays cancelled. --json: the console's error envelope.
+            return CommandResult{
+                .data = QJsonValue(), .humanText = {}, .streamed = false, .failure = loop.error()};
+        }
         return std::unexpected(loop.error()); // Ctrl+C: cancelled, as the console
     }
     if (hostError) {

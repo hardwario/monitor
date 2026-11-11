@@ -168,7 +168,7 @@ TEST(RemoteHost, JoinApprovalGatesCommandsAndSync) {
     ASSERT_TRUE(runUntil([&] { return f.console.sent.size() == 1; }));
     EXPECT_EQ(f.console.sent.front().line, "info show");
     EXPECT_EQ(f.console.sent.front().source, device::LineSource::Remote);
-    EXPECT_TRUE(f.console.hasEvent("Remote command: info show"));
+    EXPECT_TRUE(f.console.hasEvent("command info show"));
     // The echo goes back as at/write.
     ASSERT_TRUE(runUntil([&] { return !atEvents(web, QStringLiteral("write")).isEmpty(); }));
 }

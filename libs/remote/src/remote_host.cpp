@@ -407,8 +407,7 @@ void RemoteHost::onRemoteLine(const QString& text) {
     if (!m_session) {
         return;
     }
-    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Remote command: %1"))
-              .arg(redactedCommand(line)));
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "command %1")).arg(redactedCommand(line)));
     if (Status sent = m_session->sendRemoteLine(line); !sent) {
         emit warning(sent.error());
     }

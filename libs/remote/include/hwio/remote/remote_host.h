@@ -27,7 +27,7 @@
 //
 // Remote commands: an allowed `write` string of at most maxRemoteLineBytes without control
 // characters, at most remoteLinesPerSecond (excess dropped with one audit line per second) →
-// audit marker "Remote command: …" + ConsoleSession::sendRemoteLine(). A `write` object is a
+// audit marker "command …" + ConsoleSession::sendRemoteLine(). A `write` object is a
 // tunnel message (ADR-0336): hello (the joiner's app) and op-request.
 //
 // Operations (ADR-0322..0324, ADR-0336): only with HostOperations (J-Link) and after the hello was

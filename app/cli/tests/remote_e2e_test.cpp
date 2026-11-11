@@ -198,7 +198,26 @@ TEST_F(RemoteCli, HostStreamsTheConsoleAndCtrlCEndsSharing) {
     child.terminate();
     ASSERT_TRUE(child.finish()) << child.err();
     EXPECT_EQ(child.exitCode(), 130) << child.err();
+    // --json: the console's Ctrl+C envelope (cancelled), as `hwio chester app console`.
+    EXPECT_EQ(child.lastErrorCode(), QStringLiteral("cancelled")) << child.out();
     EXPECT_TRUE(runUntil([&] { return relay.socketCount() == 0; }));
+}
+
+// Human output: Ctrl+C is the normal end of sharing, no error block, cancelled exit status.
+TEST_F(RemoteCli, HostCtrlCPrintsSharingEndedWithoutError) {
+    FakeRelay relay;
+    QStringList args{QStringLiteral("remote"), QStringLiteral("host")};
+    args << relayArgs(relay);
+    Child child(args, fakeEnvironment());
+    ASSERT_TRUE(runUntil(
+        [&] { return child.err().find("Press Ctrl+C to end sharing.") != std::string::npos; }, 30s))
+        << child.err();
+    child.terminate();
+    ASSERT_TRUE(child.finish()) << child.err();
+    EXPECT_EQ(child.exitCode(), 130) << child.err();
+    EXPECT_NE(child.err().find("Sharing ended.\n"), std::string::npos) << child.err();
+    EXPECT_EQ(child.err().find("Error:"), std::string::npos) << child.err();
+    EXPECT_EQ(child.err().find("Cancelled by user."), std::string::npos) << child.err();
 }
 
 TEST_F(RemoteCli, HostOverBluetooth) {

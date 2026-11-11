@@ -21,7 +21,7 @@ Další jazyky: [English](../en/remote-support.md) · [Deutsch](../de/remote-sup
 4. Když se někdo připojí, HARDWARIO Monitor se zeptá: *K relaci 482 913 se někdo připojil. Povolit mu posílat příkazy
    do zařízení?* Klikněte na **Povolit** jen tehdy, když vám podpora HARDWARIO právě řekla, že se připojuje.
    **Ukončit relaci** (výchozí volba) ukončí relaci pro všechny. Bez odpovědi relace skončí po 2 minutách.
-5. Příkazy od podpory se v konzoli zobrazí a každému z nich předchází řádek *— Vzdáleně: <příkaz> —*.
+5. Příkazy od podpory se v konzoli zobrazí a každému z nich předchází řádek *— Vzdáleně: příkaz <příkaz> —*.
 6. Pokud podpora požádá o nahrání firmwaru, smazání, obnovení (recover) nebo reset zařízení, uvidíte, o co přesně
    žádá, například *Podpora žádá o nahrání firmwaru CHESTER Clime v3.2.1 (ID …) do aplikačního jádra.* Výchozí volba je
    **Zamítnout**; žádost bez odpovědi se po 60 sekundách zamítne. Firmware pochází jen z katalogu HARDWARIO a stáhne
