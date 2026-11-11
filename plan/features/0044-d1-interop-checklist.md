@@ -27,7 +27,14 @@ release notes or the HIL results.
       **Found:** a live joiner never received the host's tunnel `end` (the real relay drops an event that arrives
       together with the disconnect). Fixed in 0c5101c (ADR-0358); re-checked on the CHESTER: Ctrl+C on the host →
       the joiner ends 0.6 s later with `remote.host_ended`, the relay log shows the `end`.
-- [ ] The GUI **Join support session…** with **Settings › Advanced › Support server** = `http://127.0.0.1:5000`.
+- [x] GUI host ↔ CLI joiner, same machine and CHESTER, 2026-11-11 (driven over AT-SPI, GUI under XWayland, the
+      relay URL put into an isolated settings file): Connect → **Share with support…** → the dialog names the server
+      127.0.0.1 → **Start sharing** → banner "Shared with support — code 387 763"; the join dialog "Someone joined your
+      session" → **Allow** → the joiner's `app config show` answered; the console file has every "— Remote: … —"
+      line; **End sharing** → the joiner ends 0.4 s later with `remote.host_ended`.
+- [ ] GUI **Join support session…** with **Settings › Advanced › Support server** = `http://127.0.0.1:5000`: not
+      automatable here (synthetic keyboard input does not reach the window on Wayland/XWayland); needs a person to
+      type the code.
 - [x] Relay log (`docker logs`): only `at` / `sync` / `write` are relayed; payloads appear only at debug level
       (level 20). Checked 2026-11-11.
 
