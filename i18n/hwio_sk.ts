@@ -7234,7 +7234,7 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         <translation>Resetovať %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/relay_client.cpp" line="226"/>
+        <location filename="../libs/remote/src/relay_client.cpp" line="57"/>
         <source>… %n line(s) dropped …</source>
         <translation>
             <numerusform>… %n riadok zahodený …</numerusform>

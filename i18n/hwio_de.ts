@@ -7224,7 +7224,7 @@ Die Freigabe endet nach 30 Minuten ohne Aktivität oder nach 8 Stunden.</transla
         <translation>Reset von %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/relay_client.cpp" line="226"/>
+        <location filename="../libs/remote/src/relay_client.cpp" line="57"/>
         <source>… %n line(s) dropped …</source>
         <translation>
             <numerusform>… %n Zeile verworfen …</numerusform>
