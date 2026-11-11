@@ -7234,7 +7234,7 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>Reset %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/relay_client.cpp" line="226"/>
+        <location filename="../libs/remote/src/relay_client.cpp" line="56"/>
         <source>… %n line(s) dropped …</source>
         <translation>
             <numerusform>… %n wiersz odrzucony …</numerusform>
