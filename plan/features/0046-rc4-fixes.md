@@ -153,8 +153,13 @@ and the '#'-prefixed hexdump rule.
   cleared like a success; the CLI joiner's cancelled error carries the same message), and the customer's side says
   "Cancelled by support. Nothing was changed." (a toast when the wizard closes, a line in `remote host`, the audit
   line). `RemoteOperationClient::declined()` and `LteUpdateReporter::cancelledBySupport()` carry it; no protocol
-  change. No answer within the timeout stays an error on support's side; on the customer's side it also reads
-  "Cancelled by support" (the reporter gets the same "no" for both).
+  change.
+- Confirmed 2026-11-12: the internal answer has three outcomes (`SupportAnswer`: Yes / No / NoAnswer; the tunnel
+  stays yes/no). NoAnswer (no answer within the operation timeout, or the session ended) cancels before anything
+  changed and the customer's side says "Support did not answer. Nothing was changed." (toast, `remote host` line,
+  audit); support's side keeps its error. `LteUpdateReporter::cancelledText()` gives the customer's text. Test
+  builds: `HWIO_TEST_OPERATION_TIMEOUT_MS` shortens `remote host`'s operation timeout for the e2e test
+  (`RemoteCli.HostLteUpdateSupportDoesNotAnswer`).
 
 ## Verification (2026-11-12)
 

@@ -90,6 +90,9 @@ public:
 // customer's side "Cancelled by support. Nothing was changed."
 [[nodiscard]] QString lteUpdateDeclinedText(const QString& time);
 [[nodiscard]] QString cancelledBySupportText();
+// No answer from support in time, or the session ended: "Support did not answer. Nothing was
+// changed." (the customer's side and the audit).
+[[nodiscard]] QString supportDidNotAnswerText();
 [[nodiscard]] QString operationFailedText(tunnel::OpKind kind, tunnel::OpTarget target,
                                           const QString& time, const QString& message);
 

@@ -170,6 +170,20 @@ bool hostInteractive() {
     return stdinIsTerminal();
 }
 
+// The host's limits (defaults). Test builds only: HWIO_TEST_OPERATION_TIMEOUT_MS shortens the
+// operation timeout (support's answer to an LTE update question) for the end-to-end tests.
+remote::HostLimits hostLimits() {
+    remote::HostLimits limits;
+#ifdef HWIO_TEST_OVERRIDES
+    bool ok = false;
+    const int ms = qEnvironmentVariableIntValue("HWIO_TEST_OPERATION_TIMEOUT_MS", &ok);
+    if (ok && ms > 0) {
+        limits.operationTimeout = std::chrono::milliseconds(ms);
+    }
+#endif
+    return limits;
+}
+
 // The CLI's ConsentProvider: the question on stderr, the answer is the next stdin line (y / yes
 // allows). The host loop feeds the lines (answer()).
 class CliConsent final : public remote::ConsentProvider {
@@ -450,14 +464,14 @@ private:
         m_terminal->setSupportDecides(m_reporter->supportDecides());
         m_reporter->follow(*m_procedure);
         // The terminal flow does not retry: every end is the result.
-        QObject::connect(m_procedure.get(), &device::LteUpdateProcedure::finished, m_reporter.get(),
-                         [this] {
-                             m_ui->finish();
-                             if (m_reporter->cancelledBySupport()) {
-                                 m_ui->info(toStdString(remote::cancelledBySupportText()));
-                             }
-                             m_reporter->finish();
-                         });
+        QObject::connect(
+            m_procedure.get(), &device::LteUpdateProcedure::finished, m_reporter.get(), [this] {
+                m_ui->finish();
+                if (const QString text = m_reporter->cancelledText(); !text.isEmpty()) {
+                    m_ui->info(toStdString(text)); // ADR-0368: support's No / none
+                }
+                m_reporter->finish();
+            });
         if (Status started = m_procedure->start(*source); !started) {
             m_ui->warning(started.error());
             m_reporter->finish(std::move(started));
@@ -535,7 +549,7 @@ Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
 
     remote::RemoteHost host(*session, consent, operations.get(),
                             remote::HostOptions{.relay = *relay,
-                                                .limits = {},
+                                                .limits = hostLimits(),
                                                 .appVersion = std::string(buildInfo().version),
                                                 .code = std::nullopt});
     // ADR-0364: the host learns the command tree as `chester app console` does (`info show`, the

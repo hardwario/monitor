@@ -616,8 +616,9 @@ TEST(RemoteHostOperations, LteUpdateQuestionsGoToSupport) {
                                   .questions = true});
     ASSERT_TRUE(runUntil([&] { return o.operations.started.size() == 2; }));
     ASSERT_TRUE(static_cast<bool>(o.operations.ask));
-    std::vector<bool> answers;
-    o.operations.ask(tunnel::OpQuestionKind::Continue, [&](bool yes) { answers.push_back(yes); });
+    std::vector<SupportAnswer> answers;
+    o.operations.ask(tunnel::OpQuestionKind::Continue,
+                     [&](SupportAnswer a) { answers.push_back(a); });
     ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpQuestion>().has_value(); }));
     const tunnel::OpQuestion question = o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{});
     EXPECT_EQ(question.id, "lte1");
@@ -633,32 +634,45 @@ TEST(RemoteHostOperations, LteUpdateQuestionsGoToSupport) {
     EXPECT_TRUE(answers.empty());
     answer("lte1", question.qid, true);
     ASSERT_TRUE(runUntil([&] { return answers.size() == 1; }));
-    EXPECT_TRUE(answers.front());
+    EXPECT_EQ(answers.front(), SupportAnswer::Yes);
     EXPECT_TRUE(o.f.console.hasEvent("Support answered: continue."));
     answer("lte1", question.qid, false); // only once
     runFor(300ms);
     EXPECT_EQ(answers.size(), 1U);
 
-    // No answer in time: no.
+    // Support's No.
     o.operations.ask(tunnel::OpQuestionKind::ContinueWithoutCopy,
-                     [&](bool yes) { answers.push_back(yes); });
-    ASSERT_TRUE(runUntil([&] { return answers.size() == 2; }, 10s));
-    EXPECT_FALSE(answers.back());
-    EXPECT_TRUE(o.f.console.hasEvent("Support did not answer within 1 s: cancelled."));
-
-    // The session ends with a question open: no.
-    o.operations.ask(tunnel::OpQuestionKind::Continue, [&](bool yes) { answers.push_back(yes); });
+                     [&](SupportAnswer a) { answers.push_back(a); });
     ASSERT_TRUE(runUntil([&] {
         return o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{}).qid != question.qid;
     }));
+    const std::string second = o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{}).qid;
+    answer("lte1", second, false);
+    ASSERT_TRUE(runUntil([&] { return answers.size() == 2; }));
+    EXPECT_EQ(answers.back(), SupportAnswer::No);
+    EXPECT_TRUE(o.f.console.hasEvent("Cancelled by support. Nothing was changed."));
+
+    // No answer in time (confirmed 2026-11-12: not "cancelled by support").
+    o.operations.ask(tunnel::OpQuestionKind::ContinueWithoutCopy,
+                     [&](SupportAnswer a) { answers.push_back(a); });
+    ASSERT_TRUE(runUntil([&] { return answers.size() == 3; }, 10s));
+    EXPECT_EQ(answers.back(), SupportAnswer::NoAnswer);
+    EXPECT_TRUE(o.f.console.hasEvent("Support did not answer. Nothing was changed."));
+    const std::string third = o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{}).qid;
+
+    // The session ends with a question open: no answer.
+    o.operations.ask(tunnel::OpQuestionKind::Continue,
+                     [&](SupportAnswer a) { answers.push_back(a); });
+    ASSERT_TRUE(runUntil(
+        [&] { return o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{}).qid != third; }));
     auto ask = o.operations.ask; // abandon() clears the fake's copy
     o.f.host.end();
-    ASSERT_EQ(answers.size(), 3U);
-    EXPECT_FALSE(answers.back());
-    // After the end every question is answered no (on the next turn).
-    ask(tunnel::OpQuestionKind::Continue, [&](bool yes) { answers.push_back(yes); });
-    ASSERT_TRUE(runUntil([&] { return answers.size() == 4; }));
-    EXPECT_FALSE(answers.back());
+    ASSERT_EQ(answers.size(), 4U);
+    EXPECT_EQ(answers.back(), SupportAnswer::NoAnswer);
+    // After the end every question gets no answer (on the next turn).
+    ask(tunnel::OpQuestionKind::Continue, [&](SupportAnswer a) { answers.push_back(a); });
+    ASSERT_TRUE(runUntil([&] { return answers.size() == 5; }));
+    EXPECT_EQ(answers.back(), SupportAnswer::NoAnswer);
 }
 
 TEST(RemoteHostOperations, LteUpdateRefusedWhenTheHostHasNone) {

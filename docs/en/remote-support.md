@@ -31,7 +31,7 @@ Other languages: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-
    disconnects and reconnects, and support sees each step and the result.
    Before anything is changed, HARDWARIO Support confirms the update; you only see what will happen and follow the
    cable instructions (there is no button to click). If no copy of the application can be made, support decides
-   whether to continue without it. The copy is always written back at the end. If support answers No, you see *Cancelled by support. Nothing was changed.* Without an answer from support within
+   whether to continue without it. The copy is always written back at the end. If support answers No, you see *Cancelled by support. Nothing was changed.* Without an answer you see *Support did not answer. Nothing was changed.* Without an answer from support within
    60 seconds the update is cancelled before anything changes.
 8. Click **End sharing** when you are done.
 

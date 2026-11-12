@@ -50,10 +50,13 @@ struct OperationUpdate {
     std::uint64_t total = 0;
 };
 
-// ADR-0368: asks support a question of the running operation; `answer` is called once, later
-// (true = yes; false = no, no answer in time, or the session ended). Empty = the joiner cannot
-// answer: the customer decides (ADR-0366).
-using AskSupport = std::function<void(tunnel::OpQuestionKind, std::function<void(bool)> answer)>;
+// ADR-0368: asks support a question of the running operation; `answer` is called once, later. Empty
+// = the joiner cannot answer: the customer decides (ADR-0366). The outcome is internal (the
+// tunnel's op-answer is yes/no): NoAnswer = no answer within the operation timeout, or the session
+// ended (confirmed 2026-11-12).
+enum class SupportAnswer : std::uint8_t { Yes, No, NoAnswer };
+using SupportAnswerFn = std::function<void(SupportAnswer)>;
+using AskSupport = std::function<void(tunnel::OpQuestionKind, SupportAnswerFn answer)>;
 
 // Runs the guided LTE update for an allowed lteUpdate request (ADR-0363): the GUI opens Flash ›
 // Update LTE firmware… with the recommended firmware and starts it, the CLI runs the terminal flow

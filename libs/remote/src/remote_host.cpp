@@ -101,15 +101,11 @@ RemoteHost::RemoteHost(device::ConsoleSession& session, ConsentProvider& consent
         if (!m_question) {
             return;
         }
-        audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote",
-                                         "Support did not answer within %1 s: cancelled."))
-                  .arg(std::chrono::duration_cast<std::chrono::seconds>(
-                           m_options.limits.operationTimeout)
-                           .count()));
+        audit(supportDidNotAnswerText());
         SupportQuestion question = std::move(*m_question);
         m_question.reset();
         if (question.answer) {
-            question.answer(false);
+            question.answer(SupportAnswer::NoAnswer);
         }
     });
     connect(&m_commandsTimer, &QTimer::timeout, this, &RemoteHost::sendCommands);
@@ -712,10 +708,9 @@ void RemoteHost::startOperation() {
         },
         // ADR-0368: only a joiner that answers, and only for the LTE update.
         operation.request.questions && operation.request.kind == tunnel::OpKind::LteUpdate
-            ? AskSupport(
-                  [this, token](tunnel::OpQuestionKind kind, std::function<void(bool)> answer) {
-                      askSupport(token, kind, std::move(answer));
-                  })
+            ? AskSupport([this, token](tunnel::OpQuestionKind kind, SupportAnswerFn answer) {
+                  askSupport(token, kind, std::move(answer));
+              })
             : AskSupport());
     if (!started) {
         finishOperation(started);
@@ -723,18 +718,19 @@ void RemoteHost::startOperation() {
 }
 
 void RemoteHost::askSupport(std::uint64_t token, tunnel::OpQuestionKind kind,
-                            std::function<void(bool)> answer) {
+                            SupportAnswerFn answer) {
     if (token != m_operationToken || !m_operation || !m_operation->accepted ||
         m_state == HostState::Ended) {
         // The operation is over: no (asked on the next turn, never inside the caller).
-        QTimer::singleShot(0, this, [answer = std::move(answer)] { answer(false); });
+        QTimer::singleShot(0, this,
+                           [answer = std::move(answer)] { answer(SupportAnswer::NoAnswer); });
         return;
     }
     const QString summary = operationSummary(m_operation->question);
     const std::string operationId = m_operation->request.id;
     // One question at a time: the earlier one is answered no.
     if (auto earlier = takeQuestion()) {
-        earlier(false);
+        earlier(SupportAnswer::NoAnswer);
     }
     const std::string qid = std::format("q-{:08x}{:08x}", QRandomGenerator::system()->generate(),
                                         QRandomGenerator::system()->generate());
@@ -745,9 +741,9 @@ void RemoteHost::askSupport(std::uint64_t token, tunnel::OpQuestionKind kind,
     sendHost(tunnel::OpQuestion{.id = operationId, .qid = qid, .question = kind});
 }
 
-std::function<void(bool)> RemoteHost::takeQuestion() {
+SupportAnswerFn RemoteHost::takeQuestion() {
     m_questionTimer.stop();
-    std::function<void(bool)> answer;
+    SupportAnswerFn answer;
     if (m_question) {
         answer = std::move(m_question->answer);
         m_question.reset();
@@ -777,7 +773,7 @@ void RemoteHost::answerSupportQuestion(bool yes) {
     audit(yes ? trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Support answered: continue."))
               : cancelledBySupportText());
     if (question.answer) {
-        question.answer(yes);
+        question.answer(yes ? SupportAnswer::Yes : SupportAnswer::No);
     }
 }
 
@@ -905,7 +901,7 @@ void RemoteHost::finish(std::optional<Error> error, bool notify) {
         audit(trRemote(
             QT_TRANSLATE_NOOP("hwio::remote", "Support did not answer before the session ended.")));
         if (auto answer = takeQuestion()) {
-            answer(false);
+            answer(SupportAnswer::NoAnswer);
         }
     }
     ++m_joinToken;

@@ -43,8 +43,8 @@
 // lteUpdate request with `questions` gets an AskSupport for its run: a question is sent as
 // op-question (a random qid; one open at a time) and answered by an op-answer of an allowed
 // participant (no join question open) for that operation and qid, once; any other answer is
-// dropped. No answer within operationTimeout, or the session ending, answers no (the update is
-// then cancelled before anything changed). Audited: asked, answered, not answered.
+// dropped. No answer within operationTimeout, or the session ending, answers NoAnswer (the update
+// is then cancelled before anything changed). Audited: asked, answered, not answered.
 //
 // Autocomplete (ADR-0364): setCommandTree() gives the host's learned command tree (the GUI tab's
 // ConsoleViewModel, the CLI host's learner, on every change); after a join is allowed, and on
@@ -210,12 +210,11 @@ private:
     void startOperation();
     void finishOperation(const Status& status);
     // ADR-0368
-    void askSupport(std::uint64_t token, tunnel::OpQuestionKind kind,
-                    std::function<void(bool)> answer);
+    void askSupport(std::uint64_t token, tunnel::OpQuestionKind kind, SupportAnswerFn answer);
     void onAnswer(const tunnel::OpAnswer& answer);
     void answerSupportQuestion(bool yes);
     // Closes the open question (stops its timer); its answer callback, empty when none.
-    [[nodiscard]] std::function<void(bool)> takeQuestion();
+    [[nodiscard]] SupportAnswerFn takeQuestion();
     void askJoin();
     void answerJoin(bool allowed);
     void sendSync();
@@ -254,7 +253,7 @@ private:
     struct SupportQuestion {
         std::string qid;
         tunnel::OpQuestionKind kind = tunnel::OpQuestionKind::Continue;
-        std::function<void(bool)> answer;
+        SupportAnswerFn answer;
     };
     std::optional<SupportQuestion> m_question;
     QTimer m_questionTimer{this};

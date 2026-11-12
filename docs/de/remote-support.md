@@ -35,7 +35,7 @@ Andere Sprachen: [English](../en/remote-support.md) · [Čeština](../cs/remote-
    verbindet, und der Support sieht jeden Schritt und das Ergebnis.
    Bevor etwas geändert wird, bestätigt der HARDWARIO Support das Update; Sie sehen nur, was geschieht, und folgen
    den Anweisungen zum Umstecken (es gibt nichts zu klicken). Kann keine Kopie der Anwendung erstellt werden,
-   entscheidet der Support, ob ohne sie fortgefahren wird. Die Kopie wird am Ende immer zurückgeschrieben. Antwortet der Support mit Nein, sehen Sie *Vom Support abgebrochen. Es wurde nichts geändert.* Antwortet
+   entscheidet der Support, ob ohne sie fortgefahren wird. Die Kopie wird am Ende immer zurückgeschrieben. Antwortet der Support mit Nein, sehen Sie *Vom Support abgebrochen. Es wurde nichts geändert.* Ohne Antwort sehen Sie *Der Support hat nicht geantwortet. Es wurde nichts geändert.* Antwortet
    der Support nicht innerhalb von 60 Sekunden, wird das Update abgebrochen, bevor etwas geändert wird.
 8. Klicken Sie auf **Freigabe beenden**, wenn Sie fertig sind.
 

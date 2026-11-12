@@ -412,7 +412,9 @@ TEST_F(RemoteCli, JoinAnswersTheLteUpdateQuestions) {
         EXPECT_TRUE(operations.started.back().questions);
         ASSERT_TRUE(static_cast<bool>(operations.ask));
         std::optional<bool> answer;
-        operations.ask(c.kind, [&](bool yes) { answer = yes; });
+        operations.ask(c.kind, [&](hwio::remote::SupportAnswer a) {
+            answer = a == hwio::remote::SupportAnswer::Yes;
+        });
         ASSERT_TRUE(runUntil([&] { return child.err().find("[y/N] ") != std::string::npos; }, 30s))
             << child.err();
         const std::string text =
@@ -446,7 +448,7 @@ TEST_F(RemoteCli, JoinAnswersTheLteUpdateQuestions) {
     }
     EXPECT_TRUE(host.console.hasEvent("Support answered: continue."));
     EXPECT_TRUE(host.console.hasEvent("Cancelled by support. Nothing was changed."));
-    EXPECT_TRUE(host.console.hasEvent("Support did not answer within 3 s: cancelled."));
+    EXPECT_TRUE(host.console.hasEvent("Support did not answer. Nothing was changed."));
 }
 
 TEST_F(RemoteCli, JoinOperationDenied) {
@@ -552,9 +554,10 @@ TEST_F(RemoteCli, JoinEndsWhenTheHostEndsSharing) {
 #ifndef _WIN32
 // How the questions of a remote LTE update are answered (ADR-0366 / ADR-0368).
 enum class LteAnswers : std::uint8_t {
-    Customer,   // a joiner without the feature: the customer answers on the host's terminal
-    SupportYes, // the joiner answers Continue: yes
-    SupportNo,  // the joiner answers Continue: no
+    Customer,    // a joiner without the feature: the customer answers on the host's terminal
+    SupportYes,  // the joiner answers Continue: yes
+    SupportNo,   // the joiner answers Continue: no
+    SupportNone, // the joiner does not answer (the host's operation timeout, shortened)
 };
 
 // ADR-0363: `remote host` runs the guided LTE update of `chester lte flash --guided` for an allowed
@@ -596,6 +599,9 @@ void runRemoteLteUpdate(const QString& home, const QProcessEnvironment& baseEnv,
     }
     QProcessEnvironment env = baseEnv;
     env.insert(QStringLiteral("HWIO_TEST_INTERACTIVE"), QStringLiteral("1"));
+    if (answers == LteAnswers::SupportNone) {
+        env.insert(QStringLiteral("HWIO_TEST_OPERATION_TIMEOUT_MS"), QStringLiteral("3000"));
+    }
     env.insert(QStringLiteral("HWIO_DESIGNATED_URL"), http.baseUrl() + QStringLiteral("/lte.zip"));
     env.insert(
         QStringLiteral("HWIO_DESIGNATED_SHA256"),
@@ -665,9 +671,11 @@ void runRemoteLteUpdate(const QString& home, const QProcessEnvironment& baseEnv,
         EXPECT_EQ(child.err().find("Continue? [y/N]"), std::string::npos) << child.err();
         ASSERT_EQ(questions.size(), 1U);
         EXPECT_EQ(questions.front(), hwio::remote::tunnel::OpQuestionKind::Continue);
-        ASSERT_TRUE(client.answer(answers == LteAnswers::SupportYes).has_value());
+        if (answers != LteAnswers::SupportNone) {
+            ASSERT_TRUE(client.answer(answers == LteAnswers::SupportYes).has_value());
+        }
     }
-    if (answers == LteAnswers::SupportNo) {
+    if (answers == LteAnswers::SupportNo || answers == LteAnswers::SupportNone) {
         // Cancelled before anything changed.
         ASSERT_TRUE(runUntil([&] { return result.has_value(); }, 30s)) << child.err();
         const auto [ok, error] = result.value_or(std::pair(true, hwio::Error{}));
@@ -675,7 +683,15 @@ void runRemoteLteUpdate(const QString& home, const QProcessEnvironment& baseEnv,
         EXPECT_EQ(error.code, hwio::ErrorCode::Cancelled) << error.detail;
         EXPECT_EQ(std::ranges::find(phases, "erase"), phases.end());
         EXPECT_EQ(std::ranges::find(phases, "backup"), phases.end());
-        ASSERT_TRUE(waitErr("Cancelled by support. Nothing was changed.")) << child.err();
+        // Confirmed 2026-11-12: a timeout is not "cancelled by support".
+        ASSERT_TRUE(waitErr(answers == LteAnswers::SupportNo
+                                ? "Cancelled by support. Nothing was changed."
+                                : "Support did not answer. Nothing was changed."))
+            << child.err();
+        EXPECT_EQ(child.err().find(answers == LteAnswers::SupportNo ? "Support did not answer."
+                                                                    : "Cancelled by support."),
+                  std::string::npos)
+            << child.err();
     } else {
         ASSERT_TRUE(waitErr("Connect the J-Link cable to the LTE connector.")) << child.err();
         moveCable("lte");
@@ -705,6 +721,12 @@ TEST_F(RemoteCli, HostLteUpdateSupportConfirms) {
 // ADR-0368: support answers no: cancelled before the copy and the erase.
 TEST_F(RemoteCli, HostLteUpdateSupportCancels) {
     runRemoteLteUpdate(home(), fakeEnvironment(), LteAnswers::SupportNo);
+}
+
+// Confirmed 2026-11-12: no answer from support within the operation timeout: cancelled before
+// anything changed, and the customer is told that support did not answer.
+TEST_F(RemoteCli, HostLteUpdateSupportDoesNotAnswer) {
+    runRemoteLteUpdate(home(), fakeEnvironment(), LteAnswers::SupportNone);
 }
 #endif // _WIN32
 

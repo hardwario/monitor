@@ -167,6 +167,11 @@ QString cancelledBySupportText() {
                                        "Cancelled by support. Nothing was changed.");
 }
 
+QString supportDidNotAnswerText() {
+    return QCoreApplication::translate("hwio::remote",
+                                       "Support did not answer. Nothing was changed.");
+}
+
 QString operationFailedText(tunnel::OpKind kind, tunnel::OpTarget target, const QString& time,
                             const QString& message) {
     const bool app = target == tunnel::OpTarget::App;

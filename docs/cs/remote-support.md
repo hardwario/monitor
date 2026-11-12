@@ -33,7 +33,7 @@ Další jazyky: [English](../en/remote-support.md) · [Deutsch](../de/remote-sup
    zapnuté, i když se zařízení odpojí a znovu připojí, a podpora vidí každý krok i výsledek.
    Než se cokoli změní, aktualizaci potvrdí podpora HARDWARIO; vy jen vidíte, co se stane, a řídíte se pokyny k
    přepojení kabelu (nic neklikáte). Pokud kopii aplikace nelze vytvořit, rozhodne podpora, zda pokračovat bez ní.
-   Kopie se na konci vždy zapíše zpět. Když podpora odpoví Ne, uvidíte *Zrušeno podporou. Nic se nezměnilo.* Když podpora do 60 sekund neodpoví, aktualizace se zruší dřív, než se cokoli
+   Kopie se na konci vždy zapíše zpět. Když podpora odpoví Ne, uvidíte *Zrušeno podporou. Nic se nezměnilo.* Bez odpovědi uvidíte *Podpora neodpověděla. Nic se nezměnilo.* Když podpora do 60 sekund neodpoví, aktualizace se zruší dřív, než se cokoli
    změní.
 8. Až budete hotovi, klikněte na **Ukončit sdílení**.
 

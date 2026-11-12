@@ -7446,97 +7446,102 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         <translation>Zrušeno podporou. Nic se nezměnilo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="177"/>
+        <location filename="../libs/remote/src/consent.cpp" line="171"/>
+        <source>Support did not answer. Nothing was changed.</source>
+        <translation>Podpora neodpověděla. Nic se nezměnilo.</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="182"/>
         <source>Flashing the application firmware on the customer&apos;s device failed (%1): %2</source>
         <translation>Nahrání aplikačního firmwaru do zařízení zákazníka selhalo (%1): %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="180"/>
+        <location filename="../libs/remote/src/consent.cpp" line="185"/>
         <source>Flashing the LTE MCU firmware on the customer&apos;s device failed (%1): %2</source>
         <translation>Nahrání firmwaru LTE MCU do zařízení zákazníka selhalo (%1): %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="186"/>
+        <location filename="../libs/remote/src/consent.cpp" line="191"/>
         <source>Erasing the application MCU on the customer&apos;s device failed (%1): %2</source>
         <translation>Smazání MCU aplikace v zařízení zákazníka selhalo (%1): %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="189"/>
+        <location filename="../libs/remote/src/consent.cpp" line="194"/>
         <source>Erasing the LTE MCU on the customer&apos;s device failed (%1): %2</source>
         <translation>Smazání LTE MCU v zařízení zákazníka selhalo (%1): %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="193"/>
+        <location filename="../libs/remote/src/consent.cpp" line="198"/>
         <source>Recovering the application MCU on the customer&apos;s device failed (%1): %2</source>
         <translation>Obnovení (recover) MCU aplikace v zařízení zákazníka selhalo (%1): %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="196"/>
+        <location filename="../libs/remote/src/consent.cpp" line="201"/>
         <source>Recovering the LTE MCU on the customer&apos;s device failed (%1): %2</source>
         <translation>Obnovení (recover) LTE MCU v zařízení zákazníka selhalo (%1): %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="201"/>
+        <location filename="../libs/remote/src/consent.cpp" line="206"/>
         <source>Resetting the customer&apos;s device failed (%1): %2</source>
         <translation>Reset zařízení zákazníka selhal (%1): %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="203"/>
+        <location filename="../libs/remote/src/consent.cpp" line="208"/>
         <source>Resetting the LTE MCU of the customer&apos;s device failed (%1): %2</source>
         <translation>Reset LTE MCU zařízení zákazníka selhal (%1): %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="208"/>
+        <location filename="../libs/remote/src/consent.cpp" line="213"/>
         <source>The LTE firmware update on the customer&apos;s device failed (%1): %2</source>
         <translation>Aktualizace firmwaru LTE v zařízení zákazníka selhala (%1): %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="219"/>
+        <location filename="../libs/remote/src/consent.cpp" line="224"/>
         <source>Support asks to flash %1 to %2. The device restarts.</source>
         <translation>Podpora žádá o nahrání %1 do %2. Zařízení se restartuje.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="223"/>
+        <location filename="../libs/remote/src/consent.cpp" line="228"/>
         <source>Support asks to erase the firmware of %1. The device stops working until new firmware is flashed.</source>
         <translation>Podpora žádá o smazání firmwaru %1. Zařízení nebude fungovat, dokud se nenahraje nový firmware.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="228"/>
+        <location filename="../libs/remote/src/consent.cpp" line="233"/>
         <source>Support asks to recover %1. This erases its flash completely, including the protection settings.</source>
         <translation>Podpora žádá o obnovení %1. Tím se zcela smaže jeho flash včetně nastavení ochrany.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="233"/>
+        <location filename="../libs/remote/src/consent.cpp" line="238"/>
         <source>Support asks to reset %1. The device restarts.</source>
         <translation>Podpora žádá o reset %1. Zařízení se restartuje.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="237"/>
+        <location filename="../libs/remote/src/consent.cpp" line="242"/>
         <source>Support asks to update the LTE firmware to %1. You will have to move the J-Link cable between the APP and LTE connectors.</source>
         <translation>Podpora žádá o aktualizaci firmwaru LTE na %1. Budete muset přepojovat kabel J-Link mezi konektory APP a LTE.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="249"/>
+        <location filename="../libs/remote/src/consent.cpp" line="254"/>
         <source>Flash %1 to %2</source>
         <translation>Nahrání %1 do %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="252"/>
+        <location filename="../libs/remote/src/consent.cpp" line="257"/>
         <source>Erase %1</source>
         <translation>Smazání %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="255"/>
+        <location filename="../libs/remote/src/consent.cpp" line="260"/>
         <source>Recover %1</source>
         <translation>Obnovení %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="258"/>
+        <location filename="../libs/remote/src/consent.cpp" line="263"/>
         <source>Reset %1</source>
         <translation>Reset %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="261"/>
+        <location filename="../libs/remote/src/consent.cpp" line="266"/>
         <source>Update the LTE firmware to %1</source>
         <translation>Aktualizace firmwaru LTE na %1</translation>
     </message>
@@ -7620,70 +7625,65 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         <translation>— Starší historie relace byla vynechána —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="104"/>
-        <source>Support did not answer within %1 s: cancelled.</source>
-        <translation>Podpora neodpověděla do %1 s: zrušeno.</translation>
-    </message>
-    <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="121"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="117"/>
         <source>Sharing started, session %1 (%2).</source>
         <translation>Sdílení zahájeno, relace %1 (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="130"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="126"/>
         <source>The join question was not answered within 2 minutes.</source>
         <translation>Na dotaz na připojení nikdo neodpověděl do 2 minut.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="144"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="140"/>
         <source>%1: denied (no answer within 60 s).</source>
         <translation>%1: zamítnuto (žádná odpověď do 60 s).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="154"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="157"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="150"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="153"/>
         <source>Sharing ended after 30 minutes without activity.</source>
         <translation>Sdílení skončilo po 30 minutách bez aktivity.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="162"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="176"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="158"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="172"/>
         <source>Start sharing again if support still needs the console.</source>
         <translation>Pokud podpora konzoli stále potřebuje, spusťte sdílení znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="169"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="171"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="165"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="167"/>
         <source>Sharing ended after the maximum of 8 hours.</source>
         <translation>Sdílení skončilo po maximální době 8 hodin.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="184"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="180"/>
         <source>Participant app: web Terminal or unknown.</source>
         <translation>Aplikace účastníka: web Terminal nebo neznámá.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="244"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="240"/>
         <source>Connection to the support server restored.</source>
         <translation>Spojení se serverem podpory obnoveno.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="269"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="265"/>
         <source>Another device uses this session code; the session was ended for safety.</source>
         <translation>Tento kód relace používá jiné zařízení; relace byla z bezpečnostních důvodů ukončena.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="284"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="280"/>
         <source>Someone joined the session.</source>
         <translation>Někdo se připojil k relaci.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="303"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="299"/>
         <source>%1: denied (someone joined).</source>
         <translation>%1: zamítnuto (někdo se připojil).</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="327"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="323"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n vzdálený příkaz byl zahozen během čekání na vaši odpověď.</numerusform>
@@ -7692,119 +7692,119 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="333"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="329"/>
         <source>You ended the session instead of allowing the participant.</source>
         <translation>Místo povolení účastníka jste relaci ukončili.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="340"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="336"/>
         <source>Participant allowed.</source>
         <translation>Účastník povolen.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="341"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="337"/>
         <source>Participant allowed (%1).</source>
         <translation>Účastník povolen (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="430"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="426"/>
         <source>A remote command was dropped (too long or with control characters).</source>
         <translation>Vzdálený příkaz byl zahozen (příliš dlouhý nebo s řídicími znaky).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="442"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="438"/>
         <source>Remote commands dropped: more than %1 per second.</source>
         <translation>Vzdálené příkazy zahozeny: více než %1 za sekundu.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="452"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="448"/>
         <source>command %1</source>
         <translation>příkaz %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="470"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="466"/>
         <source>An operation request was refused: the participant is not allowed.</source>
         <translation>Požadavek na operaci byl odmítnut: účastník není povolen.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="489"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="485"/>
         <source>Participant app: %1.</source>
         <translation>Aplikace účastníka: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="582"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="578"/>
         <source>Support asks: %1.</source>
         <translation>Podpora žádá: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="585"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="581"/>
         <source>%1: refused (this console has no operations).</source>
         <translation>%1: odmítnuto (tato konzole nemá žádné operace).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="593"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="589"/>
         <source>%1: refused (not available on this console).</source>
         <translation>%1: odmítnuto (na této konzoli není k dispozici).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="600"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="596"/>
         <source>%1: refused (another request or operation is in progress).</source>
         <translation>%1: odmítnuto (probíhá jiný požadavek nebo operace).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="608"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="632"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="604"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="628"/>
         <source>%1: refused (%2).</source>
         <translation>%1: odmítnuto (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="660"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="656"/>
         <source>%1: denied by you.</source>
         <translation>%1: zamítli jste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="679"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="675"/>
         <source>%1: allowed by you.</source>
         <translation>%1: povolili jste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="743"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="739"/>
         <source>%1: waiting for support&apos;s answer: %2</source>
         <translation>%1: čeká se na odpověď podpory: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="777"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="773"/>
         <source>Support answered: continue.</source>
         <translation>Podpora odpověděla: pokračovat.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="795"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="798"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="791"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="794"/>
         <source>%1: done.</source>
         <translation>%1: hotovo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="801"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="797"/>
         <source>%1: failed: %2</source>
         <translation>%1: selhalo: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="855"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="851"/>
         <source>— Remote: %1 —</source>
         <translation>— Vzdáleně: %1 —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="888"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="884"/>
         <source>You ended sharing.</source>
         <translation>Ukončili jste sdílení.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="906"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="902"/>
         <source>Support did not answer before the session ended.</source>
         <translation>Podpora neodpověděla před ukončením relace.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="933"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="929"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Nápověda %n příkazu přečtena pro doplňování podpory.</numerusform>
@@ -7813,12 +7813,12 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="940"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="936"/>
         <source>Sharing ended.</source>
         <translation>Sdílení skončilo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="941"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="937"/>
         <source>Sharing ended: %1</source>
         <translation>Sdílení skončilo: %1</translation>
     </message>

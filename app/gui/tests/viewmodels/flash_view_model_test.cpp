@@ -1268,16 +1268,19 @@ TEST_F(FlashTest, RemoteLteUpdateQuestionsGoToSupport) {
             QCryptographicHash::hash(bundle, QCryptographicHash::Sha256).toHex());
     qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
     startBoard();
-    for (const bool yes : {false, true}) {
+    using hwio::remote::SupportAnswer;
+    for (const SupportAnswer given :
+         {SupportAnswer::No, SupportAnswer::NoAnswer, SupportAnswer::Yes}) {
+        const bool yes = given == SupportAnswer::Yes;
         std::vector<hwio::remote::tunnel::OpQuestionKind> questions;
-        std::function<void(bool)> answer;
+        hwio::remote::SupportAnswerFn answer;
         std::optional<hwio::Status> result;
         ASSERT_TRUE(tab()
                         .remoteShare()
                         ->start([](const hwio::remote::OperationUpdate&) {},
                                 [&](hwio::Status status) { result = std::move(status); },
                                 [&](hwio::remote::tunnel::OpQuestionKind kind,
-                                    std::function<void(bool)> a) {
+                                    hwio::remote::SupportAnswerFn a) {
                                     questions.push_back(kind);
                                     answer = std::move(a);
                                 })
@@ -1296,17 +1299,18 @@ TEST_F(FlashTest, RemoteLteUpdateQuestionsGoToSupport) {
             QStringLiteral("HARDWARIO Support confirms the update. Keep the J-Link cable on the "
                            "APP connector for now.")))
             << wizard->promptText().toStdString();
-        answer(yes);
+        answer(given);
         if (!yes) {
             ASSERT_TRUE(waitFor([&] { return result.has_value(); }));
             const hwio::Status cancelled = result.value_or(hwio::Status{});
             ASSERT_FALSE(cancelled.has_value());
             EXPECT_EQ(cancelled.error().code, ErrorCode::Cancelled);
-            // Confirmed 2026-11-12: the customer is told that support cancelled.
-            ASSERT_TRUE(waitFor([this] {
-                return app().toasts().contains(
-                    QStringLiteral("Cancelled by support. Nothing was changed."));
-            }));
+            // Confirmed 2026-11-12: the customer is told that support cancelled, or did not answer.
+            const QString told =
+                given == SupportAnswer::No
+                    ? QStringLiteral("Cancelled by support. Nothing was changed.")
+                    : QStringLiteral("Support did not answer. Nothing was changed.");
+            ASSERT_TRUE(waitFor([&] { return app().toasts().contains(told); }));
             // The cancelled guide may already have closed (and deleted) the wizard.
             EXPECT_FALSE(!guard.isNull() && guard->procedure() != nullptr &&
                          guard->procedure()->applicationErased());

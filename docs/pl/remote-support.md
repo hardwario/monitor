@@ -33,7 +33,7 @@ Inne języki: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-sup
    aktywne, gdy urządzenie się rozłącza i ponownie łączy, a wsparcie widzi każdy krok i wynik.
    Zanim cokolwiek zostanie zmienione, aktualizację potwierdza wsparcie HARDWARIO; Ty tylko widzisz, co się stanie, i
    wykonujesz polecenia dotyczące przełożenia kabla (nie ma nic do kliknięcia). Jeśli nie da się zrobić kopii
-   aplikacji, wsparcie decyduje, czy kontynuować bez niej. Kopia jest na końcu zawsze zapisywana z powrotem. Gdy wsparcie odpowie Nie, zobaczysz *Anulowane przez wsparcie. Nic nie zostało zmienione.* Jeśli
+   aplikacji, wsparcie decyduje, czy kontynuować bez niej. Kopia jest na końcu zawsze zapisywana z powrotem. Gdy wsparcie odpowie Nie, zobaczysz *Anulowane przez wsparcie. Nic nie zostało zmienione.* Bez odpowiedzi zobaczysz *Wsparcie nie odpowiedziało. Nic nie zostało zmienione.* Jeśli
    wsparcie nie odpowie w ciągu 60 sekund, aktualizacja zostaje anulowana, zanim cokolwiek się zmieni.
 8. Gdy skończysz, kliknij **Zakończ udostępnianie**.
 

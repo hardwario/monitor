@@ -34,7 +34,7 @@ z webového Terminalu (len konzola) alebo z HARDWARIO Monitor.
    Zdieľanie zostáva zapnuté, aj keď sa zariadenie odpojí a znova pripojí, a podpora vidí každý krok aj výsledok.
    Skôr než sa čokoľvek zmení, aktualizáciu potvrdí podpora HARDWARIO; vy iba vidíte, čo sa stane, a riadite sa
    pokynmi na prepojenie kábla (nič neklikáte). Ak kópiu aplikácie nemožno vytvoriť, podpora rozhodne, či pokračovať
-   bez nej. Kópia sa na konci vždy zapíše späť. Keď podpora odpovie Nie, uvidíte *Zrušené podporou. Nič sa nezmenilo.* Ak podpora do 60 sekúnd neodpovie, aktualizácia sa zruší skôr, než sa
+   bez nej. Kópia sa na konci vždy zapíše späť. Keď podpora odpovie Nie, uvidíte *Zrušené podporou. Nič sa nezmenilo.* Bez odpovede uvidíte *Podpora neodpovedala. Nič sa nezmenilo.* Ak podpora do 60 sekúnd neodpovie, aktualizácia sa zruší skôr, než sa
    čokoľvek zmení.
 8. Keď skončíte, kliknite na **Ukončiť zdieľanie**.
 

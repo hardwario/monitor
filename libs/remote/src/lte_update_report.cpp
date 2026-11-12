@@ -4,11 +4,13 @@
 #include "hwio/core/result.h"
 #include "hwio/device/lte_update_procedure.h"
 #include "hwio/device/operation.h"
+#include "hwio/remote/consent.h"
 #include "hwio/remote/host_operations.h"
 #include "hwio/remote/tunnel.h"
 
 #include <QObject>
 #include <QPointer>
+#include <QString>
 #include <QTimer>
 #include <QtCore/qtmetamacros.h>
 
@@ -131,11 +133,11 @@ void LteUpdateReporter::askSupport(Step step) {
                                             : tunnel::OpQuestionKind::ContinueWithoutCopy;
     // The answer is applied on the next turn of the event loop (never inside the procedure's
     // signal or the host's call).
-    m_ask(kind, [self = QPointer<LteUpdateReporter>(this), step](bool yes) {
+    m_ask(kind, [self = QPointer<LteUpdateReporter>(this), step](SupportAnswer answer) {
         if (self.isNull()) {
             return;
         }
-        QTimer::singleShot(0, self.data(), [self, step, yes] {
+        QTimer::singleShot(0, self.data(), [self, step, answer] {
             if (self.isNull()) {
                 return;
             }
@@ -144,8 +146,8 @@ void LteUpdateReporter::askSupport(Step step) {
             if (procedure == nullptr || procedure->step() != step) {
                 return;
             }
-            if (!yes) {
-                self->m_cancelledBySupport = true;
+            if (answer != SupportAnswer::Yes) {
+                self->m_cancelledBy = answer;
                 (void)procedure->cancel(); // nothing was changed yet
             } else if (step == Step::Confirm) {
                 procedure->confirm();
@@ -156,6 +158,14 @@ void LteUpdateReporter::askSupport(Step step) {
         });
     });
     emit supportQuestionChanged(); // the question is open: the customer's view changes
+}
+
+QString LteUpdateReporter::cancelledText() const {
+    if (!m_cancelledBy) {
+        return {};
+    }
+    return *m_cancelledBy == SupportAnswer::No ? cancelledBySupportText()
+                                               : supportDidNotAnswerText();
 }
 
 void LteUpdateReporter::report(const OperationUpdate& update) {
