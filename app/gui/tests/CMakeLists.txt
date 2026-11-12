@@ -96,6 +96,7 @@ add_executable(hwio_gui_tests
     viewmodels/shortcut_registry_test.cpp
     viewmodels/single_instance_helper.h
     viewmodels/single_instance_test.cpp
+    viewmodels/ui_mode_controller_test.cpp
     viewmodels/update_service_test.cpp
     viewmodels/wizard_test.cpp
     ${HWIO_GUI_TEST_SUPPORT})

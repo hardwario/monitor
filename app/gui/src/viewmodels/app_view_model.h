@@ -30,6 +30,7 @@
 #include "viewmodels/page_registry.h"
 #include "viewmodels/probe_firmware_view_model.h"
 #include "viewmodels/shortcut_registry.h"
+#include "viewmodels/ui_mode_controller.h"
 #include "viewmodels/update_view_model.h"
 #include "wizard/report_view_model.h"
 #include "wizard/wizard_launcher.h"
@@ -132,6 +133,8 @@ class AppViewModel : public QObject {
     Q_PROPERTY(hwio::gui::UpdateViewModel* update READ update CONSTANT)
     // Plan 0036: the J-Link firmware update (ProbeFirmwareDialog).
     Q_PROPERTY(hwio::gui::ProbeFirmwareViewModel* probeFirmware READ probeFirmware CONSTANT)
+    // Plan 0045 (ADR-0359): the user mode Basic / Advanced / Expert and the first-start choice.
+    Q_PROPERTY(hwio::gui::UiModeController* uiMode READ uiMode CONSTANT)
 
 public:
     static constexpr int railBreakpoint = 1100; // ADR-0061
@@ -241,8 +244,9 @@ public:
     Q_INVOKABLE void closeGlobalPage();
     // 0021 (ADR-0172): opens the Settings tab (or switches to it) and scrolls to `sectionId`
     // ("general", "console", "jlink", "nrfutil", "about"; "" = the top). The tab exists only while
-    // it is open: not counted in the tab limit, not stored in ui/tabs.
-    Q_INVOKABLE void openSettings(const QString& sectionId = {});
+    // it is open: not counted in the tab limit, not stored in ui/tabs. Plan 0045 (ADR-0361): a
+    // section (or the row `rowId`) hidden by the user mode is shown until Settings is left.
+    Q_INVOKABLE void openSettings(const QString& sectionId = {}, const QString& rowId = {});
     Q_INVOKABLE void closeSettings();
     // The Settings page scrolled to settingsSection: the request is done (review F8).
     Q_INVOKABLE void clearSettingsSection() { m_settingsSection.clear(); }
@@ -284,6 +288,7 @@ public:
 
     [[nodiscard]] UpdateViewModel* update() const noexcept { return m_update; }
     [[nodiscard]] ProbeFirmwareViewModel* probeFirmware() const noexcept { return m_probeFirmware; }
+    [[nodiscard]] UiModeController* uiMode() const noexcept { return m_uiMode; }
     [[nodiscard]] UpdateService& updateService() noexcept { return *m_updateService; }
     // One spin-box step on the grid of `step` (review S15): up from 1 → 10, from 10 → 20; down
     // from 15 → 10; clamped to [minimum, maximum]. direction: +1 / -1.
@@ -336,6 +341,7 @@ private:
     AppOptions m_options;
     SettingsStore* m_settings = nullptr;     // child
     ShortcutRegistry* m_shortcuts = nullptr; // child
+    UiModeController* m_uiMode = nullptr;    // child (plan 0045)
     PageRegistry m_pages;
     PageListModel* m_pageList = nullptr; // child
     // Destroyed after the tabs (the destructor closes them) and in reverse order: the scanner's

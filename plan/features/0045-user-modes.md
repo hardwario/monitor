@@ -1,6 +1,6 @@
 # 0045 — User modes: Basic, Advanced, Expert
 
-- **Status:** Approved (2026-11-12, Matej Strnad; all decisions D-1..D-7 confirmed)
+- **Status:** In progress (approved 2026-11-12, Matej Strnad; all decisions D-1..D-7 confirmed)
 - **Milestone:** 2.0.0-rc.4 (ADR-0359)
 - **Author:** Matej Strnad, Claude
 - **Related ADRs:** ADR-0359 (three modes, scope, rc.4, first start), ADR-0360 (expert switch replaced by Expert mode,
@@ -132,7 +132,7 @@ None. The CLI has no modes (the mode is GUI-only; CLI output and options are unc
 
 ## Implementation steps
 
-- [ ] A1 `UiMode`, `UiModeController`, `ui/mode` key, migration from `advanced/expertActions`; unit tests
+- [x] A1 `UiMode`, `UiModeController`, `ui/mode` key, migration from `advanced/expertActions`; unit tests
 - [ ] A2 `PageRegistry` minimum mode per section, `SettingsViewModel` filtering + mode property + reveal for one
       visit; `FlashViewModel` expert actions from the mode; remove the switch; unit tests
 - [ ] B1 QML: Mode selector in General, `SettingsRow.minimumMode` on every row of the table, section rename (D-6),

@@ -194,6 +194,10 @@ qt_add_qml_module(hwio_gui
         src/viewmodels/settings_view_model.h
         src/viewmodels/shortcut_registry.cpp
         src/viewmodels/shortcut_registry.h
+        src/viewmodels/ui_mode.cpp
+        src/viewmodels/ui_mode.h
+        src/viewmodels/ui_mode_controller.cpp
+        src/viewmodels/ui_mode_controller.h
         src/viewmodels/update_view_model.cpp
         src/viewmodels/update_view_model.h
         src/wizard/check_list_model.cpp
