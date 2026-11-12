@@ -530,5 +530,64 @@ TEST(RemoteHostOperations, NoOperationsWithoutHostOperationsOrBeforeApproval) {
     EXPECT_TRUE(f.console.sent.empty());
 }
 
+// ADR-0363: the guided LTE update - opKinds in the hello, the question names the recommended
+// firmware, phases go to the joiner (a new phase at once), the outcome passes through its code.
+TEST(RemoteHostOperations, LteUpdateAskedWithTheRecommendedFirmware) {
+    FakeRelay relay;
+    OpsFixture o(relay);
+    o.f.host.start();
+    ASSERT_TRUE(runUntil([&] { return o.f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return o.f.host.commandsAllowed(); }));
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::HostHello>().has_value(); }));
+    EXPECT_TRUE(tunnel::supports(o.last<tunnel::HostHello>().value_or(tunnel::HostHello{}),
+                                 tunnel::OpKind::LteUpdate));
+
+    o.requestOp(tunnel::OpRequest{.id = "lte1",
+                                  .kind = tunnel::OpKind::LteUpdate,
+                                  .target = tunnel::OpTarget::Lte,
+                                  .firmwareId = std::nullopt});
+    ASSERT_TRUE(runUntil([&] { return o.operations.started.size() == 1; }));
+    ASSERT_EQ(o.f.consent.operationQuestions.size(), 1U);
+    const QString question = operationQuestionText(o.f.consent.operationQuestions.front());
+    EXPECT_TRUE(question.contains(QStringLiteral("HARDWARIO LTE firmware 1.7.0")))
+        << question.toStdString();
+    EXPECT_TRUE(question.contains(QStringLiteral("move the J-Link cable")))
+        << question.toStdString();
+    o.operations.progress(OperationUpdate{.phase = "connect-app"});
+    o.operations.progress(OperationUpdate{.phase = "connect-lte"}); // within 250 ms: sent anyway
+    ASSERT_TRUE(runUntil([&] {
+        return o.last<tunnel::OpProgress>().value_or(tunnel::OpProgress{}).phase == "connect-lte";
+    }));
+    o.operations.finished(
+        std::unexpected(makeError(ErrorCode::RemoteApplicationNotRestored, "test")));
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpResult>().has_value(); }));
+    EXPECT_EQ(o.last<tunnel::OpResult>().value_or(tunnel::OpResult{}).code,
+              "remote.application_not_restored");
+    EXPECT_TRUE(o.f.console.hasEvent("Update the LTE firmware to HARDWARIO LTE firmware 1.7.0"));
+}
+
+TEST(RemoteHostOperations, LteUpdateRefusedWhenTheHostHasNone) {
+    FakeRelay relay;
+    OpsFixture o(relay);
+    o.operations.lteUpdate = false;
+    o.f.host.start();
+    ASSERT_TRUE(runUntil([&] { return o.f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return o.f.host.commandsAllowed(); }));
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::HostHello>().has_value(); }));
+    EXPECT_FALSE(tunnel::supports(o.last<tunnel::HostHello>().value_or(tunnel::HostHello{}),
+                                  tunnel::OpKind::LteUpdate));
+    o.requestOp(tunnel::OpRequest{.id = "lte2",
+                                  .kind = tunnel::OpKind::LteUpdate,
+                                  .target = tunnel::OpTarget::Lte,
+                                  .firmwareId = std::nullopt});
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpDenied>().has_value(); }));
+    EXPECT_EQ(o.last<tunnel::OpDenied>().value_or(tunnel::OpDenied{}).code,
+              "remote.operation_unsupported_peer");
+    EXPECT_TRUE(o.f.consent.operationQuestions.empty());
+    EXPECT_TRUE(o.operations.started.empty());
+}
+
 } // namespace
 } // namespace hwio::remote

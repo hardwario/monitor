@@ -155,6 +155,7 @@ consteval bool isEnumerator(ErrorCode code) {
     case ErrorCode::RemoteOperationUnsupportedPeer:
     case ErrorCode::RemoteFirmwareNotInCatalog:
     case ErrorCode::RemoteProtocolError:
+    case ErrorCode::RemoteApplicationNotRestored:
         return true;
     }
     return false;
@@ -1382,6 +1383,21 @@ constexpr std::array defaultTexts{
             "remote.protocol_error cause"),
         .suggestion = QT_TRANSLATE_NOOP3("hwio::core", "Report the issue with a diagnostic report.",
                                          "remote.protocol_error suggestion"),
+    },
+    DefaultTexts{
+        .code = ErrorCode::RemoteApplicationNotRestored,
+        .message = QT_TRANSLATE_NOOP3(
+            "hwio::core", "The LTE firmware was updated, but the application was not written back.",
+            "remote.application_not_restored message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "The guided LTE update ended before the application was written back, or no copy of "
+            "the application could be saved. The application MCU is empty.",
+            "remote.application_not_restored cause"),
+        .suggestion = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "Flash an application: ask the customer to flash it, or ask to flash catalog firmware.",
+            "remote.application_not_restored suggestion"),
     },
 };
 

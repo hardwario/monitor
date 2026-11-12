@@ -2763,1774 +2763,1792 @@
 <context>
     <name>hwio::core</name>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="195"/>
+        <location filename="../libs/core/src/error.cpp" line="196"/>
         <source>An unexpected internal error occurred.</source>
         <comment>internal.unexpected message</comment>
         <translation>Došlo k neočakávanej vnútornej chybe.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="197"/>
+        <location filename="../libs/core/src/error.cpp" line="198"/>
         <source>This is a bug in HARDWARIO Monitor.</source>
         <comment>internal.unexpected cause</comment>
         <translation>Ide o chybu v aplikácii HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="200"/>
+        <location filename="../libs/core/src/error.cpp" line="201"/>
         <source>Please report it with the log file (see Details).</source>
         <comment>internal.unexpected suggestion</comment>
         <translation>Nahláste ju, prosím, a priložte súbor so záznamom (pozri Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="205"/>
+        <location filename="../libs/core/src/error.cpp" line="206"/>
         <source>An internal buffer is full.</source>
         <comment>internal.queue_full message</comment>
         <translation>Vnútorná vyrovnávacia pamäť je plná.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="207"/>
+        <location filename="../libs/core/src/error.cpp" line="208"/>
         <source>This is a bug in HARDWARIO Monitor or the computer is overloaded.</source>
         <comment>internal.queue_full cause</comment>
         <translation>Ide o chybu v aplikácii HARDWARIO Monitor alebo je počítač preťažený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="211"/>
+        <location filename="../libs/core/src/error.cpp" line="212"/>
         <source>Please report it with the log file (see Details).</source>
         <comment>internal.queue_full suggestion</comment>
         <translation>Nahláste ju, prosím, a priložte súbor so záznamom (pozri Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="216"/>
+        <location filename="../libs/core/src/error.cpp" line="217"/>
         <source>An argument or option is invalid.</source>
         <comment>usage.invalid_argument message</comment>
         <translation>Argument alebo voľba je neplatná.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="219"/>
+        <location filename="../libs/core/src/error.cpp" line="220"/>
         <source>The request contains a value that is not supported.</source>
         <comment>usage.invalid_argument cause</comment>
         <translation>Požiadavka obsahuje nepodporovanú hodnotu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="221"/>
+        <location filename="../libs/core/src/error.cpp" line="222"/>
         <source>Check the arguments and try again.</source>
         <comment>usage.invalid_argument suggestion</comment>
         <translation>Skontrolujte argumenty a skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="226"/>
+        <location filename="../libs/core/src/error.cpp" line="227"/>
         <source>The file was not found.</source>
         <comment>io.file_not_found message</comment>
         <translation>Súbor sa nenašiel.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="229"/>
+        <location filename="../libs/core/src/error.cpp" line="230"/>
         <source>The path is wrong or the file was moved or deleted.</source>
         <comment>io.file_not_found cause</comment>
         <translation>Cesta je nesprávna alebo bol súbor presunutý či odstránený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="231"/>
+        <location filename="../libs/core/src/error.cpp" line="232"/>
         <source>Check the file path (see Details).</source>
         <comment>io.file_not_found suggestion</comment>
         <translation>Skontrolujte cestu k súboru (pozri Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="236"/>
+        <location filename="../libs/core/src/error.cpp" line="237"/>
         <source>The file could not be read.</source>
         <comment>io.read_failed message</comment>
         <translation>Súbor sa nedá prečítať.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="238"/>
+        <location filename="../libs/core/src/error.cpp" line="239"/>
         <source>You do not have permission to read it or the disk reported an error.</source>
         <comment>io.read_failed cause</comment>
         <translation>Nemáte oprávnenie na čítanie alebo disk ohlásil chybu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="241"/>
+        <location filename="../libs/core/src/error.cpp" line="242"/>
         <source>Check the file path and its permissions (see Details).</source>
         <comment>io.read_failed suggestion</comment>
         <translation>Skontrolujte cestu k súboru a jeho oprávnenia (pozri Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="247"/>
+        <location filename="../libs/core/src/error.cpp" line="248"/>
         <source>The file could not be written.</source>
         <comment>io.write_failed message</comment>
         <translation>Súbor sa nedá zapísať.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="249"/>
+        <location filename="../libs/core/src/error.cpp" line="250"/>
         <source>The disk is full or read-only, or you do not have permission to write.</source>
         <comment>io.write_failed cause</comment>
         <translation>Disk je plný alebo len na čítanie, alebo nemáte oprávnenie na zápis.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="252"/>
+        <location filename="../libs/core/src/error.cpp" line="253"/>
         <source>Check the path, the free disk space and the permissions (see Details).</source>
         <comment>io.write_failed suggestion</comment>
         <translation>Skontrolujte cestu, voľné miesto na disku a oprávnenia (pozri Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="258"/>
+        <location filename="../libs/core/src/error.cpp" line="259"/>
         <source>Settings were written by a newer version and are opened read-only.</source>
         <comment>settings.newer_schema message</comment>
         <translation>Nastavenia boli uložené novšou verziou a sú otvorené len na čítanie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="261"/>
+        <location filename="../libs/core/src/error.cpp" line="262"/>
         <source>An older version of HARDWARIO Monitor is running now.</source>
         <comment>settings.newer_schema cause</comment>
         <translation>Teraz beží staršia verzia aplikácie HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="265"/>
+        <location filename="../libs/core/src/error.cpp" line="266"/>
         <source>Changes will not be saved; update HARDWARIO Monitor.</source>
         <comment>settings.newer_schema suggestion</comment>
         <translation>Zmeny sa neuložia; aktualizujte HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="270"/>
+        <location filename="../libs/core/src/error.cpp" line="271"/>
         <source>The operation timed out.</source>
         <comment>timeout message</comment>
         <translation>Vypršal časový limit operácie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="271"/>
+        <location filename="../libs/core/src/error.cpp" line="272"/>
         <source>The other side did not respond in time.</source>
         <comment>timeout cause</comment>
         <translation>Druhá strana neodpovedala včas.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="273"/>
+        <location filename="../libs/core/src/error.cpp" line="274"/>
         <source>Try it again.</source>
         <comment>timeout suggestion</comment>
         <translation>Skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="277"/>
+        <location filename="../libs/core/src/error.cpp" line="278"/>
         <source>Cancelled by user.</source>
         <comment>cancelled message</comment>
         <translation>Zrušené používateľom.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="278"/>
+        <location filename="../libs/core/src/error.cpp" line="279"/>
         <source>The operation was stopped before it finished.</source>
         <comment>cancelled cause</comment>
         <translation>Operácia bola zastavená pred dokončením.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="280"/>
+        <location filename="../libs/core/src/error.cpp" line="281"/>
         <source>Run the operation again if needed.</source>
         <comment>cancelled suggestion</comment>
         <translation>V prípade potreby operáciu spustite znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="285"/>
+        <location filename="../libs/core/src/error.cpp" line="286"/>
         <source>SEGGER J-Link Software was not found.</source>
         <comment>dependency.jlink_not_found message</comment>
         <translation>Softvér SEGGER J-Link sa nenašiel.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="287"/>
+        <location filename="../libs/core/src/error.cpp" line="288"/>
         <source>It is not installed, or it is installed in a non-standard location.</source>
         <comment>dependency.jlink_not_found cause</comment>
         <translation>Nie je nainštalovaný alebo je nainštalovaný v neštandardnom umiestnení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="290"/>
+        <location filename="../libs/core/src/error.cpp" line="291"/>
         <source>Install J-Link Software 8.00 or newer, or set its path with --jlink-library.</source>
         <comment>dependency.jlink_not_found suggestion</comment>
         <translation>Nainštalujte J-Link Software 8.00 alebo novší, alebo zadajte jeho cestu voľbou --jlink-library.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="298"/>
+        <location filename="../libs/core/src/error.cpp" line="299"/>
         <source>The J-Link library could not be loaded.</source>
         <comment>dependency.jlink_load_failed message</comment>
         <translation>Knižnicu J-Link sa nepodarilo načítať.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="300"/>
+        <location filename="../libs/core/src/error.cpp" line="301"/>
         <source>The installation is damaged, is for another processor architecture, or lacks a required function.</source>
         <comment>dependency.jlink_load_failed cause</comment>
         <translation>Inštalácia je poškodená, je určená pre inú architektúru procesora alebo v nej chýba potrebná funkcia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="304"/>
+        <location filename="../libs/core/src/error.cpp" line="305"/>
         <source>Reinstall J-Link Software.</source>
         <comment>dependency.jlink_load_failed suggestion</comment>
         <translation>Preinštalujte J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="310"/>
+        <location filename="../libs/core/src/error.cpp" line="311"/>
         <source>The J-Link Software is too old.</source>
         <comment>dependency.jlink_too_old message</comment>
         <translation>J-Link Software je príliš starý.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="312"/>
+        <location filename="../libs/core/src/error.cpp" line="313"/>
         <source>HARDWARIO Monitor needs J-Link Software 8.00 or newer.</source>
         <comment>dependency.jlink_too_old cause</comment>
         <translation>HARDWARIO Monitor potrebuje J-Link Software 8.00 alebo novší.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="315"/>
+        <location filename="../libs/core/src/error.cpp" line="316"/>
         <source>Install the current J-Link Software.</source>
         <comment>dependency.jlink_too_old suggestion</comment>
         <translation>Nainštalujte aktuálny J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="322"/>
+        <location filename="../libs/core/src/error.cpp" line="323"/>
         <source>No J-Link probe found.</source>
         <comment>probe.not_found message</comment>
         <translation>Nenašiel sa žiadny programátor J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="323"/>
+        <location filename="../libs/core/src/error.cpp" line="324"/>
         <source>The USB cable is disconnected or the J-Link is not powered.</source>
         <comment>probe.not_found cause</comment>
         <translation>Kábel USB je odpojený alebo J-Link nie je napájaný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="326"/>
+        <location filename="../libs/core/src/error.cpp" line="327"/>
         <source>Check the USB cable between the J-Link and the computer.</source>
         <comment>probe.not_found suggestion</comment>
         <translation>Skontrolujte kábel USB medzi J-Linkom a počítačom.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="333"/>
+        <location filename="../libs/core/src/error.cpp" line="334"/>
         <source>The J-Link is used by another program.</source>
         <comment>probe.in_use_by_other_process message</comment>
         <translation>J-Link používa iný program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="335"/>
+        <location filename="../libs/core/src/error.cpp" line="336"/>
         <source>Another HARDWARIO Monitor window or hwio command is using it.</source>
         <comment>probe.in_use_by_other_process cause</comment>
         <translation>Používa ho iné okno aplikácie HARDWARIO Monitor alebo príkaz hwio.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="339"/>
+        <location filename="../libs/core/src/error.cpp" line="340"/>
         <source>Close the other program, or choose another J-Link.</source>
         <comment>probe.in_use_by_other_process suggestion</comment>
         <translation>Ukončite druhý program alebo zvoľte iný J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="345"/>
+        <location filename="../libs/core/src/error.cpp" line="346"/>
         <source>The J-Link probe could not be opened.</source>
         <comment>probe.open_failed message</comment>
         <translation>Programátor J-Link sa nepodarilo otvoriť.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="347"/>
+        <location filename="../libs/core/src/error.cpp" line="348"/>
         <source>It is used by another program or session, or the USB permissions are missing (Linux udev rules).</source>
         <comment>probe.open_failed cause</comment>
         <translation>Používa ho iný program alebo relácia, alebo chýbajú oprávnenia k USB (pravidlá udev v Linuxe).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="352"/>
+        <location filename="../libs/core/src/error.cpp" line="353"/>
         <source>Close other programs using the J-Link and try again.</source>
         <comment>probe.open_failed suggestion</comment>
         <translation>Ukončite ostatné programy, ktoré používajú J-Link, a skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="358"/>
+        <location filename="../libs/core/src/error.cpp" line="359"/>
         <source>The J-Link firmware is outdated.</source>
         <comment>probe.firmware_outdated message</comment>
         <translation>Firmvér J-Linku je zastaraný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="360"/>
+        <location filename="../libs/core/src/error.cpp" line="361"/>
         <source>The J-Link firmware differs from the firmware bundled with the J-Link Software.</source>
         <comment>probe.firmware_outdated cause</comment>
         <translation>Firmvér J-Linku sa líši od firmvéru dodávaného s J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="364"/>
+        <location filename="../libs/core/src/error.cpp" line="365"/>
         <source>Run `hwio jlink update-firmware`.</source>
         <comment>probe.firmware_outdated suggestion</comment>
         <translation>Spustite `hwio jlink update-firmware`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="371"/>
+        <location filename="../libs/core/src/error.cpp" line="372"/>
         <source>The device has no power.</source>
         <comment>target.no_power message</comment>
         <translation>Zariadenie nemá napájanie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="372"/>
+        <location filename="../libs/core/src/error.cpp" line="373"/>
         <source>The device is not powered or the flat cable is disconnected.</source>
         <comment>target.no_power cause</comment>
         <translation>Zariadenie nie je napájané alebo je odpojený plochý kábel.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="375"/>
+        <location filename="../libs/core/src/error.cpp" line="376"/>
         <source>Power the device and check the flat cable.</source>
         <comment>target.no_power suggestion</comment>
         <translation>Zapnite napájanie zariadenia a skontrolujte plochý kábel.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="381"/>
+        <location filename="../libs/core/src/error.cpp" line="382"/>
         <source>Could not connect to the device.</source>
         <comment>target.connect_failed message</comment>
         <translation>K zariadeniu sa nepodarilo pripojiť.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="383"/>
+        <location filename="../libs/core/src/error.cpp" line="384"/>
         <source>The flat cable is disconnected or in the wrong connector, or the MCU is in a low-power or protected state.</source>
         <comment>target.connect_failed cause</comment>
         <translation>Plochý kábel je odpojený alebo zapojený do nesprávneho konektora, alebo je MCU v úspornom či chránenom režime.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="387"/>
+        <location filename="../libs/core/src/error.cpp" line="388"/>
         <source>Check the flat cable between the J-Link and the device.</source>
         <comment>target.connect_failed suggestion</comment>
         <translation>Skontrolujte plochý kábel medzi J-Linkom a zariadením.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="394"/>
+        <location filename="../libs/core/src/error.cpp" line="395"/>
         <source>The device&apos;s console (RTT) was not found.</source>
         <comment>target.rtt_not_found message</comment>
         <translation>Konzola zariadenia (RTT) sa nenašla.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="396"/>
+        <location filename="../libs/core/src/error.cpp" line="397"/>
         <source>The firmware has no RTT console, is still booting, or the CPU is halted.</source>
         <comment>target.rtt_not_found cause</comment>
         <translation>Firmvér nemá konzolu RTT, ešte štartuje alebo je procesor zastavený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="400"/>
+        <location filename="../libs/core/src/error.cpp" line="401"/>
         <source>Reset the device or flash firmware with RTT console support.</source>
         <comment>target.rtt_not_found suggestion</comment>
         <translation>Resetujte zariadenie alebo nahrajte firmvér s podporou konzoly RTT.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="407"/>
+        <location filename="../libs/core/src/error.cpp" line="408"/>
         <source>An RTT buffer was not found.</source>
         <comment>target.rtt_buffer_not_found message</comment>
         <translation>Vyrovnávacia pamäť RTT sa nenašla.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="409"/>
+        <location filename="../libs/core/src/error.cpp" line="410"/>
         <source>The firmware is older or different.</source>
         <comment>target.rtt_buffer_not_found cause</comment>
         <translation>Firmvér je starší alebo iný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="411"/>
+        <location filename="../libs/core/src/error.cpp" line="412"/>
         <source>Use firmware with the CHESTER shell.</source>
         <comment>target.rtt_buffer_not_found suggestion</comment>
         <translation>Použite firmvér so shellom CHESTER.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="417"/>
+        <location filename="../libs/core/src/error.cpp" line="418"/>
         <source>The device is not reading commands.</source>
         <comment>target.rtt_write_timeout message</comment>
         <translation>Zariadenie nečíta príkazy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="419"/>
+        <location filename="../libs/core/src/error.cpp" line="420"/>
         <source>The firmware is hung or its shell is disabled.</source>
         <comment>target.rtt_write_timeout cause</comment>
         <translation>Firmvér zamrzol alebo má vypnutý shell.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="421"/>
+        <location filename="../libs/core/src/error.cpp" line="422"/>
         <source>Reset the device.</source>
         <comment>target.rtt_write_timeout suggestion</comment>
         <translation>Resetujte zariadenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="427"/>
+        <location filename="../libs/core/src/error.cpp" line="428"/>
         <source>Reading from the device failed.</source>
         <comment>target.rtt_read_failed message</comment>
         <translation>Čítanie zo zariadenia zlyhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="430"/>
+        <location filename="../libs/core/src/error.cpp" line="431"/>
         <source>A cable was disconnected or the device was reset.</source>
         <comment>target.rtt_read_failed cause</comment>
         <translation>Bol odpojený kábel alebo bolo zariadenie resetované.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="432"/>
+        <location filename="../libs/core/src/error.cpp" line="433"/>
         <source>Check the cables; the console reconnects automatically if enabled.</source>
         <comment>target.rtt_read_failed suggestion</comment>
         <translation>Skontrolujte káble; ak je to zapnuté, konzola sa znova pripojí automaticky.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="439"/>
+        <location filename="../libs/core/src/error.cpp" line="440"/>
         <source>Too many devices are open (max 8).</source>
         <comment>internal.session_limit message</comment>
         <translation>Je otvorených príliš veľa zariadení (najviac 8).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="441"/>
+        <location filename="../libs/core/src/error.cpp" line="442"/>
         <source>HARDWARIO Monitor works with at most 8 devices at the same time.</source>
         <comment>internal.session_limit cause</comment>
         <translation>HARDWARIO Monitor pracuje najviac s 8 zariadeniami súčasne.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="444"/>
+        <location filename="../libs/core/src/error.cpp" line="445"/>
         <source>Close a device first.</source>
         <comment>internal.session_limit suggestion</comment>
         <translation>Najprv zatvorte niektoré zariadenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="449"/>
+        <location filename="../libs/core/src/error.cpp" line="450"/>
         <source>This operation needs confirmation.</source>
         <comment>usage.confirmation_required message</comment>
         <translation>Táto operácia vyžaduje potvrdenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="451"/>
+        <location filename="../libs/core/src/error.cpp" line="452"/>
         <source>The command runs non-interactively, so it cannot ask.</source>
         <comment>usage.confirmation_required cause</comment>
         <translation>Príkaz beží neinteraktívne, takže sa nemôže opýtať.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="454"/>
+        <location filename="../libs/core/src/error.cpp" line="455"/>
         <source>Re-run with --yes.</source>
         <comment>usage.confirmation_required suggestion</comment>
         <translation>Spustite ho znova s voľbou --yes.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="459"/>
+        <location filename="../libs/core/src/error.cpp" line="460"/>
         <source>Writing to the device failed.</source>
         <comment>target.rtt_write_failed message</comment>
         <translation>Zápis do zariadenia zlyhal.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="462"/>
+        <location filename="../libs/core/src/error.cpp" line="463"/>
         <source>A cable was disconnected or the device was reset.</source>
         <comment>target.rtt_write_failed cause</comment>
         <translation>Bol odpojený kábel alebo bolo zariadenie resetované.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="464"/>
+        <location filename="../libs/core/src/error.cpp" line="465"/>
         <source>Check the cables; the console reconnects automatically if enabled.</source>
         <comment>target.rtt_write_failed suggestion</comment>
         <translation>Skontrolujte káble; ak je to zapnuté, konzola sa znova pripojí automaticky.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="471"/>
+        <location filename="../libs/core/src/error.cpp" line="472"/>
         <source>The J-Link firmware could not be updated.</source>
         <comment>probe.firmware_update_failed message</comment>
         <translation>Firmvér J-Linku sa nepodarilo aktualizovať.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="473"/>
+        <location filename="../libs/core/src/error.cpp" line="474"/>
         <source>The update failed or the probe still reports a firmware different from the library&apos;s.</source>
         <comment>probe.firmware_update_failed cause</comment>
         <translation>Aktualizácia zlyhala alebo programátor stále hlási iný firmvér, než obsahuje knižnica.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="477"/>
+        <location filename="../libs/core/src/error.cpp" line="478"/>
         <source>Disconnect and reconnect the J-Link, then run `hwio jlink update-firmware` again.</source>
         <comment>probe.firmware_update_failed suggestion</comment>
         <translation>Odpojte a znova pripojte J-Link a potom znova spustite `hwio jlink update-firmware`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="485"/>
+        <location filename="../libs/core/src/error.cpp" line="486"/>
         <source>The device is not connected.</source>
         <comment>target.not_connected message</comment>
         <translation>Zariadenie nie je pripojené.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="488"/>
+        <location filename="../libs/core/src/error.cpp" line="489"/>
         <source>The console is disconnected or still reconnecting.</source>
         <comment>target.not_connected cause</comment>
         <translation>Konzola je odpojená alebo sa ešte len znova pripája.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="490"/>
+        <location filename="../libs/core/src/error.cpp" line="491"/>
         <source>Reconnect the console (F4).</source>
         <comment>target.not_connected suggestion</comment>
         <translation>Pripojte konzolu znova (F4).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="497"/>
+        <location filename="../libs/core/src/error.cpp" line="498"/>
         <source>The firmware file is not a valid HEX file.</source>
         <comment>firmware.hex_parse_error message</comment>
         <translation>Súbor s firmvérom nie je platný súbor HEX.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="499"/>
+        <location filename="../libs/core/src/error.cpp" line="500"/>
         <source>The file is damaged or it is not a HEX file.</source>
         <comment>firmware.hex_parse_error cause</comment>
         <translation>Súbor je poškodený alebo to nie je súbor HEX.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="501"/>
+        <location filename="../libs/core/src/error.cpp" line="502"/>
         <source>Use the .hex file produced by the build or download it again.</source>
         <comment>firmware.hex_parse_error suggestion</comment>
         <translation>Použite súbor .hex vytvorený zostavením alebo ho stiahnite znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="508"/>
+        <location filename="../libs/core/src/error.cpp" line="509"/>
         <source>The file is not a supported firmware file.</source>
         <comment>firmware.invalid_image message</comment>
         <translation>Súbor nie je podporovaný súbor s firmvérom.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="510"/>
+        <location filename="../libs/core/src/error.cpp" line="511"/>
         <source>It is not a CHESTER LTE bundle, a modem firmware zip or a HEX file, or the zip exceeds the safety limits.</source>
         <comment>firmware.invalid_image cause</comment>
         <translation>Nejde o balík CHESTER LTE, zip s firmvérom modemu ani súbor HEX, alebo zip prekračuje bezpečnostné limity.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="515"/>
+        <location filename="../libs/core/src/error.cpp" line="516"/>
         <source>Use a CHESTER .hex file or LTE bundle (.zip).</source>
         <comment>firmware.invalid_image suggestion</comment>
         <translation>Použite súbor .hex pre CHESTER alebo balík LTE (.zip).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="521"/>
+        <location filename="../libs/core/src/error.cpp" line="522"/>
         <source>The firmware does not fit the MCU.</source>
         <comment>firmware.out_of_range message</comment>
         <translation>Firmvér nezodpovedá MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="523"/>
+        <location filename="../libs/core/src/error.cpp" line="524"/>
         <source>The image was built for another MCU.</source>
         <comment>firmware.out_of_range cause</comment>
         <translation>Obraz bol zostavený pre iný MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="525"/>
+        <location filename="../libs/core/src/error.cpp" line="526"/>
         <source>Check that the firmware is for this MCU.</source>
         <comment>firmware.out_of_range suggestion</comment>
         <translation>Skontrolujte, či je firmvér určený pre tento MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="531"/>
+        <location filename="../libs/core/src/error.cpp" line="532"/>
         <source>The firmware also writes the UICR configuration area.</source>
         <comment>firmware.uicr_in_image message</comment>
         <translation>Firmvér zapisuje aj do konfiguračnej oblasti UICR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="534"/>
+        <location filename="../libs/core/src/error.cpp" line="535"/>
         <source>The build includes UICR settings.</source>
         <comment>firmware.uicr_in_image cause</comment>
         <translation>Zostavenie obsahuje nastavenia UICR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="536"/>
+        <location filename="../libs/core/src/error.cpp" line="537"/>
         <source>Re-run with --allow-uicr if this is intended; the Product Information Block is kept.</source>
         <comment>firmware.uicr_in_image suggestion</comment>
         <translation>Ak je to zámer, spustite príkaz znova s --allow-uicr; blok informácií o produkte (PIB) zostane zachovaný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="543"/>
+        <location filename="../libs/core/src/error.cpp" line="544"/>
         <source>Verification of the written firmware failed.</source>
         <comment>firmware.verify_failed message</comment>
         <translation>Overenie zapísaného firmvéru zlyhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="545"/>
+        <location filename="../libs/core/src/error.cpp" line="546"/>
         <source>The connection is unstable, or the flash is protected or faulty.</source>
         <comment>firmware.verify_failed cause</comment>
         <translation>Spojenie je nestabilné alebo je pamäť flash chránená či chybná.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="548"/>
+        <location filename="../libs/core/src/error.cpp" line="549"/>
         <source>Flash again; if it repeats, lower the J-Link speed or check the cables.</source>
         <comment>firmware.verify_failed suggestion</comment>
         <translation>Nahrajte firmvér znova; ak sa chyba opakuje, znížte rýchlosť J-Linku alebo skontrolujte káble.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="555"/>
+        <location filename="../libs/core/src/error.cpp" line="556"/>
         <source>The firmware was not found in the catalog.</source>
         <comment>firmware.not_found_in_catalog message</comment>
         <translation>Firmvér sa v katalógu nenašiel.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="557"/>
+        <location filename="../libs/core/src/error.cpp" line="558"/>
         <source>The firmware ID is wrong or it was deleted.</source>
         <comment>firmware.not_found_in_catalog cause</comment>
         <translation>ID firmvéru je nesprávne alebo bol firmvér odstránený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="559"/>
+        <location filename="../libs/core/src/error.cpp" line="560"/>
         <source>Check the firmware ID.</source>
         <comment>firmware.not_found_in_catalog suggestion</comment>
         <translation>Skontrolujte ID firmvéru.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="565"/>
+        <location filename="../libs/core/src/error.cpp" line="566"/>
         <source>The modem firmware update failed.</source>
         <comment>firmware.modem_update_failed message</comment>
         <translation>Aktualizácia firmvéru modemu zlyhala.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="567"/>
+        <location filename="../libs/core/src/error.cpp" line="568"/>
         <source>The modem firmware zip is wrong, the connection was lost, or nRF Util reported an error (see Details).</source>
         <comment>firmware.modem_update_failed cause</comment>
         <translation>Zip s firmvérom modemu je nesprávny, spojenie bolo prerušené alebo nRF Util ohlásil chybu (pozri Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="571"/>
+        <location filename="../libs/core/src/error.cpp" line="572"/>
         <source>Check the cable and power, then flash the modem firmware again.</source>
         <comment>firmware.modem_update_failed suggestion</comment>
         <translation>Skontrolujte kábel a napájanie a nahrajte firmvér modemu znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="578"/>
+        <location filename="../libs/core/src/error.cpp" line="579"/>
         <source>Downloading the firmware failed.</source>
         <comment>network.download_failed message</comment>
         <translation>Stiahnutie firmvéru zlyhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="580"/>
+        <location filename="../libs/core/src/error.cpp" line="581"/>
         <source>There is no internet connection, a proxy blocks it, or the server failed.</source>
         <comment>network.download_failed cause</comment>
         <translation>Nie je pripojenie k internetu, blokuje ho proxy alebo zlyhal server.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="585"/>
+        <location filename="../libs/core/src/error.cpp" line="586"/>
         <source>Check the internet connection and try again.</source>
         <comment>network.download_failed suggestion</comment>
         <translation>Skontrolujte pripojenie k internetu a skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="590"/>
+        <location filename="../libs/core/src/error.cpp" line="591"/>
         <source>The J-Link is connected to another MCU.</source>
         <comment>target.wrong_family message</comment>
         <translation>J-Link je pripojený k inému MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="592"/>
+        <location filename="../libs/core/src/error.cpp" line="593"/>
         <source>The J-Link is connected to the other connector of the device.</source>
         <comment>target.wrong_family cause</comment>
         <translation>J-Link je pripojený k druhému konektoru zariadenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="595"/>
+        <location filename="../libs/core/src/error.cpp" line="596"/>
         <source>Connect the J-Link to the connector of the MCU you want to program.</source>
         <comment>target.wrong_family suggestion</comment>
         <translation>Pripojte J-Link ku konektoru MCU, ktorý chcete programovať.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="602"/>
+        <location filename="../libs/core/src/error.cpp" line="603"/>
         <source>The MCU is read-back protected.</source>
         <comment>target.protected message</comment>
         <translation>MCU je chránený proti čítaniu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="604"/>
+        <location filename="../libs/core/src/error.cpp" line="605"/>
         <source>Access port protection (APPROTECT) is enabled.</source>
         <comment>target.protected cause</comment>
         <translation>Je zapnutá ochrana prístupového portu (APPROTECT).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="606"/>
+        <location filename="../libs/core/src/error.cpp" line="607"/>
         <source>Recover the MCU (this erases it), then flash it again.</source>
         <comment>target.protected suggestion</comment>
         <translation>Obnovte MCU (tým sa vymaže) a potom doň znova nahrajte firmvér.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="613"/>
+        <location filename="../libs/core/src/error.cpp" line="614"/>
         <source>Programming the MCU failed.</source>
         <comment>target.program_failed message</comment>
         <translation>Programovanie MCU zlyhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="615"/>
+        <location filename="../libs/core/src/error.cpp" line="616"/>
         <source>The connection was lost, the power is low or the MCU is protected.</source>
         <comment>target.program_failed cause</comment>
         <translation>Spojenie bolo prerušené, napájanie je nízke alebo je MCU chránený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="619"/>
+        <location filename="../libs/core/src/error.cpp" line="620"/>
         <source>Check the cables and power, then try again.</source>
         <comment>target.program_failed suggestion</comment>
         <translation>Skontrolujte káble a napájanie a skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="625"/>
+        <location filename="../libs/core/src/error.cpp" line="626"/>
         <source>Erasing the MCU failed.</source>
         <comment>target.erase_failed message</comment>
         <translation>Vymazanie MCU zlyhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="627"/>
+        <location filename="../libs/core/src/error.cpp" line="628"/>
         <source>The connection was lost, the power is low or the MCU is protected.</source>
         <comment>target.erase_failed cause</comment>
         <translation>Spojenie bolo prerušené, napájanie je nízke alebo je MCU chránený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="631"/>
+        <location filename="../libs/core/src/error.cpp" line="632"/>
         <source>Check the cables and power, then try again.</source>
         <comment>target.erase_failed suggestion</comment>
         <translation>Skontrolujte káble a napájanie a skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="637"/>
+        <location filename="../libs/core/src/error.cpp" line="638"/>
         <source>Recovering the MCU failed.</source>
         <comment>target.recover_failed message</comment>
         <translation>Obnovenie MCU zlyhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="639"/>
+        <location filename="../libs/core/src/error.cpp" line="640"/>
         <source>The device has no power or its control access port does not answer.</source>
         <comment>target.recover_failed cause</comment>
         <translation>Zariadenie nemá napájanie alebo jeho riadiaci prístupový port neodpovedá.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="643"/>
+        <location filename="../libs/core/src/error.cpp" line="644"/>
         <source>Power-cycle the device and try again.</source>
         <comment>target.recover_failed suggestion</comment>
         <translation>Odpojte a znova pripojte napájanie zariadenia a skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="650"/>
+        <location filename="../libs/core/src/error.cpp" line="651"/>
         <source>The Product Information Block is missing or damaged.</source>
         <comment>pib.invalid message</comment>
         <translation>Blok informácií o produkte (PIB) chýba alebo je poškodený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="652"/>
+        <location filename="../libs/core/src/error.cpp" line="653"/>
         <source>It was never written, or it was erased by a full erase or a recover.</source>
         <comment>pib.invalid cause</comment>
         <translation>Nebol nikdy zapísaný alebo bol vymazaný úplným vymazaním či obnovením.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="656"/>
+        <location filename="../libs/core/src/error.cpp" line="657"/>
         <source>Contact HARDWARIO support to restore it.</source>
         <comment>pib.invalid suggestion</comment>
         <translation>Na jeho obnovenie kontaktujte podporu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="661"/>
+        <location filename="../libs/core/src/error.cpp" line="662"/>
         <source>nRF Util was not found.</source>
         <comment>dependency.nrfutil_not_found message</comment>
         <translation>nRF Util sa nenašiel.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="663"/>
+        <location filename="../libs/core/src/error.cpp" line="664"/>
         <source>It is not installed; it is needed only for the modem firmware.</source>
         <comment>dependency.nrfutil_not_found cause</comment>
         <translation>Nie je nainštalovaný; je potrebný len pre firmvér modemu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="666"/>
+        <location filename="../libs/core/src/error.cpp" line="667"/>
         <source>Install nRF Util and its device command, or set its path with --nrfutil.</source>
         <comment>dependency.nrfutil_not_found suggestion</comment>
         <translation>Nainštalujte nRF Util a jeho príkaz device, alebo zadajte jeho cestu voľbou --nrfutil.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="674"/>
+        <location filename="../libs/core/src/error.cpp" line="675"/>
         <source>The nRF Util device command is not installed.</source>
         <comment>dependency.nrfutil_device_missing message</comment>
         <translation>Príkaz device programu nRF Util nie je nainštalovaný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="677"/>
+        <location filename="../libs/core/src/error.cpp" line="678"/>
         <source>nRF Util is installed without its device command.</source>
         <comment>dependency.nrfutil_device_missing cause</comment>
         <translation>nRF Util je nainštalovaný bez príkazu device.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="679"/>
+        <location filename="../libs/core/src/error.cpp" line="680"/>
         <source>Run `nrfutil install device`.</source>
         <comment>dependency.nrfutil_device_missing suggestion</comment>
         <translation>Spustite `nrfutil install device`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="685"/>
+        <location filename="../libs/core/src/error.cpp" line="686"/>
         <source>nRF Util is too old.</source>
         <comment>dependency.nrfutil_too_old message</comment>
         <translation>nRF Util je príliš starý.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="687"/>
+        <location filename="../libs/core/src/error.cpp" line="688"/>
         <source>HARDWARIO Monitor needs a newer nRF Util or device command.</source>
         <comment>dependency.nrfutil_too_old cause</comment>
         <translation>HARDWARIO Monitor potrebuje novší nRF Util alebo príkaz device.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="690"/>
+        <location filename="../libs/core/src/error.cpp" line="691"/>
         <source>Run `nrfutil self-upgrade` and `nrfutil upgrade device`.</source>
         <comment>dependency.nrfutil_too_old suggestion</comment>
         <translation>Spustite `nrfutil self-upgrade` a `nrfutil upgrade device`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="697"/>
+        <location filename="../libs/core/src/error.cpp" line="698"/>
         <source>Another operation is running on this device.</source>
         <comment>internal.busy message</comment>
         <translation>Na tomto zariadení prebieha iná operácia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="699"/>
+        <location filename="../libs/core/src/error.cpp" line="700"/>
         <source>Only one operation can run at a time.</source>
         <comment>internal.busy cause</comment>
         <translation>Naraz môže prebiehať len jedna operácia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="701"/>
+        <location filename="../libs/core/src/error.cpp" line="702"/>
         <source>Wait for it to finish or cancel it.</source>
         <comment>internal.busy suggestion</comment>
         <translation>Počkajte na jej dokončenie alebo ju zrušte.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="706"/>
+        <location filename="../libs/core/src/error.cpp" line="707"/>
         <source>Communication with the J-Link failed.</source>
         <comment>probe.io_failed message</comment>
         <translation>Komunikácia s J-Linkom zlyhala.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="708"/>
+        <location filename="../libs/core/src/error.cpp" line="709"/>
         <source>The J-Link did not answer: a USB glitch, or the USB cable was disconnected.</source>
         <comment>probe.io_failed cause</comment>
         <translation>J-Link neodpovedal: krátky výpadok USB alebo bol odpojený kábel USB.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="712"/>
+        <location filename="../libs/core/src/error.cpp" line="713"/>
         <source>Check the USB cable between the J-Link and the computer; the console reconnects automatically if enabled.</source>
         <comment>probe.io_failed suggestion</comment>
         <translation>Skontrolujte kábel USB medzi J-Linkom a počítačom; ak je to zapnuté, konzola sa znova pripojí automaticky.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="722"/>
+        <location filename="../libs/core/src/error.cpp" line="723"/>
         <source>This computer does not allow access to the J-Link (USB permissions).</source>
         <comment>usb.access_denied message</comment>
         <translation>Tento počítač nepovoľuje prístup k J-Linku (oprávnenia USB).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="725"/>
+        <location filename="../libs/core/src/error.cpp" line="726"/>
         <source>The udev rule for SEGGER devices is missing.</source>
         <comment>usb.access_denied cause</comment>
         <translation>Chýba pravidlo udev pre zariadenia SEGGER.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="727"/>
+        <location filename="../libs/core/src/error.cpp" line="728"/>
         <source>Install the udev rule shown in the setup wizard, then reconnect the J-Link. The rule gives access only to the user logged in at this computer; users connected only over SSH need their own udev rule.</source>
         <comment>usb.access_denied suggestion</comment>
         <translation>Nainštalujte pravidlo udev zobrazené v sprievodcovi nastavením a potom J-Link znova pripojte. Pravidlo dáva prístup len používateľovi prihlásenému priamo pri tomto počítači; používatelia pripojení len cez SSH potrebujú vlastné pravidlo udev.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="737"/>
+        <location filename="../libs/core/src/error.cpp" line="738"/>
         <source>Another program is running and may be using the J-Link.</source>
         <comment>probe.held_by_program message</comment>
         <translation>Beží iný program, ktorý môže používať J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="740"/>
+        <location filename="../libs/core/src/error.cpp" line="741"/>
         <source>Another debugging or programming tool keeps the probe open.</source>
         <comment>probe.held_by_program cause</comment>
         <translation>Iný ladiaci alebo programovací nástroj drží programátor otvorený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="743"/>
+        <location filename="../libs/core/src/error.cpp" line="744"/>
         <source>Close the other program and try again.</source>
         <comment>probe.held_by_program suggestion</comment>
         <translation>Zatvorte druhý program a skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="749"/>
+        <location filename="../libs/core/src/error.cpp" line="750"/>
         <source>The diagnostic report could not be saved.</source>
         <comment>diag.report_write_failed message</comment>
         <translation>Diagnostickú správu sa nepodarilo uložiť.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="751"/>
+        <location filename="../libs/core/src/error.cpp" line="752"/>
         <source>The folder is not writable or the disk is full.</source>
         <comment>diag.report_write_failed cause</comment>
         <translation>Do priečinka nemožno zapisovať alebo je disk plný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="753"/>
+        <location filename="../libs/core/src/error.cpp" line="754"/>
         <source>Choose another folder.</source>
         <comment>diag.report_write_failed suggestion</comment>
         <translation>Zvoľte iný priečinok.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="758"/>
+        <location filename="../libs/core/src/error.cpp" line="759"/>
         <source>A check did not finish in time.</source>
         <comment>diag.check_timeout message</comment>
         <translation>Kontrola sa nedokončila včas.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="760"/>
+        <location filename="../libs/core/src/error.cpp" line="761"/>
         <source>The system is slow or a tool does not answer.</source>
         <comment>diag.check_timeout cause</comment>
         <translation>Systém je pomalý alebo niektorý nástroj neodpovedá.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="762"/>
+        <location filename="../libs/core/src/error.cpp" line="763"/>
         <source>Run the checks again.</source>
         <comment>diag.check_timeout suggestion</comment>
         <translation>Spustite kontroly znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="768"/>
+        <location filename="../libs/core/src/error.cpp" line="769"/>
         <source>No Bluetooth adapter was found.</source>
         <comment>ble.adapter_not_found message</comment>
         <translation>Nenašiel sa žiadny adaptér Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="770"/>
+        <location filename="../libs/core/src/error.cpp" line="771"/>
         <source>The computer has no Bluetooth or it is disabled in the system.</source>
         <comment>ble.adapter_not_found cause</comment>
         <translation>Počítač nemá Bluetooth alebo je v systéme zakázané.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="774"/>
+        <location filename="../libs/core/src/error.cpp" line="775"/>
         <source>Enable Bluetooth or connect a USB Bluetooth adapter.</source>
         <comment>ble.adapter_not_found suggestion</comment>
         <translation>Povoľte Bluetooth alebo pripojte USB adaptér Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="781"/>
+        <location filename="../libs/core/src/error.cpp" line="782"/>
         <source>Bluetooth is turned off.</source>
         <comment>ble.adapter_off message</comment>
         <translation>Bluetooth je vypnuté.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="782"/>
+        <location filename="../libs/core/src/error.cpp" line="783"/>
         <source>Bluetooth is turned off in the system settings or with a hardware switch.</source>
         <comment>ble.adapter_off cause</comment>
         <translation>Bluetooth je vypnuté v nastaveniach systému alebo hardvérovým vypínačom.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="786"/>
+        <location filename="../libs/core/src/error.cpp" line="787"/>
         <source>Turn Bluetooth on in the system settings.</source>
         <comment>ble.adapter_off suggestion</comment>
         <translation>Zapnite Bluetooth v nastaveniach systému.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="793"/>
+        <location filename="../libs/core/src/error.cpp" line="794"/>
         <source>HARDWARIO Monitor is not allowed to use Bluetooth.</source>
         <comment>ble.permission_denied message</comment>
         <translation>HARDWARIO Monitor nemá povolené používať Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="796"/>
+        <location filename="../libs/core/src/error.cpp" line="797"/>
         <source>Bluetooth access was denied in the privacy settings.</source>
         <comment>ble.permission_denied cause</comment>
         <translation>Prístup k Bluetooth bol zamietnutý v nastaveniach súkromia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="798"/>
+        <location filename="../libs/core/src/error.cpp" line="799"/>
         <source>Allow Bluetooth for HARDWARIO Monitor (or your terminal) in System Settings → Privacy &amp; Security → Bluetooth.</source>
         <comment>ble.permission_denied suggestion</comment>
         <translation>Povoľte Bluetooth pre HARDWARIO Monitor (alebo pre svoj terminál) v Nastaveniach systému → Súkromie a zabezpečenie → Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="806"/>
+        <location filename="../libs/core/src/error.cpp" line="807"/>
         <source>The Bluetooth service of the system is not available.</source>
         <comment>ble.stack_unavailable message</comment>
         <translation>Systémová služba Bluetooth nie je dostupná.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="809"/>
+        <location filename="../libs/core/src/error.cpp" line="810"/>
         <source>The Bluetooth service of the system (BlueZ on Linux) is not running.</source>
         <comment>ble.stack_unavailable cause</comment>
         <translation>Systémová služba Bluetooth (v Linuxe BlueZ) nebeží.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="812"/>
+        <location filename="../libs/core/src/error.cpp" line="813"/>
         <source>Start the Bluetooth service: `sudo systemctl start bluetooth`.</source>
         <comment>ble.stack_unavailable suggestion</comment>
         <translation>Spustite službu Bluetooth: `sudo systemctl start bluetooth`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="819"/>
+        <location filename="../libs/core/src/error.cpp" line="820"/>
         <source>The Bluetooth device was not found.</source>
         <comment>ble.device_not_found message</comment>
         <translation>Zariadenie Bluetooth sa nenašlo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="821"/>
+        <location filename="../libs/core/src/error.cpp" line="822"/>
         <source>The device is out of range, turned off or its Bluetooth is disabled.</source>
         <comment>ble.device_not_found cause</comment>
         <translation>Zariadenie je mimo dosahu, vypnuté alebo má vypnuté Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="824"/>
+        <location filename="../libs/core/src/error.cpp" line="825"/>
         <source>Bring the device closer and make sure its Bluetooth is on.</source>
         <comment>ble.device_not_found suggestion</comment>
         <translation>Priblížte zariadenie a overte, či má zapnuté Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="832"/>
+        <location filename="../libs/core/src/error.cpp" line="833"/>
         <source>Could not connect to the device over Bluetooth.</source>
         <comment>ble.connect_failed message</comment>
         <translation>K zariadeniu sa nepodarilo pripojiť cez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="834"/>
+        <location filename="../libs/core/src/error.cpp" line="835"/>
         <source>The signal is weak or the device is busy with another connection.</source>
         <comment>ble.connect_failed cause</comment>
         <translation>Signál je slabý alebo je zariadenie zaneprázdnené iným pripojením.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="837"/>
+        <location filename="../libs/core/src/error.cpp" line="838"/>
         <source>Move closer, disconnect other phones or computers from the device and try again.</source>
         <comment>ble.connect_failed suggestion</comment>
         <translation>Priblížte sa, odpojte od zariadenia iné telefóny alebo počítače a skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="846"/>
+        <location filename="../libs/core/src/error.cpp" line="847"/>
         <source>The device does not offer the console service (NUS).</source>
         <comment>ble.service_not_found message</comment>
         <translation>Zariadenie neponúka službu konzoly (NUS).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="848"/>
+        <location filename="../libs/core/src/error.cpp" line="849"/>
         <source>The firmware has no Bluetooth shell.</source>
         <comment>ble.service_not_found cause</comment>
         <translation>Firmvér nemá shell cez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="851"/>
+        <location filename="../libs/core/src/error.cpp" line="852"/>
         <source>Use firmware with the Bluetooth console enabled.</source>
         <comment>ble.service_not_found suggestion</comment>
         <translation>Použite firmvér so zapnutou konzolou cez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="857"/>
+        <location filename="../libs/core/src/error.cpp" line="858"/>
         <source>The device is not paired with this computer.</source>
         <comment>ble.not_paired message</comment>
         <translation>Zariadenie nie je spárované s týmto počítačom.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="859"/>
+        <location filename="../libs/core/src/error.cpp" line="860"/>
         <source>Pairing was cancelled, failed or was removed on one side.</source>
         <comment>ble.not_paired cause</comment>
         <translation>Párovanie bolo zrušené, zlyhalo alebo bolo na jednej strane odstránené.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="862"/>
+        <location filename="../libs/core/src/error.cpp" line="863"/>
         <source>Pair the device: enter its passkey when the system asks.</source>
         <comment>ble.not_paired suggestion</comment>
         <translation>Spárujte zariadenie: zadajte jeho prístupový kľúč, keď sa systém opýta.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="869"/>
+        <location filename="../libs/core/src/error.cpp" line="870"/>
         <source>Pairing with the device failed.</source>
         <comment>ble.pairing_failed message</comment>
         <translation>Párovanie so zariadením zlyhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="871"/>
+        <location filename="../libs/core/src/error.cpp" line="872"/>
         <source>A wrong passkey, a timeout or a stale bond on one side.</source>
         <comment>ble.pairing_failed cause</comment>
         <translation>Nesprávny prístupový kľúč, vypršanie času alebo zastarané spárovanie na jednej strane.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="874"/>
+        <location filename="../libs/core/src/error.cpp" line="875"/>
         <source>Remove the device in the system Bluetooth settings and pair again.</source>
         <comment>ble.pairing_failed suggestion</comment>
         <translation>Odoberte zariadenie v systémových nastaveniach Bluetooth a spárujte ho znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="881"/>
+        <location filename="../libs/core/src/error.cpp" line="882"/>
         <source>This system pairs Bluetooth devices only when connecting.</source>
         <comment>ble.pairing_not_supported message</comment>
         <translation>Tento systém páruje zariadenia Bluetooth len pri pripojení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="885"/>
+        <location filename="../libs/core/src/error.cpp" line="886"/>
         <source>macOS pairs a device automatically when it connects.</source>
         <comment>ble.pairing_not_supported cause</comment>
         <translation>macOS spáruje zariadenie automaticky pri pripojení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="888"/>
+        <location filename="../libs/core/src/error.cpp" line="889"/>
         <source>Connect to the device; macOS asks for the passkey.</source>
         <comment>ble.pairing_not_supported suggestion</comment>
         <translation>Pripojte sa k zariadeniu; macOS si vyžiada prístupový kľúč.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="893"/>
+        <location filename="../libs/core/src/error.cpp" line="894"/>
         <source>Sending to the device over Bluetooth failed.</source>
         <comment>ble.write_failed message</comment>
         <translation>Odoslanie do zariadenia cez Bluetooth zlyhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="895"/>
+        <location filename="../libs/core/src/error.cpp" line="896"/>
         <source>The link was lost during the write.</source>
         <comment>ble.write_failed cause</comment>
         <translation>Spojenie sa počas zápisu stratilo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="897"/>
+        <location filename="../libs/core/src/error.cpp" line="898"/>
         <source>Reconnect.</source>
         <comment>ble.write_failed suggestion</comment>
         <translation>Pripojte sa znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="902"/>
+        <location filename="../libs/core/src/error.cpp" line="903"/>
         <source>The device is not reading commands.</source>
         <comment>ble.write_timeout message</comment>
         <translation>Zariadenie nečíta príkazy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="904"/>
+        <location filename="../libs/core/src/error.cpp" line="905"/>
         <source>The firmware is busy or the link is stalled.</source>
         <comment>ble.write_timeout cause</comment>
         <translation>Firmvér je zaneprázdnený alebo spojenie viazne.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="907"/>
+        <location filename="../libs/core/src/error.cpp" line="908"/>
         <source>Reconnect; if it repeats, restart the device.</source>
         <comment>ble.write_timeout suggestion</comment>
         <translation>Pripojte sa znova; ak sa to opakuje, reštartujte zariadenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="914"/>
+        <location filename="../libs/core/src/error.cpp" line="915"/>
         <source>The Bluetooth connection to the device was lost.</source>
         <comment>ble.disconnected message</comment>
         <translation>Spojenie Bluetooth so zariadením sa stratilo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="916"/>
+        <location filename="../libs/core/src/error.cpp" line="917"/>
         <source>The device is out of range, was restarted or turned off.</source>
         <comment>ble.disconnected cause</comment>
         <translation>Zariadenie je mimo dosahu, bolo reštartované alebo vypnuté.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="919"/>
+        <location filename="../libs/core/src/error.cpp" line="920"/>
         <source>Bring the device closer; the console reconnects automatically if enabled.</source>
         <comment>ble.disconnected suggestion</comment>
         <translation>Priblížte zariadenie; konzola sa znova pripojí automaticky, ak je to zapnuté.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="927"/>
+        <location filename="../libs/core/src/error.cpp" line="928"/>
         <source>The device is used by another program.</source>
         <comment>ble.in_use_by_other_process message</comment>
         <translation>Zariadenie používa iný program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="929"/>
+        <location filename="../libs/core/src/error.cpp" line="930"/>
         <source>Another HARDWARIO Monitor window or `hwio` command is connected to it.</source>
         <comment>ble.in_use_by_other_process cause</comment>
         <translation>Je k nemu pripojené iné okno HARDWARIO Monitor alebo príkaz `hwio`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="932"/>
+        <location filename="../libs/core/src/error.cpp" line="933"/>
         <source>Close the other program.</source>
         <comment>ble.in_use_by_other_process suggestion</comment>
         <translation>Zatvorte druhý program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="937"/>
+        <location filename="../libs/core/src/error.cpp" line="938"/>
         <source>No program is ready to ask for the Bluetooth passkey.</source>
         <comment>ble.no_pairing_agent message</comment>
         <translation>Žiadny program nie je pripravený vyžiadať si prístupový kľúč Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="940"/>
+        <location filename="../libs/core/src/error.cpp" line="941"/>
         <source>No pairing agent is running (on GNOME the agent may only be active in Settings → Bluetooth).</source>
         <comment>ble.no_pairing_agent cause</comment>
         <translation>Nebeží žiadny párovací agent (v prostredí GNOME môže byť agent aktívny len v Nastaveniach → Bluetooth).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="945"/>
+        <location filename="../libs/core/src/error.cpp" line="946"/>
         <source>Pair the device from the system Bluetooth settings, or with bluetoothctl: `agent KeyboardOnly`, `default-agent`, `pair &lt;id&gt;`.</source>
         <comment>ble.no_pairing_agent suggestion</comment>
         <translation>Spárujte zariadenie v systémových nastaveniach Bluetooth alebo pomocou bluetoothctl: `agent KeyboardOnly`, `default-agent`, `pair &lt;id&gt;`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="954"/>
+        <location filename="../libs/core/src/error.cpp" line="955"/>
         <source>The MCP port is already in use.</source>
         <comment>mcp.port_in_use message</comment>
         <translation>Port MCP sa už používa.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="956"/>
+        <location filename="../libs/core/src/error.cpp" line="957"/>
         <source>Another HARDWARIO Monitor, `hwio mcp --http` or another MCP server (for example rttt) is listening on it.</source>
         <comment>mcp.port_in_use cause</comment>
         <translation>Počúva na ňom iný HARDWARIO Monitor, `hwio mcp --http` alebo iný server MCP (napríklad rttt).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="960"/>
+        <location filename="../libs/core/src/error.cpp" line="961"/>
         <source>Stop the other server or choose another port with --port.</source>
         <comment>mcp.port_in_use suggestion</comment>
         <translation>Ukončite druhý server alebo zvoľte iný port pomocou --port.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="966"/>
+        <location filename="../libs/core/src/error.cpp" line="967"/>
         <source>The MCP server could not start.</source>
         <comment>mcp.listen_failed message</comment>
         <translation>Server MCP sa nepodarilo spustiť.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="968"/>
+        <location filename="../libs/core/src/error.cpp" line="969"/>
         <source>The operating system refused to open the listening socket on 127.0.0.1.</source>
         <comment>mcp.listen_failed cause</comment>
         <translation>Operačný systém odmietol otvoriť počúvajúci socket na 127.0.0.1.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="971"/>
+        <location filename="../libs/core/src/error.cpp" line="972"/>
         <source>Choose another port with --port.</source>
         <comment>mcp.listen_failed suggestion</comment>
         <translation>Zvoľte iný port pomocou --port.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="976"/>
+        <location filename="../libs/core/src/error.cpp" line="977"/>
         <source>The MCP token file cannot be read or created.</source>
         <comment>mcp.token_file message</comment>
         <translation>Súbor s tokenom MCP sa nedá prečítať ani vytvoriť.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="978"/>
+        <location filename="../libs/core/src/error.cpp" line="979"/>
         <source>The file or its folder has the wrong permissions, or the file does not contain a valid token.</source>
         <comment>mcp.token_file cause</comment>
         <translation>Súbor alebo jeho priečinok má nesprávne oprávnenia, alebo súbor neobsahuje platný token.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="982"/>
+        <location filename="../libs/core/src/error.cpp" line="983"/>
         <source>Check the file permissions, or delete the file to create a new token.</source>
         <comment>mcp.token_file suggestion</comment>
         <translation>Skontrolujte oprávnenia súboru alebo súbor odstráňte, aby sa vytvoril nový token.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="988"/>
+        <location filename="../libs/core/src/error.cpp" line="989"/>
         <source>This MCP tool is not allowed by the server.</source>
         <comment>mcp.tool_not_allowed message</comment>
         <translation>Server tento nástroj MCP nepovoľuje.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="990"/>
+        <location filename="../libs/core/src/error.cpp" line="991"/>
         <source>Destructive tools must be allowed when the server starts.</source>
         <comment>mcp.tool_not_allowed cause</comment>
         <translation>Deštruktívne nástroje treba povoliť pri spustení servera.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="993"/>
+        <location filename="../libs/core/src/error.cpp" line="994"/>
         <source>Start the server with --allow and the tool&apos;s category, or with --allow all.</source>
         <comment>mcp.tool_not_allowed suggestion</comment>
         <translation>Spustite server s --allow a kategóriou nástroja, alebo s --allow all.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1000"/>
+        <location filename="../libs/core/src/error.cpp" line="1001"/>
         <source>The user did not allow this action.</source>
         <comment>mcp.consent_denied message</comment>
         <translation>Používateľ túto akciu nepovolil.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1002"/>
+        <location filename="../libs/core/src/error.cpp" line="1003"/>
         <source>The user declined the permission request in HARDWARIO Monitor.</source>
         <comment>mcp.consent_denied cause</comment>
         <translation>Používateľ v HARDWARIO Monitor odmietol žiadosť o povolenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1006"/>
+        <location filename="../libs/core/src/error.cpp" line="1007"/>
         <source>Ask the user to allow it in HARDWARIO Monitor.</source>
         <comment>mcp.consent_denied suggestion</comment>
         <translation>Požiadajte používateľa, aby akciu povolil v HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1011"/>
+        <location filename="../libs/core/src/error.cpp" line="1012"/>
         <source>Nobody answered the permission request.</source>
         <comment>mcp.consent_timeout message</comment>
         <translation>Na žiadosť o povolenie nikto neodpovedal.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1013"/>
+        <location filename="../libs/core/src/error.cpp" line="1014"/>
         <source>The permission request in HARDWARIO Monitor was not answered within 2 minutes.</source>
         <comment>mcp.consent_timeout cause</comment>
         <translation>Na žiadosť o povolenie v HARDWARIO Monitor nikto neodpovedal do 2 minút.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1017"/>
+        <location filename="../libs/core/src/error.cpp" line="1018"/>
         <source>Ask the user to watch HARDWARIO Monitor and try again.</source>
         <comment>mcp.consent_timeout suggestion</comment>
         <translation>Požiadajte používateľa, aby sledoval HARDWARIO Monitor, a skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1023"/>
+        <location filename="../libs/core/src/error.cpp" line="1024"/>
         <source>Several devices are connected and the tool does not know which one to use.</source>
         <comment>mcp.device_ambiguous message</comment>
         <translation>Je pripojených viac zariadení a nástroj nevie, ktoré použiť.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1027"/>
+        <location filename="../libs/core/src/error.cpp" line="1028"/>
         <source>The device argument was left out while more than one device is open.</source>
         <comment>mcp.device_ambiguous cause</comment>
         <translation>Argument device chýba, ale otvorených je viac zariadení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1030"/>
+        <location filename="../libs/core/src/error.cpp" line="1031"/>
         <source>Pass the device argument; list_devices shows the ids.</source>
         <comment>mcp.device_ambiguous suggestion</comment>
         <translation>Zadajte argument device; identifikátory zobrazí list_devices.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1036"/>
+        <location filename="../libs/core/src/error.cpp" line="1037"/>
         <source>The device is not connected.</source>
         <comment>mcp.device_not_open message</comment>
         <translation>Zariadenie nie je pripojené.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1038"/>
+        <location filename="../libs/core/src/error.cpp" line="1039"/>
         <source>It was never connected, it was disconnected, or its tab was closed.</source>
         <comment>mcp.device_not_open cause</comment>
         <translation>Nebolo nikdy pripojené, bolo odpojené alebo bola zatvorená jeho karta.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1041"/>
+        <location filename="../libs/core/src/error.cpp" line="1042"/>
         <source>Call connect first.</source>
         <comment>mcp.device_not_open suggestion</comment>
         <translation>Najprv zavolajte connect.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1046"/>
+        <location filename="../libs/core/src/error.cpp" line="1047"/>
         <source>This tool needs a J-Link connection.</source>
         <comment>mcp.capability_missing message</comment>
         <translation>Tento nástroj potrebuje pripojenie cez J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1048"/>
+        <location filename="../libs/core/src/error.cpp" line="1049"/>
         <source>The device is connected over Bluetooth, which provides only the console.</source>
         <comment>mcp.capability_missing cause</comment>
         <translation>Zariadenie je pripojené cez Bluetooth, ktoré poskytuje len konzolu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1052"/>
+        <location filename="../libs/core/src/error.cpp" line="1053"/>
         <source>Connect the device with a J-Link probe.</source>
         <comment>mcp.capability_missing suggestion</comment>
         <translation>Pripojte zariadenie pomocou programátora J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1057"/>
+        <location filename="../libs/core/src/error.cpp" line="1058"/>
         <source>Too many MCP requests are running.</source>
         <comment>mcp.too_many_requests message</comment>
         <translation>Beží príliš veľa požiadaviek MCP.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1059"/>
+        <location filename="../libs/core/src/error.cpp" line="1060"/>
         <source>The server runs at most 32 tool calls at the same time.</source>
         <comment>mcp.too_many_requests cause</comment>
         <translation>Server spúšťa najviac 32 volaní nástrojov súčasne.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1063"/>
+        <location filename="../libs/core/src/error.cpp" line="1064"/>
         <source>Wait for running calls to finish and try again.</source>
         <comment>mcp.too_many_requests suggestion</comment>
         <translation>Počkajte, kým bežiace volania skončia, a skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1069"/>
+        <location filename="../libs/core/src/error.cpp" line="1070"/>
         <source>The CPU is running.</source>
         <comment>target.not_halted message</comment>
         <translation>Procesor beží.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1071"/>
+        <location filename="../libs/core/src/error.cpp" line="1072"/>
         <source>Registers can be read only while the core is halted.</source>
         <comment>target.not_halted cause</comment>
         <translation>Registre možno čítať len pri zastavenom jadre.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1073"/>
+        <location filename="../libs/core/src/error.cpp" line="1074"/>
         <source>Halt the core first.</source>
         <comment>target.not_halted suggestion</comment>
         <translation>Najprv zastavte jadro.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1079"/>
+        <location filename="../libs/core/src/error.cpp" line="1080"/>
         <source>The address range is not allowed for this operation.</source>
         <comment>target.address_out_of_range message</comment>
         <translation>Rozsah adries nie je pre túto operáciu povolený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1081"/>
+        <location filename="../libs/core/src/error.cpp" line="1082"/>
         <source>Memory writes are allowed only in the RAM and peripheral ranges of the target.</source>
         <comment>target.address_out_of_range cause</comment>
         <translation>Zápis do pamäte je povolený len v rozsahoch RAM a periférií cieľového MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1085"/>
+        <location filename="../libs/core/src/error.cpp" line="1086"/>
         <source>Use an address inside the RAM or peripheral ranges of the target.</source>
         <comment>target.address_out_of_range suggestion</comment>
         <translation>Použite adresu v rozsahoch RAM alebo periférií cieľového MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1091"/>
+        <location filename="../libs/core/src/error.cpp" line="1092"/>
         <source>Reading or writing target memory failed.</source>
         <comment>target.memory_access_failed message</comment>
         <translation>Čítanie alebo zápis pamäte cieľového MCU zlyhal.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1093"/>
+        <location filename="../libs/core/src/error.cpp" line="1094"/>
         <source>The address is not mapped, or the core is in a fault state.</source>
         <comment>target.memory_access_failed cause</comment>
         <translation>Adresa nie je namapovaná alebo je jadro v stave chyby.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1097"/>
+        <location filename="../libs/core/src/error.cpp" line="1098"/>
         <source>Check the address and try again after a reset.</source>
         <comment>target.memory_access_failed suggestion</comment>
         <translation>Skontrolujte adresu a skúste to znova po resete.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1102"/>
+        <location filename="../libs/core/src/error.cpp" line="1103"/>
         <source>The output file already exists.</source>
         <comment>io.file_exists message</comment>
         <translation>Výstupný súbor už existuje.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1104"/>
+        <location filename="../libs/core/src/error.cpp" line="1105"/>
         <source>Existing files are never overwritten by this command.</source>
         <comment>io.file_exists cause</comment>
         <translation>Tento príkaz nikdy neprepisuje existujúce súbory.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1108"/>
+        <location filename="../libs/core/src/error.cpp" line="1109"/>
         <source>Choose a new file name or delete the file first.</source>
         <comment>io.file_exists suggestion</comment>
         <translation>Zvoľte nový názov súboru alebo súbor najprv odstráňte.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1113"/>
+        <location filename="../libs/core/src/error.cpp" line="1114"/>
         <source>The installed J-Link software does not provide a function this operation needs.</source>
         <comment>dependency.jlink_function_missing message</comment>
         <translation>Nainštalovaný softvér J-Link neposkytuje funkciu, ktorú táto operácia potrebuje.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1117"/>
+        <location filename="../libs/core/src/error.cpp" line="1118"/>
         <source>The J-Link library is older than, or different from, the versions HARDWARIO Monitor was tested with.</source>
         <comment>dependency.jlink_function_missing cause</comment>
         <translation>Knižnica J-Link je staršia ako verzie, s ktorými bol HARDWARIO Monitor testovaný, alebo sa od nich líši.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1121"/>
+        <location filename="../libs/core/src/error.cpp" line="1122"/>
         <source>Install the latest J-Link Software and Documentation Pack.</source>
         <comment>dependency.jlink_function_missing suggestion</comment>
         <translation>Nainštalujte najnovší J-Link Software and Documentation Pack.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1127"/>
+        <location filename="../libs/core/src/error.cpp" line="1128"/>
         <source>The downloaded firmware is damaged (checksum mismatch).</source>
         <comment>firmware.checksum_mismatch message</comment>
         <translation>Stiahnutý firmvér je poškodený (nesúhlasí kontrolný súčet).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1131"/>
+        <location filename="../libs/core/src/error.cpp" line="1132"/>
         <source>The file was changed or damaged during the download.</source>
         <comment>firmware.checksum_mismatch cause</comment>
         <translation>Súbor bol počas sťahovania zmenený alebo poškodený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1134"/>
+        <location filename="../libs/core/src/error.cpp" line="1135"/>
         <source>Try again; if it repeats, report it to HARDWARIO.</source>
         <comment>firmware.checksum_mismatch suggestion</comment>
         <translation>Skúste to znova; ak sa to opakuje, nahláste to spoločnosti HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1141"/>
+        <location filename="../libs/core/src/error.cpp" line="1142"/>
         <source>Could not reach GitHub to check for updates.</source>
         <comment>update.network message</comment>
         <translation>Nepodarilo sa spojiť s GitHubom a zistiť dostupnosť aktualizácií.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1143"/>
+        <location filename="../libs/core/src/error.cpp" line="1144"/>
         <source>There is no internet connection, or a firewall or proxy blocks GitHub.</source>
         <comment>update.network cause</comment>
         <translation>Nie je k dispozícii pripojenie k internetu alebo GitHub blokuje firewall či proxy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1146"/>
+        <location filename="../libs/core/src/error.cpp" line="1147"/>
         <source>Check your connection or try again later.</source>
         <comment>update.network suggestion</comment>
         <translation>Skontrolujte pripojenie alebo to skúste neskôr.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1152"/>
+        <location filename="../libs/core/src/error.cpp" line="1153"/>
         <source>GitHub temporarily refused the update check.</source>
         <comment>update.rate_limited message</comment>
         <translation>GitHub dočasne odmietol kontrolu aktualizácií.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1154"/>
+        <location filename="../libs/core/src/error.cpp" line="1155"/>
         <source>GitHub limits how often a network address may ask; other computers on the same network may have used up the limit.</source>
         <comment>update.rate_limited cause</comment>
         <translation>GitHub obmedzuje, ako často sa smie z jednej sieťovej adresy pýtať; limit mohli vyčerpať iné počítače v rovnakej sieti.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1159"/>
+        <location filename="../libs/core/src/error.cpp" line="1160"/>
         <source>Try again in an hour.</source>
         <comment>update.rate_limited suggestion</comment>
         <translation>Skúste to znova o hodinu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1165"/>
-        <location filename="../libs/core/src/error.cpp" line="1182"/>
+        <location filename="../libs/core/src/error.cpp" line="1166"/>
+        <location filename="../libs/core/src/error.cpp" line="1183"/>
         <source>The update information from GitHub could not be read.</source>
         <comment>update.bad_response message</comment>
         <translation>Informácie o aktualizáciách z GitHubu sa nepodarilo prečítať.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1168"/>
-        <location filename="../libs/core/src/error.cpp" line="1185"/>
+        <location filename="../libs/core/src/error.cpp" line="1169"/>
+        <location filename="../libs/core/src/error.cpp" line="1186"/>
         <source>GitHub sent an unexpected answer, or a proxy changed it.</source>
         <comment>update.bad_response cause</comment>
         <translation>GitHub poslal neočakávanú odpoveď alebo ju zmenila proxy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1172"/>
-        <location filename="../libs/core/src/error.cpp" line="1189"/>
+        <location filename="../libs/core/src/error.cpp" line="1173"/>
+        <location filename="../libs/core/src/error.cpp" line="1190"/>
         <source>Try again later; if it persists, check the releases page: https://github.com/hardwario/monitor/releases</source>
         <comment>update.bad_response suggestion</comment>
         <translation>Skúste to neskôr; ak problém pretrváva, pozrite si stránku vydaní: https://github.com/hardwario/monitor/releases</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1199"/>
+        <location filename="../libs/core/src/error.cpp" line="1200"/>
         <source>The file name must be a plain name.</source>
         <comment>mcp.to_file_not_allowed message</comment>
         <translation>Názov súboru musí byť jednoduchý názov.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1201"/>
+        <location filename="../libs/core/src/error.cpp" line="1202"/>
         <source>Memory dumps are written only into the server&apos;s dump folder.</source>
         <comment>mcp.to_file_not_allowed cause</comment>
         <translation>Výpisy pamäte sa zapisujú len do priečinka výpisov servera.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1204"/>
+        <location filename="../libs/core/src/error.cpp" line="1205"/>
         <source>Use a plain file name such as flash.bin, or start the server with --dump-dir DIR.</source>
         <comment>mcp.to_file_not_allowed suggestion</comment>
         <translation>Použite jednoduchý názov súboru, napríklad flash.bin, alebo spustite server s voľbou --dump-dir DIR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1212"/>
+        <location filename="../libs/core/src/error.cpp" line="1213"/>
         <source>The output file is a symbolic link.</source>
         <comment>cli.file_is_symlink message</comment>
         <translation>Výstupný súbor je symbolický odkaz.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1214"/>
+        <location filename="../libs/core/src/error.cpp" line="1215"/>
         <source>Symbolic links are never followed or replaced, even with --force.</source>
         <comment>cli.file_is_symlink cause</comment>
         <translation>Symbolické odkazy sa nikdy nesledujú ani nenahrádzajú, ani s voľbou --force.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1218"/>
+        <location filename="../libs/core/src/error.cpp" line="1219"/>
         <source>Choose another file name or remove the link first.</source>
         <comment>cli.file_is_symlink suggestion</comment>
         <translation>Zvoľte iný názov súboru alebo najprv odstráňte odkaz.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1225"/>
+        <location filename="../libs/core/src/error.cpp" line="1226"/>
         <source>Every user account on this computer can use the J-Link (USB permissions).</source>
         <comment>usb.world_accessible message</comment>
         <translation>J-Link môže používať každý používateľský účet na tomto počítači (oprávnenia USB).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1229"/>
+        <location filename="../libs/core/src/error.cpp" line="1230"/>
         <source>A udev rule, usually /etc/udev/rules.d/99-jlink.rules from the SEGGER J-Link Software, makes the probe accessible to all accounts.</source>
         <comment>usb.world_accessible cause</comment>
         <translation>Pravidlo udev, zvyčajne /etc/udev/rules.d/99-jlink.rules zo SEGGER J-Link Software, sprístupňuje programátor všetkým účtom.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1234"/>
+        <location filename="../libs/core/src/error.cpp" line="1235"/>
         <source>Remove that rule (or its MODE=&quot;0666&quot;), install the rule shown in the setup wizard, then reconnect the J-Link. A J-Link Software update may install the rule again.</source>
         <comment>usb.world_accessible suggestion</comment>
         <translation>Odstráňte toto pravidlo (alebo jeho MODE=&quot;0666&quot;), nainštalujte pravidlo zobrazené v sprievodcovi nastavením a potom J-Link znova pripojte. Aktualizácia J-Link Software môže pravidlo nainštalovať znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1245"/>
+        <location filename="../libs/core/src/error.cpp" line="1246"/>
         <source>The J-Link is connected to another MCU of the device.</source>
         <comment>target.other_connector message</comment>
         <translation>J-Link je pripojený k inému MCU zariadenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1248"/>
+        <location filename="../libs/core/src/error.cpp" line="1249"/>
         <source>The console runs on another MCU; the J-Link cable is on the other connector.</source>
         <comment>target.other_connector cause</comment>
         <translation>Konzola beží na inom MCU; kábel J-Linku je na druhom konektore.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1252"/>
+        <location filename="../libs/core/src/error.cpp" line="1253"/>
         <source>Move the J-Link cable to the connector of the console&apos;s MCU, or update the LTE firmware.</source>
         <comment>target.other_connector suggestion</comment>
         <translation>Prepojte kábel J-Linku ku konektoru MCU konzoly alebo aktualizujte firmvér LTE.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1264"/>
+        <location filename="../libs/core/src/error.cpp" line="1265"/>
         <source>The LTE MCU was reset during the update.</source>
         <comment>target.reset_during_update message</comment>
         <translation>LTE MCU bol počas aktualizácie resetovaný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1266"/>
+        <location filename="../libs/core/src/error.cpp" line="1267"/>
         <source>The application firmware on the application MCU reset the LTE MCU through its reset pin while the LTE MCU was being updated.</source>
         <comment>target.reset_during_update cause</comment>
         <translation>Aplikačný firmvér na aplikačnom MCU resetoval LTE MCU cez jeho resetovací pin, kým sa LTE MCU aktualizoval.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1271"/>
+        <location filename="../libs/core/src/error.cpp" line="1272"/>
         <source>Use the guided update, which stops the application first: Flash › Update LTE firmware… in the desktop app, or `hwio chester lte flash --guided`.</source>
         <comment>target.reset_during_update suggestion</comment>
         <translation>Použite sprievodcu aktualizáciou, ktorý najprv zastaví aplikáciu: Nahrať FW › Aktualizovať firmvér LTE… v desktopovej aplikácii alebo `hwio chester lte flash --guided`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1280"/>
+        <location filename="../libs/core/src/error.cpp" line="1281"/>
         <source>Cannot reach the support server.</source>
         <comment>remote.relay_unreachable message</comment>
         <translation>Server podpory je nedostupný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1282"/>
+        <location filename="../libs/core/src/error.cpp" line="1283"/>
         <source>The network, a proxy or a firewall blocks the connection to the support server (wss://terminal.hardwario.com).</source>
         <comment>remote.relay_unreachable cause</comment>
         <translation>Sieť, proxy alebo firewall blokuje spojenie so serverom podpory (wss://terminal.hardwario.com).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1286"/>
+        <location filename="../libs/core/src/error.cpp" line="1287"/>
         <source>Check the internet connection or try another network.</source>
         <comment>remote.relay_unreachable suggestion</comment>
         <translation>Skontrolujte pripojenie k internetu alebo skúste inú sieť.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1292"/>
+        <location filename="../libs/core/src/error.cpp" line="1293"/>
         <source>The session code is not valid.</source>
         <comment>remote.code_invalid message</comment>
         <translation>Kód relácie nie je platný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1294"/>
+        <location filename="../libs/core/src/error.cpp" line="1295"/>
         <source>The session code must be a number: 6 digits from HARDWARIO Monitor, up to 6 digits from the web Terminal.</source>
         <comment>remote.code_invalid cause</comment>
         <translation>Kód relácie musí byť číslo: 6 číslic z HARDWARIO Monitora, najviac 6 číslic z webového Terminálu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1298"/>
+        <location filename="../libs/core/src/error.cpp" line="1299"/>
         <source>Check the code and type it again.</source>
         <comment>remote.code_invalid suggestion</comment>
         <translation>Skontrolujte kód a zadajte ho znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1303"/>
+        <location filename="../libs/core/src/error.cpp" line="1304"/>
         <source>Another device is using this session code.</source>
         <comment>remote.code_collision message</comment>
         <translation>Tento kód relácie používa iné zariadenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1305"/>
+        <location filename="../libs/core/src/error.cpp" line="1306"/>
         <source>Someone else shares a console under the same session code. The session was ended for safety.</source>
         <comment>remote.code_collision cause</comment>
         <translation>Niekto iný zdieľa konzolu pod rovnakým kódom relácie. Relácia bola z bezpečnostných dôvodov ukončená.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1309"/>
+        <location filename="../libs/core/src/error.cpp" line="1310"/>
         <source>Start sharing again to get a new code.</source>
         <comment>remote.code_collision suggestion</comment>
         <translation>Začnite zdieľať znova a získajte nový kód.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1314"/>
+        <location filename="../libs/core/src/error.cpp" line="1315"/>
         <source>The customer did not allow you to join.</source>
         <comment>remote.join_not_allowed message</comment>
         <translation>Zákazník vám nepovolil pripojiť sa.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1316"/>
+        <location filename="../libs/core/src/error.cpp" line="1317"/>
         <source>The customer ended the session instead of allowing you, or did not answer within 2 minutes.</source>
         <comment>remote.join_not_allowed cause</comment>
         <translation>Zákazník namiesto povolenia ukončil reláciu alebo neodpovedal do 2 minút.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1320"/>
+        <location filename="../libs/core/src/error.cpp" line="1321"/>
         <source>Ask the customer to share the console again and to allow you when you join.</source>
         <comment>remote.join_not_allowed suggestion</comment>
         <translation>Požiadajte zákazníka, aby znova zdieľal konzolu a povolil vás, keď sa pripojíte.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1327"/>
+        <location filename="../libs/core/src/error.cpp" line="1328"/>
         <source>The remote session ended.</source>
         <comment>remote.host_ended message</comment>
         <translation>Vzdialená relácia sa skončila.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1329"/>
+        <location filename="../libs/core/src/error.cpp" line="1330"/>
         <source>The customer ended sharing, or their device or HARDWARIO Monitor disconnected.</source>
         <comment>remote.host_ended cause</comment>
         <translation>Zákazník ukončil zdieľanie alebo sa odpojilo jeho zariadenie či HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1333"/>
+        <location filename="../libs/core/src/error.cpp" line="1334"/>
         <source>Ask the customer to share the console again if you need more time.</source>
         <comment>remote.host_ended suggestion</comment>
         <translation>Ak potrebujete viac času, požiadajte zákazníka, aby znova zdieľal konzolu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1339"/>
+        <location filename="../libs/core/src/error.cpp" line="1340"/>
         <source>The customer denied the request.</source>
         <comment>remote.operation_denied message</comment>
         <translation>Zákazník požiadavku zamietol.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1341"/>
+        <location filename="../libs/core/src/error.cpp" line="1342"/>
         <source>The customer denied the operation, or did not answer within 60 seconds.</source>
         <comment>remote.operation_denied cause</comment>
         <translation>Zákazník operáciu zamietol alebo neodpovedal do 60 sekúnd.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1344"/>
+        <location filename="../libs/core/src/error.cpp" line="1345"/>
         <source>Ask the customer to allow the operation and try again.</source>
         <comment>remote.operation_denied suggestion</comment>
         <translation>Požiadajte zákazníka, aby operáciu povolil, a skúste to znova.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1350"/>
+        <location filename="../libs/core/src/error.cpp" line="1351"/>
         <source>The customer&apos;s application supports only the console.</source>
         <comment>remote.operation_unsupported_peer message</comment>
         <translation>Aplikácia zákazníka podporuje iba konzolu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1353"/>
+        <location filename="../libs/core/src/error.cpp" line="1354"/>
         <source>The customer uses the web Terminal, which cannot flash, erase, recover or reset the device remotely.</source>
         <comment>remote.operation_unsupported_peer cause</comment>
         <translation>Zákazník používa webový Terminál, ktorý nedokáže na diaľku nahrať, vymazať, obnoviť ani resetovať zariadenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1357"/>
+        <location filename="../libs/core/src/error.cpp" line="1358"/>
         <source>Ask the customer to share the console from HARDWARIO Monitor.</source>
         <comment>remote.operation_unsupported_peer suggestion</comment>
         <translation>Požiadajte zákazníka, aby zdieľal konzolu z HARDWARIO Monitora.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1364"/>
+        <location filename="../libs/core/src/error.cpp" line="1365"/>
         <source>This firmware is not in the HARDWARIO catalog.</source>
         <comment>remote.firmware_not_in_catalog message</comment>
         <translation>Tento firmvér nie je v katalógu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1366"/>
+        <location filename="../libs/core/src/error.cpp" line="1367"/>
         <source>Remote flashing accepts only firmware from the HARDWARIO firmware catalog, identified by its ID.</source>
         <comment>remote.firmware_not_in_catalog cause</comment>
         <translation>Vzdialené nahrávanie prijíma iba firmvér z katalógu firmvéru HARDWARIO, identifikovaný jeho ID.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1370"/>
+        <location filename="../libs/core/src/error.cpp" line="1371"/>
         <source>Check the firmware ID, or ask the customer to flash a file locally.</source>
         <comment>remote.firmware_not_in_catalog suggestion</comment>
         <translation>Skontrolujte ID firmvéru alebo požiadajte zákazníka, aby nahral súbor lokálne.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1376"/>
+        <location filename="../libs/core/src/error.cpp" line="1377"/>
         <source>Unexpected data in the remote session.</source>
         <comment>remote.protocol_error message</comment>
         <translation>Neočakávané údaje vo vzdialenej relácii.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1378"/>
+        <location filename="../libs/core/src/error.cpp" line="1379"/>
         <source>The support server or the other participant sent data that HARDWARIO Monitor does not understand. It was ignored, or the session was ended for safety.</source>
         <comment>remote.protocol_error cause</comment>
         <translation>Server podpory alebo druhý účastník poslal údaje, ktorým HARDWARIO Monitor nerozumie. Boli ignorované alebo bola relácia z bezpečnostných dôvodov ukončená.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1383"/>
+        <location filename="../libs/core/src/error.cpp" line="1384"/>
         <source>Report the issue with a diagnostic report.</source>
         <comment>remote.protocol_error suggestion</comment>
         <translation>Nahláste problém s diagnostickou správou.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1427"/>
+        <location filename="../libs/core/src/error.cpp" line="1389"/>
+        <source>The LTE firmware was updated, but the application was not written back.</source>
+        <comment>remote.application_not_restored message</comment>
+        <translation>Firmvér LTE bol aktualizovaný, ale aplikácia nebola zapísaná späť.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1392"/>
+        <source>The guided LTE update ended before the application was written back, or no copy of the application could be saved. The application MCU is empty.</source>
+        <comment>remote.application_not_restored cause</comment>
+        <translation>Riadená aktualizácia LTE skončila skôr, ako bola aplikácia zapísaná späť, alebo sa nepodarilo uložiť kópiu aplikácie. MCU aplikácie je prázdny.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1397"/>
+        <source>Flash an application: ask the customer to flash it, or ask to flash catalog firmware.</source>
+        <comment>remote.application_not_restored suggestion</comment>
+        <translation>Nahrajte aplikáciu: požiadajte zákazníka, aby ju nahral, alebo požiadajte o nahratie firmvéru z katalógu.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1443"/>
         <source>The output was closed.</source>
         <comment>cancelled message when the stdout was closed</comment>
         <translation>Výstup bol zatvorený.</translation>
@@ -7228,69 +7246,134 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
 <context>
     <name>hwio::remote</name>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="26"/>
+        <location filename="../libs/remote/src/consent.cpp" line="29"/>
         <source>Someone joined session %1. Allow them to send commands to the device? Allow only if HARDWARIO Support has just told you they are joining.</source>
         <translation>Niekto sa pripojil k relácii %1. Povoliť mu posielať príkazy do zariadenia? Povoľte to iba vtedy, ak vám podpora HARDWARIO práve povedala, že sa pripája.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="37"/>
+        <location filename="../libs/remote/src/consent.cpp" line="40"/>
         <source>the LTE modem core</source>
         <translation>jadro LTE modemu</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="38"/>
+        <location filename="../libs/remote/src/consent.cpp" line="41"/>
         <source>the application core</source>
         <translation>aplikačné jadro</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="43"/>
+        <location filename="../libs/remote/src/consent.cpp" line="46"/>
         <source>firmware %1</source>
         <translation>firmvér %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="46"/>
+        <location filename="../libs/remote/src/consent.cpp" line="49"/>
         <source>firmware %1 %2 (ID %3)</source>
         <translation>firmvér %1 %2 (ID %3)</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="56"/>
+        <location filename="../libs/remote/src/consent.cpp" line="57"/>
+        <source>the recommended version</source>
+        <translation>odporúčanú verziu</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="73"/>
+        <source>downloading the firmware</source>
+        <translation>sťahovanie firmvéru</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="75"/>
+        <source>waiting for the J-Link on the APP connector</source>
+        <translation>čaká sa na J-Link na konektore APP</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="77"/>
+        <source>saving a copy of the application</source>
+        <translation>ukladanie kópie aplikácie</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="79"/>
+        <source>no copy of the application, waiting for the customer</source>
+        <translation>bez kópie aplikácie, čaká sa na zákazníka</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="81"/>
+        <source>stopping the application</source>
+        <translation>zastavovanie aplikácie</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="83"/>
+        <source>waiting for the J-Link on the LTE connector</source>
+        <translation>čaká sa na J-Link na konektore LTE</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="84"/>
+        <source>updating the LTE MCU</source>
+        <translation>aktualizácia LTE MCU</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="86"/>
+        <source>waiting for the J-Link on the APP connector again</source>
+        <translation>znova sa čaká na J-Link na konektore APP</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="89"/>
+        <source>the customer chooses the application to write back</source>
+        <translation>zákazník vyberá aplikáciu na zapísanie späť</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="92"/>
+        <source>writing the application back</source>
+        <translation>zapisovanie aplikácie späť</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="105"/>
         <source>Support asks to flash %1 to %2. The device restarts.</source>
         <translation>Podpora žiada nahrať %1 do %2. Zariadenie sa reštartuje.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="60"/>
+        <location filename="../libs/remote/src/consent.cpp" line="109"/>
         <source>Support asks to erase the firmware of %1. The device stops working until new firmware is flashed.</source>
         <translation>Podpora žiada vymazať firmvér %1. Zariadenie nebude fungovať, kým sa nenahrá nový firmvér.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="65"/>
+        <location filename="../libs/remote/src/consent.cpp" line="114"/>
         <source>Support asks to recover %1. This erases its flash completely, including the protection settings.</source>
         <translation>Podpora žiada obnoviť %1. Tým sa úplne vymaže jeho flash pamäť vrátane nastavení ochrany.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="70"/>
+        <location filename="../libs/remote/src/consent.cpp" line="119"/>
         <source>Support asks to reset %1. The device restarts.</source>
         <translation>Podpora žiada resetovať %1. Zariadenie sa reštartuje.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="80"/>
+        <location filename="../libs/remote/src/consent.cpp" line="123"/>
+        <source>Support asks to update the LTE firmware to %1. You will have to move the J-Link cable between the APP and LTE connectors.</source>
+        <translation>Podpora žiada o aktualizáciu firmvéru LTE na %1. Budete musieť prepájať kábel J-Link medzi konektormi APP a LTE.</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="135"/>
         <source>Flash %1 to %2</source>
         <translation>Nahrať %1 do %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="83"/>
+        <location filename="../libs/remote/src/consent.cpp" line="138"/>
         <source>Erase %1</source>
         <translation>Vymazať %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="86"/>
+        <location filename="../libs/remote/src/consent.cpp" line="141"/>
         <source>Recover %1</source>
         <translation>Obnoviť %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/consent.cpp" line="89"/>
+        <location filename="../libs/remote/src/consent.cpp" line="144"/>
         <source>Reset %1</source>
         <translation>Resetovať %1</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/consent.cpp" line="147"/>
+        <source>Update the LTE firmware to %1</source>
+        <translation>Aktualizácia firmvéru LTE na %1</translation>
     </message>
     <message numerus="yes">
         <location filename="../libs/remote/src/relay_client.cpp" line="57"/>
@@ -7372,65 +7455,65 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         <translation>— Staršia história relácie bola vynechaná —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="91"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="93"/>
         <source>Sharing started, session %1 (%2).</source>
         <translation>Zdieľanie sa začalo, relácia %1 (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="100"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="102"/>
         <source>The join question was not answered within 2 minutes.</source>
         <translation>Na otázku na pripojenie nikto neodpovedal do 2 minút.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="114"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="116"/>
         <source>%1: denied (no answer within 60 s).</source>
         <translation>%1: zamietnuté (žiadna odpoveď do 60 s).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="124"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="127"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="126"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="129"/>
         <source>Sharing ended after 30 minutes without activity.</source>
         <translation>Zdieľanie skončilo po 30 minútach bez aktivity.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="132"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="146"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="134"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="148"/>
         <source>Start sharing again if support still needs the console.</source>
         <translation>Začnite zdieľať znova, ak podpora ešte potrebuje konzolu.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="139"/>
         <location filename="../libs/remote/src/remote_host.cpp" line="141"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="143"/>
         <source>Sharing ended after the maximum of 8 hours.</source>
         <translation>Zdieľanie skončilo po maximálnej dobe 8 hodín.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="154"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="156"/>
         <source>Participant app: web Terminal or unknown.</source>
         <translation>Aplikácia účastníka: web Terminal alebo neznáma.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="211"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="213"/>
         <source>Connection to the support server restored.</source>
         <translation>Spojenie so serverom podpory obnovené.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="236"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="238"/>
         <source>Another device uses this session code; the session was ended for safety.</source>
         <translation>Iné zariadenie používa tento kód relácie; relácia bola z bezpečnostných dôvodov ukončená.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="251"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="253"/>
         <source>Someone joined the session.</source>
         <translation>Niekto sa pripojil k relácii.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="270"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="272"/>
         <source>%1: denied (someone joined).</source>
         <translation>%1: zamietnuté (niekto sa pripojil).</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="294"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="296"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n vzdialený príkaz bol zahodený počas čakania na vašu odpoveď.</numerusform>
@@ -7439,104 +7522,109 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="300"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="302"/>
         <source>You ended the session instead of allowing the participant.</source>
         <translation>Reláciu ste ukončili namiesto povolenia účastníka.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="307"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="309"/>
         <source>Participant allowed.</source>
         <translation>Účastník povolený.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="308"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="310"/>
         <source>Participant allowed (%1).</source>
         <translation>Účastník povolený (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="389"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="394"/>
         <source>A remote command was dropped (too long or with control characters).</source>
         <translation>Vzdialený príkaz bol zahodený (príliš dlhý alebo s riadiacimi znakmi).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="401"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="406"/>
         <source>Remote commands dropped: more than %1 per second.</source>
         <translation>Vzdialené príkazy zahodené: viac ako %1 za sekundu.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="411"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="416"/>
         <source>command %1</source>
         <translation>príkaz %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="429"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="434"/>
         <source>An operation request was refused: the participant is not allowed.</source>
         <translation>Žiadosť o operáciu bola odmietnutá: účastník nie je povolený.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="440"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="445"/>
         <source>Participant app: %1.</source>
         <translation>Aplikácia účastníka: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="461"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="471"/>
         <source>Support asks: %1.</source>
         <translation>Podpora žiada: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="464"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="474"/>
         <source>%1: refused (this console has no operations).</source>
         <translation>%1: odmietnuté (táto konzola nemá operácie).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="471"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="482"/>
+        <source>%1: refused (not available on this console).</source>
+        <translation>%1: odmietnuté (na tejto konzole nie je k dispozícii).</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/remote_host.cpp" line="489"/>
         <source>%1: refused (another request or operation is in progress).</source>
         <translation>%1: odmietnuté (prebieha iná žiadosť alebo operácia).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="479"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="503"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="497"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="521"/>
         <source>%1: refused (%2).</source>
         <translation>%1: odmietnuté (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="531"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="549"/>
         <source>%1: denied by you.</source>
         <translation>%1: zamietli ste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="550"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="568"/>
         <source>%1: allowed by you.</source>
         <translation>%1: povolili ste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="594"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="597"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="616"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="619"/>
         <source>%1: done.</source>
         <translation>%1: hotovo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="600"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="622"/>
         <source>%1: failed: %2</source>
         <translation>%1: zlyhalo: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="654"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="676"/>
         <source>— Remote: %1 —</source>
         <translation>— Vzdialené: %1 —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="687"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="709"/>
         <source>You ended sharing.</source>
         <translation>Zdieľanie ste ukončili.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="724"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="746"/>
         <source>Sharing ended.</source>
         <translation>Zdieľanie skončilo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="725"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="747"/>
         <source>Sharing ended: %1</source>
         <translation>Zdieľanie skončilo: %1</translation>
     </message>

@@ -31,11 +31,13 @@
 // tunnel message (ADR-0336): hello (the joiner's app) and op-request.
 //
 // Operations (ADR-0322..0324, ADR-0336): only with HostOperations (J-Link) and after the hello was
-// sent; one at a time, a request during an operation, an operation question or a join question is
-// denied with internal.busy. The request is validated, a flash's firmware looked up in the catalog
-// (remote.firmware_not_in_catalog), then the operation question (Deny after operationTimeout,
-// remote.operation_denied). Allow → op-accepted, op-progress (at most progressInterval apart),
-// op-result.
+// sent (it lists HostOperations::kinds() as opKinds; a kind not in it is refused with
+// remote.operation_unsupported_peer; lteUpdate, ADR-0363, asks with the recommended LTE firmware's
+// name and runs the guided update); one at a time, a request during an operation, an operation
+// question or a join question is denied with internal.busy. The request is validated, a flash's
+// firmware looked up in the catalog (remote.firmware_not_in_catalog), then the operation question
+// (Deny after operationTimeout, remote.operation_denied). Allow → op-accepted, op-progress (at most
+// progressInterval apart), op-result (a new phase at once, ADR-0363).
 //
 // Limits (ADR-0328, plan 0044 § Limits): idle (no console traffic in either direction) warns at
 // idleTimeout - idleWarningBefore (idleWarning()), keepSharing() restarts the idle time; idle or
@@ -214,6 +216,7 @@ private:
     std::optional<PendingOperation> m_operation;
     std::uint64_t m_operationToken = 0;
     std::chrono::steady_clock::time_point m_lastProgress;
+    std::string m_lastProgressPhase;
     std::deque<std::chrono::steady_clock::time_point> m_recentLines; // <= remoteLinesPerSecond
     std::chrono::steady_clock::time_point m_lastRateAudit;
     std::optional<Error> m_endError;

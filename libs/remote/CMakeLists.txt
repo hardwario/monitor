@@ -9,6 +9,7 @@
 hwio_add_backend_library(hwio_remote
     include/hwio/remote/consent.h
     include/hwio/remote/host_operations.h
+    include/hwio/remote/lte_update_report.h
     include/hwio/remote/protocol.h
     include/hwio/remote/relay_client.h
     include/hwio/remote/remote_console_session.h
@@ -19,6 +20,7 @@ hwio_add_backend_library(hwio_remote
     include/hwio/remote/tunnel.h
     src/consent.cpp
     src/host_operations.cpp
+    src/lte_update_report.cpp
     src/protocol.cpp
     src/relay_client.cpp
     src/relay_worker.h

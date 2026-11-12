@@ -19,6 +19,7 @@
 
 #include <functional>
 #include <string>
+#include <string_view>
 
 namespace hwio::remote {
 
@@ -30,8 +31,9 @@ struct OperationQuestion {
     tunnel::OpKind kind = tunnel::OpKind::Reset;
     tunnel::OpTarget target = tunnel::OpTarget::App;
     std::string firmwareId;      // flash only
-    std::string firmwareName;    // flash only: from the catalog page ("" when unknown)
-    std::string firmwareVersion; // flash only
+    std::string firmwareName;    // flash: from the catalog page ("" when unknown); lteUpdate: the
+                                 // recommended LTE firmware ("HARDWARIO LTE firmware")
+    std::string firmwareVersion; // flash, lteUpdate
 };
 
 class ConsentProvider {
@@ -70,5 +72,8 @@ public:
 [[nodiscard]] QString operationQuestionText(const OperationQuestion& question);
 // "Flash firmware CHESTER-Clime 3.2.1", "Erase the application core", ... (audit lines, titles)
 [[nodiscard]] QString operationSummary(const OperationQuestion& question);
+// The joiner's text of an op-progress phase: the steps of the guided LTE update (ADR-0363) and
+// "download" translated ("waiting for the J-Link on the LTE connector"), other phases as sent.
+[[nodiscard]] QString operationPhaseText(std::string_view phase);
 
 } // namespace hwio::remote

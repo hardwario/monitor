@@ -6,12 +6,19 @@
 //                                                  "op-progress"|"op-result"|"end", …}}
 //   joiner → host    write {hwio: {v: 1, type: "hello"|"op-request", …}}   (a JSON object, never a
 //                                                                          string)
+// ADR-0363: the operation kind `lteUpdate` (the guided LTE update with the host's recommended
+// firmware: no target, no firmware ID); the host's hello lists the kinds it runs in `opKinds`
+// (alongside `ops`; a hello without it means the four kinds of ADR-0322 when ops is true). The
+// progress of an lteUpdate names the guided update's step in `phase`
+// (device::LteUpdateProcedure::stepId: "connect-app", "backup", "erase", "connect-lte",
+// "update-lte", "connect-app-again", "choose-application", "restore"; "download" before it).
 // The web Terminal ignores an `at` whose event is not state / write / read; a web Terminal host
 // would write a `write` object to the device as text, so a Monitor joiner sends tunnel objects only
 // after the host's hello (RemoteConsoleSession).
 //
 // Decoding validates every field (version 1, known type, enum values, id and text lengths, the
-// firmware ID format, `firmwareId` only and always for flash) and fails with remote.protocol_error.
+// firmware ID format, `firmwareId` only and always for flash, `target` always except for
+// lteUpdate, which has none) and fails with remote.protocol_error.
 // `end` (ADR-0354): the host ends the session; `code` is the hwio::Error id of the reason.
 //
 // Text fields shown to the user are sanitised (control characters removed, length bounded). Pure
@@ -27,6 +34,7 @@
 #include <string>
 #include <string_view>
 #include <variant>
+#include <vector>
 
 namespace hwio::remote::tunnel {
 
@@ -35,10 +43,11 @@ inline constexpr std::string_view appId = "hwio-monitor";
 inline constexpr std::size_t maxIdBytes = 32;    // operation ids: [A-Za-z0-9_-]
 inline constexpr std::size_t maxTextBytes = 128; // app, version, device fields, phase
 
-enum class OpKind : std::uint8_t { Flash, Erase, Recover, Reset };
+enum class OpKind : std::uint8_t { Flash, Erase, Recover, Reset, LteUpdate };
+inline constexpr std::size_t maxOpKinds = 16; // entries of a hello's opKinds
 enum class OpTarget : std::uint8_t { App, Lte };
 
-[[nodiscard]] std::string_view kindId(OpKind kind) noexcept;       // "flash", "erase", ...
+[[nodiscard]] std::string_view kindId(OpKind kind) noexcept; // "flash", "erase", ..., "lteUpdate"
 [[nodiscard]] std::string_view targetId(OpTarget target) noexcept; // "app", "lte"
 [[nodiscard]] std::optional<OpKind> kindFromId(std::string_view id) noexcept;
 [[nodiscard]] std::optional<OpTarget> targetFromId(std::string_view id) noexcept;
@@ -56,7 +65,12 @@ struct HostHello {
     std::string version; // Monitor version
     DeviceInfo device;
     bool ops = false; // the host accepts operation requests
+    // ADR-0363: the kinds it runs (empty when !ops). Decoded: unknown kinds are skipped; a hello
+    // without the field gets the four kinds of ADR-0322 when ops is true.
+    std::vector<OpKind> opKinds;
 };
+// The host runs `kind` (ops and opKinds).
+[[nodiscard]] bool supports(const HostHello& hello, OpKind kind) noexcept;
 struct OpAccepted {
     std::string id;
 };
@@ -92,7 +106,7 @@ struct JoinerHello {
 struct OpRequest {
     std::string id;
     OpKind kind = OpKind::Reset;
-    OpTarget target = OpTarget::App;
+    OpTarget target = OpTarget::App;       // not sent for lteUpdate (decoded as Lte)
     std::optional<std::string> firmwareId; // flash only: a catalog firmware ID (32 hex digits)
 };
 using JoinerMessage = std::variant<JoinerHello, OpRequest>;

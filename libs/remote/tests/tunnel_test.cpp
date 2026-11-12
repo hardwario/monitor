@@ -13,6 +13,7 @@
 #include <array>
 #include <optional>
 #include <variant>
+#include <vector>
 
 namespace hwio::remote::tunnel {
 namespace {
@@ -27,7 +28,8 @@ TEST(Tunnel, HostMessagesRoundTrip) {
                              .serial = "1",
                              .transport = "jlink",
                              .firmware = "Clime v3"},
-                  .ops = true},
+                  .ops = true,
+                  .opKinds = {OpKind::Reset, OpKind::LteUpdate}},
         OpAccepted{.id = "op-1"},
         OpDenied{.id = "op-1", .code = "internal.busy"},
         OpProgress{
@@ -48,6 +50,9 @@ TEST(Tunnel, HostMessagesRoundTrip) {
     const auto hello = std::get<HostHello>(*decodeHost(encodeHost(messages[0])));
     EXPECT_TRUE(hello.ops);
     EXPECT_EQ(hello.device.firmware, "Clime v3");
+    EXPECT_EQ(hello.opKinds, (std::vector<OpKind>{OpKind::Reset, OpKind::LteUpdate}));
+    EXPECT_TRUE(supports(hello, OpKind::LteUpdate));
+    EXPECT_FALSE(supports(hello, OpKind::Flash));
     EXPECT_EQ(std::get<HostEnd>(*decodeHost(encodeHost(messages[7]))).code,
               "remote.code_collision");
     EXPECT_EQ(std::get<HostEnd>(*decodeHost(encodeHost(messages[6]))).code, "cancelled");
@@ -128,8 +133,57 @@ TEST(Tunnel, DisplayTextIsSanitisedAndBounded) {
         HostHello{.app = "hwio-monitor",
                   .version = "1",
                   .device = {.name = longName, .serial = {}, .transport = {}, .firmware = {}},
-                  .ops = false});
+                  .ops = false,
+                  .opKinds = {}});
     EXPECT_FALSE(decodeHost(at).has_value());
+}
+
+// ADR-0363: lteUpdate has no target and no firmware ID; the hello lists the kinds.
+TEST(Tunnel, LteUpdateRequestHasNoTarget) {
+    const QJsonObject write = encodeJoiner(OpRequest{
+        .id = "u", .kind = OpKind::LteUpdate, .target = OpTarget::App, .firmwareId = std::nullopt});
+    const QJsonObject data = write.value(QStringLiteral("hwio")).toObject();
+    EXPECT_EQ(data.value(QStringLiteral("kind")).toString(), QStringLiteral("lteUpdate"));
+    EXPECT_FALSE(data.contains(QStringLiteral("target")));
+    auto decoded = decodeJoiner(write);
+    ASSERT_TRUE(decoded.has_value()) << decoded.error().detail;
+    EXPECT_EQ(std::get<OpRequest>(*decoded).kind, OpKind::LteUpdate);
+    EXPECT_EQ(std::get<OpRequest>(*decoded).target, OpTarget::Lte);
+    for (
+        const char* text : {
+            R"({"hwio":{"v":1,"type":"op-request","id":"a","kind":"lteUpdate","target":"lte"}})",
+            R"({"hwio":{"v":1,"type":"op-request","id":"a","kind":"lteUpdate","firmwareId":"0123456789abcdef0123456789abcdef"}})",
+            R"({"hwio":{"v":1,"type":"op-request","id":"a","kind":"reset"}})",
+        }) {
+        EXPECT_FALSE(decodeJoiner(json(text)).has_value()) << text;
+    }
+}
+
+TEST(Tunnel, HelloOpKinds) {
+    const auto decode = [](const char* text) { return decodeHost(json(text)); };
+    // Without opKinds (an earlier host): the four ADR-0322 kinds when ops is true.
+    auto old = decode(
+        R"({"event":"hwio","data":{"v":1,"type":"hello","app":"hwio-monitor","version":"2","device":{"name":"","serial":"","transport":"","firmware":""},"ops":true}})");
+    ASSERT_TRUE(old.has_value());
+    EXPECT_TRUE(supports(std::get<HostHello>(*old), OpKind::Reset));
+    EXPECT_FALSE(supports(std::get<HostHello>(*old), OpKind::LteUpdate));
+    // Unknown kinds (a later version) are skipped; ops false means none.
+    auto later = decode(
+        R"({"event":"hwio","data":{"v":1,"type":"hello","app":"hwio-monitor","version":"3","device":{"name":"","serial":"","transport":"","firmware":""},"ops":true,"opKinds":["lteUpdate","teleport"]}})");
+    ASSERT_TRUE(later.has_value());
+    EXPECT_EQ(std::get<HostHello>(*later).opKinds, std::vector<OpKind>{OpKind::LteUpdate});
+    auto none = decode(
+        R"({"event":"hwio","data":{"v":1,"type":"hello","app":"hwio-monitor","version":"3","device":{"name":"","serial":"","transport":"","firmware":""},"ops":false,"opKinds":["reset"]}})");
+    ASSERT_TRUE(none.has_value());
+    EXPECT_FALSE(supports(std::get<HostHello>(*none), OpKind::Reset));
+    for (
+        const char* text : {
+            R"({"event":"hwio","data":{"v":1,"type":"hello","app":"hwio-monitor","version":"3","device":{"name":"","serial":"","transport":"","firmware":""},"ops":true,"opKinds":"reset"}})",
+            R"({"event":"hwio","data":{"v":1,"type":"hello","app":"hwio-monitor","version":"3","device":{"name":"","serial":"","transport":"","firmware":""},"ops":true,"opKinds":[1]}})",
+            R"({"event":"hwio","data":{"v":1,"type":"hello","app":"hwio-monitor","version":"3","device":{"name":"","serial":"","transport":"","firmware":""},"ops":true,"opKinds":["a","a","a","a","a","a","a","a","a","a","a","a","a","a","a","a","a"]}})",
+        }) {
+        EXPECT_FALSE(decode(text).has_value()) << text;
+    }
 }
 
 } // namespace

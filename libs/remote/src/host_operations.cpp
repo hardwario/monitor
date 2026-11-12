@@ -25,6 +25,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace hwio::remote {
 
@@ -56,7 +57,35 @@ DeviceSessionOperations::DeviceSessionOperations(device::DeviceSession& session,
 
 DeviceSessionOperations::~DeviceSessionOperations() { abandon(); }
 
+std::vector<tunnel::OpKind> DeviceSessionOperations::kinds() const {
+    std::vector<tunnel::OpKind> kinds{tunnel::OpKind::Flash, tunnel::OpKind::Erase,
+                                      tunnel::OpKind::Recover, tunnel::OpKind::Reset};
+    if (!lteUpdateFirmware().first.empty()) {
+        kinds.push_back(tunnel::OpKind::LteUpdate);
+    }
+    return kinds;
+}
+
+std::pair<std::string, std::string> DeviceSessionOperations::lteUpdateFirmware() const {
+    if (m_lteUpdate == nullptr) {
+        return {};
+    }
+    const device::TargetProfile* lte = device::findTarget(m_session->profile(), "lte");
+    if (lte == nullptr || !lte->designatedFirmware) {
+        return {};
+    }
+    return {std::string(lte->designatedFirmware->name),
+            std::string(lte->designatedFirmware->version)};
+}
+
 Status DeviceSessionOperations::validate(const tunnel::OpRequest& request) const {
+    if (request.kind == tunnel::OpKind::LteUpdate) {
+        if (lteUpdateFirmware().first.empty()) {
+            return std::unexpected(makeError(ErrorCode::RemoteOperationUnsupportedPeer,
+                                             "no guided LTE update on this host"));
+        }
+        return {};
+    }
     const std::string_view target = tunnel::targetId(request.target);
     if (device::findTarget(m_session->profile(), target) == nullptr) {
         return std::unexpected(makeError(ErrorCode::UsageInvalidArgument,
@@ -103,6 +132,27 @@ Status DeviceSessionOperations::start(const tunnel::OpRequest& request, Progress
     m_running = true;
     m_progress = std::move(progress);
     m_finished = std::move(finished);
+    if (request.kind == tunnel::OpKind::LteUpdate) {
+        // ADR-0363: the guided LTE update (GUI wizard / CLI terminal flow).
+        m_lteUpdateRunning = true;
+        Status started = m_lteUpdate->start(
+            [this](const OperationUpdate& update) {
+                if (m_progress) {
+                    m_progress(update);
+                }
+            },
+            [this](Status status) {
+                m_lteUpdateRunning = false;
+                finish(std::move(status));
+            });
+        if (!started) {
+            m_lteUpdateRunning = false;
+            m_running = false;
+            m_progress = {};
+            m_finished = {};
+        }
+        return started;
+    }
     if (request.kind != tunnel::OpKind::Flash) {
         startDeviceOperation(request, nullptr);
         return {};
@@ -163,6 +213,8 @@ void DeviceSessionOperations::startDeviceOperation(
     case tunnel::OpKind::Reset:
         started = m_session->reset(target, device::ResetMode::Go);
         break;
+    case tunnel::OpKind::LteUpdate: // started by start() through the runner
+        break;
     }
     if (!started) {
         finish(std::unexpected(std::move(started).error()));
@@ -195,6 +247,10 @@ void DeviceSessionOperations::abandon() {
         m_download->cancel();
         m_download.reset();
     }
+    if (m_lteUpdateRunning && m_lteUpdate != nullptr) {
+        m_lteUpdate->abandon(); // the guided update stays with the customer, unreported
+    }
+    m_lteUpdateRunning = false;
     // A device operation that runs keeps running (m_operation); its result is not reported.
     m_running = m_operation.has_value();
 }

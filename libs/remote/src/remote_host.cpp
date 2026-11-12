@@ -37,8 +37,10 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <utility>
 #include <variant>
+#include <vector>
 
 namespace hwio::remote {
 
@@ -342,6 +344,9 @@ void RemoteHost::sendHello() {
             adopted->version.empty() ? adopted->name : adopted->name + " " + adopted->version;
     }
     hello.ops = m_operations != nullptr;
+    if (m_operations != nullptr) {
+        hello.opKinds = m_operations->kinds(); // ADR-0363
+    }
     sendHost(hello);
     m_helloSent = true;
 }
@@ -457,12 +462,25 @@ void RemoteHost::onOperationRequest(const tunnel::OpRequest& request) {
                                .firmwareId = request.firmwareId.value_or(""),
                                .firmwareName = {},
                                .firmwareVersion = {}};
+    if (request.kind == tunnel::OpKind::LteUpdate && m_operations != nullptr) {
+        // ADR-0363: the host's recommended LTE firmware.
+        std::tie(question.firmwareName, question.firmwareVersion) =
+            m_operations->lteUpdateFirmware();
+    }
     const QString summary = operationSummary(question);
     audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Support asks: %1.")).arg(summary));
     if (m_operations == nullptr || !m_helloSent) {
         denyOperation(request.id, ErrorCode::RemoteOperationUnsupportedPeer,
                       trRemote(QT_TRANSLATE_NOOP("hwio::remote",
                                                  "%1: refused (this console has no operations)."))
+                          .arg(summary));
+        return;
+    }
+    if (const std::vector<tunnel::OpKind> kinds = m_operations->kinds();
+        std::ranges::find(kinds, request.kind) == kinds.end()) {
+        denyOperation(request.id, ErrorCode::RemoteOperationUnsupportedPeer,
+                      trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                                 "%1: refused (not available on this console)."))
                           .arg(summary));
         return;
     }
@@ -551,6 +569,7 @@ void RemoteHost::startOperation() {
     sendHost(tunnel::OpAccepted{.id = id});
     emit operationStarted(summary);
     m_lastProgress = {};
+    m_lastProgressPhase.clear();
     const std::uint64_t token = m_operationToken;
     Status started = m_operations->start(
         operation.request,
@@ -561,10 +580,13 @@ void RemoteHost::startOperation() {
             activity();
             emit operationProgress(update);
             const auto now = std::chrono::steady_clock::now();
-            if (now - m_lastProgress < m_options.limits.progressInterval) {
+            // A new phase is sent at once (the guided LTE update's steps, ADR-0363).
+            if (now - m_lastProgress < m_options.limits.progressInterval &&
+                update.phase == m_lastProgressPhase) {
                 return;
             }
             m_lastProgress = now;
+            m_lastProgressPhase = update.phase;
             sendHost(tunnel::OpProgress{.id = m_operation->request.id,
                                         .phase = update.phase,
                                         .step = update.step,

@@ -40,7 +40,8 @@ public:
                                    QObject* parent = nullptr);
 
     // Sends the request; the id is new and random. Errors: internal.busy (one is pending),
-    // remote.operation_unsupported_peer (web Terminal host, or ops: false), usage.invalid_argument
+    // remote.operation_unsupported_peer (web Terminal host, or ops: false, or lteUpdate not in the
+    // hello's opKinds, ADR-0363), usage.invalid_argument
     // (flash without a firmware ID, a firmware ID for another kind), remote.host_ended.
     [[nodiscard]] Result<std::string> request(tunnel::OpKind kind, tunnel::OpTarget target,
                                               std::optional<std::string> firmwareId = std::nullopt);

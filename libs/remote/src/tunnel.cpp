@@ -6,6 +6,7 @@
 #include "hwio/core/text_sanitizer.h"
 #include "hwio/firmware/firmware_cache.h"
 
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QLatin1StringView>
@@ -130,6 +131,26 @@ Result<HostMessage> decodeHostHello(const QJsonObject& data) {
     if (!name || !serial || !transport || !firmware) {
         return bad("invalid hello device");
     }
+    // ADR-0363: the kinds the host runs; absent (an earlier host) = the ADR-0322 kinds.
+    const QJsonValue kinds = data.value(QStringLiteral("opKinds"));
+    if (kinds.isUndefined()) {
+        if (ops.toBool()) {
+            hello.opKinds = {OpKind::Flash, OpKind::Erase, OpKind::Recover, OpKind::Reset};
+        }
+    } else if (!kinds.isArray() || std::cmp_greater(kinds.toArray().size(), maxOpKinds)) {
+        return bad("invalid opKinds");
+    } else {
+        for (const QJsonValue& kindValue : kinds.toArray()) {
+            if (!kindValue.isString() || kindValue.toString().size() > 32) {
+                return bad("invalid opKinds");
+            }
+            const auto kind = kindFromId(toStdString(kindValue.toString()));
+            if (kind && ops.toBool() &&
+                std::ranges::find(hello.opKinds, *kind) == hello.opKinds.end()) {
+                hello.opKinds.push_back(*kind); // unknown kinds (a later version) are skipped
+            }
+        }
+    }
     hello.app = *app;
     hello.version = *ver;
     hello.device = DeviceInfo{
@@ -196,6 +217,8 @@ std::string_view kindId(OpKind kind) noexcept {
         return "recover";
     case OpKind::Reset:
         return "reset";
+    case OpKind::LteUpdate:
+        return "lteUpdate";
     }
     return "reset";
 }
@@ -205,7 +228,8 @@ std::string_view targetId(OpTarget target) noexcept {
 }
 
 std::optional<OpKind> kindFromId(std::string_view id) noexcept {
-    for (const OpKind kind : {OpKind::Flash, OpKind::Erase, OpKind::Recover, OpKind::Reset}) {
+    for (const OpKind kind :
+         {OpKind::Flash, OpKind::Erase, OpKind::Recover, OpKind::Reset, OpKind::LteUpdate}) {
         if (kindId(kind) == id) {
             return kind;
         }
@@ -221,6 +245,10 @@ std::optional<OpTarget> targetFromId(std::string_view id) noexcept {
         return OpTarget::Lte;
     }
     return std::nullopt;
+}
+
+bool supports(const HostHello& hello, OpKind kind) noexcept {
+    return hello.ops && std::ranges::find(hello.opKinds, kind) != hello.opKinds.end();
 }
 
 bool validId(std::string_view id) noexcept {
@@ -247,6 +275,13 @@ QJsonObject encodeHost(const HostMessage& message) {
                            device.insert(QStringLiteral("firmware"), q(hello.device.firmware));
                            d.insert(QStringLiteral("device"), device);
                            d.insert(QStringLiteral("ops"), hello.ops);
+                           QJsonArray kinds;
+                           if (hello.ops) {
+                               for (const OpKind kind : hello.opKinds) {
+                                   kinds.append(q(kindId(kind)));
+                               }
+                           }
+                           d.insert(QStringLiteral("opKinds"), kinds);
                            return d;
                        },
                        [](const OpAccepted& accepted) {
@@ -307,7 +342,9 @@ QJsonObject encodeJoiner(const JoinerMessage& message) {
                            QJsonObject d = envelope("op-request");
                            d.insert(QStringLiteral("id"), q(request.id));
                            d.insert(QStringLiteral("kind"), q(kindId(request.kind)));
-                           d.insert(QStringLiteral("target"), q(targetId(request.target)));
+                           if (request.kind != OpKind::LteUpdate) { // ADR-0363: no target
+                               d.insert(QStringLiteral("target"), q(targetId(request.target)));
+                           }
                            if (request.firmwareId) {
                                d.insert(QStringLiteral("firmwareId"), q(*request.firmwareId));
                            }
@@ -388,10 +425,22 @@ Result<JoinerMessage> decodeJoiner(const QJsonValue& payload) {
         return std::unexpected(std::move(messageId).error());
     }
     const auto kind = kindFromId(toStdString(data->value(QStringLiteral("kind")).toString()));
-    const auto target = targetFromId(toStdString(data->value(QStringLiteral("target")).toString()));
-    if (!kind || !target || !data->value(QStringLiteral("kind")).isString() ||
-        !data->value(QStringLiteral("target")).isString()) {
-        return bad("invalid kind or target");
+    if (!kind || !data->value(QStringLiteral("kind")).isString()) {
+        return bad("invalid kind");
+    }
+    const QJsonValue targetValue = data->value(QStringLiteral("target"));
+    std::optional<OpTarget> target;
+    if (*kind == OpKind::LteUpdate) {
+        // ADR-0363: the guided LTE update has no target (it is always the LTE MCU).
+        if (!targetValue.isUndefined()) {
+            return bad("a target for lteUpdate");
+        }
+        target = OpTarget::Lte;
+    } else if (targetValue.isString()) {
+        target = targetFromId(toStdString(targetValue.toString()));
+    }
+    if (!target) {
+        return bad("invalid target");
     }
     OpRequest request{
         .id = *messageId, .kind = *kind, .target = *target, .firmwareId = std::nullopt};

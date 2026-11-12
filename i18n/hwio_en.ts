@@ -113,7 +113,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../libs/remote/src/remote_host.cpp" line="294"/>
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="296"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n remote command was dropped while waiting for your answer.</numerusform>

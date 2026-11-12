@@ -328,7 +328,7 @@ Support can ask for an LTE firmware update without a catalog ID.
 
 Steps:
 
-- [ ] A6 `lteUpdate` in `TunnelCodec`, hello `opKinds`, `RemoteHost` consent text + operation runner hook,
+- [x] A6 `lteUpdate` in `TunnelCodec`, hello `opKinds`, `RemoteHost` consent text + operation runner hook,
       `RemoteOperationClient`; unit tests (codec, state machine, unsupported peer)
 - [ ] B2 CLI: `remote join --lte-update`; `remote host` runs the guided terminal flow; e2e tests with the fake J-Link
       (LTE scenario) and the fake relay; `docs/en/cli.md`

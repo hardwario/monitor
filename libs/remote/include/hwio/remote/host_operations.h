@@ -12,6 +12,9 @@
 //           flash(app, image, {}) (UICR records not programmed, ADR-0036)
 //   erase   app: EraseScope::Code (UICR and PIB kept); lte: EraseScope::All (as `chester lte
 //   erase`) recover DeviceSession::recover(target) reset   DeviceSession::reset(target, Go)
+//   lteUpdate (ADR-0363) through the LteUpdateRunner set by the GUI / CLI: the guided LTE update
+//           with the profile's recommended (designated) LTE firmware; only when a runner is set
+//           and the profile's LTE target has a designated firmware.
 // A BLE console has no operations (Capability::Operations): no HostOperations, hello ops: false.
 
 #include "hwio/core/result.h"
@@ -26,6 +29,8 @@
 #include <optional>
 #include <stop_token>
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace hwio::device {
 class DeviceSession;
@@ -45,6 +50,32 @@ struct OperationUpdate {
     std::uint64_t total = 0;
 };
 
+// Runs the guided LTE update for an allowed lteUpdate request (ADR-0363): the GUI opens Flash ›
+// Update LTE firmware… with the recommended firmware and starts it, the CLI runs the terminal flow
+// of `hwio chester lte flash --guided`. The customer does the cable steps. Owner thread only.
+class LteUpdateRunner {
+public:
+    using Progress = std::function<void(const OperationUpdate&)>;
+    using Finished = std::function<void(Status)>;
+
+    LteUpdateRunner() = default;
+    LteUpdateRunner(const LteUpdateRunner&) = delete;
+    LteUpdateRunner& operator=(const LteUpdateRunner&) = delete;
+    LteUpdateRunner(LteUpdateRunner&&) = delete;
+    LteUpdateRunner& operator=(LteUpdateRunner&&) = delete;
+    virtual ~LteUpdateRunner() = default;
+
+    // Starts it; `progress` any number of times (the guided update's step as the phase), then
+    // `finished` once: ok (the LTE MCU was updated and the application written back),
+    // remote.application_not_restored (updated, the application not written back), cancelled,
+    // or the update's error (target.reset_during_update, network.*, firmware.*, ...). Errors
+    // (immediate): internal.busy (a wizard or operation is open), those of the start.
+    [[nodiscard]] virtual Status start(Progress progress, Finished finished) = 0;
+    // The session ends: no more callbacks. The guided update itself stays with the customer (it
+    // is not interrupted while they move the cable).
+    virtual void abandon() = 0;
+};
+
 class HostOperations {
 public:
     using LookupDone = std::function<void(Result<firmware::CatalogInfo>)>;
@@ -58,6 +89,11 @@ public:
     HostOperations& operator=(HostOperations&&) = delete;
     virtual ~HostOperations() = default;
 
+    // The kinds this host runs (the hello's opKinds, ADR-0363).
+    [[nodiscard]] virtual std::vector<tunnel::OpKind> kinds() const = 0;
+    // The recommended LTE firmware of lteUpdate: {name, version} ("HARDWARIO LTE firmware",
+    // "1.7.0"); empty when the host has no LTE update.
+    [[nodiscard]] virtual std::pair<std::string, std::string> lteUpdateFirmware() const = 0;
     // The request fits the device (profile target exists, flash only to app). Errors:
     // usage.invalid_argument.
     [[nodiscard]] virtual Status validate(const tunnel::OpRequest& request) const = 0;
@@ -86,6 +122,12 @@ public:
     DeviceSessionOperations(DeviceSessionOperations&&) = delete;
     DeviceSessionOperations& operator=(DeviceSessionOperations&&) = delete;
 
+    // ADR-0363: lteUpdate runs through `runner` (nullptr = no LTE update); it must outlive this
+    // object or be replaced first.
+    void setLteUpdateRunner(LteUpdateRunner* runner) noexcept { m_lteUpdate = runner; }
+
+    [[nodiscard]] std::vector<tunnel::OpKind> kinds() const override;
+    [[nodiscard]] std::pair<std::string, std::string> lteUpdateFirmware() const override;
     [[nodiscard]] Status validate(const tunnel::OpRequest& request) const override;
     void lookup(const std::string& firmwareId, LookupDone done) override;
     [[nodiscard]] Status start(const tunnel::OpRequest& request, Progress progress,
@@ -97,7 +139,9 @@ private:
                               std::shared_ptr<const firmware::FirmwareImage> image);
     void finish(Status status);
 
-    device::DeviceSession* m_session; // non-owning
+    device::DeviceSession* m_session;       // non-owning
+    LteUpdateRunner* m_lteUpdate = nullptr; // non-owning, may be nullptr
+    bool m_lteUpdateRunning = false;
     std::unique_ptr<firmware::FirmwareCatalog> m_catalog;
     std::unique_ptr<firmware::LookupOperation> m_lookup;
     LookupDone m_lookupDone;

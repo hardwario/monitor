@@ -184,15 +184,20 @@ TEST(RemoteSession, OperationClientTimesOutWithoutAnAnswer) {
     RawParticipant fakeHost(relay.url(), nsp);
     ASSERT_TRUE(fakeHost.waitConnected());
     ASSERT_TRUE(runUntil([&] { return joiner.joinState() == JoinState::Waiting; }));
-    fakeHost.emitEvent(QStringLiteral("at"),
-                       tunnel::encodeHost(tunnel::HostHello{
-                           .app = "hwio-monitor", .version = "2.1.0", .device = {}, .ops = true}));
+    fakeHost.emitEvent(
+        QStringLiteral("at"),
+        tunnel::encodeHost(tunnel::HostHello{
+            .app = "hwio-monitor", .version = "2.1.0", .device = {}, .ops = true, .opKinds = {}}));
     ASSERT_TRUE(runUntil([&] { return joiner.hostHello().has_value(); }));
     RemoteOperationClient client(
         joiner, RemoteOperationLimits{.responseTimeout = 200ms, .inactivityTimeout = 200ms});
     std::optional<Error> error;
     QObject::connect(&client, &RemoteOperationClient::finished,
                      [&](bool, const Error& e) { error = e; });
+    // ADR-0363: lteUpdate only when the hello lists it (this one lists nothing).
+    EXPECT_EQ(client.request(tunnel::OpKind::LteUpdate, tunnel::OpTarget::Lte).error().code,
+              ErrorCode::RemoteOperationUnsupportedPeer);
+    EXPECT_FALSE(client.busy());
     ASSERT_TRUE(client.request(tunnel::OpKind::Reset, tunnel::OpTarget::App).has_value());
     // A denial for another id is ignored.
     fakeHost.emitEvent(

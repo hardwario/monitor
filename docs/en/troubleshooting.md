@@ -109,7 +109,7 @@ that blocks WebSockets prevents sharing and joining. If someone else uses the sa
 ends for safety: start it again to get a new code. A joiner who is not allowed within 2 minutes (or is refused) has to
 ask the customer to share again. See [Remote support](remote-support.md).
 
-Error codes: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error).
+Error codes: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored).
 
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### LTE modem firmware needs nRF Util
@@ -793,6 +793,16 @@ Seen by the joiner when the connection to the server ended for good.
 
 - **Probably:** The support server or the other participant sent data that HARDWARIO Monitor does not understand. It was ignored, or the session was ended for safety.
 - **What to do:** Report the issue with a diagnostic report.
+
+<a id="remote.application_not_restored"></a>
+#### `remote.application_not_restored`
+
+**The LTE firmware was updated, but the application was not written back.**
+
+- **Probably:** The guided LTE update ended before the application was written back, or no copy of the application could be saved. The application MCU is empty.
+- **What to do:** Flash an application: ask the customer to flash it, or ask to flash catalog firmware.
+
+Reported to the joiner after a remote LTE update (**Ask to update LTE firmware**, `hwio remote join --lte-update`).
 
 <a id="update.network"></a>
 #### `update.network`

@@ -174,12 +174,27 @@ class FakeOperations final : public HostOperations {
 public:
     // NOLINTBEGIN(cppcoreguidelines-non-private-member-variables-in-classes)
     bool catalogKnows = true;
+    bool lteUpdate = true; // ADR-0363: lteUpdate in kinds()
     std::vector<tunnel::OpRequest> started;
     Progress progress;
     Finished finished;
     int abandoned = 0;
     // NOLINTEND(cppcoreguidelines-non-private-member-variables-in-classes)
 
+    [[nodiscard]] std::vector<tunnel::OpKind> kinds() const override {
+        std::vector<tunnel::OpKind> kinds{tunnel::OpKind::Flash, tunnel::OpKind::Erase,
+                                          tunnel::OpKind::Recover, tunnel::OpKind::Reset};
+        if (lteUpdate) {
+            kinds.push_back(tunnel::OpKind::LteUpdate);
+        }
+        return kinds;
+    }
+    [[nodiscard]] std::pair<std::string, std::string> lteUpdateFirmware() const override {
+        if (!lteUpdate) {
+            return {};
+        }
+        return {"HARDWARIO LTE firmware", "1.7.0"};
+    }
     [[nodiscard]] Status validate(const tunnel::OpRequest& request) const override {
         if (request.kind == tunnel::OpKind::Flash && request.target != tunnel::OpTarget::App) {
             return std::unexpected(makeError(ErrorCode::UsageInvalidArgument, "flash to lte"));

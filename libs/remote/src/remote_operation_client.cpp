@@ -67,6 +67,12 @@ Result<std::string> RemoteOperationClient::request(tunnel::OpKind kind, tunnel::
     if (m_session.isNull()) {
         return std::unexpected(makeError(ErrorCode::RemoteHostEnded));
     }
+    if (kind == tunnel::OpKind::LteUpdate &&
+        (!m_session->hostHello() || !tunnel::supports(*m_session->hostHello(), kind))) {
+        // ADR-0363: only a host that lists it in its hello's opKinds.
+        return std::unexpected(makeError(ErrorCode::RemoteOperationUnsupportedPeer,
+                                         "the host has no remote LTE update"));
+    }
     if ((kind == tunnel::OpKind::Flash) != firmwareId.has_value()) {
         return std::unexpected(makeError(ErrorCode::UsageInvalidArgument,
                                          "a firmware ID goes with flash, and only with flash"));
