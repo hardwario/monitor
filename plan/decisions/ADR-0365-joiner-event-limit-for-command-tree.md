@@ -20,10 +20,10 @@ its help texts, or not at all.
 ## Decision
 
 - A joiner (Monitor in a remote tab, `hwio remote join`) accepts incoming relay events up to **512 KiB** (a 256 KiB
-  tree plus the JSON escaping of the tunnel inside `at` / `write`). Larger events are dropped as before.
+  tree plus its envelope, with a generous margin; the tree travels as a JSON object, not escaped twice). Larger events are dropped as before.
 - A host keeps the **64 KiB** limit for incoming events: what it receives comes from joiners and stays small.
-- The host sends the whole tree, help texts included, when its event fits the joiner's 512 KiB; the fallback without
-  help texts stays only as a safety net and is logged.
+- The host sends the whole tree, help texts included, when it fits the joiner's tree bound (256 KiB) and event limit
+  (512 KiB); otherwise it falls back to the tree without help texts (logged), or sends none.
 - The joiner's validation of the tree (256 KiB, 4000 nodes, depth 8, name charset) is unchanged.
 
 ## Consequences
