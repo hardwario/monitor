@@ -365,7 +365,8 @@ TestCase {
         testSupport.remoteHostRead("                                 44 74 4f 34 78 54 73 31  4b 36 69 41 73 41 53 4a |DtO4xTs1 K6iAsASJ");
         testSupport.remoteHostRead("                                 00 01 02 0a                                      |....            ");
         tryVerify(() => log.totalLines === before + 3, 10000, log.totalLines);
-        compare(log.visibleLines, visible + 1); // only the header
+        // The filtered count follows the appended lines asynchronously on some platforms.
+        tryCompare(log, "visibleLines", visible + 1, 10000); // only the header
     }
 
     function test_shareNotOfferedInARemoteTab() {
