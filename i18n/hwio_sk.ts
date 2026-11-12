@@ -5734,92 +5734,92 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="152"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="168"/>
         <source>another operation started on the device.</source>
         <translation>na zariadení sa spustila iná operácia.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="153"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="169"/>
         <source>Run the batch file again when it has finished.</source>
         <translation>Po jej dokončení spustite dávkový súbor znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="220"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="246"/>
         <source>the device disconnected.</source>
         <translation>zariadenie sa odpojilo.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="221"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="247"/>
         <source>Reconnect and run the batch file again.</source>
         <translation>Znova sa pripojte a spustite dávkový súbor znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="235"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="261"/>
         <source>The batch stopped after %1 of %2 commands.</source>
         <translation>Dávka sa zastavila po %1 z %2 príkazov.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="248"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="274"/>
         <source>The device was reset and halted.</source>
         <translation>Zariadenie bolo resetované a zastavené.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="249"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="275"/>
         <source>The device was reset.</source>
         <translation>Zariadenie bolo resetované.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="331"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="357"/>
         <source>%1 — the console resumes automatically</source>
         <translation>%1 — konzola sa obnoví automaticky</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="334"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="360"/>
         <source>This target has no console</source>
         <translation>Tento cieľ nemá konzolu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="337"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="363"/>
         <source>Waiting for pairing…</source>
         <translation>Čaká sa na spárovanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="338"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="364"/>
         <source>Connecting…</source>
         <translation>Pripájanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="340"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="366"/>
         <source>Not connected</source>
         <translation>Nepripojené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="697"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="736"/>
         <source>The file could not be saved.</source>
         <translation>Súbor sa nepodarilo uložiť.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="698"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="737"/>
         <source>the folder is not writable or the disk is full.</source>
         <translation>do priečinka sa nedá zapisovať alebo je disk plný.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="699"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="738"/>
         <source>Choose another folder.</source>
         <translation>Vyberte iný priečinok.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="719"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="758"/>
         <source>The view was saved to %1.</source>
         <translation>Výpis bol uložený do %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="748"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="787"/>
         <source>Sends each line of a UTF-8 text file to the device as a shell command, one line every %1 ms. Empty lines and lines starting with # are skipped. At most %2 commands, %3 MiB per file and %4 bytes per line.</source>
         <translation>Odošle každý riadok textového súboru v UTF-8 do zariadenia ako príkaz shellu, jeden riadok každých %1 ms. Prázdne riadky a riadky začínajúce znakom # sa preskočia. Najviac %2 príkazov, %3 MiB na súbor a %4 bajtov na riadok.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="776"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="815"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Do schránky bol skopírovaný prvý %n riadok (limit kopírovania).</numerusform>
@@ -5828,7 +5828,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="791"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="830"/>
         <source>There is no console log file for this device yet.</source>
         <translation>Pre toto zariadenie zatiaľ neexistuje súbor so záznamom konzoly.</translation>
     </message>
@@ -6974,27 +6974,27 @@ Ktokoľvek, kto pozná kód, vidí výstup konzoly. Kód prečítajte iba podpor
 Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="139"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="142"/>
         <source>%1…</source>
         <translation>%1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="147"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="150"/>
         <source>Remote operation: %1 %2 %</source>
         <translation>Vzdialená operácia: %1 %2 %</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="162"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="165"/>
         <source>Sharing ended: %1</source>
         <translation>Zdieľanie skončilo: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="200"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="203"/>
         <source>Link copied to the clipboard.</source>
         <translation>Odkaz skopírovaný do schránky.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="207"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="210"/>
         <source>Code copied to the clipboard.</source>
         <translation>Kód skopírovaný do schránky.</translation>
     </message>
@@ -7634,7 +7634,7 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         <translation>Zdieľanie ste ukončili.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="809"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="810"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Nápoveda %n príkazu prečítaná pre dopĺňanie podpory.</numerusform>
@@ -7643,12 +7643,12 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="816"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="817"/>
         <source>Sharing ended.</source>
         <translation>Zdieľanie skončilo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="817"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="818"/>
         <source>Sharing ended: %1</source>
         <translation>Zdieľanie skončilo: %1</translation>
     </message>

@@ -105,6 +105,9 @@ TestCase {
         mouseClick(findChild(join.footer, "dialogAccept")); // Allow
         tryVerify(() => share.participantAllowed, 5000);
         tryVerify(() => testSupport.remoteReceived("sync") === 1, 5000);
+        // ADR-0364: the tab's command tree goes to the allowed participant, also when it grows.
+        testSupport.setConsoleCommands(AppViewModel.currentTab, ["app", "lte"]);
+        tryVerify(() => testSupport.remoteReceivedCommands() === "app lte", 5000);
 
         testSupport.remoteRequest("reset", "app");
         tryVerify(() => share.operationQuestionOpen, 10000);
@@ -225,6 +228,32 @@ TestCase {
         button.clicked();
         tryVerify(() => testSupport.remoteRequestedKind() === "lteUpdate", 10000);
         verify(tab().remoteJoin.operationPending);
+    }
+
+    // ADR-0364: a remote tab completes from the Monitor host's command tree and asks the host for
+    // a command's subcommands (tunnel `learn`), without any query of its own.
+    function test_remoteTabCompletesFromTheHostsCommands() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(false);
+        tryVerify(() => tab().remoteJoin.state === "joined", 10000);
+        testSupport.remoteHostCommands(["app", "lte", "info"]);
+        AppViewModel.showPage("console");
+        const field = one("commandInput");
+        const input = one("shellInput");
+        tryVerify(() => field.enabled, 10000);
+        field.forceActiveFocus();
+        field.text = "";
+        keyClick(Qt.Key_A);
+        const list = input.suggestionList;
+        tryVerify(() => list.opened, 10000);
+        compare(list.rows[0].label, "app");
+        keyClick(Qt.Key_Tab);
+        compare(field.text, "app ");
+        tryVerify(() => testSupport.remoteLearnRequest() === "app", 10000);
+        verify(testSupport.remoteRequestedKind() === ""); // no operation, no shell query
     }
 
     function test_shareNotOfferedInARemoteTab() {

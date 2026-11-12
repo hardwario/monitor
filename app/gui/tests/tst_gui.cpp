@@ -251,6 +251,59 @@ public:
                                                            .ops = true,
                                                            .opKinds = kinds}));
     }
+    // ADR-0364: the participant (a Monitor host) sends its command tree: `names` at the top level.
+    Q_INVOKABLE void remoteHostCommands(const QStringList& names) const {
+        if (!m_participant) {
+            return;
+        }
+        hwio::device::CommandTree tree;
+        tree.setDashHSupported(true);
+        std::vector<hwio::device::CommandEntry> entries;
+        for (const QString& name : names) {
+            entries.push_back(
+                hwio::device::CommandEntry{.name = name.toStdString(), .help = "help"});
+        }
+        (void)tree.setChildren({}, entries);
+        m_participant->emitEvent(QStringLiteral("at"),
+                                 hwio::remote::tunnel::encodeCommands(tree, true));
+    }
+    // ADR-0364: the top-level commands of the last tree the participant received ("" for none).
+    Q_INVOKABLE [[nodiscard]] QString remoteReceivedCommands() const {
+        QString names;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("at"))) {
+                if (auto message = hwio::remote::tunnel::decodeHost(event.payload)) {
+                    if (const auto* c =
+                            std::get_if<hwio::remote::tunnel::HostCommands>(&*message)) {
+                        QStringList list;
+                        for (const auto& node : c->tree->root().children) {
+                            list.append(QString::fromStdString(node.name));
+                        }
+                        names = list.join(QLatin1Char(' '));
+                    }
+                }
+            }
+        }
+        return names;
+    }
+    // The path of the last tunnel `learn` the participant received (words joined by spaces).
+    Q_INVOKABLE [[nodiscard]] QString remoteLearnRequest() const {
+        QString path;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("write"))) {
+                if (auto message = hwio::remote::tunnel::decodeJoiner(event.payload)) {
+                    if (const auto* learn = std::get_if<hwio::remote::tunnel::Learn>(&*message)) {
+                        QStringList words;
+                        for (const std::string& word : learn->path) {
+                            words.append(QString::fromStdString(word));
+                        }
+                        path = words.join(QLatin1Char(' '));
+                    }
+                }
+            }
+        }
+        return path;
+    }
     // The kind of the last operation request the participant received ("" for none).
     Q_INVOKABLE [[nodiscard]] QString remoteRequestedKind() const {
         QString kind;

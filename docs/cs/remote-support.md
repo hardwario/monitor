@@ -49,6 +49,10 @@ a tajné hodnoty, které zařízení vypíše (například claim token), se pos�
 Vše vzdálené se zapisuje do souboru konzole: začátek a konec sdílení, každé připojení a vaše odpověď, každý vzdálený
 příkaz a každá žádost o operaci s jejím výsledkem. Viz [Soubory konzole](console.md#soubory-konzole).
 
+Pro doplňování příkazů u podpory posílá váš HARDWARIO Monitor podpoře seznam příkazů zařízení, který se naučil, a když
+podpora potřebuje podpříkazy některého příkazu, přečte si jeho nápovědu sám. Tyto dotazy na nápovědu se ve vaší konzoli
+nezobrazují; konzolový soubor zaznamená, kolik jich bylo.
+
 <a id="join-a-session"></a>
 ## Připojení k relaci (podpora)
 
@@ -60,6 +64,8 @@ příkaz a každá žádost o operaci s jejím výsledkem. Viz [Soubory konzole]
    to zákazník povolí…*. Živý výstup se může zobrazovat už teď.
 4. Po povolení dostanete historii konzole zákazníka a můžete v konzoli pracovat jako obvykle: historie, hledání, filtr
    a uložení výpisu.
+   Se zákazníkem, který používá HARDWARIO Monitor, používají návrhy a doplňování klávesou Tab seznam příkazů jeho
+   zařízení.
 5. Se zákazníkem, který používá HARDWARIO Monitor, nabízí stránka **Nahrát FW** volby **Požádat o nahrání** (ID
    firmwaru z katalogu), **Požádat o smazání**, **Požádat o obnovení** a **Požádat o reset** pro aplikační nebo LTE
    jádro. Každá žádost čeká na potvrzení zákazníka; výsledek hlásí Monitor zákazníka. Se zákazníkem, který používá

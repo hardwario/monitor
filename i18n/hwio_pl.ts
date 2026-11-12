@@ -5734,92 +5734,92 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="152"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="168"/>
         <source>another operation started on the device.</source>
         <translation>na urządzeniu uruchomiono inną operację.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="153"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="169"/>
         <source>Run the batch file again when it has finished.</source>
         <translation>Uruchom plik wsadowy ponownie po jej zakończeniu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="220"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="246"/>
         <source>the device disconnected.</source>
         <translation>urządzenie zostało rozłączone.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="221"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="247"/>
         <source>Reconnect and run the batch file again.</source>
         <translation>Połącz się ponownie i jeszcze raz uruchom plik wsadowy.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="235"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="261"/>
         <source>The batch stopped after %1 of %2 commands.</source>
         <translation>Wsad zatrzymał się po %1 z %2 poleceń.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="248"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="274"/>
         <source>The device was reset and halted.</source>
         <translation>Urządzenie zostało zresetowane i zatrzymane.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="249"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="275"/>
         <source>The device was reset.</source>
         <translation>Urządzenie zostało zresetowane.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="331"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="357"/>
         <source>%1 — the console resumes automatically</source>
         <translation>%1 — konsola wznowi działanie automatycznie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="334"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="360"/>
         <source>This target has no console</source>
         <translation>Ten cel nie ma konsoli</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="337"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="363"/>
         <source>Waiting for pairing…</source>
         <translation>Oczekiwanie na sparowanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="338"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="364"/>
         <source>Connecting…</source>
         <translation>Łączenie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="340"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="366"/>
         <source>Not connected</source>
         <translation>Nie połączono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="697"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="736"/>
         <source>The file could not be saved.</source>
         <translation>Nie można zapisać pliku.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="698"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="737"/>
         <source>the folder is not writable or the disk is full.</source>
         <translation>nie można zapisywać w folderze lub dysk jest pełny.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="699"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="738"/>
         <source>Choose another folder.</source>
         <translation>Wybierz inny folder.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="719"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="758"/>
         <source>The view was saved to %1.</source>
         <translation>Widok zapisano w %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="748"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="787"/>
         <source>Sends each line of a UTF-8 text file to the device as a shell command, one line every %1 ms. Empty lines and lines starting with # are skipped. At most %2 commands, %3 MiB per file and %4 bytes per line.</source>
         <translation>Wysyła każdy wiersz pliku tekstowego UTF-8 do urządzenia jako polecenie powłoki, jeden wiersz co %1 ms. Puste wiersze i wiersze zaczynające się od # są pomijane. Najwyżej %2 poleceń, %3 MiB na plik i %4 bajtów na wiersz.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="776"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="815"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Skopiowano do schowka pierwszy %n wiersz (limit kopiowania).</numerusform>
@@ -5828,7 +5828,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="791"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="830"/>
         <source>There is no console log file for this device yet.</source>
         <translation>Dla tego urządzenia nie ma jeszcze pliku dziennika konsoli.</translation>
     </message>
@@ -6974,27 +6974,27 @@ Każdy, kto zna kod, widzi wyjście konsoli. Podawaj kod tylko wsparciu HARDWARI
 Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="139"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="142"/>
         <source>%1…</source>
         <translation>%1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="147"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="150"/>
         <source>Remote operation: %1 %2 %</source>
         <translation>Operacja zdalna: %1 %2 %</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="162"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="165"/>
         <source>Sharing ended: %1</source>
         <translation>Udostępnianie zakończone: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="200"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="203"/>
         <source>Link copied to the clipboard.</source>
         <translation>Link skopiowano do schowka.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="207"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="210"/>
         <source>Code copied to the clipboard.</source>
         <translation>Kod skopiowano do schowka.</translation>
     </message>
@@ -7634,7 +7634,7 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>Zakończono udostępnianie.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="809"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="810"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Odczytano pomoc %n polecenia dla podpowiedzi wsparcia.</numerusform>
@@ -7643,12 +7643,12 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="816"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="817"/>
         <source>Sharing ended.</source>
         <translation>Udostępnianie zakończone.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="817"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="818"/>
         <source>Sharing ended: %1</source>
         <translation>Udostępnianie zakończone: %1</translation>
     </message>

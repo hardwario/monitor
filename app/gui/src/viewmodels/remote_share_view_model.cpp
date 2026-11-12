@@ -117,6 +117,9 @@ void RemoteShareViewModel::startSharing() {
             .limits = {},
             .appVersion = std::string(buildInfo().version),
             .code = std::nullopt});
+    m_host->setCommandTree(m_commandTree); // ADR-0364
+    connect(m_host.get(), &remote::RemoteHost::learnRequested, this,
+            &RemoteShareViewModel::learnRequested);
     connect(m_host.get(), &remote::RemoteHost::sharingStarted, this,
             &RemoteShareViewModel::changed);
     connect(m_host.get(), &remote::RemoteHost::participantsChanged, this,
@@ -260,6 +263,13 @@ void RemoteShareViewModel::abandon() {
     m_lteUpdateOffered = false;
     if (m_lteUpdate) {
         m_lteUpdate->abandon(); // the open wizard goes on, unreported
+    }
+}
+
+void RemoteShareViewModel::setCommandTree(std::shared_ptr<const device::CommandTree> tree) {
+    m_commandTree = std::move(tree);
+    if (m_host) {
+        m_host->setCommandTree(m_commandTree);
     }
 }
 

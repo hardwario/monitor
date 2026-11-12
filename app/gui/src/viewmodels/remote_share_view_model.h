@@ -18,11 +18,13 @@
 //
 // Ownership: child of its DeviceTabViewModel (Qt parent). GUI thread only.
 
+#include "hwio/device/command_tree.h"
 #include "hwio/remote/consent.h"
 #include "hwio/remote/host_operations.h"
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QtQmlIntegration>
 
 #include <memory>
@@ -112,12 +114,18 @@ public:
     // is open).
     [[nodiscard]] Status start(Progress progress, Finished finished) override;
     void abandon() override;
+    // ADR-0364: the tab's learned command tree for support's autocomplete (ConsoleViewModel, on
+    // every change; nullptr = none). Kept for the next sharing too.
+    void setCommandTree(std::shared_ptr<const device::CommandTree> tree);
     // The LTE update wizard takes the open request (once); nullptr when there is none.
     [[nodiscard]] remote::LteUpdateReporter* takeLteUpdateRequest();
 
 signals:
     void changed();
     void questionsChanged();
+    // ADR-0364: a participant's autocomplete needs the subcommands of `path` (ConsoleViewModel
+    // learns them with its silent `<command> -h`).
+    void learnRequested(const QStringList& path);
 
 private:
     void stopSharing(bool notify);
@@ -136,6 +144,7 @@ private:
     QString m_endMessage;
     std::unique_ptr<remote::LteUpdateReporter> m_lteUpdate; // the last remote LTE update
     bool m_lteUpdateOffered = false; // start() waits for the wizard to take it
+    std::shared_ptr<const device::CommandTree> m_commandTree;
 };
 
 } // namespace hwio::gui

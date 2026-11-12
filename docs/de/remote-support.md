@@ -53,6 +53,10 @@ Alles, was aus der Ferne geschieht, wird in die Konsolendatei geschrieben: Begin
 und Ihre Antwort, jeder entfernte Befehl und jede Anfrage nach einer Aktion mit ihrem Ergebnis. Siehe
 [Konsolendateien](console.md).
 
+Für die Autovervollständigung des Supports sendet Ihr HARDWARIO Monitor dem Support die gelernte Liste der
+Gerätebefehle, und wenn der Support die Unterbefehle eines Befehls braucht, liest er dessen Hilfe selbst. Diese
+Hilfeabfragen erscheinen nicht in Ihrer Konsole; die Konsolendatei hält fest, wie viele es waren.
+
 <a id="join-a-session"></a>
 ## Einer Sitzung beitreten (Support)
 
@@ -64,6 +68,8 @@ und Ihre Antwort, jeder entfernte Befehl und jede Anfrage nach einer Aktion mit 
    *Warten, bis der Kunde es Ihnen erlaubt…*. Die Live-Ausgabe kann bereits erscheinen.
 4. Sobald es Ihnen erlaubt ist, erhalten Sie den Konsolenverlauf des Kunden und können wie gewohnt in der Konsole
    arbeiten: Verlauf, Suche, Filter und Ansicht speichern.
+   Bei einem Kunden mit HARDWARIO Monitor verwenden Vorschläge und die Tab-Vervollständigung die Befehlsliste seines
+   Geräts.
 5. Bei einem Kunden mit HARDWARIO Monitor bietet die Seite **Flashen** **Flashen anfragen** (eine Firmware-ID aus dem
    Katalog), **Löschen anfragen**, **Recover anfragen** und **Reset anfragen** für den Anwendungs- oder den LTE-Kern.
    Jede Anfrage wartet auf die Bestätigung des Kunden; das Ergebnis meldet der Monitor des Kunden. Bei einem Kunden

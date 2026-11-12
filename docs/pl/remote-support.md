@@ -51,6 +51,10 @@ Wszystko, co zdalne, jest zapisywane w pliku konsoli: początek i koniec udostę
 odpowiedź, każde zdalne polecenie oraz każda prośba o operację wraz z jej wynikiem. Zobacz
 [Pliki konsoli](console.md#pliki-konsoli).
 
+Na potrzeby podpowiedzi wsparcia Twój HARDWARIO Monitor wysyła wsparciu poznaną listę poleceń urządzenia, a gdy
+wsparcie potrzebuje podpoleceń jakiegoś polecenia, sam odczytuje jego pomoc. Te zapytania o pomoc nie pojawiają się w
+Twojej konsoli; plik konsoli zapisuje, ile ich było.
+
 <a id="join-a-session"></a>
 ## Dołączanie do sesji (wsparcie)
 
@@ -62,6 +66,8 @@ odpowiedź, każde zdalne polecenie oraz każda prośba o operację wraz z jej w
    zezwoli…*. Wyjście na żywo może się już pojawiać.
 4. Po uzyskaniu zgody otrzymujesz historię konsoli klienta i możesz pracować w konsoli jak zwykle: historia,
    wyszukiwanie, filtrowanie i zapisywanie widoku.
+   Gdy klient używa HARDWARIO Monitor, podpowiedzi i uzupełnianie klawiszem Tab korzystają z listy poleceń jego
+   urządzenia.
 5. Gdy klient używa HARDWARIO Monitor, strona **Wgraj** oferuje **Poproś o wgranie** (identyfikator firmware z
    katalogu), **Poproś o skasowanie**, **Poproś o recover** i **Poproś o reset** dla rdzenia aplikacji lub LTE. Każda
    prośba czeka na potwierdzenie klienta; wynik zgłasza Monitor klienta. Gdy klient używa Terminala webowego, dostępna

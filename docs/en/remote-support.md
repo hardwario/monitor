@@ -48,6 +48,10 @@ console file.
 Everything remote is written into the console file: the start and end of sharing, every join and your answer, every
 remote command, and every operation request with its result. See [Console files](console.md).
 
+For support's autocomplete, your HARDWARIO Monitor sends support the list of device commands it has learned, and when
+support needs the subcommands of a command, it reads that command's help itself. These help queries are not shown in
+your console; the console file records how many there were.
+
 <a id="join-a-session"></a>
 ## Join a session (support)
 
@@ -59,6 +63,7 @@ remote command, and every operation request with its result. See [Console files]
    customer to allow you…*. The live output may already appear.
 4. Once allowed, you get the customer's console history and can work in the console as usual: history, search,
    filter and save view.
+   With a HARDWARIO Monitor customer, suggestions and Tab completion use the customer's list of device commands.
 5. With a HARDWARIO Monitor customer, the **Flash** page offers **Ask to flash** (a catalog firmware ID), **Ask to
    erase**, **Ask to recover** and **Ask to reset** for the application or the LTE core. Each request waits for the
    customer's confirmation; the result is reported by the customer's Monitor. With a web Terminal customer only the
