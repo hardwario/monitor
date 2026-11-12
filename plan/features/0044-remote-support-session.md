@@ -6,7 +6,7 @@
 - **Related ADRs:** ADR-0334 (strict compatibility with the existing relay, 6-digit code), ADR-0335 (join approval),
   ADR-0336 (operations tunneled in `at` / `write`), ADR-0321 (QtWebSockets + own Socket.IO client),
   ADR-0322 (scope: console + flash/erase/recover/reset), ADR-0323 (firmware by catalog ID only),
-  ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0337 (2.0.0-rc.4; supersedes ADR-0326), ADR-0363 (remote LTE update, amends ADR-0323/0336), ADR-0364 (remote autocomplete),
+  ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0337 (2.0.0-rc.4; supersedes ADR-0326), ADR-0363 (remote LTE update, amends ADR-0323/0336), ADR-0364 (remote autocomplete), ADR-0365 (joiner event limit 512 KiB),
   ADR-0328 (limits), ADR-0329 (TLS only), ADR-0330 (relay URL), ADR-0331 (CLI), ADR-0332 (no MCP),
   ADR-0333 (audit in the console file), ADR-0354 (tunnel `end`, amends ADR-0336), ADR-0355 (approval again after
   the host's reconnect, amends ADR-0335), ADR-0356 (secrets redacted toward the relay, amends ADR-0329),
@@ -218,7 +218,7 @@ device session's worker (unchanged). No other shared mutable state.
 
 | What | Limit |
 |---|---|
-| Incoming event size | 64 KiB (larger → dropped, `remote.protocol_error` warning; repeated → session ends) |
+| Incoming event size | host 64 KiB, joiner 512 KiB (ADR-0365) (larger → dropped, `remote.protocol_error` warning; repeated → session ends) |
 | Remote `write` line | 512 bytes, max 20 lines/s (excess dropped, info line on the host) |
 | Outgoing queue to relay | 1 MiB. On overflow the oldest `read` lines are dropped and a "lines dropped" line is sent |
 | Relay thread hand-off (ADR-0357) | 4096 incoming events (full: warnings dropped, otherwise `remote.protocol_error`), 4096 outgoing sends (full: the oldest droppable send is dropped) |
@@ -357,10 +357,12 @@ Steps:
 - [x] B3 CLI host feeds its tree; CLI interactive joiner completion; e2e test
 - [x] C5 GUI: host tab feeds the tree; remote tab completion and suggestions; Qt Quick test (completion in a remote
       tab after the host's tree arrives); docs `remote-support.md` ×5
+- [ ] A8 Joiner incoming event limit 512 KiB, host 64 KiB; host sends the whole tree when it fits 512 KiB (ADR-0365);
+      unit tests (joiner accepts a 256 KiB tree with help texts, host still drops > 64 KiB, joiner drops > 512 KiB)
 
 ### Implementation notes (2026-11-12, amendments ADR-0363 / ADR-0364)
 
-Details filled in while implementing A6–C5 that the amendments did not fix; **to be confirmed by the user**:
+Details filled in while implementing A6–C5 that the amendments did not fix; confirmed by the user on 2026-11-12 (the `commands` size changed, ADR-0365):
 
 - **New error code `remote.application_not_restored`** (category cancelled, exit 130 like `lte flash --guided`
   without a copy): the op-result of an LTE update that updated the LTE MCU but did not write the application back
@@ -379,9 +381,9 @@ Details filled in while implementing A6–C5 that the amendments did not fix; **
 - **CLI host:** the terminal flow (`GuidedTerminal`, moved to `app/cli/src/guided_lte.h`) runs without its own event
   loop; its y/N question is answered on the host's stdin like the other questions; `--nrfutil` applies. No LTE update
   with `--deny-operations` or without a terminal.
-- **`commands` size:** a joiner drops relay events over 64 KiB (§ Limits), so the host sends the tree without help
-  texts when it would be larger, and not at all when even that does not fit (logged). The joiner validates the
-  256 KiB / 4000 nodes / depth 8 bounds as specified.
+- **`commands` size:** superseded by ADR-0365 (user decision 2026-11-12): a joiner accepts incoming events up to
+  512 KiB, so the host sends the whole tree with help texts; the fallback without help texts stays as a logged safety
+  net. The joiner validates the 256 KiB / 4000 nodes / depth 8 bounds as specified.
 - **Joiner `learn`:** each path once, again after 10 s (the host may have rate-limited it), at most 200 paths.
 - **CLI:** `device::CommandTreeSource` (implemented by `CommandTreeLearner` and the remote joiner's adapter) feeds
   the console's completion; `remote host` now learns the tree (`info show`, cache or `help`) like `chester app
