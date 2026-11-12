@@ -202,6 +202,35 @@ TestCase {
         tryVerify(() => !dialog.visible);
         verify(testSupport.setSetting("ui/mode", "advanced"));
 
+        // Plan 0046 (ADR-0368, ADR-0369): support's Flash card in a remote tab - the customer's
+        // Monitor asks before the erase; a failed operation's result (test builds: the fake relay).
+        if (testSupport.startFakeRelay()) {
+            testSupport.resetTabs();
+            window.width = 1280;
+            window.height = 800;
+            verify(testSupport.remoteJoin("12345"));
+            verify(AppViewModel.joinRemoteSession("12345", false));
+            const tab = () => AppViewModel.currentTabViewModel;
+            tryVerify(() => tab() !== null && tab().remoteJoin.state === "waiting", 10000);
+            testSupport.remoteMonitorHost(true);
+            tryVerify(() => tab().remoteJoin.lteUpdateAvailable, 10000);
+            AppViewModel.showPage("flash");
+            tryVerify(() => find("remoteFlashCard") !== null, 5000);
+            find("remoteTargetLte").click();
+            tab().remoteJoin.requestOperation("lteUpdate", "lte", "");
+            tryVerify(() => testSupport.remoteRequestedKind() === "lteUpdate", 10000);
+            testSupport.remoteHostAccept();
+            testSupport.remoteHostQuestion("continue");
+            tryVerify(() => find("remoteQuestion") !== null, 5000);
+            save("f17-remote-lte-question");
+            tab().remoteJoin.answerQuestion(false);
+            testSupport.remoteHostResult("cancelled");
+            tryVerify(() => tab().remoteJoin.resultDismissable, 5000);
+            save("f18-remote-result-error");
+            testSupport.resetTabs();
+            testSupport.stopFakeRelay();
+        }
+
         // Settings: the whole page.
         testSupport.resetTabs();
         window.width = 1280;

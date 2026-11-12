@@ -88,6 +88,10 @@ J-Link jest na złączu LTE) prowadzi więc przez całą procedurę:
 2. **APP connector** (złącze APP): podłącz J-Link do złącza APP. Kreator przechodzi dalej sam, gdy MCU aplikacji
    odpowie; na niewłaściwym złączu wyświetla **This is the LTE connector. Move the cable to the APP connector.** (to
    jest złącze LTE, przełóż kabel do złącza APP).
+   Zanim cokolwiek zostanie zmienione, krok **Ready to update the LTE MCU** (gotowe do aktualizacji MCU LTE) mówi, co
+   się stanie: aplikacja zostanie wymazana, przełożysz kabel J-Link do złącza LTE, a na końcu z powrotem do APP, i
+   aplikacja zostanie zapisana z powrotem. **Continue** (kontynuuj) to rozpoczyna; **Cancel** (anuluj) kończy kreator
+   bez żadnych zmian.
 3. **Stop the application** (zatrzymanie aplikacji): zapisywana jest kopia firmware aplikacji, a następnie aplikacja
    jest kasowana (**Erase application**: UICR i PIB pozostają). Jeśli nie da się wykonać kopii, na przykład gdy MCU ma
    ochronę przed odczytem, możesz wybrać **Continue without a copy** (kontynuuj bez kopii) i na końcu samodzielnie

@@ -32,6 +32,10 @@ z webového Terminalu (len konzola) alebo z HARDWARIO Monitor.
    medzi konektormi APP a LTE.* Po kliknutí na **Povoliť** sa otvorí **Nahrávanie firmvéru** › **Aktualizovať firmvér
    LTE…** s týmto firmvérom a sám sa spustí: postupujte podľa jeho krokov a prepojte kábel, keď o to požiada.
    Zdieľanie zostáva zapnuté, aj keď sa zariadenie odpojí a znova pripojí, a podpora vidí každý krok aj výsledok.
+   Skôr než sa čokoľvek zmení, aktualizáciu potvrdí podpora HARDWARIO; vy iba vidíte, čo sa stane, a riadite sa
+   pokynmi na prepojenie kábla (nič neklikáte). Ak kópiu aplikácie nemožno vytvoriť, podpora rozhodne, či pokračovať
+   bez nej. Kópia sa na konci vždy zapíše späť. Ak podpora do 60 sekúnd neodpovie, aktualizácia sa zruší skôr, než sa
+   čokoľvek zmení.
 8. Keď skončíte, kliknite na **Ukončiť zdieľanie**.
 
 Zdieľanie sa skončí aj vtedy, keď zariadenie odpojíte, zatvoríte kartu alebo aplikáciu ukončíte, po 30 minútach bez
@@ -67,14 +71,22 @@ konzole nezobrazujú; konzolový súbor zaznamená, koľko ich bolo.
    filter a uloženie zobrazenia.
    So zákazníkom, ktorý používa HARDWARIO Monitor, používajú návrhy a dopĺňanie klávesom Tab zoznam príkazov jeho
    zariadenia.
+   Riadky hexdumpu zo záznamu zariadenia sú predvolene skryté, rovnako ako v miestnej karte (štítok **H**).
 5. So zákazníkom, ktorý používa HARDWARIO Monitor, ponúka stránka **Nahrávanie firmvéru** voľby **Požiadať o nahranie**
    (ID firmvéru z katalógu), **Požiadať o vymazanie**, **Požiadať o obnovenie** a **Požiadať o reset** pre aplikačné
    alebo LTE jadro. Každá žiadosť čaká na potvrdenie zákazníka; výsledok hlási Monitor zákazníka. So zákazníkom, ktorý
    používa webový Terminal, je k dispozícii len konzola.
+   Výsledok uvádza operáciu a čas, napríklad *Zariadenie zákazníka resetované (14:02).*, a zapíše sa aj ako riadok do
+   konzoly. Úspech zmizne, keď opustíte stránku **Nahrávanie firmvéru** alebo požiadate o ďalšiu operáciu; chyba zostane,
+   kým ju nezatvoríte (×).
 6. Keď je vybrané **Jadro LTE modemu**, voľba **Požiadať o aktualizáciu firmvéru LTE** požiada o riadenú aktualizáciu
    LTE na verziu, ktorú odporúča HARDWARIO Monitor zákazníka (bez ID firmvéru). Zákazník prepája kábel J-Link medzi
    konektormi APP a LTE; vy vidíte každý krok (napríklad *čaká sa na J-Link na konektore LTE*) a výsledok. Ak
    aktualizácia skončí bez zapísania aplikácie späť, výsledok je `remote.application_not_restored`.
+   Pred vymazaním aplikácie sa vás karta opýta: *Aplikácia v zákazníkovom zariadení CHESTER bude vymazaná. …
+   Pokračovať?* (**Pokračovať** · **Zrušiť**); ak kópiu aplikácie nemožno vytvoriť, opýta sa *Aplikáciu sa nepodarilo
+   skopírovať. Pokračovať bez kópie?*. Nie alebo žiadna odpoveď do 60 sekúnd aktualizáciu zruší skôr, než sa čokoľvek
+   zmení. Kópia sa zapíše späť automaticky. Zákazník so starším HARDWARIO Monitorom odpovedá na tieto otázky sám.
 
 Keď zákazník ukončí zdieľanie, HARDWARIO Monitor to nie vždy rozpozná: server to neoznamuje. Po 30 minútach bez
 akejkoľvek aktivity to lišta oznámi a ponúkne **Opustiť**. Karta zostane otvorená, takže konzolu môžete stále uložiť.
@@ -94,6 +106,8 @@ hwio remote join 482913 --lte-update      # riadená aktualizácia LTE (zákazn�
 
 `hwio remote host` sa pred povolením pripojenia alebo operácie opýta v termináli. Bez terminálu na stdin sa pripojenie
 nikdy nepovolí. Pozrite si [Príkazový riadok](../en/cli.md#remote-support-hwio-remote).
+
+V termináli sa `hwio remote join --lte-update` pýta na otázky aktualizácie LTE s `[y/N]`.
 
 <a id="settings"></a>
 ## Nastavenia

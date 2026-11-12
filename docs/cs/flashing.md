@@ -83,6 +83,9 @@ konektoru LTE) vás proto provede celým postupem:
 1. **Firmware**: LTE firmware HARDWARIO, nebo váš vlastní soubor.
 2. **Konektor APP**: připojte J-Link ke konektoru APP. Průvodce pokračuje sám, jakmile aplikační MCU odpoví; na
    nesprávném konektoru ukáže **Toto je konektor LTE. Přepojte kabel ke konektoru APP.**
+   Než se cokoli změní, krok **Připraveno k aktualizaci LTE MCU** řekne, co se stane: aplikace se smaže, přepojíte
+   kabel J-Link na konektor LTE a na konci zpět na APP a aplikace se zapíše zpět. **Pokračovat** to spustí;
+   **Zrušit** průvodce ukončí a nic se nezmění.
 3. **Zastavení aplikace**: uloží se kopie aplikačního firmwaru a potom se aplikace smaže (**Smazat aplikaci**: UICR i
    PIB zůstanou). Pokud kopii nelze vytvořit, například u MCU chráněného proti čtení, můžete **Pokračovat bez kopie**
    a na konci nahrát aplikaci sami.

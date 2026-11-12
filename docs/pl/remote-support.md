@@ -31,6 +31,10 @@ Inne języki: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-sup
    między złączami APP i LTE.* Po kliknięciu **Zezwól** otwiera się **Wgraj** › **Aktualizuj firmware LTE…** z tym
    firmware i uruchamia się sam: wykonuj jego kroki i przełóż kabel, gdy o to poprosi. Udostępnianie pozostaje
    aktywne, gdy urządzenie się rozłącza i ponownie łączy, a wsparcie widzi każdy krok i wynik.
+   Zanim cokolwiek zostanie zmienione, aktualizację potwierdza wsparcie HARDWARIO; Ty tylko widzisz, co się stanie, i
+   wykonujesz polecenia dotyczące przełożenia kabla (nie ma nic do kliknięcia). Jeśli nie da się zrobić kopii
+   aplikacji, wsparcie decyduje, czy kontynuować bez niej. Kopia jest na końcu zawsze zapisywana z powrotem. Jeśli
+   wsparcie nie odpowie w ciągu 60 sekund, aktualizacja zostaje anulowana, zanim cokolwiek się zmieni.
 8. Gdy skończysz, kliknij **Zakończ udostępnianie**.
 
 Udostępnianie kończy się też po odłączeniu urządzenia, zamknięciu karty lub zamknięciu aplikacji, po 30 minutach
@@ -68,14 +72,22 @@ Twojej konsoli; plik konsoli zapisuje, ile ich było.
    wyszukiwanie, filtrowanie i zapisywanie widoku.
    Gdy klient używa HARDWARIO Monitor, podpowiedzi i uzupełnianie klawiszem Tab korzystają z listy poleceń jego
    urządzenia.
+   Wiersze hexdumpu z dziennika urządzenia są domyślnie ukryte, tak jak w lokalnej karcie (przełącznik **H**).
 5. Gdy klient używa HARDWARIO Monitor, strona **Wgraj** oferuje **Poproś o wgranie** (identyfikator firmware z
    katalogu), **Poproś o skasowanie**, **Poproś o recover** i **Poproś o reset** dla rdzenia aplikacji lub LTE. Każda
    prośba czeka na potwierdzenie klienta; wynik zgłasza Monitor klienta. Gdy klient używa Terminala webowego, dostępna
    jest tylko konsola.
+   Wynik podaje operację i godzinę, na przykład *Urządzenie klienta zresetowane (14:02).*, i jest też zapisywany jako
+   wiersz w konsoli. Sukces znika, gdy opuścisz stronę **Wgraj** lub poprosisz o kolejną operację; błąd pozostaje, dopóki
+   go nie zamkniesz (×).
 6. Gdy wybrany jest **Rdzeń modemu LTE**, **Poproś o aktualizację firmware LTE** prosi o prowadzoną aktualizację LTE do
    wersji zalecanej przez HARDWARIO Monitor klienta (bez identyfikatora firmware). Klient przekłada kabel J-Link między
    złączami APP i LTE; widzisz każdy krok (na przykład *oczekiwanie na J-Link na złączu LTE*) i wynik. Jeśli
    aktualizacja zakończy się bez zapisania aplikacji z powrotem, wynikiem jest `remote.application_not_restored`.
+   Przed wymazaniem aplikacji karta pyta: *Aplikacja na urządzeniu CHESTER klienta zostanie wymazana. … Kontynuować?*
+   (**Kontynuuj** · **Anuluj**); jeśli nie da się zrobić kopii aplikacji, pyta *Nie udało się skopiować aplikacji.
+   Kontynuować bez kopii?*. Nie lub brak odpowiedzi w ciągu 60 sekund anuluje aktualizację, zanim cokolwiek się zmieni.
+   Kopia jest zapisywana z powrotem automatycznie. Klient ze starszym HARDWARIO Monitor odpowiada na te pytania sam.
 
 HARDWARIO Monitor nie zawsze rozpozna, że klient zakończył udostępnianie: serwer tego nie ogłasza. Po 30 minutach bez
 żadnej aktywności baner o tym informuje i oferuje **Opuść**. Karta pozostaje otwarta, więc nadal możesz zapisać
@@ -96,6 +108,8 @@ hwio remote join 482913 --lte-update      # prowadzona aktualizacja LTE (klient 
 
 `hwio remote host` pyta w terminalu, zanim zezwoli na dołączenie lub operację. Bez terminala na stdin dołączenie
 nigdy nie jest dozwolone. Zobacz [Wiersz poleceń](../en/cli.md#remote-support-hwio-remote).
+
+W terminalu `hwio remote join --lte-update` zadaje pytania aktualizacji LTE z `[y/N]`.
 
 <a id="settings"></a>
 ## Ustawienia

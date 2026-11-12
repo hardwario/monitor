@@ -98,6 +98,10 @@ deshalb durch den ganzen Ablauf:
 2. **APP connector** (APP-Anschluss): Schließen Sie den J-Link an den APP-Anschluss an. Der Assistent geht von selbst
    weiter, sobald die Anwendungs-MCU antwortet; am falschen Anschluss meldet er **This is the LTE connector. Move the
    cable to the APP connector.** (das ist der LTE-Anschluss, stecken Sie das Kabel an den APP-Anschluss um).
+   Bevor etwas geändert wird, sagt **Ready to update the LTE MCU** (Bereit zur Aktualisierung der LTE-MCU), was
+   geschieht: Die Anwendung wird gelöscht, Sie stecken das J-Link-Kabel auf den LTE-Anschluss und am Ende zurück auf
+   APP um, und die Anwendung wird zurückgeschrieben. **Continue** (Fortfahren) startet das; **Cancel** (Abbrechen)
+   beendet den Assistenten, ohne etwas zu ändern.
 3. **Stop the application** (Anwendung anhalten): Eine Kopie der Anwendungsfirmware wird gespeichert, dann wird die
    Anwendung gelöscht (**Erase application**: der UICR und der PIB bleiben erhalten). Lässt sich keine Kopie
    erstellen, zum Beispiel bei einer gegen Auslesen geschützten MCU, können Sie mit **Continue without a copy** (ohne

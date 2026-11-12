@@ -115,7 +115,7 @@ Without a terminal the guided flow keeps its existing behaviour for missing term
 - [x] A4 Support's operation result (ADR-0369): named with time, success clears, error until ×, console line; CLI
       names; Qt Quick tests
 - [x] A5 Hexdump continuation lines in support's console are Log/Hexdump (ADR-0171); unit test + hidden by default
-- [ ] C1 Translations (0 unfinished), docs (LTE update pages ×5, remote-support ×5, CLI), screenshots, release notes rc.4
+- [x] C1 Translations (0 unfinished), docs (LTE update pages ×5, remote-support ×5, CLI), screenshots, release notes rc.4
 - [ ] C2 Verification: full ctest, ASan/TSan for changed tests, clang-tidy, qmllint, clang-format, check_translations
 
 ## Tests and verification

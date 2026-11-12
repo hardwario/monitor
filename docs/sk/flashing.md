@@ -87,6 +87,9 @@ v banneri, keď je J-Link na konektore LTE) vás preto prevedie celým postupom:
 2. **APP connector** (konektor APP): pripojte J-Link ku konektoru APP. Sprievodca pokračuje sám, keď aplikačný MCU
    odpovie; na nesprávnom konektore zobrazí **This is the LTE connector. Move the cable to the APP connector.** (toto
    je konektor LTE, prepojte kábel ku konektoru APP).
+   Skôr než sa čokoľvek zmení, krok **Ready to update the LTE MCU** (pripravené na aktualizáciu LTE MCU) povie, čo sa
+   stane: aplikácia sa vymaže, prepojíte kábel J-Link na konektor LTE a na konci späť na APP a aplikácia sa zapíše
+   späť. **Continue** (pokračovať) to spustí; **Cancel** (zrušiť) sprievodcu ukončí bez akejkoľvek zmeny.
 3. **Stop the application** (zastavenie aplikácie): uloží sa kópia aplikačného firmvéru a potom sa aplikácia vymaže
    (**Erase application**: UICR aj PIB zostanú). Ak sa kópia nedá vytvoriť, napríklad pri MCU chránenom proti spätnému
    čítaniu, môžete zvoliť **Continue without a copy** (pokračovať bez kópie) a na konci nahrať aplikáciu sami.

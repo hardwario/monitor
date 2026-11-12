@@ -85,6 +85,9 @@ when the J-Link is on the LTE connector) therefore guides you through the whole 
 1. **Firmware**: the HARDWARIO LTE firmware or your own file.
 2. **APP connector**: connect the J-Link to the APP connector. The guide continues by itself when the application MCU
    answers; on the wrong connector it says **This is the LTE connector. Move the cable to the APP connector.**
+   Before anything is changed, **Ready to update the LTE MCU** says what will happen: the application is erased, you
+   move the J-Link cable to the LTE connector and at the end back to APP, and the application is written back.
+   **Continue** starts it; **Cancel** ends the guide with nothing changed.
 3. **Stop the application**: a copy of the application firmware is saved, then the application is erased (**Erase
    application**: the UICR and the PIB stay). If no copy can be made, for example on a read-back protected MCU, you
    can **Continue without a copy** and flash an application yourself at the end.
