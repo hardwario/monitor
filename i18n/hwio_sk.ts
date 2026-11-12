@@ -2476,45 +2476,45 @@
         <translation>Vybrať súbor s firmvérom</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="440"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="442"/>
         <source>New device tab</source>
         <translation>Nová karta zariadenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="443"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="445"/>
         <source>Close the device tab</source>
         <translation>Zavrieť kartu zariadenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="446"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="449"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="448"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="451"/>
         <source>Next tab</source>
         <translation>Ďalšia karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="452"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="455"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="454"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="457"/>
         <source>Previous tab</source>
         <translation>Predchádzajúca karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="458"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="460"/>
         <source>Settings</source>
         <translation>Nastavenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="461"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="463"/>
         <source>Connect or disconnect</source>
         <translation>Pripojiť alebo odpojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="464"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="466"/>
         <source>Reconnect</source>
         <translation>Znova pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="467"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="470"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="469"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="472"/>
         <source>Keyboard shortcuts</source>
         <translation>Klávesové skratky</translation>
     </message>
@@ -5291,12 +5291,12 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="717"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="719"/>
         <source>Close a tab first: at most %1 device tabs can be open.</source>
         <translation>Najprv zatvorte kartu: otvorených môže byť najviac %1 kariet zariadení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1255"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1257"/>
         <source>Copied to clipboard.</source>
         <translation>Skopírované do schránky.</translation>
     </message>
@@ -7042,34 +7042,34 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
 <context>
     <name>hwio::gui::UiModeController</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="41"/>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="39"/>
         <source>Basic</source>
         <translation>Základný</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="43"/>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="41"/>
         <source>Expert</source>
         <translation>Expertný</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="47"/>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="45"/>
         <source>Advanced</source>
         <translation>Pokročilý</translation>
     </message>
     <message>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="51"/>
+        <source>Watch the console and flash firmware. Only the essential settings.</source>
+        <translation>Sledujte konzolu a nahrávajte firmvér. Len základné nastavenia.</translation>
+    </message>
+    <message>
         <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="53"/>
-        <source>The essentials: language, look and console files.</source>
-        <translation>To podstatné: jazyk, vzhľad a súbory konzoly.</translation>
+        <source>Full control, including timing options and maintenance actions that can erase the device&apos;s identity.</source>
+        <translation>Plná kontrola vrátane nastavení časovania a servisných akcií, ktoré môžu vymazať identitu zariadenia.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="55"/>
-        <source>Everything, including timing options and expert maintenance actions.</source>
-        <translation>Všetko vrátane možností časovania a odborných akcií údržby.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="59"/>
-        <source>Also J-Link, nRF Util, AI assistants and console options.</source>
-        <translation>Navyše J-Link, nRF Util, AI asistenti a možnosti konzoly.</translation>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="58"/>
+        <source>Develop with CHESTER: J-Link and nRF Util options, AI assistants, console tools.</source>
+        <translation>Vývoj s CHESTER: možnosti J-Link a nRF Util, AI asistenti, nástroje konzoly.</translation>
     </message>
 </context>
 <context>

@@ -115,7 +115,7 @@ TEST_F(SettingsTest, SectionsPerMode) {
               (QStringList{QStringLiteral("general"), QStringLiteral("console"),
                            QStringLiteral("about")}));
     EXPECT_EQ(settings().modeDescription(),
-              QStringLiteral("The essentials: language, look and console files."));
+              QStringLiteral("Watch the console and flash firmware. Only the essential settings."));
     EXPECT_EQ(sections.count(), 1);
     EXPECT_EQ(mode.count(), 1);
     EXPECT_TRUE(app().uiMode()->chosen());

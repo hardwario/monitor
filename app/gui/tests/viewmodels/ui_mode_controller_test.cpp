@@ -101,7 +101,8 @@ TEST_F(UiModeTest, FirstStartPreselectsAdvanced) {
               QStringLiteral("Basic"));
     EXPECT_EQ(
         UiModeController::modes().at(2).toMap().value(QStringLiteral("description")).toString(),
-        QStringLiteral("Everything, including timing options and expert maintenance actions."));
+        QStringLiteral("Full control, including timing options and maintenance actions that can "
+                       "erase the device's identity."));
 }
 
 // ADR-0362: upgrading with the expert switch on → Expert preselected; off → Advanced.

@@ -48,13 +48,14 @@ QString UiModeController::name(UiMode mode) {
 QString UiModeController::description(UiMode mode) {
     switch (mode) {
     case UiMode::Basic:
-        return tr("The essentials: language, look and console files.");
+        return tr("Watch the console and flash firmware. Only the essential settings.");
     case UiMode::Expert:
-        return tr("Everything, including timing options and expert maintenance actions.");
+        return tr("Full control, including timing options and maintenance actions that can erase "
+                  "the device's identity.");
     case UiMode::Advanced:
         break;
     }
-    return tr("Also J-Link, nRF Util, AI assistants and console options.");
+    return tr("Develop with CHESTER: J-Link and nRF Util options, AI assistants, console tools.");
 }
 
 QVariantList UiModeController::modes() {

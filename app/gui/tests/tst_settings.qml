@@ -144,7 +144,7 @@ TestCase {
     function test_modeSelector() {
         const vm = AppViewModel.globalPageViewModel("settings");
         compare(vm.mode, UiMode.Advanced);
-        compare(find("modeDescription").text, "Also J-Link, nRF Util, AI assistants and console options.");
+        compare(find("modeDescription").text, "Develop with CHESTER: J-Link and nRF Util options, AI assistants, console tools.");
         compare(find("modeButton_" + UiMode.Advanced).kind, "primary");
         const flash = testSupport.flashPage(0);
         verify(flash !== null);
@@ -153,14 +153,14 @@ TestCase {
         compare(vm.mode, UiMode.Expert);
         compare(testSupport.setting("ui/mode"), "expert");
         verify(flash.expertActions);
-        compare(find("modeDescription").text, "Everything, including timing options and expert maintenance actions.");
+        compare(find("modeDescription").text, "Full control, including timing options and maintenance actions that can erase the device's identity.");
         tryVerify(() => find("section_expert") !== null);
         wait(Qt.styleHints.mouseDoubleClickInterval + 50); // two separate clicks, not a double click
         mouseClick(find("modeButton_" + UiMode.Basic));
         compare(vm.mode, UiMode.Basic);
         verify(!flash.expertActions);
         tryVerify(() => find("section_jlink") === null);
-        compare(find("modeDescription").text, "The essentials: language, look and console files.");
+        compare(find("modeDescription").text, "Watch the console and flash firmware. Only the essential settings.");
         compare(find("modeButton_" + UiMode.Basic).kind, "primary");
         compare(find("modeButton_" + UiMode.Expert).kind, "normal");
     }

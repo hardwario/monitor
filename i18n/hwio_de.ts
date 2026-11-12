@@ -2470,45 +2470,45 @@
         <translation>Firmware-Datei wählen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="440"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="442"/>
         <source>New device tab</source>
         <translation>Neuer Geräte-Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="443"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="445"/>
         <source>Close the device tab</source>
         <translation>Geräte-Tab schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="446"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="449"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="448"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="451"/>
         <source>Next tab</source>
         <translation>Nächster Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="452"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="455"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="454"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="457"/>
         <source>Previous tab</source>
         <translation>Vorheriger Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="458"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="460"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="461"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="463"/>
         <source>Connect or disconnect</source>
         <translation>Verbinden oder trennen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="464"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="466"/>
         <source>Reconnect</source>
         <translation>Neu verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="467"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="470"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="469"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="472"/>
         <source>Keyboard shortcuts</source>
         <translation>Tastenkürzel</translation>
     </message>
@@ -5285,12 +5285,12 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="717"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="719"/>
         <source>Close a tab first: at most %1 device tabs can be open.</source>
         <translation>Schließen Sie zuerst einen Tab: Es können höchstens %1 Geräte-Tabs geöffnet sein.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1255"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1257"/>
         <source>Copied to clipboard.</source>
         <translation>In die Zwischenablage kopiert.</translation>
     </message>
@@ -7032,34 +7032,34 @@ Die Freigabe endet nach 30 Minuten ohne Aktivität oder nach 8 Stunden.</transla
 <context>
     <name>hwio::gui::UiModeController</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="41"/>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="39"/>
         <source>Basic</source>
         <translation>Einfach</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="43"/>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="41"/>
         <source>Expert</source>
         <translation>Experte</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="47"/>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="45"/>
         <source>Advanced</source>
         <translation>Erweitert</translation>
     </message>
     <message>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="51"/>
+        <source>Watch the console and flash firmware. Only the essential settings.</source>
+        <translation>Konsole beobachten und Firmware flashen. Nur die wichtigsten Einstellungen.</translation>
+    </message>
+    <message>
         <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="53"/>
-        <source>The essentials: language, look and console files.</source>
-        <translation>Das Wesentliche: Sprache, Darstellung und Konsolendateien.</translation>
+        <source>Full control, including timing options and maintenance actions that can erase the device&apos;s identity.</source>
+        <translation>Volle Kontrolle, einschließlich Timing-Optionen und Wartungsaktionen, die die Identität des Geräts löschen können.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="55"/>
-        <source>Everything, including timing options and expert maintenance actions.</source>
-        <translation>Alles, einschließlich der Timing-Optionen und der Experten-Wartungsaktionen.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="59"/>
-        <source>Also J-Link, nRF Util, AI assistants and console options.</source>
-        <translation>Zusätzlich J-Link, nRF Util, KI-Assistenten und Konsolenoptionen.</translation>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="58"/>
+        <source>Develop with CHESTER: J-Link and nRF Util options, AI assistants, console tools.</source>
+        <translation>Mit CHESTER entwickeln: J-Link- und nRF-Util-Optionen, KI-Assistenten, Konsolenwerkzeuge.</translation>
     </message>
 </context>
 <context>
