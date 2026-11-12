@@ -57,6 +57,7 @@ TestCase {
     }
 
     function init() {
+        verify(testSupport.setSetting("ui/mode", "advanced"));
         AppViewModel.setLanguage("en");
         AppViewModel.theme = "light";
         testSupport.resetTabs();
@@ -72,8 +73,10 @@ TestCase {
 
     function test_sectionsAndDetection() {
         const sections = findAll(window.contentItem, "sectionLoader").filter(effectivelyVisible);
-        // General, Console (0005), J-Link, nRF Util, AI assistants (0014), Advanced (0033), About
-        compare(sections.length, 7);
+        // Advanced mode (plan 0045): General, Console (0005), J-Link, nRF Util, AI assistants
+        // (0014), About; Expert (0033) only in Expert mode.
+        compare(sections.length, 6);
+        verify(!find("section_expert"));
         verify(find("section_mcp") !== null);
         verify(find("section_general") !== null);
         verify(find("section_console") !== null);
@@ -87,22 +90,10 @@ TestCase {
         verify(find("aboutText").text.indexOf("HARDWARIO Monitor") === 0);
     }
 
-    // Plan 0033 (ADR-0236): Settings → Advanced → "Show expert maintenance actions".
-    function test_advancedSection() {
-        verify(find("section_advanced") !== null);
-        const sw = find("expertActionsSwitch");
-        verify(sw !== null);
-        compare(sw.checked, false);
-        const vm = AppViewModel.globalPageViewModel("settings");
-        sw.toggle();
-        sw.toggled();
-        compare(vm.expertActions, true);
-        vm.expertActions = false;
-        compare(sw.checked, false);
-    }
-
-    // Plan 0044 (ADR-0330): Settings → Advanced → "Support server", https only.
+    // Plan 0044 (ADR-0330): Settings → Expert → "Support server", https only (Expert mode).
     function test_relayUrlField() {
+        verify(testSupport.setSetting("ui/mode", "expert"));
+        tryVerify(() => find("relayUrlField") !== null);
         const field = find("relayUrlField");
         verify(field !== null);
         const vm = AppViewModel.globalPageViewModel("settings");

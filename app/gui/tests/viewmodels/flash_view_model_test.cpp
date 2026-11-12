@@ -24,6 +24,8 @@
 #include "viewmodels/firmware_source_view_model.h"
 #include "viewmodels/flash_view_model.h"
 #include "viewmodels/recent_sources_model.h"
+#include "viewmodels/ui_mode.h"
+#include "viewmodels/ui_mode_controller.h"
 #include "wizard/lte_update_wizard.h"
 #include "wizard/wizard.h"
 #include "wizard/wizard_view_model.h"
@@ -139,9 +141,10 @@ protected:
     static bool reachStage(const hwio::gui::LteUpdateWizard& wizard, int stage) {
         return waitFor([&] { return wizard.stage() == stage; }, std::chrono::seconds(60));
     }
+    // Plan 0045 (ADR-0360): the expert actions are Expert mode.
     void enableExpertActions() {
         ASSERT_TRUE(
-            app().settingsStore()->setValue(QStringLiteral("advanced/expertActions"), true));
+            app().settingsStore()->setValue(QStringLiteral("ui/mode"), QStringLiteral("expert")));
     }
     [[nodiscard]] DeviceTabViewModel& tab() { return *m_app->currentTabViewModel(); }
     [[nodiscard]] FlashViewModel& flash() {
@@ -1048,10 +1051,10 @@ TEST_F(LoaderTest, LoadErrorsAreHWioErrors) {
     EXPECT_EQ(result.error().code, ErrorCode::IoFileNotFound);
 }
 
-// ---- plan 0033: expert maintenance actions (ADR-0236)
+// ---- plan 0033: expert maintenance actions (ADR-0236), Expert mode since plan 0045 (ADR-0360)
 // --------------------------------------------
 
-TEST_F(FlashTest, ExpertActionsAreHiddenUntilTheSettingIsOn) {
+TEST_F(FlashTest, ExpertActionsFollowTheMode) {
     start(probeScenario());
     EXPECT_FALSE(flash().expertActions());
     EXPECT_FALSE(flash().eraseAllAvailable());
@@ -1076,14 +1079,19 @@ TEST_F(FlashTest, ExpertActionsAreHiddenUntilTheSettingIsOn) {
               QStringLiteral("LTE MCU"));
     flash().setMaintenanceTarget(QStringLiteral("lte"));
     EXPECT_EQ(flash().maintenanceTitle(), QStringLiteral("Maintenance — LTE MCU"));
-    // Off again: back to the application MCU.
-    ASSERT_TRUE(app().settingsStore()->setValue(QStringLiteral("advanced/expertActions"), false));
+    // Advanced again: back to the application MCU.
+    ASSERT_TRUE(
+        app().uiMode()->choose(hwio::gui::UiMode::Advanced)); // the Settings segmented control
     EXPECT_EQ(flash().maintenanceTarget(), QStringLiteral("app"));
     EXPECT_FALSE(flash().recoverAvailable());
+    EXPECT_FALSE(flash().expertActions());
+    // Basic hides them too.
+    ASSERT_TRUE(app().uiMode()->choose(hwio::gui::UiMode::Basic));
+    EXPECT_FALSE(flash().eraseAllAvailable());
 }
 
 // The target.protected hand-off (plan 0033 E): the Flash page with Maintenance unfolded and
-// [Recover…] for that MCU, once; the setting is not changed.
+// [Recover…] for that MCU, once, in every mode (ADR-0360); the mode is not changed.
 TEST_F(FlashTest, TheProtectedHandOffShowsRecoverOnce) {
     start(probeScenario());
     EXPECT_FALSE(flash().maintenanceExpanded());
@@ -1101,6 +1109,16 @@ TEST_F(FlashTest, TheProtectedHandOffShowsRecoverOnce) {
     EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
         << flash().error().detail().toStdString();
     EXPECT_FALSE(flash().recoverAvailable()); // this once
+}
+
+// Plan 0045 (ADR-0360): the protected-MCU hand-off works in Basic mode too.
+TEST_F(FlashTest, TheProtectedHandOffWorksInBasicMode) {
+    start(probeScenario());
+    ASSERT_TRUE(app().uiMode()->choose(hwio::gui::UiMode::Basic));
+    emit app().wizard() -> handOff(QStringLiteral("open-flash-page:recover:app"), &tab());
+    EXPECT_TRUE(flash().recoverAvailable());
+    EXPECT_FALSE(flash().eraseAllAvailable());
+    EXPECT_EQ(app().uiMode()->mode(), hwio::gui::UiMode::Basic);
 }
 
 // ---- plan 0033: the LTE firmware update wizard (ADR-0234)

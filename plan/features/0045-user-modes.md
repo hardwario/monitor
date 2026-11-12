@@ -133,7 +133,7 @@ None. The CLI has no modes (the mode is GUI-only; CLI output and options are unc
 ## Implementation steps
 
 - [x] A1 `UiMode`, `UiModeController`, `ui/mode` key, migration from `advanced/expertActions`; unit tests
-- [ ] A2 `PageRegistry` minimum mode per section, `SettingsViewModel` filtering + mode property + reveal for one
+- [x] A2 `PageRegistry` minimum mode per section, `SettingsViewModel` filtering + mode property + reveal for one
       visit; `FlashViewModel` expert actions from the mode; remove the switch; unit tests
 - [ ] B1 QML: Mode selector in General, `SettingsRow.minimumMode` on every row of the table, section rename (D-6),
       reveal note; first-start `ModeChoiceDialog`; Qt Quick tests (each mode shows exactly the table's rows;

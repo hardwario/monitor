@@ -11,6 +11,8 @@
 #include "viewmodels/connection_view_model.h"
 #include "viewmodels/dependency_status.h"
 #include "viewmodels/settings_view_model.h"
+#include "viewmodels/ui_mode.h"
+#include "viewmodels/ui_mode_controller.h"
 
 #include <QFile>
 #include <QIODevice>
@@ -39,6 +41,7 @@ using hwio::gui::AppViewModel;
 using hwio::gui::DependencyStatus;
 using hwio::gui::FirmwareServices;
 using hwio::gui::SettingsViewModel;
+using hwio::gui::UiMode;
 using hwio::gui::test::waitFor;
 
 class SettingsTest : public hwio::gui::test::GuiTest {
@@ -73,32 +76,93 @@ private:
     std::unique_ptr<AppViewModel> m_app;
 };
 
-TEST_F(SettingsTest, SectionsInRegistryOrder) {
+[[nodiscard]] QStringList sectionIds(const SettingsViewModel& settings) {
     QStringList ids;
-    for (const QVariant& section : settings().sections()) {
+    for (const QVariant& section : settings.sections()) {
         ids.append(section.toMap().value(QStringLiteral("sectionId")).toString());
     }
-    // Console (order 20) is contributed by plan 0005, AI assistants (50) by plan 0014, Advanced
-    // (80) by plan 0033.
-    EXPECT_EQ(
-        ids, (QStringList{QStringLiteral("general"), QStringLiteral("console"),
-                          QStringLiteral("jlink"), QStringLiteral("nrfutil"), QStringLiteral("mcp"),
-                          QStringLiteral("advanced"), QStringLiteral("about")}));
-    EXPECT_EQ(settings().sections().at(2).toMap().value(QStringLiteral("title")).toString(),
-              QStringLiteral("J-Link"));
+    return ids;
 }
 
-// Plan 0033 (ADR-0236): Settings → Advanced → "Show expert maintenance actions", off by default,
-// stored as advanced/expertActions.
-TEST_F(SettingsTest, ExpertActionsSwitchIsStored) {
-    EXPECT_FALSE(settings().expertActions());
-    QSignalSpy changed(&settings(), &hwio::gui::SettingsViewModel::valuesChanged);
-    settings().setExpertActions(true);
-    EXPECT_TRUE(settings().expertActions());
-    EXPECT_TRUE(app().settingsStore()->value(QStringLiteral("advanced/expertActions")).toBool());
-    EXPECT_GE(changed.count(), 1);
-    settings().setExpertActions(false);
-    EXPECT_FALSE(app().settingsStore()->value(QStringLiteral("advanced/expertActions")).toBool());
+TEST_F(SettingsTest, SectionsInRegistryOrder) {
+    // Console (order 20) is contributed by plan 0005, AI assistants (50) by plan 0014, Expert
+    // (80) by plan 0033 (renamed by plan 0045).
+    ASSERT_TRUE(app().uiMode()->choose(UiMode::Expert));
+    EXPECT_EQ(
+        sectionIds(settings()),
+        (QStringList{QStringLiteral("general"), QStringLiteral("console"), QStringLiteral("jlink"),
+                     QStringLiteral("nrfutil"), QStringLiteral("mcp"), QStringLiteral("expert"),
+                     QStringLiteral("about")}));
+    EXPECT_EQ(settings().sections().at(2).toMap().value(QStringLiteral("title")).toString(),
+              QStringLiteral("J-Link"));
+    EXPECT_EQ(settings().sections().at(5).toMap().value(QStringLiteral("title")).toString(),
+              QStringLiteral("Expert"));
+}
+
+// Plan 0045 (ADR-0359): the sections each mode shows; the first start shows Advanced.
+TEST_F(SettingsTest, SectionsPerMode) {
+    EXPECT_FALSE(app().uiMode()->chosen());
+    EXPECT_EQ(settings().mode(), static_cast<int>(UiMode::Advanced));
+    const QStringList advanced{QStringLiteral("general"), QStringLiteral("console"),
+                               QStringLiteral("jlink"),   QStringLiteral("nrfutil"),
+                               QStringLiteral("mcp"),     QStringLiteral("about")};
+    EXPECT_EQ(sectionIds(settings()), advanced);
+
+    QSignalSpy sections(&settings(), &SettingsViewModel::sectionsChanged);
+    QSignalSpy mode(&settings(), &SettingsViewModel::modeChanged);
+    settings().selectMode(static_cast<int>(UiMode::Basic));
+    EXPECT_EQ(sectionIds(settings()),
+              (QStringList{QStringLiteral("general"), QStringLiteral("console"),
+                           QStringLiteral("about")}));
+    EXPECT_EQ(settings().modeDescription(),
+              QStringLiteral("The essentials: language, look and console files."));
+    EXPECT_EQ(sections.count(), 1);
+    EXPECT_EQ(mode.count(), 1);
+    EXPECT_TRUE(app().uiMode()->chosen());
+    EXPECT_EQ(app().settingsStore()->value(QStringLiteral("ui/mode")).toString(),
+              QStringLiteral("basic"));
+    EXPECT_FALSE(settings().shows(UiMode::Advanced));
+
+    settings().selectMode(static_cast<int>(UiMode::Advanced));
+    EXPECT_EQ(sectionIds(settings()), advanced);
+    settings().selectMode(42); // ignored
+    EXPECT_EQ(settings().mode(), static_cast<int>(UiMode::Advanced));
+    EXPECT_EQ(settings().modes().size(), 3);
+}
+
+// ADR-0361: an error or guide that opens a hidden section shows it until Settings is left.
+TEST_F(SettingsTest, HiddenSectionIsRevealedForOneVisit) {
+    ASSERT_TRUE(app().uiMode()->choose(UiMode::Basic));
+    app().openSettings(QStringLiteral("jlink"));
+    EXPECT_EQ(settings().revealedSection(), QStringLiteral("jlink"));
+    ASSERT_TRUE(sectionIds(settings()).contains(QStringLiteral("jlink")));
+    const QVariantMap jlink = settings().sections().at(2).toMap();
+    EXPECT_EQ(jlink.value(QStringLiteral("sectionId")).toString(), QStringLiteral("jlink"));
+    EXPECT_TRUE(jlink.value(QStringLiteral("revealed")).toBool());
+    EXPECT_EQ(jlink.value(QStringLiteral("minimumMode")).toInt(),
+              static_cast<int>(UiMode::Advanced));
+    EXPECT_FALSE(settings().sections().at(0).toMap().value(QStringLiteral("revealed")).toBool());
+    EXPECT_EQ(app().uiMode()->mode(), UiMode::Basic); // the mode is unchanged
+
+    // Leaving Settings (another tab) hides it again.
+    app().setCurrentTab(0);
+    EXPECT_EQ(settings().revealedSection(), QString());
+    EXPECT_FALSE(sectionIds(settings()).contains(QStringLiteral("jlink")));
+
+    // A row: remembered for its SettingsRow; closing Settings clears it.
+    app().openSettings(QStringLiteral("expert"), QStringLiteral("relayUrl"));
+    EXPECT_EQ(settings().revealedSection(), QStringLiteral("expert"));
+    EXPECT_EQ(settings().revealedRow(), QStringLiteral("relayUrl"));
+    app().closeSettings();
+    EXPECT_EQ(settings().revealedSection(), QString());
+    EXPECT_EQ(settings().revealedRow(), QString());
+
+    // A section the mode shows is not "revealed".
+    app().openSettings(QStringLiteral("console"));
+    EXPECT_EQ(settings().revealedSection(), QString());
+    ASSERT_TRUE(app().uiMode()->choose(UiMode::Advanced));
+    app().openSettings(QStringLiteral("nrfutil"));
+    EXPECT_EQ(settings().revealedSection(), QString());
 }
 
 // Plan 0044 (ADR-0330): Settings → Advanced → Support server: https only, "" = the default server;
@@ -255,6 +319,10 @@ TEST_F(SettingsTest, ReadOnlySettingsFile) {
     settings().setRestoreTabs(false);
     EXPECT_FALSE(settings().writeError().isEmpty());
     EXPECT_TRUE(settings().restoreTabs());
+    // Plan 0045: the mode applies for this run; the write error is shown.
+    settings().selectMode(static_cast<int>(UiMode::Basic));
+    EXPECT_EQ(settings().mode(), static_cast<int>(UiMode::Basic));
+    EXPECT_FALSE(settings().writeError().isEmpty());
 }
 
 // Plan 0038 A0 (ADR-0263): Nordic's direct nrfutil downloads per OS / CPU, else the product page.

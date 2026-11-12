@@ -16,6 +16,8 @@
 #include "viewmodels/dependency_status.h"
 #include "viewmodels/licenses_model.h"
 #include "viewmodels/page_registry.h"
+#include "viewmodels/ui_mode.h"
+#include "viewmodels/ui_mode_controller.h"
 #include "workers/firmware_loader.h"
 
 #include <QLatin1Char>
@@ -34,6 +36,7 @@
 #include <QtTypes>
 
 #include <filesystem>
+#include <optional>
 
 namespace hwio::gui {
 
@@ -61,8 +64,9 @@ QString pathOf(const QUrl& file) {
 
 } // namespace
 
-SettingsViewModel::SettingsViewModel(AppViewModel& app, FirmwareServices& services, QObject* parent)
-    : QObject(parent), m_app(app), m_services(services),
+SettingsViewModel::SettingsViewModel(AppViewModel& app, FirmwareServices& services,
+                                     UiModeController& mode, QObject* parent)
+    : QObject(parent), m_app(app), m_services(services), m_mode(mode),
       // Qt parent ownership: the model is a child of this view model.
       m_licenceFiles(new LicensesModel(this)) { // NOLINT(cppcoreguidelines-owning-memory)
     loadSpeed();
@@ -73,13 +77,31 @@ SettingsViewModel::SettingsViewModel(AppViewModel& app, FirmwareServices& servic
             loadSpeed();
             valuesChanged(); // signal
         } else if (key == restoreTabsKey || key == latencyKey || key == autoReconnectKey ||
-                   key == resetOnOpenKey || key == FirmwareServices::expertActionsKey ||
-                   key == toQString(remote::relayUrlSetting.path)) {
+                   key == resetOnOpenKey || key == toQString(remote::relayUrlSetting.path)) {
             valuesChanged(); // signal
         } else if (key == FirmwareServices::jlinkPathKey) {
             jlinkLibraryChanged(); // signal
         } else if (key == FirmwareServices::nrfUtilPathKey) {
             nrfUtilChanged(); // signal
+        }
+    });
+    // Plan 0045: the mode changes the visible sections (and, in QML, rows).
+    connect(&m_mode, &UiModeController::modeChanged, this, [this] {
+        modeChanged();      // signal
+        modeTextsChanged(); // signal: the description of the selected mode
+        sectionsChanged();  // signal
+    });
+    connect(&m_mode, &UiModeController::textsChanged, this, &SettingsViewModel::modeTextsChanged);
+    connect(&m_mode, &UiModeController::writeFailed, this, [this](const QString& message) {
+        if (message != m_writeError) {
+            m_writeError = message;
+            writeErrorChanged(); // signal
+        }
+    });
+    // ADR-0361: leaving Settings (another tab, or Settings closed) hides the revealed section.
+    connect(&m_app, &AppViewModel::globalPageChanged, this, [this] {
+        if (m_app.globalPage() != pageId) {
+            clearReveal();
         }
     });
     DependencyStatus* status = m_services.dependencies();
@@ -96,12 +118,61 @@ bool SettingsViewModel::readOnly() const { return m_app.settingsStore()->readOnl
 QVariantList SettingsViewModel::sections() const {
     QVariantList list;
     for (const SettingsSectionDescriptor& section : m_app.pageRegistry().settingsSections()) {
-        list.append(QVariantMap{{QStringLiteral("sectionId"), section.id},
-                                {QStringLiteral("title"), PageRegistry::title(section)},
-                                {QStringLiteral("qml"), section.qml}});
+        const bool shown = m_mode.shows(section.minimumMode);
+        if (!shown && section.id != m_revealedSection) {
+            continue; // hidden by the mode (plan 0045)
+        }
+        list.append(
+            QVariantMap{{QStringLiteral("sectionId"), section.id},
+                        {QStringLiteral("title"), PageRegistry::title(section)},
+                        {QStringLiteral("qml"), section.qml},
+                        {QStringLiteral("minimumMode"), static_cast<int>(section.minimumMode)},
+                        {QStringLiteral("revealed"), !shown}});
     }
     return list;
 }
+
+// ---- Mode (plan 0045)
+// ----------------------------------------------------------------------------------------
+
+int SettingsViewModel::mode() const { return m_mode.modeValue(); }
+
+bool SettingsViewModel::shows(UiMode needed) const { return m_mode.shows(needed); }
+
+QVariantList SettingsViewModel::modes() const { return m_mode.modes(); }
+
+QString SettingsViewModel::modeDescription() const {
+    return UiModeController::description(m_mode.mode());
+}
+
+void SettingsViewModel::selectMode(int mode) {
+    const std::optional<UiMode> value = uiModeFromInt(mode);
+    if (!value) {
+        return;
+    }
+    if (m_mode.choose(*value) && !m_writeError.isEmpty()) {
+        m_writeError.clear();
+        writeErrorChanged(); // signal
+    }
+}
+
+void SettingsViewModel::openAt(const QString& sectionId, const QString& rowId) {
+    const SettingsSectionDescriptor* section = m_app.pageRegistry().findSettingsSection(sectionId);
+    const QString revealed =
+        section != nullptr && !m_mode.shows(section->minimumMode) ? sectionId : QString();
+    if (revealed == m_revealedSection && rowId == m_revealedRow) {
+        return;
+    }
+    const bool sectionChanged = revealed != m_revealedSection;
+    m_revealedSection = revealed;
+    m_revealedRow = rowId;
+    revealChanged(); // signal
+    if (sectionChanged) {
+        sectionsChanged(); // signal
+    }
+}
+
+void SettingsViewModel::clearReveal() { openAt(QString(), QString()); }
 
 bool SettingsViewModel::write(const QString& key, const QVariant& value) {
     const Status status = m_app.settingsStore()->setValue(key, value);
@@ -284,16 +355,6 @@ void SettingsViewModel::setDefaultLatencyMs(int latency) {
         write(latencyKey, latency);
     }
     valuesChanged(); // signal
-}
-
-bool SettingsViewModel::expertActions() const {
-    return m_app.settingsStore()->value(FirmwareServices::expertActionsKey).toBool();
-}
-
-void SettingsViewModel::setExpertActions(bool value) {
-    if (value != expertActions()) {
-        write(FirmwareServices::expertActionsKey, value);
-    }
 }
 
 QString SettingsViewModel::relayUrl() const {

@@ -44,9 +44,6 @@ public:
     static inline const QString recentKey = QStringLiteral("flash/recent");
     static inline const QString jlinkPathKey = QStringLiteral("jlink/libraryPath");
     static inline const QString nrfUtilPathKey = QStringLiteral("nrfutil/path");
-    // Plan 0033 (ADR-0236): the expert maintenance actions; plan 0045 (ADR-0360): replaced by
-    // Expert mode, the key is UiModeController::legacyExpertKey (registered by the shell).
-    static inline const QString expertActionsKey = QStringLiteral("advanced/expertActions");
 
     struct Options {
         SettingsStore* settings = nullptr;    // outlives this object (AppViewModel)

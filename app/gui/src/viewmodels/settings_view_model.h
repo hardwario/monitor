@@ -16,7 +16,10 @@
 //     same ConnectionOptions logic as the popover), RTT latency (rtt/latencyMs, 0 = the profile's),
 //     auto-reconnect, reset on connect.
 //   - nRF Util: Automatic / Custom path (nrfutil/path, checked before it is saved).
-//   - Advanced (plan 0033, ADR-0236): "Show expert maintenance actions" (advanced/expertActions).
+//   - Expert (plan 0033, renamed by plan 0045 / ADR-0362): the support server (remote/relayUrl).
+//   - Mode (plan 0045, ADR-0359): Basic / Advanced / Expert (UiModeController); `sections` holds
+//     only the sections the mode shows, plus a section an error or a guide opened (openAt,
+//     ADR-0361: shown until Settings is left). Rows declare their minimum mode in QML.
 //   - About: versions, licences, links; Copy.
 // A settings file of a newer schema is read-only (readOnly: the page disables every control).
 //
@@ -25,6 +28,7 @@
 #include "viewmodels/connection_view_model.h"
 #include "viewmodels/dependency_status.h"
 #include "viewmodels/licenses_model.h"
+#include "viewmodels/ui_mode.h"
 
 #include <QObject>
 #include <QString>
@@ -41,6 +45,7 @@ namespace hwio::gui {
 
 class AppViewModel;
 class FirmwareServices;
+class UiModeController;
 
 class SettingsViewModel : public QObject {
     Q_OBJECT
@@ -80,8 +85,14 @@ class SettingsViewModel : public QObject {
     Q_PROPERTY(int minLatencyMs READ minLatencyMs CONSTANT)
     Q_PROPERTY(int maxLatencyMs READ maxLatencyMs CONSTANT)
 
-    // Advanced (plan 0033, ADR-0236): advanced/expertActions.
-    Q_PROPERTY(bool expertActions READ expertActions WRITE setExpertActions NOTIFY valuesChanged)
+    // Plan 0045 (ADR-0359): the user mode (UiMode.Basic / Advanced / Expert), the choices
+    // [{mode, name, description}] and the description of the selected mode.
+    Q_PROPERTY(int mode READ mode NOTIFY modeChanged)
+    Q_PROPERTY(QVariantList modes READ modes NOTIFY modeTextsChanged)
+    Q_PROPERTY(QString modeDescription READ modeDescription NOTIFY modeTextsChanged)
+    // ADR-0361: the section / row hidden by the mode that was opened for this visit ("" = none).
+    Q_PROPERTY(QString revealedSection READ revealedSection NOTIFY revealChanged)
+    Q_PROPERTY(QString revealedRow READ revealedRow NOTIFY revealChanged)
     // Plan 0044 (ADR-0330): remote/relayUrl, "" = the default server; an https URL.
     Q_PROPERTY(QString relayUrl READ relayUrl NOTIFY valuesChanged)
     Q_PROPERTY(QString defaultRelayUrl READ defaultRelayUrl CONSTANT)
@@ -120,7 +131,9 @@ class SettingsViewModel : public QObject {
 public:
     static inline const QString pageId = QStringLiteral("settings");
 
-    SettingsViewModel(AppViewModel& app, FirmwareServices& services, QObject* parent);
+    // `mode` is owned by AppViewModel and outlives this object.
+    SettingsViewModel(AppViewModel& app, FirmwareServices& services, UiModeController& mode,
+                      QObject* parent);
 
     [[nodiscard]] bool readOnly() const;
     [[nodiscard]] QVariantList sections() const;
@@ -163,12 +176,26 @@ public:
     [[nodiscard]] static int minLatencyMs();
     [[nodiscard]] static int maxLatencyMs();
 
-    [[nodiscard]] bool expertActions() const;
+    [[nodiscard]] int mode() const;
+    [[nodiscard]] bool shows(UiMode needed) const;
+    [[nodiscard]] QVariantList modes() const;
+    [[nodiscard]] QString modeDescription() const;
+    // The segmented control (UiMode values; others are ignored). A failed write shows writeError;
+    // the mode then applies for this run only.
+    Q_INVOKABLE void selectMode(int mode);
+    [[nodiscard]] QString revealedSection() const { return m_revealedSection; }
+    [[nodiscard]] QString revealedRow() const { return m_revealedRow; }
+    // Settings is opened at `sectionId` (and `rowId`, "" = none) by an error, a guide or a link
+    // (AppViewModel::openSettings): a section hidden by the mode is shown until Settings is left;
+    // the row is remembered (its QML knows whether the mode hides it).
+    void openAt(const QString& sectionId, const QString& rowId);
+    // Settings was left: the revealed section / row are hidden again.
+    void clearReveal();
+
     [[nodiscard]] QString relayUrl() const;
     [[nodiscard]] static QString defaultRelayUrl();
     // "" when stored (or cleared: the default server), else why the text is not a valid server.
     Q_INVOKABLE QString setRelayUrl(const QString& text);
-    void setExpertActions(bool value);
 
     [[nodiscard]] QString nrfUtilMode() const;
     void setNrfUtilMode(const QString& mode);
@@ -204,6 +231,9 @@ public:
 
 signals:
     void sectionsChanged();
+    void modeChanged();
+    void modeTextsChanged();
+    void revealChanged();
     void writeErrorChanged();
     void languageChanged();
     void themeChanged();
@@ -222,6 +252,7 @@ private:
 
     AppViewModel& m_app;
     FirmwareServices& m_services;
+    UiModeController& m_mode;
     LicensesModel* m_licenceFiles = nullptr; // child
     ConnectionOptions m_speed;               // the default speed: automatic + the last fixed value
     bool m_jlinkCustomMode = false;
@@ -233,6 +264,8 @@ private:
     QString m_jlinkPathError;
     QString m_nrfUtilPathError;
     QString m_writeError;
+    QString m_revealedSection;
+    QString m_revealedRow;
 };
 
 } // namespace hwio::gui

@@ -65,7 +65,7 @@ set(HWIO_GUI_QML_FILES
     qml/remote/RemoteSessionDialogs.qml
     qml/remote/ShareDialog.qml
     qml/settings/AboutSection.qml
-    qml/settings/AdvancedSection.qml
+    qml/settings/ExpertSection.qml
     qml/settings/GeneralSection.qml
     qml/settings/JLinkSection.qml
     qml/settings/McpSection.qml

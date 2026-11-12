@@ -36,6 +36,7 @@
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
 #include "viewmodels/history_store.h"
+#include "viewmodels/ui_mode_controller.h"
 #include "zip_builder.h"
 
 #include <QByteArray>
@@ -280,6 +281,11 @@ public:
     // Plan 0033: a setting written through the store (e.g. advanced/expertActions).
     Q_INVOKABLE [[nodiscard]] bool setSetting(const QString& key, const QVariant& value) const {
         return static_cast<bool>(m_app->settingsStore()->setValue(key, value));
+    }
+    // Plan 0045: as on the first start (ui/mode not stored; the first-start dialog opens).
+    Q_INVOKABLE void resetUiMode() const {
+        (void)m_app->settingsStore()->removeGroup(QStringLiteral("ui/mode"));
+        m_app->uiMode()->reload();
     }
     Q_INVOKABLE [[nodiscard]] QString setting(const QString& key) const {
         return m_app->settingsStore()->value(key).toString();
@@ -674,6 +680,12 @@ public slots:
         // The tests start in English whatever the system language is.
         if (!m_languageManager->apply(QStringLiteral("en"))) {
             qFatal("tst_gui: English could not be selected");
+        }
+        // Plan 0045: the tests start in the default mode, chosen (no first-start dialog);
+        // tst_settings resets it for the dialog test.
+        if (!m_app->settingsStore()->setValue(QStringLiteral("ui/mode"),
+                                              QStringLiteral("advanced"))) {
+            qFatal("tst_gui: ui/mode could not be set");
         }
         m_support.emplace(&*m_app, m_dir.path());
     }

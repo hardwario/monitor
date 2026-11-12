@@ -855,7 +855,12 @@ void AppViewModel::closeGlobalPage() { closeSettings(); }
 void AppViewModel::openSettings(const QString& sectionId, const QString& rowId) {
     m_tabs->openSettings();
     setCurrentTab(m_tabs->settingsRow());
-    (void)rowId; // A2
+    // Plan 0045 (ADR-0361): a section or row hidden by the mode is shown for this visit.
+    if (auto* settings =
+            qobject_cast<SettingsViewModel*>(globalPageViewModel(SettingsViewModel::pageId));
+        settings != nullptr) {
+        settings->openAt(sectionId, rowId);
+    }
     m_settingsSection = sectionId;
     settingsSectionRequested(sectionId); // signal: the page scrolls to the section
 }

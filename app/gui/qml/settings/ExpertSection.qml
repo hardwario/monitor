@@ -1,5 +1,6 @@
-// Settings → Advanced (plan/features/0033, ADR-0236): "Show expert maintenance actions" - Erase
-// everything, Recover and the LTE MCU maintenance on the Flash page. Off by default.
+// Settings → Expert (plan/features/0033, renamed "Advanced" → "Expert" by plan 0045, ADR-0362;
+// shown in Expert mode only). The switch "Show expert maintenance actions" of ADR-0236 became
+// Expert mode (ADR-0360).
 // Plan 0044 (ADR-0330): "Support server" - the relay of remote support sessions, empty = default.
 pragma ComponentBehavior: Bound
 
@@ -14,19 +15,6 @@ ColumnLayout {
     readonly property SettingsViewModel vm: AppViewModel.globalPageViewModel("settings") as SettingsViewModel
 
     spacing: Theme.spacingM
-
-    SettingsRow {
-        Layout.fillWidth: true
-        label: qsTr("Show expert maintenance actions")
-        description: qsTr("Erase everything, Recover and the LTE MCU maintenance on the Flash page. They can erase the serial number and the configuration of the device.")
-
-        Switch {
-            objectName: "expertActionsSwitch"
-            checked: section.vm.expertActions
-            Accessible.name: qsTr("Show expert maintenance actions")
-            onToggled: section.vm.expertActions = checked
-        }
-    }
 
     SettingsRow {
         Layout.fillWidth: true

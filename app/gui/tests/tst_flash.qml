@@ -88,7 +88,7 @@ TestCase {
         // Tall enough that every card is on screen for the clicks (the recent list grows).
         window.width = 1280;
         window.height = 1400;
-        verify(testSupport.setSetting("advanced/expertActions", false));
+        verify(testSupport.setSetting("ui/mode", "advanced"));
         verify(testSupport.configureTab(0, "app", 801000001, "Test Probe"));
         AppViewModel.showPage("flash");
         tryVerify(() => find("flashPage") !== null);
@@ -323,11 +323,11 @@ TestCase {
         verify(!find("maintenanceActions"));
         mouseClick(find("maintenanceHeader"));
         verify(find("maintenanceActions") !== null);
-        // ADR-0236: Erase everything and Recover only with the expert actions.
+        // ADR-0236 / ADR-0360: Erase everything and Recover only in Expert mode.
         verify(!find("eraseAllButton"));
         verify(!find("recoverButton"));
         verify(!find("maintenanceTargets"));
-        verify(testSupport.setSetting("advanced/expertActions", true));
+        verify(testSupport.setSetting("ui/mode", "expert"));
         tryVerify(() => find("eraseAllButton") !== null);
         verify(find("maintenanceTargets") !== null);
         waitForRendering(window.contentItem);
@@ -354,10 +354,10 @@ TestCase {
     }
 
     // Review F1/F2: the LTE MCU has no code-only erase; its erase-all and recover name the PIB.
-    // Plan 0033 (ADR-0236): the LTE MCU is chosen in Maintenance with the expert actions on.
+    // Plan 0033 (ADR-0236): the LTE MCU is chosen in Maintenance in Expert mode (ADR-0360).
     function test_lteMaintenance() {
         const flash = vm();
-        verify(testSupport.setSetting("advanced/expertActions", true));
+        verify(testSupport.setSetting("ui/mode", "expert"));
         mouseClick(find("maintenanceHeader"));
         verify(find("eraseCodeButton") !== null);
         tryVerify(() => find("maintenanceTarget_lte") !== null);
@@ -436,7 +436,7 @@ TestCase {
         const flash = vm();
         flash.source.loadFile(testSupport.writeHex("app.hex", 4096, true));
         tryVerify(() => flash.source.sourceState === FirmwareSourceViewModel.Ready, 5000);
-        verify(testSupport.setSetting("advanced/expertActions", true));
+        verify(testSupport.setSetting("ui/mode", "expert"));
         vm().maintenanceExpanded = true; // below the fold at 600 px
         tryVerify(() => find("maintenanceActions") !== null);
         waitForRendering(window.contentItem);

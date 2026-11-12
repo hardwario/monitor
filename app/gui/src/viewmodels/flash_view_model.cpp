@@ -9,12 +9,13 @@
 #include "hwio/device/profile.h"
 #include "hwio/firmware/program_progress.h"
 #include "pages/firmware_services.h"
-#include "settings_store.h"
 #include "viewmodels/dependency_status.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
 #include "viewmodels/firmware_source_view_model.h"
 #include "viewmodels/settings_view_model.h"
+#include "viewmodels/ui_mode.h"
+#include "viewmodels/ui_mode_controller.h"
 #include "workers/firmware_loader.h"
 
 #include <QLocale>
@@ -75,8 +76,9 @@ QString partNames(const device::TargetProfile& target) {
 
 } // namespace
 
-FlashViewModel::FlashViewModel(DeviceTabViewModel* tab, FirmwareServices& services)
-    : QObject(tab), m_tab(tab), m_services(services),
+FlashViewModel::FlashViewModel(DeviceTabViewModel* tab, FirmwareServices& services,
+                               UiModeController& mode)
+    : QObject(tab), m_tab(tab), m_services(services), m_mode(mode),
       // Qt parent ownership: this object.
       // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
       m_source(new FirmwareSourceViewModel(
@@ -109,13 +111,8 @@ FlashViewModel::FlashViewModel(DeviceTabViewModel* tab, FirmwareServices& servic
         maintenanceChanged(); // signal
         stateChanged();       // signal
     });
-    if (SettingsStore* store = m_services.settings(); store != nullptr) {
-        connect(store, &SettingsStore::valueChanged, this, [this](const QString& key) {
-            if (key == FirmwareServices::expertActionsKey) {
-                onExpertActionsChanged();
-            }
-        });
-    }
+    // Plan 0045 (ADR-0360): the expert actions follow the user mode.
+    connect(&m_mode, &UiModeController::modeChanged, this, &FlashViewModel::onExpertActionsChanged);
     connect(m_services.dependencies(), &DependencyStatus::nrfUtilChanged, this,
             &FlashViewModel::stateChanged);
     // 0021 (ADR-0166): "In the device" and, after an application flash, "Now in the device".
@@ -430,10 +427,7 @@ bool FlashViewModel::canRunMaintenance() const {
 
 // ---- plan 0033: expert maintenance actions (ADR-0236) and the LTE update (ADR-0234) ------------
 
-bool FlashViewModel::expertActions() const {
-    const SettingsStore* store = m_services.settings();
-    return store != nullptr && store->value(FirmwareServices::expertActionsKey).toBool();
-}
+bool FlashViewModel::expertActions() const { return m_mode.shows(UiMode::Expert); }
 
 void FlashViewModel::onExpertActionsChanged() {
     // Without the expert actions only the console target and a revealed MCU remain choosable.
