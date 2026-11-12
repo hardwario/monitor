@@ -5,6 +5,7 @@
 #include "cli_app.h"
 #include "cli_log.h"
 #include "command_collector.h"
+#include "console_learning.h"
 #include "console_ui.h"
 #include "guided_lte.h"
 #include "hwio/core/error.h"
@@ -12,6 +13,11 @@
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
 #include "hwio/core/version.h"
+#include "hwio/device/command_tree.h"
+#include "hwio/device/command_tree_cache.h"
+#include "hwio/device/command_tree_learner.h"
+#include "hwio/device/command_tree_source.h"
+#include "hwio/device/completer.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
 #include "hwio/device/console_session.h"
@@ -43,6 +49,7 @@
 #include <QLoggingCategory>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QStringLiteral>
 #include <QTimer>
 #include <QUrl>
@@ -514,6 +521,28 @@ Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
                                                 .limits = {},
                                                 .appVersion = std::string(buildInfo().version),
                                                 .code = std::nullopt});
+    // ADR-0364: the host learns the command tree as `chester app console` does (`info show`, the
+    // cached tree or `help`) and gives it to the session; a participant's learn request runs its
+    // silent `<command> -h`.
+    std::optional<ConsoleLearning> learning;
+    {
+        auto settings = Settings::openDefault();
+        learning.emplace(*session, session->profile().id, session->consoleTargetId(),
+                         !settings || settings->get(device::readCommandsOnConnectSetting),
+                         device::CommandTreeCache::defaultDirectory());
+    }
+    device::CommandTreeLearner& learner = learning->learner();
+    QObject::connect(&learner, &device::CommandTreeLearner::treeChanged, &host,
+                     [&host, &learner] { host.setCommandTree(learner.tree()); });
+    QObject::connect(&host, &remote::RemoteHost::learnRequested, &learner,
+                     [&learner](const QStringList& path) {
+                         std::vector<std::string> words;
+                         for (const QString& word : path) {
+                             words.push_back(toStdString(word));
+                         }
+                         learner.requestChildren(words);
+                     });
+    host.setCommandTree(learner.tree());
     bool ended = false;
     connectHostStatus(context, host);
     QObject::connect(&host, &remote::RemoteHost::ended, &host, [&] { ended = true; });
@@ -543,6 +572,7 @@ Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
     event(context, endEvent);
     status(context, hostError ? "Sharing ended: " + hostError->message : "Sharing ended.");
     operations.reset();
+    learning.reset(); // its queries leave the session before it closes
     session->close();
     view.printConsoleFile(session->consoleFile());
     view.printStopped();
@@ -565,6 +595,23 @@ Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
 }
 
 // ---- join ---------------------------------------------------------------------------------------
+
+// ADR-0364: the interactive joiner completes from the host's command tree; a command's
+// subcommands are asked from the host (tunnel `learn`). A web Terminal host sends none.
+class RemoteTreeSource final : public device::CommandTreeSource {
+public:
+    explicit RemoteTreeSource(remote::RemoteConsoleSession& session) : m_session(&session) {}
+    [[nodiscard]] std::shared_ptr<const device::CommandTree> tree() const override {
+        return m_session->commandTree();
+    }
+    void requestTopLevel() override {} // the host sends its tree by itself
+    void requestChildren(const std::vector<std::string>& path) override {
+        m_session->requestLearn(path);
+    }
+
+private:
+    remote::RemoteConsoleSession* m_session; // non-owning, outlives this object
+};
 
 std::optional<tunnel::OpKind> requestedOperation(const JoinCommandOptions& options) {
     if (!options.flash.empty()) {
@@ -782,6 +829,10 @@ Result<CommandResult> join(const Context& context, const JoinCommandOptions& opt
     ui.linger =
         std::chrono::milliseconds(static_cast<std::int64_t>(options.lingerSeconds * 1000.0));
     ui.prompt = "remote:~$ ";
+    RemoteTreeSource treeSource(session);
+    if (interactive) {
+        ui.learner = &treeSource; // ADR-0364
+    }
     const Status consoleStatus = runConsole(consoleContext, session, view, ui);
     session.close();
     view.printStopped();

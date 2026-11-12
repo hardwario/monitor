@@ -206,7 +206,9 @@ other input line keeps sharing after the idle warning. Without a terminal on std
 ends at the first join. `--deny-operations` denies every operation request without asking. An allowed LTE update runs
 the terminal flow of `hwio chester lte flash --guided` (with `--nrfutil` if given): follow its prompts and move the
 cable when it asks; if it ends without writing the application back, support gets `remote.application_not_restored`.
-Ctrl+C ends sharing
+The host learns the device's command list as `chester app console` does and sends it to an allowed HARDWARIO Monitor
+joiner, whose interactive console completes commands with Tab from it (subcommands are read by the host's silent
+`<command> -h`, not shown in the console). Ctrl+C ends sharing
 (exit code 130). With `--json` the host prints `{"type":"remote","event":"sharing","code","link","relay"}`, the
 questions (`"event":"question"`) and `{"type":"remote","event":"ended","error"}` between the console events.
 

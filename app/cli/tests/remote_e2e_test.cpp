@@ -569,4 +569,59 @@ TEST_F(RemoteCli, HostRunsTheGuidedLteUpdate) {
 }
 #endif // _WIN32
 
+// ADR-0364: `remote host` learns its command tree (`help`) and sends it to an allowed joiner; a
+// joiner's learn request makes it ask `<command> -h` silently and send the grown tree.
+TEST_F(RemoteCli, HostSendsItsCommandTreeAndLearnsForTheJoiner) {
+    {
+        QFile file(home() + QStringLiteral("/scenario.json"));
+        ASSERT_TRUE(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        file.write(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+            "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "boot banner\n"}],
+                    "responses": {
+                      "help": "Please press the <Tab> button to see all available commands.\nYou can try to call commands with <-h> or <--help> parameter for more information.\n\nAvailable commands:\n  app   :Application commands\n  info  :Info commands\n",
+                      "app -h": "app - Application commands\nSubcommands:\n  config  :Configuration commands\n"}}}]})");
+    }
+    QProcessEnvironment env = fakeEnvironment();
+    env.insert(QStringLiteral("HWIO_TEST_INTERACTIVE"), QStringLiteral("1"));
+    FakeRelay relay;
+    QStringList args{QStringLiteral("remote"), QStringLiteral("host")};
+    args << relayArgs(relay);
+    Child child(args, env);
+    ASSERT_TRUE(
+        runUntil([&] { return child.err().find("Session code: ") != std::string::npos; }, 30s))
+        << child.err();
+    const std::string err = child.err();
+    const auto target =
+        hwio::remote::parseJoinInput(err.substr(err.find("Session code: ") + 14, 7));
+    ASSERT_TRUE(target.has_value());
+    hwio::remote::RemoteConsoleSession joiner(
+        hwio::remote::JoinOptions{.relay = relay.url(),
+                                  .code = target->code,
+                                  .appVersion = "2.1.0-support",
+                                  .relayLimits = {},
+                                  .transcript = {},
+                                  .idleNoticeAfter = std::chrono::minutes(30),
+                                  .consoleLog = nullptr});
+    ASSERT_TRUE(runUntil(
+        [&] { return child.err().find("Allow them to send commands") != std::string::npos; }, 30s))
+        << child.err();
+    child.write("y\n");
+    const std::vector<std::string> app{"app"};
+    ASSERT_TRUE(runUntil(
+        [&] { return joiner.commandTree() && joiner.commandTree()->find(app) != nullptr; }, 30s))
+        << child.err();
+    joiner.requestLearn(app);
+    const std::vector<std::string> config{"app", "config"};
+    ASSERT_TRUE(runUntil(
+        [&] { return joiner.commandTree() && joiner.commandTree()->find(config) != nullptr; }, 30s))
+        << child.err();
+    // The help queries are silent: support sees no `help` / `app -h` in the console.
+    for (const auto& line : joiner.log().linesSince(0)) {
+        EXPECT_NE(line.text, "app -h");
+        EXPECT_NE(line.text, "help");
+    }
+    child.stop();
+    ASSERT_TRUE(child.finish());
+}
+
 } // namespace

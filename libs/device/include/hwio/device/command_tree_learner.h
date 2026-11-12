@@ -22,6 +22,7 @@
 
 #include "hwio/device/command_tree.h"
 #include "hwio/device/command_tree_cache.h"
+#include "hwio/device/command_tree_source.h"
 #include "hwio/device/shell_query.h"
 
 #include <QObject>
@@ -37,7 +38,7 @@
 
 namespace hwio::device {
 
-class CommandTreeLearner : public QObject {
+class CommandTreeLearner : public QObject, public CommandTreeSource {
     Q_OBJECT
 
 public:
@@ -49,10 +50,10 @@ public:
     void start(std::optional<FirmwareKey> key, bool readOnConnect);
     // Forgets the tree (disconnect).
     void reset();
-    void requestTopLevel();
-    void requestChildren(const std::vector<std::string>& path);
+    void requestTopLevel() override;
+    void requestChildren(const std::vector<std::string>& path) override;
 
-    [[nodiscard]] std::shared_ptr<const CommandTree> tree() const { return m_tree; }
+    [[nodiscard]] std::shared_ptr<const CommandTree> tree() const override { return m_tree; }
     [[nodiscard]] bool reading() const noexcept { return m_pendingQueries > 0; }
 
 signals:

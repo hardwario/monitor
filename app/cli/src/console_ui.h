@@ -19,7 +19,7 @@
 #include "cli_app.h"
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
-#include "hwio/device/command_tree_learner.h"
+#include "hwio/device/command_tree_source.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/session_events.h"
@@ -114,10 +114,11 @@ struct ConsoleUiOptions {
     std::span<const std::string_view> sensitivePrefixes;
     bool rememberCommands = true;
     // Plan 0021 (ADR-0170), interactive only: replxx hints from the history (console/suggestions,
-    // --no-suggestions) and Tab completion from the device command tree the learner learns on the
+    // --no-suggestions) and Tab completion from the device command tree the learner (or a remote
+    // session's tree, plan 0044 ADR-0364) learns on the
     // main thread (nullptr = none; it must outlive runConsole()).
     bool suggestions = false;
-    device::CommandTreeLearner* learner = nullptr;
+    device::CommandTreeSource* learner = nullptr;
     std::string prompt = "uart:~$ "; // the local prompt (BLE: the profile's shell prompt)
     // Plain / --json mode: output is collected this long after the end of input (--linger).
     std::chrono::milliseconds linger{1000};
