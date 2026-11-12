@@ -15,19 +15,23 @@
 #include "remote_test_support.h"
 
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLatin1Char>
 #include <QList>
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
 #include <QtContainerFwd>
+#include <QtTypes>
 
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <expected>
 #include <format>
 #include <initializer_list>
@@ -669,27 +673,76 @@ TEST(RemoteHostCommands, TreeAfterAllowAndLearnLimits) {
     EXPECT_TRUE(f.console.hasEvent("Help of 3 command(s) read for support's autocomplete."));
 }
 
-// ADR-0364: a tree too large for a joiner's event limit (64 KiB) goes without its help texts.
-TEST(RemoteHostCommands, LargeTreeWithoutHelpTexts) {
-    FakeRelay relay;
-    HostFixture f(optionsFor(relay));
+std::shared_ptr<const device::CommandTree> wideTree(int commands) {
     device::CommandTree tree;
     std::vector<device::CommandEntry> entries;
-    entries.reserve(400);
-    for (int i = 0; i < 400; ++i) {
+    entries.reserve(static_cast<std::size_t>(commands));
+    for (int i = 0; i < commands; ++i) {
         entries.push_back(device::CommandEntry{.name = std::format("command{}", i),
                                                .help = std::string(250, 'h')});
     }
-    ASSERT_TRUE(tree.setChildren({}, entries));
-    f.host.setCommandTree(std::make_shared<const device::CommandTree>(std::move(tree)));
+    EXPECT_TRUE(tree.setChildren({}, entries));
+    return std::make_shared<const device::CommandTree>(std::move(tree));
+}
+
+qsizetype commandsDataBytes(const device::CommandTree& tree, bool withHelp) {
+    return QJsonDocument(
+               tunnel::encodeCommands(tree, withHelp).value(QStringLiteral("data")).toObject())
+        .toJson(QJsonDocument::Compact)
+        .size();
+}
+
+// ADR-0365: a tree within the joiner's bound (256 KiB, far over the old 64 KiB event limit) goes
+// with its help texts.
+TEST(RemoteHostCommands, LargeTreeWithHelpTexts) {
+    FakeRelay relay;
+    HostFixture f(optionsFor(relay));
+    const auto tree = wideTree(800);
+    ASSERT_GT(commandsDataBytes(*tree, true), 200 * 1024);
+    ASSERT_LE(commandsDataBytes(*tree, true), tunnel::maxCommandsBytes);
+    f.host.setCommandTree(tree);
     f.host.start();
     ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
     RawParticipant monitor(relay.url(), nsp);
     ASSERT_TRUE(runUntil([&] { return commandsOf(monitor).size() == 1; }));
     const auto received = commandsOf(monitor).front().tree;
-    EXPECT_EQ(received->nodeCount(), 400U);
+    EXPECT_EQ(received->nodeCount(), 800U);
+    const std::vector<std::string> last{"command799"};
+    EXPECT_EQ(received->find(last)->help, std::string(250, 'h'));
+}
+
+// ADR-0365 safety net: a tree over the joiner's bound goes without its help texts.
+TEST(RemoteHostCommands, TreeOverTheJoinerBoundWithoutHelpTexts) {
+    FakeRelay relay;
+    HostFixture f(optionsFor(relay));
+    const auto tree = wideTree(2000);
+    ASSERT_GT(commandsDataBytes(*tree, true), tunnel::maxCommandsBytes);
+    f.host.setCommandTree(tree);
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return commandsOf(monitor).size() == 1; }));
+    const auto received = commandsOf(monitor).front().tree;
+    EXPECT_EQ(received->nodeCount(), 2000U);
     const std::vector<std::string> first{"command0"};
     EXPECT_EQ(received->find(first)->help, "");
+}
+
+// ADR-0365: a host keeps the 64 KiB limit for incoming events.
+TEST(RemoteHost, DropsIncomingEventsOver64KiB) {
+    FakeRelay relay;
+    HostFixture f(optionsFor(relay));
+    QList<Error> warnings;
+    QObject::connect(&f.host, &RemoteHost::warning,
+                     [&](const Error& error) { warnings.append(error); });
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant joiner(relay.url(), nsp);
+    ASSERT_TRUE(joiner.waitConnected());
+    joiner.emitEvent(QStringLiteral("write"), QString(qsizetype{70} * 1024, QLatin1Char('x')));
+    ASSERT_TRUE(runUntil([&] { return warnings.size() == 1; }));
+    EXPECT_EQ(warnings.front().code, ErrorCode::RemoteProtocolError);
+    EXPECT_EQ(f.host.state(), HostState::Sharing);
 }
 
 } // namespace

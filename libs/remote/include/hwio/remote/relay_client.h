@@ -12,7 +12,8 @@
 // destructor). RelayClient itself is a QObject facade on the owner thread; every member function
 // is called there and every signal is emitted there (queued, in the worker's order).
 //
-// Limits (plan 0044 § Limits): incoming event 64 KiB (bigger: dropped, warning; the
+// Limits (plan 0044 § Limits): incoming event RelayConfig::incomingEventBytes, 64 KiB for a host,
+// 512 KiB for a joiner (ADR-0365; bigger: dropped, warning; the
 // maxOversizedEvents-th one ends the connection with remote.protocol_error; so do
 // maxProtocolErrors malformed packets); the outgoing queue holds at most outgoingQueueBytes
 // (UTF-8 bytes of the encoded packets, counting what the socket has not written yet): when it is
@@ -28,6 +29,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/device/session_events.h" // Q_DECLARE_METATYPE(hwio::Error)
+#include "hwio/remote/protocol.h"
 #include "hwio/remote/session_code.h"
 
 #include <QJsonValue>
@@ -68,6 +70,9 @@ struct RelayConfig {
     QUrl relay; // validated by parseRelayUrl()
     SessionCode code = SessionCode::generate();
     RelayLimits limits;
+    // Set by the role (ADR-0365): hostIncomingEventBytes for RemoteHost, joinerIncomingEventBytes
+    // for RemoteConsoleSession (protocol.h).
+    std::size_t incomingEventBytes = hostIncomingEventBytes;
 };
 
 namespace detail {

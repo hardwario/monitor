@@ -19,6 +19,7 @@
 #include <QtTypes>
 
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <format>
@@ -105,8 +106,8 @@ QString encode(PacketType type, QStringView data) {
 
 namespace socketio {
 
-Result<Packet> parsePacket(QStringView text) {
-    if (std::cmp_greater(text.size(), maxIncomingEventBytes)) {
+Result<Packet> parsePacket(QStringView text, std::size_t maxChars) {
+    if (std::cmp_greater(text.size(), maxChars)) {
         return protocolError(std::format("Socket.IO packet of {} characters", text.size()));
     }
     if (text.isEmpty()) {

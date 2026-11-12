@@ -57,7 +57,7 @@ constexpr const char* kDroppedLinesText =
     QT_TRANSLATE_N_NOOP("hwio::remote", "… %n line(s) dropped …");
 
 // QWebSocket refuses bigger frames (the relay's own maxPayload is 1 MB); smaller ones over
-// maxIncomingEventBytes are dropped by the worker with a warning.
+// RelayConfig::incomingEventBytes are dropped by the worker with a warning.
 constexpr qint64 maxSocketMessageBytes = 1024LL * 1024;
 
 // shutdown(): a CONNECT the relay refuses (no ^/\d+$ namespace) with a CONNECT_ERROR, without
@@ -330,13 +330,13 @@ void RelayWorker::handleEngineIo(const QString& message) {
 }
 
 void RelayWorker::handleSocketIo(const QString& data) {
-    if (std::cmp_greater(data.size(), maxIncomingEventBytes) ||
-        std::cmp_greater(data.toUtf8().size(), maxIncomingEventBytes)) {
+    const std::size_t limit = m_config.incomingEventBytes;
+    if (std::cmp_greater(data.size(), limit) || std::cmp_greater(data.toUtf8().size(), limit)) {
         protocolProblem(
             protocol(std::format("incoming event of {} characters dropped", data.size())), true);
         return;
     }
-    auto packet = socketio::parsePacket(data);
+    auto packet = socketio::parsePacket(data, limit);
     if (!packet) {
         protocolProblem(std::move(packet).error(), false);
         return;

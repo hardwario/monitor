@@ -19,6 +19,7 @@
 #include "remote_test_support.h"
 
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QObject>
@@ -34,6 +35,7 @@
 #include <chrono>
 #include <cstdint>
 #include <expected>
+#include <format>
 #include <memory>
 #include <optional>
 #include <string>
@@ -364,6 +366,38 @@ TEST(RemoteSession, CommandTreeAndLearn) {
     host.setCommandTree(std::make_shared<const device::CommandTree>(tree));
     const std::vector<std::string> config{"app", "config"};
     ASSERT_TRUE(runUntil([&] { return joiner.commandTree()->find(config) != nullptr; }));
+}
+
+// ADR-0365: a joiner accepts a host's ~256 KiB command tree with its help texts (an event far over
+// the host's 64 KiB limit).
+TEST(RemoteSession, LargeCommandTreeWithHelpTexts) {
+    FakeRelay relay;
+    FakeConsole console;
+    ScriptedConsent consent;
+    RemoteHost host(console, consent, nullptr, hostFor(relay));
+    device::CommandTree tree;
+    std::vector<device::CommandEntry> entries;
+    entries.reserve(920);
+    for (int i = 0; i < 920; ++i) {
+        entries.push_back(device::CommandEntry{.name = std::format("command{}", i),
+                                               .help = std::string(250, 'h')});
+    }
+    ASSERT_TRUE(tree.setChildren({}, entries));
+    const qsizetype bytes =
+        QJsonDocument(tunnel::encodeCommands(tree, true).value(QStringLiteral("data")).toObject())
+            .toJson(QJsonDocument::Compact)
+            .size();
+    ASSERT_GT(bytes, 250 * 1024);
+    ASSERT_LE(bytes, tunnel::maxCommandsBytes);
+    host.setCommandTree(std::make_shared<const device::CommandTree>(std::move(tree)));
+    host.start();
+    ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
+    RemoteConsoleSession joiner(joinFor(relay));
+    ASSERT_TRUE(runUntil([&] { return joiner.commandTree() != nullptr; }));
+    EXPECT_EQ(joiner.commandTree()->nodeCount(), 920U);
+    const std::vector<std::string> last{"command919"};
+    ASSERT_NE(joiner.commandTree()->find(last), nullptr);
+    EXPECT_EQ(joiner.commandTree()->find(last)->help, std::string(250, 'h'));
 }
 
 } // namespace

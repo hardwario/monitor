@@ -190,7 +190,10 @@ void RemoteHost::start() {
 
 void RemoteHost::connectRelay() {
     ++m_codeTries;
-    RelayConfig config{.relay = m_options.relay, .code = m_code, .limits = m_options.limits.relay};
+    RelayConfig config{.relay = m_options.relay,
+                       .code = m_code,
+                       .limits = m_options.limits.relay,
+                       .incomingEventBytes = hostIncomingEventBytes};
     m_relay = std::make_unique<RelayClient>(std::move(config));
     connect(m_relay.get(), &RelayClient::connected, this, &RemoteHost::onRelayConnected);
     connect(m_relay.get(), &RelayClient::connectionLost, this, [this](const Error& /*error*/) {
@@ -478,13 +481,24 @@ void RemoteHost::sendCommands() {
         return;
     }
     m_sentTree = m_commandTree;
-    // A Monitor joiner drops larger events: the tree without its help texts then.
+    // ADR-0365: a Monitor joiner accepts events up to joinerIncomingEventBytes, so a tree within
+    // the joiner's tunnel bound (tunnel::maxCommandsBytes, which it checks on `data`) goes with its
+    // help texts. Safety net (a bigger tree): without them, else not at all.
     constexpr std::size_t eventOverhead = 1024;
     for (const bool withHelp : {true, false}) {
         const QJsonObject at = tunnel::encodeCommands(*m_commandTree, withHelp);
-        if (std::cmp_less_equal(QJsonDocument(at).toJson(QJsonDocument::Compact).size() +
-                                    static_cast<qsizetype>(eventOverhead),
-                                maxIncomingEventBytes)) {
+        const qsizetype bytes = QJsonDocument(at).toJson(QJsonDocument::Compact).size();
+        const qsizetype dataBytes = QJsonDocument(at.value(QStringLiteral("data")).toObject())
+                                        .toJson(QJsonDocument::Compact)
+                                        .size();
+        if (std::cmp_less_equal(dataBytes, tunnel::maxCommandsBytes) &&
+            std::cmp_less_equal(bytes + static_cast<qsizetype>(eventOverhead),
+                                joinerIncomingEventBytes)) {
+            if (!withHelp) {
+                qCWarning(log::lcRemote)
+                    << "Command tree sent without help texts: too large for the relay"
+                    << m_commandTree->nodeCount();
+            }
             m_relay->emitEvent(QStringLiteral("at"), at, false);
             return;
         }

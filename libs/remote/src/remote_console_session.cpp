@@ -12,6 +12,7 @@
 #include "hwio/device/line_assembler.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
+#include "hwio/remote/protocol.h"
 #include "hwio/remote/relay_client.h"
 #include "hwio/remote/transcript.h"
 #include "hwio/remote/tunnel.h"
@@ -60,8 +61,11 @@ RemoteConsoleSession::RemoteConsoleSession(JoinOptions options)
             emit idleNotice();
         }
     });
-    m_relay = std::make_unique<RelayClient>(RelayConfig{
-        .relay = m_options.relay, .code = m_options.code, .limits = m_options.relayLimits});
+    m_relay = std::make_unique<RelayClient>(
+        RelayConfig{.relay = m_options.relay,
+                    .code = m_options.code,
+                    .limits = m_options.relayLimits,
+                    .incomingEventBytes = joinerIncomingEventBytes}); // ADR-0365
     connect(m_relay.get(), &RelayClient::connected, this, [this](bool reconnected) {
         if (reconnected) {
             // The host sees a new join: it asks the customer again (ADR-0335).

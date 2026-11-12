@@ -357,7 +357,7 @@ Steps:
 - [x] B3 CLI host feeds its tree; CLI interactive joiner completion; e2e test
 - [x] C5 GUI: host tab feeds the tree; remote tab completion and suggestions; Qt Quick test (completion in a remote
       tab after the host's tree arrives); docs `remote-support.md` ×5
-- [ ] A8 Joiner incoming event limit 512 KiB, host 64 KiB; host sends the whole tree when it fits 512 KiB (ADR-0365);
+- [x] A8 Joiner incoming event limit 512 KiB, host 64 KiB; host sends the whole tree when it fits 512 KiB (ADR-0365);
       unit tests (joiner accepts a 256 KiB tree with help texts, host still drops > 64 KiB, joiner drops > 512 KiB)
 
 ### Implementation notes (2026-11-12, amendments ADR-0363 / ADR-0364)
@@ -384,6 +384,13 @@ Details filled in while implementing A6–C5 that the amendments did not fix; co
 - **`commands` size:** superseded by ADR-0365 (user decision 2026-11-12): a joiner accepts incoming events up to
   512 KiB, so the host sends the whole tree with help texts; the fallback without help texts stays as a logged safety
   net. The joiner validates the 256 KiB / 4000 nodes / depth 8 bounds as specified.
+- **Event limit by role (A8, ADR-0365):** `RelayConfig::incomingEventBytes` (default `hostIncomingEventBytes`,
+  64 KiB); `RemoteHost` sets it to the host value, `RemoteConsoleSession` to `joinerIncomingEventBytes` (512 KiB),
+  so the GUI remote tab and `hwio remote join` get it without new options. `socketio::parsePacket` takes the limit
+  (default 512 KiB, the largest any participant accepts). The host sends the tree with help texts when its tunnel
+  `data` fits the joiner's unchanged 256 KiB bound (`maxCommandsBytes`, which is stricter than the 512 KiB event:
+  objects are not escaped twice) and the event fits 512 KiB; a bigger tree (the CommandTree allows 2000 nodes with
+  256-byte help texts) goes without help texts with a logged warning, or not at all.
 - **Joiner `learn`:** each path once, again after 10 s (the host may have rate-limited it), at most 200 paths.
 - **CLI:** `device::CommandTreeSource` (implemented by `CommandTreeLearner` and the remote joiner's adapter) feeds
   the console's completion; `remote host` now learns the tree (`info show`, cache or `help`) like `chester app

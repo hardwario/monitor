@@ -41,8 +41,9 @@
 //
 // Autocomplete (ADR-0364): setCommandTree() gives the host's learned command tree (the GUI tab's
 // ConsoleViewModel, the CLI host's learner, on every change); after a join is allowed, and on
-// every change while allowed (coalesced), it is sent as tunnel `commands`, without help texts when
-// it would not fit the relay event size a joiner accepts (maxIncomingEventBytes). A tunnel `learn`
+// every change while allowed (coalesced), it is sent as tunnel `commands` with its help texts (a
+// joiner accepts events up to joinerIncomingEventBytes, ADR-0365; should it not fit, it goes
+// without help texts, logged, as a safety net). A tunnel `learn`
 // of an allowed participant for a known path, at most learnPerSecond and learnPerSession, emits
 // learnRequested() (the owner runs its silent `<path> -h` query and sets the grown tree);
 // others are dropped. Not audited one by one; their count is in the audit line at the end.
