@@ -23,6 +23,8 @@ Proposed palette (ADR-0047). The dark theme keeps the old app's accent and log c
 | `textMuted` | `#57606A` | `#9BA3B4` | secondary text, timestamps, line numbers |
 | `accent` | `#0B5FCC` | `#79B8FF` | primary buttons, focus ring, links, selected rail item |
 | `onAccent` | `#FFFFFF` | `#0B1A2E` | text on accent |
+| `accentFill` | `#0B5FCC` | `#1D63D8` | filled accent controls: primary buttons, checked segments and toggles (ADR-0367) |
+| `textOnAccentFill` | `#FFFFFF` | `#FFFFFF` | text on `accentFill` (ADR-0367) |
 | `success` | `#1A7F37` | `#56D364` | connected dot, success card |
 | `warning` | `#8A5A00` | `#FFAB70` | warning level, warnings |
 | `error` | `#C4232E` | `#FF7B86` | error level, error panel accent, destructive buttons |
@@ -47,7 +49,7 @@ Proposed palette (ADR-0047). The dark theme keeps the old app's accent and log c
 | error | 5.8 | 5.6 | 5.4 | 6.6 | 7.0 | 5.9 |
 | success | 5.1 | 4.9 | 4.7 | 8.5 | 9.0 | 7.6 |
 
-`onAccent` on `accent`: 6.0 (light), 8.4 (dark). `text` on `findMatch`: 12.8 (light), 5.9 (dark).
+`onAccent` on `accent`: 6.0 (light), 8.4 (dark). `textOnAccentFill` on `accentFill`: 6.0 (light), 5.5 (dark); checked by tst_components (ADR-0367). `text` on `findMatch`: 12.8 (light), 5.9 (dark).
 Colour is never the only signal: log levels also show a level tag column (`D I W E`), the connection state has a
 text label, and matches have an outline in high-contrast mode.
 

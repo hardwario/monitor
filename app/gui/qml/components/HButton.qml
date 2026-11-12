@@ -14,11 +14,13 @@ Button {
     property string iconName: ""
     property string toolTipText: ""
 
-    readonly property color baseColor: control.kind === "primary" ? Theme.accent
+    // ADR-0367: primary is a filled accent control (accentFill / textOnAccentFill).
+    readonly property color baseColor: control.kind === "primary" ? Theme.accentFill
                                      : control.kind === "danger" ? Theme.error
                                      : control.kind === "ghost" ? "transparent" : Theme.bg
-    readonly property color contentColor: control.kind === "primary" || control.kind === "danger"
-                                          ? Theme.onAccent : (control.kind === "ghost" ? Theme.accent : Theme.text)
+    readonly property color contentColor: control.kind === "primary" ? Theme.textOnAccentFill
+                                        : control.kind === "danger" ? Theme.onAccent
+                                        : control.kind === "ghost" ? Theme.accent : Theme.text
 
     implicitHeight: Theme.controlHeight
     implicitWidth: Math.max(64, implicitContentWidth + leftPadding + rightPadding)
@@ -71,7 +73,7 @@ Button {
         Rectangle {
             anchors.fill: parent
             radius: parent.radius
-            color: control.kind === "primary" || control.kind === "danger" ? Theme.onAccent : Theme.text
+            color: control.kind === "primary" || control.kind === "danger" ? control.contentColor : Theme.text
             opacity: control.down || control.checked && control.kind === "normal" ? 0.14 : (control.hovered ? 0.07 : 0)
 
             Behavior on opacity {

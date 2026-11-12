@@ -63,12 +63,12 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             font: Theme.fontUiSmall
-            color: segment.checked ? Theme.onAccent : Theme.text
+            color: segment.checked ? Theme.textOnAccentFill : Theme.text
         }
 
         background: Rectangle {
             radius: Theme.radiusS
-            color: segment.checked ? Theme.accent : "transparent"
+            color: segment.checked ? Theme.accentFill : "transparent" // ADR-0367
 
             FocusRing {
                 control: segment
@@ -102,12 +102,12 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             font: Theme.fontMonoSmall
-            color: toggle.checked ? Theme.onAccent : Theme.textMuted
+            color: toggle.checked ? Theme.textOnAccentFill : Theme.textMuted
         }
 
         background: Rectangle {
             radius: Theme.radiusS
-            color: toggle.checked ? Theme.accent : "transparent"
+            color: toggle.checked ? Theme.accentFill : "transparent" // ADR-0367
 
             FocusRing {
                 control: toggle

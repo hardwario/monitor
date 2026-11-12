@@ -23,7 +23,8 @@ ApplicationWindow {
     font.pixelSize: 13
     font.family: "Inter"
     Material.theme: dialog.darkTheme ? Material.Dark : Material.Light
-    Material.accent: dialog.darkTheme ? "#79B8FF" : "#0B5FCC"
+    // The fill of the highlighted Quit button: Theme.accentFill (ADR-0367; no Theme here).
+    Material.accent: dialog.darkTheme ? "#1D63D8" : "#0B5FCC"
 
     ColumnLayout {
         anchors.fill: parent
