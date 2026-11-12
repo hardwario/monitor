@@ -40,9 +40,12 @@ Settings › General, first row, visible in every mode:
 **Mode** — `Basic` · `Advanced` · `Expert` (segmented control), with one line under it that describes the selected
 mode:
 
-- Basic: "The essentials: language, look and console files."
-- Advanced: "Also J-Link, nRF Util, AI assistants and console options."
-- Expert: "Everything, including timing options and expert maintenance actions."
+- Basic: "Watch the console and flash firmware. Only the essential settings."
+- Advanced: "Develop with CHESTER: J-Link and nRF Util options, AI assistants, console tools."
+- Expert: "Full control, including timing options and maintenance actions that can erase the device's identity."
+
+(Wording changed 2026-11-12 after review: the first-start dialog asks how the user wants to use Monitor, so the
+descriptions say who each mode is for, not only which settings appear. The same texts are used in Settings.)
 
 Changing the mode takes effect at once (sections appear / disappear, the Flash page's maintenance updates).
 
