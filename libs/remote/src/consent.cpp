@@ -73,9 +73,11 @@ QString operationPhaseText(std::string_view phase) {
         {.id = "download", .text = QT_TRANSLATE_NOOP("hwio::remote", "downloading the firmware")},
         {.id = "connect-app",
          .text = QT_TRANSLATE_NOOP("hwio::remote", "waiting for the J-Link on the APP connector")},
-        // Plan 0046 (ADR-0366): the customer confirms before the application is erased.
+        // Plan 0046: confirmed before the application is erased (the customer, ADR-0366, or
+        // support, ADR-0368).
         {.id = "confirm",
-         .text = QT_TRANSLATE_NOOP("hwio::remote", "waiting for the customer to continue")},
+         .text =
+             QT_TRANSLATE_NOOP("hwio::remote", "waiting for the confirmation before the erase")},
         {.id = "backup",
          .text = QT_TRANSLATE_NOOP("hwio::remote", "saving a copy of the application")},
         {.id = "backup-failed",

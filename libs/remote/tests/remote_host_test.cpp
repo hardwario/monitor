@@ -580,7 +580,7 @@ TEST(RemoteHostOperations, LteUpdateAskedWithTheRecommendedFirmware) {
     EXPECT_TRUE(o.f.console.hasEvent("Update the LTE firmware to HARDWARIO LTE firmware 1.7.0"));
     // Plan 0046 (ADR-0366): the joiner's text while the customer confirms.
     EXPECT_EQ(operationPhaseText("confirm"),
-              QStringLiteral("waiting for the customer to continue"));
+              QStringLiteral("waiting for the confirmation before the erase"));
 }
 
 // ADR-0368: support answers the LTE update's questions - only a request with `questions` gets
