@@ -7,6 +7,7 @@
 #include "fake_relay.h"
 #include "hex_builder.h"
 #include "http_fixture.h"
+#include "hwio/core/error.h"
 #include "hwio/device/console_line.h"
 #include "hwio/remote/host_operations.h"
 #include "hwio/remote/remote_console_session.h"
@@ -35,9 +36,11 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <chrono>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {

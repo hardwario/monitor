@@ -3,7 +3,9 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/result.h"
 #include "hwio/core/version.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/profile.h"
@@ -24,6 +26,7 @@
 #include <QtCore/qnamespace.h>
 
 #include <chrono>
+#include <expected>
 #include <memory>
 #include <optional>
 #include <string>

@@ -2337,12 +2337,12 @@
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="99"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="116"/>
         <source>Settings were created by a newer version and are read-only.</source>
         <translation>Ustawienia zostały utworzone przez nowszą wersję i są tylko do odczytu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="119"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="136"/>
         <source>The setting was not saved: %1</source>
         <translation>Ustawienie nie zostało zapisane: %1</translation>
     </message>
@@ -5734,92 +5734,92 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="168"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="169"/>
         <source>another operation started on the device.</source>
         <translation>na urządzeniu uruchomiono inną operację.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="169"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="170"/>
         <source>Run the batch file again when it has finished.</source>
         <translation>Uruchom plik wsadowy ponownie po jej zakończeniu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="246"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="247"/>
         <source>the device disconnected.</source>
         <translation>urządzenie zostało rozłączone.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="247"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="248"/>
         <source>Reconnect and run the batch file again.</source>
         <translation>Połącz się ponownie i jeszcze raz uruchom plik wsadowy.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="261"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="262"/>
         <source>The batch stopped after %1 of %2 commands.</source>
         <translation>Wsad zatrzymał się po %1 z %2 poleceń.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="274"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="275"/>
         <source>The device was reset and halted.</source>
         <translation>Urządzenie zostało zresetowane i zatrzymane.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="275"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="276"/>
         <source>The device was reset.</source>
         <translation>Urządzenie zostało zresetowane.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="357"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="358"/>
         <source>%1 — the console resumes automatically</source>
         <translation>%1 — konsola wznowi działanie automatycznie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="360"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="361"/>
         <source>This target has no console</source>
         <translation>Ten cel nie ma konsoli</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="363"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="364"/>
         <source>Waiting for pairing…</source>
         <translation>Oczekiwanie na sparowanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="364"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="365"/>
         <source>Connecting…</source>
         <translation>Łączenie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="366"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="367"/>
         <source>Not connected</source>
         <translation>Nie połączono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="736"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="737"/>
         <source>The file could not be saved.</source>
         <translation>Nie można zapisać pliku.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="737"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="738"/>
         <source>the folder is not writable or the disk is full.</source>
         <translation>nie można zapisywać w folderze lub dysk jest pełny.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="738"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="739"/>
         <source>Choose another folder.</source>
         <translation>Wybierz inny folder.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="758"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="759"/>
         <source>The view was saved to %1.</source>
         <translation>Widok zapisano w %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="787"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="788"/>
         <source>Sends each line of a UTF-8 text file to the device as a shell command, one line every %1 ms. Empty lines and lines starting with # are skipped. At most %2 commands, %3 MiB per file and %4 bytes per line.</source>
         <translation>Wysyła każdy wiersz pliku tekstowego UTF-8 do urządzenia jako polecenie powłoki, jeden wiersz co %1 ms. Puste wiersze i wiersze zaczynające się od # są pomijane. Najwyżej %2 poleceń, %3 MiB na plik i %4 bajtów na wiersz.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="815"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="816"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Skopiowano do schowka pierwszy %n wiersz (limit kopiowania).</numerusform>
@@ -5828,7 +5828,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="830"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="831"/>
         <source>There is no console log file for this device yet.</source>
         <translation>Dla tego urządzenia nie ma jeszcze pliku dziennika konsoli.</translation>
     </message>
@@ -6493,178 +6493,178 @@
 <context>
     <name>hwio::gui::LteUpdateWizard</name>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="96"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="98"/>
         <source>Update the LTE firmware</source>
         <translation>Aktualizacja firmware LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
         <source>Firmware</source>
         <translation>Firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="172"/>
         <source>APP connector</source>
         <translation>Złącze APP</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
         <source>Stop the application</source>
         <translation>Zatrzymanie aplikacji</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="172"/>
         <source>LTE connector</source>
         <translation>Złącze LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="172"/>
         <source>Update</source>
         <translation>Aktualizacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="173"/>
         <source>Application</source>
         <translation>Aplikacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="173"/>
         <source>Done</source>
         <translation>Gotowe</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="259"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="261"/>
         <source>LTE firmware updated</source>
         <translation>Firmware LTE zaktualizowany</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="260"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="262"/>
         <source>The LTE MCU has its new firmware and the application runs again. The console reconnects.</source>
         <translation>MCU LTE ma nowy firmware, a aplikacja znów działa. Konsola połączy się ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="264"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="266"/>
         <source>Open console</source>
         <translation>Otwórz konsolę</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="272"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="274"/>
         <source>Choose the LTE firmware</source>
         <translation>Wybierz firmware LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="273"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="275"/>
         <source>Next</source>
         <translation>Dalej</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="277"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="279"/>
         <source>Connect the J-Link to the LTE connector</source>
         <translation>Podłącz J-Link do złącza LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="278"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="280"/>
         <source>Connect the J-Link to the APP connector</source>
         <translation>Podłącz J-Link do złącza APP</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="284"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="286"/>
         <source>Stopping the application</source>
         <translation>Zatrzymywanie aplikacji</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="287"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="289"/>
         <source>Updating the LTE MCU</source>
         <translation>Aktualizacja MCU LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="290"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="292"/>
         <source>Writing the application</source>
         <translation>Zapisywanie aplikacji</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="295"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="297"/>
         <source>No copy of the application</source>
         <translation>Brak kopii aplikacji</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="296"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="298"/>
         <source>Continue without a copy</source>
         <translation>Kontynuuj bez kopii</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="299"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="301"/>
         <source>Put the application back</source>
         <translation>Przywracanie aplikacji</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="300"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="302"/>
         <source>Write back</source>
         <translation>Zapisz z powrotem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="300"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="302"/>
         <source>Flash</source>
         <translation>Wgraj</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="303"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="305"/>
         <source>The LTE firmware update failed</source>
         <translation>Aktualizacja firmware LTE nie powiodła się</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="304"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="306"/>
         <source>Try again</source>
         <translation>Spróbuj ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="332"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="334"/>
         <source>nRF Util was not found. It is needed for LTE firmware.</source>
         <translation>Nie znaleziono nRF Util. Jest potrzebny do firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="447"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="449"/>
         <source>Paused for the LTE firmware update</source>
         <translation>Wstrzymano na czas aktualizacji firmware LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="448"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="450"/>
         <source>The LTE firmware update is in progress. Cancel it and close the tab?</source>
         <translation>Trwa aktualizacja firmware LTE. Anulować ją i zamknąć kartę?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="497"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="499"/>
         <source>The application MCU is erased. The device will not run until you flash an application.</source>
         <translation>MCU aplikacji jest wymazany. Urządzenie nie będzie działać, dopóki nie wgrasz aplikacji.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="500"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="502"/>
         <source>The copy of the application stays in %1.</source>
         <translation>Kopia aplikacji pozostaje w %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="507"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="509"/>
         <source>Cancel anyway</source>
         <translation>Anuluj mimo to</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="509"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="511"/>
         <source>Back</source>
         <translation>Wstecz</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="536"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="538"/>
         <source>Updating the LTE MCU needs the J-Link moved between the APP and LTE connectors. The guide stops the application, updates the LTE MCU and puts the application back.</source>
         <translation>Aktualizacja MCU LTE wymaga przełożenia J-Linka między złączami APP i LTE. Kreator zatrzyma aplikację, zaktualizuje MCU LTE i przywróci aplikację.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="588"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="590"/>
         <source>Step %1 of %2</source>
         <translation>Krok %1 z %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="616"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="618"/>
         <source>Copy: %1</source>
         <translation>Kopia: %1</translation>
     </message>
@@ -6944,12 +6944,12 @@
         <translation>Konsola klienta (Bluetooth) nie obsługuje wgrywania.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="170"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="173"/>
         <source>The firmware ID must be 32 hexadecimal digits from the HARDWARIO catalog.</source>
         <translation>Identyfikator firmware musi mieć 32 cyfry szesnastkowe z katalogu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="179"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="182"/>
         <source>Waiting for the customer&apos;s confirmation…</source>
         <translation>Czekanie na potwierdzenie klienta…</translation>
     </message>
@@ -6957,7 +6957,7 @@
 <context>
     <name>hwio::gui::RemoteShareViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="80"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="83"/>
         <source>Support will see this console and can send commands after you allow them. They can also ask to flash, erase, recover or reset the device; each request needs your confirmation.
 
 The session passes through the HARDWARIO server %1.
@@ -6974,27 +6974,27 @@ Każdy, kto zna kod, widzi wyjście konsoli. Podawaj kod tylko wsparciu HARDWARI
 Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="142"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="145"/>
         <source>%1…</source>
         <translation>%1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="150"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="153"/>
         <source>Remote operation: %1 %2 %</source>
         <translation>Operacja zdalna: %1 %2 %</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="165"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="168"/>
         <source>Sharing ended: %1</source>
         <translation>Udostępnianie zakończone: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="203"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="206"/>
         <source>Link copied to the clipboard.</source>
         <translation>Link skopiowano do schowka.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="210"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="213"/>
         <source>Code copied to the clipboard.</source>
         <translation>Kod skopiowano do schowka.</translation>
     </message>
@@ -7425,110 +7425,110 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>Popraw adres serwera wsparcia lub wyczyść go, aby używać domyślnego serwera.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="71"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="72"/>
         <source>— Connection restored; waiting for the customer to allow you again —</source>
         <translation>— Połączenie przywrócone; oczekiwanie, aż klient ponownie Cię dopuści —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="120"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="121"/>
         <source>A command line must not be longer than %1 bytes.</source>
         <translation>Wiersz polecenia nie może być dłuższy niż %1 bajtów.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="183"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="184"/>
         <source>Session %1</source>
         <translation>Sesja %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="190"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="191"/>
         <source>%1 — remote</source>
         <translation>%1 — zdalnie</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="194"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="195"/>
         <source>%1 — web Terminal</source>
         <translation>%1 — web Terminal</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="265"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="266"/>
         <source>— Connected to HARDWARIO Monitor %1 of the customer —</source>
         <translation>— Połączono z HARDWARIO Monitor %1 klienta —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="316"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="317"/>
         <source>The customer&apos;s device is disconnected.</source>
         <translation>Urządzenie klienta jest odłączone.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="360"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="361"/>
         <source>— Session history from the customer —</source>
         <translation>— Historia sesji od klienta —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="363"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="364"/>
         <source>— Older history of the session was left out —</source>
         <translation>— Starsza historia sesji została pominięta —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="96"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="101"/>
         <source>Sharing started, session %1 (%2).</source>
         <translation>Udostępnianie rozpoczęte, sesja %1 (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="105"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="110"/>
         <source>The join question was not answered within 2 minutes.</source>
         <translation>Na pytanie o dołączenie nie odpowiedziano w ciągu 2 minut.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="119"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="124"/>
         <source>%1: denied (no answer within 60 s).</source>
         <translation>%1: odrzucono (brak odpowiedzi w ciągu 60 s).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="129"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="132"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="134"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="137"/>
         <source>Sharing ended after 30 minutes without activity.</source>
         <translation>Udostępnianie zakończone po 30 minutach bez aktywności.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="137"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="151"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="142"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="156"/>
         <source>Start sharing again if support still needs the console.</source>
         <translation>Udostępnij ponownie, jeśli wsparcie nadal potrzebuje konsoli.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="144"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="146"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="149"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="151"/>
         <source>Sharing ended after the maximum of 8 hours.</source>
         <translation>Udostępnianie zakończone po maksymalnym czasie 8 godzin.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="159"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="164"/>
         <source>Participant app: web Terminal or unknown.</source>
         <translation>Aplikacja uczestnika: web Terminal lub nieznana.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="216"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="221"/>
         <source>Connection to the support server restored.</source>
         <translation>Połączenie z serwerem wsparcia przywrócone.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="241"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="246"/>
         <source>Another device uses this session code; the session was ended for safety.</source>
         <translation>Inne urządzenie używa tego kodu sesji; sesja została zakończona ze względów bezpieczeństwa.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="256"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="261"/>
         <source>Someone joined the session.</source>
         <translation>Ktoś dołączył do sesji.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="275"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="280"/>
         <source>%1: denied (someone joined).</source>
         <translation>%1: odrzucono (ktoś dołączył).</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="299"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="304"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n zdalne polecenie zostało odrzucone podczas oczekiwania na Twoją odpowiedź.</numerusform>
@@ -7537,104 +7537,104 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="305"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="310"/>
         <source>You ended the session instead of allowing the participant.</source>
         <translation>Zakończono sesję zamiast dopuścić uczestnika.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="312"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="317"/>
         <source>Participant allowed.</source>
         <translation>Uczestnik dopuszczony.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="313"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="318"/>
         <source>Participant allowed (%1).</source>
         <translation>Uczestnik dopuszczony (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="399"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="404"/>
         <source>A remote command was dropped (too long or with control characters).</source>
         <translation>Zdalne polecenie zostało odrzucone (za długie lub ze znakami sterującymi).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="411"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="416"/>
         <source>Remote commands dropped: more than %1 per second.</source>
         <translation>Zdalne polecenia odrzucone: więcej niż %1 na sekundę.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="421"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="426"/>
         <source>command %1</source>
         <translation>polecenie %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="439"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="444"/>
         <source>An operation request was refused: the participant is not allowed.</source>
         <translation>Żądanie operacji odrzucono: uczestnik nie jest dopuszczony.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="454"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="459"/>
         <source>Participant app: %1.</source>
         <translation>Aplikacja uczestnika: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="536"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="541"/>
         <source>Support asks: %1.</source>
         <translation>Prośba wsparcia: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="539"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="544"/>
         <source>%1: refused (this console has no operations).</source>
         <translation>%1: odmowa (ta konsola nie ma operacji).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="547"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="552"/>
         <source>%1: refused (not available on this console).</source>
         <translation>%1: odmowa (niedostępne w tej konsoli).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="554"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="559"/>
         <source>%1: refused (another request or operation is in progress).</source>
         <translation>%1: odmowa (trwa inne żądanie lub operacja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="562"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="586"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="567"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="591"/>
         <source>%1: refused (%2).</source>
         <translation>%1: odmowa (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="614"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="619"/>
         <source>%1: denied by you.</source>
         <translation>%1: odrzucono (Twoja decyzja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="633"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="638"/>
         <source>%1: allowed by you.</source>
         <translation>%1: zezwolono (Twoja decyzja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="681"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="684"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="686"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="689"/>
         <source>%1: done.</source>
         <translation>%1: gotowe.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="687"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="692"/>
         <source>%1: failed: %2</source>
         <translation>%1: niepowodzenie: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="741"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="746"/>
         <source>— Remote: %1 —</source>
         <translation>— Zdalnie: %1 —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="774"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="779"/>
         <source>You ended sharing.</source>
         <translation>Zakończono udostępnianie.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="810"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="815"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Odczytano pomoc %n polecenia dla podpowiedzi wsparcia.</numerusform>
@@ -7643,12 +7643,12 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="817"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="822"/>
         <source>Sharing ended.</source>
         <translation>Udostępnianie zakończone.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="818"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="823"/>
         <source>Sharing ended: %1</source>
         <translation>Udostępnianie zakończone: %1</translation>
     </message>

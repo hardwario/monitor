@@ -19,6 +19,7 @@
 #include <QCoreApplication>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLatin1Char>
 #include <QList>
 #include <QLoggingCategory>
 #include <QObject>

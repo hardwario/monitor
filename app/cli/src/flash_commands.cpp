@@ -42,7 +42,6 @@
 #include <QString>
 #include <QStringLiteral>
 #include <QTimer>
-#include <QtCore/qnamespace.h>
 #include <QtEnvironmentVariables>
 #include <QtLogging>
 #include <QtTypes>

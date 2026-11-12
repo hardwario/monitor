@@ -2337,12 +2337,12 @@
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="99"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="116"/>
         <source>Settings were created by a newer version and are read-only.</source>
         <translation>Nastavenia vytvorila novšia verzia a sú len na čítanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="119"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="136"/>
         <source>The setting was not saved: %1</source>
         <translation>Nastavenie sa neuložilo: %1</translation>
     </message>
@@ -5734,92 +5734,92 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="168"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="169"/>
         <source>another operation started on the device.</source>
         <translation>na zariadení sa spustila iná operácia.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="169"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="170"/>
         <source>Run the batch file again when it has finished.</source>
         <translation>Po jej dokončení spustite dávkový súbor znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="246"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="247"/>
         <source>the device disconnected.</source>
         <translation>zariadenie sa odpojilo.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="247"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="248"/>
         <source>Reconnect and run the batch file again.</source>
         <translation>Znova sa pripojte a spustite dávkový súbor znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="261"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="262"/>
         <source>The batch stopped after %1 of %2 commands.</source>
         <translation>Dávka sa zastavila po %1 z %2 príkazov.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="274"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="275"/>
         <source>The device was reset and halted.</source>
         <translation>Zariadenie bolo resetované a zastavené.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="275"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="276"/>
         <source>The device was reset.</source>
         <translation>Zariadenie bolo resetované.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="357"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="358"/>
         <source>%1 — the console resumes automatically</source>
         <translation>%1 — konzola sa obnoví automaticky</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="360"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="361"/>
         <source>This target has no console</source>
         <translation>Tento cieľ nemá konzolu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="363"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="364"/>
         <source>Waiting for pairing…</source>
         <translation>Čaká sa na spárovanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="364"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="365"/>
         <source>Connecting…</source>
         <translation>Pripájanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="366"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="367"/>
         <source>Not connected</source>
         <translation>Nepripojené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="736"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="737"/>
         <source>The file could not be saved.</source>
         <translation>Súbor sa nepodarilo uložiť.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="737"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="738"/>
         <source>the folder is not writable or the disk is full.</source>
         <translation>do priečinka sa nedá zapisovať alebo je disk plný.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="738"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="739"/>
         <source>Choose another folder.</source>
         <translation>Vyberte iný priečinok.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="758"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="759"/>
         <source>The view was saved to %1.</source>
         <translation>Výpis bol uložený do %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="787"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="788"/>
         <source>Sends each line of a UTF-8 text file to the device as a shell command, one line every %1 ms. Empty lines and lines starting with # are skipped. At most %2 commands, %3 MiB per file and %4 bytes per line.</source>
         <translation>Odošle každý riadok textového súboru v UTF-8 do zariadenia ako príkaz shellu, jeden riadok každých %1 ms. Prázdne riadky a riadky začínajúce znakom # sa preskočia. Najviac %2 príkazov, %3 MiB na súbor a %4 bajtov na riadok.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="815"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="816"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Do schránky bol skopírovaný prvý %n riadok (limit kopírovania).</numerusform>
@@ -5828,7 +5828,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="830"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="831"/>
         <source>There is no console log file for this device yet.</source>
         <translation>Pre toto zariadenie zatiaľ neexistuje súbor so záznamom konzoly.</translation>
     </message>
@@ -6493,178 +6493,178 @@
 <context>
     <name>hwio::gui::LteUpdateWizard</name>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="96"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="98"/>
         <source>Update the LTE firmware</source>
         <translation>Aktualizácia firmvéru LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
         <source>Firmware</source>
         <translation>Firmvér</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="172"/>
         <source>APP connector</source>
         <translation>Konektor APP</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
         <source>Stop the application</source>
         <translation>Zastavenie aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="172"/>
         <source>LTE connector</source>
         <translation>Konektor LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="172"/>
         <source>Update</source>
         <translation>Aktualizácia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="173"/>
         <source>Application</source>
         <translation>Aplikácia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="173"/>
         <source>Done</source>
         <translation>Hotovo</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="259"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="261"/>
         <source>LTE firmware updated</source>
         <translation>Firmvér LTE je aktualizovaný</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="260"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="262"/>
         <source>The LTE MCU has its new firmware and the application runs again. The console reconnects.</source>
         <translation>LTE MCU má nový firmvér a aplikácia znova beží. Konzola sa znova pripojí.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="264"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="266"/>
         <source>Open console</source>
         <translation>Otvoriť konzolu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="272"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="274"/>
         <source>Choose the LTE firmware</source>
         <translation>Vyberte firmvér LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="273"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="275"/>
         <source>Next</source>
         <translation>Ďalej</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="277"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="279"/>
         <source>Connect the J-Link to the LTE connector</source>
         <translation>Pripojte J-Link ku konektoru LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="278"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="280"/>
         <source>Connect the J-Link to the APP connector</source>
         <translation>Pripojte J-Link ku konektoru APP</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="284"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="286"/>
         <source>Stopping the application</source>
         <translation>Zastavenie aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="287"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="289"/>
         <source>Updating the LTE MCU</source>
         <translation>Aktualizácia LTE MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="290"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="292"/>
         <source>Writing the application</source>
         <translation>Zápis aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="295"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="297"/>
         <source>No copy of the application</source>
         <translation>Bez kópie aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="296"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="298"/>
         <source>Continue without a copy</source>
         <translation>Pokračovať bez kópie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="299"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="301"/>
         <source>Put the application back</source>
         <translation>Vrátenie aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="300"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="302"/>
         <source>Write back</source>
         <translation>Zapísať späť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="300"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="302"/>
         <source>Flash</source>
         <translation>Nahrať</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="303"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="305"/>
         <source>The LTE firmware update failed</source>
         <translation>Aktualizácia firmvéru LTE zlyhala</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="304"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="306"/>
         <source>Try again</source>
         <translation>Skúsiť znova</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="332"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="334"/>
         <source>nRF Util was not found. It is needed for LTE firmware.</source>
         <translation>nRF Util sa nenašiel. Je potrebný pre firmvér LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="447"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="449"/>
         <source>Paused for the LTE firmware update</source>
         <translation>Pozastavené kvôli aktualizácii firmvéru LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="448"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="450"/>
         <source>The LTE firmware update is in progress. Cancel it and close the tab?</source>
         <translation>Prebieha aktualizácia firmvéru LTE. Zrušiť ju a zavrieť kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="497"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="499"/>
         <source>The application MCU is erased. The device will not run until you flash an application.</source>
         <translation>MCU aplikácie je vymazaný. Zariadenie nepobeží, kým nenahráte aplikáciu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="500"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="502"/>
         <source>The copy of the application stays in %1.</source>
         <translation>Kópia aplikácie zostáva v %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="507"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="509"/>
         <source>Cancel anyway</source>
         <translation>Napriek tomu zrušiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="509"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="511"/>
         <source>Back</source>
         <translation>Späť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="536"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="538"/>
         <source>Updating the LTE MCU needs the J-Link moved between the APP and LTE connectors. The guide stops the application, updates the LTE MCU and puts the application back.</source>
         <translation>Aktualizácia LTE MCU vyžaduje prepojiť J-Link medzi konektormi APP a LTE. Sprievodca zastaví aplikáciu, aktualizuje LTE MCU a vráti aplikáciu späť.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="588"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="590"/>
         <source>Step %1 of %2</source>
         <translation>Krok %1 z %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="616"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="618"/>
         <source>Copy: %1</source>
         <translation>Kópia: %1</translation>
     </message>
@@ -6944,12 +6944,12 @@
         <translation>Konzola zákazníka (Bluetooth) nepodporuje nahrávanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="170"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="173"/>
         <source>The firmware ID must be 32 hexadecimal digits from the HARDWARIO catalog.</source>
         <translation>ID firmvéru musí mať 32 hexadecimálnych číslic z katalógu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="179"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="182"/>
         <source>Waiting for the customer&apos;s confirmation…</source>
         <translation>Čaká sa na potvrdenie zákazníka…</translation>
     </message>
@@ -6957,7 +6957,7 @@
 <context>
     <name>hwio::gui::RemoteShareViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="80"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="83"/>
         <source>Support will see this console and can send commands after you allow them. They can also ask to flash, erase, recover or reset the device; each request needs your confirmation.
 
 The session passes through the HARDWARIO server %1.
@@ -6974,27 +6974,27 @@ Ktokoľvek, kto pozná kód, vidí výstup konzoly. Kód prečítajte iba podpor
 Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="142"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="145"/>
         <source>%1…</source>
         <translation>%1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="150"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="153"/>
         <source>Remote operation: %1 %2 %</source>
         <translation>Vzdialená operácia: %1 %2 %</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="165"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="168"/>
         <source>Sharing ended: %1</source>
         <translation>Zdieľanie skončilo: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="203"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="206"/>
         <source>Link copied to the clipboard.</source>
         <translation>Odkaz skopírovaný do schránky.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="210"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="213"/>
         <source>Code copied to the clipboard.</source>
         <translation>Kód skopírovaný do schránky.</translation>
     </message>
@@ -7425,110 +7425,110 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         <translation>Opravte adresu servera podpory alebo ju vymažte, aby sa použil predvolený server.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="71"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="72"/>
         <source>— Connection restored; waiting for the customer to allow you again —</source>
         <translation>— Spojenie obnovené; čaká sa, kým vás zákazník znova povolí —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="120"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="121"/>
         <source>A command line must not be longer than %1 bytes.</source>
         <translation>Riadok príkazu nesmie byť dlhší ako %1 bajtov.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="183"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="184"/>
         <source>Session %1</source>
         <translation>Relácia %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="190"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="191"/>
         <source>%1 — remote</source>
         <translation>%1 — na diaľku</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="194"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="195"/>
         <source>%1 — web Terminal</source>
         <translation>%1 — web Terminal</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="265"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="266"/>
         <source>— Connected to HARDWARIO Monitor %1 of the customer —</source>
         <translation>— Pripojené k HARDWARIO Monitor %1 zákazníka —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="316"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="317"/>
         <source>The customer&apos;s device is disconnected.</source>
         <translation>Zariadenie zákazníka je odpojené.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="360"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="361"/>
         <source>— Session history from the customer —</source>
         <translation>— História relácie od zákazníka —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="363"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="364"/>
         <source>— Older history of the session was left out —</source>
         <translation>— Staršia história relácie bola vynechaná —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="96"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="101"/>
         <source>Sharing started, session %1 (%2).</source>
         <translation>Zdieľanie sa začalo, relácia %1 (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="105"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="110"/>
         <source>The join question was not answered within 2 minutes.</source>
         <translation>Na otázku na pripojenie nikto neodpovedal do 2 minút.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="119"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="124"/>
         <source>%1: denied (no answer within 60 s).</source>
         <translation>%1: zamietnuté (žiadna odpoveď do 60 s).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="129"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="132"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="134"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="137"/>
         <source>Sharing ended after 30 minutes without activity.</source>
         <translation>Zdieľanie skončilo po 30 minútach bez aktivity.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="137"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="151"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="142"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="156"/>
         <source>Start sharing again if support still needs the console.</source>
         <translation>Začnite zdieľať znova, ak podpora ešte potrebuje konzolu.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="144"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="146"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="149"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="151"/>
         <source>Sharing ended after the maximum of 8 hours.</source>
         <translation>Zdieľanie skončilo po maximálnej dobe 8 hodín.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="159"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="164"/>
         <source>Participant app: web Terminal or unknown.</source>
         <translation>Aplikácia účastníka: web Terminal alebo neznáma.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="216"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="221"/>
         <source>Connection to the support server restored.</source>
         <translation>Spojenie so serverom podpory obnovené.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="241"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="246"/>
         <source>Another device uses this session code; the session was ended for safety.</source>
         <translation>Iné zariadenie používa tento kód relácie; relácia bola z bezpečnostných dôvodov ukončená.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="256"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="261"/>
         <source>Someone joined the session.</source>
         <translation>Niekto sa pripojil k relácii.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="275"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="280"/>
         <source>%1: denied (someone joined).</source>
         <translation>%1: zamietnuté (niekto sa pripojil).</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="299"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="304"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n vzdialený príkaz bol zahodený počas čakania na vašu odpoveď.</numerusform>
@@ -7537,104 +7537,104 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="305"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="310"/>
         <source>You ended the session instead of allowing the participant.</source>
         <translation>Reláciu ste ukončili namiesto povolenia účastníka.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="312"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="317"/>
         <source>Participant allowed.</source>
         <translation>Účastník povolený.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="313"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="318"/>
         <source>Participant allowed (%1).</source>
         <translation>Účastník povolený (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="399"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="404"/>
         <source>A remote command was dropped (too long or with control characters).</source>
         <translation>Vzdialený príkaz bol zahodený (príliš dlhý alebo s riadiacimi znakmi).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="411"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="416"/>
         <source>Remote commands dropped: more than %1 per second.</source>
         <translation>Vzdialené príkazy zahodené: viac ako %1 za sekundu.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="421"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="426"/>
         <source>command %1</source>
         <translation>príkaz %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="439"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="444"/>
         <source>An operation request was refused: the participant is not allowed.</source>
         <translation>Žiadosť o operáciu bola odmietnutá: účastník nie je povolený.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="454"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="459"/>
         <source>Participant app: %1.</source>
         <translation>Aplikácia účastníka: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="536"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="541"/>
         <source>Support asks: %1.</source>
         <translation>Podpora žiada: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="539"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="544"/>
         <source>%1: refused (this console has no operations).</source>
         <translation>%1: odmietnuté (táto konzola nemá operácie).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="547"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="552"/>
         <source>%1: refused (not available on this console).</source>
         <translation>%1: odmietnuté (na tejto konzole nie je k dispozícii).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="554"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="559"/>
         <source>%1: refused (another request or operation is in progress).</source>
         <translation>%1: odmietnuté (prebieha iná žiadosť alebo operácia).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="562"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="586"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="567"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="591"/>
         <source>%1: refused (%2).</source>
         <translation>%1: odmietnuté (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="614"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="619"/>
         <source>%1: denied by you.</source>
         <translation>%1: zamietli ste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="633"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="638"/>
         <source>%1: allowed by you.</source>
         <translation>%1: povolili ste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="681"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="684"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="686"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="689"/>
         <source>%1: done.</source>
         <translation>%1: hotovo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="687"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="692"/>
         <source>%1: failed: %2</source>
         <translation>%1: zlyhalo: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="741"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="746"/>
         <source>— Remote: %1 —</source>
         <translation>— Vzdialené: %1 —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="774"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="779"/>
         <source>You ended sharing.</source>
         <translation>Zdieľanie ste ukončili.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="810"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="815"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Nápoveda %n príkazu prečítaná pre dopĺňanie podpory.</numerusform>
@@ -7643,12 +7643,12 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="817"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="822"/>
         <source>Sharing ended.</source>
         <translation>Zdieľanie skončilo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="818"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="823"/>
         <source>Sharing ended: %1</source>
         <translation>Zdieľanie skončilo: %1</translation>
     </message>

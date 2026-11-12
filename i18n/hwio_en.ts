@@ -75,7 +75,7 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="815"/>
+        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="816"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Copied the first %n line to the clipboard (copy limit).</numerusform>
@@ -113,7 +113,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../libs/remote/src/remote_host.cpp" line="299"/>
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="304"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n remote command was dropped while waiting for your answer.</numerusform>
@@ -121,7 +121,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../libs/remote/src/remote_host.cpp" line="810"/>
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="815"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Help of %n command read for support&apos;s autocomplete.</numerusform>

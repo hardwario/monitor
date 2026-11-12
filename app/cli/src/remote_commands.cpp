@@ -53,6 +53,8 @@
 #include <QStringLiteral>
 #include <QTimer>
 #include <QUrl>
+#include <QtContainerFwd>
+#include <QtEnvironmentVariables>
 
 #include <CLI/CLI.hpp>
 

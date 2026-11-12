@@ -7,6 +7,7 @@
 #include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/session_events.h"
+#include "hwio/remote/consent.h"
 #include "hwio/remote/host_operations.h"
 #include "hwio/remote/remote_host.h"
 #include "hwio/remote/session_code.h"
@@ -21,6 +22,7 @@
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
+#include <QtContainerFwd>
 
 #include <gtest/gtest.h>
 
@@ -33,6 +35,7 @@
 #include <optional>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace hwio::remote {
@@ -672,6 +675,7 @@ TEST(RemoteHostCommands, LargeTreeWithoutHelpTexts) {
     HostFixture f(optionsFor(relay));
     device::CommandTree tree;
     std::vector<device::CommandEntry> entries;
+    entries.reserve(400);
     for (int i = 0; i < 400; ++i) {
         entries.push_back(device::CommandEntry{.name = std::format("command{}", i),
                                                .help = std::string(250, 'h')});

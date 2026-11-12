@@ -139,8 +139,11 @@ QString RemoteJoinViewModel::operationsUnavailableText() const {
 
 bool RemoteJoinViewModel::lteUpdateAvailable() const {
     const remote::RemoteConsoleSession* session = m_tab->remoteSession();
-    return operationsAvailable() &&
-           tunnel::supports(*session->hostHello(), tunnel::OpKind::LteUpdate);
+    if (!operationsAvailable() || session == nullptr) {
+        return false;
+    }
+    const std::optional<tunnel::HostHello>& hello = session->hostHello();
+    return hello.has_value() && tunnel::supports(*hello, tunnel::OpKind::LteUpdate);
 }
 
 bool RemoteJoinViewModel::operationPending() const { return m_client && m_client->busy(); }

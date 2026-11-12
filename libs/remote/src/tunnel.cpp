@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <format>
@@ -143,7 +144,7 @@ Result<HostMessage> decodeHostHello(const QJsonObject& data) {
     } else if (!kinds.isArray() || std::cmp_greater(kinds.toArray().size(), maxOpKinds)) {
         return bad("invalid opKinds");
     } else {
-        for (const QJsonValue& kindValue : kinds.toArray()) {
+        for (const auto& kindValue : kinds.toArray()) {
             if (!kindValue.isString() || kindValue.toString().size() > 32) {
                 return bad("invalid opKinds");
             }
@@ -208,6 +209,63 @@ Result<HostMessage> decodeOpResult(const QJsonObject& data, const std::string& m
     return result;
 }
 
+Result<JoinerMessage> decodeLearn(const QJsonObject& data) {
+    const QJsonValue pathValue = data.value(QStringLiteral("path"));
+    if (!pathValue.isArray() || pathValue.toArray().isEmpty() ||
+        std::cmp_greater(pathValue.toArray().size(), maxCommandDepth)) {
+        return bad("invalid learn path");
+    }
+    Learn learn;
+    for (const auto& word : pathValue.toArray()) {
+        if (!word.isString() || !device::isCommandName(toStdString(word.toString()))) {
+            return bad("invalid learn path");
+        }
+        learn.path.push_back(toStdString(word.toString()));
+    }
+    return learn;
+}
+
+Result<JoinerMessage> decodeOpRequest(const QJsonObject& data) {
+    auto messageId = id(data);
+    if (!messageId) {
+        return std::unexpected(std::move(messageId).error());
+    }
+    const auto kind = kindFromId(toStdString(data.value(QStringLiteral("kind")).toString()));
+    if (!kind || !data.value(QStringLiteral("kind")).isString()) {
+        return bad("invalid kind");
+    }
+    const QJsonValue targetValue = data.value(QStringLiteral("target"));
+    std::optional<OpTarget> target;
+    if (*kind == OpKind::LteUpdate) {
+        // ADR-0363: the guided LTE update has no target (it is always the LTE MCU).
+        if (!targetValue.isUndefined()) {
+            return bad("a target for lteUpdate");
+        }
+        target = OpTarget::Lte;
+    } else if (targetValue.isString()) {
+        target = targetFromId(toStdString(targetValue.toString()));
+    }
+    if (!target) {
+        return bad("invalid target");
+    }
+    OpRequest request{
+        .id = *messageId, .kind = *kind, .target = *target, .firmwareId = std::nullopt};
+    const QJsonValue firmware = data.value(QStringLiteral("firmwareId"));
+    if (*kind == OpKind::Flash) {
+        if (!firmware.isString()) {
+            return bad("flash without a firmware ID");
+        }
+        const auto parsed = firmware::FirmwareId::parse(toStdString(firmware.toString()));
+        if (!parsed) {
+            return bad("invalid firmware ID");
+        }
+        request.firmwareId = parsed->value();
+    } else if (!firmware.isUndefined()) {
+        return bad("firmware ID for an operation other than flash");
+    }
+    return request;
+}
+
 // ADR-0364: copies the entries of a command tree at `depth` (1 = the top level) with sanitised
 // help texts. False when an entry is malformed or a bound is exceeded.
 bool copyCommandEntries(const QJsonArray& in, QJsonArray& out, std::size_t depth,
@@ -215,7 +273,7 @@ bool copyCommandEntries(const QJsonArray& in, QJsonArray& out, std::size_t depth
     if (depth > maxCommandDepth) {
         return false;
     }
-    for (const QJsonValue& value : in) {
+    for (const auto& value : in) {
         if (!value.isObject() || ++nodes > maxCommandNodes) {
             return false;
         }
@@ -270,7 +328,7 @@ Result<HostMessage> decodeCommands(const QJsonObject& data) {
 // Removes the help texts of a command tree's entries (recursively).
 QJsonArray withoutHelp(const QJsonArray& entries) {
     QJsonArray out;
-    for (const QJsonValue& value : entries) {
+    for (const auto& value : entries) {
         QJsonObject entry = value.toObject();
         entry.remove(QStringLiteral("help"));
         if (entry.contains(QStringLiteral("children"))) {
@@ -527,61 +585,12 @@ Result<JoinerMessage> decodeJoiner(const QJsonValue& payload) {
         return JoinerHello{.app = *app, .version = *ver};
     }
     if (type == QStringLiteral("learn")) {
-        const QJsonValue pathValue = data->value(QStringLiteral("path"));
-        if (!pathValue.isArray() || pathValue.toArray().isEmpty() ||
-            std::cmp_greater(pathValue.toArray().size(), maxCommandDepth)) {
-            return bad("invalid learn path");
-        }
-        Learn learn;
-        for (const QJsonValue& word : pathValue.toArray()) {
-            if (!word.isString() || !device::isCommandName(toStdString(word.toString()))) {
-                return bad("invalid learn path");
-            }
-            learn.path.push_back(toStdString(word.toString()));
-        }
-        return learn;
+        return decodeLearn(*data);
     }
     if (type != QStringLiteral("op-request")) {
         return bad("unknown joiner message type");
     }
-    auto messageId = id(*data);
-    if (!messageId) {
-        return std::unexpected(std::move(messageId).error());
-    }
-    const auto kind = kindFromId(toStdString(data->value(QStringLiteral("kind")).toString()));
-    if (!kind || !data->value(QStringLiteral("kind")).isString()) {
-        return bad("invalid kind");
-    }
-    const QJsonValue targetValue = data->value(QStringLiteral("target"));
-    std::optional<OpTarget> target;
-    if (*kind == OpKind::LteUpdate) {
-        // ADR-0363: the guided LTE update has no target (it is always the LTE MCU).
-        if (!targetValue.isUndefined()) {
-            return bad("a target for lteUpdate");
-        }
-        target = OpTarget::Lte;
-    } else if (targetValue.isString()) {
-        target = targetFromId(toStdString(targetValue.toString()));
-    }
-    if (!target) {
-        return bad("invalid target");
-    }
-    OpRequest request{
-        .id = *messageId, .kind = *kind, .target = *target, .firmwareId = std::nullopt};
-    const QJsonValue firmware = data->value(QStringLiteral("firmwareId"));
-    if (*kind == OpKind::Flash) {
-        if (!firmware.isString()) {
-            return bad("flash without a firmware ID");
-        }
-        const std::string firmwareText = toStdString(firmware.toString());
-        if (!firmware::FirmwareId::parse(firmwareText)) {
-            return bad("invalid firmware ID");
-        }
-        request.firmwareId = firmware::FirmwareId::parse(firmwareText)->value();
-    } else if (!firmware.isUndefined()) {
-        return bad("firmware ID for an operation other than flash");
-    }
-    return request;
+    return decodeOpRequest(*data);
 }
 
 } // namespace hwio::remote::tunnel

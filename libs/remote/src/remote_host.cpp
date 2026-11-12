@@ -4,6 +4,7 @@
 #include "hwio/core/json.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/profile.h"
@@ -25,15 +26,19 @@
 #include <QLoggingCategory>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QStringLiteral>
 #include <QTimer>
 #include <QUrl>
+#include <QtContainerFwd>
 #include <QtCore/qtmetamacros.h>
 #include <QtCore/qttranslation.h>
 #include <QtLogging>
+#include <QtTypes>
 
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <optional>
