@@ -27,3 +27,7 @@ translations, docs and the interop check against the local relay — is part of 
   `packaging/RELEASE.md`.
 - The relay itself stays unchanged (ADR-0334); no backend-team work blocks rc.4.
 - Strings in the plan that name "2.1.0" as an example version stay examples; the hello carries the real version.
+
+## Amendment (2026-11-12)
+
+ADR-0359 adds plan 0045 (user modes) to 2.0.0-rc.4; rc.4 waits for its verification as well.
