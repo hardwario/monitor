@@ -56,7 +56,17 @@ Item {
 
     function retryScroll() {
         if (page.pendingSection !== "")
-            Qt.callLater(page.scrollToPending);
+            deferredScroll.restart();
+    }
+
+    // Defers to the next turn of the event loop. A Timer instead of Qt.callLater: it dies with the
+    // page, so a deferred scroll never runs on a page destroyed in the meantime (an error link that
+    // opens Settings while the page closes in the same turn crashed the QML engine).
+    function deferShowSection(sectionId: string) {
+        if (sectionId === "")
+            return;
+        page.pendingSection = sectionId;
+        deferredScroll.restart();
     }
 
     objectName: "settingsPage"
@@ -64,14 +74,21 @@ Item {
     onVmChanged: {
         if (page.visible && page.vm)
             page.vm.pageShown();
-        Qt.callLater(page.showSection, AppViewModel.settingsSection);
+        page.deferShowSection(AppViewModel.settingsSection);
+    }
+
+    Timer {
+        id: deferredScroll
+
+        interval: 0
+        onTriggered: page.scrollToPending()
     }
 
     Connections {
         target: AppViewModel
 
         function onSettingsSectionRequested(sectionId: string) {
-            Qt.callLater(page.showSection, sectionId);
+            page.deferShowSection(sectionId);
         }
     }
 

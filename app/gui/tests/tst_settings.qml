@@ -203,6 +203,21 @@ TestCase {
         verify(!find("defaultLatencyBox"));
     }
 
+    // An error link opens Settings at a section and the page closes within the same event-loop
+    // iteration: the deferred scroll must not run on the destroyed page (it crashed).
+    function test_sectionRequestThenCloseAtOnce() {
+        AppViewModel.closeSettings();
+        AppViewModel.openSettings("jlink");
+        AppViewModel.closeSettings();
+        wait(100);
+        AppViewModel.openSettings("nrfutil");
+        AppViewModel.currentTab = 0;
+        AppViewModel.closeGlobalPage();
+        wait(100);
+        AppViewModel.openGlobalPage("settings");
+        tryVerify(() => find("settingsPage") !== null);
+    }
+
     // ADR-0359: the first-start dialog - Advanced preselected, Continue stores the choice, not
     // shown again; ADR-0362: with the rc.3 expert switch on, Expert is preselected and Esc keeps it.
     function test_modeChoiceDialog() {
