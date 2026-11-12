@@ -358,6 +358,35 @@ Steps:
 - [x] C5 GUI: host tab feeds the tree; remote tab completion and suggestions; Qt Quick test (completion in a remote
       tab after the host's tree arrives); docs `remote-support.md` ×5
 
+### Implementation notes (2026-11-12, amendments ADR-0363 / ADR-0364)
+
+Details filled in while implementing A6–C5 that the amendments did not fix; **to be confirmed by the user**:
+
+- **New error code `remote.application_not_restored`** (category cancelled, exit 130 like `lte flash --guided`
+  without a copy): the op-result of an LTE update that updated the LTE MCU but did not write the application back
+  (the outcome "LTE updated, application not restored"). The protocol carries only error codes, so the outcome needed
+  one; troubleshooting anchors in all languages.
+- **LTE update progress:** `op-progress.phase` is the guided update's step id (`LteUpdateProcedure::stepId`:
+  `connect-app`, `backup`, `erase`, `connect-lte`, `update-lte`, `connect-app-again`, `choose-application`,
+  `restore`; `download` before it; `failed` while the GUI wizard offers Try again), shown translated by the joiner.
+  A new phase is sent at once (not throttled), and the last progress is repeated every 60 s while the customer moves
+  the cable (the joiner's 5-minute inactivity timeout). A GUI failure the wizard can retry is reported when the wizard
+  closes.
+- **GUI auto-start:** the wizard opened for the request selects the recommended firmware and starts once it is
+  downloaded and nRF Util was found; a download or nRF Util problem ends the request with that error (the wizard
+  stays open for the customer). The request is refused with `internal.busy` while the tab is busy or another
+  wizard is open.
+- **CLI host:** the terminal flow (`GuidedTerminal`, moved to `app/cli/src/guided_lte.h`) runs without its own event
+  loop; its y/N question is answered on the host's stdin like the other questions; `--nrfutil` applies. No LTE update
+  with `--deny-operations` or without a terminal.
+- **`commands` size:** a joiner drops relay events over 64 KiB (§ Limits), so the host sends the tree without help
+  texts when it would be larger, and not at all when even that does not fit (logged). The joiner validates the
+  256 KiB / 4000 nodes / depth 8 bounds as specified.
+- **Joiner `learn`:** each path once, again after 10 s (the host may have rate-limited it), at most 200 paths.
+- **CLI:** `device::CommandTreeSource` (implemented by `CommandTreeLearner` and the remote joiner's adapter) feeds
+  the console's completion; `remote host` now learns the tree (`info show`, cache or `help`) like `chester app
+  console`.
+
 ## Tests and verification
 
 - Unit: `SessionCode` (range, CSPRNG source, link parsing, invalid input); Engine.IO/Socket.IO framing (fuzz-style
