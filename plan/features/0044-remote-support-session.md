@@ -6,7 +6,7 @@
 - **Related ADRs:** ADR-0334 (strict compatibility with the existing relay, 6-digit code), ADR-0335 (join approval),
   ADR-0336 (operations tunneled in `at` / `write`), ADR-0321 (QtWebSockets + own Socket.IO client),
   ADR-0322 (scope: console + flash/erase/recover/reset), ADR-0323 (firmware by catalog ID only),
-  ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0337 (2.0.0-rc.4; supersedes ADR-0326), ADR-0363 (remote LTE update, amends ADR-0323/0336),
+  ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0337 (2.0.0-rc.4; supersedes ADR-0326), ADR-0363 (remote LTE update, amends ADR-0323/0336), ADR-0364 (remote autocomplete),
   ADR-0328 (limits), ADR-0329 (TLS only), ADR-0330 (relay URL), ADR-0331 (CLI), ADR-0332 (no MCP),
   ADR-0333 (audit in the console file), ADR-0354 (tunnel `end`, amends ADR-0336), ADR-0355 (approval again after
   the host's reconnect, amends ADR-0335), ADR-0356 (secrets redacted toward the relay, amends ADR-0329),
@@ -334,6 +334,29 @@ Steps:
       (LTE scenario) and the fake relay; `docs/en/cli.md`
 - [ ] C4 GUI: Remote operations button, host confirmation, guided wizard started from the request with progress
       forwarded; Qt Quick tests; translations ×4; docs `remote-support.md` ×5; release notes rc.4
+
+## Amendment 2026-11-12: Remote autocomplete (ADR-0364)
+
+A remote tab had no autocomplete (learning starts only after a local attach's `info show`).
+
+- **Host:** `RemoteHost::setCommandTree(tree)` — the GUI tab (ConsoleViewModel's learned tree) and the CLI host
+  (its learner) call it whenever their tree changes; after the join is allowed the host sends tunnel `commands`
+  (serialized `CommandTree`, bounded: 256 KiB, 4000 nodes, depth 8). A tunnel `learn {path}` from an allowed joiner
+  (known path only, at most 2 per second, at most 200 per session) makes the host run its silent `<path> -h` query and
+  send the updated tree. Not audited as remote commands (read-only help queries), but counted in the audit summary at
+  the end.
+- **Joiner:** `RemoteConsoleSession::commandTree()` + `commandTreeChanged`; validation as untrusted input; the remote
+  tab's ConsoleViewModel uses it instead of the local learner (no `info show` / learner on a remote tab) and sends
+  `learn` where the local learner would query children. The CLI interactive joiner uses it too.
+- **web Terminal host:** no tree; suggestions from history only.
+
+Steps:
+
+- [ ] A7 Tunnel `commands` / `learn`, limits and validation, `RemoteHost::setCommandTree`, joiner tree; unit tests
+      (codec, malformed / oversize trees, rate limits, learn before allow refused)
+- [ ] B3 CLI host feeds its tree; CLI interactive joiner completion; e2e test
+- [ ] C5 GUI: host tab feeds the tree; remote tab completion and suggestions; Qt Quick test (completion in a remote
+      tab after the host's tree arrives); docs `remote-support.md` ×5
 
 ## Tests and verification
 
