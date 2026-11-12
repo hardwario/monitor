@@ -10,8 +10,9 @@
 // firmware: no target, no firmware ID); the host's hello lists the kinds it runs in `opKinds`
 // (alongside `ops`; a hello without it means the four kinds of ADR-0322 when ops is true). The
 // progress of an lteUpdate names the guided update's step in `phase`
-// (device::LteUpdateProcedure::stepId: "connect-app", "backup", "erase", "connect-lte",
-// "update-lte", "connect-app-again", "choose-application", "restore"; "download" before it).
+// (device::LteUpdateProcedure::stepId: "connect-app", "confirm" (ADR-0366: the customer's
+// Continue), "backup", "erase", "connect-lte", "update-lte", "connect-app-again",
+// "choose-application", "restore"; "download" before it).
 // ADR-0364: host → joiners `commands` {tree: <device::CommandTree JSON>} (the host's learned
 // command tree for the joiner's autocomplete), joiner → host `learn` {path: [names]} (the host
 // learns that command's subcommands with its silent query). The tree is untrusted input: at most

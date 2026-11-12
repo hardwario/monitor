@@ -190,6 +190,7 @@ int LteUpdateWizard::stepIndex() const {
     case Step::Idle:
         return 0;
     case Step::ConnectApp:
+    case Step::Confirm: // plan 0046: the APP connector answered, nothing changed yet
         return 1;
     case Step::Backup:
     case Step::BackupFailed:
@@ -235,6 +236,8 @@ int LteUpdateWizard::stage() const {
     case Step::ConnectLte:
     case Step::ConnectAppAgain:
         return Connector;
+    case Step::Confirm:
+        return Confirm;
     case Step::Backup:
     case Step::Erase:
     case Step::UpdateLte:
@@ -278,6 +281,10 @@ WizardStep LteUpdateWizard::current() const {
         step.heading = m_procedure->step() == Step::ConnectLte
                            ? tr("Connect the J-Link to the LTE connector")
                            : tr("Connect the J-Link to the APP connector");
+        break;
+    case Confirm:
+        step.heading = tr("Ready to update the LTE MCU");
+        step.primaryText = tr("Continue");
         break;
     case Working:
         switch (m_procedure->step()) {
@@ -347,6 +354,7 @@ bool LteUpdateWizard::canPrimary() const {
     switch (static_cast<Stage>(stage())) {
     case Firmware:
         return firmwareReady() && !m_tab.isNull() && !m_tab->choosing() && !m_tab->isBusy();
+    case Confirm:
     case BackupFailed:
         return true;
     case Application:
@@ -372,6 +380,9 @@ void LteUpdateWizard::primary() {
     switch (static_cast<Stage>(stage())) {
     case Firmware:
         startProcedure();
+        break;
+    case Confirm:
+        m_procedure->confirm(); // ADR-0366: the copy and the erase start now
         break;
     case BackupFailed:
         m_procedure->continueWithoutBackup();

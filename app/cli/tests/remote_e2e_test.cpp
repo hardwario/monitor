@@ -558,6 +558,15 @@ TEST_F(RemoteCli, HostRunsTheGuidedLteUpdate) {
     ASSERT_TRUE(waitErr("Support asks to update the LTE firmware to HARDWARIO LTE firmware 1.7.0"))
         << child.err();
     child.write("y\n");
+    // Plan 0046 (ADR-0366): the customer confirms before the application is erased; the joiner
+    // sees the phase "confirm" meanwhile.
+    ASSERT_TRUE(waitErr("Continue? [y/N] ")) << child.err();
+    EXPECT_NE(child.err().find("The application on this CHESTER will be erased."),
+              std::string::npos)
+        << child.err();
+    ASSERT_TRUE(
+        runUntil([&] { return std::ranges::find(phases, "confirm") != phases.end(); }, 30s));
+    child.write("y\n");
     ASSERT_TRUE(waitErr("Connect the J-Link cable to the LTE connector.")) << child.err();
     moveCable("lte");
     ASSERT_TRUE(waitErr("Move the cable to the APP connector.")) << child.err();

@@ -577,6 +577,9 @@ TEST(RemoteHostOperations, LteUpdateAskedWithTheRecommendedFirmware) {
     EXPECT_EQ(o.last<tunnel::OpResult>().value_or(tunnel::OpResult{}).code,
               "remote.application_not_restored");
     EXPECT_TRUE(o.f.console.hasEvent("Update the LTE firmware to HARDWARIO LTE firmware 1.7.0"));
+    // Plan 0046 (ADR-0366): the joiner's text while the customer confirms.
+    EXPECT_EQ(operationPhaseText("confirm"),
+              QStringLiteral("waiting for the customer to continue"));
 }
 
 TEST(RemoteHostOperations, LteUpdateRefusedWhenTheHostHasNone) {

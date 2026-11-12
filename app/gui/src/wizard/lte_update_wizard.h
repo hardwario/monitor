@@ -6,7 +6,9 @@
 // A thin adapter: step 1 chooses the LTE firmware (an LTE-kind FirmwareSourceViewModel, the same
 // source part as the Flash page: the designated HARDWARIO LTE firmware or an own .hex / bundle /
 // modem zip, nRF Util prerequisite inline); [Next] starts device::LteUpdateProcedure on the tab's
-// session, and the wizard only shows the procedure's step, prompt, progress and error. Steps:
+// session, and the wizard only shows the procedure's step, prompt, progress and error. Once the APP
+// connector answers it waits for [Continue] (Confirm, "Ready to update the LTE MCU": the
+// application will be erased, the cable moves to LTE and back; ADR-0366). Steps:
 //   1 Firmware · 2 APP connector · 3 Stop the application · 4 LTE connector · 5 Update the LTE MCU
 //   · 6 APP connector · 7 Application (the copy, or firmware from the catalog / a file) · 8 Done
 // Every step but Done is an Embedded step "lte-update" (LteUpdateStep.qml) bound to this object.
@@ -18,7 +20,9 @@
 // takeLteUpdateRequest() at start()), the wizard selects the recommended (designated) firmware and
 // starts by itself once it is downloaded and nRF Util was found; a download or nRF Util problem is
 // the request's result (the wizard stays open on step 1). The request follows the procedure
-// (LteUpdateReporter) and ends when the wizard closes.
+// (LteUpdateReporter) and ends when the wizard closes. Plan 0046 (ADR-0366): like a local update
+// it stops at Confirm until the customer clicks [Continue] (the reporter's heartbeat keeps the
+// joiner's request alive meanwhile).
 //
 // Ownership: created by the WizardRegistry factory with the WizardViewModel as Qt parent; keeps
 // the tab as QPointer (wizard contract). GUI thread only.
@@ -77,6 +81,7 @@ public:
     enum Stage : quint8 { // NOLINT(cppcoreguidelines-use-enum-class)
         Firmware,         // step 1: the LTE source
         Connector,        // steps 2, 4, 6: picture + prompt, advances by itself
+        Confirm,          // step 2 answered: what will happen + [Continue] (plan 0046, ADR-0366)
         Working,          // backup, erase, LTE update, restore: prompt + progress
         BackupFailed,     // the error + [Continue without a copy]
         Application,      // step 7: the copy or another firmware

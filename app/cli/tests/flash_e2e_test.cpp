@@ -546,6 +546,14 @@ TEST_F(FlashCli, GuidedLteFlashWithScriptedConnectorMoves) {
         }
         return err.contains(text);
     };
+    // Plan 0046 (ADR-0366): what will happen, then the question; nothing is changed before it.
+    ASSERT_TRUE(waitFor("Continue? [y/N] ")) << err.toStdString();
+    EXPECT_TRUE(err.contains("The application on this CHESTER will be erased. Then you move the "
+                             "J-Link cable to the LTE connector, and at the end back to APP; the "
+                             "application is written back."))
+        << err.toStdString();
+    EXPECT_FALSE(err.contains("Saving a copy of the application")) << err.toStdString();
+    process.write("y\n");
     ASSERT_TRUE(waitFor("Connect the J-Link cable to the LTE connector.")) << err.toStdString();
     EXPECT_TRUE(err.contains("Saving a copy of the application")) << err.toStdString();
     writeFile(QStringLiteral("connector"), "lte");
@@ -603,6 +611,8 @@ TEST_F(FlashCli, GuidedLteFlashWithoutACopyExitsNonZero) {
         }
         return err.contains(text);
     };
+    ASSERT_TRUE(waitFor("Continue? [y/N] ")) << err.toStdString();
+    process.write("y\n");
     ASSERT_TRUE(waitFor("Connect the J-Link cable to the LTE connector.")) << err.toStdString();
     writeFile(QStringLiteral("connector"), "lte");
     ASSERT_TRUE(waitFor("This is the LTE connector. Move the cable to the APP connector."))
@@ -616,6 +626,52 @@ TEST_F(FlashCli, GuidedLteFlashWithoutACopyExitsNonZero) {
         << err.toStdString();
     EXPECT_NE(err.indexOf("Flash an application with `hwio chester app flash`."), -1)
         << err.toStdString();
+}
+
+// Plan 0046 (ADR-0366): "no" to the question ends the guided update as cancelled (exit code 130)
+// with nothing changed: no copy, the application is still in the device.
+TEST_F(FlashCli, GuidedLteFlashAnsweredNoChangesNothing) {
+    writeFile(QStringLiteral("lte.hex"), QByteArray::fromStdString(appHex()));
+    writeFile(QStringLiteral("connector"), "app");
+    useScenario(QStringLiteral(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+        "connectors": {"file": "%1", "chips": {
+          "app": {"memory": [{"address": 4096, "hex": "a5a5a5a5"}]},
+          "lte": {"family": "nrf91"}}}}]})")
+                    .arg(path(QStringLiteral("connector"))));
+    QProcessEnvironment env = fakeEnvironment();
+    env.insert(QStringLiteral("HWIO_TEST_INTERACTIVE"), QStringLiteral("1"));
+    QProcess process;
+    process.setProcessEnvironment(env);
+    process.start(QStringLiteral(HWIO_CLI_EXECUTABLE),
+                  {QStringLiteral("chester"), QStringLiteral("lte"), QStringLiteral("flash"),
+                   QStringLiteral("--guided"), path(QStringLiteral("lte.hex"))});
+    ASSERT_TRUE(process.waitForStarted(10000));
+    QByteArray err;
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+    while (!err.contains("Continue? [y/N] ") && std::chrono::steady_clock::now() < deadline &&
+           process.state() != QProcess::NotRunning) {
+        process.waitForReadyRead(50);
+        err += process.readAllStandardError();
+    }
+    ASSERT_TRUE(err.contains("Continue? [y/N] ")) << err.toStdString();
+    process.write("n\n");
+    ASSERT_TRUE(process.waitForFinished(30000));
+    err += process.readAllStandardError();
+    const std::string out = process.readAllStandardOutput().toStdString();
+    EXPECT_EQ(process.exitCode(), 130) << out << err.toStdString();
+    EXPECT_FALSE(err.contains("Saving a copy of the application")) << err.toStdString();
+    EXPECT_FALSE(err.contains("Erasing the application")) << err.toStdString();
+    const RunResult read =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("mem"), QStringLiteral("read"), QStringLiteral("0x1000"),
+              QStringLiteral("--length"), QStringLiteral("4")});
+    ASSERT_EQ(read.exitCode, 0) << read.out << read.err;
+    EXPECT_NE(QString::fromStdString(read.out)
+                  .remove(QLatin1Char(' '))
+                  .toLower()
+                  .indexOf(QStringLiteral("a5a5a5a5")),
+              -1)
+        << read.out;
 }
 #endif
 

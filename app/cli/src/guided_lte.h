@@ -4,11 +4,12 @@
 // --guided` and, for a remote lteUpdate request, `hwio remote host` (plan 0044, ADR-0363).
 //
 // GuidedTerminal drives one LteUpdateProcedure in the terminal: its prompts and progress on
-// stderr, the y/N question of a failed copy, Ctrl+C in run() (cancelled where the procedure allows
-// it). run() blocks until the procedure ends; without run() (the remote host, whose event loop
-// keeps running) it only follows the procedure, and the y/N question goes to `ask` (the host's
-// stdin reader answers it). An empty application (no copy) ends the procedure as Cancelled after
-// the LTE update (noCopyEnd()).
+// stderr, the y/N questions (plan 0046, ADR-0366: "Continue? [y/N] " once the APP connector
+// answers, before anything changes - no ends the update as cancelled; and the question of a failed
+// copy), Ctrl+C in run() (cancelled where the procedure allows it). run() blocks until the
+// procedure ends; without run() (the remote host, whose event loop keeps running) it only follows
+// the procedure, and the y/N questions go to `ask` (the host's stdin reader answers them). An empty
+// application (no copy) ends the procedure as Cancelled after the LTE update (noCopyEnd()).
 //
 // designatedLteSource(): the profile's designated LTE firmware (nRF Util checked, downloaded or
 // taken from the cache, SHA-256 verified) as the procedure's source.
@@ -94,7 +95,10 @@ private:
     void onChanged() {
         show();
         const Step step = m_procedure.step();
-        if (step == Step::BackupFailed) {
+        if (step == Step::Confirm) {
+            // Asked on the next turn of the event loop, after the prompt that says what happens.
+            QMetaObject::invokeMethod(&m_loop, [this] { askToContinue(); }, Qt::QueuedConnection);
+        } else if (step == Step::BackupFailed) {
             if (m_procedure.error()) {
                 m_ui.warning(*m_procedure.error());
             }
@@ -106,6 +110,29 @@ private:
             m_noCopyEnd = true;
             QMetaObject::invokeMethod(
                 &m_loop, [this] { (void)m_procedure.cancel(); }, Qt::QueuedConnection);
+        }
+    }
+
+    void askToContinue() {
+        if (m_procedure.step() != Step::Confirm) {
+            return;
+        }
+        const std::string question = "Continue? [y/N] ";
+        if (m_ask) {
+            m_ask(question, [this](bool yes) { answerToContinue(yes); });
+            return;
+        }
+        answerToContinue(askYesNo(question));
+    }
+
+    void answerToContinue(bool yes) {
+        if (m_procedure.step() != Step::Confirm) {
+            return;
+        }
+        if (yes) {
+            m_procedure.confirm();
+        } else {
+            (void)m_procedure.cancel(); // nothing was changed
         }
     }
 

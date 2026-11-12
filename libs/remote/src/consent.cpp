@@ -69,10 +69,13 @@ QString operationPhaseText(std::string_view phase) {
         std::string_view id;
         const char* text;
     };
-    static constexpr std::array<PhaseText, 10> texts{{
+    static constexpr std::array<PhaseText, 11> texts{{
         {.id = "download", .text = QT_TRANSLATE_NOOP("hwio::remote", "downloading the firmware")},
         {.id = "connect-app",
          .text = QT_TRANSLATE_NOOP("hwio::remote", "waiting for the J-Link on the APP connector")},
+        // Plan 0046 (ADR-0366): the customer confirms before the application is erased.
+        {.id = "confirm",
+         .text = QT_TRANSLATE_NOOP("hwio::remote", "waiting for the customer to continue")},
         {.id = "backup",
          .text = QT_TRANSLATE_NOOP("hwio::remote", "saving a copy of the application")},
         {.id = "backup-failed",

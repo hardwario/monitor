@@ -1138,7 +1138,20 @@ TEST_F(FlashTest, LteUpdateWizardRunsABundleThroughEveryStep) {
     wizard->primary();
     EXPECT_TRUE(tab().isBusy());
     EXPECT_EQ(tab().busyText(), QStringLiteral("Paused for the LTE firmware update"));
-    // On APP: copy and erase, then the LTE connector. Cancel now asks first.
+    // Plan 0046 (ADR-0366): on APP it says what will happen and waits for [Continue].
+    ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Confirm));
+    EXPECT_EQ(wizard->current().heading, QStringLiteral("Ready to update the LTE MCU"));
+    EXPECT_EQ(wizard->current().primaryText, QStringLiteral("Continue"));
+    EXPECT_EQ(wizard->promptText(),
+              QStringLiteral("The application on this CHESTER will be erased. Then you move the "
+                             "J-Link cable to the LTE connector, and at the end back to APP; the "
+                             "application is written back."));
+    EXPECT_TRUE(wizard->canPrimary());
+    EXPECT_TRUE(wizard->canCancel());
+    EXPECT_TRUE(wizard->busyCancelText().isEmpty()); // nothing changed yet: no question
+    EXPECT_FALSE(wizard->procedure()->applicationErased());
+    wizard->primary();
+    // The copy and the erase, then the LTE connector. Cancel now asks first.
     ASSERT_TRUE(waitFor([&] {
         return wizard->procedure()->step() == hwio::device::LteUpdateProcedure::Step::ConnectLte;
     }));
@@ -1188,6 +1201,8 @@ TEST_F(FlashTest, LteUpdateWizardModemFailureCanBeRetriedOrCancelled) {
     ASSERT_TRUE(loadInto(*wizard->lteSource(), modemFile()));
     ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
     wizard->primary();
+    ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Confirm));
+    wizard->primary(); // [Continue]
     ASSERT_TRUE(waitFor([&] {
         return wizard->procedure()->step() == hwio::device::LteUpdateProcedure::Step::ConnectLte;
     }));
@@ -1203,6 +1218,25 @@ TEST_F(FlashTest, LteUpdateWizardModemFailureCanBeRetriedOrCancelled) {
     app().wizard()->cancel(true);
     EXPECT_FALSE(app().wizard()->isOpen());
     EXPECT_FALSE(tab().isBusy());
+}
+
+// Plan 0046 (ADR-0366): [Cancel] at "Ready to update the LTE MCU" closes the wizard without a
+// question; the application stays and the console reconnects.
+TEST_F(FlashTest, LteUpdateWizardCancelBeforeContinueChangesNothing) {
+    startBoard();
+    hwio::gui::LteUpdateWizard* wizard = openLteWizard();
+    ASSERT_NE(wizard, nullptr);
+    wizard->lteSource()->setLteSource(FirmwareSourceViewModel::OwnFile);
+    ASSERT_TRUE(loadInto(*wizard->lteSource(), hexFile("lte.hex")));
+    ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
+    wizard->primary();
+    ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Confirm));
+    EXPECT_EQ(wizard->current().id, QStringLiteral("app-connector"));
+    EXPECT_TRUE(wizard->busyCancelText().isEmpty());
+    app().wizard()->cancel(false); // no question: closes at once
+    EXPECT_FALSE(app().wizard()->isOpen());
+    ASSERT_TRUE(waitFor([this] { return !tab().isBusy(); })); // the closed wizard is deleted later
+    ASSERT_TRUE(waitFor([this] { return tab().state() == DeviceTabViewModel::Connected; }));
 }
 
 // Review F5 / ADR-0114 (moved here by plan 0033): the nRF Util path is read from the settings when
@@ -1228,6 +1262,8 @@ TEST_F(FlashTest, AChangedNrfUtilPathReachesTheLteUpdate) {
     ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
     wizard->primary();
     EXPECT_EQ(tab().session(), opened.data()); // no new session
+    ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Confirm));
+    wizard->primary(); // [Continue]
     ASSERT_TRUE(waitFor([&] {
         return wizard->procedure()->step() == hwio::device::LteUpdateProcedure::Step::ConnectLte;
     }));
