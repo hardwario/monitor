@@ -87,11 +87,13 @@ SettingsViewModel::SettingsViewModel(AppViewModel& app, FirmwareServices& servic
     });
     // Plan 0045: the mode changes the visible sections (and, in QML, rows).
     connect(&m_mode, &UiModeController::modeChanged, this, [this] {
-        modeChanged();      // signal
-        modeTextsChanged(); // signal: the description of the selected mode
-        sectionsChanged();  // signal
+        modeChanged();     // signal (also the description)
+        sectionsChanged(); // signal
     });
-    connect(&m_mode, &UiModeController::textsChanged, this, &SettingsViewModel::modeTextsChanged);
+    connect(&m_mode, &UiModeController::textsChanged, this, [this] {
+        modeTextsChanged(); // signal
+        modeChanged();      // signal: the description in the new language
+    });
     connect(&m_mode, &UiModeController::writeFailed, this, [this](const QString& message) {
         if (message != m_writeError) {
             m_writeError = message;

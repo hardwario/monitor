@@ -89,7 +89,7 @@ class SettingsViewModel : public QObject {
     // [{mode, name, description}] and the description of the selected mode.
     Q_PROPERTY(int mode READ mode NOTIFY modeChanged)
     Q_PROPERTY(QVariantList modes READ modes NOTIFY modeTextsChanged)
-    Q_PROPERTY(QString modeDescription READ modeDescription NOTIFY modeTextsChanged)
+    Q_PROPERTY(QString modeDescription READ modeDescription NOTIFY modeChanged)
     // ADR-0361: the section / row hidden by the mode that was opened for this visit ("" = none).
     Q_PROPERTY(QString revealedSection READ revealedSection NOTIFY revealChanged)
     Q_PROPERTY(QString revealedRow READ revealedRow NOTIFY revealChanged)

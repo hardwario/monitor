@@ -1,7 +1,8 @@
 // The global Settings page (Ctrl+,; plan/features/0006-m3-flash-settings.md, ADR-0059; shown by the
 // Settings tab, 0021 ADR-0172): the
 // sections registered in the PageRegistry (General, Console by 0005, J-Link, nRF Util, About), each
-// under its title. Changes apply immediately; invalid input shows an inline error and is not saved.
+// under its title; only those the user mode shows (plan 0045), plus one opened by an error or a guide
+// with a note (ADR-0361). Changes apply immediately; invalid input shows an inline error and is not saved.
 // A settings file of a newer version is read-only: a banner and all controls disabled.
 pragma ComponentBehavior: Bound
 
@@ -179,6 +180,14 @@ Item {
                             Layout.fillWidth: true
                             implicitHeight: 1
                             color: Theme.border
+                        }
+
+                        // Plan 0045 (ADR-0361): a section the mode hides, opened by an error or a
+                        // guide, is shown for this visit.
+                        RevealNote {
+                            Layout.fillWidth: true
+                            visible: section.modelData.revealed
+                            mode: section.modelData.minimumMode
                         }
 
                         Loader {

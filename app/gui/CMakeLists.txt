@@ -70,6 +70,8 @@ set(HWIO_GUI_QML_FILES
     qml/settings/JLinkSection.qml
     qml/settings/McpSection.qml
     qml/settings/NrfUtilSection.qml
+    qml/settings/RevealNote.qml
+    qml/settings/SettingsGroup.qml
     qml/settings/SettingsRow.qml
     qml/shell/AdvancedPopover.qml
     qml/shell/BleDeviceList.qml
@@ -78,6 +80,7 @@ set(HWIO_GUI_QML_FILES
     qml/shell/DeviceBar.qml
     qml/shell/DeviceTabBar.qml
     qml/shell/HelpMenu.qml
+    qml/shell/ModeChoiceDialog.qml
     qml/shell/NavRail.qml
     qml/shell/PageHost.qml
     qml/settings/ConsoleSection.qml

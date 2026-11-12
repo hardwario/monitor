@@ -1,7 +1,9 @@
 // The Settings page (plan 0006): the sections in registry order, live theme, the J-Link default
 // speed with "Automatic speed" (ADR-0111) and its slow-speed warning (ADR-0110), the detected
 // J-Link library, nRF Util "not found", "Run the setup wizard" hidden while the setup wizard is
-// not registered, both themes, and the layout at 960 x 600 in Czech.
+// not registered, both themes, and the layout at 960 x 600 in Czech. Plan 0045: the rows of each
+// user mode, the Mode selector, a hidden section / row revealed for one visit, and the first-start
+// mode dialog.
 import QtQuick
 import QtTest
 import HardwarioMonitor
@@ -110,6 +112,152 @@ TestCase {
         compare(field.text, "");
     }
 
+    // Plan 0045 (ADR-0359): for each mode exactly the rows of the plan's table are visible.
+    function test_modeRows_data() {
+        const all = ["modeSelector", "languageSelector", "themeSelector", "restoreTabsSwitch",
+                     "consoleFontSize", "consoleTimestamps", "consoleWrap", "consoleLogToFile",
+                     "consoleLogFolder", "aboutText", "updateAutoCheck", "cliRow", "licenceFiles"];
+        const advanced = ["consoleSuggestions", "consoleReadCommands", "consoleRememberCommands",
+                          "consoleClearHistory", "section_jlink", "jlinkAuto", "defaultAutoSpeed",
+                          "defaultAutoReconnect", "section_nrfutil", "nrfUtilAuto", "section_mcp",
+                          "mcpEnabled", "updatePrerelease"];
+        const expert = ["defaultLatencyBox", "defaultResetOnConnect", "section_expert", "relayUrlField"];
+        return [
+            { tag: "basic", mode: "basic", shown: all, hidden: advanced.concat(expert) },
+            { tag: "advanced", mode: "advanced", shown: all.concat(advanced), hidden: expert },
+            { tag: "expert", mode: "expert", shown: all.concat(advanced, expert), hidden: [] }
+        ];
+    }
+
+    function test_modeRows(data) {
+        verify(testSupport.setSetting("ui/mode", data.mode));
+        window.height = 4000; // every section laid out
+        waitForRendering(window.contentItem);
+        for (const name of data.shown)
+            tryVerify(() => find(name) !== null, 3000, `${name} is shown in ${data.mode}`);
+        for (const name of data.hidden)
+            verify(find(name) === null, `${name} is hidden in ${data.mode}`);
+        verify(!find("revealNote"));
+    }
+
+    // The Mode selector: the description follows; Settings and the Flash maintenance change at once.
+    function test_modeSelector() {
+        const vm = AppViewModel.globalPageViewModel("settings");
+        compare(vm.mode, UiMode.Advanced);
+        compare(find("modeDescription").text, "Also J-Link, nRF Util, AI assistants and console options.");
+        compare(find("modeButton_" + UiMode.Advanced).kind, "primary");
+        const flash = testSupport.flashPage(0);
+        verify(flash !== null);
+        verify(!flash.expertActions);
+        mouseClick(find("modeButton_" + UiMode.Expert));
+        compare(vm.mode, UiMode.Expert);
+        compare(testSupport.setting("ui/mode"), "expert");
+        verify(flash.expertActions);
+        compare(find("modeDescription").text, "Everything, including timing options and expert maintenance actions.");
+        tryVerify(() => find("section_expert") !== null);
+        wait(Qt.styleHints.mouseDoubleClickInterval + 50); // two separate clicks, not a double click
+        mouseClick(find("modeButton_" + UiMode.Basic));
+        compare(vm.mode, UiMode.Basic);
+        verify(!flash.expertActions);
+        tryVerify(() => find("section_jlink") === null);
+        compare(find("modeDescription").text, "The essentials: language, look and console files.");
+        compare(find("modeButton_" + UiMode.Basic).kind, "primary");
+        compare(find("modeButton_" + UiMode.Expert).kind, "normal");
+    }
+
+    // ADR-0361: an error's "Open Settings" in Basic mode shows the J-Link section with the note;
+    // leaving Settings hides it again, the mode is unchanged.
+    function test_revealHiddenSection() {
+        verify(testSupport.setSetting("ui/mode", "basic"));
+        tryVerify(() => find("section_jlink") === null);
+        AppViewModel.openSettings("jlink");
+        tryVerify(() => find("section_jlink") !== null);
+        const note = findAll(find("section_jlink"), "revealNote").filter(effectivelyVisible);
+        compare(note.length, 1);
+        compare(note[0].text, "Shown because it was needed. It is part of the Advanced mode.");
+        verify(find("jlinkAuto") !== null);
+        verify(!find("defaultLatencyBox")); // Expert rows stay hidden
+        tryCompare(AppViewModel, "settingsSection", ""); // scrolled
+        compare(AppViewModel.globalPageViewModel("settings").mode, UiMode.Basic);
+        AppViewModel.currentTab = 0; // leave Settings
+        AppViewModel.openGlobalPage("settings");
+        tryVerify(() => find("settingsPage") !== null);
+        tryVerify(() => find("section_jlink") === null);
+        verify(!find("revealNote"));
+    }
+
+    // ADR-0361: a row hidden by the mode (Expert) opened in Advanced mode, with its note.
+    function test_revealHiddenRow() {
+        verify(!find("defaultLatencyBox"));
+        AppViewModel.openSettings("jlink", "jlinkLatency");
+        tryVerify(() => find("defaultLatencyBox") !== null);
+        const notes = findAll(window.contentItem, "revealNote").filter(effectivelyVisible);
+        compare(notes.length, 1);
+        compare(notes[0].text, "Shown because it was needed. It is part of the Expert mode.");
+        verify(!find("defaultResetOnConnect"));
+        tryCompare(AppViewModel, "settingsSection", ""); // scrolled
+        AppViewModel.closeSettings();
+        AppViewModel.openGlobalPage("settings");
+        tryVerify(() => find("settingsPage") !== null);
+        tryVerify(() => find("defaultAutoSpeed") !== null);
+        verify(!find("defaultLatencyBox"));
+    }
+
+    // ADR-0359: the first-start dialog - Advanced preselected, Continue stores the choice, not
+    // shown again; ADR-0362: with the rc.3 expert switch on, Expert is preselected and Esc keeps it.
+    function test_modeChoiceDialog() {
+        const dialog = findChild(window, "modeChoiceDialog");
+        verify(dialog !== null);
+        verify(!dialog.visible);
+        testSupport.resetUiMode();
+        tryVerify(() => dialog.opened);
+        verify(!AppViewModel.uiMode.chosen);
+        compare(dialog.selected, UiMode.Advanced);
+        compare(findChild(dialog.contentItem, "modeCard_" + UiMode.Advanced).Accessible.checked, true);
+        mouseClick(findChild(dialog.contentItem, "modeCard_" + UiMode.Basic));
+        compare(dialog.selected, UiMode.Basic);
+        mouseClick(findChild(dialog.footer, "modeChoiceContinue"));
+        tryVerify(() => !dialog.visible);
+        verify(AppViewModel.uiMode.chosen);
+        compare(AppViewModel.uiMode.mode, UiMode.Basic);
+        compare(testSupport.setting("ui/mode"), "basic");
+        wait(100);
+        verify(!dialog.visible); // not shown again
+
+        verify(testSupport.setSetting("advanced/expertActions", true));
+        testSupport.resetUiMode();
+        tryVerify(() => dialog.opened);
+        compare(dialog.selected, UiMode.Expert);
+        mouseClick(findChild(dialog.contentItem, "modeCard_" + UiMode.Basic));
+        keyClick(Qt.Key_Escape); // closing keeps the preselection
+        tryVerify(() => !dialog.visible);
+        compare(AppViewModel.uiMode.mode, UiMode.Expert);
+        compare(testSupport.setting("ui/mode"), "expert");
+        compare(testSupport.setting("advanced/expertActions"), "false"); // removed (ADR-0360)
+    }
+
+    // The dialog fits at 960 x 600 in the longest languages.
+    function test_modeChoiceDialogLayout_data() {
+        return [{ tag: "de" }, { tag: "pl" }, { tag: "cs" }, { tag: "sk" }];
+    }
+
+    function test_modeChoiceDialogLayout(data) {
+        AppViewModel.setLanguage(data.tag);
+        window.width = 960;
+        window.height = 600;
+        const dialog = findChild(window, "modeChoiceDialog");
+        testSupport.resetUiMode();
+        tryVerify(() => dialog.opened);
+        waitForRendering(window.contentItem);
+        verify(dialog.y >= 0 && dialog.y + dialog.height <= window.height + 0.5, `dialog height ${dialog.height}`);
+        const button = findChild(dialog.footer, "modeChoiceContinue");
+        const r = button.mapToItem(window.contentItem, 0, 0);
+        verify(r.y + button.height <= window.height + 0.5 && r.x + button.width <= window.width + 0.5);
+        mouseClick(button);
+        tryVerify(() => !dialog.visible);
+        verify(AppViewModel.uiMode.chosen);
+    }
+
     function test_themeIsLive() {
         const box = find("themeSelector");
         box.activated(2);
@@ -205,11 +353,12 @@ TestCase {
     }
 
     function test_layout960(data) {
+        verify(testSupport.setSetting("ui/mode", "expert")); // every row
         AppViewModel.setLanguage(data.tag);
         window.width = 960;
         window.height = 600;
         waitForRendering(window.contentItem);
-        for (const name of ["languageSelector", "themeSelector", "defaultSpeedBox", "defaultLatencyBox", "copyAbout"]) {
+        for (const name of ["modeSelector", "languageSelector", "themeSelector", "defaultSpeedBox", "defaultLatencyBox", "copyAbout"]) {
             const item = find(name);
             verify(item !== null, name);
             const r = rect(item);

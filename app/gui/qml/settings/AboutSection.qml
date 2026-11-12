@@ -61,6 +61,7 @@ ColumnLayout {
 
             CheckBox {
                 objectName: "updatePrerelease"
+                visible: section.vm.mode >= UiMode.Advanced // plan 0045
                 text: qsTr("Include pre-releases (beta, release candidates)")
                 checked: section.update.includePrerelease
                 onToggled: section.update.includePrerelease = checked
