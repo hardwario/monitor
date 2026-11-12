@@ -14,6 +14,12 @@
 // held by the procedure, D4). Cancel: not while a flash or the erase runs (canCancel); after the
 // erase it asks first ("The application MCU is erased…", with the path of the copy).
 //
+// Plan 0044 (ADR-0363): opened for a remote lteUpdate request (RemoteShareViewModel's
+// takeLteUpdateRequest() at start()), the wizard selects the recommended (designated) firmware and
+// starts by itself once it is downloaded and nRF Util was found; a download or nRF Util problem is
+// the request's result (the wizard stays open on step 1). The request follows the procedure
+// (LteUpdateReporter) and ends when the wizard closes.
+//
 // Ownership: created by the WizardRegistry factory with the WizardViewModel as Qt parent; keeps
 // the tab as QPointer (wizard contract). GUI thread only.
 
@@ -30,6 +36,10 @@
 
 #include <memory>
 #include <vector>
+
+namespace hwio::remote {
+class LteUpdateReporter;
+} // namespace hwio::remote
 
 namespace hwio::gui {
 
@@ -131,6 +141,8 @@ private:
     void onProcedureChanged();
     void onProcedureFinished();
     void releaseTab();
+    // Plan 0044 (ADR-0363): the remote request's automatic start.
+    void checkRemoteStart();
 
     FirmwareServices& m_services;
     QPointer<DeviceTabViewModel> m_tab;
@@ -140,6 +152,8 @@ private:
     std::optional<Error> m_startError; // the procedure could not start
     bool m_useBackup = true;
     bool m_tabBusy = false;
+    QPointer<remote::LteUpdateReporter> m_remote; // owned by the tab's RemoteShareViewModel
+    bool m_remoteStarted = false;
 };
 
 void registerLteUpdateWizard(class AppViewModel& app, FirmwareServices& services);

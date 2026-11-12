@@ -27,7 +27,12 @@ z webového Terminalu (len konzola) alebo z HARDWARIO Monitor.
    napríklad *Podpora žiada o nahranie firmvéru CHESTER Clime v3.2.1 (ID …) do aplikačného jadra.* **Zamietnuť** je
    predvolená voľba; žiadosť bez odpovede sa po 60 sekundách zamietne. Firmvér pochádza len z katalógu HARDWARIO a váš
    HARDWARIO Monitor ho stiahne a overí.
-7. Keď skončíte, kliknite na **Ukončiť zdieľanie**.
+7. Ak vás podpora požiada o aktualizáciu firmvéru LTE, otázka uvádza verziu, ktorú odporúča váš HARDWARIO Monitor:
+   *Podpora žiada o aktualizáciu firmvéru LTE na HARDWARIO LTE firmware 1.7.0. Budete musieť prepájať kábel J-Link
+   medzi konektormi APP a LTE.* Po kliknutí na **Povoliť** sa otvorí **Nahrávanie firmvéru** › **Aktualizovať firmvér
+   LTE…** s týmto firmvérom a sám sa spustí: postupujte podľa jeho krokov a prepojte kábel, keď o to požiada.
+   Zdieľanie zostáva zapnuté, aj keď sa zariadenie odpojí a znova pripojí, a podpora vidí každý krok aj výsledok.
+8. Keď skončíte, kliknite na **Ukončiť zdieľanie**.
 
 Zdieľanie sa skončí aj vtedy, keď zariadenie odpojíte, zatvoríte kartu alebo aplikáciu ukončíte, po 30 minútach bez
 aktivity (lišta vás 2 minúty vopred upozorní, **Ponechať zdieľanie** ho predĺži) a najneskôr po 8 hodinách.
@@ -60,6 +65,10 @@ vzdialený príkaz a každá žiadosť o operáciu s jej výsledkom. Pozrite si 
    (ID firmvéru z katalógu), **Požiadať o vymazanie**, **Požiadať o obnovenie** a **Požiadať o reset** pre aplikačné
    alebo LTE jadro. Každá žiadosť čaká na potvrdenie zákazníka; výsledok hlási Monitor zákazníka. So zákazníkom, ktorý
    používa webový Terminal, je k dispozícii len konzola.
+6. Keď je vybrané **Jadro LTE modemu**, voľba **Požiadať o aktualizáciu firmvéru LTE** požiada o riadenú aktualizáciu
+   LTE na verziu, ktorú odporúča HARDWARIO Monitor zákazníka (bez ID firmvéru). Zákazník prepája kábel J-Link medzi
+   konektormi APP a LTE; vy vidíte každý krok (napríklad *čaká sa na J-Link na konektore LTE*) a výsledok. Ak
+   aktualizácia skončí bez zapísania aplikácie späť, výsledok je `remote.application_not_restored`.
 
 Keď zákazník ukončí zdieľanie, HARDWARIO Monitor to nie vždy rozpozná: server to neoznamuje. Po 30 minútach bez
 akejkoľvek aktivity to lišta oznámi a ponúkne **Opustiť**. Karta zostane otvorená, takže konzolu môžete stále uložiť.
@@ -74,6 +83,7 @@ hwio remote join 482913                   # interactive console
 hwio remote join 482913 --command "info show"
 hwio remote join 482913 --flash 0123456789abcdef0123456789abcdef
 hwio remote join 482913 --reset --target lte
+hwio remote join 482913 --lte-update      # riadená aktualizácia LTE (zákazník prepája kábel)
 ```
 
 `hwio remote host` sa pred povolením pripojenia alebo operácie opýta v termináli. Bez terminálu na stdin sa pripojenie

@@ -11,9 +11,15 @@
 // them as modal dialogs whose default button refuses (End session / Deny) and calls answerJoin()
 // / answerOperation(). A withdrawn question (timeout, session end) closes the dialog.
 //
+// Plan 0044 (ADR-0363): it is also the host's remote::LteUpdateRunner: an allowed lteUpdate opens
+// Flash › Update LTE firmware… on the tab (the wizard takes the request with
+// takeLteUpdateRequest() and starts with the recommended firmware); the request's reporter stays
+// here, the wizard keeps it as a QPointer.
+//
 // Ownership: child of its DeviceTabViewModel (Qt parent). GUI thread only.
 
 #include "hwio/remote/consent.h"
+#include "hwio/remote/host_operations.h"
 
 #include <QObject>
 #include <QString>
@@ -24,6 +30,7 @@
 
 namespace hwio::remote {
 class DeviceSessionOperations;
+class LteUpdateReporter;
 class RemoteHost;
 } // namespace hwio::remote
 
@@ -31,7 +38,9 @@ namespace hwio::gui {
 
 class DeviceTabViewModel;
 
-class RemoteShareViewModel : public QObject, public remote::ConsentProvider {
+class RemoteShareViewModel : public QObject,
+                             public remote::ConsentProvider,
+                             public remote::LteUpdateRunner {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("Owned by DeviceTabViewModel")
@@ -99,6 +108,13 @@ public:
     [[nodiscard]] Withdraw askOperation(const remote::OperationQuestion& question,
                                         Answer answer) override;
 
+    // remote::LteUpdateRunner (ADR-0363). Errors: internal.busy (the tab is busy, another wizard
+    // is open).
+    [[nodiscard]] Status start(Progress progress, Finished finished) override;
+    void abandon() override;
+    // The LTE update wizard takes the open request (once); nullptr when there is none.
+    [[nodiscard]] remote::LteUpdateReporter* takeLteUpdateRequest();
+
 signals:
     void changed();
     void questionsChanged();
@@ -118,6 +134,8 @@ private:
     bool m_idleWarning = false;
     bool m_reconnecting = false;
     QString m_endMessage;
+    std::unique_ptr<remote::LteUpdateReporter> m_lteUpdate; // the last remote LTE update
+    bool m_lteUpdateOffered = false; // start() waits for the wizard to take it
 };
 
 } // namespace hwio::gui

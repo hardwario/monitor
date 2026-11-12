@@ -2115,57 +2115,72 @@
 <context>
     <name>RemoteFlashCard</name>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="25"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="27"/>
         <source>Remote operations</source>
         <translation>Remote-Operationen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="44"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="46"/>
         <source>The customer confirms every request in their HARDWARIO Monitor. Only firmware from the HARDWARIO catalog can be flashed remotely.</source>
         <translation>Der Kunde bestätigt jede Anfrage in seinem HARDWARIO Monitor. Aus der Ferne kann nur Firmware aus dem HARDWARIO-Katalog geflasht werden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="55"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="57"/>
         <source>Target:</source>
         <translation>Ziel:</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="63"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="65"/>
         <source>Application core</source>
         <translation>Applikationskern</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="71"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="73"/>
         <source>LTE modem core</source>
         <translation>LTE-Modemkern</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="85"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="87"/>
         <source>Catalog firmware ID (32 hexadecimal digits)</source>
         <translation>Firmware-ID aus dem Katalog (32 Hexadezimalziffern)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="87"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="89"/>
         <source>Catalog firmware ID</source>
         <translation>Firmware-ID aus dem Katalog</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="93"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="95"/>
         <source>Ask to flash</source>
         <translation>Flashen anfragen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="106"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="113"/>
+        <source>The customer&apos;s HARDWARIO Monitor updates the LTE firmware to its recommended version. The customer moves the J-Link cable between the APP and LTE connectors when asked.</source>
+        <translation>Der HARDWARIO Monitor des Kunden aktualisiert die LTE-Firmware auf seine empfohlene Version. Der Kunde steckt das J-Link-Kabel auf Aufforderung zwischen dem APP- und dem LTE-Anschluss um.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="114"/>
+        <source>The customer&apos;s HARDWARIO Monitor cannot update the LTE firmware remotely.</source>
+        <translation>Der HARDWARIO Monitor des Kunden kann die LTE-Firmware nicht aus der Ferne aktualisieren.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="122"/>
+        <source>Ask to update LTE firmware</source>
+        <translation>LTE-Firmware-Update anfragen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="135"/>
         <source>Ask to erase</source>
         <translation>Löschen anfragen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="113"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="142"/>
         <source>Ask to recover</source>
         <translation>Recover anfragen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="120"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="149"/>
         <source>Ask to reset</source>
         <translation>Reset anfragen</translation>
     </message>
@@ -6470,178 +6485,178 @@
 <context>
     <name>hwio::gui::LteUpdateWizard</name>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="91"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="96"/>
         <source>Update the LTE firmware</source>
         <translation>LTE-Firmware aktualisieren</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="105"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
         <source>Firmware</source>
         <translation>Firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="105"/>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="106"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
         <source>APP connector</source>
         <translation>APP-Anschluss</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="105"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
         <source>Stop the application</source>
         <translation>Anwendung stoppen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="106"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
         <source>LTE connector</source>
         <translation>LTE-Anschluss</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="106"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
         <source>Update</source>
         <translation>Update</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="107"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
         <source>Application</source>
         <translation>Anwendung</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="107"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
         <source>Done</source>
         <translation>Fertig</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="195"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="259"/>
         <source>LTE firmware updated</source>
         <translation>LTE-Firmware aktualisiert</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="196"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="260"/>
         <source>The LTE MCU has its new firmware and the application runs again. The console reconnects.</source>
         <translation>Die LTE-MCU hat ihre neue Firmware und die Anwendung läuft wieder. Die Konsole verbindet sich erneut.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="200"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="264"/>
         <source>Open console</source>
         <translation>Konsole öffnen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="208"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="272"/>
         <source>Choose the LTE firmware</source>
         <translation>LTE-Firmware wählen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="209"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="273"/>
         <source>Next</source>
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="213"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="277"/>
         <source>Connect the J-Link to the LTE connector</source>
         <translation>Schließen Sie den J-Link an den LTE-Anschluss an</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="214"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="278"/>
         <source>Connect the J-Link to the APP connector</source>
         <translation>Schließen Sie den J-Link an den APP-Anschluss an</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="220"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="284"/>
         <source>Stopping the application</source>
         <translation>Anwendung wird gestoppt</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="223"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="287"/>
         <source>Updating the LTE MCU</source>
         <translation>LTE-MCU wird aktualisiert</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="226"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="290"/>
         <source>Writing the application</source>
         <translation>Anwendung wird geschrieben</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="231"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="295"/>
         <source>No copy of the application</source>
         <translation>Keine Kopie der Anwendung</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="232"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="296"/>
         <source>Continue without a copy</source>
         <translation>Ohne Kopie fortfahren</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="235"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="299"/>
         <source>Put the application back</source>
         <translation>Anwendung zurückschreiben</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="236"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="300"/>
         <source>Write back</source>
         <translation>Zurückschreiben</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="236"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="300"/>
         <source>Flash</source>
         <translation>Flashen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="239"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="303"/>
         <source>The LTE firmware update failed</source>
         <translation>Das LTE-Firmware-Update ist fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="240"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="304"/>
         <source>Try again</source>
         <translation>Erneut versuchen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="268"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="332"/>
         <source>nRF Util was not found. It is needed for LTE firmware.</source>
         <translation>nRF Util wurde nicht gefunden. Es wird für LTE-Firmware benötigt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="383"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="447"/>
         <source>Paused for the LTE firmware update</source>
         <translation>Pausiert für das LTE-Firmware-Update</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="384"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="448"/>
         <source>The LTE firmware update is in progress. Cancel it and close the tab?</source>
         <translation>Das LTE-Firmware-Update läuft. Abbrechen und den Tab schließen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="433"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="497"/>
         <source>The application MCU is erased. The device will not run until you flash an application.</source>
         <translation>Die Anwendungs-MCU ist gelöscht. Das Gerät läuft erst wieder, wenn Sie eine Anwendung flashen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="436"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="500"/>
         <source>The copy of the application stays in %1.</source>
         <translation>Die Kopie der Anwendung bleibt in %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="443"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="507"/>
         <source>Cancel anyway</source>
         <translation>Trotzdem abbrechen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="445"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="509"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="472"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="536"/>
         <source>Updating the LTE MCU needs the J-Link moved between the APP and LTE connectors. The guide stops the application, updates the LTE MCU and puts the application back.</source>
         <translation>Für das Update der LTE-MCU muss der J-Link zwischen den Anschlüssen APP und LTE umgesteckt werden. Der Assistent stoppt die Anwendung, aktualisiert die LTE-MCU und stellt die Anwendung wieder her.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="524"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="588"/>
         <source>Step %1 of %2</source>
         <translation>Schritt %1 von %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="552"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="616"/>
         <source>Copy: %1</source>
         <translation>Kopie: %1</translation>
     </message>
@@ -6869,7 +6884,7 @@
 <context>
     <name>hwio::gui::RemoteJoinViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="59"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="60"/>
         <source>The customer allowed it. Running on the customer&apos;s side…</source>
         <translation>Der Kunde hat es erlaubt. Wird beim Kunden ausgeführt…</translation>
     </message>
@@ -6879,52 +6894,52 @@
         <translation>Wird beim Kunden ausgeführt: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="75"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="76"/>
         <source>Done (reported by the customer&apos;s Monitor).</source>
         <translation>Fertig (gemeldet vom Monitor des Kunden).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="107"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="108"/>
         <source>Connecting to the support server…</source>
         <translation>Verbindung zum Support-Server wird hergestellt…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="110"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="111"/>
         <source>Waiting for the customer to allow you… The live output may already appear.</source>
         <translation>Warten, bis der Kunde Sie erlaubt… Die Live-Ausgabe kann bereits erscheinen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="113"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="114"/>
         <source>No activity from the customer for 30 min. The session may have ended.</source>
         <translation>Seit 30 min keine Aktivität des Kunden. Die Sitzung ist möglicherweise beendet.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="116"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="117"/>
         <source>The session ended. The console stays here so that you can save it.</source>
         <translation>Die Sitzung wurde beendet. Die Konsole bleibt hier, damit Sie sie speichern können.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="130"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="131"/>
         <source>Operations are available once the customer has allowed you.</source>
         <translation>Operationen sind verfügbar, sobald der Kunde Sie erlaubt hat.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="133"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="134"/>
         <source>The customer uses the web Terminal, which supports only the console. Ask them to use HARDWARIO Monitor for flashing.</source>
         <translation>Der Kunde verwendet das Web-Terminal, das nur die Konsole unterstützt. Bitten Sie ihn, zum Flashen HARDWARIO Monitor zu verwenden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="136"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="137"/>
         <source>The customer&apos;s console (Bluetooth) has no flashing.</source>
         <translation>Die Konsole des Kunden (Bluetooth) unterstützt kein Flashen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="161"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="170"/>
         <source>The firmware ID must be 32 hexadecimal digits from the HARDWARIO catalog.</source>
         <translation>Die Firmware-ID muss aus 32 Hexadezimalziffern aus dem HARDWARIO-Katalog bestehen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="170"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="179"/>
         <source>Waiting for the customer&apos;s confirmation…</source>
         <translation>Warten auf die Bestätigung des Kunden…</translation>
     </message>
@@ -6932,7 +6947,7 @@
 <context>
     <name>hwio::gui::RemoteShareViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="79"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="80"/>
         <source>Support will see this console and can send commands after you allow them. They can also ask to flash, erase, recover or reset the device; each request needs your confirmation.
 
 The session passes through the HARDWARIO server %1.
@@ -6949,27 +6964,27 @@ Jeder, der den Code kennt, sieht die Konsolenausgabe. Lesen Sie den Code nur dem
 Die Freigabe endet nach 30 Minuten ohne Aktivität oder nach 8 Stunden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="137"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="139"/>
         <source>%1…</source>
         <translation>%1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="145"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="147"/>
         <source>Remote operation: %1 %2 %</source>
         <translation>Remote-Operation: %1 %2 %</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="160"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="162"/>
         <source>Sharing ended: %1</source>
         <translation>Freigabe beendet: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="198"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="200"/>
         <source>Link copied to the clipboard.</source>
         <translation>Link in die Zwischenablage kopiert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="205"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="207"/>
         <source>Code copied to the clipboard.</source>
         <translation>Code in die Zwischenablage kopiert.</translation>
     </message>

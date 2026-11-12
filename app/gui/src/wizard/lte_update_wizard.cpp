@@ -9,6 +9,7 @@
 #include "hwio/device/operation.h"
 #include "hwio/device/profile.h"
 #include "hwio/firmware/firmware_image.h"
+#include "hwio/remote/lte_update_report.h"
 #include "pages/firmware_services.h"
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/dependency_status.h"
@@ -16,6 +17,7 @@
 #include "viewmodels/error_info.h"
 #include "viewmodels/firmware_source_view_model.h"
 #include "viewmodels/flash_view_model.h"
+#include "viewmodels/remote_share_view_model.h"
 #include "viewmodels/settings_view_model.h"
 #include "wizard/wizard.h"
 #include "wizard/wizard_registry.h"
@@ -84,6 +86,9 @@ LteUpdateWizard::LteUpdateWizard(FirmwareServices& services, QObject* parent)
 }
 
 LteUpdateWizard::~LteUpdateWizard() {
+    if (!m_remote.isNull()) {
+        m_remote->finish(); // the wizard closed: the procedure's state is the request's result
+    }
     m_procedure.reset(); // releases the hold before the tab's busy state
     releaseTab();
 }
@@ -96,7 +101,66 @@ void LteUpdateWizard::start(const ErrorInfo& context, DeviceTabViewModel* tab) {
     if (needsNrfUtil()) {
         m_services.dependencies()->ensureChecked();
     }
+    // Plan 0044 (ADR-0363): a remote request starts with the recommended firmware by itself.
+    if (tab != nullptr && tab->remoteShare() != nullptr) {
+        m_remote = tab->remoteShare()->takeLteUpdateRequest();
+    }
+    if (!m_remote.isNull()) {
+        m_lteSource->setLteSource(FirmwareSourceViewModel::Designated);
+        m_lteSource->prepareDesignated();
+        m_services.dependencies()->ensureChecked();
+        connect(m_lteSource, &FirmwareSourceViewModel::designatedChanged, this,
+                &LteUpdateWizard::checkRemoteStart);
+        connect(m_services.dependencies(), &DependencyStatus::nrfUtilChanged, this,
+                &LteUpdateWizard::checkRemoteStart);
+        checkRemoteStart();
+    }
     emit changed();
+}
+
+void LteUpdateWizard::checkRemoteStart() {
+    if (m_remote.isNull() || m_remoteStarted || m_remote->done()) {
+        return;
+    }
+    switch (m_lteSource->designatedState()) {
+    case FirmwareSourceViewModel::DesignatedFailed:
+        m_remoteStarted = true;
+        // Only the code reaches support (op-result).
+        m_remote->finish(std::unexpected(
+            makeError(errorCodeFromId(toStdString(m_lteSource->designatedError().code()))
+                          .value_or(ErrorCode::NetworkDownloadFailed),
+                      "the designated LTE firmware")));
+        return;
+    case FirmwareSourceViewModel::DesignatedReady:
+        break;
+    default: {
+        const qreal progress = m_lteSource->designatedProgress();
+        m_remote->download(progress < 0 ? 0 : static_cast<std::uint64_t>(progress * 1000.0),
+                           progress < 0 ? 0 : 1000);
+        return;
+    }
+    }
+    const DependencyStatus* dependencies = m_services.dependencies();
+    if (dependencies->nrfUtilState() == DependencyStatus::Problem &&
+        dependencies->nrfUtilProblem()) {
+        m_remoteStarted = true;
+        m_remote->finish(std::unexpected(*dependencies->nrfUtilProblem()));
+        return;
+    }
+    if (dependencies->nrfUtilState() != DependencyStatus::Found) {
+        return; // checked soon (nrfUtilChanged)
+    }
+    if (!canPrimary()) {
+        return;
+    }
+    m_remoteStarted = true;
+    startProcedure();
+    if (m_procedure) {
+        m_remote->follow(*m_procedure);
+    } else {
+        m_remote->finish(std::unexpected(
+            m_startError.value_or(makeError(ErrorCode::InternalUnexpected, "not started"))));
+    }
 }
 
 // ---- steps --------------------------------------------------------------------------------------

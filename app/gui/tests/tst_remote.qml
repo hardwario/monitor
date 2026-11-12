@@ -162,6 +162,71 @@ TestCase {
         verify(testSupport.consoleLastSeq(index) >= lines);
     }
 
+    // ADR-0363: support asks for the LTE update; the confirmation names the recommended firmware
+    // and the cable moves (Deny is the default); Allow opens Flash › Update LTE firmware… with the
+    // recommended firmware. nRF Util is missing in these tests, so the request ends with that
+    // error, the wizard stays open for the customer, and sharing stays active.
+    function test_lteUpdateRequestOpensTheGuidedUpdate() {
+        connectConsole();
+        const share = tab().remoteShare;
+        tryVerify(() => share.available, 5000);
+        share.startSharing();
+        tryVerify(() => share.state === "sharing", 10000);
+        verify(testSupport.remoteJoin(share.code));
+        tryVerify(() => share.joinQuestionOpen, 10000);
+        share.answerJoin(true);
+        tryVerify(() => share.participantAllowed, 5000);
+
+        testSupport.remoteRequest("lteUpdate", "lte");
+        tryVerify(() => share.operationQuestionOpen, 10000);
+        verify(share.operationQuestionText.indexOf("HARDWARIO LTE firmware 1.7.0") >= 0, share.operationQuestionText);
+        verify(share.operationQuestionText.indexOf("move the J-Link cable") >= 0, share.operationQuestionText);
+        const dialogs = findAll(window.contentItem, "remoteSessionDialogs").filter(effectivelyVisible)[0];
+        const operation = findChild(dialogs, "remoteOperationDialog");
+        tryVerify(() => operation.opened, 5000);
+        tryVerify(() => findChild(operation.footer, "dialogReject").activeFocus, 5000);
+        mouseClick(findChild(operation.footer, "dialogAccept")); // Allow
+        tryVerify(() => AppViewModel.wizard.open, 10000);
+        compare(AppViewModel.wizard.wizardId, "lte-update");
+        const wizard = testSupport.openWizard();
+        compare(wizard.lteSource.lteSource, FirmwareSourceViewModel.Designated);
+        tryVerify(() => testSupport.remoteLastResult() === "dependency.nrfutil_not_found", 20000, testSupport.remoteLastResult());
+        verify(AppViewModel.wizard.open);
+        verify(share.sharing);
+        AppViewModel.wizard.cancel(true);
+        tryVerify(() => !AppViewModel.wizard.open, 5000);
+        // The modal dialog blocks the clicks of the next test until it has really closed.
+        const wizardDialog = findChild(window, "wizardDialog");
+        tryVerify(() => !wizardDialog || !wizardDialog.visible, 5000);
+        share.endSharing();
+        tryVerify(() => !share.sharing, 5000);
+    }
+
+    // ADR-0363: the joiner's Flash page offers the LTE update (no ID field) with the LTE core.
+    function test_joinerAsksForAnLteUpdate() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(true);
+        tryVerify(() => tab().remoteJoin.operationsAvailable, 10000);
+        verify(tab().remoteJoin.lteUpdateAvailable);
+        AppViewModel.showPage("flash");
+        tryVerify(() => shown("remoteFlashCard").length === 1, 5000);
+        verify(shown("remoteFirmwareId").length === 1);
+        verify(shown("remoteLteUpdateButton").length === 0);
+        const lte = one("remoteTargetLte");
+        lte.click(); // the card may be below the visible part of the page
+        tryVerify(() => lte.checked, 5000);
+        tryVerify(() => shown("remoteFirmwareId").length === 0, 5000);
+        const button = one("remoteLteUpdateButton");
+        compare(button.text, "Ask to update LTE firmware");
+        verify(button.enabled);
+        button.clicked();
+        tryVerify(() => testSupport.remoteRequestedKind() === "lteUpdate", 10000);
+        verify(tab().remoteJoin.operationPending);
+    }
+
     function test_shareNotOfferedInARemoteTab() {
         verify(AppViewModel.joinRemoteSession("482913", false));
         tryVerify(() => tab().transport === "remote", 5000);

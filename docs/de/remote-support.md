@@ -27,7 +27,13 @@ Andere Sprachen: [English](../en/remote-support.md) · [Čeština](../cs/remote-
    Anwendungskern zu flashen.* **Ablehnen** ist die Vorgabe; eine Anfrage ohne Antwort wird nach 60 Sekunden
    abgelehnt. Die Firmware stammt nur aus dem HARDWARIO-Katalog, und Ihr HARDWARIO Monitor lädt sie herunter und
    prüft sie.
-7. Klicken Sie auf **Freigabe beenden**, wenn Sie fertig sind.
+7. Bittet der Support um ein Update der LTE-Firmware, nennt die Frage die Version, die Ihr HARDWARIO Monitor
+   empfiehlt: *Der Support bittet, die LTE-Firmware auf HARDWARIO LTE firmware 1.7.0 zu aktualisieren. Sie müssen das
+   J-Link-Kabel zwischen dem APP- und dem LTE-Anschluss umstecken.* Nach **Erlauben** öffnet sich **Flashen** ›
+   **LTE-Firmware aktualisieren…** mit dieser Firmware und startet von selbst: Folgen Sie den Schritten und stecken
+   Sie das Kabel um, wenn es verlangt wird. Die Freigabe bleibt aktiv, während sich das Gerät trennt und wieder
+   verbindet, und der Support sieht jeden Schritt und das Ergebnis.
+8. Klicken Sie auf **Freigabe beenden**, wenn Sie fertig sind.
 
 Die Freigabe endet auch, wenn Sie das Gerät trennen, den Tab schließen oder die App beenden, nach 30 Minuten ohne
 Aktivität (ein Banner warnt Sie 2 Minuten vorher, **Weiter freigeben** verlängert sie) und spätestens nach 8 Stunden.
@@ -62,6 +68,11 @@ und Ihre Antwort, jeder entfernte Befehl und jede Anfrage nach einer Aktion mit 
    Katalog), **Löschen anfragen**, **Recover anfragen** und **Reset anfragen** für den Anwendungs- oder den LTE-Kern.
    Jede Anfrage wartet auf die Bestätigung des Kunden; das Ergebnis meldet der Monitor des Kunden. Bei einem Kunden
    mit dem Web-Terminal ist nur die Konsole verfügbar.
+6. Mit **LTE-Modemkern** ausgewählt fordert **LTE-Firmware-Update anfragen** das geführte LTE-Update auf die Version
+   an, die der HARDWARIO Monitor des Kunden empfiehlt (keine Firmware-ID). Der Kunde steckt das J-Link-Kabel zwischen
+   dem APP- und dem LTE-Anschluss um; Sie sehen jeden Schritt (zum Beispiel *Warten auf den J-Link am LTE-Anschluss*)
+   und das Ergebnis. Endet das Update, ohne die Anwendung zurückzuschreiben, ist das Ergebnis
+   `remote.application_not_restored`.
 
 Wenn der Kunde die Freigabe beendet, kann HARDWARIO Monitor das nicht immer erkennen: Der Server kündigt es nicht an.
 Nach 30 Minuten ohne jede Aktivität weist das Banner darauf hin und bietet **Verlassen** an. Der Tab bleibt offen,
@@ -77,6 +88,7 @@ hwio remote join 482913                   # interactive console
 hwio remote join 482913 --command "info show"
 hwio remote join 482913 --flash 0123456789abcdef0123456789abcdef
 hwio remote join 482913 --reset --target lte
+hwio remote join 482913 --lte-update      # das geführte LTE-Update (der Kunde steckt das Kabel um)
 ```
 
 `hwio remote host` fragt im Terminal nach, bevor es einen Beitritt oder eine Aktion erlaubt. Ohne Terminal an stdin

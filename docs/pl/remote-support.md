@@ -26,7 +26,12 @@ Inne języki: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-sup
    o co dokładnie prosi, na przykład *Wsparcie prosi o wgranie firmware CHESTER Clime v3.2.1 (ID …) do rdzenia
    aplikacji.* Domyślna jest odpowiedź **Odmów**; prośba bez odpowiedzi zostaje odrzucona po 60 sekundach. Firmware
    pochodzi wyłącznie z katalogu HARDWARIO, a Twój HARDWARIO Monitor sam je pobiera i weryfikuje.
-7. Gdy skończysz, kliknij **Zakończ udostępnianie**.
+7. Jeśli wsparcie poprosi o aktualizację firmware LTE, pytanie podaje wersję zalecaną przez Twój HARDWARIO Monitor:
+   *Wsparcie prosi o aktualizację firmware LTE do HARDWARIO LTE firmware 1.7.0. Będziesz musiał przełożyć kabel J-Link
+   między złączami APP i LTE.* Po kliknięciu **Zezwól** otwiera się **Wgraj** › **Aktualizuj firmware LTE…** z tym
+   firmware i uruchamia się sam: wykonuj jego kroki i przełóż kabel, gdy o to poprosi. Udostępnianie pozostaje
+   aktywne, gdy urządzenie się rozłącza i ponownie łączy, a wsparcie widzi każdy krok i wynik.
+8. Gdy skończysz, kliknij **Zakończ udostępnianie**.
 
 Udostępnianie kończy się też po odłączeniu urządzenia, zamknięciu karty lub zamknięciu aplikacji, po 30 minutach
 bezczynności (baner ostrzega 2 minuty wcześniej, **Kontynuuj udostępnianie** je przedłuża) i najpóźniej po 8 godzinach.
@@ -61,6 +66,10 @@ odpowiedź, każde zdalne polecenie oraz każda prośba o operację wraz z jej w
    katalogu), **Poproś o skasowanie**, **Poproś o recover** i **Poproś o reset** dla rdzenia aplikacji lub LTE. Każda
    prośba czeka na potwierdzenie klienta; wynik zgłasza Monitor klienta. Gdy klient używa Terminala webowego, dostępna
    jest tylko konsola.
+6. Gdy wybrany jest **Rdzeń modemu LTE**, **Poproś o aktualizację firmware LTE** prosi o prowadzoną aktualizację LTE do
+   wersji zalecanej przez HARDWARIO Monitor klienta (bez identyfikatora firmware). Klient przekłada kabel J-Link między
+   złączami APP i LTE; widzisz każdy krok (na przykład *oczekiwanie na J-Link na złączu LTE*) i wynik. Jeśli
+   aktualizacja zakończy się bez zapisania aplikacji z powrotem, wynikiem jest `remote.application_not_restored`.
 
 HARDWARIO Monitor nie zawsze rozpozna, że klient zakończył udostępnianie: serwer tego nie ogłasza. Po 30 minutach bez
 żadnej aktywności baner o tym informuje i oferuje **Opuść**. Karta pozostaje otwarta, więc nadal możesz zapisać
@@ -76,6 +85,7 @@ hwio remote join 482913                   # interactive console
 hwio remote join 482913 --command "info show"
 hwio remote join 482913 --flash 0123456789abcdef0123456789abcdef
 hwio remote join 482913 --reset --target lte
+hwio remote join 482913 --lte-update      # prowadzona aktualizacja LTE (klient przekłada kabel)
 ```
 
 `hwio remote host` pyta w terminalu, zanim zezwoli na dołączenie lub operację. Bez terminala na stdin dołączenie

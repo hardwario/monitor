@@ -793,7 +793,7 @@ Sieht der Beitretende, wenn die Verbindung zum Server endgültig beendet ist.
 - **Wahrscheinlich:** Das geführte LTE-Update endete, bevor die Anwendung zurückgeschrieben wurde, oder es konnte keine Kopie der Anwendung gespeichert werden. Die Anwendungs-MCU ist leer.
 - **Was tun:** Eine Anwendung flashen: Bitten Sie den Kunden, sie zu flashen, oder fordern Sie das Flashen von Katalog-Firmware an.
 
-Wird dem Teilnehmer nach einem Remote-LTE-Update gemeldet (**Um LTE-Firmware-Update bitten**, `hwio remote join --lte-update`).
+Wird dem Teilnehmer nach einem Remote-LTE-Update gemeldet (**LTE-Firmware-Update anfragen**, `hwio remote join --lte-update`).
 
 <a id="update.network"></a>
 #### `update.network`

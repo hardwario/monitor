@@ -11,6 +11,7 @@
 #include "hwio/firmware/firmware_catalog.h"
 #include "hwio/remote/consent.h"
 #include "hwio/remote/host_operations.h"
+#include "hwio/remote/lte_update_report.h"
 #include "hwio/remote/remote_host.h"
 #include "hwio/remote/session_code.h"
 #include "settings_store.h"
@@ -106,6 +107,7 @@ void RemoteShareViewModel::startSharing() {
                                      .lookupTimeout = std::chrono::seconds(15),
                                      .maxPageBytes = 1024ULL * 1024},
             m_tab->firmwareCache());
+        m_operations->setLteUpdateRunner(this); // ADR-0363
     }
     const SettingsStore* store = m_tab->settingsStore();
     m_host = std::make_unique<remote::RemoteHost>(
@@ -234,6 +236,39 @@ RemoteShareViewModel::askOperation(const remote::OperationQuestion& question, An
         m_operationAnswer = {};
         questionsChanged(); // signal
     };
+}
+
+Status RemoteShareViewModel::start(Progress progress, Finished finished) {
+    if ((m_lteUpdate && !m_lteUpdate->done()) || m_tab->isBusy() || m_tab->choosing()) {
+        return std::unexpected(makeError(ErrorCode::InternalBusy, "the tab is busy"));
+    }
+    m_lteUpdate =
+        std::make_unique<remote::LteUpdateReporter>(std::move(progress), std::move(finished));
+    m_lteUpdateOffered = true;
+    qCInfo(lcGui) << "Remote: opening the LTE update for support";
+    m_tab->openWizard(QStringLiteral("lte-update")); // takes the request when it opens
+    if (m_lteUpdateOffered) {
+        m_lteUpdateOffered = false;
+        m_lteUpdate->abandon();
+        return std::unexpected(
+            makeError(ErrorCode::InternalBusy, "the LTE update guide could not be opened"));
+    }
+    return {};
+}
+
+void RemoteShareViewModel::abandon() {
+    m_lteUpdateOffered = false;
+    if (m_lteUpdate) {
+        m_lteUpdate->abandon(); // the open wizard goes on, unreported
+    }
+}
+
+remote::LteUpdateReporter* RemoteShareViewModel::takeLteUpdateRequest() {
+    if (!m_lteUpdateOffered) {
+        return nullptr;
+    }
+    m_lteUpdateOffered = false;
+    return m_lteUpdate.get();
 }
 
 void RemoteShareViewModel::answerJoin(bool allowed) {

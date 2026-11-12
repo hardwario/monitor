@@ -36,6 +36,8 @@ class RemoteJoinViewModel : public QObject {
     // The host is HARDWARIO Monitor with operations (the Flash page offers them).
     Q_PROPERTY(bool operationsAvailable READ operationsAvailable NOTIFY changed)
     Q_PROPERTY(QString operationsUnavailableText READ operationsUnavailableText NOTIFY changed)
+    // ADR-0363: the host offers the guided LTE update (its hello's opKinds).
+    Q_PROPERTY(bool lteUpdateAvailable READ lteUpdateAvailable NOTIFY changed)
     Q_PROPERTY(bool operationPending READ operationPending NOTIFY operationChanged)
     Q_PROPERTY(QString operationStatus READ operationStatus NOTIFY operationChanged)
     Q_PROPERTY(bool operationFailed READ operationFailed NOTIFY operationChanged)
@@ -55,12 +57,14 @@ public:
     [[nodiscard]] QString bannerText() const;
     [[nodiscard]] bool operationsAvailable() const;
     [[nodiscard]] QString operationsUnavailableText() const;
+    [[nodiscard]] bool lteUpdateAvailable() const;
     [[nodiscard]] bool operationPending() const;
     [[nodiscard]] QString operationStatus() const { return m_status; }
     [[nodiscard]] bool operationFailed() const { return m_failed; }
     [[nodiscard]] double operationProgress() const { return m_progress; }
 
-    // `kind`: "flash" (with `firmwareId`), "erase", "recover", "reset"; `target` "app" | "lte".
+    // `kind`: "flash" (with `firmwareId`), "erase", "recover", "reset", "lteUpdate" (ADR-0363,
+    // `target` ignored); `target` "app" | "lte".
     Q_INVOKABLE void requestOperation(const QString& kind, const QString& target,
                                       const QString& firmwareId = QString());
     // A valid catalog firmware ID (32 hex digits) for the Flash page's field.

@@ -332,7 +332,7 @@ Steps:
       `RemoteOperationClient`; unit tests (codec, state machine, unsupported peer)
 - [x] B2 CLI: `remote join --lte-update`; `remote host` runs the guided terminal flow; e2e tests with the fake J-Link
       (LTE scenario) and the fake relay; `docs/en/cli.md`
-- [ ] C4 GUI: Remote operations button, host confirmation, guided wizard started from the request with progress
+- [x] C4 GUI: Remote operations button, host confirmation, guided wizard started from the request with progress
       forwarded; Qt Quick tests; translations ×4; docs `remote-support.md` ×5; release notes rc.4
 
 ## Amendment 2026-11-12: Remote autocomplete (ADR-0364)

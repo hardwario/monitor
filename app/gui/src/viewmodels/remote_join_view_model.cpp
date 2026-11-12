@@ -4,6 +4,7 @@
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/firmware/firmware_cache.h"
+#include "hwio/remote/consent.h"
 #include "hwio/remote/remote_console_session.h"
 #include "hwio/remote/remote_operation_client.h"
 #include "hwio/remote/session_code.h"
@@ -64,8 +65,8 @@ void RemoteJoinViewModel::attach() {
                     m_progress = progress.total > 0 ? static_cast<double>(progress.done) /
                                                           static_cast<double>(progress.total)
                                                     : -1.0;
-                    m_status =
-                        tr("Running on the customer's side: %1").arg(toQString(progress.phase));
+                    m_status = tr("Running on the customer's side: %1")
+                                   .arg(remote::operationPhaseText(progress.phase));
                     operationChanged(); // signal
                 });
         connect(m_client.get(), &remote::RemoteOperationClient::finished, this,
@@ -136,6 +137,12 @@ QString RemoteJoinViewModel::operationsUnavailableText() const {
     return tr("The customer's console (Bluetooth) has no flashing.");
 }
 
+bool RemoteJoinViewModel::lteUpdateAvailable() const {
+    const remote::RemoteConsoleSession* session = m_tab->remoteSession();
+    return operationsAvailable() &&
+           tunnel::supports(*session->hostHello(), tunnel::OpKind::LteUpdate);
+}
+
 bool RemoteJoinViewModel::operationPending() const { return m_client && m_client->busy(); }
 
 bool RemoteJoinViewModel::isFirmwareId(const QString& text) {
@@ -148,7 +155,9 @@ void RemoteJoinViewModel::requestOperation(const QString& kind, const QString& t
         return;
     }
     const auto opKind = tunnel::kindFromId(toStdString(kind));
-    const auto opTarget = tunnel::targetFromId(toStdString(target));
+    const auto opTarget = opKind == tunnel::OpKind::LteUpdate
+                              ? std::optional(tunnel::OpTarget::Lte)
+                              : tunnel::targetFromId(toStdString(target));
     if (!opKind || !opTarget) {
         return;
     }

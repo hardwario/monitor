@@ -2121,57 +2121,72 @@
 <context>
     <name>RemoteFlashCard</name>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="25"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="27"/>
         <source>Remote operations</source>
         <translation>Vzdialené operácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="44"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="46"/>
         <source>The customer confirms every request in their HARDWARIO Monitor. Only firmware from the HARDWARIO catalog can be flashed remotely.</source>
         <translation>Zákazník potvrdzuje každú požiadavku vo svojom HARDWARIO Monitore. Na diaľku je možné nahrať iba firmvér z katalógu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="55"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="57"/>
         <source>Target:</source>
         <translation>Cieľ:</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="63"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="65"/>
         <source>Application core</source>
         <translation>Aplikačné jadro</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="71"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="73"/>
         <source>LTE modem core</source>
         <translation>Jadro LTE modemu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="85"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="87"/>
         <source>Catalog firmware ID (32 hexadecimal digits)</source>
         <translation>ID firmvéru v katalógu (32 hexadecimálnych číslic)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="87"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="89"/>
         <source>Catalog firmware ID</source>
         <translation>ID firmvéru v katalógu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="93"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="95"/>
         <source>Ask to flash</source>
         <translation>Požiadať o nahranie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="106"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="113"/>
+        <source>The customer&apos;s HARDWARIO Monitor updates the LTE firmware to its recommended version. The customer moves the J-Link cable between the APP and LTE connectors when asked.</source>
+        <translation>HARDWARIO Monitor zákazníka aktualizuje firmvér LTE na svoju odporúčanú verziu. Zákazník na výzvu prepája kábel J-Link medzi konektormi APP a LTE.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="114"/>
+        <source>The customer&apos;s HARDWARIO Monitor cannot update the LTE firmware remotely.</source>
+        <translation>HARDWARIO Monitor zákazníka nevie aktualizovať firmvér LTE na diaľku.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="122"/>
+        <source>Ask to update LTE firmware</source>
+        <translation>Požiadať o aktualizáciu firmvéru LTE</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="135"/>
         <source>Ask to erase</source>
         <translation>Požiadať o vymazanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="113"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="142"/>
         <source>Ask to recover</source>
         <translation>Požiadať o obnovenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="120"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="149"/>
         <source>Ask to reset</source>
         <translation>Požiadať o reset</translation>
     </message>
@@ -6478,178 +6493,178 @@
 <context>
     <name>hwio::gui::LteUpdateWizard</name>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="91"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="96"/>
         <source>Update the LTE firmware</source>
         <translation>Aktualizácia firmvéru LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="105"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
         <source>Firmware</source>
         <translation>Firmvér</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="105"/>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="106"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
         <source>APP connector</source>
         <translation>Konektor APP</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="105"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="169"/>
         <source>Stop the application</source>
         <translation>Zastavenie aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="106"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
         <source>LTE connector</source>
         <translation>Konektor LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="106"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="170"/>
         <source>Update</source>
         <translation>Aktualizácia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="107"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
         <source>Application</source>
         <translation>Aplikácia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="107"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="171"/>
         <source>Done</source>
         <translation>Hotovo</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="195"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="259"/>
         <source>LTE firmware updated</source>
         <translation>Firmvér LTE je aktualizovaný</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="196"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="260"/>
         <source>The LTE MCU has its new firmware and the application runs again. The console reconnects.</source>
         <translation>LTE MCU má nový firmvér a aplikácia znova beží. Konzola sa znova pripojí.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="200"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="264"/>
         <source>Open console</source>
         <translation>Otvoriť konzolu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="208"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="272"/>
         <source>Choose the LTE firmware</source>
         <translation>Vyberte firmvér LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="209"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="273"/>
         <source>Next</source>
         <translation>Ďalej</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="213"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="277"/>
         <source>Connect the J-Link to the LTE connector</source>
         <translation>Pripojte J-Link ku konektoru LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="214"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="278"/>
         <source>Connect the J-Link to the APP connector</source>
         <translation>Pripojte J-Link ku konektoru APP</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="220"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="284"/>
         <source>Stopping the application</source>
         <translation>Zastavenie aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="223"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="287"/>
         <source>Updating the LTE MCU</source>
         <translation>Aktualizácia LTE MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="226"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="290"/>
         <source>Writing the application</source>
         <translation>Zápis aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="231"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="295"/>
         <source>No copy of the application</source>
         <translation>Bez kópie aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="232"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="296"/>
         <source>Continue without a copy</source>
         <translation>Pokračovať bez kópie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="235"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="299"/>
         <source>Put the application back</source>
         <translation>Vrátenie aplikácie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="236"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="300"/>
         <source>Write back</source>
         <translation>Zapísať späť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="236"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="300"/>
         <source>Flash</source>
         <translation>Nahrať</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="239"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="303"/>
         <source>The LTE firmware update failed</source>
         <translation>Aktualizácia firmvéru LTE zlyhala</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="240"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="304"/>
         <source>Try again</source>
         <translation>Skúsiť znova</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="268"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="332"/>
         <source>nRF Util was not found. It is needed for LTE firmware.</source>
         <translation>nRF Util sa nenašiel. Je potrebný pre firmvér LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="383"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="447"/>
         <source>Paused for the LTE firmware update</source>
         <translation>Pozastavené kvôli aktualizácii firmvéru LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="384"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="448"/>
         <source>The LTE firmware update is in progress. Cancel it and close the tab?</source>
         <translation>Prebieha aktualizácia firmvéru LTE. Zrušiť ju a zavrieť kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="433"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="497"/>
         <source>The application MCU is erased. The device will not run until you flash an application.</source>
         <translation>MCU aplikácie je vymazaný. Zariadenie nepobeží, kým nenahráte aplikáciu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="436"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="500"/>
         <source>The copy of the application stays in %1.</source>
         <translation>Kópia aplikácie zostáva v %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="443"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="507"/>
         <source>Cancel anyway</source>
         <translation>Napriek tomu zrušiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="445"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="509"/>
         <source>Back</source>
         <translation>Späť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="472"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="536"/>
         <source>Updating the LTE MCU needs the J-Link moved between the APP and LTE connectors. The guide stops the application, updates the LTE MCU and puts the application back.</source>
         <translation>Aktualizácia LTE MCU vyžaduje prepojiť J-Link medzi konektormi APP a LTE. Sprievodca zastaví aplikáciu, aktualizuje LTE MCU a vráti aplikáciu späť.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="524"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="588"/>
         <source>Step %1 of %2</source>
         <translation>Krok %1 z %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="552"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="616"/>
         <source>Copy: %1</source>
         <translation>Kópia: %1</translation>
     </message>
@@ -6879,7 +6894,7 @@
 <context>
     <name>hwio::gui::RemoteJoinViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="59"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="60"/>
         <source>The customer allowed it. Running on the customer&apos;s side…</source>
         <translation>Zákazník to povolil. Prebieha na strane zákazníka…</translation>
     </message>
@@ -6889,52 +6904,52 @@
         <translation>Prebieha na strane zákazníka: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="75"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="76"/>
         <source>Done (reported by the customer&apos;s Monitor).</source>
         <translation>Hotovo (podľa Monitora zákazníka).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="107"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="108"/>
         <source>Connecting to the support server…</source>
         <translation>Pripája sa k serveru podpory…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="110"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="111"/>
         <source>Waiting for the customer to allow you… The live output may already appear.</source>
         <translation>Čaká sa, kým vás zákazník povolí… Živý výstup sa už môže zobrazovať.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="113"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="114"/>
         <source>No activity from the customer for 30 min. The session may have ended.</source>
         <translation>Žiadna aktivita od zákazníka 30 min. Relácia sa možno skončila.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="116"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="117"/>
         <source>The session ended. The console stays here so that you can save it.</source>
         <translation>Relácia sa skončila. Konzola tu zostáva, aby ste ju mohli uložiť.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="130"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="131"/>
         <source>Operations are available once the customer has allowed you.</source>
         <translation>Operácie sú dostupné, keď vás zákazník povolí.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="133"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="134"/>
         <source>The customer uses the web Terminal, which supports only the console. Ask them to use HARDWARIO Monitor for flashing.</source>
         <translation>Zákazník používa webový Terminál, ktorý podporuje iba konzolu. Požiadajte ho, aby na nahrávanie použil HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="136"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="137"/>
         <source>The customer&apos;s console (Bluetooth) has no flashing.</source>
         <translation>Konzola zákazníka (Bluetooth) nepodporuje nahrávanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="161"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="170"/>
         <source>The firmware ID must be 32 hexadecimal digits from the HARDWARIO catalog.</source>
         <translation>ID firmvéru musí mať 32 hexadecimálnych číslic z katalógu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="170"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="179"/>
         <source>Waiting for the customer&apos;s confirmation…</source>
         <translation>Čaká sa na potvrdenie zákazníka…</translation>
     </message>
@@ -6942,7 +6957,7 @@
 <context>
     <name>hwio::gui::RemoteShareViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="79"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="80"/>
         <source>Support will see this console and can send commands after you allow them. They can also ask to flash, erase, recover or reset the device; each request needs your confirmation.
 
 The session passes through the HARDWARIO server %1.
@@ -6959,27 +6974,27 @@ Ktokoľvek, kto pozná kód, vidí výstup konzoly. Kód prečítajte iba podpor
 Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="137"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="139"/>
         <source>%1…</source>
         <translation>%1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="145"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="147"/>
         <source>Remote operation: %1 %2 %</source>
         <translation>Vzdialená operácia: %1 %2 %</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="160"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="162"/>
         <source>Sharing ended: %1</source>
         <translation>Zdieľanie skončilo: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="198"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="200"/>
         <source>Link copied to the clipboard.</source>
         <translation>Odkaz skopírovaný do schránky.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="205"/>
+        <location filename="../app/gui/src/viewmodels/remote_share_view_model.cpp" line="207"/>
         <source>Code copied to the clipboard.</source>
         <translation>Kód skopírovaný do schránky.</translation>
     </message>

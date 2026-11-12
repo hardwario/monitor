@@ -24,7 +24,12 @@ Other languages: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-
    *Support asks to flash firmware CHESTER Clime v3.2.1 (ID …) to the application core.* **Deny** is the default; a
    request without an answer is denied after 60 seconds. Firmware comes only from the HARDWARIO catalog, and your
    HARDWARIO Monitor downloads and verifies it.
-7. Click **End sharing** when you are done.
+7. If support asks to update the LTE firmware, the question names the version your HARDWARIO Monitor recommends:
+   *Support asks to update the LTE firmware to HARDWARIO LTE firmware 1.7.0. You will have to move the J-Link cable
+   between the APP and LTE connectors.* After **Allow**, **Flash** › **Update LTE firmware…** opens with that firmware
+   and starts by itself: follow its steps and move the cable when it asks. Sharing stays on while the device
+   disconnects and reconnects, and support sees each step and the result.
+8. Click **End sharing** when you are done.
 
 Sharing also ends when you disconnect the device, close the tab or quit, after 30 minutes without activity (a banner
 warns you 2 minutes before, **Keep sharing** extends it) and after 8 hours at most.
@@ -58,6 +63,10 @@ remote command, and every operation request with its result. See [Console files]
    erase**, **Ask to recover** and **Ask to reset** for the application or the LTE core. Each request waits for the
    customer's confirmation; the result is reported by the customer's Monitor. With a web Terminal customer only the
    console is available.
+6. With **LTE modem core** selected, **Ask to update LTE firmware** asks for the guided LTE update to the version the
+   customer's HARDWARIO Monitor recommends (no firmware ID). The customer moves the J-Link cable between the APP and
+   LTE connectors; you see each step (for example *waiting for the J-Link on the LTE connector*) and the result. If the
+   update ends without writing the application back, the result is `remote.application_not_restored`.
 
 When the customer ends sharing, HARDWARIO Monitor cannot always tell: the server does not announce it. After 30 minutes
 without any activity the banner says so and offers **Leave**. The tab stays open, so you can still save the console.
@@ -72,6 +81,7 @@ hwio remote join 482913                   # interactive console
 hwio remote join 482913 --command "info show"
 hwio remote join 482913 --flash 0123456789abcdef0123456789abcdef
 hwio remote join 482913 --reset --target lte
+hwio remote join 482913 --lte-update      # the guided LTE update (the customer moves the cable)
 ```
 
 `hwio remote host` asks on the terminal before it allows a join or an operation. Without a terminal on stdin joins are

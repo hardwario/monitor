@@ -80,6 +80,7 @@
 #include <optional>
 #include <thread>
 #include <utility>
+#include <variant>
 #include <vector>
 
 Q_IMPORT_QML_PLUGIN(HardwarioMonitorPlugin)
@@ -207,6 +208,62 @@ public:
                                                                       .target = *opTarget,
                                                                       .firmwareId = std::nullopt}));
         }
+    }
+    // ADR-0363: the code of the last op-result the participant received ("ok" for success, ""
+    // for none).
+    Q_INVOKABLE [[nodiscard]] QString remoteLastResult() const {
+        QString result;
+        if (!m_participant) {
+            return result;
+        }
+        for (const auto& event : m_participant->named(QStringLiteral("at"))) {
+            if (auto message = hwio::remote::tunnel::decodeHost(event.payload)) {
+                if (const auto* r = std::get_if<hwio::remote::tunnel::OpResult>(&*message)) {
+                    result =
+                        r->ok ? QStringLiteral("ok") : QString::fromStdString(r->code.value_or(""));
+                }
+            }
+        }
+        return result;
+    }
+    // The participant acts as a Monitor host: a sync and its hello (operations; `lteUpdate`: the
+    // guided LTE update in opKinds).
+    Q_INVOKABLE void remoteMonitorHost(bool lteUpdate) const {
+        if (!m_participant) {
+            return;
+        }
+        QJsonObject sync;
+        sync.insert(QStringLiteral("state"), QStringLiteral("connected"));
+        sync.insert(QStringLiteral("commands"), QJsonArray());
+        m_participant->emitEvent(QStringLiteral("sync"), sync);
+        namespace tunnel = hwio::remote::tunnel;
+        std::vector<tunnel::OpKind> kinds{tunnel::OpKind::Reset};
+        if (lteUpdate) {
+            kinds.push_back(tunnel::OpKind::LteUpdate);
+        }
+        m_participant->emitEvent(QStringLiteral("at"), tunnel::encodeHost(tunnel::HostHello{
+                                                           .app = "hwio-monitor",
+                                                           .version = "2.1.0",
+                                                           .device = {.name = "CHESTER-M",
+                                                                      .serial = "1",
+                                                                      .transport = "jlink",
+                                                                      .firmware = {}},
+                                                           .ops = true,
+                                                           .opKinds = kinds}));
+    }
+    // The kind of the last operation request the participant received ("" for none).
+    Q_INVOKABLE [[nodiscard]] QString remoteRequestedKind() const {
+        QString kind;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("write"))) {
+                if (auto message = hwio::remote::tunnel::decodeJoiner(event.payload)) {
+                    if (const auto* r = std::get_if<hwio::remote::tunnel::OpRequest>(&*message)) {
+                        kind = QString::fromLatin1(hwio::remote::tunnel::kindId(r->kind));
+                    }
+                }
+            }
+        }
+        return kind;
     }
     // Events of `name` the participant received ("sync", "at", ...).
     Q_INVOKABLE [[nodiscard]] int remoteReceived(const QString& name) const {
