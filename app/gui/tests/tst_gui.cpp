@@ -283,9 +283,12 @@ public:
         return static_cast<bool>(m_app->settingsStore()->setValue(key, value));
     }
     // Plan 0045: as on the first start (ui/mode not stored; the first-start dialog opens).
-    Q_INVOKABLE void resetUiMode() const {
-        (void)m_app->settingsStore()->removeGroup(QStringLiteral("ui/mode"));
+    Q_INVOKABLE [[nodiscard]] bool resetUiMode() const {
+        if (!m_app->settingsStore()->removeGroup(QStringLiteral("ui/mode"))) {
+            return false;
+        }
         m_app->uiMode()->reload();
+        return true;
     }
     Q_INVOKABLE [[nodiscard]] QString setting(const QString& key) const {
         return m_app->settingsStore()->value(key).toString();

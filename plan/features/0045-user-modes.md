@@ -1,6 +1,6 @@
 # 0045 — User modes: Basic, Advanced, Expert
 
-- **Status:** In progress (approved 2026-11-12, Matej Strnad; all decisions D-1..D-7 confirmed)
+- **Status:** Done (2026-11-12; approved 2026-11-12, Matej Strnad; all decisions D-1..D-7 confirmed)
 - **Milestone:** 2.0.0-rc.4 (ADR-0359)
 - **Author:** Matej Strnad, Claude
 - **Related ADRs:** ADR-0359 (three modes, scope, rc.4, first start), ADR-0360 (expert switch replaced by Expert mode,
@@ -140,7 +140,7 @@ None. The CLI has no modes (the mode is GUI-only; CLI output and options are unc
       reveal; dialog default Advanced)
 - [x] B2 Screenshots tests updated
 - [x] C1 Translations (0 unfinished), glossary, docs ×5, release notes rc.4
-- [ ] C2 Verification: full ctest, ASan/TSan, clang-tidy, qmllint, clang-format, check_translations
+- [x] C2 Verification: full ctest, ASan/TSan, clang-tidy, qmllint, clang-format, check_translations
 
 ## Tests and verification
 
@@ -152,6 +152,19 @@ None. The CLI has no modes (the mode is GUI-only; CLI output and options are unc
   Continue stores it, not shown again).
 - Manual: upgrade from rc.3 with the expert switch on and off; first start with a fresh settings file; all five
   languages fit in the segmented control and the dialog.
+
+## Implementation notes
+
+- The J-Link section is registered with minimum mode Advanced (all its rows are Advanced or Expert, so it would be
+  empty in Basic); its Library / speed / auto-reconnect rows declare Basic, so a J-Link error in Basic mode reveals
+  them (ADR-0361), while RTT latency and Reset on connect stay Expert.
+- Rows bind `visible` to `settings.mode >= minimumMode || revealed` (a property comparison, so the binding updates);
+  `SettingsViewModel::shows()` is the C++ form. The Console command options are one `SettingsGroup`
+  (row id `consoleCommands`); About › Include pre-releases is a single control gated by the mode.
+- The Settings section id `advanced` became `expert` (ExpertSection.qml).
+- Manual checks not done by the implementing agent: an upgrade from a real rc.3 installation, a first start with a
+  fresh settings file on each OS; long labels were checked only by the 960 x 600 Qt Quick tests (cs, de, pl, sk)
+  and the screenshots.
 
 ## Risks and open points
 

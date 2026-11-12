@@ -209,7 +209,7 @@ TestCase {
         const dialog = findChild(window, "modeChoiceDialog");
         verify(dialog !== null);
         verify(!dialog.visible);
-        testSupport.resetUiMode();
+        verify(testSupport.resetUiMode());
         tryVerify(() => dialog.opened);
         verify(!AppViewModel.uiMode.chosen);
         compare(dialog.selected, UiMode.Advanced);
@@ -225,7 +225,7 @@ TestCase {
         verify(!dialog.visible); // not shown again
 
         verify(testSupport.setSetting("advanced/expertActions", true));
-        testSupport.resetUiMode();
+        verify(testSupport.resetUiMode());
         tryVerify(() => dialog.opened);
         compare(dialog.selected, UiMode.Expert);
         mouseClick(findChild(dialog.contentItem, "modeCard_" + UiMode.Basic));
@@ -246,7 +246,7 @@ TestCase {
         window.width = 960;
         window.height = 600;
         const dialog = findChild(window, "modeChoiceDialog");
-        testSupport.resetUiMode();
+        verify(testSupport.resetUiMode());
         tryVerify(() => dialog.opened);
         waitForRendering(window.contentItem);
         verify(dialog.y >= 0 && dialog.y + dialog.height <= window.height + 0.5, `dialog height ${dialog.height}`);

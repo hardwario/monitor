@@ -127,7 +127,7 @@ TEST_F(SettingsTest, SectionsPerMode) {
     EXPECT_EQ(sectionIds(settings()), advanced);
     settings().selectMode(42); // ignored
     EXPECT_EQ(settings().mode(), static_cast<int>(UiMode::Advanced));
-    EXPECT_EQ(settings().modes().size(), 3);
+    EXPECT_EQ(SettingsViewModel::modes().size(), 3);
 }
 
 // ADR-0361: an error or guide that opens a hidden section shows it until Settings is left.

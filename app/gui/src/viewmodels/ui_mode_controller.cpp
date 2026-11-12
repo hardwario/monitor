@@ -13,6 +13,7 @@
 #include <QStringLiteral>
 #include <QVariantList>
 #include <QVariantMap>
+#include <QtContainerFwd>
 
 #include <array>
 #include <optional>
@@ -21,9 +22,6 @@ namespace hwio::gui {
 
 UiModeController::UiModeController(SettingsStore& store, QObject* parent)
     : QObject(parent), m_store(store) {
-    const std::optional<UiMode> stored = parseUiMode(m_store.value(modeKey).toString());
-    m_chosen = stored.has_value();
-    m_mode = stored.value_or(preselection());
     connect(&m_store, &SettingsStore::valueChanged, this, [this](const QString& key) {
         if (key == modeKey) {
             reload();
@@ -59,7 +57,7 @@ QString UiModeController::description(UiMode mode) {
     return tr("Also J-Link, nRF Util, AI assistants and console options.");
 }
 
-QVariantList UiModeController::modes() const {
+QVariantList UiModeController::modes() {
     QVariantList list;
     for (const UiMode mode : std::array{UiMode::Basic, UiMode::Advanced, UiMode::Expert}) {
         list.append(QVariantMap{{QStringLiteral("mode"), static_cast<int>(mode)},
@@ -93,7 +91,9 @@ Status UiModeController::choose(UiMode mode) {
 
 void UiModeController::chooseMode(int mode) {
     if (const std::optional<UiMode> value = uiModeFromInt(mode); value) {
-        (void)choose(*value); // a failure is reported by writeFailed
+        if (const Status status = choose(*value); !status) {
+            qCInfo(lcGui) << "UiMode: applies for this run only"; // reported by writeFailed
+        }
     }
 }
 

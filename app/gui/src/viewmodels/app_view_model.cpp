@@ -124,8 +124,10 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
       // children of this object (destroyed explicitly in the right order by the destructor).
       m_settings(new SettingsStore( // NOLINT(cppcoreguidelines-owning-memory)
           std::move(m_options.settings), this)),
-      m_shortcuts(new ShortcutRegistry(this)),      // NOLINT(cppcoreguidelines-owning-memory)
-      m_pageList(new PageListModel(m_pages, this)), // NOLINT(cppcoreguidelines-owning-memory)
+      m_shortcuts(new ShortcutRegistry(this)), // NOLINT(cppcoreguidelines-owning-memory)
+      // Plan 0045: the user mode (read after registerShellKeys, below).
+      m_uiMode(new UiModeController(*m_settings, this)), // NOLINT(cppcoreguidelines-owning-memory)
+      m_pageList(new PageListModel(m_pages, this)),      // NOLINT(cppcoreguidelines-owning-memory)
       m_registry(std::make_unique<device::SessionRegistry>(m_options.registry)),
       m_scanner(std::make_unique<ProbeScanner>(m_options.registry.instanceRoot,
                                                m_options.registry.lockDirectory,
@@ -160,9 +162,9 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
     }
 
     registerShellKeys(*m_settings);
-    // Plan 0045: the user mode, before the extensions (the Settings and Flash view models use it).
-    // Qt parent ownership: a child of this object.
-    m_uiMode = new UiModeController(*m_settings, this); // NOLINT(cppcoreguidelines-owning-memory)
+    // Plan 0045: the user mode, read before the extensions (the Settings and Flash view models use
+    // it).
+    m_uiMode->reload();
     registerShellShortcuts();
     // Plan 0036 (ADR-0257): the J-Link firmware update. Qt parent ownership: a child, deleted by
     // the destructor after the tabs. Created before the extensions: the MCP controller (plan 0014)

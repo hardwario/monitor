@@ -141,7 +141,7 @@ int SettingsViewModel::mode() const { return m_mode.modeValue(); }
 
 bool SettingsViewModel::shows(UiMode needed) const { return m_mode.shows(needed); }
 
-QVariantList SettingsViewModel::modes() const { return m_mode.modes(); }
+QVariantList SettingsViewModel::modes() { return UiModeController::modes(); }
 
 QString SettingsViewModel::modeDescription() const {
     return UiModeController::description(m_mode.mode());

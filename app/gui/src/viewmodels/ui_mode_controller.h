@@ -42,7 +42,8 @@ public:
     // The rc.3 switch "Show expert maintenance actions" (ADR-0236); read only for the preselection.
     static inline const QString legacyExpertKey = QStringLiteral("advanced/expertActions");
 
-    // Reads ui/mode from `store` (whose keys registerShellKeys registered).
+    // Not chosen, Advanced until reload() reads ui/mode from `store` (call it once
+    // AppViewModel::registerShellKeys has registered the keys).
     UiModeController(SettingsStore& store, QObject* parent);
 
     [[nodiscard]] UiMode mode() const noexcept { return m_mode; }
@@ -51,7 +52,7 @@ public:
     [[nodiscard]] bool shows(UiMode needed) const noexcept { return atLeast(m_mode, needed); }
     // Expert when advanced/expertActions is on, otherwise Advanced (ADR-0362).
     [[nodiscard]] UiMode preselection() const;
-    [[nodiscard]] QVariantList modes() const;
+    [[nodiscard]] static QVariantList modes();
     // The description line of a mode (Settings › General, the first-start dialog).
     [[nodiscard]] static QString description(UiMode mode);
     [[nodiscard]] static QString name(UiMode mode);
@@ -62,7 +63,7 @@ public:
     // QML (the dialog, the segmented control): UiMode values; others are ignored.
     Q_INVOKABLE void chooseMode(int mode);
 
-    // Reads ui/mode again (it changes through the store; tests reset it).
+    // Reads ui/mode (at the start, when it changes through the store; tests reset it).
     void reload();
     // The language changed: modes() again.
     void retranslate();

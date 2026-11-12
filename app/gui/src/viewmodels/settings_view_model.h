@@ -178,7 +178,7 @@ public:
 
     [[nodiscard]] int mode() const;
     [[nodiscard]] bool shows(UiMode needed) const;
-    [[nodiscard]] QVariantList modes() const;
+    [[nodiscard]] static QVariantList modes();
     [[nodiscard]] QString modeDescription() const;
     // The segmented control (UiMode values; others are ignored). A failed write shows writeError;
     // the mode then applies for this run only.

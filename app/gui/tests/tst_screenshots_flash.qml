@@ -244,7 +244,7 @@ TestCase {
         verify(testSupport.setSetting("ui/mode", "advanced"));
 
         // The first-start dialog (Advanced preselected).
-        testSupport.resetUiMode();
+        verify(testSupport.resetUiMode());
         const modeDialog = findChild(window, "modeChoiceDialog");
         tryVerify(() => modeDialog.opened);
         save("s07-mode-choice");

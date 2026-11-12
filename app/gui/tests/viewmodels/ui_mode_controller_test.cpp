@@ -53,6 +53,7 @@ protected:
         m_store = std::make_unique<SettingsStore>(std::move(settings));
         hwio::gui::AppViewModel::registerShellKeys(*m_store);
         m_controller = std::make_unique<UiModeController>(*m_store, nullptr);
+        m_controller->reload();
     }
     void close() {
         m_controller.reset();
@@ -95,11 +96,11 @@ TEST_F(UiModeTest, FirstStartPreselectsAdvanced) {
     EXPECT_EQ(controller().mode(), UiMode::Advanced);
     EXPECT_TRUE(controller().shows(UiMode::Advanced));
     EXPECT_FALSE(controller().shows(UiMode::Expert));
-    ASSERT_EQ(controller().modes().size(), 3);
-    EXPECT_EQ(controller().modes().at(0).toMap().value(QStringLiteral("name")).toString(),
+    ASSERT_EQ(UiModeController::modes().size(), 3);
+    EXPECT_EQ(UiModeController::modes().at(0).toMap().value(QStringLiteral("name")).toString(),
               QStringLiteral("Basic"));
     EXPECT_EQ(
-        controller().modes().at(2).toMap().value(QStringLiteral("description")).toString(),
+        UiModeController::modes().at(2).toMap().value(QStringLiteral("description")).toString(),
         QStringLiteral("Everything, including timing options and expert maintenance actions."));
 }
 
