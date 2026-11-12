@@ -6,7 +6,7 @@
 - **Related ADRs:** ADR-0334 (strict compatibility with the existing relay, 6-digit code), ADR-0335 (join approval),
   ADR-0336 (operations tunneled in `at` / `write`), ADR-0321 (QtWebSockets + own Socket.IO client),
   ADR-0322 (scope: console + flash/erase/recover/reset), ADR-0323 (firmware by catalog ID only),
-  ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0337 (2.0.0-rc.4; supersedes ADR-0326),
+  ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0337 (2.0.0-rc.4; supersedes ADR-0326), ADR-0363 (remote LTE update, amends ADR-0323/0336),
   ADR-0328 (limits), ADR-0329 (TLS only), ADR-0330 (relay URL), ADR-0331 (CLI), ADR-0332 (no MCP),
   ADR-0333 (audit in the console file), ADR-0354 (tunnel `end`, amends ADR-0336), ADR-0355 (approval again after
   the host's reconnect, amends ADR-0335), ADR-0356 (secrets redacted toward the relay, amends ADR-0329),
@@ -307,6 +307,33 @@ behaviour became ADRs (ADR-0355, ADR-0356); ADR-0354 adds the tunnel `end`.
   (as `chester lte erase`); reset = `ResetMode::Go`; flash = catalog firmware on `app` only.
 - **No silent queries from remote tabs.** A remote tab never sends `info show` or any other silent shell query (no
   `DeviceInfoWatcher`, so the command tree is not learned either).
+
+## Amendment 2026-11-12: Remote LTE update (ADR-0363)
+
+Support can ask for an LTE firmware update without a catalog ID.
+
+- **Protocol:** tunnel operation `lteUpdate` (no target, no firmware ID), advertised in the host's hello
+  (`opKinds`, alongside `ops`); hosts without it answer `remote.operation_unsupported_peer`.
+- **Host (GUI):** confirmation *"Support asks to update the LTE firmware to HARDWARIO LTE firmware 1.7.0. You will
+  have to move the J-Link cable between the APP and LTE connectors."* (**Deny** default, 60 s). On Allow the tab opens
+  the guided LTE update (Flash › Update LTE firmware…) with the recommended firmware preselected and starts it; the
+  customer follows its steps. Phases / progress / result are sent to support; sharing stays active across the
+  disconnect / reconnect; audit lines as for other operations.
+- **Host (CLI):** `hwio remote host` runs the guided terminal flow of `hwio chester lte flash --guided` (prompts on the
+  host's terminal); the exit outcome "LTE updated, application not restored" is reported as such.
+- **Joiner (GUI):** Flash page › Remote operations: with **LTE modem core** selected, **Ask to update LTE firmware**
+  (no ID field); erase / recover / reset unchanged. **Joiner (CLI):** `hwio remote join CODE --lte-update`.
+- **Errors:** denied / timeout / busy as for other operations; the LTE update's own errors (e.g.
+  `target.reset_during_update`, download / verification errors) are passed through with their codes.
+
+Steps:
+
+- [ ] A6 `lteUpdate` in `TunnelCodec`, hello `opKinds`, `RemoteHost` consent text + operation runner hook,
+      `RemoteOperationClient`; unit tests (codec, state machine, unsupported peer)
+- [ ] B2 CLI: `remote join --lte-update`; `remote host` runs the guided terminal flow; e2e tests with the fake J-Link
+      (LTE scenario) and the fake relay; `docs/en/cli.md`
+- [ ] C4 GUI: Remote operations button, host confirmation, guided wizard started from the request with progress
+      forwarded; Qt Quick tests; translations ×4; docs `remote-support.md` ×5; release notes rc.4
 
 ## Tests and verification
 
