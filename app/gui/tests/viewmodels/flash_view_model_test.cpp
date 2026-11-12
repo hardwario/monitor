@@ -9,6 +9,7 @@
 #include "hex_builder.h"
 #include "http_fixture.h"
 #include "hwio/core/error.h"
+#include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/firmware/program_progress.h"
@@ -61,6 +62,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <filesystem>
 #include <functional>
 #include <memory>
@@ -1296,8 +1298,9 @@ TEST_F(FlashTest, RemoteLteUpdateQuestionsGoToSupport) {
         answer(yes);
         if (!yes) {
             ASSERT_TRUE(waitFor([&] { return result.has_value(); }));
-            ASSERT_FALSE(result->has_value());
-            EXPECT_EQ(result->error().code, ErrorCode::Cancelled);
+            const hwio::Status cancelled = result.value_or(hwio::Status{});
+            ASSERT_FALSE(cancelled.has_value());
+            EXPECT_EQ(cancelled.error().code, ErrorCode::Cancelled);
             EXPECT_FALSE(wizard->procedure() != nullptr &&
                          wizard->procedure()->applicationErased());
             app().wizard()->cancel(true);
@@ -1318,7 +1321,9 @@ TEST_F(FlashTest, RemoteLteUpdateQuestionsGoToSupport) {
         moveCable("app");
         // Written back without [Write back].
         ASSERT_TRUE(waitFor([&] { return result.has_value(); }, std::chrono::seconds(60)));
-        EXPECT_TRUE(result->has_value()) << result->error().detail;
+        const hwio::Status written = result.value_or(
+            std::unexpected(hwio::makeError(ErrorCode::InternalUnexpected, "no result")));
+        EXPECT_TRUE(written.has_value()) << (written ? std::string() : written.error().detail);
         EXPECT_EQ(questions.size(), 1U);
         ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Summary));
         app().wizard()->cancel(true);

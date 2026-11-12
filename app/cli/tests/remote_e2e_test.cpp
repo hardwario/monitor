@@ -41,6 +41,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <optional>
 #include <string>
 #include <utility>
@@ -419,13 +420,14 @@ TEST_F(RemoteCli, JoinAnswersTheLteUpdateQuestions) {
         EXPECT_NE(child.err().find(text), std::string::npos) << child.err();
         const auto question = child.remoteEvent(QStringLiteral("question"));
         ASSERT_TRUE(question.has_value()) << child.out();
-        EXPECT_EQ(question->value(QStringLiteral("kind")).toString().toStdString(),
-                  hwio::remote::tunnel::questionId(c.kind));
+        EXPECT_EQ(
+            question.value_or(QJsonObject()).value(QStringLiteral("kind")).toString().toStdString(),
+            hwio::remote::tunnel::questionId(c.kind));
         if (c.input != nullptr) {
             child.write(c.input);
         }
         ASSERT_TRUE(runUntil([&] { return answer.has_value(); }, 10s)) << child.err();
-        EXPECT_EQ(*answer, c.expected);
+        EXPECT_EQ(answer.value_or(!c.expected), c.expected);
         // The customer's Monitor cancels after a no (nothing changed) or goes on after a yes.
         operations.finished(c.expected ? hwio::Status{}
                                        : hwio::Status(std::unexpected(hwio::makeError(
@@ -621,7 +623,7 @@ void runRemoteLteUpdate(const QString& home, const QProcessEnvironment& baseEnv,
         },
         30s))
         << child.err();
-    EXPECT_TRUE(joiner.hostHello()->opQuestions);
+    EXPECT_TRUE(joiner.hostHello().value_or(hwio::remote::tunnel::HostHello{}).opQuestions);
     hwio::remote::RemoteOperationClient client(joiner);
     client.setAnswersQuestions(answers != LteAnswers::Customer);
     std::vector<std::string> phases;
@@ -659,8 +661,9 @@ void runRemoteLteUpdate(const QString& home, const QProcessEnvironment& baseEnv,
     if (answers == LteAnswers::SupportNo) {
         // Cancelled before anything changed.
         ASSERT_TRUE(runUntil([&] { return result.has_value(); }, 30s)) << child.err();
-        EXPECT_FALSE(result->first);
-        EXPECT_EQ(result->second.code, hwio::ErrorCode::Cancelled) << result->second.detail;
+        const auto [ok, error] = result.value_or(std::pair(true, hwio::Error{}));
+        EXPECT_FALSE(ok);
+        EXPECT_EQ(error.code, hwio::ErrorCode::Cancelled) << error.detail;
         EXPECT_EQ(std::ranges::find(phases, "erase"), phases.end());
         EXPECT_EQ(std::ranges::find(phases, "backup"), phases.end());
     } else {

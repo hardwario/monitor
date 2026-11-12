@@ -76,6 +76,7 @@ signals:
 
 private:
     void onMessage(const tunnel::HostMessage& message);
+    void onQuestion(const tunnel::OpQuestion& question);
     void finish(const std::optional<Error>& error);
 
     QPointer<RemoteConsoleSession> m_session;

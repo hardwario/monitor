@@ -685,6 +685,62 @@ Status waitAllowed(const Context& context, remote::RemoteConsoleSession& session
     return {};
 }
 
+// ADR-0368: `remote join` answers the questions of a remote LTE update on stdin (y/N) when stdin
+// is a terminal; the reader starts with the first question. Owner thread only.
+class JoinQuestions {
+public:
+    JoinQuestions(const Context& context, remote::RemoteOperationClient& client, ProgressUi& ui)
+        : m_context(&context), m_client(&client), m_ui(&ui) {
+        if (!hostInteractive()) {
+            return;
+        }
+        client.setAnswersQuestions(true);
+        QObject::connect(&client, &remote::RemoteOperationClient::question, &client,
+                         [this](tunnel::OpQuestionKind kind) { ask(kind); });
+    }
+
+    // Answers the open question with a line typed meanwhile (y / yes: continue).
+    void poll() {
+        if (!m_reader || !m_client->openQuestion()) {
+            return;
+        }
+        const auto line = m_reader->poll();
+        if (!line) {
+            return; // nothing typed yet
+        }
+        std::string lower = line->value_or("");
+        std::ranges::transform(lower, lower.begin(),
+                               [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        const bool yes = line->has_value() && (lower == "y" || lower == "yes");
+        if (Status sent = m_client->answer(yes); !sent) {
+            m_ui->warning(sent.error());
+            return;
+        }
+        status(*m_context, yes ? "Answered: continue." : "Answered: cancel.");
+    }
+
+private:
+    void ask(tunnel::OpQuestionKind kind) {
+        m_ui->finish();
+        const QString text = remote::operationQuestionKindText(kind);
+        QJsonObject question;
+        question.insert(QStringLiteral("event"), QStringLiteral("question"));
+        question.insert(QStringLiteral("kind"), toQString(tunnel::questionId(kind)));
+        question.insert(QStringLiteral("text"), text);
+        event(*m_context, question);
+        std::cerr << toStdString(text) << " [y/N] " << std::flush;
+        if (!m_reader) {
+            m_reader = std::make_unique<StdinLineReader>();
+        }
+    }
+
+    // Non-owning; all outlive this object (locals of joinOperation()).
+    const Context* m_context;
+    remote::RemoteOperationClient* m_client;
+    ProgressUi* m_ui;
+    std::unique_ptr<StdinLineReader> m_reader;
+};
+
 Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsoleSession& session,
                                     tunnel::OpKind kind, const JoinCommandOptions& options) {
     const auto target = tunnel::targetFromId(options.core);
@@ -718,43 +774,7 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
                      [&](bool ok, const Error& error) { outcome.emplace(ok, error); });
     // ADR-0368: with a terminal on stdin support answers the LTE update's questions here (y/N);
     // without one the customer does (the request does not offer it).
-    std::unique_ptr<StdinLineReader> answers;
-    if (hostInteractive()) {
-        client.setAnswersQuestions(true);
-        QObject::connect(&client, &remote::RemoteOperationClient::question, &client,
-                         [&](tunnel::OpQuestionKind kind) {
-                             ui.finish();
-                             const QString text = remote::operationQuestionKindText(kind);
-                             QJsonObject question;
-                             question.insert(QStringLiteral("event"), QStringLiteral("question"));
-                             question.insert(QStringLiteral("kind"),
-                                             toQString(tunnel::questionId(kind)));
-                             question.insert(QStringLiteral("text"), text);
-                             event(context, question);
-                             std::cerr << toStdString(text) << " [y/N] " << std::flush;
-                             if (!answers) {
-                                 answers = std::make_unique<StdinLineReader>();
-                             }
-                         });
-    }
-    const auto answerFromStdin = [&] {
-        if (!answers || !client.openQuestion()) {
-            return;
-        }
-        const auto line = answers->poll();
-        if (!line) {
-            return; // nothing typed yet
-        }
-        std::string lower = line->value_or("");
-        std::ranges::transform(lower, lower.begin(),
-                               [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-        const bool yes = line->has_value() && (lower == "y" || lower == "yes");
-        if (Status sent = client.answer(yes); !sent) {
-            ui.warning(sent.error());
-            return;
-        }
-        status(context, yes ? "Answered: continue." : "Answered: cancel.");
-    };
+    JoinQuestions questions(context, client, ui);
     auto id = client.request(
         kind, *target, kind == tunnel::OpKind::Flash ? std::optional(options.flash) : std::nullopt);
     if (!id) {
@@ -763,7 +783,7 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
     status(context, "Waiting for the customer's confirmation...");
     const Status waited = runUntil(
         [&] {
-            answerFromStdin();
+            questions.poll();
             return outcome.has_value();
         },
         std::nullopt, context.stop);

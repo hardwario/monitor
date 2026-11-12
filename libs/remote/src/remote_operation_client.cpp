@@ -124,11 +124,7 @@ void RemoteOperationClient::onMessage(const tunnel::HostMessage& message) {
                         emit progress(m);
                     }
                 } else if constexpr (std::is_same_v<T, tunnel::OpQuestion>) {
-                    if (m_accepted && m_answers) {
-                        m_timer.start(m_limits.inactivityTimeout);
-                        m_question = m;
-                        emit question(m.question);
-                    }
+                    onQuestion(m);
                 } else if constexpr (std::is_same_v<T, tunnel::OpResult>) {
                     if (m.ok) {
                         finish(std::nullopt);
@@ -139,6 +135,15 @@ void RemoteOperationClient::onMessage(const tunnel::HostMessage& message) {
             }
         },
         message);
+}
+
+void RemoteOperationClient::onQuestion(const tunnel::OpQuestion& question) {
+    if (!m_accepted || !m_answers) {
+        return; // ADR-0368: only for an accepted request that offered answers
+    }
+    m_timer.start(m_limits.inactivityTimeout);
+    m_question = question;
+    emit this->question(question.question);
 }
 
 Status RemoteOperationClient::answer(bool yes) {

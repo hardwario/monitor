@@ -72,6 +72,7 @@
 #include <QtQuickTest/quicktest.h>
 #include <QtTypes>
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -144,12 +145,9 @@ public:
             return false;
         }
         const std::string needle = part.toStdString();
-        for (const auto& line : tab->consoleLog()->linesSince(0)) {
-            if (line.text.find(needle) != std::string::npos) {
-                return true;
-            }
-        }
-        return false;
+        return std::ranges::any_of(tab->consoleLog()->linesSince(0), [&](const auto& line) {
+            return line.text.find(needle) != std::string::npos;
+        });
     }
 
     [[nodiscard]] static QString screenshotDir() {

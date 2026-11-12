@@ -3,6 +3,7 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/result.h"
 #include "hwio/firmware/firmware_cache.h"
 #include "hwio/remote/consent.h"
 #include "hwio/remote/remote_console_session.h"

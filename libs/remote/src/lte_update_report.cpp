@@ -10,6 +10,7 @@
 #include <QObject>
 #include <QPointer>
 #include <QTimer>
+#include <QtCore/qtmetamacros.h>
 
 #include <algorithm>
 #include <chrono>

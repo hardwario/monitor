@@ -730,20 +730,29 @@ void RemoteHost::askSupport(std::uint64_t token, tunnel::OpQuestionKind kind,
         QTimer::singleShot(0, this, [answer = std::move(answer)] { answer(false); });
         return;
     }
-    if (m_question) {
-        // One question at a time: the earlier one is answered no.
-        m_questionTimer.stop();
-        if (auto earlier = std::exchange(m_question, std::nullopt)->answer) {
-            earlier(false);
-        }
+    const QString summary = operationSummary(m_operation->question);
+    const std::string operationId = m_operation->request.id;
+    // One question at a time: the earlier one is answered no.
+    if (auto earlier = takeQuestion()) {
+        earlier(false);
     }
     const std::string qid = std::format("q-{:08x}{:08x}", QRandomGenerator::system()->generate(),
                                         QRandomGenerator::system()->generate());
     m_question = SupportQuestion{.qid = qid, .kind = kind, .answer = std::move(answer)};
     m_questionTimer.start(m_options.limits.operationTimeout);
     audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: waiting for support's answer: %2"))
-              .arg(operationSummary(m_operation->question), operationQuestionKindText(kind)));
-    sendHost(tunnel::OpQuestion{.id = m_operation->request.id, .qid = qid, .question = kind});
+              .arg(summary, operationQuestionKindText(kind)));
+    sendHost(tunnel::OpQuestion{.id = operationId, .qid = qid, .question = kind});
+}
+
+std::function<void(bool)> RemoteHost::takeQuestion() {
+    m_questionTimer.stop();
+    std::function<void(bool)> answer;
+    if (m_question) {
+        answer = std::move(m_question->answer);
+        m_question.reset();
+    }
+    return answer;
 }
 
 void RemoteHost::onAnswer(const tunnel::OpAnswer& answer) {
@@ -895,7 +904,7 @@ void RemoteHost::finish(std::optional<Error> error, bool notify) {
     if (m_question) {
         audit(trRemote(
             QT_TRANSLATE_NOOP("hwio::remote", "Support did not answer before the session ended.")));
-        if (auto answer = std::exchange(m_question, std::nullopt)->answer) {
+        if (auto answer = takeQuestion()) {
             answer(false);
         }
     }

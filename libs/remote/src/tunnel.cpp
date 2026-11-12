@@ -112,6 +112,15 @@ Result<QJsonObject> openEnvelope(const QJsonValue& value) {
     return data;
 }
 
+// ADR-0368: an optional bool (absent = false).
+Result<bool> optionalBool(const QJsonObject& data, const QString& key) {
+    const QJsonValue value = data.value(key);
+    if (!value.isUndefined() && !value.isBool()) {
+        return bad("invalid " + toStdString(key));
+    }
+    return value.toBool(false);
+}
+
 Result<HostMessage> decodeHostHello(const QJsonObject& data) {
     HostHello hello;
     auto app = text(data, "app");
@@ -160,12 +169,11 @@ Result<HostMessage> decodeHostHello(const QJsonObject& data) {
     hello.device = DeviceInfo{
         .name = *name, .serial = *serial, .transport = *transport, .firmware = *firmware};
     hello.ops = ops.toBool();
-    // ADR-0368: optional; absent = false.
-    const QJsonValue questions = data.value(QStringLiteral("opQuestions"));
-    if (!questions.isUndefined() && !questions.isBool()) {
-        return bad("invalid opQuestions");
+    const auto questions = optionalBool(data, QStringLiteral("opQuestions")); // ADR-0368
+    if (!questions) {
+        return std::unexpected(questions.error());
     }
-    hello.opQuestions = hello.ops && questions.toBool(false);
+    hello.opQuestions = hello.ops && *questions;
     return hello;
 }
 

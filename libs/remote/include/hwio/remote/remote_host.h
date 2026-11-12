@@ -214,6 +214,8 @@ private:
                     std::function<void(bool)> answer);
     void onAnswer(const tunnel::OpAnswer& answer);
     void answerSupportQuestion(bool yes);
+    // Closes the open question (stops its timer); its answer callback, empty when none.
+    [[nodiscard]] std::function<void(bool)> takeQuestion();
     void askJoin();
     void answerJoin(bool allowed);
     void sendSync();
