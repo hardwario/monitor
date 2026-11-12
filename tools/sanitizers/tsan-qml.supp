@@ -25,6 +25,13 @@ called_from_lib:libglib-2.0.so.0
 # Qt joins QQmlThread inside uninstrumented libQt6Qml/libQt6Core first; TSan used to see an ordering only
 # through the glib wakeup fd, which the entry above hides (plan/features/0020).
 race:Registry::lookupCachedUnit
+# QNetworkAccessManager's HTTP thread (uninstrumented libQt6Network): the socket buffer is filled by
+# read() on that thread and copied by memcpy on the GUI thread, synchronized inside Qt. Seen in
+# tst_gui.tst_remote (test_lteUpdateRequestOpensTheGuidedUpdate: the LTE wizard downloads the
+# designated firmware from a local HTTP server, plan 0044 C4). The C++ tests leave such downloads
+# out under TSan instead (app/cli/tests/CMakeLists.txt); a Qt Quick test cannot be filtered per
+# function, so only the interceptors called from libQt6Network are ignored here.
+called_from_lib:libQt6Network.so.6
 
 # ---- the entries of tsan.supp ----
 # TSAN_OPTIONS takes one suppressions file, so these lines are copied from tsan.supp (review S14,
