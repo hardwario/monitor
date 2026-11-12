@@ -58,6 +58,11 @@ change a term here should change it in the whole catalog.
 | application MCU / LTE MCU | MCU aplikace / LTE MCU | Anwendungs-MCU / LTE-MCU | MCU aplikacji / MCU LTE | MCU aplikácie / LTE MCU |
 | guide (LTE update) | průvodce | Assistent | kreator | sprievodca |
 | move the cable (to a connector) | přepojit | umstecken | przełożyć | prepojiť |
+| mode (user mode, plan 0045) | režim | Modus | tryb | režim |
+| Basic (mode) | Základní | Einfach | Podstawowy | Základný |
+| Advanced (mode) | Pokročilý | Erweitert | Zaawansowany | Pokročilý |
+| Expert (mode) | Expertní | Experte | Ekspert | Expertný |
+| Expert (Settings section) | Expertní | Experte | Ekspert | Expertné |
 | expert maintenance actions | odborné akce údržby | Experten-Wartungsaktionen | zaawansowane czynności serwisowe | odborné akcie údržby |
 | Copy / Copied to clipboard. | Kopírovat / Zkopírováno do schránky. | Kopieren / In die Zwischenablage kopiert. | Kopiuj / Skopiowano do schowka. | Kopírovať / Skopírované do schránky. |
 | Cancel / Close / Retry | Zrušit / Zavřít / Zkusit znovu | Abbrechen / Schließen / Erneut versuchen | Anuluj / Zamknij / Spróbuj ponownie | Zrušiť / Zavrieť / Skúsiť znova |

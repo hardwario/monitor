@@ -85,5 +85,6 @@ werden Beitritte nie erlaubt. Siehe [Kommandozeile](../en/cli.md#remote-support-
 <a id="settings"></a>
 ## Einstellungen
 
-**Einstellungen** › **Erweitert** › **Support-Server** ändert den Server (zum Beispiel einen Testserver). Es werden nur
-`https`-Adressen akzeptiert. Lassen Sie das Feld leer für `https://terminal.hardwario.com`.
+**Einstellungen** › **Experte** › **Support-Server** (im [Modus](getting-started.md#modes) Experte) ändert den Server
+(zum Beispiel einen Testserver). Es werden nur `https`-Adressen akzeptiert. Lassen Sie das Feld leer für
+`https://terminal.hardwario.com`.

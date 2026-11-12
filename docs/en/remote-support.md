@@ -80,5 +80,5 @@ never allowed. See [Command line](cli.md#remote-support-hwio-remote).
 <a id="settings"></a>
 ## Settings
 
-**Settings** › **Advanced** › **Support server** changes the server (for example a test server). Only `https` addresses
-are accepted. Leave it empty for `https://terminal.hardwario.com`.
+**Settings** › **Expert** › **Support server** (in the Expert [mode](getting-started.md#modes)) changes the server (for
+example a test server). Only `https` addresses are accepted. Leave it empty for `https://terminal.hardwario.com`.

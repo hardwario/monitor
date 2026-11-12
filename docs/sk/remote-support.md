@@ -82,5 +82,6 @@ nikdy nepovolí. Pozrite si [Príkazový riadok](../en/cli.md#remote-support-hwi
 <a id="settings"></a>
 ## Nastavenia
 
-**Nastavenia** › **Rozšírené** › **Server podpory** zmení server (napríklad na testovací server). Prijímajú sa len
-adresy `https`. Pre `https://terminal.hardwario.com` nechajte pole prázdne.
+**Nastavenia** › **Expertné** › **Server podpory** (v [režime](getting-started.md#modes) Expertný) zmení server
+(napríklad na testovací server). Prijímajú sa len adresy `https`. Pre `https://terminal.hardwario.com` nechajte pole
+prázdne.

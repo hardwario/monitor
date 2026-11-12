@@ -493,7 +493,7 @@ Nach einem fehlgeschlagenen Schritt eines LTE-Updates war im Reset-Grund-Registe
 - **Probably:** Access port protection (APPROTECT) is enabled.
 - **What to do:** Recover the MCU (this erases it), then flash it again.
 
-Recover entfernt den Schutz, löscht aber die MCU vollständig, einschließlich des Product Information Block. Siehe [Recover](flashing.md#recover). Für eine benannte MCU lautet der Vorschlag „Run `hwio <profile> <target> recover` (erases the MCU).“; in der Desktop-App verwenden Sie **Recover…** unter **Maintenance** auf der Seite **Flash** (angezeigt mit **Settings › Advanced › Show expert maintenance actions** oder einmal, wenn die Fehlerbehebungsanleitung Sie dorthin schickt).
+Recover entfernt den Schutz, löscht aber die MCU vollständig, einschließlich des Product Information Block. Siehe [Recover](flashing.md#recover). Für eine benannte MCU lautet der Vorschlag „Run `hwio <profile> <target> recover` (erases the MCU).“; in der Desktop-App verwenden Sie **Recover…** unter **Maintenance** auf der Seite **Flash** (angezeigt im Modus Expert, **Settings › General › Mode**, oder einmal, wenn die Fehlerbehebungsanleitung Sie dorthin schickt).
 
 <a id="target.program_failed"></a>
 #### `target.program_failed`

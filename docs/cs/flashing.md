@@ -105,12 +105,12 @@ aplikaci. Kopie zůstane ve složce `backups` ([Soukromí a uložená data](priv
 | **Reset** | Resetuje MCU | ne |
 | **Reset a zastavit** | Resetuje MCU a ponechá procesor zastavený | ne |
 | **Smazat aplikaci** | Smaže firmware; zachová UICR i PIB (jen aplikační MCU) | ne |
-| **Smazat vše…** | Smaže paměť flash, UICR i PIB (jen odborné akce) | ano |
-| **Obnovit (recover)…** | Viz níže (jen odborné akce) | ano |
+| **Smazat vše…** | Smaže paměť flash, UICR i PIB (jen režim Expertní) | ano |
+| **Obnovit (recover)…** | Viz níže (jen režim Expertní) | ano |
 
 **Smazat vše…**, **Obnovit (recover)…** a údržba **LTE MCU** (volba **Aplikační MCU | LTE MCU** nad tlačítky) se
-zobrazí jen se zapnutou volbou **Nastavení › Pokročilé › Zobrazit odborné akce údržby**, protože mohou smazat sériové
-číslo a konfiguraci zařízení. U LTE MCU potřebují J-Link na konektoru LTE.
+zobrazí jen v [režimu](getting-started.md#modes) **Expertní** (**Nastavení › Obecné › Režim**), protože mohou smazat
+sériové číslo a konfiguraci zařízení. U LTE MCU potřebují J-Link na konektoru LTE.
 
 <a id="recover"></a>
 ### Obnovení (recover)
@@ -119,7 +119,7 @@ Když je MCU chráněný proti čtení (approtect), J-Link do něj nemůže čí
 [target.protected](troubleshooting.md#target.protected). **Obnovit (recover)…** ochranu odstraní tím, že MCU úplně
 smaže, včetně UICR a PIB. U LTE MCU potom nahraje malý obraz, díky kterému zůstane MCU laditelný. Po obnovení firmware
 znovu naflashujte. Obnovení se nikdy nespouští samo. Když vás průvodce řešením problémů u chráněného MCU pošle na
-stránku **Nahrát FW**, zobrazí se tam **Obnovit (recover)…** jednou, i bez odborného nastavení.
+stránku **Nahrát FW**, zobrazí se tam **Obnovit (recover)…** jednou, v každém režimu.
 
 ## Příkazová řádka
 

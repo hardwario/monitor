@@ -64,7 +64,7 @@
 <context>
     <name>hwio::gui::BlePickerViewModel</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="513"/>
+        <location filename="../../../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="520"/>
         <source>%n device(s) found</source>
         <translation>
             <numerusform>%n device found</numerusform>
@@ -105,7 +105,7 @@
 <context>
     <name>hwio::remote</name>
     <message numerus="yes">
-        <location filename="../../../libs/remote/src/relay_client.cpp" line="56"/>
+        <location filename="../../../libs/remote/src/relay_client.cpp" line="57"/>
         <source>… %n line(s) dropped …</source>
         <translation>
             <numerusform>… %n line dropped …</numerusform>

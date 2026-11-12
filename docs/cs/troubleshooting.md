@@ -493,7 +493,7 @@ Po neúspěšném kroku aktualizace LTE byl v registru důvodu resetu MCU LTE na
 - **Pravděpodobně:** Je zapnutá ochrana přístupového portu (APPROTECT).
 - **Co dělat:** Obnovte MCU (tím se vymaže) a pak do něj nahrajte firmware znovu.
 
-Obnovení (recover) ochranu odstraní, ale MCU úplně smaže, včetně bloku informací o produktu. Viz [Obnovení (recover)](flashing.md#obnovení-recover). U konkrétního MCU zní doporučení „Spusťte `hwio <profile> <target> recover` (vymaže MCU).“; v desktopové aplikaci použijte **Obnovit (recover)…** v části **Údržba** na stránce **Nahrát FW** (zobrazí se s volbou **Nastavení › Pokročilé › Zobrazit odborné akce údržby**, nebo jednou, když vás tam pošle průvodce řešením problémů).
+Obnovení (recover) ochranu odstraní, ale MCU úplně smaže, včetně bloku informací o produktu. Viz [Obnovení (recover)](flashing.md#obnovení-recover). U konkrétního MCU zní doporučení „Spusťte `hwio <profile> <target> recover` (vymaže MCU).“; v desktopové aplikaci použijte **Obnovit (recover)…** v části **Údržba** na stránce **Nahrát FW** (zobrazí se v režimu Expertní, **Nastavení › Obecné › Režim**, nebo jednou, když vás tam pošle průvodce řešením problémů).
 
 <a id="target.program_failed"></a>
 #### `target.program_failed`

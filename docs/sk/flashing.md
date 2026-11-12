@@ -109,12 +109,12 @@ nenahráte aplikáciu. Kópia zostane v priečinku `backups` ([Súkromie a ulož
 | **Reset** | Resetuje MCU | nie |
 | **Reset and halt** | Resetuje MCU a ponechá CPU zastavený | nie |
 | **Erase application** | Vymaže firmvér; zachová UICR aj PIB (len aplikačný MCU) | nie |
-| **Erase everything…** | Vymaže flash pamäť, UICR aj PIB (len odborné akcie) | áno |
-| **Recover…** | Pozrite nižšie (len odborné akcie) | áno |
+| **Erase everything…** | Vymaže flash pamäť, UICR aj PIB (len v režime Expert) | áno |
+| **Recover…** | Pozrite nižšie (len v režime Expert) | áno |
 
 **Erase everything…**, **Recover…** a údržba **LTE MCU** (voľba **Application MCU | LTE MCU** nad tlačidlami) sa
-zobrazia len so zapnutou voľbou **Settings › Advanced › Show expert maintenance actions** (zobraziť odborné akcie
-údržby), pretože môžu vymazať sériové číslo a konfiguráciu zariadenia. Na LTE MCU potrebujú J-Link na konektore LTE.
+zobrazia len v [režime](getting-started.md#modes) **Expert** (**Settings › General › Mode**), pretože môžu vymazať
+sériové číslo a konfiguráciu zariadenia. Na LTE MCU potrebujú J-Link na konektore LTE.
 
 <a id="recover"></a>
 ### Obnovenie
@@ -123,7 +123,7 @@ Keď je MCU chránený proti spätnému čítaniu (approtect), J-Link ho nemôž
 chybou [target.protected](troubleshooting.md#target.protected). **Recover…** (obnoviť) odstráni ochranu úplným
 vymazaním MCU vrátane UICR a PIB. Na LTE MCU potom nahrá malý obraz, ktorý ponechá MCU dostupný pre ladenie. Po
 obnovení firmvér znova nahrajte. Obnovenie sa nikdy nespustí samo. Keď vás sprievodca riešením problémov pri chránenom
-MCU pošle na stránku **Flash**, **Recover…** sa tam zobrazí raz, aj bez odborného nastavenia.
+MCU pošle na stránku **Flash**, **Recover…** sa tam zobrazí raz, v každom režime.
 
 ## Príkazový riadok
 

@@ -84,5 +84,6 @@ nigdy nie jest dozwolone. Zobacz [Wiersz poleceń](../en/cli.md#remote-support-h
 <a id="settings"></a>
 ## Ustawienia
 
-**Ustawienia** › **Zaawansowane** › **Serwer wsparcia** zmienia serwer (na przykład na serwer testowy). Akceptowane są
-tylko adresy `https`. Pozostaw puste, aby używać `https://terminal.hardwario.com`.
+**Ustawienia** › **Ekspert** › **Serwer wsparcia** (w [trybie](getting-started.md#modes) Ekspert) zmienia serwer (na
+przykład na serwer testowy). Akceptowane są tylko adresy `https`. Pozostaw puste, aby używać
+`https://terminal.hardwario.com`.

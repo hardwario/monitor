@@ -493,7 +493,7 @@ Po neúspešnom kroku aktualizácie LTE bol v registri dôvodu resetu LTE MCU na
 - **Probably:** Access port protection (APPROTECT) is enabled.
 - **What to do:** Recover the MCU (this erases it), then flash it again.
 
-Obnovenie odstráni ochranu, ale úplne vymaže MCU vrátane bloku informácií o produkte (Product Information Block). Pozrite si [Obnovenie](flashing.md#obnovenie). Pre konkrétny MCU odporúčanie znie "Run `hwio <profile> <target> recover` (erases the MCU)."; v desktopovej aplikácii použite **Recover…** v časti **Maintenance** na stránke **Flash** (zobrazí sa so zapnutou voľbou **Settings › Advanced › Show expert maintenance actions** alebo raz, keď vás tam pošle sprievodca riešením problémov).
+Obnovenie odstráni ochranu, ale úplne vymaže MCU vrátane bloku informácií o produkte (Product Information Block). Pozrite si [Obnovenie](flashing.md#obnovenie). Pre konkrétny MCU odporúčanie znie "Run `hwio <profile> <target> recover` (erases the MCU)."; v desktopovej aplikácii použite **Recover…** v časti **Maintenance** na stránke **Flash** (zobrazí sa v režime Expert, **Settings › General › Mode**, alebo raz, keď vás tam pošle sprievodca riešením problémov).
 
 <a id="target.program_failed"></a>
 #### `target.program_failed`

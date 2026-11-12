@@ -502,7 +502,7 @@ After a failed step of an LTE update the reset-pin bit of the LTE MCU's reset re
 - **Probably:** Access port protection (APPROTECT) is enabled.
 - **What to do:** Recover the MCU (this erases it), then flash it again.
 
-Recover removes the protection but erases the MCU completely, including the Product Information Block. See [Recover](flashing.md#recover). For a named MCU the suggestion is "Run `hwio <profile> <target> recover` (erases the MCU)."; in the desktop app use **Recover…** under **Maintenance** on the **Flash** page (shown with **Settings › Advanced › Show expert maintenance actions**, or once when the troubleshooting guide sends you there).
+Recover removes the protection but erases the MCU completely, including the Product Information Block. See [Recover](flashing.md#recover). For a named MCU the suggestion is "Run `hwio <profile> <target> recover` (erases the MCU)."; in the desktop app use **Recover…** under **Maintenance** on the **Flash** page (shown in the Expert mode, **Settings › General › Mode**, or once when the troubleshooting guide sends you there).
 
 <a id="target.program_failed"></a>
 #### `target.program_failed`

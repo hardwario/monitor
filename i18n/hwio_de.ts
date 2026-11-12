@@ -10,8 +10,8 @@
     </message>
     <message>
         <location filename="../app/gui/qml/settings/AboutSection.qml" line="40"/>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="139"/>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="159"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="140"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="160"/>
         <source>Copy</source>
         <translation>Kopieren</translation>
     </message>
@@ -31,67 +31,67 @@
         <translation>Automatisch nach Updates suchen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="64"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="65"/>
         <source>Include pre-releases (beta, release candidates)</source>
         <translation>Vorabversionen einbeziehen (Beta, Release Candidates)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="87"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="88"/>
         <source>Last checked: %1 — %2</source>
         <translation>Zuletzt geprüft: %1 — %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="96"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="97"/>
         <source>Download</source>
         <translation>Herunterladen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="102"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="103"/>
         <source>Check now</source>
         <translation>Jetzt prüfen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="113"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="114"/>
         <source>Command line</source>
         <translation>Befehlszeile</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="114"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="115"/>
         <source>The hwio command is on the PATH of new terminals.</source>
         <translation>Der Befehl hwio ist im PATH neuer Terminals verfügbar.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="151"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="152"/>
         <source>Create a symlink: %1</source>
         <translation>Symbolischen Link erstellen: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="168"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="169"/>
         <source>Licences</source>
         <translation>Lizenzen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="169"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="170"/>
         <source>SEGGER J-Link Software and Nordic nRF Util are not included; they are used from your installation.</source>
         <translation>SEGGER J-Link Software und Nordic nRF Util sind nicht enthalten; sie werden aus Ihrer Installation verwendet.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="194"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="195"/>
         <source>Links</source>
         <translation>Links</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="202"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="203"/>
         <source>Documentation ↗</source>
         <translation>Dokumentation ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="208"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="209"/>
         <source>Firmware catalog ↗</source>
         <translation>Firmware-Katalog ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/AboutSection.qml" line="214"/>
+        <location filename="../app/gui/qml/settings/AboutSection.qml" line="215"/>
         <source>Source code ↗</source>
         <translation>Quellcode ↗</translation>
     </message>
@@ -139,36 +139,6 @@
         <location filename="../app/gui/qml/shell/AdvancedPopover.qml" line="133"/>
         <source>Changes apply on the next connect.</source>
         <translation>Änderungen gelten ab der nächsten Verbindung.</translation>
-    </message>
-</context>
-<context>
-    <name>AdvancedSection</name>
-    <message>
-        <location filename="../app/gui/qml/settings/AdvancedSection.qml" line="20"/>
-        <location filename="../app/gui/qml/settings/AdvancedSection.qml" line="26"/>
-        <source>Show expert maintenance actions</source>
-        <translation>Experten-Wartungsaktionen anzeigen</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/settings/AdvancedSection.qml" line="21"/>
-        <source>Erase everything, Recover and the LTE MCU maintenance on the Flash page. They can erase the serial number and the configuration of the device.</source>
-        <translation>Alles löschen, Wiederherstellen (Recover) und die Wartung der LTE-MCU auf der Seite Flashen. Sie können die Seriennummer und die Konfiguration des Geräts löschen.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/settings/AdvancedSection.qml" line="33"/>
-        <location filename="../app/gui/qml/settings/AdvancedSection.qml" line="55"/>
-        <source>Support server</source>
-        <translation>Support-Server</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/settings/AdvancedSection.qml" line="34"/>
-        <source>The server used for remote support sessions. Empty = the HARDWARIO server (%1). Only https addresses.</source>
-        <translation>Der Server für Fernsupport-Sitzungen. Leer = der HARDWARIO-Server (%1). Nur https-Adressen.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/settings/AdvancedSection.qml" line="64"/>
-        <source>Only https addresses are accepted.</source>
-        <translation>Es werden nur https-Adressen akzeptiert.</translation>
     </message>
 </context>
 <context>
@@ -221,94 +191,94 @@
 <context>
     <name>BleDeviceList</name>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="62"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="98"/>
         <source>Choose a device to connect</source>
         <translation>Wählen Sie ein Gerät zum Verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="70"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="106"/>
         <source>Bluetooth devices nearby. The list refreshes automatically.</source>
         <translation>Bluetooth-Geräte in der Nähe. Die Liste wird automatisch aktualisiert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="81"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="117"/>
         <source>Open Privacy settings</source>
         <translation>Datenschutzeinstellungen öffnen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="112"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="148"/>
         <source>Filter by name…</source>
         <translation>Nach Name filtern…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="115"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="151"/>
         <source>Filter by name</source>
         <translation>Nach Name filtern</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="123"/>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="138"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="160"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="175"/>
         <source>Show all devices</source>
         <translation>Alle Geräte anzeigen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="135"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="172"/>
         <source>No %1 found nearby</source>
         <translation>Kein Gerät %1 in der Nähe gefunden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="136"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="173"/>
         <source>Make sure the device is powered and its Bluetooth is on.</source>
         <translation>Stellen Sie sicher, dass das Gerät mit Strom versorgt wird und Bluetooth eingeschaltet ist.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="181"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="220"/>
         <source>(no name)</source>
         <translation>(kein Name)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="290"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="338"/>
         <source>%1 dBm</source>
         <translation>%1 dBm</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="312"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="360"/>
         <source>not seen recently</source>
         <translation>länger nicht gesehen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="323"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="371"/>
         <source>In use by another program (%1)</source>
         <translation>Von einem anderen Programm verwendet (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="324"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="372"/>
         <source>In use (tab %1)</source>
         <translation>In Verwendung (Tab %1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="355"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="403"/>
         <source>Scanning for Bluetooth devices…</source>
         <translation>Suche nach Bluetooth-Geräten…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="379"/>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="393"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="427"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="441"/>
         <source>Device type</source>
         <translation>Gerätetyp</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="394"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="442"/>
         <source>Used for devices of an unknown type</source>
         <translation>Wird für Geräte unbekannten Typs verwendet</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="406"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="454"/>
         <source>Choose a free device in the list above.</source>
         <translation>Wählen Sie oben in der Liste ein freies Gerät.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="420"/>
+        <location filename="../app/gui/qml/shell/BleDeviceList.qml" line="468"/>
         <source>Connect</source>
         <translation>Verbinden</translation>
     </message>
@@ -853,65 +823,65 @@
 <context>
     <name>ConsoleSection</name>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="24"/>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="37"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="25"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="38"/>
         <source>Font size</source>
         <translation>Schriftgröße</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="45"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="46"/>
         <source>Show timestamps</source>
         <translation>Zeitstempel anzeigen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="53"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="54"/>
         <source>Wrap long lines</source>
         <translation>Lange Zeilen umbrechen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="61"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="69"/>
         <source>Suggest commands while typing</source>
         <translation>Befehle beim Tippen vorschlagen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="69"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="77"/>
         <source>Read the command list from the device on connect (sends “help”)</source>
         <translation>Befehlsliste beim Verbinden vom Gerät lesen (sendet „help“)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="82"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="90"/>
         <source>Remember commands</source>
         <translation>Befehle merken</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="89"/>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="108"/>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="110"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="97"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="117"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="119"/>
         <source>Clear history</source>
         <translation>Verlauf löschen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="109"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="118"/>
         <source>Delete the saved command history of all devices?</source>
         <translation>Den gespeicherten Befehlsverlauf aller Geräte löschen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="117"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="126"/>
         <source>Save console to log files</source>
         <translation>Konsole in Protokolldateien speichern</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="131"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="140"/>
         <source>Log folder</source>
         <translation>Protokollordner</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="148"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="157"/>
         <source>Open</source>
         <translation>Öffnen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="157"/>
+        <location filename="../app/gui/qml/settings/ConsoleSection.qml" line="166"/>
         <source>Keeps the last %1 files, max. %2 MB.</source>
         <translation>Behält die letzten %1 Dateien, max. %2 MB.</translation>
     </message>
@@ -1144,6 +1114,25 @@
     </message>
 </context>
 <context>
+    <name>ExpertSection</name>
+    <message>
+        <location filename="../app/gui/qml/settings/ExpertSection.qml" line="21"/>
+        <location filename="../app/gui/qml/settings/ExpertSection.qml" line="43"/>
+        <source>Support server</source>
+        <translation>Support-Server</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/ExpertSection.qml" line="22"/>
+        <source>The server used for remote support sessions. Empty = the HARDWARIO server (%1). Only https addresses.</source>
+        <translation>Der Server für Fernsupport-Sitzungen. Leer = der HARDWARIO-Server (%1). Nur https-Adressen.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/ExpertSection.qml" line="52"/>
+        <source>Only https addresses are accepted.</source>
+        <translation>Es werden nur https-Adressen akzeptiert.</translation>
+    </message>
+</context>
+<context>
     <name>FlashBar</name>
     <message>
         <location filename="../app/gui/qml/flash/FlashBar.qml" line="71"/>
@@ -1182,25 +1171,31 @@
 <context>
     <name>GeneralSection</name>
     <message>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="18"/>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="29"/>
+        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="19"/>
+        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="26"/>
+        <source>Mode</source>
+        <translation>Modus</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="59"/>
+        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="70"/>
         <source>Language</source>
         <translation>Sprache</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="36"/>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="47"/>
+        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="77"/>
+        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="88"/>
         <source>Theme</source>
         <translation>Design</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="54"/>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="60"/>
+        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="95"/>
+        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="101"/>
         <source>Reopen tabs at start</source>
         <translation>Tabs beim Start wieder öffnen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="55"/>
+        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="96"/>
         <source>Tabs are restored disconnected.</source>
         <translation>Tabs werden getrennt wiederhergestellt.</translation>
     </message>
@@ -1316,34 +1311,34 @@
     </message>
     <message>
         <location filename="../app/gui/qml/settings/JLinkSection.qml" line="128"/>
-        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="138"/>
+        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="140"/>
         <source>RTT latency (ms)</source>
         <translation>RTT-Latenz (ms)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="146"/>
-        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="151"/>
+        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="148"/>
+        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="153"/>
         <source>Auto-reconnect</source>
         <translation>Automatisch neu verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="158"/>
-        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="163"/>
+        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="160"/>
+        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="167"/>
         <source>Reset on connect</source>
         <translation>Reset beim Verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="170"/>
+        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="174"/>
         <source>These are the defaults for probes without their own options (⋯ Advanced in the device bar). Changes apply on the next connect.</source>
         <translation>Standardwerte für Programmieradapter ohne eigene Optionen (⋯ Erweitert in der Geräteleiste). Änderungen gelten ab der nächsten Verbindung.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="181"/>
+        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="185"/>
         <source>Run the setup wizard</source>
         <translation>Einrichtungsassistent starten</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="188"/>
+        <location filename="../app/gui/qml/settings/JLinkSection.qml" line="192"/>
         <source>Choose the JLinkARM library</source>
         <translation>JLinkARM-Bibliothek wählen</translation>
     </message>
@@ -1450,28 +1445,28 @@
         <translation>HARDWARIO Monitor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="186"/>
+        <location filename="../app/gui/qml/Main.qml" line="202"/>
         <source>Close the tab?</source>
         <translation>Tab schließen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="187"/>
+        <location filename="../app/gui/qml/Main.qml" line="203"/>
         <source>Cancel and close</source>
         <translation>Abbrechen und schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="188"/>
-        <location filename="../app/gui/qml/Main.qml" line="198"/>
+        <location filename="../app/gui/qml/Main.qml" line="204"/>
+        <location filename="../app/gui/qml/Main.qml" line="214"/>
         <source>Keep running</source>
         <translation>Weiterlaufen lassen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="196"/>
+        <location filename="../app/gui/qml/Main.qml" line="212"/>
         <source>Quit HARDWARIO Monitor?</source>
         <translation>HARDWARIO Monitor beenden?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="197"/>
+        <location filename="../app/gui/qml/Main.qml" line="213"/>
         <source>Cancel and quit</source>
         <translation>Abbrechen und beenden</translation>
     </message>
@@ -1717,6 +1712,24 @@
     </message>
 </context>
 <context>
+    <name>ModeChoiceDialog</name>
+    <message>
+        <location filename="../app/gui/qml/shell/ModeChoiceDialog.qml" line="21"/>
+        <source>How do you want to use HARDWARIO Monitor?</source>
+        <translation>Wie möchten Sie HARDWARIO Monitor verwenden?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/ModeChoiceDialog.qml" line="112"/>
+        <source>You can change it at any time in Settings › General.</source>
+        <translation>Sie können das jederzeit unter Einstellungen › Allgemein ändern.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/ModeChoiceDialog.qml" line="130"/>
+        <source>Continue</source>
+        <translation>Weiter</translation>
+    </message>
+</context>
+<context>
     <name>NavRail</name>
     <message>
         <location filename="../app/gui/qml/shell/NavRail.qml" line="23"/>
@@ -1848,43 +1861,43 @@
         <translation>Konsole</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="75"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="78"/>
         <source>Flash</source>
         <translation>Flashen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="87"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="90"/>
         <location filename="../app/gui/src/viewmodels/device_tab_list_model.cpp" line="34"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="102"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="105"/>
         <source>General</source>
         <translation>Allgemein</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="107"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="110"/>
         <source>J-Link</source>
         <translation>J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="112"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="117"/>
         <source>nRF Util</source>
         <translation>nRF Util</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="118"/>
-        <source>Advanced</source>
-        <translation>Erweitert</translation>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="125"/>
+        <source>Expert</source>
+        <translation>Experte</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="123"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="131"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_registration.cpp" line="20"/>
+        <location filename="../app/gui/src/mcp/mcp_registration.cpp" line="21"/>
         <source>AI assistants (MCP)</source>
         <translation>KI-Assistenten (MCP)</translation>
     </message>
@@ -2288,14 +2301,27 @@
     </message>
 </context>
 <context>
+    <name>RevealNote</name>
+    <message>
+        <location filename="../app/gui/qml/settings/RevealNote.qml" line="13"/>
+        <source>Shown because it was needed. It is part of the Expert mode.</source>
+        <translation>Angezeigt, weil es benötigt wurde. Es gehört zum Modus „Experte“.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/RevealNote.qml" line="14"/>
+        <source>Shown because it was needed. It is part of the Advanced mode.</source>
+        <translation>Angezeigt, weil es benötigt wurde. Es gehört zum Modus „Erweitert“.</translation>
+    </message>
+</context>
+<context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="98"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="99"/>
         <source>Settings were created by a newer version and are read-only.</source>
         <translation>Die Einstellungen wurden von einer neueren Version erstellt und sind schreibgeschützt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="118"/>
+        <location filename="../app/gui/qml/pages/SettingsPage.qml" line="119"/>
         <source>The setting was not saved: %1</source>
         <translation>Die Einstellung wurde nicht gespeichert: %1</translation>
     </message>
@@ -2434,55 +2460,55 @@
         <translation>Schriftgröße der Konsole</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="132"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="140"/>
         <source>Flash</source>
         <translation>Firmware flashen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="136"/>
+        <location filename="../app/gui/src/pages/flash_settings_pages.cpp" line="144"/>
         <source>Choose a firmware file</source>
         <translation>Firmware-Datei wählen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="422"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="440"/>
         <source>New device tab</source>
         <translation>Neuer Geräte-Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="425"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="443"/>
         <source>Close the device tab</source>
         <translation>Geräte-Tab schließen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="428"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="431"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="446"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="449"/>
         <source>Next tab</source>
         <translation>Nächster Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="434"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="437"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="452"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="455"/>
         <source>Previous tab</source>
         <translation>Vorheriger Tab</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="440"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="458"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="443"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="461"/>
         <source>Connect or disconnect</source>
         <translation>Verbinden oder trennen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="446"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="464"/>
         <source>Reconnect</source>
         <translation>Neu verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="449"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="452"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="467"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="470"/>
         <source>Keyboard shortcuts</source>
         <translation>Tastenkürzel</translation>
     </message>
@@ -5259,12 +5285,12 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="699"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="717"/>
         <source>Close a tab first: at most %1 device tabs can be open.</source>
         <translation>Schließen Sie zuerst einen Tab: Es können höchstens %1 Geräte-Tabs geöffnet sein.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1231"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1255"/>
         <source>Copied to clipboard.</source>
         <translation>In die Zwischenablage kopiert.</translation>
     </message>
@@ -5330,7 +5356,7 @@
         <translation>Unbekanntes Gerät</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="513"/>
+        <location filename="../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="520"/>
         <source>%n device(s) found</source>
         <translation>
             <numerusform>%n Gerät gefunden</numerusform>
@@ -6002,402 +6028,402 @@
 <context>
     <name>hwio::gui::FlashViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="201"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="198"/>
         <source>Application firmware</source>
         <translation>Anwendungs-Firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="202"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="199"/>
         <source>Application MCU</source>
         <translation>Anwendungs-MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="203"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="200"/>
         <source>.hex file or catalog ID</source>
         <translation>.hex-Datei oder Katalog-ID</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="207"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="204"/>
         <source>LTE firmware</source>
         <translation>LTE-Firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="208"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="205"/>
         <source>%1 + modem</source>
         <translation>%1 + Modem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="208"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="205"/>
         <source>LTE MCU</source>
         <translation>LTE-MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="209"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="206"/>
         <source>The HARDWARIO LTE firmware or your own .hex / .zip</source>
         <translation>Die HARDWARIO-LTE-Firmware oder Ihre eigene .hex / .zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="246"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="243"/>
         <source>nRF Util was not found. It is needed for LTE firmware.</source>
         <translation>nRF Util wurde nicht gefunden. Es wird für LTE-Firmware benötigt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="268"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="265"/>
         <source>Choose a device first</source>
         <translation>Wählen Sie zuerst ein Gerät</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="272"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="269"/>
         <source>Use Update LTE firmware… above: the J-Link has to be moved between the connectors.</source>
         <translation>Verwenden Sie oben „LTE-Firmware aktualisieren…“: Der J-Link muss zwischen den Anschlüssen umgesteckt werden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="276"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="273"/>
         <source>Another operation is running</source>
         <translation>Ein anderer Vorgang läuft</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="281"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="278"/>
         <source>The LTE firmware is not downloaded yet</source>
         <translation>Die LTE-Firmware ist noch nicht heruntergeladen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="284"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="281"/>
         <source>Choose a firmware file</source>
         <translation>Wählen Sie eine Firmware-Datei</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="286"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="283"/>
         <source>Choose a firmware file or enter a catalog ID</source>
         <translation>Wählen Sie eine Firmware-Datei oder geben Sie eine Katalog-ID ein</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="288"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="285"/>
         <source>Loading the firmware file…</source>
         <translation>Firmware-Datei wird geladen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="290"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="287"/>
         <source>Downloading the firmware…</source>
         <translation>Firmware wird heruntergeladen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="293"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="290"/>
         <source>The LTE firmware could not be downloaded</source>
         <translation>Die LTE-Firmware konnte nicht heruntergeladen werden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="295"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="292"/>
         <source>The file does not match the chosen kind</source>
         <translation>Die Datei passt nicht zur gewählten Firmware-Art</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="296"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="293"/>
         <source>The firmware cannot be used</source>
         <translation>Die Firmware kann nicht verwendet werden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="303"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="300"/>
         <source>nRF Util was not found</source>
         <translation>nRF Util wurde nicht gefunden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="308"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="305"/>
         <source>The firmware writes the UICR: allow it in Options</source>
         <translation>Die Firmware schreibt das UICR: Erlauben Sie dies unter Optionen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="468"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="462"/>
         <source>%1 MCU</source>
         <translation>MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="559"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="553"/>
         <source>Flashing is in progress. Cancel it and close the tab?</source>
         <translation>Das Flashen läuft. Abbrechen und den Tab schließen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="560"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="554"/>
         <source>An operation is running on this device. Cancel it and close the tab?</source>
         <translation>Auf diesem Gerät läuft ein Vorgang. Abbrechen und den Tab schließen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="702"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="696"/>
         <source>In the device: %1</source>
         <translation>Im Gerät: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="707"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="701"/>
         <source>Now in the device: %1</source>
         <translation>Jetzt im Gerät: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="782"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="776"/>
         <source>Flashing…</source>
         <translation>Flashen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="784"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="778"/>
         <source>Updating the modem…</source>
         <translation>Modem wird aktualisiert…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="787"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="781"/>
         <source>Erasing…</source>
         <translation>Löschen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="789"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="783"/>
         <source>Recovering…</source>
         <translation>Wiederherstellen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="791"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="785"/>
         <source>Resetting…</source>
         <translation>Zurücksetzen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="804"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="798"/>
         <source>Working…</source>
         <translation>Wird ausgeführt…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="812"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="806"/>
         <source>Flashing %1 to the %2 MCU</source>
         <translation>%1 wird auf die MCU %2 geflasht</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="814"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="808"/>
         <source>Flashing the LTE bundle %1</source>
         <translation>LTE-Paket %1 wird geflasht</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="816"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="810"/>
         <source>Updating the modem firmware with %1</source>
         <translation>Modem-Firmware wird mit %1 aktualisiert</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="818"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="812"/>
         <source>Erasing the application firmware of the %1 MCU</source>
         <translation>Anwendungs-Firmware der MCU %1 wird gelöscht</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="820"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="814"/>
         <source>Erasing everything on the %1 MCU</source>
         <translation>Alles auf der MCU %1 wird gelöscht</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="822"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="816"/>
         <source>Recovering the %1 MCU</source>
         <translation>MCU %1 wird wiederhergestellt</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="824"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="818"/>
         <source>Resetting the %1 MCU</source>
         <translation>MCU %1 wird zurückgesetzt</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="843"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="837"/>
         <source>Connecting</source>
         <translation>Verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="845"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="839"/>
         <source>Switching MCU</source>
         <translation>MCU wechseln</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="847"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="841"/>
         <source>Erasing</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="849"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="843"/>
         <source>Programming</source>
         <translation>Programmieren</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="851"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="845"/>
         <source>Verifying</source>
         <translation>Verifizieren</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="853"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="847"/>
         <source>Updating the modem</source>
         <translation>Modem aktualisieren</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="855"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="849"/>
         <source>Recovering</source>
         <translation>Wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="857"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="851"/>
         <source>Resetting</source>
         <translation>Zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="859"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="853"/>
         <source>Restoring console</source>
         <translation>Konsole wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="881"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="875"/>
         <source>Step %1 of %2</source>
         <translation>Schritt %1 von %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="920"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="914"/>
         <source>The console is disconnected during the modem update and resumes automatically afterwards.</source>
         <translation>Die Konsole ist während des Modem-Updates getrennt und wird danach automatisch fortgesetzt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="924"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="918"/>
         <source>The console is paused. The erased MCU stays halted: reconnect after flashing.</source>
         <translation>Die Konsole ist pausiert. Die gelöschte MCU bleibt angehalten: Verbinden Sie nach dem Flashen erneut.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="926"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="920"/>
         <source>The console is paused. The CPU stays halted after flashing.</source>
         <translation>Die Konsole ist pausiert. Die CPU bleibt nach dem Flashen angehalten.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="927"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="921"/>
         <source>The console is paused and resumes automatically after flashing.</source>
         <translation>Die Konsole ist pausiert und wird nach dem Flashen automatisch fortgesetzt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="942"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="936"/>
         <source>The console is paused and resumes automatically afterwards.</source>
         <translation>Die Konsole ist pausiert und wird danach automatisch fortgesetzt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="952"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="946"/>
         <source>Firmware flashed and verified in %1 s.</source>
         <translation>Firmware in %1 s geflasht und verifiziert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="954"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="948"/>
         <source>LTE modem firmware and LTE firmware flashed in %1 s.</source>
         <translation>LTE-Modem-Firmware und LTE-Firmware in %1 s geflasht.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="957"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="951"/>
         <source>Modem firmware updated in %1 s.</source>
         <translation>Modem-Firmware in %1 s aktualisiert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="959"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="953"/>
         <source>The application firmware of the %1 MCU was erased.</source>
         <translation>Die Anwendungs-Firmware der MCU %1 wurde gelöscht.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="961"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="955"/>
         <source>Everything on the %1 MCU was erased.</source>
         <translation>Alles auf der MCU %1 wurde gelöscht.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="963"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="957"/>
         <source>The %1 MCU was recovered.</source>
         <translation>Die MCU %1 wurde wiederhergestellt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="965"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="959"/>
         <source>The %1 MCU was reset and halted.</source>
         <translation>Die MCU %1 wurde zurückgesetzt und angehalten.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="966"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="960"/>
         <source>The %1 MCU was reset.</source>
         <translation>Die MCU %1 wurde zurückgesetzt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="982"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="976"/>
         <source>The modem update was cancelled. Flash the modem firmware again before you use LTE.</source>
         <translation>Das Modem-Update wurde abgebrochen. Flashen Sie die Modem-Firmware erneut, bevor Sie LTE verwenden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="986"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="980"/>
         <source>Flashing was cancelled. The device may not start until you flash it again.</source>
         <translation>Das Flashen wurde abgebrochen. Das Gerät startet möglicherweise erst wieder, wenn Sie es erneut flashen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="988"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="982"/>
         <source>The operation was cancelled.</source>
         <translation>Der Vorgang wurde abgebrochen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="992"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="986"/>
         <source>Flashing was interrupted. The firmware may be partly written: flash it again.</source>
         <translation>Das Flashen wurde unterbrochen. Die Firmware ist möglicherweise nur teilweise geschrieben: Flashen Sie sie erneut.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1008"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1002"/>
         <source>Chip: %1</source>
         <translation>Chip: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1027"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1021"/>
         <source>Maintenance — %1 MCU</source>
         <translation>Wartung — MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1028"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1022"/>
         <source>Maintenance</source>
         <translation>Wartung</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1037"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1031"/>
         <source>Firmware (flash)</source>
         <translation>Firmware (Flash)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1037"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1031"/>
         <source>UICR configuration</source>
         <translation>UICR-Konfiguration</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1038"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1032"/>
         <source>Product Information Block (serial number, hardware version, …)</source>
         <translation>Produktinformationsblock (Seriennummer, Hardwareversion, …)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1039"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1033"/>
         <source>This erases:</source>
         <translation>Dabei wird gelöscht:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1042"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1036"/>
         <source>Recover removes the read-out protection by erasing the %1 MCU completely, then programs a small image that keeps it debuggable. This erases:</source>
         <translation>Recover entfernt den Ausleseschutz, indem die MCU %1 vollständig gelöscht wird, und programmiert dann ein kleines Image, damit sie debugfähig bleibt. Dabei wird gelöscht:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1045"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1039"/>
         <source>Recover removes the read-out protection by erasing the %1 MCU completely. This erases:</source>
         <translation>Recover entfernt den Ausleseschutz, indem die MCU %1 vollständig gelöscht wird. Dabei wird gelöscht:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1050"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1044"/>
         <source>Recover the %1 MCU?</source>
         <translation>MCU %1 wiederherstellen (Recover)?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1051"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1045"/>
         <source>Erase everything on the %1 MCU?</source>
         <translation>Alles auf der MCU %1 löschen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1054"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1048"/>
         <source>This cannot be undone.</source>
         <translation>Dies kann nicht rückgängig gemacht werden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1055"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1049"/>
         <source>Recover</source>
         <translation>Wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1055"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1049"/>
         <source>Erase everything</source>
         <translation>Alles löschen</translation>
     </message>
@@ -6941,66 +6967,99 @@ Die Freigabe endet nach 30 Minuten ohne Aktivität oder nach 8 Stunden.</transla
 <context>
     <name>hwio::gui::SettingsViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="136"/>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="169"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="209"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="242"/>
         <source>System</source>
         <translation>System</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="171"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="244"/>
         <source>Light</source>
         <translation>Hell</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="173"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="246"/>
         <source>Dark</source>
         <translation>Dunkel</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="413"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="476"/>
         <source>Detected: %1 · %2 · %3</source>
         <translation>Erkannt: %1 · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="416"/>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="435"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="479"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="498"/>
         <source>Checking…</source>
         <translation>Wird geprüft…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="433"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="496"/>
         <source>Detected: %1 · %2</source>
         <translation>Erkannt: %1 · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="438"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="501"/>
         <source>Not found — needed only for LTE modem firmware</source>
         <translation>Nicht gefunden — nur für LTE-Modem-Firmware erforderlich</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="461"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="524"/>
         <source>checking…</source>
         <translation>wird geprüft…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="465"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="528"/>
         <source>not checked</source>
         <translation>nicht geprüft</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="472"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="535"/>
         <source>Build: %1</source>
         <translation>Build: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="473"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="536"/>
         <source>J-Link Software: %1</source>
         <translation>J-Link Software: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="476"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="539"/>
         <source>nRF Util: %1</source>
         <translation>nRF Util: %1</translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::UiModeController</name>
+    <message>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="41"/>
+        <source>Basic</source>
+        <translation>Einfach</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="43"/>
+        <source>Expert</source>
+        <translation>Experte</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="47"/>
+        <source>Advanced</source>
+        <translation>Erweitert</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="53"/>
+        <source>The essentials: language, look and console files.</source>
+        <translation>Das Wesentliche: Sprache, Darstellung und Konsolendateien.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="55"/>
+        <source>Everything, including timing options and expert maintenance actions.</source>
+        <translation>Alles, einschließlich der Timing-Optionen und der Experten-Wartungsaktionen.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/ui_mode_controller.cpp" line="59"/>
+        <source>Also J-Link, nRF Util, AI assistants and console options.</source>
+        <translation>Zusätzlich J-Link, nRF Util, KI-Assistenten und Konsolenoptionen.</translation>
     </message>
 </context>
 <context>
@@ -7224,7 +7283,7 @@ Die Freigabe endet nach 30 Minuten ohne Aktivität oder nach 8 Stunden.</transla
         <translation>Reset von %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/relay_client.cpp" line="56"/>
+        <location filename="../libs/remote/src/relay_client.cpp" line="57"/>
         <source>… %n line(s) dropped …</source>
         <translation>
             <numerusform>… %n Zeile verworfen …</numerusform>

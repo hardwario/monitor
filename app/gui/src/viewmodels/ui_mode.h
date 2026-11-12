@@ -11,6 +11,7 @@
 #include <QString>
 #include <QStringView>
 #include <QtQmlIntegration>
+#include <QtTypes>
 
 #include <optional>
 
@@ -20,7 +21,7 @@ namespace ui_mode {
 Q_NAMESPACE
 QML_NAMED_ELEMENT(UiMode)
 
-enum class UiMode : int { Basic = 0, Advanced = 1, Expert = 2 };
+enum class UiMode : quint8 { Basic = 0, Advanced = 1, Expert = 2 };
 Q_ENUM_NS(UiMode)
 
 } // namespace ui_mode

@@ -29,7 +29,7 @@ namespace hwio::remote {
 
 // The default relay (ADR-0330).
 inline constexpr std::string_view defaultRelayUrl = "https://terminal.hardwario.com";
-// Settings → Advanced (ADR-0330); empty = defaultRelayUrl.
+// Settings → Expert (ADR-0330, ADR-0362); empty = defaultRelayUrl.
 inline const SettingKey<std::string> relayUrlSetting{.path = "remote/relayUrl", .defaultValue = {}};
 
 inline constexpr std::uint32_t minHostCode = 100000;

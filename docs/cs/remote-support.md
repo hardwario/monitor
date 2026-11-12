@@ -81,5 +81,5 @@ nikdy nepovolí. Viz [Příkazová řádka](../en/cli.md#remote-support-hwio-rem
 <a id="settings"></a>
 ## Nastavení
 
-**Nastavení** › **Pokročilé** › **Server podpory** změní server (například na testovací). Přijímají se jen adresy
-`https`. Pro `https://terminal.hardwario.com` nechte pole prázdné.
+**Nastavení** › **Expertní** › **Server podpory** (v [režimu](getting-started.md#modes) Expertní) změní server
+(například na testovací). Přijímají se jen adresy `https`. Pro `https://terminal.hardwario.com` nechte pole prázdné.
