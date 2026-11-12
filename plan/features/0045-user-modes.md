@@ -138,7 +138,7 @@ None. The CLI has no modes (the mode is GUI-only; CLI output and options are unc
 - [x] B1 QML: Mode selector in General, `SettingsRow.minimumMode` on every row of the table, section rename (D-6),
       reveal note; first-start `ModeChoiceDialog`; Qt Quick tests (each mode shows exactly the table's rows;
       reveal; dialog default Advanced)
-- [ ] B2 Screenshots tests updated
+- [x] B2 Screenshots tests updated
 - [ ] C1 Translations (0 unfinished), glossary, docs ×5, release notes rc.4
 - [ ] C2 Verification: full ctest, ASan/TSan, clang-tidy, qmllint, clang-format, check_translations
 

@@ -1,5 +1,7 @@
 // Screenshots of the Flash and Settings pages (plan 0006, E2) in both themes and both languages;
 // only when HWIO_SCREENSHOT_DIR is set (QT_QUICK_BACKEND=software for the offscreen platform).
+// Plan 0045: the expert maintenance in Expert mode, Settings in each user mode, a section revealed
+// for one visit and the first-start mode dialog.
 import QtQuick
 import QtTest
 import HardwarioMonitor
@@ -171,11 +173,12 @@ TestCase {
         tryVerify(() => vm.opState === FlashViewModel.Failed, 30000);
         save("f11-flash-failed-interrupted");
 
-        // Maintenance and the erase-all confirmation (ADR-0038).
+        // Maintenance and the erase-all confirmation (ADR-0038), in Expert mode (ADR-0360).
+        verify(testSupport.setSetting("ui/mode", "expert"));
         testSupport.useScenario(normalScenario);
         vm = freshTab("app", FirmwareSourceViewModel.AppFirmware);
         window.height = 900;
-        find("maintenance").expanded = true;
+        vm.maintenanceExpanded = true;
         tryVerify(() => find("maintenanceActions") !== null);
         save("f12-flash-maintenance");
         vm.requestConfirmation(false);
@@ -197,6 +200,7 @@ TestCase {
         save("f16-flash-confirm-erase-all-lte");
         dialog.reject();
         tryVerify(() => !dialog.visible);
+        verify(testSupport.setSetting("ui/mode", "advanced"));
 
         // Settings: the whole page.
         testSupport.resetTabs();
@@ -218,6 +222,36 @@ TestCase {
         window.width = 960;
         window.height = 600;
         save("s03-settings-960x600");
+
+        // Plan 0045: the whole page in Basic and Expert mode (Advanced is s01).
+        window.width = 1280;
+        window.height = 1500;
+        verify(testSupport.setSetting("ui/mode", "basic"));
+        tryVerify(() => find("section_jlink") === null);
+        save("s04-settings-basic");
+        verify(testSupport.setSetting("ui/mode", "expert"));
+        tryVerify(() => find("section_expert") !== null);
+        window.height = 1800;
+        save("s05-settings-expert");
+        // Basic mode, "Open Settings" of a J-Link error: the section for this visit, with the note.
+        verify(testSupport.setSetting("ui/mode", "basic"));
+        window.height = 800;
+        AppViewModel.openSettings("jlink");
+        tryVerify(() => find("section_jlink") !== null);
+        tryCompare(AppViewModel, "settingsSection", "");
+        save("s06-settings-revealed-jlink");
         AppViewModel.closeGlobalPage();
+        verify(testSupport.setSetting("ui/mode", "advanced"));
+
+        // The first-start dialog (Advanced preselected).
+        testSupport.resetUiMode();
+        const modeDialog = findChild(window, "modeChoiceDialog");
+        tryVerify(() => modeDialog.opened);
+        save("s07-mode-choice");
+        window.width = 960;
+        window.height = 600;
+        save("s08-mode-choice-960x600");
+        modeDialog.accept();
+        tryVerify(() => !modeDialog.visible);
     }
 }
