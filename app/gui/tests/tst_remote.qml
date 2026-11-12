@@ -344,6 +344,26 @@ TestCase {
         verify(testSupport.remoteRequestedKind() === ""); // no operation, no shell query
     }
 
+    // Plan 0046 A5 (ADR-0171): hexdump continuation lines from the host are log lines of level
+    // Hexdump, hidden by the default chips as in a local tab.
+    function test_remoteHexdumpLinesAreHiddenByDefault() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(false);
+        tryVerify(() => tab().remoteJoin.state === "joined", 10000);
+        AppViewModel.showPage("console");
+        const log = testSupport.consoleViewModel(AppViewModel.currentTab).log;
+        const before = log.totalLines;
+        const visible = log.visibleLines;
+        testSupport.remoteHostRead("[00:00:12.345,000] <inf> app_lrw: Received:");
+        testSupport.remoteHostRead("                                 44 74 4f 34 78 54 73 31  4b 36 69 41 73 41 53 4a |DtO4xTs1 K6iAsASJ");
+        testSupport.remoteHostRead("                                 00 01 02 0a                                      |....            ");
+        tryVerify(() => log.totalLines === before + 3, 10000, log.totalLines);
+        compare(log.visibleLines, visible + 1); // only the header
+    }
+
     function test_shareNotOfferedInARemoteTab() {
         verify(AppViewModel.joinRemoteSession("482913", false));
         tryVerify(() => tab().transport === "remote", 5000);

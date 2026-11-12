@@ -38,6 +38,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -244,6 +245,13 @@ device::ConsoleLine RemoteConsoleSession::makeLine(device::Direction dir, const 
     // The device lines of the host (LineSource::Remote marks only this session's own markers).
     if (dir == device::Direction::Out) {
         line.level = device::parseZephyrLevel(line.text);
+        const std::string_view shown = line.text;
+        if (line.level == device::LogLevel::None &&
+            device::isHexdumpLine(shown.starts_with('#') ? shown.substr(1) : shown)) {
+            // ADR-0171 (as BleConsoleHandler and the '#' rule of LineAssembler): the continuation
+            // lines of a log hexdump are log lines too, hidden by default like in a local tab.
+            line.level = device::LogLevel::Hexdump;
+        }
         line.channel =
             line.level != device::LogLevel::None ? device::Channel::Log : device::Channel::Shell;
     }

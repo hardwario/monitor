@@ -131,6 +131,32 @@ TEST(RemoteSession, MonitorToMonitorConsole) {
             return line.channel == device::Channel::Log && line.level == device::LogLevel::Warning;
         });
     }));
+    // Plan 0046 A5 (ADR-0171): hexdump continuation lines are log lines of level Hexdump (hidden
+    // by default like in a local tab), also '#'-prefixed ones (CHESTER over Bluetooth).
+    console.logLine("[00:00:12.345,000] <inf> app_lrw: Received:");
+    console.logLine("                                 44 74 4f 34 78 54 73 31  4b 36 69 41 73 41 "
+                    "53 4a |DtO4xTs1 K6iAsASJ");
+    console.shell("#   01 02 |..");
+    console.shell("not a hexdump |x");
+    ASSERT_TRUE(runUntil([&] {
+        return std::ranges::any_of(joiner.log().linesSince(0), [](const device::ConsoleLine& line) {
+            return line.text == "not a hexdump |x";
+        });
+    }));
+    int hexdumps = 0;
+    for (const device::ConsoleLine& line : joiner.log().linesSince(0)) {
+        if (line.text.ends_with("|DtO4xTs1 K6iAsASJ") || line.text == "#   01 02 |..") {
+            EXPECT_EQ(line.channel, device::Channel::Log) << line.text;
+            EXPECT_EQ(line.level, device::LogLevel::Hexdump) << line.text;
+            ++hexdumps;
+        } else if (line.text == "not a hexdump |x") {
+            EXPECT_EQ(line.channel, device::Channel::Shell);
+            EXPECT_EQ(line.level, device::LogLevel::None);
+        } else if (line.text.ends_with("app_lrw: Received:")) {
+            EXPECT_EQ(line.level, device::LogLevel::Info);
+        }
+    }
+    EXPECT_EQ(hexdumps, 2);
     EXPECT_FALSE(joiner.sendLine(std::string(600, 'x')).has_value());
     EXPECT_FALSE(joiner.sendLine("a\rb").has_value());
 }

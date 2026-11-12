@@ -416,6 +416,17 @@ public:
         m_participant->emitEvent(QStringLiteral("sync"), sync);
     }
 
+    // The participant (a host) sends one line of device output (`at` {event: "read"}).
+    Q_INVOKABLE void remoteHostRead(const QString& line) const {
+        if (!m_participant) {
+            return;
+        }
+        QJsonObject at;
+        at.insert(QStringLiteral("event"), QStringLiteral("read"));
+        at.insert(QStringLiteral("data"), line);
+        m_participant->emitEvent(QStringLiteral("at"), at);
+    }
+
     // Keeps one Choose device tab (busy pages are finished first).
     Q_INVOKABLE void resetTabs() {
         while (m_app->tabs()->count() > 1) {

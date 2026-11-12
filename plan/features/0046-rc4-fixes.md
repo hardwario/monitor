@@ -114,7 +114,7 @@ Without a terminal the guided flow keeps its existing behaviour for missing term
       CLI joiner yes/no/timeout, `remote host` with support yes/no, Qt Quick joiner question, wizard customer side)
 - [x] A4 Support's operation result (ADR-0369): named with time, success clears, error until ×, console line; CLI
       names; Qt Quick tests
-- [ ] A5 Hexdump continuation lines in support's console are Log/Hexdump (ADR-0171); unit test + hidden by default
+- [x] A5 Hexdump continuation lines in support's console are Log/Hexdump (ADR-0171); unit test + hidden by default
 - [ ] C1 Translations (0 unfinished), docs (LTE update pages ×5, remote-support ×5, CLI), screenshots, release notes rc.4
 - [ ] C2 Verification: full ctest, ASan/TSan for changed tests, clang-tidy, qmllint, clang-format, check_translations
 
@@ -136,4 +136,6 @@ To be confirmed by the user:
 - The customer-side behaviour is tested in the view-model test (`FlashTest.RemoteLteUpdateQuestionsGoToSupport`)
   rather than in Qt Quick: a Qt Quick test would need the fake nRF Util and a designated-firmware server in the QML
   test process.
-
+- A5: a '#'-prefixed hexdump continuation (CHESTER over Bluetooth on the host) is classified too, as
+  LineAssembler's '#' rule does locally. The CLI joiner prints through the same ConsoleView as
+  `chester app console`: hexdump lines are muted log lines there (the CLI never hides them), as locally.
