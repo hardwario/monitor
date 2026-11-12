@@ -352,7 +352,7 @@ A remote tab had no autocomplete (learning starts only after a local attach's `i
 
 Steps:
 
-- [ ] A7 Tunnel `commands` / `learn`, limits and validation, `RemoteHost::setCommandTree`, joiner tree; unit tests
+- [x] A7 Tunnel `commands` / `learn`, limits and validation, `RemoteHost::setCommandTree`, joiner tree; unit tests
       (codec, malformed / oversize trees, rate limits, learn before allow refused)
 - [ ] B3 CLI host feeds its tree; CLI interactive joiner completion; e2e test
 - [ ] C5 GUI: host tab feeds the tree; remote tab completion and suggestions; Qt Quick test (completion in a remote

@@ -99,7 +99,8 @@ void RemoteOperationClient::onMessage(const tunnel::HostMessage& message) {
         [this](const auto& m) {
             using T = std::decay_t<decltype(m)>;
             if constexpr (std::is_same_v<T, tunnel::HostHello> ||
-                          std::is_same_v<T, tunnel::HostEnd>) {
+                          std::is_same_v<T, tunnel::HostEnd> ||
+                          std::is_same_v<T, tunnel::HostCommands>) {
                 return; // the session handles these; HostEnd ends it (joinStateChanged)
             } else {
                 if (m.id != *m_pending) {

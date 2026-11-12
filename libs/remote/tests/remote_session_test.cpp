@@ -5,6 +5,7 @@
 #include "fake_relay.h"
 #include "hwio/core/error.h"
 #include "hwio/core/firmware_identity.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
 #include "hwio/device/console_session.h"
@@ -22,6 +23,7 @@
 #include <QJsonValue>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QStringLiteral>
 #include <QtTypes>
 
@@ -326,6 +328,41 @@ TEST(RemoteSession, JoinerRelayUnreachable) {
     RemoteConsoleSession joiner(options);
     ASSERT_TRUE(runUntil([&] { return joiner.joinState() == JoinState::Ended; }));
     EXPECT_EQ(joiner.connection().error.value_or(Error{}).code, ErrorCode::RemoteRelayUnreachable);
+}
+
+// ADR-0364: a Monitor host's command tree reaches the joiner; learn goes to the host once.
+TEST(RemoteSession, CommandTreeAndLearn) {
+    FakeRelay relay;
+    FakeConsole console;
+    ScriptedConsent consent;
+    RemoteHost host(console, consent, nullptr, hostFor(relay));
+    QStringList learned;
+    QObject::connect(&host, &RemoteHost::learnRequested,
+                     [&](const QStringList& path) { learned.append(path.join(u' ')); });
+    device::CommandTree tree;
+    const std::vector<device::CommandEntry> top{{.name = "app", .help = "Application"}};
+    ASSERT_TRUE(tree.setChildren({}, top));
+    host.setCommandTree(std::make_shared<const device::CommandTree>(tree));
+    host.start();
+    ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
+    RemoteConsoleSession joiner(joinFor(relay));
+    int changes = 0;
+    QObject::connect(&joiner, &RemoteConsoleSession::commandTreeChanged, [&] { ++changes; });
+    ASSERT_TRUE(runUntil([&] { return joiner.commandTree() != nullptr; }));
+    EXPECT_EQ(changes, 1);
+    const std::vector<std::string> app{"app"};
+    ASSERT_NE(joiner.commandTree()->find(app), nullptr);
+    joiner.requestLearn(app);
+    joiner.requestLearn(app); // asked already
+    ASSERT_TRUE(runUntil([&] { return learned.size() == 1; }));
+    runFor(200ms);
+    EXPECT_EQ(learned.size(), 1);
+    // The host learns it: the grown tree follows.
+    const std::vector<device::CommandEntry> sub{{.name = "config", .help = "Configuration"}};
+    ASSERT_TRUE(tree.setChildren(app, sub));
+    host.setCommandTree(std::make_shared<const device::CommandTree>(tree));
+    const std::vector<std::string> config{"app", "config"};
+    ASSERT_TRUE(runUntil([&] { return joiner.commandTree()->find(config) != nullptr; }));
 }
 
 } // namespace

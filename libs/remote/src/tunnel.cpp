@@ -4,9 +4,11 @@
 #include "hwio/core/json.h"
 #include "hwio/core/result.h"
 #include "hwio/core/text_sanitizer.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/firmware/firmware_cache.h"
 
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QLatin1StringView>
@@ -18,6 +20,7 @@
 #include <cstdint>
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -205,6 +208,80 @@ Result<HostMessage> decodeOpResult(const QJsonObject& data, const std::string& m
     return result;
 }
 
+// ADR-0364: copies the entries of a command tree at `depth` (1 = the top level) with sanitised
+// help texts. False when an entry is malformed or a bound is exceeded.
+bool copyCommandEntries(const QJsonArray& in, QJsonArray& out, std::size_t depth,
+                        std::size_t& nodes) {
+    if (depth > maxCommandDepth) {
+        return false;
+    }
+    for (const QJsonValue& value : in) {
+        if (!value.isObject() || ++nodes > maxCommandNodes) {
+            return false;
+        }
+        const QJsonObject entry = value.toObject();
+        const QJsonValue name = entry.value(QStringLiteral("name"));
+        const QJsonValue help = entry.value(QStringLiteral("help"));
+        const QJsonValue children = entry.value(QStringLiteral("children"));
+        if (!name.isString() || !device::isCommandName(toStdString(name.toString())) ||
+            (!help.isUndefined() && !help.isString())) {
+            return false;
+        }
+        QJsonObject copy;
+        copy.insert(QStringLiteral("name"), name);
+        copy.insert(QStringLiteral("help"), sanitizeDeviceText(help.toString()));
+        if (!children.isUndefined()) {
+            QJsonArray copiedChildren;
+            if (!children.isArray() ||
+                !copyCommandEntries(children.toArray(), copiedChildren, depth + 1, nodes)) {
+                return false;
+            }
+            copy.insert(QStringLiteral("children"), copiedChildren);
+        }
+        out.append(copy);
+    }
+    return true;
+}
+
+Result<HostMessage> decodeCommands(const QJsonObject& data) {
+    if (std::cmp_greater(QJsonDocument(data).toJson(QJsonDocument::Compact).size(),
+                         maxCommandsBytes)) {
+        return bad("command tree too large");
+    }
+    const QJsonValue treeValue = data.value(QStringLiteral("tree"));
+    if (!treeValue.isObject()) {
+        return bad("commands without a tree");
+    }
+    QJsonObject tree = treeValue.toObject();
+    const QJsonValue root = tree.value(QStringLiteral("root"));
+    QJsonArray copied;
+    std::size_t nodes = 0;
+    if (!root.isArray() || !copyCommandEntries(root.toArray(), copied, 1, nodes)) {
+        return bad("invalid command tree");
+    }
+    tree.insert(QStringLiteral("root"), copied);
+    auto parsed = device::CommandTree::fromJson(tree);
+    if (!parsed) {
+        return bad("invalid command tree: " + parsed.error().detail);
+    }
+    return HostCommands{.tree = std::make_shared<const device::CommandTree>(std::move(*parsed))};
+}
+
+// Removes the help texts of a command tree's entries (recursively).
+QJsonArray withoutHelp(const QJsonArray& entries) {
+    QJsonArray out;
+    for (const QJsonValue& value : entries) {
+        QJsonObject entry = value.toObject();
+        entry.remove(QStringLiteral("help"));
+        if (entry.contains(QStringLiteral("children"))) {
+            entry.insert(QStringLiteral("children"),
+                         withoutHelp(entry.value(QStringLiteral("children")).toArray()));
+        }
+        out.append(entry);
+    }
+    return out;
+}
+
 } // namespace
 
 std::string_view kindId(OpKind kind) noexcept {
@@ -262,67 +339,73 @@ bool validId(std::string_view id) noexcept {
 }
 
 QJsonObject encodeHost(const HostMessage& message) {
-    QJsonObject data =
-        std::visit(Overloaded{
-                       [](const HostHello& hello) {
-                           QJsonObject d = envelope("hello");
-                           d.insert(QStringLiteral("app"), q(hello.app));
-                           d.insert(QStringLiteral("version"), q(hello.version));
-                           QJsonObject device;
-                           device.insert(QStringLiteral("name"), q(hello.device.name));
-                           device.insert(QStringLiteral("serial"), q(hello.device.serial));
-                           device.insert(QStringLiteral("transport"), q(hello.device.transport));
-                           device.insert(QStringLiteral("firmware"), q(hello.device.firmware));
-                           d.insert(QStringLiteral("device"), device);
-                           d.insert(QStringLiteral("ops"), hello.ops);
-                           QJsonArray kinds;
-                           if (hello.ops) {
-                               for (const OpKind kind : hello.opKinds) {
-                                   kinds.append(q(kindId(kind)));
-                               }
-                           }
-                           d.insert(QStringLiteral("opKinds"), kinds);
-                           return d;
-                       },
-                       [](const OpAccepted& accepted) {
-                           QJsonObject d = envelope("op-accepted");
-                           d.insert(QStringLiteral("id"), q(accepted.id));
-                           return d;
-                       },
-                       [](const OpDenied& denied) {
-                           QJsonObject d = envelope("op-denied");
-                           d.insert(QStringLiteral("id"), q(denied.id));
-                           d.insert(QStringLiteral("code"), q(denied.code));
-                           return d;
-                       },
-                       [](const OpProgress& progress) {
-                           QJsonObject d = envelope("op-progress");
-                           d.insert(QStringLiteral("id"), q(progress.id));
-                           d.insert(QStringLiteral("phase"), q(progress.phase));
-                           d.insert(QStringLiteral("step"), progress.step);
-                           d.insert(QStringLiteral("steps"), progress.steps);
-                           d.insert(QStringLiteral("done"), static_cast<double>(progress.done));
-                           d.insert(QStringLiteral("total"), static_cast<double>(progress.total));
-                           return d;
-                       },
-                       [](const OpResult& result) {
-                           QJsonObject d = envelope("op-result");
-                           d.insert(QStringLiteral("id"), q(result.id));
-                           d.insert(QStringLiteral("ok"), result.ok);
-                           if (result.code) {
-                               QJsonObject error;
-                               error.insert(QStringLiteral("code"), q(*result.code));
-                               d.insert(QStringLiteral("error"), error);
-                           }
-                           return d;
-                       },
-                       [](const HostEnd& end) {
-                           QJsonObject d = envelope("end");
-                           d.insert(QStringLiteral("code"), q(end.code));
-                           return d;
-                       },
-                   },
-                   message);
+    QJsonObject data = std::visit(
+        Overloaded{
+            [](const HostHello& hello) {
+                QJsonObject d = envelope("hello");
+                d.insert(QStringLiteral("app"), q(hello.app));
+                d.insert(QStringLiteral("version"), q(hello.version));
+                QJsonObject device;
+                device.insert(QStringLiteral("name"), q(hello.device.name));
+                device.insert(QStringLiteral("serial"), q(hello.device.serial));
+                device.insert(QStringLiteral("transport"), q(hello.device.transport));
+                device.insert(QStringLiteral("firmware"), q(hello.device.firmware));
+                d.insert(QStringLiteral("device"), device);
+                d.insert(QStringLiteral("ops"), hello.ops);
+                QJsonArray kinds;
+                if (hello.ops) {
+                    for (const OpKind kind : hello.opKinds) {
+                        kinds.append(q(kindId(kind)));
+                    }
+                }
+                d.insert(QStringLiteral("opKinds"), kinds);
+                return d;
+            },
+            [](const OpAccepted& accepted) {
+                QJsonObject d = envelope("op-accepted");
+                d.insert(QStringLiteral("id"), q(accepted.id));
+                return d;
+            },
+            [](const OpDenied& denied) {
+                QJsonObject d = envelope("op-denied");
+                d.insert(QStringLiteral("id"), q(denied.id));
+                d.insert(QStringLiteral("code"), q(denied.code));
+                return d;
+            },
+            [](const OpProgress& progress) {
+                QJsonObject d = envelope("op-progress");
+                d.insert(QStringLiteral("id"), q(progress.id));
+                d.insert(QStringLiteral("phase"), q(progress.phase));
+                d.insert(QStringLiteral("step"), progress.step);
+                d.insert(QStringLiteral("steps"), progress.steps);
+                d.insert(QStringLiteral("done"), static_cast<double>(progress.done));
+                d.insert(QStringLiteral("total"), static_cast<double>(progress.total));
+                return d;
+            },
+            [](const OpResult& result) {
+                QJsonObject d = envelope("op-result");
+                d.insert(QStringLiteral("id"), q(result.id));
+                d.insert(QStringLiteral("ok"), result.ok);
+                if (result.code) {
+                    QJsonObject error;
+                    error.insert(QStringLiteral("code"), q(*result.code));
+                    d.insert(QStringLiteral("error"), error);
+                }
+                return d;
+            },
+            [](const HostEnd& end) {
+                QJsonObject d = envelope("end");
+                d.insert(QStringLiteral("code"), q(end.code));
+                return d;
+            },
+            [](const HostCommands& commands) {
+                QJsonObject d = envelope("commands");
+                d.insert(QStringLiteral("tree"),
+                         commands.tree ? commands.tree->toJson() : device::CommandTree().toJson());
+                return d;
+            },
+        },
+        message);
     QJsonObject at;
     at.insert(QStringLiteral("event"), QStringLiteral("hwio"));
     at.insert(QStringLiteral("data"), data);
@@ -350,11 +433,34 @@ QJsonObject encodeJoiner(const JoinerMessage& message) {
                            }
                            return d;
                        },
+                       [](const Learn& learn) {
+                           QJsonObject d = envelope("learn");
+                           QJsonArray path;
+                           for (const std::string& word : learn.path) {
+                               path.append(q(word));
+                           }
+                           d.insert(QStringLiteral("path"), path);
+                           return d;
+                       },
                    },
                    message);
     QJsonObject write;
     write.insert(QStringLiteral("hwio"), data);
     return write;
+}
+
+QJsonObject encodeCommands(const device::CommandTree& tree, bool withHelp) {
+    QJsonObject at =
+        encodeHost(HostCommands{.tree = std::make_shared<const device::CommandTree>(tree)});
+    if (withHelp) {
+        return at;
+    }
+    QJsonObject data = at.value(QStringLiteral("data")).toObject();
+    QJsonObject json = data.value(QStringLiteral("tree")).toObject();
+    json.insert(QStringLiteral("root"), withoutHelp(json.value(QStringLiteral("root")).toArray()));
+    data.insert(QStringLiteral("tree"), json);
+    at.insert(QStringLiteral("data"), data);
+    return at;
 }
 
 bool isTunnelAt(const QJsonValue& payload) {
@@ -380,6 +486,9 @@ Result<HostMessage> decodeHost(const QJsonValue& payload) {
             return std::unexpected(std::move(code).error());
         }
         return HostEnd{.code = *code};
+    }
+    if (type == QStringLiteral("commands")) {
+        return decodeCommands(*data);
     }
     auto messageId = id(*data);
     if (!messageId) {
@@ -416,6 +525,21 @@ Result<JoinerMessage> decodeJoiner(const QJsonValue& payload) {
             return bad("invalid hello");
         }
         return JoinerHello{.app = *app, .version = *ver};
+    }
+    if (type == QStringLiteral("learn")) {
+        const QJsonValue pathValue = data->value(QStringLiteral("path"));
+        if (!pathValue.isArray() || pathValue.toArray().isEmpty() ||
+            std::cmp_greater(pathValue.toArray().size(), maxCommandDepth)) {
+            return bad("invalid learn path");
+        }
+        Learn learn;
+        for (const QJsonValue& word : pathValue.toArray()) {
+            if (!word.isString() || !device::isCommandName(toStdString(word.toString()))) {
+                return bad("invalid learn path");
+            }
+            learn.path.push_back(toStdString(word.toString()));
+        }
+        return learn;
     }
     if (type != QStringLiteral("op-request")) {
         return bad("unknown joiner message type");

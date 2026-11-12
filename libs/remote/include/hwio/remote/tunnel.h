@@ -12,6 +12,11 @@
 // progress of an lteUpdate names the guided update's step in `phase`
 // (device::LteUpdateProcedure::stepId: "connect-app", "backup", "erase", "connect-lte",
 // "update-lte", "connect-app-again", "choose-application", "restore"; "download" before it).
+// ADR-0364: host → joiners `commands` {tree: <device::CommandTree JSON>} (the host's learned
+// command tree for the joiner's autocomplete), joiner → host `learn` {path: [names]} (the host
+// learns that command's subcommands with its silent query). The tree is untrusted input: at most
+// maxCommandsBytes of JSON, maxCommandNodes nodes, maxCommandDepth levels, command names only
+// (CommandTree's charset), help texts sanitised; then CommandTree's own bounds apply.
 // The web Terminal ignores an `at` whose event is not state / write / read; a web Terminal host
 // would write a `write` object to the device as text, so a Monitor joiner sends tunnel objects only
 // after the host's hello (RemoteConsoleSession).
@@ -25,11 +30,13 @@
 // functions, any thread.
 
 #include "hwio/core/result.h"
+#include "hwio/device/command_tree.h"
 
 #include <QJsonObject>
 #include <QJsonValue>
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -42,6 +49,10 @@ inline constexpr int version = 1;
 inline constexpr std::string_view appId = "hwio-monitor";
 inline constexpr std::size_t maxIdBytes = 32;    // operation ids: [A-Za-z0-9_-]
 inline constexpr std::size_t maxTextBytes = 128; // app, version, device fields, phase
+// ADR-0364: the `commands` tree and a `learn` path.
+inline constexpr std::size_t maxCommandsBytes = 256ULL * 1024;
+inline constexpr std::size_t maxCommandNodes = 4000;
+inline constexpr std::size_t maxCommandDepth = 8;
 
 enum class OpKind : std::uint8_t { Flash, Erase, Recover, Reset, LteUpdate };
 inline constexpr std::size_t maxOpKinds = 16; // entries of a hello's opKinds
@@ -96,7 +107,12 @@ struct HostEnd {
     std::string code =
         "cancelled"; // a hwio::Error id: "cancelled" (End sharing), "remote.idle", ...
 };
-using HostMessage = std::variant<HostHello, OpAccepted, OpDenied, OpProgress, OpResult, HostEnd>;
+// ADR-0364: the host's command tree (never null when decoded).
+struct HostCommands {
+    std::shared_ptr<const device::CommandTree> tree;
+};
+using HostMessage =
+    std::variant<HostHello, OpAccepted, OpDenied, OpProgress, OpResult, HostEnd, HostCommands>;
 
 // ---- joiner → host ----
 struct JoinerHello {
@@ -109,7 +125,11 @@ struct OpRequest {
     OpTarget target = OpTarget::App;       // not sent for lteUpdate (decoded as Lte)
     std::optional<std::string> firmwareId; // flash only: a catalog firmware ID (32 hex digits)
 };
-using JoinerMessage = std::variant<JoinerHello, OpRequest>;
+// ADR-0364: learn the subcommands of the command at `path` (1..maxCommandDepth names).
+struct Learn {
+    std::vector<std::string> path;
+};
+using JoinerMessage = std::variant<JoinerHello, OpRequest, Learn>;
 
 // The `at` payload {event: "hwio", data: …}.
 [[nodiscard]] QJsonObject encodeHost(const HostMessage& message);
@@ -122,6 +142,10 @@ using JoinerMessage = std::variant<JoinerHello, OpRequest>;
 [[nodiscard]] Result<HostMessage> decodeHost(const QJsonValue& payload);
 // Decodes a `write` object. Errors: remote.protocol_error.
 [[nodiscard]] Result<JoinerMessage> decodeJoiner(const QJsonValue& payload);
+
+// The `commands` message of `tree` without help texts when `withHelp` is false (to fit the relay's
+// event size, RemoteHost).
+[[nodiscard]] QJsonObject encodeCommands(const device::CommandTree& tree, bool withHelp);
 
 // True for a valid operation id.
 [[nodiscard]] bool validId(std::string_view id) noexcept;

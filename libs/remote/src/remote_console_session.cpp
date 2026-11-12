@@ -32,11 +32,13 @@
 #include <chrono>
 #include <cstdint>
 #include <expected>
+#include <map>
 #include <memory>
 #include <optional>
 #include <string>
 #include <utility>
 #include <variant>
+#include <vector>
 
 namespace hwio::remote {
 
@@ -210,6 +212,25 @@ Status RemoteConsoleSession::sendTunnel(const tunnel::JoinerMessage& message) {
     return {};
 }
 
+void RemoteConsoleSession::requestLearn(const std::vector<std::string>& path) {
+    if (m_state != JoinState::Allowed || !m_hostHello || !m_commandTree || path.empty()) {
+        return;
+    }
+    const auto now = std::chrono::steady_clock::now();
+    if (const auto asked = m_learnAsked.find(path);
+        asked != m_learnAsked.end() && now - asked->second < learnRetry) {
+        return; // asked recently (the host may have dropped it: asked again later)
+    }
+    if (!m_learnAsked.contains(path) && m_learnAsked.size() >= maxLearnPaths) {
+        return;
+    }
+    m_learnAsked[path] = now;
+    if (Status sent = sendTunnel(tunnel::Learn{.path = path}); !sent) {
+        qCInfo(log::lcRemote).noquote()
+            << "Learn request not sent:" << toQString(sent.error().detail);
+    }
+}
+
 device::ConsoleLine RemoteConsoleSession::makeLine(device::Direction dir, const QString& text) {
     device::ConsoleLine line;
     line.dir = dir;
@@ -255,6 +276,12 @@ void RemoteConsoleSession::onTunnelAt(const QJsonValue& payload) {
     }
     if (!m_hostHello) {
         return; // ADR-0336: host objects count only after the host's hello
+    }
+    if (const auto* commands = std::get_if<tunnel::HostCommands>(&*message)) {
+        // ADR-0364: validated by the codec (bounds, names, sanitised help).
+        m_commandTree = commands->tree;
+        emit commandTreeChanged();
+        return;
     }
     if (std::holds_alternative<tunnel::HostEnd>(*message)) {
         // ADR-0354: the host ended sharing on purpose.

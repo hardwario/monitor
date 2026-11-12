@@ -113,11 +113,19 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../libs/remote/src/remote_host.cpp" line="296"/>
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="299"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n remote command was dropped while waiting for your answer.</numerusform>
             <numerusform>%n remote commands were dropped while waiting for your answer.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="809"/>
+        <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
+        <translation>
+            <numerusform>Help of %n command read for support&apos;s autocomplete.</numerusform>
+            <numerusform>Help of %n commands read for support&apos;s autocomplete.</numerusform>
         </translation>
     </message>
 </context>

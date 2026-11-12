@@ -1,10 +1,13 @@
 #include "hwio/core/error.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/remote/tunnel.h"
 
 #include <QByteArray>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLatin1Char>
 #include <QString>
 #include <QStringLiteral>
 
@@ -12,6 +15,7 @@
 
 #include <array>
 #include <optional>
+#include <string>
 #include <variant>
 #include <vector>
 
@@ -183,6 +187,112 @@ TEST(Tunnel, HelloOpKinds) {
             R"({"event":"hwio","data":{"v":1,"type":"hello","app":"hwio-monitor","version":"3","device":{"name":"","serial":"","transport":"","firmware":""},"ops":true,"opKinds":["a","a","a","a","a","a","a","a","a","a","a","a","a","a","a","a","a"]}})",
         }) {
         EXPECT_FALSE(decode(text).has_value()) << text;
+    }
+}
+
+// ADR-0364: the command tree and learn requests.
+device::CommandTree sampleTree() {
+    device::CommandTree tree;
+    tree.setDashHSupported(true);
+    const std::vector<device::CommandEntry> top{{.name = "app", .help = "Application"},
+                                                {.name = "lte", .help = "LTE"}};
+    EXPECT_TRUE(tree.setChildren({}, top));
+    const std::vector<std::string> path{"app"};
+    const std::vector<device::CommandEntry> sub{{.name = "config", .help = "Configuration"}};
+    EXPECT_TRUE(tree.setChildren(path, sub));
+    return tree;
+}
+
+TEST(Tunnel, CommandsRoundTrip) {
+    const device::CommandTree tree = sampleTree();
+    auto decoded = decodeHost(encodeCommands(tree, true));
+    ASSERT_TRUE(decoded.has_value()) << decoded.error().detail;
+    const auto& commands = std::get<HostCommands>(*decoded);
+    ASSERT_NE(commands.tree, nullptr);
+    EXPECT_EQ(commands.tree->nodeCount(), 3U);
+    EXPECT_TRUE(commands.tree->dashHSupported());
+    const std::vector<std::string> path{"app", "config"};
+    ASSERT_NE(commands.tree->find(path), nullptr);
+    const std::vector<std::string> app{"app"};
+    EXPECT_EQ(commands.tree->find(app)->help, "Application");
+    auto bare = decodeHost(encodeCommands(tree, false));
+    ASSERT_TRUE(bare.has_value());
+    EXPECT_EQ(std::get<HostCommands>(*bare).tree->find(app)->help, "");
+}
+
+QJsonObject commandsWithRoot(const QJsonArray& root) {
+    QJsonObject tree;
+    tree.insert(QStringLiteral("schema"), 2);
+    tree.insert(QStringLiteral("dashH"), true);
+    tree.insert(QStringLiteral("root"), root);
+    QJsonObject data;
+    data.insert(QStringLiteral("v"), 1);
+    data.insert(QStringLiteral("type"), QStringLiteral("commands"));
+    data.insert(QStringLiteral("tree"), tree);
+    QJsonObject at;
+    at.insert(QStringLiteral("event"), QStringLiteral("hwio"));
+    at.insert(QStringLiteral("data"), data);
+    return at;
+}
+
+QJsonObject entry(const QString& name, const QJsonValue& help = QStringLiteral("")) {
+    QJsonObject object;
+    object.insert(QStringLiteral("name"), name);
+    object.insert(QStringLiteral("help"), help);
+    return object;
+}
+
+TEST(Tunnel, RejectsMalformedOrOversizeCommandTrees) {
+    // A bad name, a help that is not text, children that are not a list.
+    EXPECT_FALSE(decodeHost(commandsWithRoot({entry(QStringLiteral("rm -rf"))})).has_value());
+    EXPECT_FALSE(decodeHost(commandsWithRoot({entry(QStringLiteral("a"), 5)})).has_value());
+    QJsonObject badChildren = entry(QStringLiteral("a"));
+    badChildren.insert(QStringLiteral("children"), QStringLiteral("x"));
+    EXPECT_FALSE(decodeHost(commandsWithRoot({badChildren})).has_value());
+    EXPECT_FALSE(
+        decodeHost(json(R"({"event":"hwio","data":{"v":1,"type":"commands"}})")).has_value());
+    // Deeper than 8 levels.
+    QJsonObject deep = entry(QStringLiteral("x"));
+    for (int i = 0; i < 9; ++i) {
+        QJsonObject parent = entry(QStringLiteral("x"));
+        parent.insert(QStringLiteral("children"), QJsonArray{deep});
+        deep = parent;
+    }
+    EXPECT_FALSE(decodeHost(commandsWithRoot({deep})).has_value());
+    // More than 4000 nodes.
+    QJsonArray many;
+    for (int i = 0; i < 4001; ++i) {
+        many.append(entry(QStringLiteral("c%1").arg(i)));
+    }
+    EXPECT_FALSE(decodeHost(commandsWithRoot(many)).has_value());
+    // More than 256 KiB.
+    QJsonArray big;
+    for (int i = 0; i < 1100; ++i) {
+        big.append(entry(QStringLiteral("c%1").arg(i), QString(256, QLatin1Char('h'))));
+    }
+    EXPECT_FALSE(decodeHost(commandsWithRoot(big)).has_value());
+    // Help texts are sanitised.
+    auto clean = decodeHost(
+        commandsWithRoot({entry(QStringLiteral("a"), QString::fromLatin1("x\x1b[31my\x07"))}));
+    ASSERT_TRUE(clean.has_value());
+    const std::vector<std::string> a{"a"};
+    const std::string help = std::get<HostCommands>(*clean).tree->find(a)->help;
+    EXPECT_EQ(help.find('\x1b'), std::string::npos) << help;
+    EXPECT_EQ(help.find('\x07'), std::string::npos) << help;
+}
+
+TEST(Tunnel, LearnRequests) {
+    auto decoded = decodeJoiner(encodeJoiner(Learn{.path = {"app", "config"}}));
+    ASSERT_TRUE(decoded.has_value()) << decoded.error().detail;
+    EXPECT_EQ(std::get<Learn>(*decoded).path, (std::vector<std::string>{"app", "config"}));
+    for (const char* text : {
+             R"({"hwio":{"v":1,"type":"learn"}})",
+             R"({"hwio":{"v":1,"type":"learn","path":[]}})",
+             R"({"hwio":{"v":1,"type":"learn","path":["a b"]}})",
+             R"({"hwio":{"v":1,"type":"learn","path":[1]}})",
+             R"({"hwio":{"v":1,"type":"learn","path":["a","a","a","a","a","a","a","a","a"]}})",
+         }) {
+        EXPECT_FALSE(decodeJoiner(json(text)).has_value()) << text;
     }
 }
 

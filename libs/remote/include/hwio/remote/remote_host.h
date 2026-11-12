@@ -39,6 +39,14 @@
 // (Deny after operationTimeout, remote.operation_denied). Allow → op-accepted, op-progress (at most
 // progressInterval apart), op-result (a new phase at once, ADR-0363).
 //
+// Autocomplete (ADR-0364): setCommandTree() gives the host's learned command tree (the GUI tab's
+// ConsoleViewModel, the CLI host's learner, on every change); after a join is allowed, and on
+// every change while allowed (coalesced), it is sent as tunnel `commands`, without help texts when
+// it would not fit the relay event size a joiner accepts (maxIncomingEventBytes). A tunnel `learn`
+// of an allowed participant for a known path, at most learnPerSecond and learnPerSession, emits
+// learnRequested() (the owner runs its silent `<path> -h` query and sets the grown tree);
+// others are dropped. Not audited one by one; their count is in the audit line at the end.
+//
 // Limits (ADR-0328, plan 0044 § Limits): idle (no console traffic in either direction) warns at
 // idleTimeout - idleWarningBefore (idleWarning()), keepSharing() restarts the idle time; idle or
 // maxLifetime end the session. ConsoleSession closed → the session ends.
@@ -48,6 +56,7 @@
 // its outcome. The texts are translated (the host's language), context "hwio::remote".
 
 #include "hwio/core/error.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/session_events.h"
 #include "hwio/remote/consent.h"
@@ -62,6 +71,7 @@
 #include <QObject>
 #include <QPointer>
 #include <QString>
+#include <QStringList>
 #include <QStringLiteral>
 #include <QTimer>
 #include <QUrl>
@@ -92,6 +102,10 @@ struct HostLimits {
     int remoteLinesPerSecond = 20;
     std::chrono::milliseconds progressInterval{250}; // op-progress at most 4/s
     std::chrono::milliseconds helloWait{5000};       // then the peer counts as web Terminal
+    // ADR-0364: tunnel `learn` requests of the participants.
+    int learnPerSecond = 2;
+    int learnPerSession = 200;
+    std::chrono::milliseconds commandsDelay{250}; // tree changes are sent at most this often
     TranscriptLimits transcript;
     RelayLimits relay;
 };
@@ -129,6 +143,8 @@ public:
     void end();
     // Keep sharing after the idle warning (any CLI input).
     void keepSharing();
+    // ADR-0364: the host's command tree (nullptr = none known).
+    void setCommandTree(std::shared_ptr<const device::CommandTree> tree);
 
     [[nodiscard]] HostState state() const noexcept { return m_state; }
     [[nodiscard]] const SessionCode& code() const noexcept { return m_code; }
@@ -159,6 +175,8 @@ signals:
     // The session ended: by end() (no error) or for `error`'s reason. Once.
     void ended();
     void warning(const hwio::Error& error);
+    // ADR-0364: a participant's autocomplete needs the subcommands of `path` (command words).
+    void learnRequested(const QStringList& path);
 
 private:
     struct PendingOperation {
@@ -176,6 +194,8 @@ private:
     void onRemoteLine(const QString& text);
     void onTunnel(const QJsonValue& payload);
     void onOperationRequest(const tunnel::OpRequest& request);
+    void onLearn(const tunnel::Learn& learn);
+    void sendCommands();
     void askOperation(PendingOperation pending);
     void denyOperation(const std::string& id, ErrorCode code, const QString& audit);
     void startOperation();
@@ -228,6 +248,12 @@ private:
     QTimer m_idleTimer{this};
     QTimer m_lifetimeTimer{this};
     QTimer m_helloTimer{this};
+    // ADR-0364
+    std::shared_ptr<const device::CommandTree> m_commandTree;
+    std::shared_ptr<const device::CommandTree> m_sentTree;
+    std::deque<std::chrono::steady_clock::time_point> m_recentLearn; // <= learnPerSecond
+    int m_learnCount = 0;
+    QTimer m_commandsTimer{this};
 };
 
 } // namespace hwio::remote

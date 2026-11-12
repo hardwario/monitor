@@ -4,6 +4,7 @@
 #include "fake_console.h"
 #include "fake_relay.h"
 #include "hwio/core/error.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/session_events.h"
 #include "hwio/remote/host_operations.h"
@@ -18,6 +19,7 @@
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QStringLiteral>
 
 #include <gtest/gtest.h>
@@ -25,10 +27,13 @@
 #include <algorithm>
 #include <chrono>
 #include <expected>
+#include <format>
+#include <initializer_list>
 #include <memory>
 #include <optional>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace hwio::remote {
 namespace {
@@ -587,6 +592,100 @@ TEST(RemoteHostOperations, LteUpdateRefusedWhenTheHostHasNone) {
               "remote.operation_unsupported_peer");
     EXPECT_TRUE(o.f.consent.operationQuestions.empty());
     EXPECT_TRUE(o.operations.started.empty());
+}
+
+// ADR-0364: the command tree goes to an allowed participant (not before), learn requests for known
+// commands pass rate-limited, others are dropped, and their count is audited at the end.
+std::shared_ptr<const device::CommandTree> treeOf(std::initializer_list<const char*> names) {
+    device::CommandTree tree;
+    std::vector<device::CommandEntry> entries;
+    for (const char* name : names) {
+        entries.push_back(device::CommandEntry{.name = name, .help = "help"});
+    }
+    EXPECT_TRUE(tree.setChildren({}, entries));
+    return std::make_shared<const device::CommandTree>(std::move(tree));
+}
+
+QList<tunnel::HostCommands> commandsOf(const RawParticipant& p) {
+    QList<tunnel::HostCommands> out;
+    for (const auto& r : p.named(QStringLiteral("at"))) {
+        if (auto m = tunnel::decodeHost(r.payload)) {
+            if (const auto* c = std::get_if<tunnel::HostCommands>(&*m)) {
+                out.append(*c);
+            }
+        }
+    }
+    return out;
+}
+
+TEST(RemoteHostCommands, TreeAfterAllowAndLearnLimits) {
+    FakeRelay relay;
+    HostOptions options = optionsFor(relay);
+    options.limits.learnPerSession = 3;
+    options.limits.commandsDelay = 10ms;
+    HostFixture f(options);
+    f.consent.joins = ScriptedConsent::Mode::Manual;
+    QStringList learned;
+    QObject::connect(&f.host, &RemoteHost::learnRequested,
+                     [&](const QStringList& path) { learned.append(path.join(u' ')); });
+    f.host.setCommandTree(treeOf({"app", "lte", "info"}));
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return static_cast<bool>(f.consent.pendingJoin); }));
+    const auto learn = [&](std::vector<std::string> path) {
+        monitor.emitEvent(QStringLiteral("write"),
+                          tunnel::encodeJoiner(tunnel::Learn{.path = std::move(path)}));
+    };
+    learn({"app"}); // before the approval: dropped
+    runFor(200ms);
+    EXPECT_TRUE(commandsOf(monitor).isEmpty());
+    std::exchange(f.consent.pendingJoin, {})(true);
+    ASSERT_TRUE(runUntil([&] { return commandsOf(monitor).size() == 1; }));
+    EXPECT_EQ(commandsOf(monitor).front().tree->nodeCount(), 3U);
+    EXPECT_TRUE(learned.isEmpty());
+
+    learn({"nope"}); // unknown command
+    learn({"app"});
+    learn({"lte"});
+    learn({"info"}); // the third within a second: dropped
+    ASSERT_TRUE(runUntil([&] { return learned.size() == 2; }));
+    runFor(1100ms);
+    learn({"info"});
+    learn({"app"}); // beyond the session limit (3)
+    ASSERT_TRUE(runUntil([&] { return learned.size() == 3; }));
+    runFor(200ms);
+    EXPECT_EQ(learned,
+              (QStringList{QStringLiteral("app"), QStringLiteral("lte"), QStringLiteral("info")}));
+    EXPECT_FALSE(f.console.hasEvent("command app")); // not audited as remote commands
+
+    // A grown tree is sent again; the same tree is not.
+    f.host.setCommandTree(treeOf({"app", "lte", "info", "time"}));
+    ASSERT_TRUE(runUntil([&] { return commandsOf(monitor).size() == 2; }));
+    f.host.end();
+    EXPECT_TRUE(f.console.hasEvent("Help of 3 command(s) read for support's autocomplete."));
+}
+
+// ADR-0364: a tree too large for a joiner's event limit (64 KiB) goes without its help texts.
+TEST(RemoteHostCommands, LargeTreeWithoutHelpTexts) {
+    FakeRelay relay;
+    HostFixture f(optionsFor(relay));
+    device::CommandTree tree;
+    std::vector<device::CommandEntry> entries;
+    for (int i = 0; i < 400; ++i) {
+        entries.push_back(device::CommandEntry{.name = std::format("command{}", i),
+                                               .help = std::string(250, 'h')});
+    }
+    ASSERT_TRUE(tree.setChildren({}, entries));
+    f.host.setCommandTree(std::make_shared<const device::CommandTree>(std::move(tree)));
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return commandsOf(monitor).size() == 1; }));
+    const auto received = commandsOf(monitor).front().tree;
+    EXPECT_EQ(received->nodeCount(), 400U);
+    const std::vector<std::string> first{"command0"};
+    EXPECT_EQ(received->find(first)->help, "");
 }
 
 } // namespace

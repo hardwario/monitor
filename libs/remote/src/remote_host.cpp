@@ -11,12 +11,14 @@
 #include "hwio/firmware/firmware_catalog.h"
 #include "hwio/remote/consent.h"
 #include "hwio/remote/host_operations.h"
+#include "hwio/remote/protocol.h"
 #include "hwio/remote/relay_client.h"
 #include "hwio/remote/session_code.h"
 #include "hwio/remote/transcript.h"
 #include "hwio/remote/tunnel.h"
 
 #include <QCoreApplication>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QList>
@@ -82,9 +84,10 @@ RemoteHost::RemoteHost(device::ConsoleSession& session, ConsentProvider& consent
       m_options(std::move(options)), m_code(m_options.code.value_or(SessionCode::generate())),
       m_transcript(m_options.limits.transcript) {
     for (QTimer* timer : {&m_collisionTimer, &m_joinTimer, &m_operationTimer, &m_idleWarningTimer,
-                          &m_idleTimer, &m_lifetimeTimer, &m_helloTimer}) {
+                          &m_idleTimer, &m_lifetimeTimer, &m_helloTimer, &m_commandsTimer}) {
         timer->setSingleShot(true);
     }
+    connect(&m_commandsTimer, &QTimer::timeout, this, &RemoteHost::sendCommands);
     connect(&m_collisionTimer, &QTimer::timeout, this, [this] {
         m_inCollisionWindow = false;
         if (m_state == HostState::Connecting && !m_everShared) {
@@ -311,6 +314,8 @@ void RemoteHost::answerJoin(bool allowed) {
                     .arg(toQString(m_peerApp)));
     sendSync();
     sendHello();
+    m_sentTree.reset();
+    sendCommands(); // ADR-0364
     if (m_peerApp.empty()) {
         m_helloTimer.start(m_options.limits.helloWait);
     }
@@ -437,6 +442,10 @@ void RemoteHost::onTunnel(const QJsonValue& payload) {
         }
         return;
     }
+    if (const auto* learn = std::get_if<tunnel::Learn>(&*message)) {
+        onLearn(*learn);
+        return;
+    }
     if (const auto* hello = std::get_if<tunnel::JoinerHello>(&*message)) {
         const std::string app = "HARDWARIO Monitor " + hello->version;
         if (app != m_peerApp) {
@@ -449,6 +458,62 @@ void RemoteHost::onTunnel(const QJsonValue& payload) {
         return;
     }
     onOperationRequest(std::get<tunnel::OpRequest>(*message));
+}
+
+void RemoteHost::setCommandTree(std::shared_ptr<const device::CommandTree> tree) {
+    m_commandTree = std::move(tree);
+    if (m_allowed && !m_joinPending && m_helloSent && !m_commandsTimer.isActive()) {
+        m_commandsTimer.start(m_options.limits.commandsDelay);
+    }
+}
+
+void RemoteHost::sendCommands() {
+    if (!m_relay || m_state == HostState::Ended || !m_allowed || m_joinPending || !m_commandTree ||
+        m_commandTree->empty() || m_commandTree == m_sentTree) {
+        return;
+    }
+    m_sentTree = m_commandTree;
+    // A Monitor joiner drops larger events: the tree without its help texts then.
+    constexpr std::size_t eventOverhead = 1024;
+    for (const bool withHelp : {true, false}) {
+        const QJsonObject at = tunnel::encodeCommands(*m_commandTree, withHelp);
+        if (std::cmp_less_equal(QJsonDocument(at).toJson(QJsonDocument::Compact).size() +
+                                    static_cast<qsizetype>(eventOverhead),
+                                maxIncomingEventBytes)) {
+            m_relay->emitEvent(QStringLiteral("at"), at, false);
+            return;
+        }
+    }
+    qCWarning(log::lcRemote) << "Command tree not sent: too large for the relay"
+                             << m_commandTree->nodeCount();
+}
+
+void RemoteHost::onLearn(const tunnel::Learn& learn) {
+    // ADR-0364: a known command only, rate-limited per second and per session.
+    if (!m_commandTree || m_commandTree->find(learn.path) == nullptr) {
+        qCInfo(log::lcRemote) << "Learn request for an unknown command dropped";
+        return;
+    }
+    if (m_learnCount >= m_options.limits.learnPerSession) {
+        qCInfo(log::lcRemote) << "Learn request dropped: the session limit is reached";
+        return;
+    }
+    const auto now = std::chrono::steady_clock::now();
+    while (!m_recentLearn.empty() && now - m_recentLearn.front() >= std::chrono::seconds(1)) {
+        m_recentLearn.pop_front();
+    }
+    if (std::cmp_greater_equal(m_recentLearn.size(), m_options.limits.learnPerSecond)) {
+        qCInfo(log::lcRemote) << "Learn request dropped: more than"
+                              << m_options.limits.learnPerSecond << "per second";
+        return;
+    }
+    m_recentLearn.push_back(now);
+    ++m_learnCount;
+    QStringList path;
+    for (const std::string& word : learn.path) {
+        path.append(toQString(word));
+    }
+    emit learnRequested(path);
 }
 
 void RemoteHost::denyOperation(const std::string& id, ErrorCode code, const QString& auditText) {
@@ -717,7 +782,7 @@ void RemoteHost::finish(std::optional<Error> error, bool notify) {
     m_state = HostState::Ended;
     m_endError = std::move(error);
     for (QTimer* timer : {&m_collisionTimer, &m_joinTimer, &m_operationTimer, &m_idleWarningTimer,
-                          &m_idleTimer, &m_lifetimeTimer, &m_helloTimer}) {
+                          &m_idleTimer, &m_lifetimeTimer, &m_helloTimer, &m_commandsTimer}) {
         timer->stop();
     }
     ++m_joinToken;
@@ -739,6 +804,12 @@ void RemoteHost::finish(std::optional<Error> error, bool notify) {
                                                         : std::string("cancelled")});
         }
         m_relay->stop();
+    }
+    if (m_learnCount > 0) {
+        audit(
+            trRemoteN(QT_TRANSLATE_N_NOOP("hwio::remote",
+                                          "Help of %n command(s) read for support's autocomplete."),
+                      m_learnCount));
     }
     if (m_everShared && !m_session.isNull()) {
         const QString reason = m_endError ? toQString(m_endError->message) : QString();
