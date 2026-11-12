@@ -1285,6 +1285,7 @@ TEST_F(FlashTest, RemoteLteUpdateQuestionsGoToSupport) {
         ASSERT_TRUE(waitFor([&] { return app().wizard()->isOpen(); }));
         auto* wizard = qobject_cast<hwio::gui::LteUpdateWizard*>(app().wizard()->wizard());
         ASSERT_NE(wizard, nullptr);
+        const QPointer<hwio::gui::LteUpdateWizard> guard(wizard);
         ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Confirm));
         ASSERT_TRUE(waitFor([&] { return !questions.empty(); }));
         EXPECT_EQ(questions.front(), hwio::remote::tunnel::OpQuestionKind::Continue);
@@ -1301,9 +1302,12 @@ TEST_F(FlashTest, RemoteLteUpdateQuestionsGoToSupport) {
             const hwio::Status cancelled = result.value_or(hwio::Status{});
             ASSERT_FALSE(cancelled.has_value());
             EXPECT_EQ(cancelled.error().code, ErrorCode::Cancelled);
-            EXPECT_FALSE(wizard->procedure() != nullptr &&
-                         wizard->procedure()->applicationErased());
-            app().wizard()->cancel(true);
+            // The cancelled guide may already have closed (and deleted) the wizard.
+            EXPECT_FALSE(!guard.isNull() && guard->procedure() != nullptr &&
+                         guard->procedure()->applicationErased());
+            if (app().wizard()->isOpen()) {
+                app().wizard()->cancel(true);
+            }
             ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen() && !tab().isBusy(); }));
             continue;
         }

@@ -1,6 +1,6 @@
 # 0046 — rc.4 fixes: LTE update confirmation, dark-theme button contrast, remote session fixes
 
-- **Status:** In progress (approved 2026-11-12, Matej Strnad)
+- **Status:** Done (approved 2026-11-12, Matej Strnad)
 - **Milestone:** 2.0.0-rc.4
 - **Author:** Matej Strnad, Claude
 - **Related ADRs:** ADR-0366 (confirm before the erase), ADR-0367 (filled buttons in the dark theme),
@@ -116,7 +116,7 @@ Without a terminal the guided flow keeps its existing behaviour for missing term
       names; Qt Quick tests
 - [x] A5 Hexdump continuation lines in support's console are Log/Hexdump (ADR-0171); unit test + hidden by default
 - [x] C1 Translations (0 unfinished), docs (LTE update pages ×5, remote-support ×5, CLI), screenshots, release notes rc.4
-- [ ] C2 Verification: full ctest, ASan/TSan for changed tests, clang-tidy, qmllint, clang-format, check_translations
+- [x] C2 Verification: full ctest, ASan/TSan for changed tests, clang-tidy, qmllint, clang-format, check_translations
 
 ## Tests and verification
 
@@ -139,3 +139,18 @@ To be confirmed by the user:
 - A5: a '#'-prefixed hexdump continuation (CHESTER over Bluetooth on the host) is classified too, as
   LineAssembler's '#' rule does locally. The CLI joiner prints through the same ConsoleView as
   `chester app console`: hexdump lines are muted log lines there (the CLI never hides them), as locally.
+- The `confirm` phase text on the joiner side is neutral ("waiting for the confirmation before the erase"),
+  since support or the customer may confirm.
+- The result time is the local time as `HH:mm` (24 h, as in ADR-0369's example), not the locale's short format.
+  The CLI joiner's failure keeps its error code; its message is prefixed with the operation name and time.
+- Under TSan `RemoteCli.HostLteUpdateSupport*` and `FlashTest.RemoteLteUpdateQuestionsGoToSupport` are left out
+  like the other designated-firmware download tests (Qt's HTTP thread is uninstrumented).
+
+## Verification (2026-11-12)
+
+linux-debug: full ctest 1835/1835 passed (HIL skipped), the changed tests again after the clang-tidy fixes;
+linux-asan and linux-tsan: the changed remote, CLI, wizard and Qt Quick tests pass; `linux-tidy` zero findings;
+`all_qmllint` clean; clang-format-21, `tools/check-includes.sh`, `tools/check-lfs.sh` pass; `check_translations`:
+0 unfinished in every language. Not done: the manual checks on a real CHESTER (the wizard up to Ready to update the
+LTE MCU and Cancel, a remote LTE update with support answering, the dark-theme buttons by eye).
+
