@@ -51,6 +51,7 @@
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
+#include <QTime>
 #include <QTimer>
 #include <QUrl>
 #include <QtContainerFwd>
@@ -773,8 +774,13 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
     if (!outcome) { // runUntil() returns success only once the outcome is set
         return std::unexpected(makeError(ErrorCode::RemoteHostEnded));
     }
+    // ADR-0369: the result names the operation and the local time, as support's Flash card.
+    const QString time = QTime::currentTime().toString(QStringLiteral("HH:mm"));
     if (!outcome->first) {
-        return std::unexpected(outcome->second);
+        Error error = outcome->second;
+        error.message =
+            toStdString(remote::operationFailedText(kind, *target, time, toQString(error.message)));
+        return std::unexpected(std::move(error));
     }
     QJsonObject data;
     data.insert(QStringLiteral("operation"), toQString(tunnel::kindId(kind)));
@@ -785,14 +791,11 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
         data.insert(QStringLiteral("firmwareId"), toQString(options.flash));
     }
     data.insert(QStringLiteral("reportedBy"), QStringLiteral("host"));
-    return CommandResult{.data = data,
-                         .humanText =
-                             kind == tunnel::OpKind::LteUpdate
-                                 ? std::string("The LTE firmware was updated and the application "
-                                               "written back (reported by the customer's Monitor).")
-                                 : std::format("{} done (reported by the customer's Monitor).",
-                                               tunnel::kindId(kind)),
-                         .streamed = false};
+    return CommandResult{
+        .data = data,
+        .humanText = toStdString(remote::operationResultText(
+            kind, kind == tunnel::OpKind::LteUpdate ? tunnel::OpTarget::Lte : *target, time)),
+        .streamed = false};
 }
 
 Result<CommandResult> join(const Context& context, const JoinCommandOptions& options) {

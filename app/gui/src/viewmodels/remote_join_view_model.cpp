@@ -15,6 +15,7 @@
 #include <QObject>
 #include <QString>
 #include <QStringLiteral>
+#include <QTime>
 #include <QUrl>
 #include <QVariantMap>
 #include <QtContainerFwd>
@@ -30,6 +31,42 @@ namespace tunnel = remote::tunnel;
 RemoteJoinViewModel::RemoteJoinViewModel(DeviceTabViewModel* tab) : QObject(tab), m_tab(tab) {
     connect(m_tab, &DeviceTabViewModel::sessionChanged, this, &RemoteJoinViewModel::attach);
     connect(m_tab, &DeviceTabViewModel::transportChanged, this, &RemoteJoinViewModel::changed);
+    // ADR-0369: a success does not linger once support leaves the Flash page.
+    connect(m_tab, &DeviceTabViewModel::currentPageChanged, this, [this] {
+        if (m_tab->currentPage() != QStringLiteral("flash") && !m_failed && !operationPending()) {
+            clearResult();
+        }
+    });
+}
+
+void RemoteJoinViewModel::onFinished(bool ok, const Error& error) {
+    // ADR-0369: named, with the local time, also in the console (kept in its log and file).
+    const QString time = QTime::currentTime().toString(QStringLiteral("HH:mm"));
+    m_failed = !ok;
+    m_progress = -1.0;
+    m_status = ok ? remote::operationResultText(m_kind, m_target, time)
+                  : remote::operationFailedText(m_kind, m_target, time, toQString(error.message));
+    m_tab->addStatusLine(m_status);
+    qCInfo(lcGui) << "Remote operation result:"
+                  << (ok ? QStringLiteral("ok") : toQString(idOf(error.code)));
+    operationChanged(); // signal
+}
+
+void RemoteJoinViewModel::clearResult() {
+    if (m_status.isEmpty() && !m_failed) {
+        return;
+    }
+    m_status.clear();
+    m_failed = false;
+    operationChanged(); // signal
+}
+
+bool RemoteJoinViewModel::resultDismissable() const { return m_failed && !operationPending(); }
+
+void RemoteJoinViewModel::dismissResult() {
+    if (resultDismissable()) {
+        clearResult();
+    }
 }
 
 RemoteJoinViewModel::~RemoteJoinViewModel() = default;
@@ -75,13 +112,7 @@ void RemoteJoinViewModel::attach() {
                     operationChanged(); // signal
                 });
         connect(m_client.get(), &remote::RemoteOperationClient::finished, this,
-                [this](bool ok, const Error& error) {
-                    m_failed = !ok;
-                    m_progress = -1.0;
-                    m_status = ok ? tr("Done (reported by the customer's Monitor).")
-                                  : toQString(error.message);
-                    operationChanged(); // signal
-                });
+                &RemoteJoinViewModel::onFinished);
     }
     changed();          // signal
     operationChanged(); // signal
@@ -200,6 +231,8 @@ void RemoteJoinViewModel::requestOperation(const QString& kind, const QString& t
         }
         id = parsed->value();
     }
+    m_kind = *opKind;
+    m_target = *opTarget;
     auto requested = m_client->request(*opKind, *opTarget, id);
     m_failed = !requested;
     m_progress = -1.0;

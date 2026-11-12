@@ -79,5 +79,13 @@ public:
 // line): "The application on the customer's CHESTER will be erased. … Continue?", "The
 // application could not be copied. Continue without a copy?"
 [[nodiscard]] QString operationQuestionKindText(tunnel::OpQuestionKind kind);
+// ADR-0369: support's result of a remote operation, named, with the local time `time` ("14:02"):
+// "Application firmware flashed on the customer's device (14:02).", "Customer's device reset
+// (14:02).", "LTE firmware updated, application written back (14:02).", ... A failure keeps the
+// error message: "Resetting the customer's device failed (14:02): <message>".
+[[nodiscard]] QString operationResultText(tunnel::OpKind kind, tunnel::OpTarget target,
+                                          const QString& time);
+[[nodiscard]] QString operationFailedText(tunnel::OpKind kind, tunnel::OpTarget target,
+                                          const QString& time, const QString& message);
 
 } // namespace hwio::remote

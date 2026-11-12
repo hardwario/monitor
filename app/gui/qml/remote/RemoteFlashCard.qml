@@ -2,7 +2,9 @@
 // by ID only, and Erase / Recover / Reset of the application or LTE core; with the LTE core
 // selected, the guided LTE update with the customer's recommended firmware (ADR-0363) instead of
 // the firmware ID. Every request waits for
-// the customer's confirmation; progress and the result are reported by the customer's Monitor.
+// the customer's confirmation; progress and the result are reported by the customer's Monitor
+// (ADR-0369: the result names the operation and the time). ADR-0368: support answers the LTE
+// update's questions here.
 // With a web Terminal host only the explanation is shown. Presentation only: RemoteJoinViewModel.
 pragma ComponentBehavior: Bound
 
@@ -198,13 +200,32 @@ ColumnLayout {
         }
     }
 
-    Label {
-        objectName: "remoteOperationStatus"
-        textFormat: Text.PlainText
+    // ADR-0369: the result names the operation and the time; an error stays until × (a success
+    // clears when support leaves the page or starts another operation).
+    RowLayout {
         Layout.fillWidth: true
-        visible: text !== ""
-        text: card.join ? card.join.operationStatus : ""
-        color: card.join && card.join.operationFailed ? Theme.error : Theme.text
-        wrapMode: Text.Wrap
+        visible: status.text !== ""
+        spacing: Theme.spacingS
+
+        Label {
+            id: status
+
+            objectName: "remoteOperationStatus"
+            textFormat: Text.PlainText
+            Layout.fillWidth: true
+            text: card.join ? card.join.operationStatus : ""
+            color: card.join && card.join.operationFailed ? Theme.error : Theme.text
+            wrapMode: Text.Wrap
+        }
+
+        HToolButton {
+            objectName: "remoteResultDismiss"
+            Layout.alignment: Qt.AlignTop
+            visible: card.join !== null && card.join.resultDismissable
+            iconName: "close"
+            text: qsTr("Dismiss")
+            display: AbstractButton.IconOnly
+            onClicked: card.join.dismissResult()
+        }
     }
 }

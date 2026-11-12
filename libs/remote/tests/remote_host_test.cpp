@@ -644,7 +644,7 @@ TEST(RemoteHostOperations, LteUpdateQuestionsGoToSupport) {
                      [&](bool yes) { answers.push_back(yes); });
     ASSERT_TRUE(runUntil([&] { return answers.size() == 2; }, 10s));
     EXPECT_FALSE(answers.back());
-    EXPECT_TRUE(o.f.console.hasEvent("Support did not answer within 60 s"));
+    EXPECT_TRUE(o.f.console.hasEvent("Support did not answer within 1 s: cancelled."));
 
     // The session ends with a question open: no.
     o.operations.ask(tunnel::OpQuestionKind::Continue, [&](bool yes) { answers.push_back(yes); });

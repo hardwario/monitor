@@ -265,6 +265,59 @@ TestCase {
         tryVerify(() => !tab().remoteJoin.operationPending, 5000);
     }
 
+    // ADR-0369: the result names the operation and the local time and is also a console line; a
+    // success clears when support leaves the Flash page, an error stays until ×.
+    function test_joinerSeesTheOperationResult() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(true);
+        tryVerify(() => tab().remoteJoin.operationsAvailable, 10000);
+        AppViewModel.showPage("flash");
+        tryVerify(() => shown("remoteFlashCard").length === 1, 5000);
+        const join = tab().remoteJoin;
+
+        const results = [
+            ["reset", "app", /^Customer's device reset \(\d\d:\d\d\)\.$/],
+            ["erase", "lte", /^LTE MCU erased on the customer's device \(\d\d:\d\d\)\.$/],
+            ["lteUpdate", "lte", /^LTE firmware updated, application written back \(\d\d:\d\d\)\.$/],
+        ];
+        for (let i = 0; i < results.length; ++i) {
+            join.requestOperation(results[i][0], results[i][1], "");
+            tryVerify(() => testSupport.remoteRequestedKind() === results[i][0], 10000);
+            testSupport.remoteHostAccept();
+            testSupport.remoteHostResult("");
+            tryVerify(() => !join.operationPending, 5000);
+            verify(results[i][2].test(join.operationStatus), join.operationStatus);
+            verify(!join.operationFailed);
+            verify(!join.resultDismissable);
+            verify(testSupport.consoleHasLine(AppViewModel.currentTab, join.operationStatus));
+        }
+        compare(one("remoteOperationStatus").text, join.operationStatus);
+        // A success clears when support leaves the Flash page.
+        AppViewModel.showPage("console");
+        tryVerify(() => join.operationStatus === "", 5000);
+        verify(testSupport.consoleHasLine(AppViewModel.currentTab, "LTE firmware updated, application written back"));
+
+        // An error stays (also on other pages) until ×.
+        AppViewModel.showPage("flash");
+        join.requestOperation("reset", "app", "");
+        tryVerify(() => testSupport.remoteRequestedKind() === "reset", 10000);
+        testSupport.remoteHostAccept();
+        testSupport.remoteHostResult("target.connect_failed");
+        tryVerify(() => join.operationFailed, 5000);
+        verify(/^Resetting the customer's device failed \(\d\d:\d\d\): /.test(join.operationStatus), join.operationStatus);
+        verify(testSupport.consoleHasLine(AppViewModel.currentTab, "Resetting the customer's device failed"));
+        AppViewModel.showPage("console");
+        AppViewModel.showPage("flash");
+        verify(join.operationFailed);
+        tryVerify(() => shown("remoteResultDismiss").length === 1, 5000);
+        one("remoteResultDismiss").clicked();
+        tryVerify(() => join.operationStatus === "", 5000);
+        verify(shown("remoteOperationStatus").length === 0);
+    }
+
     // ADR-0364: a remote tab completes from the Monitor host's command tree and asks the host for
     // a command's subcommands (tunnel `learn`), without any query of its own.
     function test_remoteTabCompletesFromTheHostsCommands() {

@@ -4,9 +4,15 @@
 // (plan/features/0044 § Joiner, ADR-0325, ADR-0336): the banner state (waiting for the customer,
 // joined, ended, idle) and the remote operations of the Flash page (catalog firmware ID only,
 // erase, recover, reset; each confirmed by the customer, results as reported by the host). Also the
-// validation of the Join dialog's input (static helpers used by AppViewModel).
+// validation of the Join dialog's input (static helpers used by AppViewModel). ADR-0369: a result
+// names the operation and the local time and is also a status line in the tab's console; a success
+// clears when support leaves the Flash page or starts another operation, an error stays until
+// dismissResult() or another operation.
 //
 // Ownership: child of its DeviceTabViewModel (Qt parent). GUI thread only.
+
+#include "hwio/core/error.h"
+#include "hwio/remote/tunnel.h"
 
 #include <QObject>
 #include <QString>
@@ -46,6 +52,8 @@ class RemoteJoinViewModel : public QObject {
     // ADR-0368: the customer's Monitor asks support (the LTE update's Continue, Continue without a
     // copy); "" when no question is open. answerQuestion() answers it.
     Q_PROPERTY(QString operationQuestion READ operationQuestion NOTIFY operationChanged)
+    // ADR-0369: an error result that support dismisses with × (dismissResult()).
+    Q_PROPERTY(bool resultDismissable READ resultDismissable NOTIFY operationChanged)
 
 public:
     explicit RemoteJoinViewModel(DeviceTabViewModel* tab);
@@ -67,6 +75,9 @@ public:
     [[nodiscard]] double operationProgress() const { return m_progress; }
     [[nodiscard]] QString operationQuestion() const;
     Q_INVOKABLE void answerQuestion(bool yes);
+    [[nodiscard]] bool resultDismissable() const;
+    // ADR-0369: clears an error result (×).
+    Q_INVOKABLE void dismissResult();
 
     // `kind`: "flash" (with `firmwareId`), "erase", "recover", "reset", "lteUpdate" (ADR-0363,
     // `target` ignored); `target` "app" | "lte".
@@ -84,6 +95,8 @@ signals:
 
 private:
     void attach();
+    void onFinished(bool ok, const Error& error);
+    void clearResult();
 
     DeviceTabViewModel* m_tab; // the parent
     std::unique_ptr<remote::RemoteOperationClient> m_client;
@@ -91,6 +104,9 @@ private:
     QString m_status;
     bool m_failed = false;
     double m_progress = -1.0;
+    // ADR-0369: the operation of the pending request (its result names it).
+    remote::tunnel::OpKind m_kind = remote::tunnel::OpKind::Reset;
+    remote::tunnel::OpTarget m_target = remote::tunnel::OpTarget::App;
 };
 
 } // namespace hwio::gui

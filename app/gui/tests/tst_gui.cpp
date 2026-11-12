@@ -137,6 +137,21 @@ public:
         return tab != nullptr ? static_cast<double>(tab->consoleLog()->lastSeq()) : 0;
     }
 
+    // ADR-0369: whether a line of a tab's console log (shell channel) contains `part`.
+    Q_INVOKABLE [[nodiscard]] bool consoleHasLine(int index, const QString& part) const {
+        hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);
+        if (tab == nullptr) {
+            return false;
+        }
+        const std::string needle = part.toStdString();
+        for (const auto& line : tab->consoleLog()->linesSince(0)) {
+            if (line.text.find(needle) != std::string::npos) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     [[nodiscard]] static QString screenshotDir() {
         return qEnvironmentVariable("HWIO_SCREENSHOT_DIR");
     }

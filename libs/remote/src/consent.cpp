@@ -117,6 +117,89 @@ QString operationQuestionKindText(tunnel::OpQuestionKind kind) {
     return {};
 }
 
+QString operationResultText(tunnel::OpKind kind, tunnel::OpTarget target, const QString& time) {
+    const bool app = target == tunnel::OpTarget::App;
+    const char* text = nullptr;
+    switch (kind) {
+    case tunnel::OpKind::Flash:
+        text =
+            app ? QT_TRANSLATE_NOOP("hwio::remote",
+                                    "Application firmware flashed on the customer's device (%1).")
+                : QT_TRANSLATE_NOOP("hwio::remote",
+                                    "LTE MCU firmware flashed on the customer's device (%1).");
+        break;
+    case tunnel::OpKind::Erase:
+        text = app ? QT_TRANSLATE_NOOP("hwio::remote",
+                                       "Application MCU erased on the customer's device (%1).")
+                   : QT_TRANSLATE_NOOP("hwio::remote",
+                                       "LTE MCU erased on the customer's device (%1).");
+        break;
+    case tunnel::OpKind::Recover:
+        text = app ? QT_TRANSLATE_NOOP("hwio::remote",
+                                       "Application MCU recovered on the customer's device (%1).")
+                   : QT_TRANSLATE_NOOP("hwio::remote",
+                                       "LTE MCU recovered on the customer's device (%1).");
+        break;
+    case tunnel::OpKind::Reset:
+        text =
+            app ? QT_TRANSLATE_NOOP("hwio::remote", "Customer's device reset (%1).")
+                : QT_TRANSLATE_NOOP("hwio::remote", "LTE MCU of the customer's device reset (%1).");
+        break;
+    case tunnel::OpKind::LteUpdate:
+        text = QT_TRANSLATE_NOOP("hwio::remote",
+                                 "LTE firmware updated, application written back (%1).");
+        break;
+    }
+    return text == nullptr ? QString()
+                           : QCoreApplication::translate("hwio::remote", text).arg(time);
+}
+
+QString operationFailedText(tunnel::OpKind kind, tunnel::OpTarget target, const QString& time,
+                            const QString& message) {
+    const bool app = target == tunnel::OpTarget::App;
+    const char* text = nullptr;
+    switch (kind) {
+    case tunnel::OpKind::Flash:
+        text =
+            app ? QT_TRANSLATE_NOOP(
+                      "hwio::remote",
+                      "Flashing the application firmware on the customer's device failed (%1): %2")
+                : QT_TRANSLATE_NOOP(
+                      "hwio::remote",
+                      "Flashing the LTE MCU firmware on the customer's device failed (%1): %2");
+        break;
+    case tunnel::OpKind::Erase:
+        text =
+            app ? QT_TRANSLATE_NOOP(
+                      "hwio::remote",
+                      "Erasing the application MCU on the customer's device failed (%1): %2")
+                : QT_TRANSLATE_NOOP("hwio::remote",
+                                    "Erasing the LTE MCU on the customer's device failed (%1): %2");
+        break;
+    case tunnel::OpKind::Recover:
+        text = app ? QT_TRANSLATE_NOOP(
+                         "hwio::remote",
+                         "Recovering the application MCU on the customer's device failed (%1): %2")
+                   : QT_TRANSLATE_NOOP(
+                         "hwio::remote",
+                         "Recovering the LTE MCU on the customer's device failed (%1): %2");
+        break;
+    case tunnel::OpKind::Reset:
+        text = app ? QT_TRANSLATE_NOOP("hwio::remote",
+                                       "Resetting the customer's device failed (%1): %2")
+                   : QT_TRANSLATE_NOOP(
+                         "hwio::remote",
+                         "Resetting the LTE MCU of the customer's device failed (%1): %2");
+        break;
+    case tunnel::OpKind::LteUpdate:
+        text = QT_TRANSLATE_NOOP(
+            "hwio::remote", "The LTE firmware update on the customer's device failed (%1): %2");
+        break;
+    }
+    return text == nullptr ? message
+                           : QCoreApplication::translate("hwio::remote", text).arg(time, message);
+}
+
 QString operationQuestionText(const OperationQuestion& question) {
     switch (question.kind) {
     case tunnel::OpKind::Flash:
