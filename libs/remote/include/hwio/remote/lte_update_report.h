@@ -63,6 +63,9 @@ public:
     [[nodiscard]] bool supportDecides() const noexcept { return static_cast<bool>(m_ask); }
     // A question to support is open (asked, its answer not applied yet).
     [[nodiscard]] bool supportQuestionOpen() const noexcept { return m_questionOpen; }
+    // Support answered No: the update was cancelled before anything changed (the customer's side
+    // says cancelledBySupportText()).
+    [[nodiscard]] bool cancelledBySupport() const noexcept { return m_cancelledBySupport; }
     [[nodiscard]] bool done() const noexcept { return m_done; }
     // The LTE MCU got its new firmware (the procedure passed its LTE update).
     [[nodiscard]] bool lteUpdated() const noexcept { return m_lteUpdated; }
@@ -90,6 +93,7 @@ private:
     bool m_askedContinue = false;
     bool m_askedCopy = false;
     bool m_questionOpen = false;
+    bool m_cancelledBySupport = false;
 };
 
 } // namespace hwio::remote

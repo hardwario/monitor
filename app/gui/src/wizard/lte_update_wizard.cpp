@@ -9,6 +9,7 @@
 #include "hwio/device/operation.h"
 #include "hwio/device/profile.h"
 #include "hwio/firmware/firmware_image.h"
+#include "hwio/remote/consent.h"
 #include "hwio/remote/lte_update_report.h"
 #include "pages/firmware_services.h"
 #include "viewmodels/app_view_model.h"
@@ -494,6 +495,10 @@ void LteUpdateWizard::onProcedureFinished() {
         releaseTab();
     }
     if (step == Step::Cancelled) {
+        // ADR-0368: support answered No; the customer is told why the guide closed.
+        if (!m_remote.isNull() && m_remote->cancelledBySupport() && !m_tab.isNull()) {
+            m_tab->showToast(remote::cancelledBySupportText());
+        }
         emit finished(false); // the dialog closes (also after Cancel and close)
         return;
     }

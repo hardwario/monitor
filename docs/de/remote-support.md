@@ -35,7 +35,7 @@ Andere Sprachen: [English](../en/remote-support.md) · [Čeština](../cs/remote-
    verbindet, und der Support sieht jeden Schritt und das Ergebnis.
    Bevor etwas geändert wird, bestätigt der HARDWARIO Support das Update; Sie sehen nur, was geschieht, und folgen
    den Anweisungen zum Umstecken (es gibt nichts zu klicken). Kann keine Kopie der Anwendung erstellt werden,
-   entscheidet der Support, ob ohne sie fortgefahren wird. Die Kopie wird am Ende immer zurückgeschrieben. Antwortet
+   entscheidet der Support, ob ohne sie fortgefahren wird. Die Kopie wird am Ende immer zurückgeschrieben. Antwortet der Support mit Nein, sehen Sie *Vom Support abgebrochen. Es wurde nichts geändert.* Antwortet
    der Support nicht innerhalb von 60 Sekunden, wird das Update abgebrochen, bevor etwas geändert wird.
 8. Klicken Sie auf **Freigabe beenden**, wenn Sie fertig sind.
 
@@ -90,7 +90,7 @@ Hilfeabfragen erscheinen nicht in Ihrer Konsole; die Konsolendatei hält fest, w
    Bevor die Anwendung gelöscht wird, fragt die Karte Sie: *Die Anwendung auf dem CHESTER des Kunden wird gelöscht. …
    Fortfahren?* (**Fortfahren** · **Abbrechen**); kann keine Kopie der Anwendung erstellt werden, fragt sie *Die
    Anwendung konnte nicht kopiert werden. Ohne Kopie fortfahren?*. Nein, oder keine Antwort innerhalb von 60 Sekunden,
-   bricht das Update ab, bevor etwas geändert wird. Die Kopie wird automatisch zurückgeschrieben. Ein Kunde mit einem
+   bricht das Update ab, bevor etwas geändert wird. Die Kopie wird automatisch zurückgeschrieben. Nach Ihrem Nein zeigt die Karte *LTE-Firmware-Update von Ihnen abgebrochen (14:02). Es wurde nichts geändert.* Ein Kunde mit einem
    älteren HARDWARIO Monitor beantwortet diese Fragen selbst.
 
 Wenn der Kunde die Freigabe beendet, kann HARDWARIO Monitor das nicht immer erkennen: Der Server kündigt es nicht an.

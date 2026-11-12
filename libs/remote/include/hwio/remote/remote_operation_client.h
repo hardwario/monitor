@@ -59,6 +59,9 @@ public:
     }
     // Answers the open question. Errors: usage.invalid_argument (none open), those of sending.
     [[nodiscard]] Status answer(bool yes);
+    // ADR-0368: this joiner answered No to a question of the current (or just finished) request;
+    // its cancelled result is then "cancelled by you". Reset by request().
+    [[nodiscard]] bool declined() const noexcept { return m_declined; }
     [[nodiscard]] bool isAccepted() const noexcept { return m_accepted; }
     // Forgets the pending operation (no more signals for it).
     void abandon();
@@ -84,6 +87,7 @@ private:
     std::optional<std::string> m_pending;
     bool m_accepted = false;
     bool m_answers = false;
+    bool m_declined = false;
     std::optional<tunnel::OpQuestion> m_question;
     QTimer m_timer{this};
 };

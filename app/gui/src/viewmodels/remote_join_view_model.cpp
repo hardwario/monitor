@@ -43,10 +43,17 @@ RemoteJoinViewModel::RemoteJoinViewModel(DeviceTabViewModel* tab) : QObject(tab)
 void RemoteJoinViewModel::onFinished(bool ok, const Error& error) {
     // ADR-0369: named, with the local time, also in the console (kept in its log and file).
     const QString time = QTime::currentTime().toString(QStringLiteral("HH:mm"));
-    m_failed = !ok;
+    // Support's own No (ADR-0368): a cancellation, not an error.
+    const bool declined = !ok && error.code == ErrorCode::Cancelled && m_client->declined();
+    m_failed = !ok && !declined;
     m_progress = -1.0;
-    m_status = ok ? remote::operationResultText(m_kind, m_target, time)
-                  : remote::operationFailedText(m_kind, m_target, time, toQString(error.message));
+    if (ok) {
+        m_status = remote::operationResultText(m_kind, m_target, time);
+    } else if (declined) {
+        m_status = remote::lteUpdateDeclinedText(time);
+    } else {
+        m_status = remote::operationFailedText(m_kind, m_target, time, toQString(error.message));
+    }
     m_tab->addStatusLine(m_status);
     qCInfo(lcGui) << "Remote operation result:"
                   << (ok ? QStringLiteral("ok") : toQString(idOf(error.code)));

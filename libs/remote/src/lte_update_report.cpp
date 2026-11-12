@@ -145,6 +145,7 @@ void LteUpdateReporter::askSupport(Step step) {
                 return;
             }
             if (!yes) {
+                self->m_cancelledBySupport = true;
                 (void)procedure->cancel(); // nothing was changed yet
             } else if (step == Step::Confirm) {
                 procedure->confirm();

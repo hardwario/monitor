@@ -434,9 +434,18 @@ TEST_F(RemoteCli, JoinAnswersTheLteUpdateQuestions) {
                                              hwio::ErrorCode::Cancelled, "cancelled"))));
         ASSERT_TRUE(child.finish()) << child.err();
         EXPECT_EQ(child.exitCode(), c.expected ? 0 : 130) << child.err();
+        // Confirmed 2026-11-12: support's own No is "cancelled by you"; no answer stays an error.
+        const bool declined = c.input != nullptr && !c.expected;
+        EXPECT_EQ(child.out().find("LTE firmware update cancelled by you (") != std::string::npos,
+                  declined)
+            << child.out();
+        if (declined) {
+            EXPECT_NE(child.out().find("). Nothing was changed."), std::string::npos)
+                << child.out();
+        }
     }
     EXPECT_TRUE(host.console.hasEvent("Support answered: continue."));
-    EXPECT_TRUE(host.console.hasEvent("Support answered: cancel."));
+    EXPECT_TRUE(host.console.hasEvent("Cancelled by support. Nothing was changed."));
     EXPECT_TRUE(host.console.hasEvent("Support did not answer within 3 s: cancelled."));
 }
 
@@ -666,6 +675,7 @@ void runRemoteLteUpdate(const QString& home, const QProcessEnvironment& baseEnv,
         EXPECT_EQ(error.code, hwio::ErrorCode::Cancelled) << error.detail;
         EXPECT_EQ(std::ranges::find(phases, "erase"), phases.end());
         EXPECT_EQ(std::ranges::find(phases, "backup"), phases.end());
+        ASSERT_TRUE(waitErr("Cancelled by support. Nothing was changed.")) << child.err();
     } else {
         ASSERT_TRUE(waitErr("Connect the J-Link cable to the LTE connector.")) << child.err();
         moveCable("lte");

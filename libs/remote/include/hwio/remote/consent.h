@@ -85,6 +85,11 @@ public:
 // error message: "Resetting the customer's device failed (14:02): <message>".
 [[nodiscard]] QString operationResultText(tunnel::OpKind kind, tunnel::OpTarget target,
                                           const QString& time);
+// ADR-0368 (confirmed 2026-11-12): support answered No to a question of the remote LTE update:
+// support's result "LTE firmware update cancelled by you (14:02). Nothing was changed.", the
+// customer's side "Cancelled by support. Nothing was changed."
+[[nodiscard]] QString lteUpdateDeclinedText(const QString& time);
+[[nodiscard]] QString cancelledBySupportText();
 [[nodiscard]] QString operationFailedText(tunnel::OpKind kind, tunnel::OpTarget target,
                                           const QString& time, const QString& message);
 

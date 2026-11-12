@@ -34,7 +34,7 @@ z webového Terminalu (len konzola) alebo z HARDWARIO Monitor.
    Zdieľanie zostáva zapnuté, aj keď sa zariadenie odpojí a znova pripojí, a podpora vidí každý krok aj výsledok.
    Skôr než sa čokoľvek zmení, aktualizáciu potvrdí podpora HARDWARIO; vy iba vidíte, čo sa stane, a riadite sa
    pokynmi na prepojenie kábla (nič neklikáte). Ak kópiu aplikácie nemožno vytvoriť, podpora rozhodne, či pokračovať
-   bez nej. Kópia sa na konci vždy zapíše späť. Ak podpora do 60 sekúnd neodpovie, aktualizácia sa zruší skôr, než sa
+   bez nej. Kópia sa na konci vždy zapíše späť. Keď podpora odpovie Nie, uvidíte *Zrušené podporou. Nič sa nezmenilo.* Ak podpora do 60 sekúnd neodpovie, aktualizácia sa zruší skôr, než sa
    čokoľvek zmení.
 8. Keď skončíte, kliknite na **Ukončiť zdieľanie**.
 
@@ -86,7 +86,7 @@ konzole nezobrazujú; konzolový súbor zaznamená, koľko ich bolo.
    Pred vymazaním aplikácie sa vás karta opýta: *Aplikácia v zákazníkovom zariadení CHESTER bude vymazaná. …
    Pokračovať?* (**Pokračovať** · **Zrušiť**); ak kópiu aplikácie nemožno vytvoriť, opýta sa *Aplikáciu sa nepodarilo
    skopírovať. Pokračovať bez kópie?*. Nie alebo žiadna odpoveď do 60 sekúnd aktualizáciu zruší skôr, než sa čokoľvek
-   zmení. Kópia sa zapíše späť automaticky. Zákazník so starším HARDWARIO Monitorom odpovedá na tieto otázky sám.
+   zmení. Kópia sa zapíše späť automaticky. Po vašom Nie karta ukáže *Aktualizáciu firmvéru LTE ste zrušili (14:02). Nič sa nezmenilo.* Zákazník so starším HARDWARIO Monitorom odpovedá na tieto otázky sám.
 
 Keď zákazník ukončí zdieľanie, HARDWARIO Monitor to nie vždy rozpozná: server to neoznamuje. Po 30 minútach bez
 akejkoľvek aktivity to lišta oznámi a ponúkne **Opustiť**. Karta zostane otvorená, takže konzolu môžete stále uložiť.

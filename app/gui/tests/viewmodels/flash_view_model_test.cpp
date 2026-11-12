@@ -1302,6 +1302,11 @@ TEST_F(FlashTest, RemoteLteUpdateQuestionsGoToSupport) {
             const hwio::Status cancelled = result.value_or(hwio::Status{});
             ASSERT_FALSE(cancelled.has_value());
             EXPECT_EQ(cancelled.error().code, ErrorCode::Cancelled);
+            // Confirmed 2026-11-12: the customer is told that support cancelled.
+            ASSERT_TRUE(waitFor([this] {
+                return app().toasts().contains(
+                    QStringLiteral("Cancelled by support. Nothing was changed."));
+            }));
             // The cancelled guide may already have closed (and deleted) the wizard.
             EXPECT_FALSE(!guard.isNull() && guard->procedure() != nullptr &&
                          guard->procedure()->applicationErased());

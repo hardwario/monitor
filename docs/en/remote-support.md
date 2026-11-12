@@ -31,7 +31,7 @@ Other languages: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-
    disconnects and reconnects, and support sees each step and the result.
    Before anything is changed, HARDWARIO Support confirms the update; you only see what will happen and follow the
    cable instructions (there is no button to click). If no copy of the application can be made, support decides
-   whether to continue without it. The copy is always written back at the end. Without an answer from support within
+   whether to continue without it. The copy is always written back at the end. If support answers No, you see *Cancelled by support. Nothing was changed.* Without an answer from support within
    60 seconds the update is cancelled before anything changes.
 8. Click **End sharing** when you are done.
 
@@ -83,7 +83,7 @@ your console; the console file records how many there were.
    Before the application is erased, the card asks you: *The application on the customer's CHESTER will be erased. …
    Continue?* (**Continue** · **Cancel**); if no copy of the application can be made it asks *The application could
    not be copied. Continue without a copy?*. No, or no answer within 60 seconds, cancels the update before anything
-   changes. The copy is written back automatically. A customer with an older HARDWARIO Monitor answers these questions
+   changes. The copy is written back automatically. After your No the card says *LTE firmware update cancelled by you (14:02). Nothing was changed.* A customer with an older HARDWARIO Monitor answers these questions
    themselves.
 
 When the customer ends sharing, HARDWARIO Monitor cannot always tell: the server does not announce it. After 30 minutes

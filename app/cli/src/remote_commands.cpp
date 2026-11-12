@@ -453,6 +453,9 @@ private:
         QObject::connect(m_procedure.get(), &device::LteUpdateProcedure::finished, m_reporter.get(),
                          [this] {
                              m_ui->finish();
+                             if (m_reporter->cancelledBySupport()) {
+                                 m_ui->info(toStdString(remote::cancelledBySupportText()));
+                             }
                              m_reporter->finish();
                          });
         if (Status started = m_procedure->start(*source); !started) {
@@ -798,8 +801,10 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
     const QString time = QTime::currentTime().toString(QStringLiteral("HH:mm"));
     if (!outcome->first) {
         Error error = outcome->second;
-        error.message =
-            toStdString(remote::operationFailedText(kind, *target, time, toQString(error.message)));
+        error.message = toStdString(
+            error.code == ErrorCode::Cancelled && client.declined()
+                ? remote::lteUpdateDeclinedText(time) // ADR-0368: support's own No
+                : remote::operationFailedText(kind, *target, time, toQString(error.message)));
         return std::unexpected(std::move(error));
     }
     QJsonObject data;

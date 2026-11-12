@@ -33,7 +33,7 @@ Další jazyky: [English](../en/remote-support.md) · [Deutsch](../de/remote-sup
    zapnuté, i když se zařízení odpojí a znovu připojí, a podpora vidí každý krok i výsledek.
    Než se cokoli změní, aktualizaci potvrdí podpora HARDWARIO; vy jen vidíte, co se stane, a řídíte se pokyny k
    přepojení kabelu (nic neklikáte). Pokud kopii aplikace nelze vytvořit, rozhodne podpora, zda pokračovat bez ní.
-   Kopie se na konci vždy zapíše zpět. Když podpora do 60 sekund neodpoví, aktualizace se zruší dřív, než se cokoli
+   Kopie se na konci vždy zapíše zpět. Když podpora odpoví Ne, uvidíte *Zrušeno podporou. Nic se nezměnilo.* Když podpora do 60 sekund neodpoví, aktualizace se zruší dřív, než se cokoli
    změní.
 8. Až budete hotovi, klikněte na **Ukončit sdílení**.
 
@@ -85,7 +85,7 @@ nezobrazují; konzolový soubor zaznamená, kolik jich bylo.
    Před smazáním aplikace se vás karta zeptá: *Aplikace v zákazníkově zařízení CHESTER bude smazána. … Pokračovat?*
    (**Pokračovat** · **Zrušit**); pokud kopii aplikace nelze vytvořit, zeptá se *Aplikaci se nepodařilo zkopírovat.
    Pokračovat bez kopie?*. Ne, nebo žádná odpověď do 60 sekund, aktualizaci zruší dřív, než se cokoli změní. Kopie se
-   zapíše zpět automaticky. Zákazník se starším HARDWARIO Monitorem na tyto otázky odpovídá sám.
+   zapíše zpět automaticky. Po vašem Ne karta ukáže *Aktualizaci firmwaru LTE jste zrušili (14:02). Nic se nezměnilo.* Zákazník se starším HARDWARIO Monitorem na tyto otázky odpovídá sám.
 
 Když zákazník ukončí sdílení, HARDWARIO Monitor to nemusí vždy poznat: server to neoznamuje. Po 30 minutách bez
 jakékoli aktivity to banner oznámí a nabídne **Opustit**. Karta zůstane otevřená, takže konzoli můžete ještě uložit.

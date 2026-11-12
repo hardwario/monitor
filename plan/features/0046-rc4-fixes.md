@@ -124,7 +124,9 @@ As in the steps; manual: the wizard on a real CHESTER up to the confirmation (Ca
 
 ## Implementation notes
 
-To be confirmed by the user:
+Confirmed by the user on 2026-11-12: the first three points below (sender/leave detection, questions back to the
+customer after sharing ends, the customer can still Cancel), the neutral `confirm` phase text, 24-hour `HH:mm`
+and the '#'-prefixed hexdump rule.
 
 - The relay does not report who sent a `write` nor that a joiner left. The host therefore accepts an `op-answer`
   from any allowed participant that knows the operation id and the open question's random qid (in practice the
@@ -145,6 +147,14 @@ To be confirmed by the user:
   The CLI joiner's failure keeps its error code; its message is prefixed with the operation name and time.
 - Under TSan `RemoteCli.HostLteUpdateSupport*` and `FlashTest.RemoteLteUpdateQuestionsGoToSupport` are left out
   like the other designated-firmware download tests (Qt's HTTP thread is uninstrumented).
+
+- Confirmed 2026-11-12: when support answers No (to Continue before the erase or to Continue without a copy),
+  support's result reads "LTE firmware update cancelled by you (HH:mm). Nothing was changed." (not an error: no ×,
+  cleared like a success; the CLI joiner's cancelled error carries the same message), and the customer's side says
+  "Cancelled by support. Nothing was changed." (a toast when the wizard closes, a line in `remote host`, the audit
+  line). `RemoteOperationClient::declined()` and `LteUpdateReporter::cancelledBySupport()` carry it; no protocol
+  change. No answer within the timeout stays an error on support's side; on the customer's side it also reads
+  "Cancelled by support" (the reporter gets the same "no" for both).
 
 ## Verification (2026-11-12)
 

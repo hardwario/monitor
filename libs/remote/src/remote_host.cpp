@@ -775,7 +775,7 @@ void RemoteHost::answerSupportQuestion(bool yes) {
     m_question.reset();
     activity();
     audit(yes ? trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Support answered: continue."))
-              : trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Support answered: cancel.")));
+              : cancelledBySupportText());
     if (question.answer) {
         question.answer(yes);
     }

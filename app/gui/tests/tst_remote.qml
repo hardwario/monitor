@@ -261,8 +261,12 @@ TestCase {
         tryVerify(() => testSupport.remoteLastAnswer() === "no", 5000);
         tryVerify(() => shown("remoteQuestion").length === 0, 5000);
 
+        // Confirmed 2026-11-12: support's own No is a cancellation, not an error.
         testSupport.remoteHostResult("cancelled");
         tryVerify(() => !tab().remoteJoin.operationPending, 5000);
+        verify(/^LTE firmware update cancelled by you \(\d\d:\d\d\)\. Nothing was changed\.$/.test(tab().remoteJoin.operationStatus), tab().remoteJoin.operationStatus);
+        verify(!tab().remoteJoin.operationFailed);
+        verify(!tab().remoteJoin.resultDismissable);
     }
 
     // ADR-0369: the result names the operation and the local time and is also a console line; a

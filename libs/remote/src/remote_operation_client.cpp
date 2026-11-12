@@ -77,6 +77,7 @@ Result<std::string> RemoteOperationClient::request(tunnel::OpKind kind, tunnel::
         return std::unexpected(makeError(ErrorCode::UsageInvalidArgument,
                                          "a firmware ID goes with flash, and only with flash"));
     }
+    m_declined = false;
     std::string id = std::format("op-{:08x}{:08x}", QRandomGenerator::system()->generate(),
                                  QRandomGenerator::system()->generate());
     // ADR-0368: support answers the LTE update's questions when both sides can.
@@ -153,6 +154,7 @@ Status RemoteOperationClient::answer(bool yes) {
     if (m_session.isNull()) {
         return std::unexpected(makeError(ErrorCode::RemoteHostEnded));
     }
+    m_declined = m_declined || !yes;
     const tunnel::OpAnswer message{.id = m_question->id, .qid = m_question->qid, .yes = yes};
     m_question.reset();
     emit questionClosed();

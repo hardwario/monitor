@@ -203,7 +203,7 @@ TestCase {
         verify(testSupport.setSetting("ui/mode", "advanced"));
 
         // Plan 0046 (ADR-0368, ADR-0369): support's Flash card in a remote tab - the customer's
-        // Monitor asks before the erase; a failed operation's result (test builds: the fake relay).
+        // Monitor asks before the erase; support's No ends it (test builds: the fake relay).
         if (testSupport.startFakeRelay()) {
             testSupport.resetTabs();
             window.width = 1280;
@@ -225,8 +225,8 @@ TestCase {
             save("f17-remote-lte-question");
             tab().remoteJoin.answerQuestion(false);
             testSupport.remoteHostResult("cancelled");
-            tryVerify(() => tab().remoteJoin.resultDismissable, 5000);
-            save("f18-remote-result-error");
+            tryVerify(() => !tab().remoteJoin.operationPending && tab().remoteJoin.operationStatus !== "", 5000);
+            save("f18-remote-lte-cancelled-by-you");
             testSupport.resetTabs();
             testSupport.stopFakeRelay();
         }

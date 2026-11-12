@@ -156,6 +156,17 @@ QString operationResultText(tunnel::OpKind kind, tunnel::OpTarget target, const 
                            : QCoreApplication::translate("hwio::remote", text).arg(time);
 }
 
+QString lteUpdateDeclinedText(const QString& time) {
+    return QCoreApplication::translate(
+               "hwio::remote", "LTE firmware update cancelled by you (%1). Nothing was changed.")
+        .arg(time);
+}
+
+QString cancelledBySupportText() {
+    return QCoreApplication::translate("hwio::remote",
+                                       "Cancelled by support. Nothing was changed.");
+}
+
 QString operationFailedText(tunnel::OpKind kind, tunnel::OpTarget target, const QString& time,
                             const QString& message) {
     const bool app = target == tunnel::OpTarget::App;
