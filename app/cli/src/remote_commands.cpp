@@ -6,6 +6,7 @@
 #include "cli_log.h"
 #include "command_collector.h"
 #include "console_ui.h"
+#include "guided_lte.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/result.h"
@@ -15,12 +16,15 @@
 #include "hwio/device/console_log.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/device_session.h"
+#include "hwio/device/lte_update_procedure.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_registry.h"
 #include "hwio/firmware/firmware_cache.h"
 #include "hwio/firmware/firmware_catalog.h"
+#include "hwio/hw/nrfutil/nrfutil.h"
 #include "hwio/remote/consent.h"
 #include "hwio/remote/host_operations.h"
+#include "hwio/remote/lte_update_report.h"
 #include "hwio/remote/remote_console_session.h"
 #include "hwio/remote/remote_host.h"
 #include "hwio/remote/remote_operation_client.h"
@@ -95,6 +99,7 @@ struct JoinCommandOptions {
     bool erase = false;
     bool recover = false;
     bool reset = false;
+    bool lteUpdate = false; // ADR-0363
     std::string core = "app";
     double lingerSeconds = 1.0;
 };
@@ -142,6 +147,17 @@ Status runUntil(const std::function<bool()>& done, std::optional<std::chrono::mi
 
 // ---- host ---------------------------------------------------------------------------------------
 
+// A terminal on stdin (ADR-0335: joins can be allowed).
+bool hostInteractive() {
+#ifdef HWIO_TEST_OVERRIDES
+    // Test builds only (as `lte flash --guided`): the end-to-end tests answer through a pipe.
+    if (qEnvironmentVariableIsSet("HWIO_TEST_INTERACTIVE")) {
+        return true;
+    }
+#endif
+    return stdinIsTerminal();
+}
+
 // The CLI's ConsentProvider: the question on stderr, the answer is the next stdin line (y / yes
 // allows). The host loop feeds the lines (answer()).
 class CliConsent final : public remote::ConsentProvider {
@@ -162,6 +178,15 @@ public:
         }
         return ask(toStdString(remote::operationQuestionText(question)), "operation",
                    std::move(answer), "[y/N]");
+    }
+
+    // ADR-0363: a y/N question of the guided LTE update (no question may be open: then no).
+    void askQuestion(const std::string& text, Answer answer) {
+        if (m_pending) {
+            answer(false);
+            return;
+        }
+        (void)ask(text, "lte-update", std::move(answer), "[y/N]");
     }
 
     // True when the line answered a question.
@@ -269,6 +294,12 @@ Result<HostSession> openHostSession(const Context& context, const GlobalOptions&
     if (!sessionOptions) {
         return std::unexpected(std::move(sessionOptions).error());
     }
+    // ADR-0363: a remote LTE update uses --nrfutil (as `chester lte flash`).
+    if (!globals.nrfutil.empty()) {
+        auto settings = Settings::openDefault();
+        sessionOptions->nrfUtil = nrfutil::defaultLocatorOptions(
+            fs::path(toQString(globals.nrfutil).toStdU16String()), settings ? &*settings : nullptr);
+    }
     opened.connectTimeout = device::connectTimeoutForSpeed(sessionOptions->speedKhz);
     opened.registry = std::make_unique<device::SessionRegistry>();
     auto jlink =
@@ -336,6 +367,91 @@ void pumpHostInput(StdinLineReader* reader, bool& inputEnded, CliConsent& consen
     }
 }
 
+// ADR-0363: a remote lteUpdate runs the terminal flow of `chester lte flash --guided` on the shared
+// session with the designated LTE firmware; the customer follows its prompts on stderr and answers
+// its y/N question like the other questions (stdin). Started on the next turn of the event loop
+// (the download runs a nested loop). Owner thread only.
+class CliLteUpdate final : public remote::LteUpdateRunner {
+public:
+    CliLteUpdate(const Context& context, const GlobalOptions& globals,
+                 device::DeviceSession& session, CliConsent& consent)
+        : m_context(&context), m_globals(&globals), m_session(&session), m_consent(&consent) {}
+    ~CliLteUpdate() override { abandon(); }
+    CliLteUpdate(const CliLteUpdate&) = delete;
+    CliLteUpdate& operator=(const CliLteUpdate&) = delete;
+    CliLteUpdate(CliLteUpdate&&) = delete;
+    CliLteUpdate& operator=(CliLteUpdate&&) = delete;
+
+    [[nodiscard]] Status start(Progress progress, Finished finished) override {
+        if (m_reporter && !m_reporter->done()) {
+            return std::unexpected(makeError(ErrorCode::InternalBusy, "an LTE update runs"));
+        }
+        m_terminal.reset();
+        m_procedure.reset();
+        m_reporter =
+            std::make_unique<remote::LteUpdateReporter>(std::move(progress), std::move(finished));
+        QTimer::singleShot(0, m_reporter.get(), [this] { run(); });
+        return {};
+    }
+
+    void abandon() override {
+        if (m_reporter) {
+            m_reporter->abandon(); // the guided update goes on in the terminal, unreported
+        }
+    }
+
+private:
+    void run() {
+        m_ui = std::make_unique<ProgressUi>(*m_context, std::cerr, stderrIsTerminal());
+        auto source = designatedLteSource(*m_context, *m_globals, *m_ui,
+                                          [this](std::uint64_t done, std::uint64_t total) {
+                                              if (m_reporter) {
+                                                  m_reporter->download(done, total);
+                                              }
+                                          });
+        if (!m_reporter || m_reporter->done()) {
+            return; // the session ended meanwhile
+        }
+        if (!source) {
+            m_ui->warning(source.error());
+            m_reporter->finish(std::unexpected(std::move(source).error()));
+            return;
+        }
+        m_procedure = std::make_unique<device::LteUpdateProcedure>(
+            *m_session, device::LteUpdateProcedure::Options{.pollInterval = std::chrono::seconds(1),
+                                                            .backupDirectory = {},
+                                                            .autoRestore = true,
+                                                            .now = {}});
+        m_terminal = std::make_unique<GuidedTerminal>(
+            *m_context, *m_ui, *m_procedure,
+            [this](const std::string& question, std::function<void(bool)> answer) {
+                m_consent->askQuestion(question, std::move(answer));
+            });
+        m_reporter->follow(*m_procedure);
+        // The terminal flow does not retry: every end is the result.
+        QObject::connect(m_procedure.get(), &device::LteUpdateProcedure::finished, m_reporter.get(),
+                         [this] {
+                             m_ui->finish();
+                             m_reporter->finish();
+                         });
+        if (Status started = m_procedure->start(*source); !started) {
+            m_ui->warning(started.error());
+            m_reporter->finish(std::move(started));
+            return;
+        }
+        m_terminal->show();
+    }
+
+    const Context* m_context;
+    const GlobalOptions* m_globals;
+    device::DeviceSession* m_session;
+    CliConsent* m_consent;
+    std::unique_ptr<ProgressUi> m_ui;
+    std::unique_ptr<remote::LteUpdateReporter> m_reporter;
+    std::unique_ptr<device::LteUpdateProcedure> m_procedure;
+    std::unique_ptr<GuidedTerminal> m_terminal; // declared after the procedure it follows
+};
+
 Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
                            const ProbeOptions& group, const HostCommandOptions& options) {
     auto relay = relayOf(options.relay);
@@ -365,15 +481,8 @@ Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
         return std::unexpected(connected.error());
     }
 
-    // Operations: J-Link only (a BLE console has none).
-    firmware::FirmwareCache cache(firmware::FirmwareCache::defaultDirectory());
-    std::unique_ptr<remote::DeviceSessionOperations> operations;
-    if (jlinkSession) {
-        operations = std::make_unique<remote::DeviceSessionOperations>(
-            *jlinkSession, chesterCatalogOptions(), &cache);
-    }
     // ADR-0335: without a terminal on stdin no join is ever allowed.
-    const bool interactive = stdinIsTerminal();
+    const bool interactive = hostInteractive();
     CliConsent cliConsent(hostContext, options.denyOperations);
     remote::AutoDenyConsent autoDeny;
     remote::ConsentProvider& joins =
@@ -384,6 +493,20 @@ Result<CommandResult> host(const Context& context, const GlobalOptions& globals,
     if (!interactive) {
         status(context, "No terminal on stdin: joins cannot be allowed; the session ends at the "
                         "first join.");
+    }
+
+    // Operations: J-Link only (a BLE console has none). Declared after what they use.
+    firmware::FirmwareCache cache(firmware::FirmwareCache::defaultDirectory());
+    std::optional<CliLteUpdate> lteUpdate;
+    std::unique_ptr<remote::DeviceSessionOperations> operations;
+    if (jlinkSession) {
+        operations = std::make_unique<remote::DeviceSessionOperations>(
+            *jlinkSession, chesterCatalogOptions(), &cache);
+        // ADR-0363: the guided LTE update needs the customer at the terminal.
+        if (interactive && !options.denyOperations) {
+            lteUpdate.emplace(hostContext, globals, *jlinkSession, cliConsent);
+            operations->setLteUpdateRunner(&*lteUpdate);
+        }
     }
 
     remote::RemoteHost host(*session, consent, operations.get(),
@@ -456,6 +579,9 @@ std::optional<tunnel::OpKind> requestedOperation(const JoinCommandOptions& optio
     if (options.reset) {
         return tunnel::OpKind::Reset;
     }
+    if (options.lteUpdate) {
+        return tunnel::OpKind::LteUpdate;
+    }
     return std::nullopt;
 }
 
@@ -508,9 +634,11 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
     // or Ctrl+C) is reported just below.
     [[maybe_unused]] const Status helloWaited =
         runUntil([&] { return session.hostHello().has_value(); }, helloWait, context.stop);
-    if (!session.hostHello() || !session.hostHello()->ops) {
-        return std::unexpected(makeError(ErrorCode::RemoteOperationUnsupportedPeer,
-                                         session.hostHello() ? "ops: false" : "no hello"));
+    if (!session.hostHello() || !tunnel::supports(*session.hostHello(), kind)) {
+        return std::unexpected(makeError(
+            ErrorCode::RemoteOperationUnsupportedPeer,
+            session.hostHello() ? std::format("{} not offered by the host", tunnel::kindId(kind))
+                                : "no hello"));
     }
     remote::RemoteOperationClient client(session);
     ProgressUi ui(context, std::cerr, stderrIsTerminal());
@@ -520,8 +648,10 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
     });
     QObject::connect(&client, &remote::RemoteOperationClient::progress, &client,
                      [&](const tunnel::OpProgress& p) {
-                         ui.progress(p.phase.empty() ? "working" : p.phase, p.done, p.total, p.step,
-                                     p.steps);
+                         ui.progress(p.phase.empty()
+                                         ? std::string("working")
+                                         : toStdString(remote::operationPhaseText(p.phase)),
+                                     p.done, p.total, p.step, p.steps);
                      });
     QObject::connect(&client, &remote::RemoteOperationClient::finished, &client,
                      [&](bool ok, const Error& error) { outcome.emplace(ok, error); });
@@ -544,14 +674,20 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
     }
     QJsonObject data;
     data.insert(QStringLiteral("operation"), toQString(tunnel::kindId(kind)));
-    data.insert(QStringLiteral("target"), toQString(tunnel::targetId(*target)));
+    if (kind != tunnel::OpKind::LteUpdate) { // ADR-0363: no target
+        data.insert(QStringLiteral("target"), toQString(tunnel::targetId(*target)));
+    }
     if (kind == tunnel::OpKind::Flash) {
         data.insert(QStringLiteral("firmwareId"), toQString(options.flash));
     }
     data.insert(QStringLiteral("reportedBy"), QStringLiteral("host"));
     return CommandResult{.data = data,
-                         .humanText = std::format("{} done (reported by the customer's Monitor).",
-                                                  tunnel::kindId(kind)),
+                         .humanText =
+                             kind == tunnel::OpKind::LteUpdate
+                                 ? std::string("The LTE firmware was updated and the application "
+                                               "written back (reported by the customer's Monitor).")
+                                 : std::format("{} done (reported by the customer's Monitor).",
+                                               tunnel::kindId(kind)),
                          .streamed = false};
 }
 
@@ -752,10 +888,14 @@ void registerRemoteCommands(CLI::App& app, CommandSlot& slot, const GlobalOption
                                                  "Ask the customer to recover the target");
     CLI::Option* reset = joinCommand->add_flag("--reset", joinOptions->reset,
                                                "Ask the customer to reset the target");
-    joinCommand->add_option("--target", joinOptions->core, "Operation target: app or lte")
-        ->capture_default_str()
-        ->check(CLI::IsMember({"app", "lte"}))
-        ->option_text("app|lte");
+    CLI::Option* lteUpdate = joinCommand->add_flag("--lte-update", joinOptions->lteUpdate,
+                                                   "Ask the customer to update the LTE firmware "
+                                                   "(guided, their Monitor's recommended version)");
+    CLI::Option* targetOption =
+        joinCommand->add_option("--target", joinOptions->core, "Operation target: app or lte")
+            ->capture_default_str()
+            ->check(CLI::IsMember({"app", "lte"}))
+            ->option_text("app|lte");
     joinCommand
         ->add_option("--linger", joinOptions->lingerSeconds,
                      "Non-interactive console: seconds to keep collecting output after the end "
@@ -763,10 +903,13 @@ void registerRemoteCommands(CLI::App& app, CommandSlot& slot, const GlobalOption
         ->capture_default_str()
         ->check(CLI::Range(0.0, 60.0))
         ->option_text("S");
-    commandOption->excludes(flash)->excludes(erase)->excludes(recover)->excludes(reset);
-    flash->excludes(erase)->excludes(recover)->excludes(reset);
-    erase->excludes(recover)->excludes(reset);
-    recover->excludes(reset);
+    commandOption->excludes(flash)->excludes(erase)->excludes(recover)->excludes(reset)->excludes(
+        lteUpdate);
+    flash->excludes(erase)->excludes(recover)->excludes(reset)->excludes(lteUpdate);
+    erase->excludes(recover)->excludes(reset)->excludes(lteUpdate);
+    recover->excludes(reset)->excludes(lteUpdate);
+    reset->excludes(lteUpdate);
+    lteUpdate->excludes(targetOption);
     joinCommand->callback([&slot, joinOptions] {
         slot.command = [joinOptions](const Context& context) {
             return join(context, *joinOptions);

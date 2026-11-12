@@ -199,10 +199,14 @@ of the advertised name, which exactly one device found by a 5-second scan must m
 | `hwio remote join CODE\|LINK [--relay URL] [--linger S]` | Joins a session: the console (interactive on a terminal, plain lines or `--json` NDJSON otherwise) |
 | `hwio remote join CODE\|LINK --command CMD [-t S]` | One command after the customer allowed you; the response as in `chester app command` |
 | `hwio remote join CODE\|LINK --flash ID \| --erase \| --recover \| --reset [--target app\|lte]` | Asks the customer's HARDWARIO Monitor for one operation (flash: catalog firmware ID, application core only) |
+| `hwio remote join CODE\|LINK --lte-update` | Asks the customer's HARDWARIO Monitor to update the LTE firmware to its recommended version (the guided update: the customer moves the J-Link cable between the APP and LTE connectors); no firmware ID, no `--target` |
 
 `hwio remote host` asks on the terminal (stderr, answer `y` to allow) before it allows a join or an operation, and any
 other input line keeps sharing after the idle warning. Without a terminal on stdin joins are never allowed: the session
-ends at the first join. `--deny-operations` denies every operation request without asking. Ctrl+C ends sharing
+ends at the first join. `--deny-operations` denies every operation request without asking. An allowed LTE update runs
+the terminal flow of `hwio chester lte flash --guided` (with `--nrfutil` if given): follow its prompts and move the
+cable when it asks; if it ends without writing the application back, support gets `remote.application_not_restored`.
+Ctrl+C ends sharing
 (exit code 130). With `--json` the host prints `{"type":"remote","event":"sharing","code","link","relay"}`, the
 questions (`"event":"question"`) and `{"type":"remote","event":"ended","error"}` between the console events.
 

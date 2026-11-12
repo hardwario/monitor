@@ -5,14 +5,20 @@
 #include "cli_process.h"
 #include "fake_console.h"
 #include "fake_relay.h"
+#include "hex_builder.h"
+#include "http_fixture.h"
 #include "hwio/device/console_line.h"
 #include "hwio/remote/host_operations.h"
+#include "hwio/remote/remote_console_session.h"
 #include "hwio/remote/remote_host.h"
+#include "hwio/remote/remote_operation_client.h"
 #include "hwio/remote/session_code.h"
 #include "hwio/remote/tunnel.h"
 #include "remote_test_support.h"
+#include "zip_builder.h"
 
 #include <QByteArray>
+#include <QCryptographicHash>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -76,6 +82,7 @@ public:
     Child& operator=(Child&&) = delete;
 
     void closeInput() { m_process.closeWriteChannel(); }
+    void write(const QByteArray& data) { m_process.write(data); }
 #ifndef _WIN32
     // SIGTERM: the CLI handles it like Ctrl+C (exit status 130).
     void terminate() { m_process.terminate(); }
@@ -331,6 +338,36 @@ TEST_F(RemoteCli, JoinRequestsAResetAndTheCustomerAllows) {
     EXPECT_EQ(data.value(QStringLiteral("operation")).toString(), QStringLiteral("reset"));
 }
 
+// ADR-0363: `--lte-update` asks for the guided LTE update (no target, no firmware ID).
+TEST_F(RemoteCli, JoinRequestsAnLteUpdate) {
+    FakeRelay relay;
+    FakeOperations operations;
+    InProcessHost host(relay, &operations);
+    ASSERT_TRUE(runUntil([&] { return host.host.state() == hwio::remote::HostState::Sharing; }));
+    QStringList args{QStringLiteral("--json"), QStringLiteral("remote"), QStringLiteral("join"),
+                     QStringLiteral("482913"), QStringLiteral("--lte-update")};
+    args << relayArgs(relay);
+    Child child(args, fakeEnvironment());
+    ASSERT_TRUE(runUntil([&] { return operations.started.size() == 1; }, 30s)) << child.err();
+    EXPECT_EQ(operations.started.front().kind, hwio::remote::tunnel::OpKind::LteUpdate);
+    ASSERT_EQ(host.consent.operationQuestions.size(), 1U);
+    EXPECT_EQ(host.consent.operationQuestions.front().firmwareVersion, "1.7.0");
+    operations.progress(hwio::remote::OperationUpdate{.phase = "connect-lte"});
+    operations.finished(hwio::Status{});
+    ASSERT_TRUE(child.finish()) << child.err();
+    EXPECT_EQ(child.exitCode(), 0) << child.err();
+    const QJsonObject data = child.envelopes().back().value(QStringLiteral("data")).toObject();
+    EXPECT_EQ(data.value(QStringLiteral("operation")).toString(), QStringLiteral("lteUpdate"));
+    EXPECT_FALSE(data.contains(QStringLiteral("target")));
+
+    // --lte-update has no target.
+    const auto refused =
+        run({QStringLiteral("remote"), QStringLiteral("join"), QStringLiteral("482913"),
+             QStringLiteral("--lte-update"), QStringLiteral("--target"), QStringLiteral("lte")},
+            fakeEnvironment());
+    EXPECT_EQ(refused.exitCode, 2) << refused.err;
+}
+
 TEST_F(RemoteCli, JoinOperationDenied) {
     FakeRelay relay;
     FakeOperations operations;
@@ -430,5 +467,106 @@ TEST_F(RemoteCli, JoinEndsWhenTheHostEndsSharing) {
     EXPECT_NE(child.exitCode(), 0);
     EXPECT_EQ(child.lastErrorCode(), QStringLiteral("remote.host_ended")) << child.out();
 }
+
+#ifndef _WIN32
+// ADR-0363: `remote host` runs the guided LTE update of `chester lte flash --guided` for an allowed
+// lteUpdate request: the customer answers on stdin (HWIO_TEST_INTERACTIVE stands in for the
+// terminal) and moves the cable (the fake board's connector file); the joiner sees the phases and
+// the result.
+TEST_F(RemoteCli, HostRunsTheGuidedLteUpdate) {
+    const std::string appHex = hwio::firmware::test::hexRecord(0, 0x1000, {1, 2, 3, 4}) +
+                               hwio::firmware::test::eofRecord();
+    const QByteArray modem = hwio::firmware::test::zipBytes(
+        {{.name = "firmware.update.image.segments.0.hex", .data = appHex}});
+    const QByteArray bundle =
+        hwio::firmware::test::zipBytes({{.name = "modem.zip", .data = modem.toStdString()},
+                                        {.name = "application.hex", .data = appHex}});
+    hwio::firmware::test::HttpFixture http;
+    ASSERT_TRUE(http.listening());
+    http.set(QStringLiteral("/chester/lte.zip"),
+             hwio::firmware::test::HttpFixture::Response::ok(bundle));
+    const QString connector = home() + QStringLiteral("/connector");
+    const auto moveCable = [&](const char* to) {
+        QFile file(connector);
+        ASSERT_TRUE(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        file.write(to);
+    };
+    moveCable("app");
+    {
+        QFile file(home() + QStringLiteral("/scenario.json"));
+        ASSERT_TRUE(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        file.write(
+            QStringLiteral(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+            "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "boot banner\n"}]},
+            "connectors": {"file": "%1", "chips": {
+              "app": {"memory": [{"address": 4096, "hex": "a5a5a5a5"}]},
+              "lte": {"family": "nrf91"}}}}]})")
+                .arg(connector)
+                .toUtf8());
+    }
+    QProcessEnvironment env = fakeEnvironment();
+    env.insert(QStringLiteral("HWIO_TEST_INTERACTIVE"), QStringLiteral("1"));
+    env.insert(QStringLiteral("HWIO_DESIGNATED_URL"), http.baseUrl() + QStringLiteral("/lte.zip"));
+    env.insert(
+        QStringLiteral("HWIO_DESIGNATED_SHA256"),
+        QString::fromLatin1(QCryptographicHash::hash(bundle, QCryptographicHash::Sha256).toHex()));
+    FakeRelay relay;
+    QStringList args{QStringLiteral("--nrfutil"), QStringLiteral(HWIO_FAKE_NRFUTIL),
+                     QStringLiteral("remote"), QStringLiteral("host")};
+    args << relayArgs(relay);
+    Child child(args, env);
+    const auto waitErr = [&](const char* text) {
+        return runUntil([&] { return child.err().find(text) != std::string::npos; }, 30s);
+    };
+    ASSERT_TRUE(waitErr("Session code: ")) << child.err();
+    const std::string err = child.err();
+    const std::string code = err.substr(err.find("Session code: ") + 14, 7); // "482 913"
+
+    const auto target = hwio::remote::parseJoinInput(code);
+    ASSERT_TRUE(target.has_value()) << code;
+    hwio::remote::RemoteConsoleSession joiner(
+        hwio::remote::JoinOptions{.relay = relay.url(),
+                                  .code = target->code,
+                                  .appVersion = "2.1.0-support",
+                                  .relayLimits = {},
+                                  .transcript = {},
+                                  .idleNoticeAfter = std::chrono::minutes(30),
+                                  .consoleLog = nullptr});
+    ASSERT_TRUE(waitErr("Allow them to send commands")) << child.err();
+    child.write("y\n");
+    ASSERT_TRUE(runUntil(
+        [&] {
+            return joiner.hostHello() &&
+                   hwio::remote::tunnel::supports(*joiner.hostHello(),
+                                                  hwio::remote::tunnel::OpKind::LteUpdate);
+        },
+        30s))
+        << child.err();
+    hwio::remote::RemoteOperationClient client(joiner);
+    std::vector<std::string> phases;
+    std::optional<std::pair<bool, hwio::Error>> result;
+    QObject::connect(&client, &hwio::remote::RemoteOperationClient::progress, &client,
+                     [&](const hwio::remote::tunnel::OpProgress& p) { phases.push_back(p.phase); });
+    QObject::connect(&client, &hwio::remote::RemoteOperationClient::finished, &client,
+                     [&](bool ok, const hwio::Error& error) { result.emplace(ok, error); });
+    ASSERT_TRUE(
+        client.request(hwio::remote::tunnel::OpKind::LteUpdate, hwio::remote::tunnel::OpTarget::Lte)
+            .has_value());
+    ASSERT_TRUE(waitErr("Support asks to update the LTE firmware to HARDWARIO LTE firmware 1.7.0"))
+        << child.err();
+    child.write("y\n");
+    ASSERT_TRUE(waitErr("Connect the J-Link cable to the LTE connector.")) << child.err();
+    moveCable("lte");
+    ASSERT_TRUE(waitErr("Move the cable to the APP connector.")) << child.err();
+    moveCable("app");
+    ASSERT_TRUE(runUntil([&] { return result.has_value(); }, 60s)) << child.err();
+    EXPECT_TRUE(result && result->first) << (result ? result->second.detail : "") << child.err();
+    EXPECT_NE(std::ranges::find(phases, "download"), phases.end());
+    EXPECT_NE(std::ranges::find(phases, "connect-lte"), phases.end());
+    EXPECT_EQ(joiner.joinState(), hwio::remote::JoinState::Allowed); // sharing stayed active
+    child.stop();
+    ASSERT_TRUE(child.finish());
+}
+#endif // _WIN32
 
 } // namespace

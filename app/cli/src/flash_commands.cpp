@@ -4,6 +4,7 @@
 #include "cli_log.h"
 #include "confirm.h"
 #include "diag_commands.h"
+#include "guided_lte.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/result.h"
@@ -500,14 +501,20 @@ const firmware::DesignatedFirmware& designatedLte() {
 
 // Plan 0021 (ADR-0165): the designated LTE firmware of the profile, downloaded (or taken from the
 // cache) and SHA-256 verified.
-Result<firmware::DesignatedDownload> downloadDesignated(const Context& context, ProgressUi& ui,
-                                                        bool noCache) {
+Result<firmware::DesignatedDownload>
+downloadDesignated(const Context& context, ProgressUi& ui, bool noCache,
+                   const std::function<void(std::uint64_t, std::uint64_t)>& bytes = {}) {
     const firmware::DesignatedFirmware& designated = designatedLte();
     firmware::FirmwareCache cache(firmware::FirmwareCache::defaultDirectory());
     auto catalog = chesterCatalog(&cache);
     auto operation = catalog->downloadDesignated(
         designated, firmware::DownloadOptions{.noCache = noCache, .expectedSha256 = std::nullopt},
-        [&ui](std::uint64_t done, std::uint64_t total) { ui.progress("downloading", done, total); },
+        [&ui, &bytes](std::uint64_t done, std::uint64_t total) {
+            ui.progress("downloading", done, total);
+            if (bytes) {
+                bytes(done, total);
+            }
+        },
         context.stop);
     auto downloaded = firmware::waitForDownload(*operation);
     ui.finish();
@@ -686,111 +693,6 @@ bool interactiveTerminal() {
     return stdinIsTerminal() && stderrIsTerminal();
 }
 
-// Drives one LteUpdateProcedure in the terminal: its prompts and progress on stderr, the y/N
-// question of a failed copy, Ctrl+C (cancelled where the procedure allows it).
-class GuidedTerminal {
-public:
-    using Step = device::LteUpdateProcedure::Step;
-
-    GuidedTerminal(const Context& context, ProgressUi& ui, device::LteUpdateProcedure& procedure)
-        : m_context(context), m_ui(ui), m_procedure(procedure) {
-        QObject::connect(&procedure, &device::LteUpdateProcedure::changed, &m_loop,
-                         [this] { onChanged(); });
-        QObject::connect(&procedure, &device::LteUpdateProcedure::progressChanged, &m_loop,
-                         [this] { onProgress(); });
-        QObject::connect(&procedure, &device::LteUpdateProcedure::finished, &m_loop,
-                         &QEventLoop::quit);
-        QObject::connect(&m_stopCheck, &QTimer::timeout, &m_loop, [this] { onStopCheck(); });
-    }
-
-    // Runs until the procedure ends (it was started by the caller).
-    void run() {
-        show();
-        m_stopCheck.start(std::chrono::milliseconds(100));
-        if (!ended()) {
-            m_loop.exec();
-        }
-        m_stopCheck.stop();
-        m_ui.finish();
-    }
-
-    [[nodiscard]] bool noCopyEnd() const noexcept { return m_noCopyEnd; }
-
-private:
-    [[nodiscard]] bool ended() const {
-        const Step step = m_procedure.step();
-        return step == Step::Done || step == Step::Failed || step == Step::Cancelled;
-    }
-
-    void show() {
-        const Step step = m_procedure.step();
-        const std::string prompt = toStdString(m_procedure.promptText());
-        if (step == Step::Failed || step == Step::Cancelled || prompt == m_lastPrompt) {
-            return;
-        }
-        m_ui.finish();
-        m_lastPrompt = prompt;
-        m_ui.info(prompt);
-    }
-
-    void onChanged() {
-        show();
-        const Step step = m_procedure.step();
-        if (step == Step::BackupFailed) {
-            if (m_procedure.error()) {
-                m_ui.warning(*m_procedure.error());
-            }
-            // Asked on the next turn of the event loop; nothing runs on the device meanwhile.
-            QMetaObject::invokeMethod(&m_loop, [this] { askAboutTheCopy(); }, Qt::QueuedConnection);
-        } else if (step == Step::ChooseApplication && !m_procedure.hasBackup()) {
-            // No copy (an empty or unreadable application): the LTE MCU is updated; the
-            // application is the user's to flash.
-            m_noCopyEnd = true;
-            QMetaObject::invokeMethod(
-                &m_loop, [this] { (void)m_procedure.cancel(); }, Qt::QueuedConnection);
-        }
-    }
-
-    void askAboutTheCopy() {
-        if (m_procedure.step() != Step::BackupFailed) {
-            return;
-        }
-        if (askYesNo("Continue without a copy of the application? [y/N] ")) {
-            m_procedure.continueWithoutBackup();
-        } else {
-            (void)m_procedure.cancel();
-        }
-    }
-
-    void onProgress() {
-        const Step step = m_procedure.step();
-        if (step == Step::Backup) {
-            m_ui.progress("reading", m_procedure.progress().done, m_procedure.progress().total);
-        } else if (step == Step::Erase || step == Step::UpdateLte || step == Step::Restore) {
-            m_ui.progress(m_procedure.progress());
-        }
-    }
-
-    void onStopCheck() {
-        if (!m_context.stop.stop_requested()) {
-            return;
-        }
-        if (!m_procedure.cancel() && !m_cancelRefusedShown) {
-            m_cancelRefusedShown = true;
-            m_ui.info("The MCU is being written and cannot be interrupted; cancelling afterwards.");
-        }
-    }
-
-    const Context& m_context;
-    ProgressUi& m_ui;
-    device::LteUpdateProcedure& m_procedure;
-    QEventLoop m_loop;
-    QTimer m_stopCheck;
-    std::string m_lastPrompt;
-    bool m_noCopyEnd = false;
-    bool m_cancelRefusedShown = false;
-};
-
 // The command's result for the procedure's end.
 Result<CommandResult> guidedResult(const device::LteUpdateProcedure& procedure, bool noCopyEnd) {
     using Step = device::LteUpdateProcedure::Step;
@@ -863,6 +765,27 @@ Result<CommandResult> lteGuided(const Context& context, const GlobalOptions& glo
 }
 
 } // namespace
+
+Result<device::LteUpdateProcedure::Source>
+designatedLteSource(const Context& context, const GlobalOptions& globals, ProgressUi& ui,
+                    const std::function<void(std::uint64_t, std::uint64_t)>& download) {
+    // The designated bundle always contains modem firmware: nRF Util first (ADR-0042).
+    if (auto checked = checkNrfUtil(globals, ui); !checked) {
+        return std::unexpected(std::move(checked).error());
+    }
+    auto downloaded = downloadDesignated(context, ui, false, download);
+    if (!downloaded) {
+        return std::unexpected(std::move(downloaded).error());
+    }
+    const firmware::DesignatedFirmware& entry = designatedLte();
+    return device::LteUpdateProcedure::Source{
+        .kind = device::LteUpdateProcedure::Source::Kind::Bundle,
+        .image = nullptr,
+        .bundle = downloaded->bundle,
+        .modemZip = {},
+        .name = std::format("{} {}", entry.name, entry.version),
+        .options = device::FlashOptions{.halt = false, .allowUicr = false}};
+}
 
 Result<FlashInput> resolveFlashInput(const std::string& argument, const fs::path& directory) {
     if (!argument.empty()) {

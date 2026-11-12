@@ -35,6 +35,7 @@ add_library(hwio_cli_impl STATIC
     src/flag_consent_broker.cpp
     src/flag_consent_broker.h
     src/flash_commands.cpp
+    src/guided_lte.h
     src/flash_commands.h
     src/jlink_commands.cpp
     src/jlink_commands.h
