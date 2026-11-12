@@ -122,7 +122,7 @@ void DeviceSessionOperations::lookup(const std::string& firmwareId, LookupDone d
 }
 
 Status DeviceSessionOperations::start(const tunnel::OpRequest& request, Progress progress,
-                                      Finished finished) {
+                                      Finished finished, AskSupport ask) {
     if (m_running) {
         return std::unexpected(makeError(ErrorCode::InternalBusy, "a remote operation runs"));
     }
@@ -144,7 +144,8 @@ Status DeviceSessionOperations::start(const tunnel::OpRequest& request, Progress
             [this](Status status) {
                 m_lteUpdateRunning = false;
                 finish(std::move(status));
-            });
+            },
+            std::move(ask));
         if (!started) {
             m_lteUpdateRunning = false;
             m_running = false;

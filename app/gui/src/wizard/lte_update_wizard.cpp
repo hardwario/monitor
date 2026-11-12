@@ -36,6 +36,7 @@
 #include <QtTypes>
 
 #include <array>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
@@ -108,6 +109,8 @@ void LteUpdateWizard::start(const ErrorInfo& context, DeviceTabViewModel* tab) {
         m_remote = tab->remoteShare()->takeLteUpdateRequest();
     }
     if (!m_remote.isNull()) {
+        connect(m_remote.data(), &remote::LteUpdateReporter::supportQuestionChanged, this,
+                &Wizard::changed); // ADR-0368
         m_lteSource->setLteSource(FirmwareSourceViewModel::Designated);
         m_lteSource->prepareDesignated();
         m_services.dependencies()->ensureChecked();
@@ -284,7 +287,8 @@ WizardStep LteUpdateWizard::current() const {
         break;
     case Confirm:
         step.heading = tr("Ready to update the LTE MCU");
-        step.primaryText = tr("Continue");
+        // ADR-0368: in a remote update support answers; the customer has no button.
+        step.primaryText = supportDecides() ? QString() : tr("Continue");
         break;
     case Working:
         switch (m_procedure->step()) {
@@ -302,7 +306,7 @@ WizardStep LteUpdateWizard::current() const {
         break;
     case BackupFailed:
         step.heading = tr("No copy of the application");
-        step.primaryText = tr("Continue without a copy");
+        step.primaryText = supportDecides() ? QString() : tr("Continue without a copy");
         break;
     case Application:
         step.heading = tr("Put the application back");
@@ -356,7 +360,7 @@ bool LteUpdateWizard::canPrimary() const {
         return firmwareReady() && !m_tab.isNull() && !m_tab->choosing() && !m_tab->isBusy();
     case Confirm:
     case BackupFailed:
-        return true;
+        return !supportDecides(); // ADR-0368: support answers in a remote update
     case Application:
         return (useBackup() && hasBackup()) || m_appSource->readySource() != nullptr;
     case Failed:
@@ -442,8 +446,12 @@ void LteUpdateWizard::startProcedure() {
         emit changed();
         return;
     }
+    // ADR-0368: a remote update always writes the copy back (no question to the customer).
     m_procedure = std::make_unique<device::LteUpdateProcedure>(
-        *session, device::LteUpdateProcedure::Options{});
+        *session, device::LteUpdateProcedure::Options{.pollInterval = std::chrono::seconds(1),
+                                                      .backupDirectory = {},
+                                                      .autoRestore = !m_remote.isNull(),
+                                                      .now = {}});
     connect(m_procedure.get(), &device::LteUpdateProcedure::changed, this,
             &LteUpdateWizard::onProcedureChanged);
     connect(m_procedure.get(), &device::LteUpdateProcedure::progressChanged, this,
@@ -467,6 +475,11 @@ void LteUpdateWizard::startProcedure() {
 void LteUpdateWizard::onProcedureChanged() {
     if (m_procedure && m_procedure->step() == Step::ChooseApplication && !hasBackup()) {
         m_useBackup = false;
+        // ADR-0368: nothing to write back; support is told now (the LTE MCU is updated, the
+        // application not restored). The customer may still flash an application here.
+        if (!m_remote.isNull()) {
+            m_remote->finish();
+        }
     }
     emit changed();
 }
@@ -550,7 +563,21 @@ QString LteUpdateWizard::promptText() const {
                   "connectors. The guide stops the application, updates the LTE MCU and puts the "
                   "application back.");
     }
-    return m_procedure->promptText();
+    QString text = m_procedure->promptText();
+    // ADR-0368: support answers the remote update's questions.
+    if (supportDecides() && m_procedure->step() == Step::Confirm) {
+        text += QStringLiteral("\n\n") +
+                tr("HARDWARIO Support confirms the update. Keep the J-Link cable on the APP "
+                   "connector for now.");
+    } else if (supportDecides() && m_procedure->step() == Step::BackupFailed) {
+        text += QStringLiteral("\n\n") +
+                tr("HARDWARIO Support decides whether to continue without a copy.");
+    }
+    return text;
+}
+
+bool LteUpdateWizard::supportDecides() const {
+    return !m_remote.isNull() && m_remote->supportDecides();
 }
 
 QString LteUpdateWizard::illustration() const {

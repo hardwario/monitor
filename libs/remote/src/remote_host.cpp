@@ -25,6 +25,7 @@
 #include <QList>
 #include <QLoggingCategory>
 #include <QObject>
+#include <QRandomGenerator>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
@@ -40,6 +41,8 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <format>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -88,10 +91,27 @@ RemoteHost::RemoteHost(device::ConsoleSession& session, ConsentProvider& consent
     : QObject(parent), m_session(&session), m_consent(&consent), m_operations(operations),
       m_options(std::move(options)), m_code(m_options.code.value_or(SessionCode::generate())),
       m_transcript(m_options.limits.transcript) {
-    for (QTimer* timer : {&m_collisionTimer, &m_joinTimer, &m_operationTimer, &m_idleWarningTimer,
-                          &m_idleTimer, &m_lifetimeTimer, &m_helloTimer, &m_commandsTimer}) {
+    for (QTimer* timer :
+         {&m_collisionTimer, &m_joinTimer, &m_operationTimer, &m_idleWarningTimer, &m_idleTimer,
+          &m_lifetimeTimer, &m_helloTimer, &m_commandsTimer, &m_questionTimer}) {
         timer->setSingleShot(true);
     }
+    // ADR-0368: no answer from support in time = no (cancelled before anything changed).
+    connect(&m_questionTimer, &QTimer::timeout, this, [this] {
+        if (!m_question) {
+            return;
+        }
+        audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                         "Support did not answer within %1 s: cancelled."))
+                  .arg(std::chrono::duration_cast<std::chrono::seconds>(
+                           m_options.limits.operationTimeout)
+                           .count()));
+        SupportQuestion question = std::move(*m_question);
+        m_question.reset();
+        if (question.answer) {
+            question.answer(false);
+        }
+    });
     connect(&m_commandsTimer, &QTimer::timeout, this, &RemoteHost::sendCommands);
     connect(&m_collisionTimer, &QTimer::timeout, this, [this] {
         m_inCollisionWindow = false;
@@ -359,6 +379,9 @@ void RemoteHost::sendHello() {
     hello.ops = m_operations != nullptr;
     if (m_operations != nullptr) {
         hello.opKinds = m_operations->kinds(); // ADR-0363
+        // ADR-0368: support answers the questions of the LTE update.
+        hello.opQuestions =
+            std::ranges::find(hello.opKinds, tunnel::OpKind::LteUpdate) != hello.opKinds.end();
     }
     sendHost(hello);
     m_helloSent = true;
@@ -452,6 +475,10 @@ void RemoteHost::onTunnel(const QJsonValue& payload) {
     }
     if (const auto* learn = std::get_if<tunnel::Learn>(&*message)) {
         onLearn(*learn);
+        return;
+    }
+    if (const auto* answer = std::get_if<tunnel::OpAnswer>(&*message)) {
+        onAnswer(*answer);
         return;
     }
     if (const auto* hello = std::get_if<tunnel::JoinerHello>(&*message)) {
@@ -682,9 +709,66 @@ void RemoteHost::startOperation() {
             if (token == m_operationToken && m_operation) {
                 finishOperation(status);
             }
-        });
+        },
+        // ADR-0368: only a joiner that answers, and only for the LTE update.
+        operation.request.questions && operation.request.kind == tunnel::OpKind::LteUpdate
+            ? AskSupport(
+                  [this, token](tunnel::OpQuestionKind kind, std::function<void(bool)> answer) {
+                      askSupport(token, kind, std::move(answer));
+                  })
+            : AskSupport());
     if (!started) {
         finishOperation(started);
+    }
+}
+
+void RemoteHost::askSupport(std::uint64_t token, tunnel::OpQuestionKind kind,
+                            std::function<void(bool)> answer) {
+    if (token != m_operationToken || !m_operation || !m_operation->accepted ||
+        m_state == HostState::Ended) {
+        // The operation is over: no (asked on the next turn, never inside the caller).
+        QTimer::singleShot(0, this, [answer = std::move(answer)] { answer(false); });
+        return;
+    }
+    if (m_question) {
+        // One question at a time: the earlier one is answered no.
+        m_questionTimer.stop();
+        if (auto earlier = std::exchange(m_question, std::nullopt)->answer) {
+            earlier(false);
+        }
+    }
+    const std::string qid = std::format("q-{:08x}{:08x}", QRandomGenerator::system()->generate(),
+                                        QRandomGenerator::system()->generate());
+    m_question = SupportQuestion{.qid = qid, .kind = kind, .answer = std::move(answer)};
+    m_questionTimer.start(m_options.limits.operationTimeout);
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: waiting for support's answer: %2"))
+              .arg(operationSummary(m_operation->question), operationQuestionKindText(kind)));
+    sendHost(tunnel::OpQuestion{.id = m_operation->request.id, .qid = qid, .question = kind});
+}
+
+void RemoteHost::onAnswer(const tunnel::OpAnswer& answer) {
+    // ADR-0368: an allowed participant (checked by onTunnel), the open question of the running
+    // operation, once.
+    if (!m_question || !m_operation || !m_operation->accepted ||
+        answer.id != m_operation->request.id || answer.qid != m_question->qid) {
+        qCInfo(log::lcRemote) << "Operation answer dropped: no such open question";
+        return;
+    }
+    answerSupportQuestion(answer.yes);
+}
+
+void RemoteHost::answerSupportQuestion(bool yes) {
+    if (!m_question) {
+        return;
+    }
+    m_questionTimer.stop();
+    SupportQuestion question = std::move(*m_question);
+    m_question.reset();
+    activity();
+    audit(yes ? trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Support answered: continue."))
+              : trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Support answered: cancel.")));
+    if (question.answer) {
+        question.answer(yes);
     }
 }
 
@@ -695,6 +779,8 @@ void RemoteHost::finishOperation(const Status& status) {
     const QString summary = operationSummary(m_operation->question);
     const std::string id = m_operation->request.id;
     m_operation.reset();
+    m_questionTimer.stop();
+    m_question.reset(); // ADR-0368: the operation ended; its question is gone
     activity();
     if (status) {
         audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: done.")).arg(summary));
@@ -800,9 +886,18 @@ void RemoteHost::finish(std::optional<Error> error, bool notify) {
     }
     m_state = HostState::Ended;
     m_endError = std::move(error);
-    for (QTimer* timer : {&m_collisionTimer, &m_joinTimer, &m_operationTimer, &m_idleWarningTimer,
-                          &m_idleTimer, &m_lifetimeTimer, &m_helloTimer, &m_commandsTimer}) {
+    for (QTimer* timer :
+         {&m_collisionTimer, &m_joinTimer, &m_operationTimer, &m_idleWarningTimer, &m_idleTimer,
+          &m_lifetimeTimer, &m_helloTimer, &m_commandsTimer, &m_questionTimer}) {
         timer->stop();
+    }
+    // ADR-0368: an open question to support is answered no (nothing was changed yet).
+    if (m_question) {
+        audit(trRemote(
+            QT_TRANSLATE_NOOP("hwio::remote", "Support did not answer before the session ended.")));
+        if (auto answer = std::exchange(m_question, std::nullopt)->answer) {
+            answer(false);
+        }
     }
     ++m_joinToken;
     ++m_operationToken;

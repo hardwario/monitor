@@ -160,6 +160,12 @@ Result<HostMessage> decodeHostHello(const QJsonObject& data) {
     hello.device = DeviceInfo{
         .name = *name, .serial = *serial, .transport = *transport, .firmware = *firmware};
     hello.ops = ops.toBool();
+    // ADR-0368: optional; absent = false.
+    const QJsonValue questions = data.value(QStringLiteral("opQuestions"));
+    if (!questions.isUndefined() && !questions.isBool()) {
+        return bad("invalid opQuestions");
+    }
+    hello.opQuestions = hello.ops && questions.toBool(false);
     return hello;
 }
 
@@ -209,6 +215,45 @@ Result<HostMessage> decodeOpResult(const QJsonObject& data, const std::string& m
     return result;
 }
 
+// ADR-0368: a question id (the operation id rules).
+Result<std::string> qid(const QJsonObject& object) {
+    const QJsonValue value = object.value(QStringLiteral("qid"));
+    if (!value.isString() || !validId(toStdString(value.toString()))) {
+        return bad("invalid question id");
+    }
+    return toStdString(value.toString());
+}
+
+Result<HostMessage> decodeOpQuestion(const QJsonObject& data, const std::string& messageId) {
+    auto questionId = qid(data);
+    if (!questionId) {
+        return std::unexpected(std::move(questionId).error());
+    }
+    const QJsonValue kind = data.value(QStringLiteral("question"));
+    const auto question =
+        kind.isString() ? questionFromId(toStdString(kind.toString())) : std::nullopt;
+    if (!question) {
+        return bad("unknown question");
+    }
+    return OpQuestion{.id = messageId, .qid = *questionId, .question = *question};
+}
+
+Result<JoinerMessage> decodeOpAnswer(const QJsonObject& data) {
+    auto messageId = id(data);
+    if (!messageId) {
+        return std::unexpected(std::move(messageId).error());
+    }
+    auto questionId = qid(data);
+    if (!questionId) {
+        return std::unexpected(std::move(questionId).error());
+    }
+    const QJsonValue yes = data.value(QStringLiteral("yes"));
+    if (!yes.isBool()) {
+        return bad("invalid answer");
+    }
+    return OpAnswer{.id = *messageId, .qid = *questionId, .yes = yes.toBool()};
+}
+
 Result<JoinerMessage> decodeLearn(const QJsonObject& data) {
     const QJsonValue pathValue = data.value(QStringLiteral("path"));
     if (!pathValue.isArray() || pathValue.toArray().isEmpty() ||
@@ -248,8 +293,17 @@ Result<JoinerMessage> decodeOpRequest(const QJsonObject& data) {
     if (!target) {
         return bad("invalid target");
     }
-    OpRequest request{
-        .id = *messageId, .kind = *kind, .target = *target, .firmwareId = std::nullopt};
+    OpRequest request{.id = *messageId,
+                      .kind = *kind,
+                      .target = *target,
+                      .firmwareId = std::nullopt,
+                      .questions = false};
+    // ADR-0368: optional; only `true` is sent.
+    const QJsonValue questions = data.value(QStringLiteral("questions"));
+    if (!questions.isUndefined() && !questions.isBool()) {
+        return bad("invalid questions");
+    }
+    request.questions = questions.toBool(false);
     const QJsonValue firmware = data.value(QStringLiteral("firmwareId"));
     if (*kind == OpKind::Flash) {
         if (!firmware.isString()) {
@@ -372,6 +426,20 @@ std::optional<OpKind> kindFromId(std::string_view id) noexcept {
     return std::nullopt;
 }
 
+std::string_view questionId(OpQuestionKind kind) noexcept {
+    return kind == OpQuestionKind::ContinueWithoutCopy ? "continueWithoutCopy" : "continue";
+}
+
+std::optional<OpQuestionKind> questionFromId(std::string_view id) noexcept {
+    if (id == "continue") {
+        return OpQuestionKind::Continue;
+    }
+    if (id == "continueWithoutCopy") {
+        return OpQuestionKind::ContinueWithoutCopy;
+    }
+    return std::nullopt;
+}
+
 std::optional<OpTarget> targetFromId(std::string_view id) noexcept {
     if (id == "app") {
         return OpTarget::App;
@@ -417,6 +485,9 @@ QJsonObject encodeHost(const HostMessage& message) {
                     }
                 }
                 d.insert(QStringLiteral("opKinds"), kinds);
+                if (hello.opQuestions) { // ADR-0368
+                    d.insert(QStringLiteral("opQuestions"), true);
+                }
                 return d;
             },
             [](const OpAccepted& accepted) {
@@ -449,6 +520,13 @@ QJsonObject encodeHost(const HostMessage& message) {
                     error.insert(QStringLiteral("code"), q(*result.code));
                     d.insert(QStringLiteral("error"), error);
                 }
+                return d;
+            },
+            [](const OpQuestion& question) {
+                QJsonObject d = envelope("op-question");
+                d.insert(QStringLiteral("id"), q(question.id));
+                d.insert(QStringLiteral("qid"), q(question.qid));
+                d.insert(QStringLiteral("question"), q(questionId(question.question)));
                 return d;
             },
             [](const HostEnd& end) {
@@ -489,6 +567,16 @@ QJsonObject encodeJoiner(const JoinerMessage& message) {
                            if (request.firmwareId) {
                                d.insert(QStringLiteral("firmwareId"), q(*request.firmwareId));
                            }
+                           if (request.questions) { // ADR-0368
+                               d.insert(QStringLiteral("questions"), true);
+                           }
+                           return d;
+                       },
+                       [](const OpAnswer& answer) {
+                           QJsonObject d = envelope("op-answer");
+                           d.insert(QStringLiteral("id"), q(answer.id));
+                           d.insert(QStringLiteral("qid"), q(answer.qid));
+                           d.insert(QStringLiteral("yes"), answer.yes);
                            return d;
                        },
                        [](const Learn& learn) {
@@ -564,6 +652,9 @@ Result<HostMessage> decodeHost(const QJsonValue& payload) {
     if (type == QStringLiteral("op-result")) {
         return decodeOpResult(*data, *messageId);
     }
+    if (type == QStringLiteral("op-question")) {
+        return decodeOpQuestion(*data, *messageId);
+    }
     return bad("unknown host message type");
 }
 
@@ -586,6 +677,9 @@ Result<JoinerMessage> decodeJoiner(const QJsonValue& payload) {
     }
     if (type == QStringLiteral("learn")) {
         return decodeLearn(*data);
+    }
+    if (type == QStringLiteral("op-answer")) {
+        return decodeOpAnswer(*data);
     }
     if (type != QStringLiteral("op-request")) {
         return bad("unknown joiner message type");

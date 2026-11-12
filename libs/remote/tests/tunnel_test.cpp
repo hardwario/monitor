@@ -203,6 +203,88 @@ device::CommandTree sampleTree() {
     return tree;
 }
 
+// ADR-0368: support's questions - the hello flag, the request flag, op-question and op-answer.
+TEST(Tunnel, OperationQuestionsRoundTrip) {
+    HostHello hello{
+        .app = "hwio-monitor",
+        .version = "2.1.0",
+        .device = {.name = "CHESTER", .serial = "1", .transport = "jlink", .firmware = ""},
+        .ops = true,
+        .opKinds = {OpKind::LteUpdate},
+        .opQuestions = true};
+    auto decodedHello = decodeHost(encodeHost(hello));
+    ASSERT_TRUE(decodedHello.has_value()) << decodedHello.error().detail;
+    EXPECT_TRUE(std::get<HostHello>(*decodedHello).opQuestions);
+    hello.opQuestions = false;
+    const QJsonObject without = encodeHost(hello);
+    EXPECT_FALSE(
+        without.value(QStringLiteral("data")).toObject().contains(QStringLiteral("opQuestions")));
+    EXPECT_FALSE(std::get<HostHello>(*decodeHost(without)).opQuestions);
+
+    const OpRequest request{.id = "op-1",
+                            .kind = OpKind::LteUpdate,
+                            .target = OpTarget::Lte,
+                            .firmwareId = std::nullopt,
+                            .questions = true};
+    auto decodedRequest = decodeJoiner(encodeJoiner(request));
+    ASSERT_TRUE(decodedRequest.has_value()) << decodedRequest.error().detail;
+    EXPECT_TRUE(std::get<OpRequest>(*decodedRequest).questions);
+
+    for (const OpQuestionKind kind :
+         {OpQuestionKind::Continue, OpQuestionKind::ContinueWithoutCopy}) {
+        auto question =
+            decodeHost(encodeHost(OpQuestion{.id = "op-1", .qid = "q-1", .question = kind}));
+        ASSERT_TRUE(question.has_value()) << question.error().detail;
+        const auto& q = std::get<OpQuestion>(*question);
+        EXPECT_EQ(q.id, "op-1");
+        EXPECT_EQ(q.qid, "q-1");
+        EXPECT_EQ(q.question, kind);
+        EXPECT_EQ(questionFromId(questionId(kind)), kind);
+    }
+    EXPECT_EQ(questionId(OpQuestionKind::Continue), "continue");
+    EXPECT_EQ(questionId(OpQuestionKind::ContinueWithoutCopy), "continueWithoutCopy");
+    EXPECT_FALSE(questionFromId("erase").has_value());
+
+    auto answer = decodeJoiner(encodeJoiner(OpAnswer{.id = "op-1", .qid = "q-1", .yes = true}));
+    ASSERT_TRUE(answer.has_value()) << answer.error().detail;
+    EXPECT_TRUE(std::get<OpAnswer>(*answer).yes);
+    EXPECT_EQ(std::get<OpAnswer>(*answer).qid, "q-1");
+}
+
+TEST(Tunnel, RejectsInvalidOperationQuestions) {
+    for (
+        const char* text : {
+            R"({"event": "hwio", "data": {"v": 1, "type": "op-question", "id": "a", "question": "continue"}})",
+            R"({"event": "hwio", "data": {"v": 1, "type": "op-question", "id": "a", "qid": "q 1", "question": "continue"}})",
+            R"({"event": "hwio", "data": {"v": 1, "type": "op-question", "id": "a", "qid": "q", "question": "erase"}})",
+            R"({"event": "hwio", "data": {"v": 1, "type": "op-question", "id": "a", "qid": "q", "question": 1}})",
+            R"({"event": "hwio", "data": {"v": 1, "type": "op-question", "qid": "q", "question": "continue"}})",
+            R"({"event": "hwio", "data": {"v": 1, "type": "hello", "app": "hwio-monitor", "version": "2", "device": {"name": "", "serial": "", "transport": "", "firmware": ""}, "ops": true, "opQuestions": "yes"}})",
+        }) {
+        const auto decoded = decodeHost(json(text));
+        ASSERT_FALSE(decoded.has_value()) << text;
+        EXPECT_EQ(decoded.error().code, ErrorCode::RemoteProtocolError);
+    }
+    for (
+        const char* text : {
+            R"({"hwio": {"v": 1, "type": "op-answer", "id": "a", "qid": "q"}})",
+            R"({"hwio": {"v": 1, "type": "op-answer", "id": "a", "qid": "q", "yes": "y"}})",
+            R"({"hwio": {"v": 1, "type": "op-answer", "id": "a", "yes": true}})",
+            R"({"hwio": {"v": 1, "type": "op-answer", "qid": "q", "yes": true}})",
+            R"({"hwio": {"v": 1, "type": "op-answer", "id": "a", "qid": "0123456789012345678901234567890123", "yes": true}})",
+            R"({"hwio": {"v": 1, "type": "op-request", "id": "a", "kind": "lteUpdate", "questions": 1}})",
+        }) {
+        const auto decoded = decodeJoiner(json(text));
+        ASSERT_FALSE(decoded.has_value()) << text;
+        EXPECT_EQ(decoded.error().code, ErrorCode::RemoteProtocolError);
+    }
+    // ops: false never offers questions.
+    const auto noOps = decodeHost(json(
+        R"({"event": "hwio", "data": {"v": 1, "type": "hello", "app": "hwio-monitor", "version": "2", "device": {"name": "", "serial": "", "transport": "", "firmware": ""}, "ops": false, "opQuestions": true}})"));
+    ASSERT_TRUE(noOps.has_value());
+    EXPECT_FALSE(std::get<HostHello>(*noOps).opQuestions);
+}
+
 TEST(Tunnel, CommandsRoundTrip) {
     const device::CommandTree tree = sampleTree();
     auto decoded = decodeHost(encodeCommands(tree, true));

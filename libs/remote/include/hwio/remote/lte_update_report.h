@@ -15,6 +15,11 @@
 // A failure the procedure can retry (the GUI wizard's [Try again]) is reported only by finish()
 // (the wizard closes); every other end is reported when the procedure finishes.
 //
+// Support decides (ADR-0368, setAskSupport()): when the followed procedure reaches Confirm or
+// BackupFailed, the reporter asks support once per step; on the next turn of the event loop yes
+// runs confirm() / continueWithoutBackup(), no (also no answer, a closed session) cancel() - the
+// customer is not asked (supportDecides() tells the GUI and the terminal flow).
+//
 // Owner thread of the procedure only. The procedure must outlive follow() or be followed by
 // another one / abandon() first (it is kept as a QPointer anyway).
 
@@ -28,6 +33,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <utility>
 
 namespace hwio::remote {
 
@@ -52,16 +58,25 @@ public:
     void finish(Status status);
     // No more callbacks.
     void abandon();
-
+    // ADR-0368: support answers the update's questions (empty = the customer does).
+    void setAskSupport(AskSupport ask) { m_ask = std::move(ask); }
+    [[nodiscard]] bool supportDecides() const noexcept { return static_cast<bool>(m_ask); }
+    // A question to support is open (asked, its answer not applied yet).
+    [[nodiscard]] bool supportQuestionOpen() const noexcept { return m_questionOpen; }
     [[nodiscard]] bool done() const noexcept { return m_done; }
     // The LTE MCU got its new firmware (the procedure passed its LTE update).
     [[nodiscard]] bool lteUpdated() const noexcept { return m_lteUpdated; }
+
+signals:
+    // supportQuestionOpen() or supportDecides() changed (asked, answered and applied, abandoned).
+    void supportQuestionChanged();
 
 private:
     void onChanged();
     void onProgress();
     void onFinished();
     void report(const OperationUpdate& update);
+    void askSupport(device::LteUpdateProcedure::Step step);
     [[nodiscard]] Status result() const;
 
     LteUpdateRunner::Progress m_progress;
@@ -71,6 +86,10 @@ private:
     bool m_lteUpdated = false;
     bool m_done = false;
     QTimer m_heartbeat{this};
+    AskSupport m_ask;
+    bool m_askedContinue = false;
+    bool m_askedCopy = false;
+    bool m_questionOpen = false;
 };
 
 } // namespace hwio::remote

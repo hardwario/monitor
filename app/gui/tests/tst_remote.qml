@@ -230,6 +230,41 @@ TestCase {
         verify(tab().remoteJoin.operationPending);
     }
 
+    // ADR-0368: the customer's Monitor asks support (Continue before the erase, Continue without a
+    // copy) on the joiner's Flash card; the answer goes back as op-answer and the question closes.
+    function test_joinerAnswersTheLteUpdateQuestions() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(true);
+        tryVerify(() => tab().remoteJoin.lteUpdateAvailable, 10000);
+        AppViewModel.showPage("flash");
+        tryVerify(() => shown("remoteFlashCard").length === 1, 5000);
+        tab().remoteJoin.requestOperation("lteUpdate", "lte", "");
+        tryVerify(() => testSupport.remoteRequestedKind() === "lteUpdate", 10000);
+        testSupport.remoteHostAccept();
+        verify(shown("remoteQuestion").length === 0);
+
+        testSupport.remoteHostQuestion("continue");
+        tryVerify(() => shown("remoteQuestion").length === 1, 5000);
+        verify(one("remoteQuestionText").text.indexOf("will be erased") >= 0, one("remoteQuestionText").text);
+        compare(one("remoteQuestionYes").text, "Continue");
+        one("remoteQuestionYes").clicked();
+        tryVerify(() => testSupport.remoteLastAnswer() === "yes", 5000);
+        tryVerify(() => shown("remoteQuestion").length === 0, 5000);
+
+        testSupport.remoteHostQuestion("continueWithoutCopy");
+        tryVerify(() => shown("remoteQuestion").length === 1, 5000);
+        compare(one("remoteQuestionText").text, "The application could not be copied. Continue without a copy?");
+        one("remoteQuestionNo").clicked();
+        tryVerify(() => testSupport.remoteLastAnswer() === "no", 5000);
+        tryVerify(() => shown("remoteQuestion").length === 0, 5000);
+
+        testSupport.remoteHostResult("cancelled");
+        tryVerify(() => !tab().remoteJoin.operationPending, 5000);
+    }
+
     // ADR-0364: a remote tab completes from the Monitor host's command tree and asks the host for
     // a command's subcommands (tunnel `learn`), without any query of its own.
     function test_remoteTabCompletesFromTheHostsCommands() {

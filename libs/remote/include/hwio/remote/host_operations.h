@@ -50,9 +50,15 @@ struct OperationUpdate {
     std::uint64_t total = 0;
 };
 
+// ADR-0368: asks support a question of the running operation; `answer` is called once, later
+// (true = yes; false = no, no answer in time, or the session ended). Empty = the joiner cannot
+// answer: the customer decides (ADR-0366).
+using AskSupport = std::function<void(tunnel::OpQuestionKind, std::function<void(bool)> answer)>;
+
 // Runs the guided LTE update for an allowed lteUpdate request (ADR-0363): the GUI opens Flash ›
 // Update LTE firmware… with the recommended firmware and starts it, the CLI runs the terminal flow
-// of `hwio chester lte flash --guided`. The customer does the cable steps. Owner thread only.
+// of `hwio chester lte flash --guided`. The customer does the cable steps; the copy of the
+// application is always written back (ADR-0368). Owner thread only.
 class LteUpdateRunner {
 public:
     using Progress = std::function<void(const OperationUpdate&)>;
@@ -70,7 +76,9 @@ public:
     // remote.application_not_restored (updated, the application not written back), cancelled,
     // or the update's error (target.reset_during_update, network.*, firmware.*, ...). Errors
     // (immediate): internal.busy (a wizard or operation is open), those of the start.
-    [[nodiscard]] virtual Status start(Progress progress, Finished finished) = 0;
+    // `ask` (ADR-0368): support answers Continue and Continue without a copy; empty = the
+    // customer does.
+    [[nodiscard]] virtual Status start(Progress progress, Finished finished, AskSupport ask) = 0;
     // The session ends: no more callbacks. The guided update itself stays with the customer (it
     // is not interrupted while they move the cable).
     virtual void abandon() = 0;
@@ -100,10 +108,11 @@ public:
     // The catalog page of a flash request's firmware (for the confirmation text); `done` once.
     // Errors: remote.firmware_not_in_catalog (unknown ID), network.*, cancelled.
     virtual void lookup(const std::string& firmwareId, LookupDone done) = 0;
-    // Starts an allowed request; `progress` any number of times, then `finished` once. Errors
-    // (immediate): internal.busy (one runs), those of the session.
+    // Starts an allowed request; `progress` any number of times, then `finished` once; `ask`
+    // (ADR-0368, may be empty) goes to the LTE update. Errors (immediate): internal.busy (one
+    // runs), those of the session.
     [[nodiscard]] virtual Status start(const tunnel::OpRequest& request, Progress progress,
-                                       Finished finished) = 0;
+                                       Finished finished, AskSupport ask) = 0;
     // The session ends: a lookup or download is cancelled and no callback follows; an operation
     // already running on the device finishes (it is not interrupted half-way), unreported.
     virtual void abandon() = 0;
@@ -131,7 +140,7 @@ public:
     [[nodiscard]] Status validate(const tunnel::OpRequest& request) const override;
     void lookup(const std::string& firmwareId, LookupDone done) override;
     [[nodiscard]] Status start(const tunnel::OpRequest& request, Progress progress,
-                               Finished finished) override;
+                               Finished finished, AskSupport ask) override;
     void abandon() override;
 
 private:

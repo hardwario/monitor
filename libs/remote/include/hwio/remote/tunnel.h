@@ -13,6 +13,14 @@
 // (device::LteUpdateProcedure::stepId: "connect-app", "confirm" (ADR-0366: the customer's
 // Continue), "backup", "erase", "connect-lte", "update-lte", "connect-app-again",
 // "choose-application", "restore"; "download" before it).
+// ADR-0368: support answers the questions of a remote LTE update. The host's hello says
+// `opQuestions: true`; a joiner that can answer sends `questions: true` in its op-request. Then
+// host → joiners `op-question` {id, qid, question: "continue" | "continueWithoutCopy"} and joiner →
+// host `op-answer` {id, qid, yes}. The relay does not tell the host who sent a `write` (every
+// participant sees every event), so the host accepts an answer from an allowed participant only,
+// only for its open question (operation id and the host's random qid), and only once; the texts are
+// the joiner's own (translated there), never sent. Without the feature on either side the customer
+// answers (ADR-0366).
 // ADR-0364: host → joiners `commands` {tree: <device::CommandTree JSON>} (the host's learned
 // command tree for the joiner's autocomplete), joiner → host `learn` {path: [names]} (the host
 // learns that command's subcommands with its silent query). The tree is untrusted input: at most
@@ -58,11 +66,18 @@ inline constexpr std::size_t maxCommandDepth = 8;
 enum class OpKind : std::uint8_t { Flash, Erase, Recover, Reset, LteUpdate };
 inline constexpr std::size_t maxOpKinds = 16; // entries of a hello's opKinds
 enum class OpTarget : std::uint8_t { App, Lte };
+// ADR-0368: the questions of a remote LTE update that support answers.
+enum class OpQuestionKind : std::uint8_t {
+    Continue,            // ADR-0366: the application will be erased; go on?
+    ContinueWithoutCopy, // the application could not be copied; go on without a copy?
+};
 
 [[nodiscard]] std::string_view kindId(OpKind kind) noexcept; // "flash", "erase", ..., "lteUpdate"
 [[nodiscard]] std::string_view targetId(OpTarget target) noexcept; // "app", "lte"
 [[nodiscard]] std::optional<OpKind> kindFromId(std::string_view id) noexcept;
 [[nodiscard]] std::optional<OpTarget> targetFromId(std::string_view id) noexcept;
+[[nodiscard]] std::string_view questionId(OpQuestionKind kind) noexcept; // "continue", ...
+[[nodiscard]] std::optional<OpQuestionKind> questionFromId(std::string_view id) noexcept;
 
 struct DeviceInfo {
     std::string name;      // "CHESTER-M"
@@ -80,6 +95,8 @@ struct HostHello {
     // ADR-0363: the kinds it runs (empty when !ops). Decoded: unknown kinds are skipped; a hello
     // without the field gets the four kinds of ADR-0322 when ops is true.
     std::vector<OpKind> opKinds;
+    // ADR-0368: the host sends op-question to a joiner whose request says `questions`.
+    bool opQuestions = false;
 };
 // The host runs `kind` (ops and opKinds).
 [[nodiscard]] bool supports(const HostHello& hello, OpKind kind) noexcept;
@@ -108,12 +125,18 @@ struct HostEnd {
     std::string code =
         "cancelled"; // a hwio::Error id: "cancelled" (End sharing), "remote.idle", ...
 };
+// ADR-0368: a question of the running operation for support (the joiner's text for `question`).
+struct OpQuestion {
+    std::string id;  // the operation
+    std::string qid; // the question (random, the host's)
+    OpQuestionKind question = OpQuestionKind::Continue;
+};
 // ADR-0364: the host's command tree (never null when decoded).
 struct HostCommands {
     std::shared_ptr<const device::CommandTree> tree;
 };
-using HostMessage =
-    std::variant<HostHello, OpAccepted, OpDenied, OpProgress, OpResult, HostEnd, HostCommands>;
+using HostMessage = std::variant<HostHello, OpAccepted, OpDenied, OpProgress, OpResult, HostEnd,
+                                 HostCommands, OpQuestion>;
 
 // ---- joiner → host ----
 struct JoinerHello {
@@ -125,12 +148,19 @@ struct OpRequest {
     OpKind kind = OpKind::Reset;
     OpTarget target = OpTarget::App;       // not sent for lteUpdate (decoded as Lte)
     std::optional<std::string> firmwareId; // flash only: a catalog firmware ID (32 hex digits)
+    bool questions = false; // ADR-0368: the joiner answers op-question (sent only when true)
 };
 // ADR-0364: learn the subcommands of the command at `path` (1..maxCommandDepth names).
 struct Learn {
     std::vector<std::string> path;
 };
-using JoinerMessage = std::variant<JoinerHello, OpRequest, Learn>;
+// ADR-0368: support's answer to an op-question.
+struct OpAnswer {
+    std::string id;
+    std::string qid;
+    bool yes = false;
+};
+using JoinerMessage = std::variant<JoinerHello, OpRequest, Learn, OpAnswer>;
 
 // The `at` payload {event: "hwio", data: …}.
 [[nodiscard]] QJsonObject encodeHost(const HostMessage& message);

@@ -75,5 +75,9 @@ public:
 // The joiner's text of an op-progress phase: the steps of the guided LTE update (ADR-0363) and
 // "download" translated ("waiting for the J-Link on the LTE connector"), other phases as sent.
 [[nodiscard]] QString operationPhaseText(std::string_view phase);
+// ADR-0368: support's question of a remote LTE update (the joiner's text; also the host's audit
+// line): "The application on the customer's CHESTER will be erased. … Continue?", "The
+// application could not be copied. Continue without a copy?"
+[[nodiscard]] QString operationQuestionKindText(tunnel::OpQuestionKind kind);
 
 } // namespace hwio::remote

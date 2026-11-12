@@ -228,7 +228,7 @@ public:
         return result;
     }
     // The participant acts as a Monitor host: a sync and its hello (operations; `lteUpdate`: the
-    // guided LTE update in opKinds).
+    // guided LTE update in opKinds, with support's questions, ADR-0368).
     Q_INVOKABLE void remoteMonitorHost(bool lteUpdate) const {
         if (!m_participant) {
             return;
@@ -250,7 +250,64 @@ public:
                                                                       .transport = "jlink",
                                                                       .firmware = {}},
                                                            .ops = true,
-                                                           .opKinds = kinds}));
+                                                           .opKinds = kinds,
+                                                           .opQuestions = lteUpdate}));
+    }
+    // The ID of the last operation request the participant received ("" for none).
+    [[nodiscard]] std::string remoteRequestId() const {
+        std::string id;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("write"))) {
+                if (auto message = hwio::remote::tunnel::decodeJoiner(event.payload)) {
+                    if (const auto* r = std::get_if<hwio::remote::tunnel::OpRequest>(&*message)) {
+                        id = r->id;
+                    }
+                }
+            }
+        }
+        return id;
+    }
+    // The participant (a Monitor host) answers the last request: op-accepted, an op-question
+    // (ADR-0368: "continue" | "continueWithoutCopy", qid "q-qml"), the op-result (`code` "" = ok).
+    Q_INVOKABLE void remoteHostAccept() const {
+        if (m_participant) {
+            m_participant->emitEvent(QStringLiteral("at"), hwio::remote::tunnel::encodeHost(
+                                                               hwio::remote::tunnel::OpAccepted{
+                                                                   .id = remoteRequestId()}));
+        }
+    }
+    Q_INVOKABLE void remoteHostQuestion(const QString& question) const {
+        const auto kind = hwio::remote::tunnel::questionFromId(question.toStdString());
+        if (m_participant && kind) {
+            m_participant->emitEvent(
+                QStringLiteral("at"),
+                hwio::remote::tunnel::encodeHost(hwio::remote::tunnel::OpQuestion{
+                    .id = remoteRequestId(), .qid = "q-qml", .question = *kind}));
+        }
+    }
+    Q_INVOKABLE void remoteHostResult(const QString& code) const {
+        if (m_participant) {
+            m_participant->emitEvent(
+                QStringLiteral("at"),
+                hwio::remote::tunnel::encodeHost(hwio::remote::tunnel::OpResult{
+                    .id = remoteRequestId(),
+                    .ok = code.isEmpty(),
+                    .code = code.isEmpty() ? std::nullopt : std::optional(code.toStdString())}));
+        }
+    }
+    // ADR-0368: the last op-answer the participant received: "yes", "no" or "" (none).
+    Q_INVOKABLE [[nodiscard]] QString remoteLastAnswer() const {
+        QString answer;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("write"))) {
+                if (auto message = hwio::remote::tunnel::decodeJoiner(event.payload)) {
+                    if (const auto* a = std::get_if<hwio::remote::tunnel::OpAnswer>(&*message)) {
+                        answer = a->yes ? QStringLiteral("yes") : QStringLiteral("no");
+                    }
+                }
+            }
+        }
+        return answer;
     }
     // ADR-0364: the participant (a Monitor host) sends its command tree: `names` at the top level.
     Q_INVOKABLE void remoteHostCommands(const QStringList& names) const {

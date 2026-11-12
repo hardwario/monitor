@@ -22,7 +22,9 @@
 // the request's result (the wizard stays open on step 1). The request follows the procedure
 // (LteUpdateReporter) and ends when the wizard closes. Plan 0046 (ADR-0366): like a local update
 // it stops at Confirm until the customer clicks [Continue] (the reporter's heartbeat keeps the
-// joiner's request alive meanwhile).
+// joiner's request alive meanwhile). ADR-0368: when support answers (the joiner said so), Confirm
+// and BackupFailed show no button (support's answer moves on, a no cancels), and the copy is always
+// written back; without a copy support is told at once.
 //
 // Ownership: created by the WizardRegistry factory with the WizardViewModel as Qt parent; keeps
 // the tab as QPointer (wizard contract). GUI thread only.
@@ -133,6 +135,8 @@ public:
 
     // The procedure (tests).
     [[nodiscard]] device::LteUpdateProcedure* procedure() const { return m_procedure.get(); }
+    // ADR-0368: a remote update whose questions HARDWARIO Support answers (no customer button).
+    [[nodiscard]] bool supportDecides() const;
 
 signals:
     void progressChanged();

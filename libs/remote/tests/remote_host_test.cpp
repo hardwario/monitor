@@ -374,8 +374,9 @@ TEST(RemoteHost, WebTerminalJoinerHelloTimeoutIsAudited) {
 // ---- operations (ADR-0336) ----
 
 struct OpsFixture {
-    explicit OpsFixture(const FakeRelay& relay)
-        : f(optionsFor(relay), &operations), joiner(relay.url(), nsp) {}
+    explicit OpsFixture(const FakeRelay& relay) : OpsFixture(relay, optionsFor(relay)) {}
+    OpsFixture(const FakeRelay& relay, HostOptions options)
+        : f(std::move(options), &operations), joiner(relay.url(), nsp) {}
     FakeOperations operations;
     HostFixture f;
     RawParticipant joiner;
@@ -580,6 +581,84 @@ TEST(RemoteHostOperations, LteUpdateAskedWithTheRecommendedFirmware) {
     // Plan 0046 (ADR-0366): the joiner's text while the customer confirms.
     EXPECT_EQ(operationPhaseText("confirm"),
               QStringLiteral("waiting for the customer to continue"));
+}
+
+// ADR-0368: support answers the LTE update's questions - only a request with `questions` gets
+// AskSupport; an op-answer counts only for the open question (operation id and qid), once; no
+// answer within operationTimeout or the session's end answers no.
+TEST(RemoteHostOperations, LteUpdateQuestionsGoToSupport) {
+    FakeRelay relay;
+    HostOptions options = optionsFor(relay);
+    options.limits.operationTimeout = 1500ms;
+    OpsFixture o(relay, options);
+    o.f.host.start();
+    ASSERT_TRUE(runUntil([&] { return o.f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return o.f.host.commandsAllowed(); }));
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::HostHello>().has_value(); }));
+    EXPECT_TRUE(o.last<tunnel::HostHello>().value_or(tunnel::HostHello{}).opQuestions);
+
+    // Without `questions` the customer answers (ADR-0366): no AskSupport.
+    o.requestOp(tunnel::OpRequest{.id = "lte0",
+                                  .kind = tunnel::OpKind::LteUpdate,
+                                  .target = tunnel::OpTarget::Lte,
+                                  .firmwareId = std::nullopt,
+                                  .questions = false});
+    ASSERT_TRUE(runUntil([&] { return o.operations.started.size() == 1; }));
+    EXPECT_FALSE(static_cast<bool>(o.operations.ask));
+    o.operations.finished(Status{});
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpResult>().has_value(); }));
+
+    o.requestOp(tunnel::OpRequest{.id = "lte1",
+                                  .kind = tunnel::OpKind::LteUpdate,
+                                  .target = tunnel::OpTarget::Lte,
+                                  .firmwareId = std::nullopt,
+                                  .questions = true});
+    ASSERT_TRUE(runUntil([&] { return o.operations.started.size() == 2; }));
+    ASSERT_TRUE(static_cast<bool>(o.operations.ask));
+    std::vector<bool> answers;
+    o.operations.ask(tunnel::OpQuestionKind::Continue, [&](bool yes) { answers.push_back(yes); });
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpQuestion>().has_value(); }));
+    const tunnel::OpQuestion question = o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{});
+    EXPECT_EQ(question.id, "lte1");
+    EXPECT_EQ(question.question, tunnel::OpQuestionKind::Continue);
+    EXPECT_TRUE(o.f.console.hasEvent("waiting for support's answer"));
+    const auto answer = [&](const std::string& id, const std::string& qid, bool yes) {
+        o.joiner.emitEvent(QStringLiteral("write"), tunnel::encodeJoiner(tunnel::OpAnswer{
+                                                        .id = id, .qid = qid, .yes = yes}));
+    };
+    answer("lte1", "q-other", true);    // not the open question
+    answer("lte0", question.qid, true); // not this operation
+    runFor(300ms);
+    EXPECT_TRUE(answers.empty());
+    answer("lte1", question.qid, true);
+    ASSERT_TRUE(runUntil([&] { return answers.size() == 1; }));
+    EXPECT_TRUE(answers.front());
+    EXPECT_TRUE(o.f.console.hasEvent("Support answered: continue."));
+    answer("lte1", question.qid, false); // only once
+    runFor(300ms);
+    EXPECT_EQ(answers.size(), 1U);
+
+    // No answer in time: no.
+    o.operations.ask(tunnel::OpQuestionKind::ContinueWithoutCopy,
+                     [&](bool yes) { answers.push_back(yes); });
+    ASSERT_TRUE(runUntil([&] { return answers.size() == 2; }, 10s));
+    EXPECT_FALSE(answers.back());
+    EXPECT_TRUE(o.f.console.hasEvent("Support did not answer within 60 s"));
+
+    // The session ends with a question open: no.
+    o.operations.ask(tunnel::OpQuestionKind::Continue, [&](bool yes) { answers.push_back(yes); });
+    ASSERT_TRUE(runUntil([&] {
+        return o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{}).qid != question.qid;
+    }));
+    auto ask = o.operations.ask; // abandon() clears the fake's copy
+    o.f.host.end();
+    ASSERT_EQ(answers.size(), 3U);
+    EXPECT_FALSE(answers.back());
+    // After the end every question is answered no (on the next turn).
+    ask(tunnel::OpQuestionKind::Continue, [&](bool yes) { answers.push_back(yes); });
+    ASSERT_TRUE(runUntil([&] { return answers.size() == 4; }));
+    EXPECT_FALSE(answers.back());
 }
 
 TEST(RemoteHostOperations, LteUpdateRefusedWhenTheHostHasNone) {

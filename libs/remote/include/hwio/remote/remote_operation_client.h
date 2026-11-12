@@ -9,6 +9,11 @@
 // catalog lookup), then inactivityTimeout between progress messages and the result. Results are
 // the customer's Monitor's report: a failed op-result carries the host's error code, translated
 // here (unknown codes: remote.protocol_error).
+//
+// ADR-0368: with setAnswersQuestions(true) an lteUpdate request to a host whose hello says
+// opQuestions carries `questions`; the host's op-question for the pending operation emits
+// question(), and answer() sends op-answer once (the question closes; the host decides the rest,
+// e.g. no answer within its 60 s is no).
 
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
@@ -46,6 +51,14 @@ public:
     [[nodiscard]] Result<std::string> request(tunnel::OpKind kind, tunnel::OpTarget target,
                                               std::optional<std::string> firmwareId = std::nullopt);
     [[nodiscard]] bool busy() const noexcept { return m_pending.has_value(); }
+    // ADR-0368: this joiner answers the questions of a remote LTE update (a person is there).
+    void setAnswersQuestions(bool answers) noexcept { m_answers = answers; }
+    // The open question of the pending operation (nullopt when none).
+    [[nodiscard]] std::optional<tunnel::OpQuestionKind> openQuestion() const noexcept {
+        return m_question ? std::optional(m_question->question) : std::nullopt;
+    }
+    // Answers the open question. Errors: usage.invalid_argument (none open), those of sending.
+    [[nodiscard]] Status answer(bool yes);
     [[nodiscard]] bool isAccepted() const noexcept { return m_accepted; }
     // Forgets the pending operation (no more signals for it).
     void abandon();
@@ -57,6 +70,9 @@ signals:
     // Once per request: the host's result, a denial (remote.operation_denied, internal.busy,
     // remote.firmware_not_in_catalog, ...), timeout, or remote.host_ended.
     void finished(bool ok, const hwio::Error& error);
+    // ADR-0368: the host asks support (openQuestion()); questionClosed() after answer() or the end.
+    void question(hwio::remote::tunnel::OpQuestionKind kind);
+    void questionClosed();
 
 private:
     void onMessage(const tunnel::HostMessage& message);
@@ -66,6 +82,8 @@ private:
     RemoteOperationLimits m_limits;
     std::optional<std::string> m_pending;
     bool m_accepted = false;
+    bool m_answers = false;
+    std::optional<tunnel::OpQuestion> m_question;
     QTimer m_timer{this};
 };
 

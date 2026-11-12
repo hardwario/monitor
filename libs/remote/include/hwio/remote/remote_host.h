@@ -39,6 +39,13 @@
 // (Deny after operationTimeout, remote.operation_denied). Allow → op-accepted, op-progress (at most
 // progressInterval apart), op-result (a new phase at once, ADR-0363).
 //
+// Support's questions (ADR-0368): the hello says opQuestions when the host runs lteUpdate. An
+// lteUpdate request with `questions` gets an AskSupport for its run: a question is sent as
+// op-question (a random qid; one open at a time) and answered by an op-answer of an allowed
+// participant (no join question open) for that operation and qid, once; any other answer is
+// dropped. No answer within operationTimeout, or the session ending, answers no (the update is
+// then cancelled before anything changed). Audited: asked, answered, not answered.
+//
 // Autocomplete (ADR-0364): setCommandTree() gives the host's learned command tree (the GUI tab's
 // ConsoleViewModel, the CLI host's learner, on every change); after a join is allowed, and on
 // every change while allowed (coalesced), it is sent as tunnel `commands` with its help texts (a
@@ -81,6 +88,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -201,6 +209,11 @@ private:
     void denyOperation(const std::string& id, ErrorCode code, const QString& audit);
     void startOperation();
     void finishOperation(const Status& status);
+    // ADR-0368
+    void askSupport(std::uint64_t token, tunnel::OpQuestionKind kind,
+                    std::function<void(bool)> answer);
+    void onAnswer(const tunnel::OpAnswer& answer);
+    void answerSupportQuestion(bool yes);
     void askJoin();
     void answerJoin(bool allowed);
     void sendSync();
@@ -235,6 +248,14 @@ private:
     std::uint64_t m_droppedWhilePending = 0;
     std::string m_peerApp;
     std::optional<PendingOperation> m_operation;
+    // ADR-0368: the open question to support (of m_operation).
+    struct SupportQuestion {
+        std::string qid;
+        tunnel::OpQuestionKind kind = tunnel::OpQuestionKind::Continue;
+        std::function<void(bool)> answer;
+    };
+    std::optional<SupportQuestion> m_question;
+    QTimer m_questionTimer{this};
     std::uint64_t m_operationToken = 0;
     std::chrono::steady_clock::time_point m_lastProgress;
     std::string m_lastProgressPhase;

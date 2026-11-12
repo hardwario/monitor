@@ -112,7 +112,8 @@ public:
 
     // remote::LteUpdateRunner (ADR-0363). Errors: internal.busy (the tab is busy, another wizard
     // is open).
-    [[nodiscard]] Status start(Progress progress, Finished finished) override;
+    [[nodiscard]] Status start(Progress progress, Finished finished,
+                               remote::AskSupport ask) override;
     void abandon() override;
     // ADR-0364: the tab's learned command tree for support's autocomplete (ConsoleViewModel, on
     // every change; nullptr = none). Kept for the next sharing too.

@@ -13,6 +13,8 @@
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/firmware/program_progress.h"
 #include "hwio/hw/nrfutil/nrfutil.h"
+#include "hwio/remote/host_operations.h"
+#include "hwio/remote/tunnel.h"
 #include "pages/firmware_services.h"
 #include "settings_store.h"
 #include "support/fake_jlink_scenario.h"
@@ -24,6 +26,7 @@
 #include "viewmodels/firmware_source_view_model.h"
 #include "viewmodels/flash_view_model.h"
 #include "viewmodels/recent_sources_model.h"
+#include "viewmodels/remote_share_view_model.h"
 #include "viewmodels/ui_mode.h"
 #include "viewmodels/ui_mode_controller.h"
 #include "wizard/lte_update_wizard.h"
@@ -59,7 +62,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -1237,6 +1242,89 @@ TEST_F(FlashTest, LteUpdateWizardCancelBeforeContinueChangesNothing) {
     EXPECT_FALSE(app().wizard()->isOpen());
     ASSERT_TRUE(waitFor([this] { return !tab().isBusy(); })); // the closed wizard is deleted later
     ASSERT_TRUE(waitFor([this] { return tab().state() == DeviceTabViewModel::Connected; }));
+}
+
+// ADR-0368: in a remote LTE update support answers Continue; the customer's wizard shows the
+// explanation without a button, and the copy of the application is written back automatically.
+// A no cancels before anything changed.
+TEST_F(FlashTest, RemoteLteUpdateQuestionsGoToSupport) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (HWIO_DESIGNATED_URL)";
+#endif
+    hwio::firmware::test::HttpFixture http;
+    ASSERT_TRUE(http.listening());
+    const QByteArray modem = hwio::firmware::test::zipBytes(
+        {{.name = "firmware.update.image.segments.0.hex", .data = ":00000001FF\n"},
+         {.name = "x" + randomId().toStdString() + ".txt", .data = "x"}});
+    const QByteArray bundle = hwio::firmware::test::zipBytes(
+        {{.name = "modem.zip", .data = modem.toStdString()},
+         {.name = "application.hex", .data = hwio::firmware::test::toHex(image())}});
+    http.set(QStringLiteral("/chester/lte.zip"),
+             hwio::firmware::test::HttpFixture::Response::ok(bundle));
+    qputenv("HWIO_DESIGNATED_URL", (http.baseUrl() + QStringLiteral("/lte.zip")).toUtf8());
+    qputenv("HWIO_DESIGNATED_SHA256",
+            QCryptographicHash::hash(bundle, QCryptographicHash::Sha256).toHex());
+    qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
+    startBoard();
+    for (const bool yes : {false, true}) {
+        std::vector<hwio::remote::tunnel::OpQuestionKind> questions;
+        std::function<void(bool)> answer;
+        std::optional<hwio::Status> result;
+        ASSERT_TRUE(tab()
+                        .remoteShare()
+                        ->start([](const hwio::remote::OperationUpdate&) {},
+                                [&](hwio::Status status) { result = std::move(status); },
+                                [&](hwio::remote::tunnel::OpQuestionKind kind,
+                                    std::function<void(bool)> a) {
+                                    questions.push_back(kind);
+                                    answer = std::move(a);
+                                })
+                        .has_value());
+        ASSERT_TRUE(waitFor([&] { return app().wizard()->isOpen(); }));
+        auto* wizard = qobject_cast<hwio::gui::LteUpdateWizard*>(app().wizard()->wizard());
+        ASSERT_NE(wizard, nullptr);
+        ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Confirm));
+        ASSERT_TRUE(waitFor([&] { return !questions.empty(); }));
+        EXPECT_EQ(questions.front(), hwio::remote::tunnel::OpQuestionKind::Continue);
+        EXPECT_TRUE(wizard->supportDecides());
+        EXPECT_TRUE(wizard->current().primaryText.isEmpty()); // no [Continue] for the customer
+        EXPECT_FALSE(wizard->canPrimary());
+        EXPECT_TRUE(wizard->promptText().endsWith(
+            QStringLiteral("HARDWARIO Support confirms the update. Keep the J-Link cable on the "
+                           "APP connector for now.")))
+            << wizard->promptText().toStdString();
+        answer(yes);
+        if (!yes) {
+            ASSERT_TRUE(waitFor([&] { return result.has_value(); }));
+            ASSERT_FALSE(result->has_value());
+            EXPECT_EQ(result->error().code, ErrorCode::Cancelled);
+            EXPECT_FALSE(wizard->procedure() != nullptr &&
+                         wizard->procedure()->applicationErased());
+            app().wizard()->cancel(true);
+            ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen() && !tab().isBusy(); }));
+            continue;
+        }
+        ASSERT_TRUE(waitFor([&] {
+            return wizard->procedure()->step() ==
+                   hwio::device::LteUpdateProcedure::Step::ConnectLte;
+        }));
+        moveCable("lte");
+        ASSERT_TRUE(waitFor(
+            [&] {
+                return wizard->procedure()->step() ==
+                       hwio::device::LteUpdateProcedure::Step::ConnectAppAgain;
+            },
+            std::chrono::seconds(60)));
+        moveCable("app");
+        // Written back without [Write back].
+        ASSERT_TRUE(waitFor([&] { return result.has_value(); }, std::chrono::seconds(60)));
+        EXPECT_TRUE(result->has_value()) << result->error().detail;
+        EXPECT_EQ(questions.size(), 1U);
+        ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Summary));
+        app().wizard()->cancel(true);
+    }
+    qunsetenv("HWIO_DESIGNATED_URL");
+    qunsetenv("HWIO_DESIGNATED_SHA256");
 }
 
 // Review F5 / ADR-0114 (moved here by plan 0033): the nRF Util path is read from the settings when

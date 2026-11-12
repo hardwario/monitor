@@ -58,6 +58,8 @@
 
 #include <CLI/CLI.hpp>
 
+#include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <cstdint>
 #include <expected>
@@ -391,7 +393,8 @@ public:
     CliLteUpdate(CliLteUpdate&&) = delete;
     CliLteUpdate& operator=(CliLteUpdate&&) = delete;
 
-    [[nodiscard]] Status start(Progress progress, Finished finished) override {
+    [[nodiscard]] Status start(Progress progress, Finished finished,
+                               remote::AskSupport ask) override {
         if (m_reporter && !m_reporter->done()) {
             return std::unexpected(makeError(ErrorCode::InternalBusy, "an LTE update runs"));
         }
@@ -399,6 +402,7 @@ public:
         m_procedure.reset();
         m_reporter =
             std::make_unique<remote::LteUpdateReporter>(std::move(progress), std::move(finished));
+        m_reporter->setAskSupport(std::move(ask)); // ADR-0368: support answers when it can
         QTimer::singleShot(0, m_reporter.get(), [this] { run(); });
         return {};
     }
@@ -434,8 +438,15 @@ private:
         m_terminal = std::make_unique<GuidedTerminal>(
             *m_context, *m_ui, *m_procedure,
             [this](const std::string& question, std::function<void(bool)> answer) {
-                m_consent->askQuestion(question, std::move(answer));
+                // CliConsent adds its own "[y/N]".
+                std::string text = question;
+                if (const std::string suffix = " [y/N] "; text.ends_with(suffix)) {
+                    text.resize(text.size() - suffix.size());
+                }
+                m_consent->askQuestion(text, std::move(answer));
             });
+        // ADR-0368: support answers the questions; the customer only follows the prompts.
+        m_terminal->setSupportDecides(m_reporter->supportDecides());
         m_reporter->follow(*m_procedure);
         // The terminal flow does not retry: every end is the result.
         QObject::connect(m_procedure.get(), &device::LteUpdateProcedure::finished, m_reporter.get(),
@@ -704,13 +715,57 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
                      });
     QObject::connect(&client, &remote::RemoteOperationClient::finished, &client,
                      [&](bool ok, const Error& error) { outcome.emplace(ok, error); });
+    // ADR-0368: with a terminal on stdin support answers the LTE update's questions here (y/N);
+    // without one the customer does (the request does not offer it).
+    std::unique_ptr<StdinLineReader> answers;
+    if (hostInteractive()) {
+        client.setAnswersQuestions(true);
+        QObject::connect(&client, &remote::RemoteOperationClient::question, &client,
+                         [&](tunnel::OpQuestionKind kind) {
+                             ui.finish();
+                             const QString text = remote::operationQuestionKindText(kind);
+                             QJsonObject question;
+                             question.insert(QStringLiteral("event"), QStringLiteral("question"));
+                             question.insert(QStringLiteral("kind"),
+                                             toQString(tunnel::questionId(kind)));
+                             question.insert(QStringLiteral("text"), text);
+                             event(context, question);
+                             std::cerr << toStdString(text) << " [y/N] " << std::flush;
+                             if (!answers) {
+                                 answers = std::make_unique<StdinLineReader>();
+                             }
+                         });
+    }
+    const auto answerFromStdin = [&] {
+        if (!answers || !client.openQuestion()) {
+            return;
+        }
+        const auto line = answers->poll();
+        if (!line) {
+            return; // nothing typed yet
+        }
+        std::string lower = line->value_or("");
+        std::ranges::transform(lower, lower.begin(),
+                               [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        const bool yes = line->has_value() && (lower == "y" || lower == "yes");
+        if (Status sent = client.answer(yes); !sent) {
+            ui.warning(sent.error());
+            return;
+        }
+        status(context, yes ? "Answered: continue." : "Answered: cancel.");
+    };
     auto id = client.request(
         kind, *target, kind == tunnel::OpKind::Flash ? std::optional(options.flash) : std::nullopt);
     if (!id) {
         return std::unexpected(std::move(id).error());
     }
     status(context, "Waiting for the customer's confirmation...");
-    const Status waited = runUntil([&] { return outcome.has_value(); }, std::nullopt, context.stop);
+    const Status waited = runUntil(
+        [&] {
+            answerFromStdin();
+            return outcome.has_value();
+        },
+        std::nullopt, context.stop);
     ui.finish();
     if (!waited) {
         return std::unexpected(waited.error());

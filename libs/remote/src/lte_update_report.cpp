@@ -5,8 +5,10 @@
 #include "hwio/device/lte_update_procedure.h"
 #include "hwio/device/operation.h"
 #include "hwio/remote/host_operations.h"
+#include "hwio/remote/tunnel.h"
 
 #include <QObject>
+#include <QPointer>
 #include <QTimer>
 
 #include <algorithm>
@@ -74,6 +76,9 @@ void LteUpdateReporter::onChanged() {
         step == Step::Cancelled) {
         return;
     }
+    if (step == Step::Confirm || step == Step::BackupFailed) {
+        askSupport(step); // ADR-0368
+    }
     if (!working(step)) {
         report(OperationUpdate{.phase = std::string(device::LteUpdateProcedure::stepId(step)),
                                .step = 1,
@@ -109,6 +114,46 @@ void LteUpdateReporter::onFinished() {
         return;
     }
     finish();
+}
+
+void LteUpdateReporter::askSupport(Step step) {
+    if (!m_ask) {
+        return;
+    }
+    bool& asked = step == Step::Confirm ? m_askedContinue : m_askedCopy;
+    if (asked) {
+        return;
+    }
+    asked = true;
+    m_questionOpen = true;
+    const auto kind = step == Step::Confirm ? tunnel::OpQuestionKind::Continue
+                                            : tunnel::OpQuestionKind::ContinueWithoutCopy;
+    // The answer is applied on the next turn of the event loop (never inside the procedure's
+    // signal or the host's call).
+    m_ask(kind, [self = QPointer<LteUpdateReporter>(this), step](bool yes) {
+        if (self.isNull()) {
+            return;
+        }
+        QTimer::singleShot(0, self.data(), [self, step, yes] {
+            if (self.isNull()) {
+                return;
+            }
+            self->m_questionOpen = false;
+            device::LteUpdateProcedure* procedure = self->m_procedure.data();
+            if (procedure == nullptr || procedure->step() != step) {
+                return;
+            }
+            if (!yes) {
+                (void)procedure->cancel(); // nothing was changed yet
+            } else if (step == Step::Confirm) {
+                procedure->confirm();
+            } else {
+                procedure->continueWithoutBackup();
+            }
+            emit self->supportQuestionChanged();
+        });
+    });
+    emit supportQuestionChanged(); // the question is open: the customer's view changes
 }
 
 void LteUpdateReporter::report(const OperationUpdate& update) {
@@ -161,9 +206,13 @@ void LteUpdateReporter::abandon() {
     m_heartbeat.stop();
     m_progress = {};
     m_finished = {};
+    // ADR-0368: the host goes away (it answered an open question no first); a later question is
+    // the customer's again.
+    m_ask = {};
     if (!m_procedure.isNull()) {
         m_procedure->disconnect(this);
     }
+    emit supportQuestionChanged();
 }
 
 } // namespace hwio::remote

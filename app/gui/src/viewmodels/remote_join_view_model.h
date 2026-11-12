@@ -43,6 +43,9 @@ class RemoteJoinViewModel : public QObject {
     Q_PROPERTY(bool operationFailed READ operationFailed NOTIFY operationChanged)
     // 0..1, -1 = indeterminate.
     Q_PROPERTY(double operationProgress READ operationProgress NOTIFY operationChanged)
+    // ADR-0368: the customer's Monitor asks support (the LTE update's Continue, Continue without a
+    // copy); "" when no question is open. answerQuestion() answers it.
+    Q_PROPERTY(QString operationQuestion READ operationQuestion NOTIFY operationChanged)
 
 public:
     explicit RemoteJoinViewModel(DeviceTabViewModel* tab);
@@ -62,6 +65,8 @@ public:
     [[nodiscard]] QString operationStatus() const { return m_status; }
     [[nodiscard]] bool operationFailed() const { return m_failed; }
     [[nodiscard]] double operationProgress() const { return m_progress; }
+    [[nodiscard]] QString operationQuestion() const;
+    Q_INVOKABLE void answerQuestion(bool yes);
 
     // `kind`: "flash" (with `firmwareId`), "erase", "recover", "reset", "lteUpdate" (ADR-0363,
     // `target` ignored); `target` "app" | "lte".

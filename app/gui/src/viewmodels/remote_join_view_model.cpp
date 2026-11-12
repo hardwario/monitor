@@ -56,6 +56,11 @@ void RemoteJoinViewModel::attach() {
             changed(); // signal
         });
         m_client = std::make_unique<remote::RemoteOperationClient>(*session);
+        m_client->setAnswersQuestions(true); // ADR-0368: support answers on the Flash card
+        connect(m_client.get(), &remote::RemoteOperationClient::question, this,
+                &RemoteJoinViewModel::operationChanged);
+        connect(m_client.get(), &remote::RemoteOperationClient::questionClosed, this,
+                &RemoteJoinViewModel::operationChanged);
         connect(m_client.get(), &remote::RemoteOperationClient::accepted, this, [this] {
             m_status = tr("The customer allowed it. Running on the customer's side…");
             operationChanged(); // signal
@@ -147,6 +152,25 @@ bool RemoteJoinViewModel::lteUpdateAvailable() const {
 }
 
 bool RemoteJoinViewModel::operationPending() const { return m_client && m_client->busy(); }
+
+QString RemoteJoinViewModel::operationQuestion() const {
+    if (!m_client) {
+        return {};
+    }
+    const auto question = m_client->openQuestion();
+    return question ? remote::operationQuestionKindText(*question) : QString();
+}
+
+void RemoteJoinViewModel::answerQuestion(bool yes) {
+    if (!m_client) {
+        return;
+    }
+    if (Status sent = m_client->answer(yes); !sent) {
+        qCWarning(lcGui).noquote() << "Remote answer not sent:" << toQString(sent.error().detail);
+        return;
+    }
+    qCInfo(lcGui) << "Remote question answered:" << (yes ? "continue" : "cancel");
+}
 
 bool RemoteJoinViewModel::isFirmwareId(const QString& text) {
     return firmware::FirmwareId::parse(toStdString(text.trimmed())).has_value();

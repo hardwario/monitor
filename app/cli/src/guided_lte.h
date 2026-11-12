@@ -86,6 +86,10 @@ public:
 
     [[nodiscard]] bool noCopyEnd() const noexcept { return m_noCopyEnd; }
 
+    // ADR-0368: a remote update whose questions support answers (LteUpdateReporter): the
+    // customer is told to wait instead of being asked.
+    void setSupportDecides(bool decides) noexcept { m_supportDecides = decides; }
+
 private:
     [[nodiscard]] bool ended() const {
         const Step step = m_procedure.step();
@@ -95,9 +99,17 @@ private:
     void onChanged() {
         show();
         const Step step = m_procedure.step();
-        if (step == Step::Confirm) {
+        if (step == Step::Confirm && m_supportDecides) {
+            m_ui.info("HARDWARIO Support confirms the update. Keep the J-Link cable on the APP "
+                      "connector for now.");
+        } else if (step == Step::Confirm) {
             // Asked on the next turn of the event loop, after the prompt that says what happens.
             QMetaObject::invokeMethod(&m_loop, [this] { askToContinue(); }, Qt::QueuedConnection);
+        } else if (step == Step::BackupFailed && m_supportDecides) {
+            if (m_procedure.error()) {
+                m_ui.warning(*m_procedure.error());
+            }
+            m_ui.info("HARDWARIO Support decides whether to continue without a copy.");
         } else if (step == Step::BackupFailed) {
             if (m_procedure.error()) {
                 m_ui.warning(*m_procedure.error());
@@ -186,6 +198,7 @@ private:
     QTimer m_stopCheck;
     std::string m_lastPrompt;
     bool m_noCopyEnd = false;
+    bool m_supportDecides = false;
     bool m_cancelRefusedShown = false;
 };
 

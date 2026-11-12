@@ -244,12 +244,13 @@ RemoteShareViewModel::askOperation(const remote::OperationQuestion& question, An
     };
 }
 
-Status RemoteShareViewModel::start(Progress progress, Finished finished) {
+Status RemoteShareViewModel::start(Progress progress, Finished finished, remote::AskSupport ask) {
     if ((m_lteUpdate && !m_lteUpdate->done()) || m_tab->isBusy() || m_tab->choosing()) {
         return std::unexpected(makeError(ErrorCode::InternalBusy, "the tab is busy"));
     }
     m_lteUpdate =
         std::make_unique<remote::LteUpdateReporter>(std::move(progress), std::move(finished));
+    m_lteUpdate->setAskSupport(std::move(ask)); // ADR-0368
     m_lteUpdateOffered = true;
     qCInfo(lcGui) << "Remote: opening the LTE update for support";
     m_tab->openWizard(QStringLiteral("lte-update")); // takes the request when it opens

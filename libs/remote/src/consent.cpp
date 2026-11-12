@@ -102,6 +102,21 @@ QString operationPhaseText(std::string_view phase) {
     return toQString(phase);
 }
 
+QString operationQuestionKindText(tunnel::OpQuestionKind kind) {
+    switch (kind) {
+    case tunnel::OpQuestionKind::Continue:
+        return QCoreApplication::translate(
+            "hwio::remote",
+            "The application on the customer's CHESTER will be erased. Then the customer moves the "
+            "J-Link cable to the LTE connector, and at the end back to APP; the application is "
+            "written back. Continue?");
+    case tunnel::OpQuestionKind::ContinueWithoutCopy:
+        return QCoreApplication::translate(
+            "hwio::remote", "The application could not be copied. Continue without a copy?");
+    }
+    return {};
+}
+
 QString operationQuestionText(const OperationQuestion& question) {
     switch (question.kind) {
     case tunnel::OpKind::Flash:

@@ -160,6 +160,44 @@ ColumnLayout {
         value: card.join !== null && card.join.operationProgress >= 0 ? card.join.operationProgress : 0
     }
 
+    // ADR-0368: the customer's Monitor asks support (Continue before the erase, Continue without a
+    // copy); the customer only follows the cable instructions.
+    ColumnLayout {
+        objectName: "remoteQuestion"
+        Layout.fillWidth: true
+        visible: card.join !== null && card.join.operationQuestion !== ""
+        spacing: Theme.spacingS
+
+        Label {
+            objectName: "remoteQuestionText"
+            textFormat: Text.PlainText
+            Layout.fillWidth: true
+            text: card.join ? card.join.operationQuestion : ""
+            font: Theme.fontUiStrong
+            color: Theme.text
+            wrapMode: Text.Wrap
+            Accessible.role: Accessible.StaticText
+            Accessible.name: text
+        }
+
+        RowLayout {
+            spacing: Theme.spacingS
+
+            HButton {
+                objectName: "remoteQuestionYes"
+                kind: "primary"
+                text: qsTr("Continue")
+                onClicked: card.join.answerQuestion(true)
+            }
+
+            HButton {
+                objectName: "remoteQuestionNo"
+                text: qsTr("Cancel")
+                onClicked: card.join.answerQuestion(false)
+            }
+        }
+    }
+
     Label {
         objectName: "remoteOperationStatus"
         textFormat: Text.PlainText
