@@ -12,6 +12,7 @@
 #include "hwio/device/command_tree_learner.h"
 #include "hwio/device/completer.h"
 #include "hwio/device/console_line.h"
+#include "hwio/device/console_log.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/session_events.h"
@@ -80,6 +81,13 @@ ConsoleView::ConsoleView(const Context& context, device::ConsoleSession& session
 }
 
 ConsoleView::~ConsoleView() = default;
+
+void ConsoleView::printLog() {
+    const std::vector<device::ConsoleLine> lines = m_session->log().linesSince(0);
+    if (!lines.empty()) {
+        onLines(QList<device::ConsoleLine>(lines.begin(), lines.end()));
+    }
+}
 
 void ConsoleView::setPrinter(Printer printer, bool showEcho) {
     m_printer = std::move(printer);

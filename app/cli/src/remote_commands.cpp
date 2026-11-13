@@ -622,6 +622,9 @@ Result<CommandResult> join(const Context& context, const JoinCommandOptions& opt
     consoleContext.stop = consoleStop.get_token();
     ConsoleView view(consoleContext, session, interactive && stdoutColors(), false);
     view.setOutputClosedHandler([&consoleStop] { consoleStop.request_stop(); });
+    // The host's history (sync) and early lines may have arrived while connecting, before the
+    // view was connected to linesReceived.
+    view.printLog();
     QObject::connect(&session, &remote::RemoteConsoleSession::joinStateChanged, &session, [&] {
         if (session.joinState() == remote::JoinState::Allowed) {
             view.printStatus(std::format("Joined: {}", toStdString(session.title())));

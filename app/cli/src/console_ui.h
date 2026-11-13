@@ -63,6 +63,10 @@ public:
     // through replxx; `showEcho` = false hides the echo of sent commands (replxx shows them).
     void setPrinter(Printer printer, bool showEcho);
     void printStatus(std::string_view text); // human mode only
+    // Prints the lines the session's log already holds (received before the view was created,
+    // e.g. the remote session history of `remote join`); call it right after construction, before
+    // the event loop runs again, so no line is printed twice.
+    void printLog();
     // The final {"type":"connection","state":"stopped"} event (--json); skipped when the last
     // connection event printed was already Stopped (review R28).
     void printStopped();

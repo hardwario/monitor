@@ -197,4 +197,27 @@ TEST_F(JsonConsoleView, FailedStdoutWriteCallsTheOutputClosedHandler) {
     EXPECT_EQ(calls, 1);
 }
 
+// remote join: lines that reached the session's log before the view existed (the host's
+// history) are printed by printLog(), once.
+TEST_F(JsonConsoleView, PrintLogShowsTheLinesReceivedBeforeTheView) {
+    useScenario(R"({"probes": [{"serialNumber": 1,
+                                "rtt": {"output": [{"atMs": 0, "buffer": 0,
+                                                    "text": "before view\n"}]}}]})");
+    auto session = open();
+    ASSERT_TRUE(session) << session.error().message;
+    ASSERT_TRUE(processEventsUntil([&] { return (*session)->log().lastSeq() > 0; }));
+    ConsoleView view(context(), **session, false, false);
+    view.printLog();
+    ASSERT_TRUE(processEventsUntil([&] {
+        return (*session)->connection().state == hwio::device::ConnectionState::Connected;
+    }));
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+    (*session)->close();
+    view.printStopped();
+    const std::string text = out();
+    const auto first = text.find("before view");
+    ASSERT_NE(first, std::string::npos) << text;
+    EXPECT_EQ(text.find("before view", first + 1), std::string::npos) << text;
+}
+
 } // namespace
