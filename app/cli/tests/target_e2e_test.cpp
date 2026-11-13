@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 
+#include <format>
 #include <initializer_list>
 #include <string>
 #include <vector>
@@ -414,6 +415,34 @@ TEST_F(TargetCli, RegsOnAHaltedCore) {
     EXPECT_EQ(registers.value(QStringLiteral("R0")).toString(), QStringLiteral("0x00000001"));
     EXPECT_EQ(registers.value(QStringLiteral("PC")).toString(), QStringLiteral("0x00001234"));
     EXPECT_EQ(registers.size(), 2);
+}
+
+// Plan 0048 / ADR-0371: a library that handles only 45 registers per ReadRegs call (like J-Link
+// V9.84); all 60 registers still come back with their scenario values.
+TEST_F(TargetCli, RegsBeyondTheLibraryPerCallLimit) {
+    constexpr int count = 60;
+    QJsonArray list;
+    for (int i = 0; i < count; ++i) {
+        list.append(QJsonObject{{QStringLiteral("name"), QStringLiteral("REG%1").arg(i)},
+                                {QStringLiteral("value"), 0x1000 + i}});
+    }
+    const QJsonObject chip{{QStringLiteral("halted"), true},
+                           {QStringLiteral("readRegsLimit"), 45},
+                           {QStringLiteral("registers"), list}};
+    const QJsonObject probe{{QStringLiteral("serialNumber"), 801000001},
+                            {QStringLiteral("product"), QStringLiteral("Test Probe")},
+                            {QStringLiteral("chip"), chip}};
+    writeFile(QStringLiteral("scenario.json"),
+              QJsonDocument(QJsonObject{{QStringLiteral("probes"), QJsonArray{probe}}}).toJson());
+    const RunResult json = app(args({"regs"}), true);
+    ASSERT_EQ(json.exitCode, 0) << json.out << json.err;
+    const QJsonObject registers = lastData(json).value(QStringLiteral("registers")).toObject();
+    EXPECT_EQ(registers.size(), count);
+    for (int i = 0; i < count; ++i) {
+        EXPECT_EQ(registers.value(QStringLiteral("REG%1").arg(i)).toString().toStdString(),
+                  std::format("0x{:08X}", 0x1000 + i))
+            << "REG" << i;
+    }
 }
 
 // ADR-0151: a J-Link library without the optional functions.

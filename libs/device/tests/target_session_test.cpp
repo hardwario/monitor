@@ -16,6 +16,7 @@
 #include "hwio/hw/jlink/jlink_api.h"
 #include "hwio/hw/jlink/library_locator.h"
 #include "hwio/hw/jlink/programmer.h"
+#include "hwio/hw/jlink/types.h"
 #include "scripted_api.h"
 #include "session_internal.h"
 #include "session_test_support.h"
@@ -30,6 +31,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <format>
 #include <initializer_list>
 #include <memory>
 #include <optional>
@@ -277,6 +279,42 @@ TEST_F(TargetOperations, MemoryRegistersAndZonesKeepRttAttached) {
 }
 
 // ADR-0157: on another target the light operations switch and restore (M2 pattern).
+// Plan 0048 / ADR-0371: a library that confirms only the first N registers of a call. With the
+// V9.84 limit (45) the adapter's blocks of 32 return the full list; with 31 the last register of
+// every full block is left out (never reported with a junk value).
+TEST_F(TargetOperations, RegistersBeyondTheLibraryPerCallLimit) {
+    constexpr std::size_t count = 115;
+    target().set([](ScriptedTarget& t) {
+        t.app.registers.clear();
+        for (std::size_t i = 0; i < count; ++i) {
+            t.app.registers.push_back(hwio::jlink::RegisterValue{
+                .name = std::format("R{}", i), .value = static_cast<std::uint32_t>(0x1000 + i)});
+        }
+        t.app.readRegsLimit = 45;
+    });
+    auto session = openConnected(options());
+    ASSERT_TRUE(session);
+    ASSERT_TRUE(finish(session->halt("app"))->status);
+    const OperationResult* full = finish(session->readRegisters("app"));
+    ASSERT_NE(full, nullptr);
+    ASSERT_TRUE(full->status) << full->status.error().detail;
+    ASSERT_EQ(full->registers.size(), count);
+    for (std::size_t i = 0; i < count; ++i) {
+        EXPECT_EQ(full->registers[i].name, std::format("R{}", i));
+        EXPECT_EQ(full->registers[i].value, 0x1000U + i);
+    }
+
+    target().set([](ScriptedTarget& t) { t.app.readRegsLimit = 31; });
+    const OperationResult* partial = finish(session->readRegisters("app"));
+    ASSERT_NE(partial, nullptr);
+    ASSERT_TRUE(partial->status) << partial->status.error().detail;
+    ASSERT_EQ(partial->registers.size(), count - 3);
+    for (const auto& reg : partial->registers) {
+        EXPECT_NE(reg.value, 0x00AD9390U) << reg.name;
+        EXPECT_NE(reg.name, "R31");
+    }
+}
+
 TEST_F(TargetOperations, LightOperationOnAnotherTargetSwitchesAndRestores) {
     auto session = openConnected(options());
     ASSERT_TRUE(session);

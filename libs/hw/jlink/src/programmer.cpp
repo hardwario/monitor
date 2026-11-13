@@ -598,13 +598,25 @@ Result<std::vector<RegisterValue>> JLinkProgrammer::readRegisters() {
         indexes->resize(maxRegisters);
     }
     std::vector<std::uint32_t> values(indexes->size(), 0);
+    std::vector<std::uint8_t> confirmed(indexes->size(), 0);
     if (!indexes->empty()) {
-        if (const int result = m_api.readRegisters(*indexes, values); result < 0) {
+        const int result = m_api.readRegisters(*indexes, values, confirmed);
+        if (result < 0) {
             return std::unexpected(
                 makeError(ErrorCode::TargetConnectFailed,
                           libraryDetail(std::format("JLINKARM_ReadRegs returned {}", result))));
         }
+        if (std::ranges::none_of(confirmed, [](std::uint8_t item) { return item != 0; })) {
+            return std::unexpected(
+                makeError(ErrorCode::TargetConnectFailed,
+                          libraryDetail("JLINKARM_ReadRegs confirmed no register")));
+        }
     }
+    // ADR-0371: a register the library did not confirm is left out and logged (at most
+    // maxUnconfirmedNames names in the log line).
+    constexpr std::size_t maxUnconfirmedNames = 8;
+    std::size_t unconfirmed = 0;
+    std::string unconfirmedNames;
     std::vector<RegisterValue> registers;
     registers.reserve(indexes->size());
     for (std::size_t i = 0; i < indexes->size(); ++i) {
@@ -612,7 +624,19 @@ Result<std::vector<RegisterValue>> JLinkProgrammer::readRegisters() {
         if (name.empty()) {
             name = std::format("#{}", (*indexes)[i]);
         }
+        if (confirmed[i] == 0) {
+            if (unconfirmed < maxUnconfirmedNames) {
+                unconfirmedNames += unconfirmedNames.empty() ? name : ", " + name;
+            }
+            ++unconfirmed;
+            continue;
+        }
         registers.push_back(RegisterValue{.name = std::move(name), .value = values[i]});
+    }
+    if (unconfirmed > 0) {
+        qCInfo(log::lcJLink).noquote() << QString::fromStdString(
+            std::format("Registers not confirmed by the library: {} ({}{})", unconfirmed,
+                        unconfirmedNames, unconfirmed > maxUnconfirmedNames ? ", ..." : ""));
     }
     m_api.flushMessages();
     return registers;
