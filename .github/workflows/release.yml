@@ -1,5 +1,5 @@
 # HARDWARIO Monitor v2 - release (plan/features/0015 F2, plan/features/0031, ADR-0125, ADR-0120,
-# ADR-0123, ADR-0224, ADR-0231).
+# ADR-0123, ADR-0224, ADR-0231, ADR-0370).
 #
 # A pushed tag v2.X.Y (or v2.X.Y-<pre-release>) builds, signs and checksums the packages and
 # creates a DRAFT GitHub release with the notes of packaging/release-notes/<tag>.md (plan 0034 B3,
@@ -24,9 +24,10 @@
 # signing secret or an OIDC token. Only the two sign jobs run in the environment `signing` (it
 # admits release tags v* only); they run this repository's packaging scripts and packaging tools
 # (create-dmg, CPack, WiX), never a compiler. Hand-over: unsigned-* artifacts from the build jobs to
-# the sign jobs; release-* artifacts go into the release. Variables, secrets and the Azure federated
-# credential are in packaging/README.md. Every third-party action is pinned by its full commit SHA
-# (tag in the comment), as in ci.yml.
+# the sign jobs; release-* artifacts go into the release. The debug symbol archives are workflow
+# artifacts debug-symbols-<os> (90 days), not release assets (ADR-0370). Variables, secrets and the
+# Azure federated credential are in packaging/README.md. Every third-party action is pinned by its
+# full commit SHA (tag in the comment), as in ci.yml.
 name: Release
 
 on:
@@ -151,7 +152,12 @@ jobs:
           path: |
             build/packages/*.deb
             build/packages/*.AppImage
-            build/packages/*-debug-symbols-linux.zip
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: debug-symbols-linux
+          path: build/packages/*-debug-symbols-linux.zip
+          if-no-files-found: error
+          retention-days: 90
 
   macos:
     name: macos (universal bundle, unsigned)
@@ -198,9 +204,10 @@ jobs:
           if-no-files-found: error
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: release-debug-symbols-macos
+          name: debug-symbols-macos
           path: build/packages/*-debug-symbols-macos.zip
           if-no-files-found: error
+          retention-days: 90
 
   windows:
     name: windows (installed tree, unsigned)
@@ -260,9 +267,10 @@ jobs:
           if-no-files-found: error
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: release-debug-symbols-windows
+          name: debug-symbols-windows
           path: build/packages/*-debug-symbols-windows.zip
           if-no-files-found: error
+          retention-days: 90
 
   # Signing jobs (ADR-0224): environment `signing`, tags only, no compiler, no dependency code.
   sign-macos:
@@ -482,7 +490,7 @@ jobs:
           pattern: release-*
           path: dist
           merge-multiple: true
-      - name: Every package and debug symbol archive
+      - name: Every package
         env:
           VERSION: ${{ needs.gate.outputs.version }}
         run: |
@@ -491,9 +499,7 @@ jobs:
           ls -l
           missing=0
           for f in "hwio-monitor-$v-x86_64.AppImage" "hardwario-monitor_${v}_amd64.deb" \
-                   "hwio-monitor-$v-macos-universal.dmg" "hwio-monitor-$v-windows-x64.msi" \
-                   "hwio-monitor-$v-debug-symbols-linux.zip" "hwio-monitor-$v-debug-symbols-macos.zip" \
-                   "hwio-monitor-$v-debug-symbols-windows.zip"; do
+                   "hwio-monitor-$v-macos-universal.dmg" "hwio-monitor-$v-windows-x64.msi"; do
             if [ ! -f "$f" ]; then echo "::error::missing $f"; missing=1; fi
           done
           exit $missing
