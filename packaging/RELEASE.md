@@ -49,9 +49,8 @@ it. Nothing in this repository creates tags or publishes releases by itself.
    sign-windows (environment `signing`) → publish (draft release with all assets, `SHA256SUMS`, attestations). A
    failed sign job: fix the cause and `gh run rerun <run id> --failed`.
 3. Review the draft: assets (`hwio-monitor-<v>-x86_64.AppImage`, `hardwario-monitor_<v>_amd64.deb`,
-   `hwio-monitor-<v>-macos-universal.dmg`, `hwio-monitor-<v>-windows-x64.msi`, `SHA256SUMS`,
-   `hwio-monitor-<v>-debug-symbols-{linux,macos,windows}.zip`, ADR-0232), the notes (from the notes file), the pre-release flag
-   (set automatically for tags with a `-`).
+   `hwio-monitor-<v>-macos-universal.dmg`, `hwio-monitor-<v>-windows-x64.msi`, `SHA256SUMS`), the notes (from the notes file), the
+   pre-release flag (set automatically for tags with a `-`).
 4. Spot checks: `sha256sum -c SHA256SUMS`; `gh attestation verify <file> --repo hardwario/monitor`;
    macOS `packaging/macos/sign-and-notarize.sh verify-dmg <dmg>` (the DMG and the app inside it: signature,
    stapled ticket, Gatekeeper); Windows `signtool verify /pa <msi>` and the verification lines of the
@@ -61,5 +60,7 @@ it. Nothing in this repository creates tags or publishes releases by itself.
 
 ## After the release
 
-- Keep the symbol archives with the release (crash dumps are symbolized with them, ADR-0123).
+- The debug symbols of a release are not release assets: they are the workflow artifacts
+  `debug-symbols-{linux,macos,windows}` of the release run (Actions › the run › Artifacts), kept 90 days
+  (ADR-0370); crash dumps are symbolized with them (ADR-0123).
 - If a release must be withdrawn: unpublish it (back to draft) on GitHub; never delete or move a tag.
