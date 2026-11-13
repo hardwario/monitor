@@ -75,13 +75,39 @@ Současně běží jen jedno okno aplikace. Když ji spustíte znovu, přenese s
 
 | Oddíl | Co obsahuje |
 |---|---|
-| **Obecné** | **Jazyk** (Podle systému, English, Čeština), **Vzhled** (Podle systému, Světlý, Tmavý), **Při spuštění obnovit karty** |
+| **Obecné** | **Režim** (Základní, Pokročilý, Expertní), **Jazyk** (Podle systému, English, Čeština, Deutsch, Polski, Slovenčina), **Vzhled** (Podle systému, Světlý, Tmavý), **Při spuštění obnovit karty** |
 | **Konzole** | velikost písma, časové značky, zalamování řádků, návrhy příkazů, historie příkazů, soubory konzole a jejich složka |
 | **J-Link** | knihovna J-Link (**Automaticky** nebo **Vlastní cesta**) a výchozí možnosti připojení |
 | **nRF Util** | program nRF Util (**Automaticky** nebo **Vlastní cesta**), potřebný jen pro firmware modemu LTE |
+| **AI asistenti (MCP)** | [server MCP](../en/mcp.md) pro AI asistenty |
+| **Expertní** | [server podpory](remote-support.md#settings) |
 | **O aplikaci** | verze (s tlačítkem **Kopírovat** pro podporu), [kontrola aktualizací](privacy.md#kontrola-aktualizací), příkaz `hwio` této instalace, licence, odkazy |
 
 Změny se projeví okamžitě.
+
+<a id="modes"></a>
+### Režimy
+
+**Režim** určuje, kolik toho Nastavení ukazuje. Při prvním spuštění (a jednou po aktualizaci z verze 2.0.0-rc.3 nebo
+starší) se aplikace zeptá **Jak chcete HARDWARIO Monitor používat?**: vyberte režim a klikněte na **Pokračovat**.
+Předvybraný je **Pokročilý**; pokud jste ve starší verzi měli zapnutou volbu **Zobrazit odborné akce údržby**, je to
+**Expertní**. Zavřením dialogu zůstane předvybraný režim. Změnit ho můžete kdykoli v **Nastavení › Obecné › Režim**.
+
+| Zobrazeno | Základní | Pokročilý | Expertní |
+|---|---|---|---|
+| **Obecné**: Režim, Jazyk, Vzhled, Při spuštění obnovit karty | ✓ | ✓ | ✓ |
+| **Konzole**: velikost písma, časové značky, zalamování řádků, soubory konzole, složka logů | ✓ | ✓ | ✓ |
+| **Konzole**: návrhy příkazů, načtení seznamu příkazů, **Pamatovat si příkazy**, **Vymazat historii** | | ✓ | ✓ |
+| **J-Link**: Knihovna, Výchozí rychlost, Automaticky znovu připojit | | ✓ | ✓ |
+| **J-Link**: Latence RTT, Reset při připojení | | | ✓ |
+| **nRF Util**, **AI asistenti (MCP)** | | ✓ | ✓ |
+| **Expertní**: Server podpory | | | ✓ |
+| **O aplikaci**, v režimech Pokročilý a Expertní i s předběžnými verzemi | ✓ | ✓ | ✓ |
+| **Nahrát FW › Údržba**: **Smazat vše…**, **Obnovit (recover)…**, LTE MCU | | | ✓ |
+
+Režim nastavení jen skrývá: skryté nastavení si ponechá svou hodnotu a dál se používá (například vlastní cesta ke
+knihovně J-Link v režimu Základní). Když chyba nebo průvodce otevře nastavení, které režim skrývá (**Otevřít
+nastavení**), zobrazí se pro tuto návštěvu s poznámkou „Zobrazeno, protože to bylo potřeba.“; režim se nezmění.
 
 ## Nápověda
 

@@ -17,7 +17,8 @@ target_include_directories(tst_gui PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
     # hex_builder.h, zip_builder.h (plan 0006 test files)
     "${PROJECT_SOURCE_DIR}/libs/firmware/tests")
-target_link_libraries(tst_gui PRIVATE hwio_gui hwio_guiplugin hwio::miniz Qt6::QuickTest Qt6::QuickControls2)
+target_link_libraries(tst_gui PRIVATE hwio_gui hwio_guiplugin hwio::miniz Qt6::QuickTest Qt6::QuickControls2
+    hwio_remote_fake_relay) # plan 0044: the fake relay of tst_remote
 target_compile_definitions(tst_gui PRIVATE
     "QUICK_TEST_SOURCE_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\""
     "HWIO_FAKE_JLINK_LIBRARY=\"$<TARGET_FILE:hwio_fake_jlink>\"")
@@ -56,7 +57,9 @@ foreach(_test IN LISTS _hwio_gui_qml_tests)
     # builds); without it the check would ask the real GitHub API.
     # tst_ble (plan 0012) needs the fake BLE API, also a HWIO_TEST_OVERRIDES-only switch (ADR-0087);
     # without it the shell talks to the runner's real Bluetooth stack.
-    if(NOT HWIO_TEST_OVERRIDES AND _name MATCHES "^tst_(update|ble)$")
+    # tst_remote (plan 0044): the fake relay is plain http on loopback, accepted only by test
+    # builds; without it the GUI would fall back to the real relay.
+    if(NOT HWIO_TEST_OVERRIDES AND _name MATCHES "^tst_(update|ble|remote)$")
         continue()
     endif()
     add_test(NAME "tst_gui.${_name}"
@@ -93,6 +96,7 @@ add_executable(hwio_gui_tests
     viewmodels/shortcut_registry_test.cpp
     viewmodels/single_instance_helper.h
     viewmodels/single_instance_test.cpp
+    viewmodels/ui_mode_controller_test.cpp
     viewmodels/update_service_test.cpp
     viewmodels/wizard_test.cpp
     ${HWIO_GUI_TEST_SUPPORT})
@@ -120,7 +124,7 @@ add_dependencies(hwio_gui_tests hwio_fake_jlink hwio_fake_jlink_incomplete hwio_
 # libs/firmware/tests (Qt's HTTP thread is uninstrumented; plan/features/0003, review R11).
 set(_hwio_gui_test_filter "")
 if("thread" IN_LIST HWIO_SANITIZERS)
-    set(_hwio_gui_test_filter TEST_FILTER "-FlashTest.CatalogDownloadAndErrors:FlashTest.DesignatedLteFirmware:FlashTest.CatalogInfoOfAnId:FlashTest.ACatalogDownloadWaitsForTheLookup:UpdateTest.AutomaticCheckShowsTheBannerAndStoresTheResult:UpdateTest.NoAutomaticCheckBeforeTheIntervalOrInDevelopmentBuilds:UpdateTest.DownloadOpensTheReleasePage:UpdateTest.SkippedVersionIsNotAnnouncedAgainButManualChecksIgnoreIt:UpdateTest.LaterHidesTheBanner:UpdateTest.UpToDate:UpdateTest.FailuresAreShownOnlyForManualChecks")
+    set(_hwio_gui_test_filter TEST_FILTER "-FlashTest.CatalogDownloadAndErrors:FlashTest.DesignatedLteFirmware:FlashTest.RemoteLteUpdateQuestionsGoToSupport:FlashTest.CatalogInfoOfAnId:FlashTest.ACatalogDownloadWaitsForTheLookup:UpdateTest.AutomaticCheckShowsTheBannerAndStoresTheResult:UpdateTest.NoAutomaticCheckBeforeTheIntervalOrInDevelopmentBuilds:UpdateTest.DownloadOpensTheReleasePage:UpdateTest.SkippedVersionIsNotAnnouncedAgainButManualChecksIgnoreIt:UpdateTest.LaterHidesTheBanner:UpdateTest.UpToDate:UpdateTest.FailuresAreShownOnlyForManualChecks")
 endif()
 gtest_discover_tests(hwio_gui_tests
     DISCOVERY_TIMEOUT 60

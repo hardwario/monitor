@@ -1,7 +1,7 @@
 // The Embedded step "lte-update" of the LTE firmware update wizard (plan/features/0033-rc2-feedback
 // .md C, ADR-0234), bound to LteUpdateWizard (`vm`). Shows by `vm.stage`: the LTE firmware source
-// (SourceCard, nRF Util prerequisite), a connector prompt (the dialog shows the picture), the
-// running operation (prompt + PhaseStepper), the backup problem, the application choice (the copy
+// (SourceCard, nRF Util prerequisite), a connector prompt (the dialog shows the picture), what
+// the update will do before anything changes (Confirm, plan 0046), the running operation (prompt + PhaseStepper), the backup problem, the application choice (the copy
 // or another firmware) or the failure. Presentation only.
 pragma ComponentBehavior: Bound
 
@@ -28,7 +28,7 @@ ColumnLayout {
         visible: text !== "" && step.stage !== LteUpdateWizard.Failed
         text: step.vm ? step.vm.promptText : ""
         color: step.vm && step.vm.wrongConnector ? Theme.warning : Theme.text
-        font: step.stage === LteUpdateWizard.Connector ? Theme.fontUiStrong : Theme.fontUi
+        font: step.stage === LteUpdateWizard.Connector || step.stage === LteUpdateWizard.Confirm ? Theme.fontUiStrong : Theme.fontUi
         wrapMode: Text.Wrap
         Accessible.role: Accessible.StaticText
         Accessible.name: text

@@ -132,8 +132,17 @@ struct SetFirmwareIdentity {
     std::uint64_t attach = 0;
 };
 
-using BleCommand = std::variant<StartScan, StopScan, OpenLink, ConnectLink, SendLine, CloseLink,
-                                PairDevice, QueryAdapter, StopLink, SetFirmwareIdentity>;
+// Plan 0044 (ADR-0333): passes an owner's note (a remote session audit line) to the link's
+// handler (ILinkHandler::onNote) on the BLE thread, in order with the link's events; ignored for
+// an unknown client. libs/hw/ble does not interpret it.
+struct RecordNote {
+    ClientId client = 0;
+    std::string text;
+};
+
+using BleCommand =
+    std::variant<StartScan, StopScan, OpenLink, ConnectLink, SendLine, CloseLink, PairDevice,
+                 QueryAdapter, StopLink, SetFirmwareIdentity, RecordNote>;
 
 namespace detail {
 struct HostShared;

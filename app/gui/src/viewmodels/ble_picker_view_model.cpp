@@ -301,6 +301,13 @@ void BlePickerViewModel::choose(int row) {
     setSelectedRow(row);
 }
 
+bool BlePickerViewModel::isSelectable(int row) const {
+    if (row < 0 || row >= count()) {
+        return false;
+    }
+    return m_rows.at(static_cast<std::size_t>(row)).inUseTab < 0;
+}
+
 void BlePickerViewModel::connectSelected() {
     if (!canConnect()) {
         return;

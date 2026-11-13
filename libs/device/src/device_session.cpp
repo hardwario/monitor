@@ -131,6 +131,8 @@ std::string_view transportId(Transport transport) noexcept {
         return "jlink";
     case Transport::Ble:
         return "ble";
+    case Transport::Remote:
+        return "remote";
     }
     return "jlink";
 }
@@ -398,11 +400,17 @@ Status DeviceSession::sendLine(std::string line) {
     }
     Status posted =
         post(*m_internals, m_closed,
-             detail::SendLineCommand{.line = std::move(line), .origin = sendingOrigin()});
+             detail::SendLineCommand{
+                 .line = std::move(line), .origin = sendingOrigin(), .source = sendingSource()});
     if (posted) {
         lineQueued();
     }
     return posted;
+}
+
+Status DeviceSession::recordRemoteEvent(std::string text) {
+    return post(*m_internals, m_closed,
+                detail::RemoteEventCommand{.text = boundedRemoteEvent(std::move(text))});
 }
 
 Status DeviceSession::reconnect() {

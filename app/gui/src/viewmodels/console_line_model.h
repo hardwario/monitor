@@ -181,6 +181,9 @@ public:
 
     // Removes every row (after ConsoleLog::clear of this channel).
     void resetRows();
+    // Plan 0044: resetRows(), then the next refresh shows every line the log holds (a remote
+    // session replaced the log with the host's history).
+    void reloadRows();
 
     // Tests: the scan's slice size and its slice count.
     [[nodiscard]] LineScan& scan() { return *m_scan; }

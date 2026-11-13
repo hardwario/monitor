@@ -189,7 +189,10 @@ QVariant SettingsStore::value(QAnyStringView key) const {
 Status SettingsStore::removeGroup(const QString& group) {
     if (!m_settings) {
         const QString prefix = group + QLatin1Char('/');
-        m_memory.removeIf([&prefix](const auto& entry) { return entry.key().startsWith(prefix); });
+        // As QSettings::remove: the key itself (a single key) and every key under it.
+        m_memory.removeIf([&group, &prefix](const auto& entry) {
+            return entry.key() == group || entry.key().startsWith(prefix);
+        });
         return {};
     }
     Status status = m_settings->remove(toStdString(group));

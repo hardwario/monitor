@@ -6,17 +6,17 @@
     <message numerus="yes">
         <location filename="../../../app/gui/qml/console/Banners.qml" line="20"/>
         <source>%Ln lines were dropped because the device sent data faster than it could be displayed.</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%Ln line was dropped because the device sent data faster than it could be displayed.</numerusform>
+            <numerusform>%Ln lines were dropped because the device sent data faster than it could be displayed.</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <location filename="../../../app/gui/qml/console/Banners.qml" line="29"/>
         <source>The view is paused. %Ln new lines are not shown yet.</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>The view is paused. %Ln new line is not shown yet.</numerusform>
+            <numerusform>The view is paused. %Ln new lines are not shown yet.</numerusform>
         </translation>
     </message>
 </context>
@@ -36,9 +36,9 @@
     <message numerus="yes">
         <location filename="../../../app/gui/qml/console/ConsoleSearchBar.qml" line="318"/>
         <source>%Ln matches</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%Ln match</numerusform>
+            <numerusform>%Ln matches</numerusform>
         </translation>
     </message>
 </context>
@@ -47,39 +47,39 @@
     <message numerus="yes">
         <location filename="../../../app/gui/qml/console/ConsoleView.qml" line="160"/>
         <source>%Ln lines</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%Ln line</numerusform>
+            <numerusform>%Ln lines</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <location filename="../../../app/gui/qml/console/ConsoleView.qml" line="426"/>
         <source>▼ %Ln new lines</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>▼ %Ln new line</numerusform>
+            <numerusform>▼ %Ln new lines</numerusform>
         </translation>
     </message>
 </context>
 <context>
     <name>hwio::gui::BlePickerViewModel</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="513"/>
+        <location filename="../../../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="520"/>
         <source>%n device(s) found</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n device found</numerusform>
+            <numerusform>%n devices found</numerusform>
         </translation>
     </message>
 </context>
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="770"/>
+        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="816"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Copied the first %n line to the clipboard (copy limit).</numerusform>
+            <numerusform>Copied the first %n lines to the clipboard (copy limit).</numerusform>
         </translation>
     </message>
 </context>
@@ -99,6 +99,33 @@
         <translation>
             <numerusform>AI assistants: listening on port %1, %n client</numerusform>
             <numerusform>AI assistants: listening on port %1, %n clients</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>hwio::remote</name>
+    <message numerus="yes">
+        <location filename="../../../libs/remote/src/relay_client.cpp" line="57"/>
+        <source>… %n line(s) dropped …</source>
+        <translation>
+            <numerusform>… %n line dropped …</numerusform>
+            <numerusform>… %n lines dropped …</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="323"/>
+        <source>%n remote command(s) were dropped while waiting for your answer.</source>
+        <translation>
+            <numerusform>%n remote command was dropped while waiting for your answer.</numerusform>
+            <numerusform>%n remote commands were dropped while waiting for your answer.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="929"/>
+        <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
+        <translation>
+            <numerusform>Help of %n command read for support&apos;s autocomplete.</numerusform>
+            <numerusform>Help of %n commands read for support&apos;s autocomplete.</numerusform>
         </translation>
     </message>
 </context>

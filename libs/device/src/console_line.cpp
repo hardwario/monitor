@@ -39,4 +39,8 @@ std::optional<std::string_view> levelId(LogLevel level) noexcept {
     return std::nullopt;
 }
 
+std::string_view lineSourceId(LineSource source) noexcept {
+    return source == LineSource::Remote ? "remote" : "local";
+}
+
 } // namespace hwio::device

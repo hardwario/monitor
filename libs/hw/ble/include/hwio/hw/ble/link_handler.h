@@ -54,6 +54,9 @@ public:
     // passed through unchanged; libs/hw/ble does not interpret it. Default: ignored.
     virtual void onFirmwareIdentity(const std::optional<FirmwareIdentity>& /*identity*/,
                                     std::uint64_t /*attach*/) {}
+    // Plan 0044 (ADR-0333): an owner's note (RecordNote), passed through unchanged. Default:
+    // ignored.
+    virtual void onNote(std::string /*text*/) {}
 };
 
 } // namespace hwio::ble

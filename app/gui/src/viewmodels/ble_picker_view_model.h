@@ -153,6 +153,9 @@ public:
     // A click on a row: selects it, or switches to the tab that uses the device
     // (tabActivationRequested).
     Q_INVOKABLE void choose(int row);
+    // True when choose(row) would select the row (not a device in use by a tab or another
+    // application, not a non-connectable one); the arrow keys skip the other rows.
+    [[nodiscard]] Q_INVOKABLE bool isSelectable(int row) const;
     // Emits connectRequested for the selected row (when it can connect).
     Q_INVOKABLE void connectSelected();
     // Reads the adapter again at once (the ErrorPanel's Retry).

@@ -87,6 +87,9 @@ v banneri, keď je J-Link na konektore LTE) vás preto prevedie celým postupom:
 2. **APP connector** (konektor APP): pripojte J-Link ku konektoru APP. Sprievodca pokračuje sám, keď aplikačný MCU
    odpovie; na nesprávnom konektore zobrazí **This is the LTE connector. Move the cable to the APP connector.** (toto
    je konektor LTE, prepojte kábel ku konektoru APP).
+   Skôr než sa čokoľvek zmení, krok **Ready to update the LTE MCU** (pripravené na aktualizáciu LTE MCU) povie, čo sa
+   stane: aplikácia sa vymaže, prepojíte kábel J-Link na konektor LTE a na konci späť na APP a aplikácia sa zapíše
+   späť. **Continue** (pokračovať) to spustí; **Cancel** (zrušiť) sprievodcu ukončí bez akejkoľvek zmeny.
 3. **Stop the application** (zastavenie aplikácie): uloží sa kópia aplikačného firmvéru a potom sa aplikácia vymaže
    (**Erase application**: UICR aj PIB zostanú). Ak sa kópia nedá vytvoriť, napríklad pri MCU chránenom proti spätnému
    čítaniu, môžete zvoliť **Continue without a copy** (pokračovať bez kópie) a na konci nahrať aplikáciu sami.
@@ -109,12 +112,12 @@ nenahráte aplikáciu. Kópia zostane v priečinku `backups` ([Súkromie a ulož
 | **Reset** | Resetuje MCU | nie |
 | **Reset and halt** | Resetuje MCU a ponechá CPU zastavený | nie |
 | **Erase application** | Vymaže firmvér; zachová UICR aj PIB (len aplikačný MCU) | nie |
-| **Erase everything…** | Vymaže flash pamäť, UICR aj PIB (len odborné akcie) | áno |
-| **Recover…** | Pozrite nižšie (len odborné akcie) | áno |
+| **Erase everything…** | Vymaže flash pamäť, UICR aj PIB (len v režime Expert) | áno |
+| **Recover…** | Pozrite nižšie (len v režime Expert) | áno |
 
 **Erase everything…**, **Recover…** a údržba **LTE MCU** (voľba **Application MCU | LTE MCU** nad tlačidlami) sa
-zobrazia len so zapnutou voľbou **Settings › Advanced › Show expert maintenance actions** (zobraziť odborné akcie
-údržby), pretože môžu vymazať sériové číslo a konfiguráciu zariadenia. Na LTE MCU potrebujú J-Link na konektore LTE.
+zobrazia len v [režime](getting-started.md#modes) **Expert** (**Settings › General › Mode**), pretože môžu vymazať
+sériové číslo a konfiguráciu zariadenia. Na LTE MCU potrebujú J-Link na konektore LTE.
 
 <a id="recover"></a>
 ### Obnovenie
@@ -123,7 +126,7 @@ Keď je MCU chránený proti spätnému čítaniu (approtect), J-Link ho nemôž
 chybou [target.protected](troubleshooting.md#target.protected). **Recover…** (obnoviť) odstráni ochranu úplným
 vymazaním MCU vrátane UICR a PIB. Na LTE MCU potom nahrá malý obraz, ktorý ponechá MCU dostupný pre ladenie. Po
 obnovení firmvér znova nahrajte. Obnovenie sa nikdy nespustí samo. Keď vás sprievodca riešením problémov pri chránenom
-MCU pošle na stránku **Flash**, **Recover…** sa tam zobrazí raz, aj bez odborného nastavenia.
+MCU pošle na stránku **Flash**, **Recover…** sa tam zobrazí raz, v každom režime.
 
 ## Príkazový riadok
 

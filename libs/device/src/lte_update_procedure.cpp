@@ -102,6 +102,8 @@ std::string_view LteUpdateProcedure::stepId(Step step) noexcept {
         return "idle";
     case Step::ConnectApp:
         return "connect-app";
+    case Step::Confirm:
+        return "confirm";
     case Step::Backup:
         return "backup";
     case Step::BackupFailed:
@@ -181,6 +183,7 @@ Status LteUpdateProcedure::start(Source source) {
 bool LteUpdateProcedure::canCancel() const noexcept {
     switch (m_step) {
     case Step::ConnectApp:
+    case Step::Confirm:
     case Step::Backup:
     case Step::BackupFailed:
     case Step::ConnectLte:
@@ -241,6 +244,15 @@ void LteUpdateProcedure::retry() {
         startConnectorStep(Step::ConnectAppAgain);
         break;
     }
+}
+
+void LteUpdateProcedure::confirm() {
+    if (m_step != Step::Confirm) {
+        return;
+    }
+    qCInfo(log::lcFlash) << "LTE update: confirmed";
+    m_confirmed = true;
+    startBackup();
 }
 
 void LteUpdateProcedure::continueWithoutBackup() {
@@ -373,7 +385,9 @@ void LteUpdateProcedure::afterConnector() {
     m_wrongConnector = false;
     switch (m_step) {
     case Step::ConnectApp:
-        if (hasBackup() || m_backupSkipped) {
+        if (!m_confirmed) {
+            setStep(Step::Confirm); // ADR-0366: nothing changes before the user's Continue
+        } else if (hasBackup() || m_backupSkipped) {
             startErase(); // a retried erase keeps the copy it made
         } else {
             startBackup();
@@ -611,6 +625,7 @@ void LteUpdateProcedure::onFinished(OperationId id, const OperationResult& resul
         finished(); // signal
         return;
     case Step::Idle:
+    case Step::Confirm:
     case Step::BackupFailed:
     case Step::ChooseApplication:
     case Step::Done:
@@ -649,6 +664,11 @@ QString LteUpdateProcedure::promptText() const {
                          .arg(other, wanted)
                    : tr("Connect the J-Link cable to the %1 connector.").arg(wanted);
     }
+    case Step::Confirm:
+        return tr("The application on this CHESTER will be erased. Then you move the J-Link cable "
+                  "to the %1 connector, and at the end back to %2; the application is written "
+                  "back.")
+            .arg(label(lteTarget()), label(appTarget()));
     case Step::Backup:
         return tr("Saving a copy of the application…");
     case Step::BackupFailed:

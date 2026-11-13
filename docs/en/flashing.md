@@ -85,6 +85,9 @@ when the J-Link is on the LTE connector) therefore guides you through the whole 
 1. **Firmware**: the HARDWARIO LTE firmware or your own file.
 2. **APP connector**: connect the J-Link to the APP connector. The guide continues by itself when the application MCU
    answers; on the wrong connector it says **This is the LTE connector. Move the cable to the APP connector.**
+   Before anything is changed, **Ready to update the LTE MCU** says what will happen: the application is erased, you
+   move the J-Link cable to the LTE connector and at the end back to APP, and the application is written back.
+   **Continue** starts it; **Cancel** ends the guide with nothing changed.
 3. **Stop the application**: a copy of the application firmware is saved, then the application is erased (**Erase
    application**: the UICR and the PIB stay). If no copy can be made, for example on a read-back protected MCU, you
    can **Continue without a copy** and flash an application yourself at the end.
@@ -107,12 +110,12 @@ you flash an application. The copy stays in the backups folder ([Privacy and sto
 | **Reset** | Resets the MCU | no |
 | **Reset and halt** | Resets the MCU and keeps the CPU halted | no |
 | **Erase application** | Erases the firmware; keeps the UICR and the PIB (application MCU only) | no |
-| **Erase everything…** | Erases the flash, the UICR and the PIB (expert actions only) | yes |
-| **Recover…** | See below (expert actions only) | yes |
+| **Erase everything…** | Erases the flash, the UICR and the PIB (Expert mode only) | yes |
+| **Recover…** | See below (Expert mode only) | yes |
 
 **Erase everything…**, **Recover…** and the maintenance of the **LTE MCU** (a choice **Application MCU | LTE MCU**
-above the buttons) appear only with **Settings › Advanced › Show expert maintenance actions**, because they can erase
-the serial number and the configuration of the device. On the LTE MCU they need the J-Link on the LTE connector.
+above the buttons) appear only in the **Expert** [mode](getting-started.md#modes) (**Settings › General › Mode**),
+because they can erase the serial number and the configuration of the device. On the LTE MCU they need the J-Link on the LTE connector.
 
 <a id="recover"></a>
 ### Recover
@@ -121,7 +124,7 @@ When the MCU is read-back protected (approtect), the J-Link cannot read or write
 [target.protected](troubleshooting.md#target.protected). **Recover…** removes the protection by erasing the MCU
 completely, including the UICR and the PIB. On the LTE MCU it then programs a small image that keeps the MCU
 debuggable. After a recover, flash the firmware again. Recover never runs by itself. When the troubleshooting guide
-for a protected MCU sends you to the Flash page, **Recover…** is shown there once, without the expert setting.
+for a protected MCU sends you to the Flash page, **Recover…** is shown there once, in every mode.
 
 ## Command line
 

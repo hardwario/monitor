@@ -260,6 +260,23 @@ Item {
                             }
                         }
 
+                        // Plan 0044: share this console with HARDWARIO Support (not in a remote tab).
+                        HToolButton {
+                            objectName: "shareButton"
+                            iconName: "share"
+                            text: page.tab.remoteShare.sharing ? qsTr("Sharing…") : qsTr("Share with support…")
+                            compact: page.compact
+                            visible: page.tab.transport !== "remote"
+                            enabled: page.tab.remoteShare.available && !page.tab.remoteShare.sharing
+                            onClicked: shareDialog.open()
+
+                            ShareDialog {
+                                id: shareDialog
+
+                                share: page.tab.remoteShare
+                            }
+                        }
+
                         HToolButton {
                             objectName: "reconnectButton"
                             iconName: "reconnect"

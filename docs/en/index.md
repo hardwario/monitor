@@ -14,8 +14,9 @@ Other languages: [Čeština](../cs/index.md) · [Deutsch](../de/index.md) · [Sl
 3. [Console](console.md): shell and log, search and filter, history, batch files, console files
 4. [Flashing](flashing.md): application and LTE firmware, catalog IDs, UICR, erase, recover
 5. [Bluetooth LE](bluetooth.md): the console over Bluetooth, pairing
-6. [Troubleshooting](troubleshooting.md): common problems and every error code
-7. [Privacy and stored data](privacy.md): update check, diagnostic report, where data is stored
+6. [Remote support](remote-support.md): sharing the console with HARDWARIO Support, joining a session
+7. [Troubleshooting](troubleshooting.md): common problems and every error code
+8. [Privacy and stored data](privacy.md): update check, diagnostic report, where data is stored
 
 ## Reference (English only)
 

@@ -698,7 +698,19 @@ private:
         return error;
     }
 
-    void sendLine(std::string line, std::uint64_t origin, const std::stop_token& stop) {
+    // Plan 0044 (ADR-0333): an audit marker of a remote session, in order with the device lines.
+    void recordRemoteEvent(std::string text) {
+        ConsoleLine marker;
+        marker.channel = Channel::Shell;
+        marker.dir = Direction::Marker;
+        marker.time = std::chrono::system_clock::now();
+        marker.text = std::move(text);
+        marker.source = LineSource::Remote;
+        emitLine(std::move(marker));
+    }
+
+    void sendLine(std::string line, std::uint64_t origin, LineSource source,
+                  const std::stop_token& stop) {
         if (!m_attached) {
             warn(notConnected("command not sent"));
             return;
@@ -729,6 +741,7 @@ private:
         echo.time = std::chrono::system_clock::now();
         echo.text = std::move(line);
         echo.origin = origin;
+        echo.source = source;
         emitLine(std::move(echo));          // only after it was written (ADR-0034)
         report(ConnectionState::Connected); // a write that landed proves the link works
     }
@@ -1966,85 +1979,87 @@ private:
     }
 
     void handle(Command command, const std::stop_token& stop) {
-        std::visit(
-            Overloaded{
-                [&](SendLineCommand& send) { sendLine(std::move(send.line), send.origin, stop); },
-                [&](const OperationCommand& operation) {
-                    if (operation.kind == OperationKind::Diagnose) {
-                        runDiagnose(operation, stop);
-                    } else {
-                        runOperation(operation, stop);
-                    }
-                },
-                [&](const StartConnectionCommand& start) {
-                    // ADR-0069: promote the probe-only session; the probe and its lock
-                    // stay held. Only once (review V5): a promoted session ignores it.
-                    if (!m_probeOnly) {
-                        qCInfo(log::lcDevice) << "Start connection ignored: not probe-only";
-                        return;
-                    }
-                    m_probeOnly = false;
-                    m_config.attachRtt = start.attachRtt;
-                    m_fatal = false;
-                    m_suspended = false;
-                    m_halted = false;
-                    connect(stop, true);
-                },
-                [&](const ReconnectCommand&) {
-                    if (m_held) { // plan 0033: the hold's owner decides when to reconnect
-                        qCInfo(log::lcDevice) << "Reconnect ignored: the session is held";
-                        return;
-                    }
-                    if (m_released) { // review R19: only through the reacquire path
-                        reattachProbe(stop);
-                        return;
-                    }
-                    m_suspended = false;
-                    m_halted = false;
-                    m_fatal = false;
-                    reconnect(stop);
-                },
-                [&](const SuspendCommand&) {
-                    m_suspended = true;
-                    detach();
-                    report(ConnectionState::Stopped, std::nullopt, true);
-                },
-                [&](const ResumeCommand&) {
-                    if (m_released) { // review R19
-                        reattachProbe(stop);
-                        return;
-                    }
-                    m_suspended = false;
-                    m_halted = false;
-                    m_fatal = false;
-                    reconnect(stop);
-                },
-                [&](const DetachProbeCommand&) { detachProbe(); },
-                [&](const ReattachProbeCommand&) {
-                    if (!m_released) { // review R19: nothing to reacquire
-                        qCInfo(log::lcDevice) << "Reacquire ignored: the probe was not "
-                                                 "released";
-                        return;
-                    }
-                    reattachProbe(stop);
-                },
-                [&](const SetFirmwareIdentityCommand& set) {
-                    // Plan 0028: only for the current attach (a stale answer is ignored).
-                    if (auto identity = m_banner.answer(set.identity, set.attach)) {
-                        adoptIdentity(*identity);
-                    }
-                },
-                [&](const HoldCommand& hold) { setHeld(hold.held, stop); },
-                [&](const SetRttAddressCommand& set) {
-                    // Sticky (rttt): used by every later attach.
-                    m_config.rttAddress = set.address;
-                    qCInfo(log::lcDevice).noquote()
-                        << (set.address ? QStringLiteral("RTT control block address 0x%1")
-                                              .arg(*set.address, 8, 16, QLatin1Char('0'))
-                                        : QStringLiteral("RTT control block: search"));
-                },
-            },
-            command);
+        std::visit(Overloaded{
+                       [&](SendLineCommand& send) {
+                           sendLine(std::move(send.line), send.origin, send.source, stop);
+                       },
+                       [&](RemoteEventCommand& event) { recordRemoteEvent(std::move(event.text)); },
+                       [&](const OperationCommand& operation) {
+                           if (operation.kind == OperationKind::Diagnose) {
+                               runDiagnose(operation, stop);
+                           } else {
+                               runOperation(operation, stop);
+                           }
+                       },
+                       [&](const StartConnectionCommand& start) {
+                           // ADR-0069: promote the probe-only session; the probe and its lock
+                           // stay held. Only once (review V5): a promoted session ignores it.
+                           if (!m_probeOnly) {
+                               qCInfo(log::lcDevice) << "Start connection ignored: not probe-only";
+                               return;
+                           }
+                           m_probeOnly = false;
+                           m_config.attachRtt = start.attachRtt;
+                           m_fatal = false;
+                           m_suspended = false;
+                           m_halted = false;
+                           connect(stop, true);
+                       },
+                       [&](const ReconnectCommand&) {
+                           if (m_held) { // plan 0033: the hold's owner decides when to reconnect
+                               qCInfo(log::lcDevice) << "Reconnect ignored: the session is held";
+                               return;
+                           }
+                           if (m_released) { // review R19: only through the reacquire path
+                               reattachProbe(stop);
+                               return;
+                           }
+                           m_suspended = false;
+                           m_halted = false;
+                           m_fatal = false;
+                           reconnect(stop);
+                       },
+                       [&](const SuspendCommand&) {
+                           m_suspended = true;
+                           detach();
+                           report(ConnectionState::Stopped, std::nullopt, true);
+                       },
+                       [&](const ResumeCommand&) {
+                           if (m_released) { // review R19
+                               reattachProbe(stop);
+                               return;
+                           }
+                           m_suspended = false;
+                           m_halted = false;
+                           m_fatal = false;
+                           reconnect(stop);
+                       },
+                       [&](const DetachProbeCommand&) { detachProbe(); },
+                       [&](const ReattachProbeCommand&) {
+                           if (!m_released) { // review R19: nothing to reacquire
+                               qCInfo(log::lcDevice) << "Reacquire ignored: the probe was not "
+                                                        "released";
+                               return;
+                           }
+                           reattachProbe(stop);
+                       },
+                       [&](const SetFirmwareIdentityCommand& set) {
+                           // Plan 0028: only for the current attach (a stale answer is ignored).
+                           if (auto identity = m_banner.answer(set.identity, set.attach)) {
+                               adoptIdentity(*identity);
+                           }
+                       },
+                       [&](const HoldCommand& hold) { setHeld(hold.held, stop); },
+                       [&](const SetRttAddressCommand& set) {
+                           // Sticky (rttt): used by every later attach.
+                           m_config.rttAddress = set.address;
+                           qCInfo(log::lcDevice).noquote()
+                               << (set.address ? QStringLiteral("RTT control block address 0x%1")
+                                                     .arg(*set.address, 8, 16, QLatin1Char('0'))
+                                               : QStringLiteral("RTT control block: search"));
+                       },
+                   },
+                   command);
     }
 
     // ---- probe release (M6, plan/features/0013)

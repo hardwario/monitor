@@ -98,6 +98,13 @@ Ein einfaches LTE-Update (`hwio chester lte flash` oder ein Bundle, eine Modem- 
 
 Fehlercode: [`target.reset_during_update`](#target.reset_during_update).
 
+<a id="remote-support-session-problems"></a>
+### Probleme mit der Fernsupport-Sitzung
+
+HARDWARIO Monitor erreicht den Support-Server `terminal.hardwario.com` über `wss` (HTTPS, Port 443). Eine Firewall oder ein Proxy, der WebSockets blockiert, verhindert das Freigeben und das Beitreten. Verwendet jemand anderes denselben Sitzungscode (sehr selten), endet die Freigabe aus Sicherheitsgründen: Starten Sie sie erneut, um einen neuen Code zu erhalten. Wer nach dem Beitritt nicht innerhalb von 2 Minuten zugelassen (oder abgelehnt) wird, muss den Kunden bitten, die Konsole erneut freizugeben. Siehe [Fernsupport](remote-support.md).
+
+Fehlercodes: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored).
+
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Die LTE-Modem-Firmware braucht nRF Util
 
@@ -486,7 +493,7 @@ Nach einem fehlgeschlagenen Schritt eines LTE-Updates war im Reset-Grund-Registe
 - **Probably:** Access port protection (APPROTECT) is enabled.
 - **What to do:** Recover the MCU (this erases it), then flash it again.
 
-Recover entfernt den Schutz, löscht aber die MCU vollständig, einschließlich des Product Information Block. Siehe [Recover](flashing.md#recover). Für eine benannte MCU lautet der Vorschlag „Run `hwio <profile> <target> recover` (erases the MCU).“; in der Desktop-App verwenden Sie **Recover…** unter **Maintenance** auf der Seite **Flash** (angezeigt mit **Settings › Advanced › Show expert maintenance actions** oder einmal, wenn die Fehlerbehebungsanleitung Sie dorthin schickt).
+Recover entfernt den Schutz, löscht aber die MCU vollständig, einschließlich des Product Information Block. Siehe [Recover](flashing.md#recover). Für eine benannte MCU lautet der Vorschlag „Run `hwio <profile> <target> recover` (erases the MCU).“; in der Desktop-App verwenden Sie **Recover…** unter **Maintenance** auf der Seite **Flash** (angezeigt im Modus Expert, **Settings › General › Mode**, oder einmal, wenn die Fehlerbehebungsanleitung Sie dorthin schickt).
 
 <a id="target.program_failed"></a>
 #### `target.program_failed`
@@ -641,6 +648,14 @@ Kommt von `mem read`, `mem write` und dem MCP-Server (`hwio mcp`).
 <a id="category-firmware"></a>
 ### Firmware (Exit-Code 7)
 
+<a id="remote.firmware_not_in_catalog"></a>
+#### `remote.firmware_not_in_catalog`
+
+**This firmware is not in the HARDWARIO catalog.**
+
+- **Probably:** Remote flashing accepts only firmware from the HARDWARIO firmware catalog, identified by its ID.
+- **What to do:** Check the firmware ID, or ask the customer to flash a file locally.
+
 <a id="firmware.hex_parse_error"></a>
 #### `firmware.hex_parse_error`
 
@@ -733,6 +748,52 @@ Die heruntergeladene Datei stimmte nicht mit der Prüfsumme aus dem Katalog übe
 - **What to do:** Check the internet connection and try again.
 
 Die Meldung kann die Firmware nennen, etwa „Downloading firmware `<id>` failed.“ oder „Downloading `<name>` failed.“ In der Desktop-App können Sie stattdessen auch eine eigene Datei wählen.
+
+<a id="remote.relay_unreachable"></a>
+#### `remote.relay_unreachable`
+
+**Cannot reach the support server.**
+
+- **Probably:** The network, a proxy or a firewall blocks the connection to the support server (wss://terminal.hardwario.com).
+- **What to do:** Check the internet connection or try another network.
+
+Kommt aus einer Fernsupport-Sitzung (**Mit dem Support teilen…**, **Support-Sitzung beitreten…**, `hwio remote`). Nach einem Verbindungsabbruch wird die Verbindung 5 Minuten lang erneut versucht. Siehe [Probleme mit der Fernsupport-Sitzung](#remote-support-session-problems).
+
+<a id="remote.code_collision"></a>
+#### `remote.code_collision`
+
+**Another device is using this session code.**
+
+- **Probably:** Someone else shares a console under the same session code. The session was ended for safety.
+- **What to do:** Start sharing again to get a new code.
+
+<a id="remote.host_ended"></a>
+#### `remote.host_ended`
+
+**The remote session ended.**
+
+- **Probably:** The customer ended sharing, or their device or HARDWARIO Monitor disconnected.
+- **What to do:** Ask the customer to share the console again if you need more time.
+
+Sieht der Beitretende, wenn die Verbindung zum Server endgültig beendet ist.
+
+<a id="remote.protocol_error"></a>
+#### `remote.protocol_error`
+
+**Unexpected data in the remote session.**
+
+- **Probably:** The support server or the other participant sent data that HARDWARIO Monitor does not understand. It was ignored, or the session was ended for safety.
+- **What to do:** Report the issue with a diagnostic report.
+
+<a id="remote.application_not_restored"></a>
+#### `remote.application_not_restored`
+
+**Die LTE-Firmware wurde aktualisiert, aber die Anwendung wurde nicht zurückgeschrieben.**
+
+- **Wahrscheinlich:** Das geführte LTE-Update endete, bevor die Anwendung zurückgeschrieben wurde, oder es konnte keine Kopie der Anwendung gespeichert werden. Die Anwendungs-MCU ist leer.
+- **Was tun:** Eine Anwendung flashen: Bitten Sie den Kunden, sie zu flashen, oder fordern Sie das Flashen von Katalog-Firmware an.
+
+Wird dem Teilnehmer nach einem Remote-LTE-Update gemeldet (**LTE-Firmware-Update anfragen**, `hwio remote join --lte-update`).
 
 <a id="update.network"></a>
 #### `update.network`
@@ -890,6 +951,24 @@ Nur CLI, mit `-o FILE --force`.
 
 Die Meldung sagt meist genau, welcher Wert falsch ist, zum Beispiel eine ungültige Option (der Vorschlag lautet dann „Run `hwio --help`.“), ein unbekanntes Geräteprofil oder Target, eine J-Link-Geschwindigkeit oder Latenz außerhalb des Bereichs, eine ungültige Adresse oder Länge, eine Firmware-ID, die nicht 32 Hexadezimalziffern hat, oder mehrere Bluetooth-Geräte, die zu `--name` passen (verwenden Sie `--address`). In der Desktop-App deckt er auch Konsolen-Batch-Dateien ab, die zu groß sind, einen zu langen Befehl oder keine Befehle enthalten. Siehe [CLI](../en/cli.md).
 
+<a id="remote.code_invalid"></a>
+#### `remote.code_invalid`
+
+**The session code is not valid.**
+
+- **Probably:** The session code must be a number: 6 digits from HARDWARIO Monitor, up to 6 digits from the web Terminal.
+- **What to do:** Check the code and type it again.
+
+<a id="remote.operation_unsupported_peer"></a>
+#### `remote.operation_unsupported_peer`
+
+**The customer's application supports only the console.**
+
+- **Probably:** The customer uses the web Terminal, which cannot flash, erase, recover or reset the device remotely.
+- **What to do:** Ask the customer to share the console from HARDWARIO Monitor.
+
+Auch wenn der Kunde eine Bluetooth-Konsole freigibt, die kein Flashen bietet.
+
 <a id="usage.confirmation_required"></a>
 #### `usage.confirmation_required`
 
@@ -1000,6 +1079,22 @@ Eine Warnung von `hwio doctor` oder im Diagnosebericht. Die Meldung kann die Pr�
 - **What to do:** Run the operation again if needed.
 
 Erscheint, wenn Sie Ctrl+C oder **Cancel** drücken, eine Bestätigung mit Nein beantworten oder das Gerät schließen. Die Variante „The output was closed.“ bedeutet, dass das Programm, das die Ausgabe von `hwio` liest, beendet wurde, zum Beispiel `hwio ... --json | head`.
+
+<a id="remote.join_not_allowed"></a>
+#### `remote.join_not_allowed`
+
+**The customer did not allow you to join.**
+
+- **Probably:** The customer ended the session instead of allowing you, or did not answer within 2 minutes.
+- **What to do:** Ask the customer to share the console again and to allow you when you join.
+
+<a id="remote.operation_denied"></a>
+#### `remote.operation_denied`
+
+**The customer denied the request.**
+
+- **Probably:** The customer denied the operation, or did not answer within 60 seconds.
+- **What to do:** Ask the customer to allow the operation and try again.
 
 <a id="mcp.consent_denied"></a>
 #### `mcp.consent_denied`

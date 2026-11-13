@@ -104,6 +104,7 @@ public:
     void onClosed() override;
     void onFirmwareIdentity(const std::optional<FirmwareIdentity>& identity,
                             std::uint64_t attach) override;
+    void onNote(std::string text) override; // plan 0044: a remote session audit marker
 
 private:
     void emitEvent(BleSessionEvent event);

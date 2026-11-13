@@ -98,6 +98,10 @@ deshalb durch den ganzen Ablauf:
 2. **APP connector** (APP-Anschluss): Schließen Sie den J-Link an den APP-Anschluss an. Der Assistent geht von selbst
    weiter, sobald die Anwendungs-MCU antwortet; am falschen Anschluss meldet er **This is the LTE connector. Move the
    cable to the APP connector.** (das ist der LTE-Anschluss, stecken Sie das Kabel an den APP-Anschluss um).
+   Bevor etwas geändert wird, sagt **Ready to update the LTE MCU** (Bereit zur Aktualisierung der LTE-MCU), was
+   geschieht: Die Anwendung wird gelöscht, Sie stecken das J-Link-Kabel auf den LTE-Anschluss und am Ende zurück auf
+   APP um, und die Anwendung wird zurückgeschrieben. **Continue** (Fortfahren) startet das; **Cancel** (Abbrechen)
+   beendet den Assistenten, ohne etwas zu ändern.
 3. **Stop the application** (Anwendung anhalten): Eine Kopie der Anwendungsfirmware wird gespeichert, dann wird die
    Anwendung gelöscht (**Erase application**: der UICR und der PIB bleiben erhalten). Lässt sich keine Kopie
    erstellen, zum Beispiel bei einer gegen Auslesen geschützten MCU, können Sie mit **Continue without a copy** (ohne
@@ -123,12 +127,12 @@ Ordner `backups` ([Datenschutz und gespeicherte Daten](privacy.md)).
 | **Reset** | Setzt die MCU zurück | nein |
 | **Reset and halt** | Setzt die MCU zurück und hält die CPU angehalten | nein |
 | **Erase application** | Löscht die Firmware; behält den UICR und den PIB (nur Anwendungs-MCU) | nein |
-| **Erase everything…** | Löscht den Flash, den UICR und den PIB (nur Expertenaktionen) | ja |
-| **Recover…** | Siehe unten (nur Expertenaktionen) | ja |
+| **Erase everything…** | Löscht den Flash, den UICR und den PIB (nur im Modus Expert) | ja |
+| **Recover…** | Siehe unten (nur im Modus Expert) | ja |
 
 **Erase everything…**, **Recover…** und die Wartung der **LTE MCU** (eine Auswahl **Application MCU | LTE MCU** über
-den Schaltflächen) erscheinen nur mit **Settings › Advanced › Show expert maintenance actions**
-(Experten-Wartungsaktionen anzeigen), weil sie die Seriennummer und die Konfiguration des Geräts löschen können. Auf
+den Schaltflächen) erscheinen nur im [Modus](getting-started.md#modes) **Expert** (**Settings › General › Mode**), weil
+sie die Seriennummer und die Konfiguration des Geräts löschen können. Auf
 der LTE-MCU brauchen sie den J-Link am LTE-Anschluss.
 
 <a id="recover"></a>
@@ -139,7 +143,7 @@ schlägt mit [target.protected](troubleshooting.md#target.protected) fehl. **Rec
 die MCU vollständig löscht, einschließlich des UICR und des PIB. Auf der LTE-MCU programmiert es danach ein kleines
 Image, das die MCU debugbar hält. Flashen Sie nach einem Recover die Firmware erneut. Recover läuft nie von selbst.
 Schickt Sie die Fehlerbehebungsanleitung für eine geschützte MCU auf die Seite **Flash**, wird **Recover…** dort
-einmal angezeigt, auch ohne die Experteneinstellung.
+einmal angezeigt, in jedem Modus.
 
 ## Kommandozeile
 

@@ -9,7 +9,7 @@
 #include "hwio/core/result.h"
 #include "hwio/device/command_history.h"
 #include "hwio/device/command_tree.h"
-#include "hwio/device/command_tree_learner.h"
+#include "hwio/device/command_tree_source.h"
 #include "hwio/device/completer.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_session.h"
@@ -434,7 +434,7 @@ private:
 
     // Main thread: publishes a new tree snapshot and passes the input thread's requests on.
     void syncLearning() {
-        device::CommandTreeLearner* learner = m_options->learner;
+        device::CommandTreeSource* learner = m_options->learner;
         if (learner == nullptr) {
             return;
         }
