@@ -123,10 +123,18 @@ TEST(FlagConsentBroker, DecidesFromTheFlags) {
                                 ConsentCategory::MemoryWrite | ConsentCategory::Uicr));
 }
 
-// Delivers `parts` one per read call, then the end of input.
-StdinLineReader::ReadFunction chunks(std::vector<std::string> parts) {
-    return [parts = std::move(parts), index = std::size_t{0}](std::span<char> buffer,
-                                                              std::size_t& count) mutable {
+// Delivers `parts` one per read call, then the end of input. With a `gate`, the first read waits
+// until the gate is set (at most 10 s, so a test never hangs), e.g. until the wakeup is installed.
+StdinLineReader::ReadFunction chunks(std::vector<std::string> parts,
+                                     const std::atomic<bool>* gate = nullptr) {
+    return [parts = std::move(parts), index = std::size_t{0}, gate](std::span<char> buffer,
+                                                                    std::size_t& count) mutable {
+        if (gate != nullptr && index == 0) {
+            const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+            while (!gate->load() && std::chrono::steady_clock::now() < deadline) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        }
         if (index >= parts.size()) {
             count = 0;
             return ReadStatus::End;
@@ -140,8 +148,13 @@ StdinLineReader::ReadFunction chunks(std::vector<std::string> parts) {
 
 TEST(StdinLineSource, DeliversLinesOverlongMarkersAndTheEnd) {
     std::atomic<int> wakeups{0};
-    StdinLineSource source(8, 4, 0, chunks({"one\n", "much too long line\n", "two\r\n"}));
+    // The reader thread starts in the constructor: hold its first read until the wakeup is set,
+    // or a fast machine delivers everything before it and no wakeup is ever counted.
+    std::atomic<bool> wakeupSet{false};
+    StdinLineSource source(8, 4, 0,
+                           chunks({"one\n", "much too long line\n", "two\r\n"}, &wakeupSet));
     source.setWakeup([&wakeups] { ++wakeups; });
+    wakeupSet = true;
     std::vector<hwio::mcp::ILineSource::Line> lines;
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
     while (!source.atEnd() && std::chrono::steady_clock::now() < deadline) {

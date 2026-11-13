@@ -726,7 +726,7 @@ void DeviceTabViewModel::onConnectionChanged(const device::ConnectionEvent& even
         QMetaObject::invokeMethod(
             this,
             [this, failed] {
-                if (failed && consoleSession() == failed.data() && sessionFailed()) {
+                if (!failed.isNull() && consoleSession() == failed.data() && sessionFailed()) {
                     releaseSession();
                 }
             },
@@ -746,7 +746,7 @@ void DeviceTabViewModel::pairDevice() {
     const QPointer<DeviceTabViewModel> self(this);
     const Status started = m_context.ble->pair(
         toStdString(m_bleId), this, [this, self](const Status& status, bool alreadyPaired) {
-            if (!self) {
+            if (self.isNull()) {
                 return;
             }
             m_pairing = false;
