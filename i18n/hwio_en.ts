@@ -64,7 +64,7 @@
 <context>
     <name>hwio::gui::BlePickerViewModel</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="513"/>
+        <location filename="../../../app/gui/src/viewmodels/ble_picker_view_model.cpp" line="520"/>
         <source>%n device(s) found</source>
         <translation>
             <numerusform>%n device found</numerusform>
@@ -75,7 +75,7 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="776"/>
+        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="816"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Copied the first %n line to the clipboard (copy limit).</numerusform>
@@ -113,11 +113,19 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../libs/remote/src/remote_host.cpp" line="294"/>
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="323"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n remote command was dropped while waiting for your answer.</numerusform>
             <numerusform>%n remote commands were dropped while waiting for your answer.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="929"/>
+        <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
+        <translation>
+            <numerusform>Help of %n command read for support&apos;s autocomplete.</numerusform>
+            <numerusform>Help of %n commands read for support&apos;s autocomplete.</numerusform>
         </translation>
     </message>
 </context>

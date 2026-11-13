@@ -44,6 +44,12 @@ const PageDescriptor* PageRegistry::find(const QString& id) const {
     return it == m_pages.end() ? nullptr : &*it;
 }
 
+const SettingsSectionDescriptor* PageRegistry::findSettingsSection(const QString& id) const {
+    const auto it = std::ranges::find_if(
+        m_sections, [&id](const SettingsSectionDescriptor& section) { return section.id == id; });
+    return it == m_sections.end() ? nullptr : &*it;
+}
+
 QString PageRegistry::title(const PageDescriptor& page) {
     return QCoreApplication::translate("Pages", page.titleSourceText);
 }

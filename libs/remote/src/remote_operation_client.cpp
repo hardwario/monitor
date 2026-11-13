@@ -51,7 +51,7 @@ RemoteOperationClient::RemoteOperationClient(RemoteConsoleSession& session,
     });
     connect(&session, &RemoteConsoleSession::hostMessage, this, &RemoteOperationClient::onMessage);
     connect(&session, &RemoteConsoleSession::joinStateChanged, this, [this] {
-        if (m_session && m_session->joinState() == JoinState::Ended) {
+        if (!m_session.isNull() && m_session->joinState() == JoinState::Ended) {
             finish(makeError(ErrorCode::RemoteHostEnded));
         }
     });
@@ -67,14 +67,27 @@ Result<std::string> RemoteOperationClient::request(tunnel::OpKind kind, tunnel::
     if (m_session.isNull()) {
         return std::unexpected(makeError(ErrorCode::RemoteHostEnded));
     }
+    if (kind == tunnel::OpKind::LteUpdate &&
+        (!m_session->hostHello() || !tunnel::supports(*m_session->hostHello(), kind))) {
+        // ADR-0363: only a host that lists it in its hello's opKinds.
+        return std::unexpected(makeError(ErrorCode::RemoteOperationUnsupportedPeer,
+                                         "the host has no remote LTE update"));
+    }
     if ((kind == tunnel::OpKind::Flash) != firmwareId.has_value()) {
         return std::unexpected(makeError(ErrorCode::UsageInvalidArgument,
                                          "a firmware ID goes with flash, and only with flash"));
     }
+    m_declined = false;
     std::string id = std::format("op-{:08x}{:08x}", QRandomGenerator::system()->generate(),
                                  QRandomGenerator::system()->generate());
-    const tunnel::OpRequest request{
-        .id = id, .kind = kind, .target = target, .firmwareId = std::move(firmwareId)};
+    // ADR-0368: support answers the LTE update's questions when both sides can.
+    const bool questions = m_answers && kind == tunnel::OpKind::LteUpdate &&
+                           m_session->hostHello() && m_session->hostHello()->opQuestions;
+    const tunnel::OpRequest request{.id = id,
+                                    .kind = kind,
+                                    .target = target,
+                                    .firmwareId = std::move(firmwareId),
+                                    .questions = questions};
     if (Status sent = m_session->sendTunnel(request); !sent) {
         return std::unexpected(std::move(sent).error());
     }
@@ -93,7 +106,8 @@ void RemoteOperationClient::onMessage(const tunnel::HostMessage& message) {
         [this](const auto& m) {
             using T = std::decay_t<decltype(m)>;
             if constexpr (std::is_same_v<T, tunnel::HostHello> ||
-                          std::is_same_v<T, tunnel::HostEnd>) {
+                          std::is_same_v<T, tunnel::HostEnd> ||
+                          std::is_same_v<T, tunnel::HostCommands>) {
                 return; // the session handles these; HostEnd ends it (joinStateChanged)
             } else {
                 if (m.id != *m_pending) {
@@ -110,6 +124,8 @@ void RemoteOperationClient::onMessage(const tunnel::HostMessage& message) {
                         m_timer.start(m_limits.inactivityTimeout);
                         emit progress(m);
                     }
+                } else if constexpr (std::is_same_v<T, tunnel::OpQuestion>) {
+                    onQuestion(m);
                 } else if constexpr (std::is_same_v<T, tunnel::OpResult>) {
                     if (m.ok) {
                         finish(std::nullopt);
@@ -122,6 +138,29 @@ void RemoteOperationClient::onMessage(const tunnel::HostMessage& message) {
         message);
 }
 
+void RemoteOperationClient::onQuestion(const tunnel::OpQuestion& question) {
+    if (!m_accepted || !m_answers) {
+        return; // ADR-0368: only for an accepted request that offered answers
+    }
+    m_timer.start(m_limits.inactivityTimeout);
+    m_question = question;
+    emit this->question(question.question);
+}
+
+Status RemoteOperationClient::answer(bool yes) {
+    if (!m_pending || !m_question) {
+        return std::unexpected(makeError(ErrorCode::UsageInvalidArgument, "no open question"));
+    }
+    if (m_session.isNull()) {
+        return std::unexpected(makeError(ErrorCode::RemoteHostEnded));
+    }
+    m_declined = m_declined || !yes;
+    const tunnel::OpAnswer message{.id = m_question->id, .qid = m_question->qid, .yes = yes};
+    m_question.reset();
+    emit questionClosed();
+    return m_session->sendTunnel(message);
+}
+
 void RemoteOperationClient::finish(const std::optional<Error>& error) {
     if (!m_pending) {
         return;
@@ -129,10 +168,14 @@ void RemoteOperationClient::finish(const std::optional<Error>& error) {
     m_pending.reset();
     m_accepted = false;
     m_timer.stop();
+    if (std::exchange(m_question, std::nullopt)) {
+        emit questionClosed();
+    }
     emit finished(!error.has_value(), error.value_or(Error{}));
 }
 
 void RemoteOperationClient::abandon() {
+    m_question.reset();
     m_pending.reset();
     m_accepted = false;
     m_timer.stop();

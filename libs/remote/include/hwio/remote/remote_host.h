@@ -31,11 +31,29 @@
 // tunnel message (ADR-0336): hello (the joiner's app) and op-request.
 //
 // Operations (ADR-0322..0324, ADR-0336): only with HostOperations (J-Link) and after the hello was
-// sent; one at a time, a request during an operation, an operation question or a join question is
-// denied with internal.busy. The request is validated, a flash's firmware looked up in the catalog
-// (remote.firmware_not_in_catalog), then the operation question (Deny after operationTimeout,
-// remote.operation_denied). Allow → op-accepted, op-progress (at most progressInterval apart),
-// op-result.
+// sent (it lists HostOperations::kinds() as opKinds; a kind not in it is refused with
+// remote.operation_unsupported_peer; lteUpdate, ADR-0363, asks with the recommended LTE firmware's
+// name and runs the guided update); one at a time, a request during an operation, an operation
+// question or a join question is denied with internal.busy. The request is validated, a flash's
+// firmware looked up in the catalog (remote.firmware_not_in_catalog), then the operation question
+// (Deny after operationTimeout, remote.operation_denied). Allow → op-accepted, op-progress (at most
+// progressInterval apart), op-result (a new phase at once, ADR-0363).
+//
+// Support's questions (ADR-0368): the hello says opQuestions when the host runs lteUpdate. An
+// lteUpdate request with `questions` gets an AskSupport for its run: a question is sent as
+// op-question (a random qid; one open at a time) and answered by an op-answer of an allowed
+// participant (no join question open) for that operation and qid, once; any other answer is
+// dropped. No answer within operationTimeout, or the session ending, answers NoAnswer (the update
+// is then cancelled before anything changed). Audited: asked, answered, not answered.
+//
+// Autocomplete (ADR-0364): setCommandTree() gives the host's learned command tree (the GUI tab's
+// ConsoleViewModel, the CLI host's learner, on every change); after a join is allowed, and on
+// every change while allowed (coalesced), it is sent as tunnel `commands` with its help texts (a
+// joiner accepts events up to joinerIncomingEventBytes, ADR-0365; should it not fit, it goes
+// without help texts, logged, as a safety net). A tunnel `learn`
+// of an allowed participant for a known path, at most learnPerSecond and learnPerSession, emits
+// learnRequested() (the owner runs its silent `<path> -h` query and sets the grown tree);
+// others are dropped. Not audited one by one; their count is in the audit line at the end.
 //
 // Limits (ADR-0328, plan 0044 § Limits): idle (no console traffic in either direction) warns at
 // idleTimeout - idleWarningBefore (idleWarning()), keepSharing() restarts the idle time; idle or
@@ -46,6 +64,7 @@
 // its outcome. The texts are translated (the host's language), context "hwio::remote".
 
 #include "hwio/core/error.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/session_events.h"
 #include "hwio/remote/consent.h"
@@ -60,6 +79,7 @@
 #include <QObject>
 #include <QPointer>
 #include <QString>
+#include <QStringList>
 #include <QStringLiteral>
 #include <QTimer>
 #include <QUrl>
@@ -68,6 +88,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -90,6 +111,10 @@ struct HostLimits {
     int remoteLinesPerSecond = 20;
     std::chrono::milliseconds progressInterval{250}; // op-progress at most 4/s
     std::chrono::milliseconds helloWait{5000};       // then the peer counts as web Terminal
+    // ADR-0364: tunnel `learn` requests of the participants.
+    int learnPerSecond = 2;
+    int learnPerSession = 200;
+    std::chrono::milliseconds commandsDelay{250}; // tree changes are sent at most this often
     TranscriptLimits transcript;
     RelayLimits relay;
 };
@@ -127,6 +152,8 @@ public:
     void end();
     // Keep sharing after the idle warning (any CLI input).
     void keepSharing();
+    // ADR-0364: the host's command tree (nullptr = none known).
+    void setCommandTree(std::shared_ptr<const device::CommandTree> tree);
 
     [[nodiscard]] HostState state() const noexcept { return m_state; }
     [[nodiscard]] const SessionCode& code() const noexcept { return m_code; }
@@ -157,6 +184,8 @@ signals:
     // The session ended: by end() (no error) or for `error`'s reason. Once.
     void ended();
     void warning(const hwio::Error& error);
+    // ADR-0364: a participant's autocomplete needs the subcommands of `path` (command words).
+    void learnRequested(const QStringList& path);
 
 private:
     struct PendingOperation {
@@ -174,10 +203,18 @@ private:
     void onRemoteLine(const QString& text);
     void onTunnel(const QJsonValue& payload);
     void onOperationRequest(const tunnel::OpRequest& request);
+    void onLearn(const tunnel::Learn& learn);
+    void sendCommands();
     void askOperation(PendingOperation pending);
     void denyOperation(const std::string& id, ErrorCode code, const QString& audit);
     void startOperation();
     void finishOperation(const Status& status);
+    // ADR-0368
+    void askSupport(std::uint64_t token, tunnel::OpQuestionKind kind, SupportAnswerFn answer);
+    void onAnswer(const tunnel::OpAnswer& answer);
+    void answerSupportQuestion(bool yes);
+    // Closes the open question (stops its timer); its answer callback, empty when none.
+    [[nodiscard]] SupportAnswerFn takeQuestion();
     void askJoin();
     void answerJoin(bool allowed);
     void sendSync();
@@ -212,8 +249,17 @@ private:
     std::uint64_t m_droppedWhilePending = 0;
     std::string m_peerApp;
     std::optional<PendingOperation> m_operation;
+    // ADR-0368: the open question to support (of m_operation).
+    struct SupportQuestion {
+        std::string qid;
+        tunnel::OpQuestionKind kind = tunnel::OpQuestionKind::Continue;
+        SupportAnswerFn answer;
+    };
+    std::optional<SupportQuestion> m_question;
+    QTimer m_questionTimer{this};
     std::uint64_t m_operationToken = 0;
     std::chrono::steady_clock::time_point m_lastProgress;
+    std::string m_lastProgressPhase;
     std::deque<std::chrono::steady_clock::time_point> m_recentLines; // <= remoteLinesPerSecond
     std::chrono::steady_clock::time_point m_lastRateAudit;
     std::optional<Error> m_endError;
@@ -225,6 +271,12 @@ private:
     QTimer m_idleTimer{this};
     QTimer m_lifetimeTimer{this};
     QTimer m_helloTimer{this};
+    // ADR-0364
+    std::shared_ptr<const device::CommandTree> m_commandTree;
+    std::shared_ptr<const device::CommandTree> m_sentTree;
+    std::deque<std::chrono::steady_clock::time_point> m_recentLearn; // <= learnPerSecond
+    int m_learnCount = 0;
+    QTimer m_commandsTimer{this};
 };
 
 } // namespace hwio::remote

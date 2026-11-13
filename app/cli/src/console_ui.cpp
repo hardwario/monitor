@@ -9,10 +9,9 @@
 #include "hwio/core/result.h"
 #include "hwio/device/command_history.h"
 #include "hwio/device/command_tree.h"
-#include "hwio/device/command_tree_learner.h"
+#include "hwio/device/command_tree_source.h"
 #include "hwio/device/completer.h"
 #include "hwio/device/console_line.h"
-#include "hwio/device/console_log.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/session_events.h"
@@ -81,13 +80,6 @@ ConsoleView::ConsoleView(const Context& context, device::ConsoleSession& session
 }
 
 ConsoleView::~ConsoleView() = default;
-
-void ConsoleView::printLog() {
-    const std::vector<device::ConsoleLine> lines = m_session->log().linesSince(0);
-    if (!lines.empty()) {
-        onLines(QList<device::ConsoleLine>(lines.begin(), lines.end()));
-    }
-}
 
 void ConsoleView::setPrinter(Printer printer, bool showEcho) {
     m_printer = std::move(printer);
@@ -442,7 +434,7 @@ private:
 
     // Main thread: publishes a new tree snapshot and passes the input thread's requests on.
     void syncLearning() {
-        device::CommandTreeLearner* learner = m_options->learner;
+        device::CommandTreeSource* learner = m_options->learner;
         if (learner == nullptr) {
             return;
         }

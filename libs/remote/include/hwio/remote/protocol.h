@@ -23,9 +23,12 @@
 
 namespace hwio::remote {
 
-// Incoming event payloads larger than this are dropped (plan 0044 § Limits); checked before
-// parsing.
-inline constexpr std::size_t maxIncomingEventBytes = 64ULL * 1024;
+// Incoming event size limits (plan 0044 § Limits, ADR-0365), checked before parsing; larger
+// events are dropped. A host receives only small events from its joiners; a joiner (Monitor in a
+// remote tab, `hwio remote join`) accepts the host's whole command tree (tunnel `commands`, up to
+// tunnel::maxCommandsBytes) in one `at` event. RelayConfig::incomingEventBytes selects one.
+inline constexpr std::size_t hostIncomingEventBytes = 64ULL * 1024;
+inline constexpr std::size_t joinerIncomingEventBytes = 512ULL * 1024;
 
 namespace engineio {
 
@@ -84,9 +87,10 @@ struct Event {
     QJsonValue payload = QJsonValue::Null;
 };
 
-// Errors: remote.protocol_error (unknown or binary type, a bad namespace, invalid JSON, data over
-// maxIncomingEventBytes).
-[[nodiscard]] Result<Packet> parsePacket(QStringView text);
+// Errors: remote.protocol_error (unknown or binary type, a bad namespace, invalid JSON, more than
+// maxChars characters).
+[[nodiscard]] Result<Packet> parsePacket(QStringView text,
+                                         std::size_t maxChars = joinerIncomingEventBytes);
 // Errors: remote.protocol_error (not an array, no string name).
 [[nodiscard]] Result<Event> toEvent(const Packet& packet);
 

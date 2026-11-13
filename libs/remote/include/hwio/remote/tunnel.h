@@ -6,27 +6,51 @@
 //                                                  "op-progress"|"op-result"|"end", …}}
 //   joiner → host    write {hwio: {v: 1, type: "hello"|"op-request", …}}   (a JSON object, never a
 //                                                                          string)
+// ADR-0363: the operation kind `lteUpdate` (the guided LTE update with the host's recommended
+// firmware: no target, no firmware ID); the host's hello lists the kinds it runs in `opKinds`
+// (alongside `ops`; a hello without it means the four kinds of ADR-0322 when ops is true). The
+// progress of an lteUpdate names the guided update's step in `phase`
+// (device::LteUpdateProcedure::stepId: "connect-app", "confirm" (ADR-0366: the customer's
+// Continue), "backup", "erase", "connect-lte", "update-lte", "connect-app-again",
+// "choose-application", "restore"; "download" before it).
+// ADR-0368: support answers the questions of a remote LTE update. The host's hello says
+// `opQuestions: true`; a joiner that can answer sends `questions: true` in its op-request. Then
+// host → joiners `op-question` {id, qid, question: "continue" | "continueWithoutCopy"} and joiner →
+// host `op-answer` {id, qid, yes}. The relay does not tell the host who sent a `write` (every
+// participant sees every event), so the host accepts an answer from an allowed participant only,
+// only for its open question (operation id and the host's random qid), and only once; the texts are
+// the joiner's own (translated there), never sent. Without the feature on either side the customer
+// answers (ADR-0366).
+// ADR-0364: host → joiners `commands` {tree: <device::CommandTree JSON>} (the host's learned
+// command tree for the joiner's autocomplete), joiner → host `learn` {path: [names]} (the host
+// learns that command's subcommands with its silent query). The tree is untrusted input: at most
+// maxCommandsBytes of JSON, maxCommandNodes nodes, maxCommandDepth levels, command names only
+// (CommandTree's charset), help texts sanitised; then CommandTree's own bounds apply.
 // The web Terminal ignores an `at` whose event is not state / write / read; a web Terminal host
 // would write a `write` object to the device as text, so a Monitor joiner sends tunnel objects only
 // after the host's hello (RemoteConsoleSession).
 //
 // Decoding validates every field (version 1, known type, enum values, id and text lengths, the
-// firmware ID format, `firmwareId` only and always for flash) and fails with remote.protocol_error.
+// firmware ID format, `firmwareId` only and always for flash, `target` always except for
+// lteUpdate, which has none) and fails with remote.protocol_error.
 // `end` (ADR-0354): the host ends the session; `code` is the hwio::Error id of the reason.
 //
 // Text fields shown to the user are sanitised (control characters removed, length bounded). Pure
 // functions, any thread.
 
 #include "hwio/core/result.h"
+#include "hwio/device/command_tree.h"
 
 #include <QJsonObject>
 #include <QJsonValue>
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <variant>
+#include <vector>
 
 namespace hwio::remote::tunnel {
 
@@ -34,14 +58,26 @@ inline constexpr int version = 1;
 inline constexpr std::string_view appId = "hwio-monitor";
 inline constexpr std::size_t maxIdBytes = 32;    // operation ids: [A-Za-z0-9_-]
 inline constexpr std::size_t maxTextBytes = 128; // app, version, device fields, phase
+// ADR-0364: the `commands` tree and a `learn` path.
+inline constexpr std::size_t maxCommandsBytes = 256ULL * 1024;
+inline constexpr std::size_t maxCommandNodes = 4000;
+inline constexpr std::size_t maxCommandDepth = 8;
 
-enum class OpKind : std::uint8_t { Flash, Erase, Recover, Reset };
+enum class OpKind : std::uint8_t { Flash, Erase, Recover, Reset, LteUpdate };
+inline constexpr std::size_t maxOpKinds = 16; // entries of a hello's opKinds
 enum class OpTarget : std::uint8_t { App, Lte };
+// ADR-0368: the questions of a remote LTE update that support answers.
+enum class OpQuestionKind : std::uint8_t {
+    Continue,            // ADR-0366: the application will be erased; go on?
+    ContinueWithoutCopy, // the application could not be copied; go on without a copy?
+};
 
-[[nodiscard]] std::string_view kindId(OpKind kind) noexcept;       // "flash", "erase", ...
+[[nodiscard]] std::string_view kindId(OpKind kind) noexcept; // "flash", "erase", ..., "lteUpdate"
 [[nodiscard]] std::string_view targetId(OpTarget target) noexcept; // "app", "lte"
 [[nodiscard]] std::optional<OpKind> kindFromId(std::string_view id) noexcept;
 [[nodiscard]] std::optional<OpTarget> targetFromId(std::string_view id) noexcept;
+[[nodiscard]] std::string_view questionId(OpQuestionKind kind) noexcept; // "continue", ...
+[[nodiscard]] std::optional<OpQuestionKind> questionFromId(std::string_view id) noexcept;
 
 struct DeviceInfo {
     std::string name;      // "CHESTER-M"
@@ -56,7 +92,14 @@ struct HostHello {
     std::string version; // Monitor version
     DeviceInfo device;
     bool ops = false; // the host accepts operation requests
+    // ADR-0363: the kinds it runs (empty when !ops). Decoded: unknown kinds are skipped; a hello
+    // without the field gets the four kinds of ADR-0322 when ops is true.
+    std::vector<OpKind> opKinds;
+    // ADR-0368: the host sends op-question to a joiner whose request says `questions`.
+    bool opQuestions = false;
 };
+// The host runs `kind` (ops and opKinds).
+[[nodiscard]] bool supports(const HostHello& hello, OpKind kind) noexcept;
 struct OpAccepted {
     std::string id;
 };
@@ -82,7 +125,18 @@ struct HostEnd {
     std::string code =
         "cancelled"; // a hwio::Error id: "cancelled" (End sharing), "remote.idle", ...
 };
-using HostMessage = std::variant<HostHello, OpAccepted, OpDenied, OpProgress, OpResult, HostEnd>;
+// ADR-0368: a question of the running operation for support (the joiner's text for `question`).
+struct OpQuestion {
+    std::string id;  // the operation
+    std::string qid; // the question (random, the host's)
+    OpQuestionKind question = OpQuestionKind::Continue;
+};
+// ADR-0364: the host's command tree (never null when decoded).
+struct HostCommands {
+    std::shared_ptr<const device::CommandTree> tree;
+};
+using HostMessage = std::variant<HostHello, OpAccepted, OpDenied, OpProgress, OpResult, HostEnd,
+                                 HostCommands, OpQuestion>;
 
 // ---- joiner → host ----
 struct JoinerHello {
@@ -92,10 +146,21 @@ struct JoinerHello {
 struct OpRequest {
     std::string id;
     OpKind kind = OpKind::Reset;
-    OpTarget target = OpTarget::App;
+    OpTarget target = OpTarget::App;       // not sent for lteUpdate (decoded as Lte)
     std::optional<std::string> firmwareId; // flash only: a catalog firmware ID (32 hex digits)
+    bool questions = false; // ADR-0368: the joiner answers op-question (sent only when true)
 };
-using JoinerMessage = std::variant<JoinerHello, OpRequest>;
+// ADR-0364: learn the subcommands of the command at `path` (1..maxCommandDepth names).
+struct Learn {
+    std::vector<std::string> path;
+};
+// ADR-0368: support's answer to an op-question.
+struct OpAnswer {
+    std::string id;
+    std::string qid;
+    bool yes = false;
+};
+using JoinerMessage = std::variant<JoinerHello, OpRequest, Learn, OpAnswer>;
 
 // The `at` payload {event: "hwio", data: …}.
 [[nodiscard]] QJsonObject encodeHost(const HostMessage& message);
@@ -108,6 +173,10 @@ using JoinerMessage = std::variant<JoinerHello, OpRequest>;
 [[nodiscard]] Result<HostMessage> decodeHost(const QJsonValue& payload);
 // Decodes a `write` object. Errors: remote.protocol_error.
 [[nodiscard]] Result<JoinerMessage> decodeJoiner(const QJsonValue& payload);
+
+// The `commands` message of `tree` without help texts when `withHelp` is false (to fit the relay's
+// event size, RemoteHost).
+[[nodiscard]] QJsonObject encodeCommands(const device::CommandTree& tree, bool withHelp);
 
 // True for a valid operation id.
 [[nodiscard]] bool validId(std::string_view id) noexcept;

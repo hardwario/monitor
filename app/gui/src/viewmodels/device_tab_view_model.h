@@ -195,6 +195,8 @@ public:
     [[nodiscard]] ConnectionViewModel* connection() const { return m_connection; }
     [[nodiscard]] QObjectList pageViewModels() const { return m_pageViewModels; }
     [[nodiscard]] QString currentPage() const { return m_currentPage; }
+    // ADR-0369: a status line in the console ("— text —", a marker kept in the log and its file).
+    void addStatusLine(const QString& text) { addMarker(QStringLiteral("— %1 —").arg(text)); }
     void setCurrentPage(const QString& pageId);
     [[nodiscard]] QString busyPage() const;
     [[nodiscard]] QString busyText() const;

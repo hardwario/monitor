@@ -11,6 +11,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <cstdint>
 
 namespace hwio::remote {
@@ -110,11 +111,21 @@ TEST(SocketIo, RejectsMalformedAndBinaryPackets) {
     }
 }
 
+// ADR-0365: a host accepts 64 KiB, a joiner (the default) 512 KiB.
 TEST(SocketIo, RejectsOversizedData) {
-    QString big = QStringLiteral("2/1,[\"at\",\"");
-    big.append(QString(static_cast<qsizetype>(maxIncomingEventBytes), QLatin1Char('x')));
-    big.append(QStringLiteral("\"]"));
-    EXPECT_FALSE(socketio::parsePacket(big).has_value());
+    const auto packetOf = [](std::size_t payloadChars) {
+        QString text = QStringLiteral("2/1,[\"at\",\"");
+        text.append(QString(static_cast<qsizetype>(payloadChars), QLatin1Char('x')));
+        text.append(QStringLiteral("\"]"));
+        return text;
+    };
+    const QString hostBig = packetOf(hostIncomingEventBytes);
+    EXPECT_FALSE(socketio::parsePacket(hostBig, hostIncomingEventBytes).has_value());
+    EXPECT_TRUE(socketio::parsePacket(hostBig).has_value());
+    EXPECT_TRUE(socketio::parsePacket(packetOf(hostIncomingEventBytes - 64), hostIncomingEventBytes)
+                    .has_value());
+    EXPECT_FALSE(socketio::parsePacket(packetOf(joinerIncomingEventBytes)).has_value());
+    EXPECT_TRUE(socketio::parsePacket(packetOf(joinerIncomingEventBytes - 64)).has_value());
 }
 
 // Fuzz-style: no input crashes the parsers (ASan/UBSan runs).

@@ -1,12 +1,12 @@
 # 0044 — Remote support session (HARDWARIO Terminal compatible)
 
 - **Status:** In progress (approved 2026-11-09, Matej Strnad; implementation started 2026-11-10)
-- **Milestone:** 2.1 (after 2.0.0, ADR-0326)
+- **Milestone:** 2.0.0-rc.4 (ADR-0337, supersedes ADR-0326)
 - **Author:** Matej Strnad, Claude
 - **Related ADRs:** ADR-0334 (strict compatibility with the existing relay, 6-digit code), ADR-0335 (join approval),
   ADR-0336 (operations tunneled in `at` / `write`), ADR-0321 (QtWebSockets + own Socket.IO client),
   ADR-0322 (scope: console + flash/erase/recover/reset), ADR-0323 (firmware by catalog ID only),
-  ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0326 (2.1),
+  ADR-0324 (operation confirmation), ADR-0325 (J-Link RTT and BLE, host and join roles), ADR-0337 (2.0.0-rc.4; supersedes ADR-0326), ADR-0363 (remote LTE update, amends ADR-0323/0336), ADR-0364 (remote autocomplete), ADR-0365 (joiner event limit 512 KiB),
   ADR-0328 (limits), ADR-0329 (TLS only), ADR-0330 (relay URL), ADR-0331 (CLI), ADR-0332 (no MCP),
   ADR-0333 (audit in the console file), ADR-0354 (tunnel `end`, amends ADR-0336), ADR-0355 (approval again after
   the host's reconnect, amends ADR-0335), ADR-0356 (secrets redacted toward the relay, amends ADR-0329),
@@ -218,7 +218,7 @@ device session's worker (unchanged). No other shared mutable state.
 
 | What | Limit |
 |---|---|
-| Incoming event size | 64 KiB (larger → dropped, `remote.protocol_error` warning; repeated → session ends) |
+| Incoming event size | host 64 KiB, joiner 512 KiB (ADR-0365) (larger → dropped, `remote.protocol_error` warning; repeated → session ends) |
 | Remote `write` line | 512 bytes, max 20 lines/s (excess dropped, info line on the host) |
 | Outgoing queue to relay | 1 MiB. On overflow the oldest `read` lines are dropped and a "lines dropped" line is sent |
 | Relay thread hand-off (ADR-0357) | 4096 incoming events (full: warnings dropped, otherwise `remote.protocol_error`), 4096 outgoing sends (full: the oldest droppable send is dropped) |
@@ -241,7 +241,7 @@ device session's worker (unchanged). No other shared mutable state.
 | D-0d | Firmware source | catalog ID / + file upload | catalog ID only | ADR-0323 |
 | D-0e | Consent | commands free + ops confirmed / once at start / everything | ops confirmed each; commands → see D-8 | ADR-0324 |
 | D-0f | Transports, roles | J-Link + BLE, host + join | J-Link + BLE, host + join | ADR-0325 |
-| D-0g | Release | 2.1 / 2.0.0 | 2.1 | ADR-0326 |
+| D-0g | Release | 2.1 / 2.0.0 | 2.0.0-rc.4 (2026-11-11) | ADR-0326 → ADR-0337 |
 | D-1 | Relay hardening spec | as proposed / adjust | dropped: relay stays unchanged | ADR-0327 → ADR-0334 |
 | D-2 | Idle timeout / max lifetime | 30 min / 8 h; 15 min / 2 h; none / 24 h | 30 min idle, 8 h max | ADR-0328 |
 | D-3 | Relay sees plaintext console | TLS only / E2E | TLS only (E2E impossible while compatible) | ADR-0329 |
@@ -307,6 +307,94 @@ behaviour became ADRs (ADR-0355, ADR-0356); ADR-0354 adds the tunnel `end`.
   (as `chester lte erase`); reset = `ResetMode::Go`; flash = catalog firmware on `app` only.
 - **No silent queries from remote tabs.** A remote tab never sends `info show` or any other silent shell query (no
   `DeviceInfoWatcher`, so the command tree is not learned either).
+
+## Amendment 2026-11-12: Remote LTE update (ADR-0363)
+
+Support can ask for an LTE firmware update without a catalog ID.
+
+- **Protocol:** tunnel operation `lteUpdate` (no target, no firmware ID), advertised in the host's hello
+  (`opKinds`, alongside `ops`); hosts without it answer `remote.operation_unsupported_peer`.
+- **Host (GUI):** confirmation *"Support asks to update the LTE firmware to HARDWARIO LTE firmware 1.7.0. You will
+  have to move the J-Link cable between the APP and LTE connectors."* (**Deny** default, 60 s). On Allow the tab opens
+  the guided LTE update (Flash › Update LTE firmware…) with the recommended firmware preselected and starts it; the
+  customer follows its steps. Phases / progress / result are sent to support; sharing stays active across the
+  disconnect / reconnect; audit lines as for other operations.
+- **Host (CLI):** `hwio remote host` runs the guided terminal flow of `hwio chester lte flash --guided` (prompts on the
+  host's terminal); the exit outcome "LTE updated, application not restored" is reported as such.
+- **Joiner (GUI):** Flash page › Remote operations: with **LTE modem core** selected, **Ask to update LTE firmware**
+  (no ID field); erase / recover / reset unchanged. **Joiner (CLI):** `hwio remote join CODE --lte-update`.
+- **Errors:** denied / timeout / busy as for other operations; the LTE update's own errors (e.g.
+  `target.reset_during_update`, download / verification errors) are passed through with their codes.
+
+Steps:
+
+- [x] A6 `lteUpdate` in `TunnelCodec`, hello `opKinds`, `RemoteHost` consent text + operation runner hook,
+      `RemoteOperationClient`; unit tests (codec, state machine, unsupported peer)
+- [x] B2 CLI: `remote join --lte-update`; `remote host` runs the guided terminal flow; e2e tests with the fake J-Link
+      (LTE scenario) and the fake relay; `docs/en/cli.md`
+- [x] C4 GUI: Remote operations button, host confirmation, guided wizard started from the request with progress
+      forwarded; Qt Quick tests; translations ×4; docs `remote-support.md` ×5; release notes rc.4
+
+## Amendment 2026-11-12: Remote autocomplete (ADR-0364)
+
+A remote tab had no autocomplete (learning starts only after a local attach's `info show`).
+
+- **Host:** `RemoteHost::setCommandTree(tree)` — the GUI tab (ConsoleViewModel's learned tree) and the CLI host
+  (its learner) call it whenever their tree changes; after the join is allowed the host sends tunnel `commands`
+  (serialized `CommandTree`, bounded: 256 KiB, 4000 nodes, depth 8). A tunnel `learn {path}` from an allowed joiner
+  (known path only, at most 2 per second, at most 200 per session) makes the host run its silent `<path> -h` query and
+  send the updated tree. Not audited as remote commands (read-only help queries), but counted in the audit summary at
+  the end.
+- **Joiner:** `RemoteConsoleSession::commandTree()` + `commandTreeChanged`; validation as untrusted input; the remote
+  tab's ConsoleViewModel uses it instead of the local learner (no `info show` / learner on a remote tab) and sends
+  `learn` where the local learner would query children. The CLI interactive joiner uses it too.
+- **web Terminal host:** no tree; suggestions from history only.
+
+Steps:
+
+- [x] A7 Tunnel `commands` / `learn`, limits and validation, `RemoteHost::setCommandTree`, joiner tree; unit tests
+      (codec, malformed / oversize trees, rate limits, learn before allow refused)
+- [x] B3 CLI host feeds its tree; CLI interactive joiner completion; e2e test
+- [x] C5 GUI: host tab feeds the tree; remote tab completion and suggestions; Qt Quick test (completion in a remote
+      tab after the host's tree arrives); docs `remote-support.md` ×5
+- [x] A8 Joiner incoming event limit 512 KiB, host 64 KiB; host sends the whole tree when it fits 512 KiB (ADR-0365);
+      unit tests (joiner accepts a 256 KiB tree with help texts, host still drops > 64 KiB, joiner drops > 512 KiB)
+
+### Implementation notes (2026-11-12, amendments ADR-0363 / ADR-0364)
+
+Details filled in while implementing A6–C5 that the amendments did not fix; confirmed by the user on 2026-11-12 (the `commands` size changed, ADR-0365):
+
+- **New error code `remote.application_not_restored`** (category cancelled, exit 130 like `lte flash --guided`
+  without a copy): the op-result of an LTE update that updated the LTE MCU but did not write the application back
+  (the outcome "LTE updated, application not restored"). The protocol carries only error codes, so the outcome needed
+  one; troubleshooting anchors in all languages.
+- **LTE update progress:** `op-progress.phase` is the guided update's step id (`LteUpdateProcedure::stepId`:
+  `connect-app`, `backup`, `erase`, `connect-lte`, `update-lte`, `connect-app-again`, `choose-application`,
+  `restore`; `download` before it; `failed` while the GUI wizard offers Try again), shown translated by the joiner.
+  A new phase is sent at once (not throttled), and the last progress is repeated every 60 s while the customer moves
+  the cable (the joiner's 5-minute inactivity timeout). A GUI failure the wizard can retry is reported when the wizard
+  closes.
+- **GUI auto-start:** the wizard opened for the request selects the recommended firmware and starts once it is
+  downloaded and nRF Util was found; a download or nRF Util problem ends the request with that error (the wizard
+  stays open for the customer). The request is refused with `internal.busy` while the tab is busy or another
+  wizard is open.
+- **CLI host:** the terminal flow (`GuidedTerminal`, moved to `app/cli/src/guided_lte.h`) runs without its own event
+  loop; its y/N question is answered on the host's stdin like the other questions; `--nrfutil` applies. No LTE update
+  with `--deny-operations` or without a terminal.
+- **`commands` size:** superseded by ADR-0365 (user decision 2026-11-12): a joiner accepts incoming events up to
+  512 KiB, so the host sends the whole tree with help texts; the fallback without help texts stays as a logged safety
+  net. The joiner validates the 256 KiB / 4000 nodes / depth 8 bounds as specified.
+- **Event limit by role (A8, ADR-0365):** `RelayConfig::incomingEventBytes` (default `hostIncomingEventBytes`,
+  64 KiB); `RemoteHost` sets it to the host value, `RemoteConsoleSession` to `joinerIncomingEventBytes` (512 KiB),
+  so the GUI remote tab and `hwio remote join` get it without new options. `socketio::parsePacket` takes the limit
+  (default 512 KiB, the largest any participant accepts). The host sends the tree with help texts when its tunnel
+  `data` fits the joiner's unchanged 256 KiB bound (`maxCommandsBytes`, which is stricter than the 512 KiB event:
+  objects are not escaped twice) and the event fits 512 KiB; a bigger tree (the CommandTree allows 2000 nodes with
+  256-byte help texts) goes without help texts with a logged warning, or not at all.
+- **Joiner `learn`:** each path once, again after 10 s (the host may have rate-limited it), at most 200 paths.
+- **CLI:** `device::CommandTreeSource` (implemented by `CommandTreeLearner` and the remote joiner's adapter) feeds
+  the console's completion; `remote host` now learns the tree (`info show`, cache or `help`) like `chester app
+  console`.
 
 ## Tests and verification
 

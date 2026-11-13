@@ -32,7 +32,9 @@
 #include "viewmodels/page_registry.h"
 #include "viewmodels/probe_firmware_view_model.h"
 #include "viewmodels/remote_join_view_model.h"
+#include "viewmodels/settings_view_model.h"
 #include "viewmodels/shortcut_registry.h"
+#include "viewmodels/ui_mode_controller.h"
 #include "viewmodels/update_view_model.h"
 #include "wizard_launcher.h"
 #include "wizard_view_model.h"
@@ -122,8 +124,10 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
       // children of this object (destroyed explicitly in the right order by the destructor).
       m_settings(new SettingsStore( // NOLINT(cppcoreguidelines-owning-memory)
           std::move(m_options.settings), this)),
-      m_shortcuts(new ShortcutRegistry(this)),      // NOLINT(cppcoreguidelines-owning-memory)
-      m_pageList(new PageListModel(m_pages, this)), // NOLINT(cppcoreguidelines-owning-memory)
+      m_shortcuts(new ShortcutRegistry(this)), // NOLINT(cppcoreguidelines-owning-memory)
+      // Plan 0045: the user mode (read after registerShellKeys, below).
+      m_uiMode(new UiModeController(*m_settings, this)), // NOLINT(cppcoreguidelines-owning-memory)
+      m_pageList(new PageListModel(m_pages, this)),      // NOLINT(cppcoreguidelines-owning-memory)
       m_registry(std::make_unique<device::SessionRegistry>(m_options.registry)),
       m_scanner(std::make_unique<ProbeScanner>(m_options.registry.instanceRoot,
                                                m_options.registry.lockDirectory,
@@ -158,6 +162,9 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
     }
 
     registerShellKeys(*m_settings);
+    // Plan 0045: the user mode, read before the extensions (the Settings and Flash view models use
+    // it).
+    m_uiMode->reload();
     registerShellShortcuts();
     // Plan 0036 (ADR-0257): the J-Link firmware update. Qt parent ownership: a child, deleted by
     // the destructor after the tabs. Created before the extensions: the MCP controller (plan 0014)
@@ -324,6 +331,19 @@ void AppViewModel::registerShellKeys(SettingsStore& store) {
                    .validator = validators::maxLength(1024)},
         SettingKey{
             .path = restoreTabsKey, .type = QMetaType::Bool, .defaultValue = true, .validator = {}},
+        // Plan 0045 (ADR-0359): the user mode; "" = not chosen yet (the first-start dialog).
+        SettingKey{.path = UiModeController::modeKey,
+                   .type = QMetaType::QString,
+                   .defaultValue = QString(),
+                   .validator =
+                       validators::oneOf({QString(), QStringLiteral("basic"),
+                                          QStringLiteral("advanced"), QStringLiteral("expert")})},
+        // Plan 0033 (ADR-0236): the rc.3 switch "Show expert maintenance actions", replaced by
+        // Expert mode (ADR-0360); read only for the preselection of upgrading users (ADR-0362).
+        SettingKey{.path = UiModeController::legacyExpertKey,
+                   .type = QMetaType::Bool,
+                   .defaultValue = false,
+                   .validator = {}},
         SettingKey{.path = tabsKey,
                    .type = QMetaType::QString,
                    .defaultValue = QString(),
@@ -834,9 +854,15 @@ void AppViewModel::openGlobalPage(const QString& pageId) {
 
 void AppViewModel::closeGlobalPage() { closeSettings(); }
 
-void AppViewModel::openSettings(const QString& sectionId) {
+void AppViewModel::openSettings(const QString& sectionId, const QString& rowId) {
     m_tabs->openSettings();
     setCurrentTab(m_tabs->settingsRow());
+    // Plan 0045 (ADR-0361): a section or row hidden by the mode is shown for this visit.
+    if (auto* settings =
+            qobject_cast<SettingsViewModel*>(globalPageViewModel(SettingsViewModel::pageId));
+        settings != nullptr) {
+        settings->openAt(sectionId, rowId);
+    }
     m_settingsSection = sectionId;
     settingsSectionRequested(sectionId); // signal: the page scrolls to the section
 }
@@ -1371,6 +1397,7 @@ void AppViewModel::onHandOff(const QString& action, DeviceTabViewModel* tab) {
 }
 
 void AppViewModel::retranslate() {
+    m_uiMode->retranslate();
     m_update->retranslate();
     m_pageList->retranslate();
     m_tabs->retranslate();

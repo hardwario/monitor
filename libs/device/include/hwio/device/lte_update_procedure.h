@@ -7,6 +7,10 @@
 //
 //   ConnectApp        the probe must reach the console target (application MCU): identifyTarget
 //                     every pollInterval, one in flight, until it matches (or cancel)
+//   Confirm           plan 0046 (ADR-0366): nothing is changed yet; the prompt says what will
+//                     happen (the application erased, the cable to LTE and back to APP). confirm()
+//                     goes on, cancel() ends with nothing changed. Asked once: a connector step
+//                     repeated later (a moved cable, a retry) does not ask again
 //   Backup            the PIB serial number, then the code flash in readMemory chunks; trimmed and
 //                     written by ApplicationBackup (D3). A failure (target.protected, a read or
 //                     write error) stops in BackupFailed: continueWithoutBackup() or cancel()
@@ -66,6 +70,7 @@ public:
     enum class Step : std::uint8_t {
         Idle,
         ConnectApp,
+        Confirm, // plan 0046 (ADR-0366)
         Backup,
         BackupFailed,
         Erase,
@@ -108,6 +113,8 @@ public:
     // Holds the session and waits for the application MCU. Errors: usage.invalid_argument
     // (already started, an empty source, a profile without a second target), those of hold().
     [[nodiscard]] Status start(Source source);
+    // Confirm: go on with the copy and the erase (ADR-0366).
+    void confirm();
     // BackupFailed: go on without a copy (ChooseApplication then needs an image).
     void continueWithoutBackup();
     // ChooseApplication: `image` nullptr = the copy. Errors: usage.invalid_argument (not waiting
@@ -186,6 +193,7 @@ private:
     Step m_failedStep = Step::Idle;
     std::optional<OperationId> m_operation; // the one in flight
     bool m_wrongConnector = false;
+    bool m_confirmed = false; // Confirm was answered with confirm()
     bool m_erased = false;
     bool m_erasedBefore = false; // m_erased when the current erase started
     bool m_backupSkipped = false;

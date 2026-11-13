@@ -1,5 +1,6 @@
 #include "fake_relay.h"
 #include "hwio/core/error.h"
+#include "hwio/remote/protocol.h"
 #include "hwio/remote/relay_client.h"
 #include "hwio/remote/session_code.h"
 #include "remote_test_support.h"
@@ -20,6 +21,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <utility>
 
 namespace hwio::remote {
 namespace {
@@ -180,7 +182,7 @@ TEST(RelayClient, ReconnectBudgetEndsTheConnection) {
 
 TEST(RelayClient, OversizedAndMalformedEventsAreDroppedThenEndTheSession) {
     FakeRelay relay;
-    RelayClient client(configFor(relay));
+    RelayClient client(configFor(relay)); // a host's limit, 64 KiB
     Recorder events(client);
     client.start();
     ASSERT_TRUE(runUntil([&] { return events.connects == 1; }));
@@ -199,6 +201,33 @@ TEST(RelayClient, OversizedAndMalformedEventsAreDroppedThenEndTheSession) {
     relay.sendRaw(nsp, big); // the third oversized event
     ASSERT_TRUE(runUntil([&] { return events.failed.has_value(); }));
     EXPECT_EQ(events.failed.value_or(Error{}).code, ErrorCode::RemoteProtocolError);
+}
+
+// ADR-0365: a joiner accepts events up to 512 KiB (a host 64 KiB, the test above).
+TEST(RelayClient, JoinerAcceptsEventsUpTo512KiB) {
+    FakeRelay relay;
+    RelayConfig config = configFor(relay);
+    config.incomingEventBytes = joinerIncomingEventBytes;
+    RelayClient client(std::move(config));
+    Recorder events(client);
+    client.start();
+    ASSERT_TRUE(runUntil([&] { return events.connects == 1; }));
+    const QString nsp = QStringLiteral("/482913");
+    const auto atOf = [](qsizetype chars) {
+        return QStringLiteral("42/482913,[\"at\",{\"event\":\"read\",\"data\":\"%1\"}]")
+            .arg(QString(chars, QLatin1Char('x')));
+    };
+    relay.sendRaw(nsp, atOf(qsizetype{70} * 1024));
+    relay.sendRaw(nsp, atOf(qsizetype{500} * 1024));
+    ASSERT_TRUE(runUntil([&] { return events.at.size() == 2; }));
+    EXPECT_EQ(events.at.back().toObject().value(QStringLiteral("data")).toString().size(),
+              qsizetype{500} * 1024);
+    relay.sendRaw(nsp, atOf(qsizetype{520} * 1024)); // over 512 KiB: dropped
+    ASSERT_TRUE(runUntil([&] { return events.warnings.size() == 1; }));
+    EXPECT_EQ(events.warnings.front().code, ErrorCode::RemoteProtocolError);
+    runFor(100ms);
+    EXPECT_EQ(events.at.size(), 2);
+    EXPECT_FALSE(events.failed.has_value());
 }
 
 TEST(RelayClient, InvalidNamespaceIsRefusedByTheRelay) {

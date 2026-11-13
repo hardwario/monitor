@@ -12,6 +12,7 @@
 #include "hwio/device/line_assembler.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
+#include "hwio/remote/protocol.h"
 #include "hwio/remote/relay_client.h"
 #include "hwio/remote/transcript.h"
 #include "hwio/remote/tunnel.h"
@@ -19,6 +20,7 @@
 #include <QCoreApplication>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLatin1Char>
 #include <QList>
 #include <QLoggingCategory>
 #include <QObject>
@@ -32,11 +34,14 @@
 #include <chrono>
 #include <cstdint>
 #include <expected>
+#include <map>
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
+#include <vector>
 
 namespace hwio::remote {
 
@@ -57,8 +62,11 @@ RemoteConsoleSession::RemoteConsoleSession(JoinOptions options)
             emit idleNotice();
         }
     });
-    m_relay = std::make_unique<RelayClient>(RelayConfig{
-        .relay = m_options.relay, .code = m_options.code, .limits = m_options.relayLimits});
+    m_relay = std::make_unique<RelayClient>(
+        RelayConfig{.relay = m_options.relay,
+                    .code = m_options.code,
+                    .limits = m_options.relayLimits,
+                    .incomingEventBytes = joinerIncomingEventBytes}); // ADR-0365
     connect(m_relay.get(), &RelayClient::connected, this, [this](bool reconnected) {
         if (reconnected) {
             // The host sees a new join: it asks the customer again (ADR-0335).
@@ -210,6 +218,25 @@ Status RemoteConsoleSession::sendTunnel(const tunnel::JoinerMessage& message) {
     return {};
 }
 
+void RemoteConsoleSession::requestLearn(const std::vector<std::string>& path) {
+    if (m_state != JoinState::Allowed || !m_hostHello || !m_commandTree || path.empty()) {
+        return;
+    }
+    const auto now = std::chrono::steady_clock::now();
+    if (const auto asked = m_learnAsked.find(path);
+        asked != m_learnAsked.end() && now - asked->second < learnRetry) {
+        return; // asked recently (the host may have dropped it: asked again later)
+    }
+    if (!m_learnAsked.contains(path) && m_learnAsked.size() >= maxLearnPaths) {
+        return;
+    }
+    m_learnAsked[path] = now;
+    if (Status sent = sendTunnel(tunnel::Learn{.path = path}); !sent) {
+        qCInfo(log::lcRemote).noquote()
+            << "Learn request not sent:" << toQString(sent.error().detail);
+    }
+}
+
 device::ConsoleLine RemoteConsoleSession::makeLine(device::Direction dir, const QString& text) {
     device::ConsoleLine line;
     line.dir = dir;
@@ -218,6 +245,13 @@ device::ConsoleLine RemoteConsoleSession::makeLine(device::Direction dir, const 
     // The device lines of the host (LineSource::Remote marks only this session's own markers).
     if (dir == device::Direction::Out) {
         line.level = device::parseZephyrLevel(line.text);
+        const std::string_view shown = line.text;
+        if (line.level == device::LogLevel::None &&
+            device::isHexdumpLine(shown.starts_with('#') ? shown.substr(1) : shown)) {
+            // ADR-0171 (as BleConsoleHandler and the '#' rule of LineAssembler): the continuation
+            // lines of a log hexdump are log lines too, hidden by default like in a local tab.
+            line.level = device::LogLevel::Hexdump;
+        }
         line.channel =
             line.level != device::LogLevel::None ? device::Channel::Log : device::Channel::Shell;
     }
@@ -255,6 +289,12 @@ void RemoteConsoleSession::onTunnelAt(const QJsonValue& payload) {
     }
     if (!m_hostHello) {
         return; // ADR-0336: host objects count only after the host's hello
+    }
+    if (const auto* commands = std::get_if<tunnel::HostCommands>(&*message)) {
+        // ADR-0364: validated by the codec (bounds, names, sanitised help).
+        m_commandTree = commands->tree;
+        emit commandTreeChanged();
+        return;
     }
     if (std::holds_alternative<tunnel::HostEnd>(*message)) {
         // ADR-0354: the host ended sharing on purpose.

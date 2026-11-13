@@ -77,8 +77,9 @@ jobs:
   linux:
     name: linux-${{ matrix.preset }}
     runs-on: ubuntu-24.04
-    # linux-tidy usually needs about 40 minutes; a slow runner once took more than 60 (plan 0023).
-    timeout-minutes: 90
+    # linux-tidy needed about 60-70 minutes before libs/remote (plan 0044) and runs past 90 since
+    # (2026-11-11); the other presets keep 90 (plan 0023).
+    timeout-minutes: ${{ matrix.preset == 'tidy' && 150 || 90 }}
     strategy:
       fail-fast: false
       matrix:

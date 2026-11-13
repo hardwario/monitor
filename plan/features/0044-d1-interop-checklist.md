@@ -1,7 +1,7 @@
 # 0044 D1 — Interop checklist (remote support session)
 
 Manual verification of plan [0044](0044-remote-support-session.md) step D1 with the real relay and web Terminal. Run it
-before 2.1 and before every later Monitor release (plan 0044 § Risks). Tick the boxes in a copy of this file in the
+before 2.0.0-rc.4 (ADR-0337) and before every later Monitor release (plan 0044 § Risks). Tick the boxes in a copy of this file in the
 release notes or the HIL results.
 
 ## 0. Setup

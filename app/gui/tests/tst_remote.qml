@@ -105,6 +105,9 @@ TestCase {
         mouseClick(findChild(join.footer, "dialogAccept")); // Allow
         tryVerify(() => share.participantAllowed, 5000);
         tryVerify(() => testSupport.remoteReceived("sync") === 1, 5000);
+        // ADR-0364: the tab's command tree goes to the allowed participant, also when it grows.
+        testSupport.setConsoleCommands(AppViewModel.currentTab, ["app", "lte"]);
+        tryVerify(() => testSupport.remoteReceivedCommands() === "app lte", 5000);
 
         testSupport.remoteRequest("reset", "app");
         tryVerify(() => share.operationQuestionOpen, 10000);
@@ -160,6 +163,210 @@ TestCase {
         compare(AppViewModel.currentTab, index);
         verify(tab().transport === "remote");
         verify(testSupport.consoleLastSeq(index) >= lines);
+    }
+
+    // ADR-0363: support asks for the LTE update; the confirmation names the recommended firmware
+    // and the cable moves (Deny is the default); Allow opens Flash › Update LTE firmware… with the
+    // recommended firmware. nRF Util is missing in these tests, so the request ends with that
+    // error, the wizard stays open for the customer, and sharing stays active.
+    function test_lteUpdateRequestOpensTheGuidedUpdate() {
+        connectConsole();
+        const share = tab().remoteShare;
+        tryVerify(() => share.available, 5000);
+        share.startSharing();
+        tryVerify(() => share.state === "sharing", 10000);
+        verify(testSupport.remoteJoin(share.code));
+        tryVerify(() => share.joinQuestionOpen, 10000);
+        share.answerJoin(true);
+        tryVerify(() => share.participantAllowed, 5000);
+
+        testSupport.remoteRequest("lteUpdate", "lte");
+        tryVerify(() => share.operationQuestionOpen, 10000);
+        verify(share.operationQuestionText.indexOf("HARDWARIO LTE firmware 1.7.0") >= 0, share.operationQuestionText);
+        verify(share.operationQuestionText.indexOf("move the J-Link cable") >= 0, share.operationQuestionText);
+        const dialogs = findAll(window.contentItem, "remoteSessionDialogs").filter(effectivelyVisible)[0];
+        const operation = findChild(dialogs, "remoteOperationDialog");
+        tryVerify(() => operation.opened, 5000);
+        tryVerify(() => findChild(operation.footer, "dialogReject").activeFocus, 5000);
+        mouseClick(findChild(operation.footer, "dialogAccept")); // Allow
+        tryVerify(() => AppViewModel.wizard.open, 10000);
+        compare(AppViewModel.wizard.wizardId, "lte-update");
+        const wizard = testSupport.openWizard();
+        compare(wizard.lteSource.lteSource, FirmwareSourceViewModel.Designated);
+        tryVerify(() => testSupport.remoteLastResult() === "dependency.nrfutil_not_found", 20000, testSupport.remoteLastResult());
+        verify(AppViewModel.wizard.open);
+        verify(share.sharing);
+        AppViewModel.wizard.cancel(true);
+        tryVerify(() => !AppViewModel.wizard.open, 5000);
+        // The modal dialog blocks the clicks of the next test until it has really closed.
+        const wizardDialog = findChild(window, "wizardDialog");
+        tryVerify(() => !wizardDialog || !wizardDialog.visible, 5000);
+        share.endSharing();
+        tryVerify(() => !share.sharing, 5000);
+    }
+
+    // ADR-0363: the joiner's Flash page offers the LTE update (no ID field) with the LTE core.
+    function test_joinerAsksForAnLteUpdate() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(true);
+        tryVerify(() => tab().remoteJoin.operationsAvailable, 10000);
+        verify(tab().remoteJoin.lteUpdateAvailable);
+        AppViewModel.showPage("flash");
+        tryVerify(() => shown("remoteFlashCard").length === 1, 5000);
+        verify(shown("remoteFirmwareId").length === 1);
+        verify(shown("remoteLteUpdateButton").length === 0);
+        const lte = one("remoteTargetLte");
+        lte.click(); // the card may be below the visible part of the page
+        tryVerify(() => lte.checked, 5000);
+        tryVerify(() => shown("remoteFirmwareId").length === 0, 5000);
+        const button = one("remoteLteUpdateButton");
+        compare(button.text, "Ask to update LTE firmware");
+        verify(button.enabled);
+        button.clicked();
+        tryVerify(() => testSupport.remoteRequestedKind() === "lteUpdate", 10000);
+        verify(tab().remoteJoin.operationPending);
+    }
+
+    // ADR-0368: the customer's Monitor asks support (Continue before the erase, Continue without a
+    // copy) on the joiner's Flash card; the answer goes back as op-answer and the question closes.
+    function test_joinerAnswersTheLteUpdateQuestions() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(true);
+        tryVerify(() => tab().remoteJoin.lteUpdateAvailable, 10000);
+        AppViewModel.showPage("flash");
+        tryVerify(() => shown("remoteFlashCard").length === 1, 5000);
+        tab().remoteJoin.requestOperation("lteUpdate", "lte", "");
+        tryVerify(() => testSupport.remoteRequestedKind() === "lteUpdate", 10000);
+        testSupport.remoteHostAccept();
+        verify(shown("remoteQuestion").length === 0);
+
+        testSupport.remoteHostQuestion("continue");
+        tryVerify(() => shown("remoteQuestion").length === 1, 5000);
+        verify(one("remoteQuestionText").text.indexOf("will be erased") >= 0, one("remoteQuestionText").text);
+        compare(one("remoteQuestionYes").text, "Continue");
+        one("remoteQuestionYes").clicked();
+        tryVerify(() => testSupport.remoteLastAnswer() === "yes", 5000);
+        tryVerify(() => shown("remoteQuestion").length === 0, 5000);
+
+        testSupport.remoteHostQuestion("continueWithoutCopy");
+        tryVerify(() => shown("remoteQuestion").length === 1, 5000);
+        compare(one("remoteQuestionText").text, "The application could not be copied. Continue without a copy?");
+        one("remoteQuestionNo").clicked();
+        tryVerify(() => testSupport.remoteLastAnswer() === "no", 5000);
+        tryVerify(() => shown("remoteQuestion").length === 0, 5000);
+
+        // Confirmed 2026-11-12: support's own No is a cancellation, not an error.
+        testSupport.remoteHostResult("cancelled");
+        tryVerify(() => !tab().remoteJoin.operationPending, 5000);
+        verify(/^LTE firmware update cancelled by you \(\d\d:\d\d\)\. Nothing was changed\.$/.test(tab().remoteJoin.operationStatus), tab().remoteJoin.operationStatus);
+        verify(!tab().remoteJoin.operationFailed);
+        verify(!tab().remoteJoin.resultDismissable);
+    }
+
+    // ADR-0369: the result names the operation and the local time and is also a console line; a
+    // success clears when support leaves the Flash page, an error stays until ×.
+    function test_joinerSeesTheOperationResult() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(true);
+        tryVerify(() => tab().remoteJoin.operationsAvailable, 10000);
+        AppViewModel.showPage("flash");
+        tryVerify(() => shown("remoteFlashCard").length === 1, 5000);
+        const join = tab().remoteJoin;
+
+        const results = [
+            ["reset", "app", /^Customer's device reset \(\d\d:\d\d\)\.$/],
+            ["erase", "lte", /^LTE MCU erased on the customer's device \(\d\d:\d\d\)\.$/],
+            ["lteUpdate", "lte", /^LTE firmware updated, application written back \(\d\d:\d\d\)\.$/],
+        ];
+        for (let i = 0; i < results.length; ++i) {
+            join.requestOperation(results[i][0], results[i][1], "");
+            tryVerify(() => testSupport.remoteRequestedKind() === results[i][0], 10000);
+            testSupport.remoteHostAccept();
+            testSupport.remoteHostResult("");
+            tryVerify(() => !join.operationPending, 5000);
+            verify(results[i][2].test(join.operationStatus), join.operationStatus);
+            verify(!join.operationFailed);
+            verify(!join.resultDismissable);
+            verify(testSupport.consoleHasLine(AppViewModel.currentTab, join.operationStatus));
+        }
+        compare(one("remoteOperationStatus").text, join.operationStatus);
+        // A success clears when support leaves the Flash page.
+        AppViewModel.showPage("console");
+        tryVerify(() => join.operationStatus === "", 5000);
+        verify(testSupport.consoleHasLine(AppViewModel.currentTab, "LTE firmware updated, application written back"));
+
+        // An error stays (also on other pages) until ×.
+        AppViewModel.showPage("flash");
+        join.requestOperation("reset", "app", "");
+        tryVerify(() => testSupport.remoteRequestedKind() === "reset", 10000);
+        testSupport.remoteHostAccept();
+        testSupport.remoteHostResult("target.connect_failed");
+        tryVerify(() => join.operationFailed, 5000);
+        verify(/^Resetting the customer's device failed \(\d\d:\d\d\): /.test(join.operationStatus), join.operationStatus);
+        verify(testSupport.consoleHasLine(AppViewModel.currentTab, "Resetting the customer's device failed"));
+        AppViewModel.showPage("console");
+        AppViewModel.showPage("flash");
+        verify(join.operationFailed);
+        tryVerify(() => shown("remoteResultDismiss").length === 1, 5000);
+        one("remoteResultDismiss").clicked();
+        tryVerify(() => join.operationStatus === "", 5000);
+        verify(shown("remoteOperationStatus").length === 0);
+    }
+
+    // ADR-0364: a remote tab completes from the Monitor host's command tree and asks the host for
+    // a command's subcommands (tunnel `learn`), without any query of its own.
+    function test_remoteTabCompletesFromTheHostsCommands() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(false);
+        tryVerify(() => tab().remoteJoin.state === "joined", 10000);
+        testSupport.remoteHostCommands(["app", "lte", "info"]);
+        AppViewModel.showPage("console");
+        const field = one("commandInput");
+        const input = one("shellInput");
+        tryVerify(() => field.enabled, 10000);
+        field.forceActiveFocus();
+        field.text = "";
+        keyClick(Qt.Key_A);
+        const list = input.suggestionList;
+        tryVerify(() => list.opened, 10000);
+        compare(list.rows[0].label, "app");
+        keyClick(Qt.Key_Tab);
+        compare(field.text, "app ");
+        tryVerify(() => testSupport.remoteLearnRequest() === "app", 10000);
+        verify(testSupport.remoteRequestedKind() === ""); // no operation, no shell query
+    }
+
+    // Plan 0046 A5 (ADR-0171): hexdump continuation lines from the host are log lines of level
+    // Hexdump, hidden by the default chips as in a local tab.
+    function test_remoteHexdumpLinesAreHiddenByDefault() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(false);
+        tryVerify(() => tab().remoteJoin.state === "joined", 10000);
+        AppViewModel.showPage("console");
+        const log = testSupport.consoleViewModel(AppViewModel.currentTab).log;
+        const before = log.totalLines;
+        const visible = log.visibleLines;
+        testSupport.remoteHostRead("[00:00:12.345,000] <inf> app_lrw: Received:");
+        testSupport.remoteHostRead("                                 44 74 4f 34 78 54 73 31  4b 36 69 41 73 41 53 4a |DtO4xTs1 K6iAsASJ");
+        testSupport.remoteHostRead("                                 00 01 02 0a                                      |....            ");
+        tryVerify(() => log.totalLines === before + 3, 10000, log.totalLines);
+        // The filtered count follows the appended lines asynchronously on some platforms.
+        tryCompare(log, "visibleLines", visible + 1, 10000); // only the header
     }
 
     function test_shareNotOfferedInARemoteTab() {

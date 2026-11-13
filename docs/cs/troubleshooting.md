@@ -103,7 +103,7 @@ Kód chyby: [`target.reset_during_update`](#target.reset_during_update).
 
 HARDWARIO Monitor se k serveru podpory `terminal.hardwario.com` připojuje přes `wss` (HTTPS, port 443). Firewall nebo proxy, které blokují WebSockety, znemožní sdílení i připojení k relaci. Pokud stejný kód relace používá někdo jiný (velmi vzácné), sdílení se z bezpečnostních důvodů ukončí: zahajte ho znovu a dostanete nový kód. Kdo se připojí a do 2 minut nedostane povolení (nebo je odmítnut), musí zákazníka požádat, aby sdílení zahájil znovu. Viz [Vzdálená podpora](remote-support.md).
 
-Kódy chyb: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error).
+Kódy chyb: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored).
 
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Firmware modemu LTE potřebuje nRF Util
@@ -493,7 +493,7 @@ Po neúspěšném kroku aktualizace LTE byl v registru důvodu resetu MCU LTE na
 - **Pravděpodobně:** Je zapnutá ochrana přístupového portu (APPROTECT).
 - **Co dělat:** Obnovte MCU (tím se vymaže) a pak do něj nahrajte firmware znovu.
 
-Obnovení (recover) ochranu odstraní, ale MCU úplně smaže, včetně bloku informací o produktu. Viz [Obnovení (recover)](flashing.md#obnovení-recover). U konkrétního MCU zní doporučení „Spusťte `hwio <profile> <target> recover` (vymaže MCU).“; v desktopové aplikaci použijte **Obnovit (recover)…** v části **Údržba** na stránce **Nahrát FW** (zobrazí se s volbou **Nastavení › Pokročilé › Zobrazit odborné akce údržby**, nebo jednou, když vás tam pošle průvodce řešením problémů).
+Obnovení (recover) ochranu odstraní, ale MCU úplně smaže, včetně bloku informací o produktu. Viz [Obnovení (recover)](flashing.md#obnovení-recover). U konkrétního MCU zní doporučení „Spusťte `hwio <profile> <target> recover` (vymaže MCU).“; v desktopové aplikaci použijte **Obnovit (recover)…** v části **Údržba** na stránce **Nahrát FW** (zobrazí se v režimu Expertní, **Nastavení › Obecné › Režim**, nebo jednou, když vás tam pošle průvodce řešením problémů).
 
 <a id="target.program_failed"></a>
 #### `target.program_failed`
@@ -784,6 +784,16 @@ Vidí ji ten, kdo se k relaci připojil, když spojení se serverem definitivně
 
 - **Pravděpodobně:** Server podpory nebo druhý účastník poslal data, kterým HARDWARIO Monitor nerozumí. Byla ignorována, nebo byla relace z bezpečnostních důvodů ukončena.
 - **Co dělat:** Nahlaste problém s diagnostickou zprávou.
+
+<a id="remote.application_not_restored"></a>
+#### `remote.application_not_restored`
+
+**Firmware LTE byl aktualizován, ale aplikace nebyla zapsána zpět.**
+
+- **Pravděpodobně:** Řízená aktualizace LTE skončila dříve, než byla aplikace zapsána zpět, nebo se nepodařilo uložit kopii aplikace. MCU aplikace je prázdný.
+- **Co dělat:** Nahrajte aplikaci: požádejte zákazníka, aby ji nahrál, nebo požádejte o nahrání firmwaru z katalogu.
+
+Hlásí se připojenému po vzdálené aktualizaci LTE (**Požádat o aktualizaci firmwaru LTE**, `hwio remote join --lte-update`).
 
 <a id="update.network"></a>
 #### `update.network`

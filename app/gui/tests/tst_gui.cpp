@@ -36,6 +36,7 @@
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
 #include "viewmodels/history_store.h"
+#include "viewmodels/ui_mode_controller.h"
 #include "zip_builder.h"
 
 #include <QByteArray>
@@ -71,14 +72,17 @@
 #include <QtQuickTest/quicktest.h>
 #include <QtTypes>
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
 #include <optional>
+#include <string>
 #include <thread>
 #include <utility>
+#include <variant>
 #include <vector>
 
 Q_IMPORT_QML_PLUGIN(HardwarioMonitorPlugin)
@@ -132,6 +136,18 @@ public:
     Q_INVOKABLE [[nodiscard]] double consoleLastSeq(int index) const {
         hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);
         return tab != nullptr ? static_cast<double>(tab->consoleLog()->lastSeq()) : 0;
+    }
+
+    // ADR-0369: whether a line of a tab's console log (shell channel) contains `part`.
+    Q_INVOKABLE [[nodiscard]] bool consoleHasLine(int index, const QString& part) const {
+        hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);
+        if (tab == nullptr) {
+            return false;
+        }
+        const std::string needle = part.toStdString();
+        return std::ranges::any_of(tab->consoleLog()->linesSince(0), [&](const auto& line) {
+            return line.text.find(needle) != std::string::npos;
+        });
     }
 
     [[nodiscard]] static QString screenshotDir() {
@@ -207,6 +223,172 @@ public:
                                                                       .firmwareId = std::nullopt}));
         }
     }
+    // ADR-0363: the code of the last op-result the participant received ("ok" for success, ""
+    // for none).
+    Q_INVOKABLE [[nodiscard]] QString remoteLastResult() const {
+        QString result;
+        if (!m_participant) {
+            return result;
+        }
+        for (const auto& event : m_participant->named(QStringLiteral("at"))) {
+            if (auto message = hwio::remote::tunnel::decodeHost(event.payload)) {
+                if (const auto* r = std::get_if<hwio::remote::tunnel::OpResult>(&*message)) {
+                    result =
+                        r->ok ? QStringLiteral("ok") : QString::fromStdString(r->code.value_or(""));
+                }
+            }
+        }
+        return result;
+    }
+    // The participant acts as a Monitor host: a sync and its hello (operations; `lteUpdate`: the
+    // guided LTE update in opKinds, with support's questions, ADR-0368).
+    Q_INVOKABLE void remoteMonitorHost(bool lteUpdate) const {
+        if (!m_participant) {
+            return;
+        }
+        QJsonObject sync;
+        sync.insert(QStringLiteral("state"), QStringLiteral("connected"));
+        sync.insert(QStringLiteral("commands"), QJsonArray());
+        m_participant->emitEvent(QStringLiteral("sync"), sync);
+        namespace tunnel = hwio::remote::tunnel;
+        std::vector<tunnel::OpKind> kinds{tunnel::OpKind::Reset};
+        if (lteUpdate) {
+            kinds.push_back(tunnel::OpKind::LteUpdate);
+        }
+        m_participant->emitEvent(QStringLiteral("at"), tunnel::encodeHost(tunnel::HostHello{
+                                                           .app = "hwio-monitor",
+                                                           .version = "2.1.0",
+                                                           .device = {.name = "CHESTER-M",
+                                                                      .serial = "1",
+                                                                      .transport = "jlink",
+                                                                      .firmware = {}},
+                                                           .ops = true,
+                                                           .opKinds = kinds,
+                                                           .opQuestions = lteUpdate}));
+    }
+    // The ID of the last operation request the participant received ("" for none).
+    [[nodiscard]] std::string remoteRequestId() const {
+        std::string id;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("write"))) {
+                if (auto message = hwio::remote::tunnel::decodeJoiner(event.payload)) {
+                    if (const auto* r = std::get_if<hwio::remote::tunnel::OpRequest>(&*message)) {
+                        id = r->id;
+                    }
+                }
+            }
+        }
+        return id;
+    }
+    // The participant (a Monitor host) answers the last request: op-accepted, an op-question
+    // (ADR-0368: "continue" | "continueWithoutCopy", qid "q-qml"), the op-result (`code` "" = ok).
+    Q_INVOKABLE void remoteHostAccept() const {
+        if (m_participant) {
+            m_participant->emitEvent(QStringLiteral("at"), hwio::remote::tunnel::encodeHost(
+                                                               hwio::remote::tunnel::OpAccepted{
+                                                                   .id = remoteRequestId()}));
+        }
+    }
+    Q_INVOKABLE void remoteHostQuestion(const QString& question) const {
+        const auto kind = hwio::remote::tunnel::questionFromId(question.toStdString());
+        if (m_participant && kind) {
+            m_participant->emitEvent(
+                QStringLiteral("at"),
+                hwio::remote::tunnel::encodeHost(hwio::remote::tunnel::OpQuestion{
+                    .id = remoteRequestId(), .qid = "q-qml", .question = *kind}));
+        }
+    }
+    Q_INVOKABLE void remoteHostResult(const QString& code) const {
+        if (m_participant) {
+            m_participant->emitEvent(
+                QStringLiteral("at"),
+                hwio::remote::tunnel::encodeHost(hwio::remote::tunnel::OpResult{
+                    .id = remoteRequestId(),
+                    .ok = code.isEmpty(),
+                    .code = code.isEmpty() ? std::nullopt : std::optional(code.toStdString())}));
+        }
+    }
+    // ADR-0368: the last op-answer the participant received: "yes", "no" or "" (none).
+    Q_INVOKABLE [[nodiscard]] QString remoteLastAnswer() const {
+        QString answer;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("write"))) {
+                if (auto message = hwio::remote::tunnel::decodeJoiner(event.payload)) {
+                    if (const auto* a = std::get_if<hwio::remote::tunnel::OpAnswer>(&*message)) {
+                        answer = a->yes ? QStringLiteral("yes") : QStringLiteral("no");
+                    }
+                }
+            }
+        }
+        return answer;
+    }
+    // ADR-0364: the participant (a Monitor host) sends its command tree: `names` at the top level.
+    Q_INVOKABLE void remoteHostCommands(const QStringList& names) const {
+        if (!m_participant) {
+            return;
+        }
+        hwio::device::CommandTree tree;
+        tree.setDashHSupported(true);
+        std::vector<hwio::device::CommandEntry> entries;
+        for (const QString& name : names) {
+            entries.push_back(
+                hwio::device::CommandEntry{.name = name.toStdString(), .help = "help"});
+        }
+        (void)tree.setChildren({}, entries);
+        m_participant->emitEvent(QStringLiteral("at"),
+                                 hwio::remote::tunnel::encodeCommands(tree, true));
+    }
+    // ADR-0364: the top-level commands of the last tree the participant received ("" for none).
+    Q_INVOKABLE [[nodiscard]] QString remoteReceivedCommands() const {
+        QString names;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("at"))) {
+                if (auto message = hwio::remote::tunnel::decodeHost(event.payload)) {
+                    if (const auto* c =
+                            std::get_if<hwio::remote::tunnel::HostCommands>(&*message)) {
+                        QStringList list;
+                        for (const auto& node : c->tree->root().children) {
+                            list.append(QString::fromStdString(node.name));
+                        }
+                        names = list.join(QLatin1Char(' '));
+                    }
+                }
+            }
+        }
+        return names;
+    }
+    // The path of the last tunnel `learn` the participant received (words joined by spaces).
+    Q_INVOKABLE [[nodiscard]] QString remoteLearnRequest() const {
+        QString path;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("write"))) {
+                if (auto message = hwio::remote::tunnel::decodeJoiner(event.payload)) {
+                    if (const auto* learn = std::get_if<hwio::remote::tunnel::Learn>(&*message)) {
+                        QStringList words;
+                        for (const std::string& word : learn->path) {
+                            words.append(QString::fromStdString(word));
+                        }
+                        path = words.join(QLatin1Char(' '));
+                    }
+                }
+            }
+        }
+        return path;
+    }
+    // The kind of the last operation request the participant received ("" for none).
+    Q_INVOKABLE [[nodiscard]] QString remoteRequestedKind() const {
+        QString kind;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("write"))) {
+                if (auto message = hwio::remote::tunnel::decodeJoiner(event.payload)) {
+                    if (const auto* r = std::get_if<hwio::remote::tunnel::OpRequest>(&*message)) {
+                        kind = QString::fromLatin1(hwio::remote::tunnel::kindId(r->kind));
+                    }
+                }
+            }
+        }
+        return kind;
+    }
     // Events of `name` the participant received ("sync", "at", ...).
     Q_INVOKABLE [[nodiscard]] int remoteReceived(const QString& name) const {
         return m_participant ? static_cast<int>(m_participant->named(name).size()) : 0;
@@ -230,6 +412,17 @@ public:
         sync.insert(QStringLiteral("state"), QStringLiteral("connected"));
         sync.insert(QStringLiteral("commands"), QJsonArray{entry});
         m_participant->emitEvent(QStringLiteral("sync"), sync);
+    }
+
+    // The participant (a host) sends one line of device output (`at` {event: "read"}).
+    Q_INVOKABLE void remoteHostRead(const QString& line) const {
+        if (!m_participant) {
+            return;
+        }
+        QJsonObject at;
+        at.insert(QStringLiteral("event"), QStringLiteral("read"));
+        at.insert(QStringLiteral("data"), line);
+        m_participant->emitEvent(QStringLiteral("at"), at);
     }
 
     // Keeps one Choose device tab (busy pages are finished first).
@@ -280,6 +473,14 @@ public:
     // Plan 0033: a setting written through the store (e.g. advanced/expertActions).
     Q_INVOKABLE [[nodiscard]] bool setSetting(const QString& key, const QVariant& value) const {
         return static_cast<bool>(m_app->settingsStore()->setValue(key, value));
+    }
+    // Plan 0045: as on the first start (ui/mode not stored; the first-start dialog opens).
+    Q_INVOKABLE [[nodiscard]] bool resetUiMode() const {
+        if (!m_app->settingsStore()->removeGroup(QStringLiteral("ui/mode"))) {
+            return false;
+        }
+        m_app->uiMode()->reload();
+        return true;
     }
     Q_INVOKABLE [[nodiscard]] QString setting(const QString& key) const {
         return m_app->settingsStore()->value(key).toString();
@@ -674,6 +875,12 @@ public slots:
         // The tests start in English whatever the system language is.
         if (!m_languageManager->apply(QStringLiteral("en"))) {
             qFatal("tst_gui: English could not be selected");
+        }
+        // Plan 0045: the tests start in the default mode, chosen (no first-start dialog);
+        // tst_settings resets it for the dialog test.
+        if (!m_app->settingsStore()->setValue(QStringLiteral("ui/mode"),
+                                              QStringLiteral("advanced"))) {
+            qFatal("tst_gui: ui/mode could not be set");
         }
         m_support.emplace(&*m_app, m_dir.path());
     }

@@ -18,6 +18,10 @@
 //   at {hwio: hello}      → hostHello(), title, the joiner's own hello is sent (ADR-0336: tunnel
 //                           objects only after the host's hello)
 //   at {hwio: op-*}       → hostMessage() (RemoteOperationClient)
+//   at {hwio: commands}   → commandTree(), commandTreeChanged() (ADR-0364: the host's learned
+//                           command tree, validated by TunnelCodec); requestLearn(path) asks the
+//                           host for a command's subcommands (tunnel `learn`, once per path, again
+//                           after learnRetry; at most maxLearnPaths paths per session)
 // The relay connection lost → Disconnected (remote.relay_unreachable; it reconnects), failed →
 // Stopped. A Monitor host that ends sharing sends nothing (the relay does not announce it), so the
 // session ends only when the relay connection fails; idleNotice() after idleNoticeAfter without any
@@ -25,6 +29,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/device/console_log.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/profile.h"
@@ -44,10 +49,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <map>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace hwio::remote {
 
@@ -74,6 +81,8 @@ class RemoteConsoleSession final : public device::ConsoleSession {
 
 public:
     static constexpr std::size_t maxLineBytes = 512;
+    static constexpr std::size_t maxLearnPaths = 200;
+    static constexpr std::chrono::seconds learnRetry{10};
 
     // Connects at once (non-blocking).
     explicit RemoteConsoleSession(JoinOptions options);
@@ -116,6 +125,13 @@ public:
     // Sends a tunnel message (only after the host's hello). Errors:
     // remote.operation_unsupported_peer (no hello / ops: false), remote.host_ended.
     [[nodiscard]] Status sendTunnel(const tunnel::JoinerMessage& message);
+    // ADR-0364: the host's command tree (nullptr: none, e.g. a web Terminal host).
+    [[nodiscard]] std::shared_ptr<const device::CommandTree> commandTree() const {
+        return m_commandTree;
+    }
+    // ADR-0364: asks a Monitor host to learn the subcommands of `path` (allowed, after its hello;
+    // otherwise nothing).
+    void requestLearn(const std::vector<std::string>& path);
     // The relay error that ended the session (Ended).
     [[nodiscard]] const std::optional<Error>& endError() const noexcept { return m_endError; }
 
@@ -127,6 +143,8 @@ signals:
     void hostMessage(const hwio::remote::tunnel::HostMessage& message);
     // No event from the host for idleNoticeAfter.
     void idleNotice();
+    // ADR-0364: commandTree() changed.
+    void commandTreeChanged();
 
 protected:
     void closeSession() override;
@@ -152,6 +170,9 @@ private:
     std::optional<Error> m_endError;
     QTimer m_idleTimer{this};
     std::uint64_t m_attach = 0;
+    std::shared_ptr<const device::CommandTree> m_commandTree;
+    // Paths asked for and when (<= maxLearnPaths).
+    std::map<std::vector<std::string>, std::chrono::steady_clock::time_point> m_learnAsked;
 };
 
 } // namespace hwio::remote

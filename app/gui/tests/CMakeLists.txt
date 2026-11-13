@@ -96,6 +96,7 @@ add_executable(hwio_gui_tests
     viewmodels/shortcut_registry_test.cpp
     viewmodels/single_instance_helper.h
     viewmodels/single_instance_test.cpp
+    viewmodels/ui_mode_controller_test.cpp
     viewmodels/update_service_test.cpp
     viewmodels/wizard_test.cpp
     ${HWIO_GUI_TEST_SUPPORT})
@@ -123,7 +124,7 @@ add_dependencies(hwio_gui_tests hwio_fake_jlink hwio_fake_jlink_incomplete hwio_
 # libs/firmware/tests (Qt's HTTP thread is uninstrumented; plan/features/0003, review R11).
 set(_hwio_gui_test_filter "")
 if("thread" IN_LIST HWIO_SANITIZERS)
-    set(_hwio_gui_test_filter TEST_FILTER "-FlashTest.CatalogDownloadAndErrors:FlashTest.DesignatedLteFirmware:FlashTest.CatalogInfoOfAnId:FlashTest.ACatalogDownloadWaitsForTheLookup:UpdateTest.AutomaticCheckShowsTheBannerAndStoresTheResult:UpdateTest.NoAutomaticCheckBeforeTheIntervalOrInDevelopmentBuilds:UpdateTest.DownloadOpensTheReleasePage:UpdateTest.SkippedVersionIsNotAnnouncedAgainButManualChecksIgnoreIt:UpdateTest.LaterHidesTheBanner:UpdateTest.UpToDate:UpdateTest.FailuresAreShownOnlyForManualChecks")
+    set(_hwio_gui_test_filter TEST_FILTER "-FlashTest.CatalogDownloadAndErrors:FlashTest.DesignatedLteFirmware:FlashTest.RemoteLteUpdateQuestionsGoToSupport:FlashTest.CatalogInfoOfAnId:FlashTest.ACatalogDownloadWaitsForTheLookup:UpdateTest.AutomaticCheckShowsTheBannerAndStoresTheResult:UpdateTest.NoAutomaticCheckBeforeTheIntervalOrInDevelopmentBuilds:UpdateTest.DownloadOpensTheReleasePage:UpdateTest.SkippedVersionIsNotAnnouncedAgainButManualChecksIgnoreIt:UpdateTest.LaterHidesTheBanner:UpdateTest.UpToDate:UpdateTest.FailuresAreShownOnlyForManualChecks")
 endif()
 gtest_discover_tests(hwio_gui_tests
     DISCOVERY_TIMEOUT 60

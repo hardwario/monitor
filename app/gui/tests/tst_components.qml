@@ -110,7 +110,8 @@ TestCase {
         const primary = createTemporaryObject(buttonComponent, testCase, { kind: "primary", text: "Connect" });
         const danger = createTemporaryObject(buttonComponent, testCase, { kind: "danger", text: "Erase everything", y: 80 });
         const normal = createTemporaryObject(buttonComponent, testCase, { text: "Retry", iconName: "refresh", y: 40 });
-        compare(primary.contentColor, Theme.onAccent);
+        compare(primary.contentColor, Theme.textOnAccentFill);
+        compare(primary.baseColor, Theme.accentFill);
         compare(danger.contentColor, Theme.onAccent);
         compare(normal.contentColor, Theme.text);
         compare(primary.height, Theme.controlHeight);
@@ -128,6 +129,33 @@ TestCase {
         verify(tool.toolTip.text.indexOf("Settings (") === 0, tool.toolTip.text);
         compare(tool.Accessible.name, "Settings");
         waitForRendering(tool);
+    }
+
+    // ADR-0367: the text of filled accent controls has a contrast of at least 4.5:1 (WCAG AA) in
+    // both themes; in the dark theme it is white on a darker blue.
+    function luminance(c) {
+        const channel = v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        return 0.2126 * channel(c.r) + 0.7152 * channel(c.g) + 0.0722 * channel(c.b);
+    }
+
+    function contrast(a, b) {
+        const la = luminance(a);
+        const lb = luminance(b);
+        return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+    }
+
+    function test_filledAccentContrast_data() {
+        return themes();
+    }
+
+    function test_filledAccentContrast(data) {
+        setTheme(data.theme);
+        const ratio = contrast(Theme.accentFill, Theme.textOnAccentFill);
+        verify(ratio >= 4.5, `${data.theme}: ${ratio.toFixed(2)}:1`);
+        compare(Theme.textOnAccentFill, Qt.color("#FFFFFF"));
+        compare(Theme.accentFill, Qt.color(data.theme === "dark" ? "#1D63D8" : "#0B5FCC"));
+        // `accent` stays readable as text on the background.
+        verify(contrast(Theme.accent, Theme.bg) >= 4.5);
     }
 
     function test_errorPanel_data() {

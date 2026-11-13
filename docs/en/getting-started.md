@@ -74,13 +74,39 @@ Only one window of the app runs at a time. Starting it again brings the open win
 
 | Section | What is there |
 |---|---|
-| **General** | **Language** (System, English, Čeština), **Theme** (System, Light, Dark), **Reopen tabs at start** |
+| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark), **Reopen tabs at start** |
 | **Console** | font size, timestamps, line wrap, command suggestions, command history, console files and their folder |
 | **J-Link** | the J-Link library (**Automatic** or **Custom path**) and the default connection options |
 | **nRF Util** | the nRF Util program (**Automatic** or **Custom path**), needed only for the LTE modem firmware |
+| **AI assistants (MCP)** | the [MCP server](mcp.md) for AI assistants |
+| **Expert** | the [support server](remote-support.md#settings) |
 | **About** | the version (with **Copy** for support), the [update check](privacy.md#update-check), the `hwio` command of this installation, licences, links |
 
 Changes apply immediately.
+
+<a id="modes"></a>
+### Modes
+
+The **Mode** decides how much Settings shows. At the first start (and once after updating from 2.0.0-rc.3 or older)
+the app asks **How do you want to use HARDWARIO Monitor?**: choose a mode and click **Continue**. **Advanced** is
+preselected; if you had **Show expert maintenance actions** on in an older version, **Expert** is. Closing the dialog
+keeps the preselected mode. Change it at any time in **Settings › General › Mode**.
+
+| Shown | Basic | Advanced | Expert |
+|---|---|---|---|
+| **General**: Mode, Language, Theme, Reopen tabs at start | ✓ | ✓ | ✓ |
+| **Console**: font size, timestamps, line wrap, console files, log folder | ✓ | ✓ | ✓ |
+| **Console**: command suggestions, reading the command list, **Remember commands**, **Clear history** | | ✓ | ✓ |
+| **J-Link**: Library, Default speed, Auto-reconnect | | ✓ | ✓ |
+| **J-Link**: RTT latency, Reset on connect | | | ✓ |
+| **nRF Util**, **AI assistants (MCP)** | | ✓ | ✓ |
+| **Expert**: Support server | | | ✓ |
+| **About**, with **Include pre-releases** in Advanced and Expert | ✓ | ✓ | ✓ |
+| **Flash › Maintenance**: **Erase everything…**, **Recover…**, the LTE MCU | | | ✓ |
+
+A mode only hides settings: a hidden setting keeps its value and is still used (for example a custom J-Link library
+path in Basic mode). When an error or a guide opens a setting that the mode hides (**Open Settings**), it is shown
+for that visit with the note "Shown because it was needed."; the mode does not change.
 
 ## Help
 

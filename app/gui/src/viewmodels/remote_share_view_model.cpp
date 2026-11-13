@@ -3,7 +3,9 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/result.h"
 #include "hwio/core/version.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/profile.h"
@@ -11,6 +13,7 @@
 #include "hwio/firmware/firmware_catalog.h"
 #include "hwio/remote/consent.h"
 #include "hwio/remote/host_operations.h"
+#include "hwio/remote/lte_update_report.h"
 #include "hwio/remote/remote_host.h"
 #include "hwio/remote/session_code.h"
 #include "settings_store.h"
@@ -23,6 +26,7 @@
 #include <QtCore/qnamespace.h>
 
 #include <chrono>
+#include <expected>
 #include <memory>
 #include <optional>
 #include <string>
@@ -106,6 +110,7 @@ void RemoteShareViewModel::startSharing() {
                                      .lookupTimeout = std::chrono::seconds(15),
                                      .maxPageBytes = 1024ULL * 1024},
             m_tab->firmwareCache());
+        m_operations->setLteUpdateRunner(this); // ADR-0363
     }
     const SettingsStore* store = m_tab->settingsStore();
     m_host = std::make_unique<remote::RemoteHost>(
@@ -115,6 +120,9 @@ void RemoteShareViewModel::startSharing() {
             .limits = {},
             .appVersion = std::string(buildInfo().version),
             .code = std::nullopt});
+    m_host->setCommandTree(m_commandTree); // ADR-0364
+    connect(m_host.get(), &remote::RemoteHost::learnRequested, this,
+            &RemoteShareViewModel::learnRequested);
     connect(m_host.get(), &remote::RemoteHost::sharingStarted, this,
             &RemoteShareViewModel::changed);
     connect(m_host.get(), &remote::RemoteHost::participantsChanged, this,
@@ -234,6 +242,47 @@ RemoteShareViewModel::askOperation(const remote::OperationQuestion& question, An
         m_operationAnswer = {};
         questionsChanged(); // signal
     };
+}
+
+Status RemoteShareViewModel::start(Progress progress, Finished finished, remote::AskSupport ask) {
+    if ((m_lteUpdate && !m_lteUpdate->done()) || m_tab->isBusy() || m_tab->choosing()) {
+        return std::unexpected(makeError(ErrorCode::InternalBusy, "the tab is busy"));
+    }
+    m_lteUpdate =
+        std::make_unique<remote::LteUpdateReporter>(std::move(progress), std::move(finished));
+    m_lteUpdate->setAskSupport(std::move(ask)); // ADR-0368
+    m_lteUpdateOffered = true;
+    qCInfo(lcGui) << "Remote: opening the LTE update for support";
+    m_tab->openWizard(QStringLiteral("lte-update")); // takes the request when it opens
+    if (m_lteUpdateOffered) {
+        m_lteUpdateOffered = false;
+        m_lteUpdate->abandon();
+        return std::unexpected(
+            makeError(ErrorCode::InternalBusy, "the LTE update guide could not be opened"));
+    }
+    return {};
+}
+
+void RemoteShareViewModel::abandon() {
+    m_lteUpdateOffered = false;
+    if (m_lteUpdate) {
+        m_lteUpdate->abandon(); // the open wizard goes on, unreported
+    }
+}
+
+void RemoteShareViewModel::setCommandTree(std::shared_ptr<const device::CommandTree> tree) {
+    m_commandTree = std::move(tree);
+    if (m_host) {
+        m_host->setCommandTree(m_commandTree);
+    }
+}
+
+remote::LteUpdateReporter* RemoteShareViewModel::takeLteUpdateRequest() {
+    if (!m_lteUpdateOffered) {
+        return nullptr;
+    }
+    m_lteUpdateOffered = false;
+    return m_lteUpdate.get();
 }
 
 void RemoteShareViewModel::answerJoin(bool allowed) {

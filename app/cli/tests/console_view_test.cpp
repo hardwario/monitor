@@ -5,6 +5,8 @@
 #include "console_ui.h"
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
+#include "hwio/device/console_line.h"
+#include "hwio/device/console_log.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
@@ -19,6 +21,7 @@
 #include <QIODevice>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QList>
 #include <QString>
 #include <QStringLiteral>
 #include <QTemporaryDir>
@@ -36,6 +39,7 @@
 #include <string>
 #include <thread>
 #include <utility>
+#include <vector>
 
 namespace {
 
@@ -198,7 +202,7 @@ TEST_F(JsonConsoleView, FailedStdoutWriteCallsTheOutputClosedHandler) {
 }
 
 // remote join: lines that reached the session's log before the view existed (the host's
-// history) are printed by printLog(), once.
+// history) are printed by printLines(), once.
 TEST_F(JsonConsoleView, PrintLogShowsTheLinesReceivedBeforeTheView) {
     useScenario(R"({"probes": [{"serialNumber": 1,
                                 "rtt": {"output": [{"atMs": 0, "buffer": 0,
@@ -207,7 +211,8 @@ TEST_F(JsonConsoleView, PrintLogShowsTheLinesReceivedBeforeTheView) {
     ASSERT_TRUE(session) << session.error().message;
     ASSERT_TRUE(processEventsUntil([&] { return (*session)->log().lastSeq() > 0; }));
     ConsoleView view(context(), **session, false, false);
-    view.printLog();
+    const std::vector<hwio::device::ConsoleLine> earlier = (*session)->log().linesSince(0);
+    view.printLines(QList<hwio::device::ConsoleLine>(earlier.begin(), earlier.end()));
     ASSERT_TRUE(processEventsUntil([&] {
         return (*session)->connection().state == hwio::device::ConnectionState::Connected;
     }));

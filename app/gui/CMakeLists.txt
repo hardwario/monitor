@@ -65,11 +65,13 @@ set(HWIO_GUI_QML_FILES
     qml/remote/RemoteSessionDialogs.qml
     qml/remote/ShareDialog.qml
     qml/settings/AboutSection.qml
-    qml/settings/AdvancedSection.qml
+    qml/settings/ExpertSection.qml
     qml/settings/GeneralSection.qml
     qml/settings/JLinkSection.qml
     qml/settings/McpSection.qml
     qml/settings/NrfUtilSection.qml
+    qml/settings/RevealNote.qml
+    qml/settings/SettingsGroup.qml
     qml/settings/SettingsRow.qml
     qml/shell/AdvancedPopover.qml
     qml/shell/BleDeviceList.qml
@@ -78,6 +80,7 @@ set(HWIO_GUI_QML_FILES
     qml/shell/DeviceBar.qml
     qml/shell/DeviceTabBar.qml
     qml/shell/HelpMenu.qml
+    qml/shell/ModeChoiceDialog.qml
     qml/shell/NavRail.qml
     qml/shell/PageHost.qml
     qml/settings/ConsoleSection.qml
@@ -194,6 +197,10 @@ qt_add_qml_module(hwio_gui
         src/viewmodels/settings_view_model.h
         src/viewmodels/shortcut_registry.cpp
         src/viewmodels/shortcut_registry.h
+        src/viewmodels/ui_mode.cpp
+        src/viewmodels/ui_mode.h
+        src/viewmodels/ui_mode_controller.cpp
+        src/viewmodels/ui_mode_controller.h
         src/viewmodels/update_view_model.cpp
         src/viewmodels/update_view_model.h
         src/wizard/check_list_model.cpp

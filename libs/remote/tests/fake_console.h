@@ -174,12 +174,28 @@ class FakeOperations final : public HostOperations {
 public:
     // NOLINTBEGIN(cppcoreguidelines-non-private-member-variables-in-classes)
     bool catalogKnows = true;
+    bool lteUpdate = true; // ADR-0363: lteUpdate in kinds()
     std::vector<tunnel::OpRequest> started;
     Progress progress;
     Finished finished;
+    AskSupport ask; // ADR-0368: set by start() when the joiner answers questions
     int abandoned = 0;
     // NOLINTEND(cppcoreguidelines-non-private-member-variables-in-classes)
 
+    [[nodiscard]] std::vector<tunnel::OpKind> kinds() const override {
+        std::vector<tunnel::OpKind> kinds{tunnel::OpKind::Flash, tunnel::OpKind::Erase,
+                                          tunnel::OpKind::Recover, tunnel::OpKind::Reset};
+        if (lteUpdate) {
+            kinds.push_back(tunnel::OpKind::LteUpdate);
+        }
+        return kinds;
+    }
+    [[nodiscard]] std::pair<std::string, std::string> lteUpdateFirmware() const override {
+        if (!lteUpdate) {
+            return {};
+        }
+        return {"HARDWARIO LTE firmware", "1.7.0"};
+    }
     [[nodiscard]] Status validate(const tunnel::OpRequest& request) const override {
         if (request.kind == tunnel::OpKind::Flash && request.target != tunnel::OpTarget::App) {
             return std::unexpected(makeError(ErrorCode::UsageInvalidArgument, "flash to lte"));
@@ -194,16 +210,19 @@ public:
         done(firmware::CatalogInfo{
             .name = "CHESTER-Clime", .version = "v3.2.1", .uploaded = {}, .sha256 = std::nullopt});
     }
-    [[nodiscard]] Status start(const tunnel::OpRequest& request, Progress p, Finished f) override {
+    [[nodiscard]] Status start(const tunnel::OpRequest& request, Progress p, Finished f,
+                               AskSupport a) override {
         started.push_back(request);
         progress = std::move(p);
         finished = std::move(f);
+        ask = std::move(a);
         return {};
     }
     void abandon() override {
         ++abandoned;
         progress = {};
         finished = {};
+        ask = {};
     }
 };
 

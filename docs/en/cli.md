@@ -167,7 +167,8 @@ erase its flash and the PIB.
 The LTE MCU has no console. Modem firmware needs nRF Util.
 
 `--guided` runs the [LTE firmware update](flashing.md#lte-firmware-update) of the app in the terminal: start with the
-J-Link on the APP connector; it saves a copy of the application, erases the application, asks you to move the J-Link
+J-Link on the APP connector; it says what will happen and asks `Continue? [y/N]` (no: exit code 130, nothing
+changed), then saves a copy of the application, erases the application, asks you to move the J-Link
 to the LTE connector, updates the LTE MCU, asks you to move it back and writes the application back. Each step
 continues by itself as soon as the J-Link reaches the right MCU; the copy's path is printed at the end. When there is
 no copy to write back (an empty or unreadable application), the command ends with exit code 130 and the application
@@ -199,17 +200,30 @@ of the advertised name, which exactly one device found by a 5-second scan must m
 | `hwio remote join CODE\|LINK [--relay URL] [--linger S]` | Joins a session: the console (interactive on a terminal, plain lines or `--json` NDJSON otherwise) |
 | `hwio remote join CODE\|LINK --command CMD [-t S]` | One command after the customer allowed you; the response as in `chester app command` |
 | `hwio remote join CODE\|LINK --flash ID \| --erase \| --recover \| --reset [--target app\|lte]` | Asks the customer's HARDWARIO Monitor for one operation (flash: catalog firmware ID, application core only) |
+| `hwio remote join CODE\|LINK --lte-update` | Asks the customer's HARDWARIO Monitor to update the LTE firmware to its recommended version (the guided update: the customer moves the J-Link cable between the APP and LTE connectors); no firmware ID, no `--target` |
 
 `hwio remote host` asks on the terminal (stderr, answer `y` to allow) before it allows a join or an operation, and any
 other input line keeps sharing after the idle warning. Without a terminal on stdin joins are never allowed: the session
-ends at the first join. `--deny-operations` denies every operation request without asking. Ctrl+C ends sharing
+ends at the first join. `--deny-operations` denies every operation request without asking. An allowed LTE update runs
+the terminal flow of `hwio chester lte flash --guided` (with `--nrfutil` if given): follow its prompts and move the
+cable when it asks; if it ends without writing the application back, support gets `remote.application_not_restored`.
+When the joiner answers the update's questions (HARDWARIO Monitor 2.0.0-rc.4 or newer), support confirms **Continue**
+and **Continue without a copy** instead of you, and the copy is written back without a question; without an answer
+within 60 seconds the update is cancelled before anything changes.
+The host learns the device's command list as `chester app console` does and sends it to an allowed HARDWARIO Monitor
+joiner, whose interactive console completes commands with Tab from it (subcommands are read by the host's silent
+`<command> -h`, not shown in the console). Ctrl+C ends sharing
 (exit code 130). With `--json` the host prints `{"type":"remote","event":"sharing","code","link","relay"}`, the
 questions (`"event":"question"`) and `{"type":"remote","event":"ended","error"}` between the console events.
 
 The server is `https://terminal.hardwario.com` unless the setting `remote/relayUrl` or `--relay URL` names another one
 (https only). A link to another server needs confirmation on a terminal and is refused without one. A denied request or
-a join that was not allowed exits with 130 (`remote.operation_denied`, `remote.join_not_allowed`). See
-[Remote support](remote-support.md).
+a join that was not allowed exits with 130 (`remote.operation_denied`, `remote.join_not_allowed`). The result line of
+an operation names it and the time (*Customer's device reset (14:02).*). On a terminal, `--lte-update` asks you the
+customer's Monitor's questions (*… Continue? [y/N]*, *The application could not be copied. Continue without a copy?
+[y/N]*; with `--json` also `{"type":"remote","event":"question","kind":"continue"|"continueWithoutCopy","text"}`); no,
+or no answer within 60 seconds, cancels the update before anything changes. Without a terminal the customer answers
+them. See [Remote support](remote-support.md).
 
 ## Other commands
 

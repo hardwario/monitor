@@ -3,7 +3,9 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/result.h"
 #include "hwio/firmware/firmware_cache.h"
+#include "hwio/remote/consent.h"
 #include "hwio/remote/remote_console_session.h"
 #include "hwio/remote/remote_operation_client.h"
 #include "hwio/remote/session_code.h"
@@ -14,6 +16,7 @@
 #include <QObject>
 #include <QString>
 #include <QStringLiteral>
+#include <QTime>
 #include <QUrl>
 #include <QVariantMap>
 #include <QtContainerFwd>
@@ -29,6 +32,49 @@ namespace tunnel = remote::tunnel;
 RemoteJoinViewModel::RemoteJoinViewModel(DeviceTabViewModel* tab) : QObject(tab), m_tab(tab) {
     connect(m_tab, &DeviceTabViewModel::sessionChanged, this, &RemoteJoinViewModel::attach);
     connect(m_tab, &DeviceTabViewModel::transportChanged, this, &RemoteJoinViewModel::changed);
+    // ADR-0369: a success does not linger once support leaves the Flash page.
+    connect(m_tab, &DeviceTabViewModel::currentPageChanged, this, [this] {
+        if (m_tab->currentPage() != QStringLiteral("flash") && !m_failed && !operationPending()) {
+            clearResult();
+        }
+    });
+}
+
+void RemoteJoinViewModel::onFinished(bool ok, const Error& error) {
+    // ADR-0369: named, with the local time, also in the console (kept in its log and file).
+    const QString time = QTime::currentTime().toString(QStringLiteral("HH:mm"));
+    // Support's own No (ADR-0368): a cancellation, not an error.
+    const bool declined = !ok && error.code == ErrorCode::Cancelled && m_client->declined();
+    m_failed = !ok && !declined;
+    m_progress = -1.0;
+    if (ok) {
+        m_status = remote::operationResultText(m_kind, m_target, time);
+    } else if (declined) {
+        m_status = remote::lteUpdateDeclinedText(time);
+    } else {
+        m_status = remote::operationFailedText(m_kind, m_target, time, toQString(error.message));
+    }
+    m_tab->addStatusLine(m_status);
+    qCInfo(lcGui) << "Remote operation result:"
+                  << (ok ? QStringLiteral("ok") : toQString(idOf(error.code)));
+    operationChanged(); // signal
+}
+
+void RemoteJoinViewModel::clearResult() {
+    if (m_status.isEmpty() && !m_failed) {
+        return;
+    }
+    m_status.clear();
+    m_failed = false;
+    operationChanged(); // signal
+}
+
+bool RemoteJoinViewModel::resultDismissable() const { return m_failed && !operationPending(); }
+
+void RemoteJoinViewModel::dismissResult() {
+    if (resultDismissable()) {
+        clearResult();
+    }
 }
 
 RemoteJoinViewModel::~RemoteJoinViewModel() = default;
@@ -55,6 +101,11 @@ void RemoteJoinViewModel::attach() {
             changed(); // signal
         });
         m_client = std::make_unique<remote::RemoteOperationClient>(*session);
+        m_client->setAnswersQuestions(true); // ADR-0368: support answers on the Flash card
+        connect(m_client.get(), &remote::RemoteOperationClient::question, this,
+                &RemoteJoinViewModel::operationChanged);
+        connect(m_client.get(), &remote::RemoteOperationClient::questionClosed, this,
+                &RemoteJoinViewModel::operationChanged);
         connect(m_client.get(), &remote::RemoteOperationClient::accepted, this, [this] {
             m_status = tr("The customer allowed it. Running on the customer's side…");
             operationChanged(); // signal
@@ -64,18 +115,12 @@ void RemoteJoinViewModel::attach() {
                     m_progress = progress.total > 0 ? static_cast<double>(progress.done) /
                                                           static_cast<double>(progress.total)
                                                     : -1.0;
-                    m_status =
-                        tr("Running on the customer's side: %1").arg(toQString(progress.phase));
+                    m_status = tr("Running on the customer's side: %1")
+                                   .arg(remote::operationPhaseText(progress.phase));
                     operationChanged(); // signal
                 });
         connect(m_client.get(), &remote::RemoteOperationClient::finished, this,
-                [this](bool ok, const Error& error) {
-                    m_failed = !ok;
-                    m_progress = -1.0;
-                    m_status = ok ? tr("Done (reported by the customer's Monitor).")
-                                  : toQString(error.message);
-                    operationChanged(); // signal
-                });
+                &RemoteJoinViewModel::onFinished);
     }
     changed();          // signal
     operationChanged(); // signal
@@ -136,7 +181,35 @@ QString RemoteJoinViewModel::operationsUnavailableText() const {
     return tr("The customer's console (Bluetooth) has no flashing.");
 }
 
+bool RemoteJoinViewModel::lteUpdateAvailable() const {
+    const remote::RemoteConsoleSession* session = m_tab->remoteSession();
+    if (!operationsAvailable() || session == nullptr) {
+        return false;
+    }
+    const std::optional<tunnel::HostHello>& hello = session->hostHello();
+    return hello.has_value() && tunnel::supports(*hello, tunnel::OpKind::LteUpdate);
+}
+
 bool RemoteJoinViewModel::operationPending() const { return m_client && m_client->busy(); }
+
+QString RemoteJoinViewModel::operationQuestion() const {
+    if (!m_client) {
+        return {};
+    }
+    const auto question = m_client->openQuestion();
+    return question ? remote::operationQuestionKindText(*question) : QString();
+}
+
+void RemoteJoinViewModel::answerQuestion(bool yes) {
+    if (!m_client) {
+        return;
+    }
+    if (Status sent = m_client->answer(yes); !sent) {
+        qCWarning(lcGui).noquote() << "Remote answer not sent:" << toQString(sent.error().detail);
+        return;
+    }
+    qCInfo(lcGui) << "Remote question answered:" << (yes ? "continue" : "cancel");
+}
 
 bool RemoteJoinViewModel::isFirmwareId(const QString& text) {
     return firmware::FirmwareId::parse(toStdString(text.trimmed())).has_value();
@@ -148,7 +221,9 @@ void RemoteJoinViewModel::requestOperation(const QString& kind, const QString& t
         return;
     }
     const auto opKind = tunnel::kindFromId(toStdString(kind));
-    const auto opTarget = tunnel::targetFromId(toStdString(target));
+    const auto opTarget = opKind == tunnel::OpKind::LteUpdate
+                              ? std::optional(tunnel::OpTarget::Lte)
+                              : tunnel::targetFromId(toStdString(target));
     if (!opKind || !opTarget) {
         return;
     }
@@ -164,6 +239,8 @@ void RemoteJoinViewModel::requestOperation(const QString& kind, const QString& t
         }
         id = parsed->value();
     }
+    m_kind = *opKind;
+    m_target = *opTarget;
     auto requested = m_client->request(*opKind, *opTarget, id);
     m_failed = !requested;
     m_progress = -1.0;

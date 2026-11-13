@@ -5,14 +5,22 @@
 #include "cli_process.h"
 #include "fake_console.h"
 #include "fake_relay.h"
+#include "hex_builder.h"
+#include "http_fixture.h"
+#include "hwio/core/error.h"
 #include "hwio/device/console_line.h"
+#include "hwio/remote/consent.h"
 #include "hwio/remote/host_operations.h"
+#include "hwio/remote/remote_console_session.h"
 #include "hwio/remote/remote_host.h"
+#include "hwio/remote/remote_operation_client.h"
 #include "hwio/remote/session_code.h"
 #include "hwio/remote/tunnel.h"
 #include "remote_test_support.h"
+#include "zip_builder.h"
 
 #include <QByteArray>
+#include <QCryptographicHash>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -30,9 +38,14 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
+#include <expected>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -77,6 +90,7 @@ public:
     Child& operator=(Child&&) = delete;
 
     void closeInput() { m_process.closeWriteChannel(); }
+    void write(const QByteArray& data) { m_process.write(data); }
 #ifndef _WIN32
     // SIGTERM: the CLI handles it like Ctrl+C (exit status 130).
     void terminate() { m_process.terminate(); }
@@ -156,18 +170,20 @@ protected:
 
     // An in-process Monitor host on `relay`, code 482913.
     struct InProcessHost {
-        InProcessHost(const FakeRelay& relay, hwio::remote::HostOperations* operations)
+        InProcessHost(const FakeRelay& relay, hwio::remote::HostOperations* operations,
+                      std::chrono::milliseconds operationTimeout = 60s)
             : host(console, consent, operations,
                    hwio::remote::HostOptions{.relay = relay.url(),
-                                             .limits = limits(),
+                                             .limits = limits(operationTimeout),
                                              .appVersion = "2.1.0-customer",
                                              .code =
                                                  *hwio::remote::SessionCode::fromValue(482913)}) {
             host.start();
         }
-        static hwio::remote::HostLimits limits() {
+        static hwio::remote::HostLimits limits(std::chrono::milliseconds operationTimeout) {
             hwio::remote::HostLimits l;
             l.collisionWindow = 100ms;
+            l.operationTimeout = operationTimeout;
             return l;
         }
         FakeConsole console;
@@ -332,6 +348,110 @@ TEST_F(RemoteCli, JoinRequestsAResetAndTheCustomerAllows) {
     EXPECT_EQ(data.value(QStringLiteral("operation")).toString(), QStringLiteral("reset"));
 }
 
+// ADR-0363: `--lte-update` asks for the guided LTE update (no target, no firmware ID).
+TEST_F(RemoteCli, JoinRequestsAnLteUpdate) {
+    FakeRelay relay;
+    FakeOperations operations;
+    InProcessHost host(relay, &operations);
+    ASSERT_TRUE(runUntil([&] { return host.host.state() == hwio::remote::HostState::Sharing; }));
+    QStringList args{QStringLiteral("--json"), QStringLiteral("remote"), QStringLiteral("join"),
+                     QStringLiteral("482913"), QStringLiteral("--lte-update")};
+    args << relayArgs(relay);
+    Child child(args, fakeEnvironment());
+    ASSERT_TRUE(runUntil([&] { return operations.started.size() == 1; }, 30s)) << child.err();
+    EXPECT_EQ(operations.started.front().kind, hwio::remote::tunnel::OpKind::LteUpdate);
+    ASSERT_EQ(host.consent.operationQuestions.size(), 1U);
+    EXPECT_EQ(host.consent.operationQuestions.front().firmwareVersion, "1.7.0");
+    operations.progress(hwio::remote::OperationUpdate{.phase = "connect-lte"});
+    operations.finished(hwio::Status{});
+    ASSERT_TRUE(child.finish()) << child.err();
+    EXPECT_EQ(child.exitCode(), 0) << child.err();
+    const QJsonObject data = child.envelopes().back().value(QStringLiteral("data")).toObject();
+    EXPECT_EQ(data.value(QStringLiteral("operation")).toString(), QStringLiteral("lteUpdate"));
+    EXPECT_FALSE(data.contains(QStringLiteral("target")));
+
+    // --lte-update has no target.
+    const auto refused =
+        run({QStringLiteral("remote"), QStringLiteral("join"), QStringLiteral("482913"),
+             QStringLiteral("--lte-update"), QStringLiteral("--target"), QStringLiteral("lte")},
+            fakeEnvironment());
+    EXPECT_EQ(refused.exitCode, 2) << refused.err;
+}
+
+// ADR-0368: with a terminal `remote join --lte-update` answers the customer's Monitor's questions
+// (Continue before the erase, Continue without a copy) with y/N; no, and no answer within the
+// host's operation timeout, answer no.
+TEST_F(RemoteCli, JoinAnswersTheLteUpdateQuestions) {
+    FakeRelay relay;
+    FakeOperations operations;
+    InProcessHost host(relay, &operations, 3s);
+    ASSERT_TRUE(runUntil([&] { return host.host.state() == hwio::remote::HostState::Sharing; }));
+    QProcessEnvironment env = fakeEnvironment();
+    env.insert(QStringLiteral("HWIO_TEST_INTERACTIVE"), QStringLiteral("1"));
+    QStringList args{QStringLiteral("--json"), QStringLiteral("remote"), QStringLiteral("join"),
+                     QStringLiteral("482913"), QStringLiteral("--lte-update")};
+    args << relayArgs(relay);
+    struct Case {
+        hwio::remote::tunnel::OpQuestionKind kind;
+        const char* input; // nullptr: no answer
+        bool expected;
+    };
+    const std::vector<Case> cases{
+        {.kind = hwio::remote::tunnel::OpQuestionKind::Continue, .input = "y\n", .expected = true},
+        {.kind = hwio::remote::tunnel::OpQuestionKind::ContinueWithoutCopy,
+         .input = "n\n",
+         .expected = false},
+        {.kind = hwio::remote::tunnel::OpQuestionKind::Continue,
+         .input = nullptr,
+         .expected = false},
+    };
+    for (const Case& c : cases) {
+        const std::size_t before = operations.started.size();
+        Child child(args, env);
+        ASSERT_TRUE(runUntil([&] { return operations.started.size() == before + 1; }, 30s))
+            << child.err();
+        EXPECT_TRUE(operations.started.back().questions);
+        ASSERT_TRUE(static_cast<bool>(operations.ask));
+        std::optional<bool> answer;
+        operations.ask(c.kind, [&](hwio::remote::SupportAnswer a) {
+            answer = a == hwio::remote::SupportAnswer::Yes;
+        });
+        ASSERT_TRUE(runUntil([&] { return child.err().find("[y/N] ") != std::string::npos; }, 30s))
+            << child.err();
+        const std::string text =
+            hwio::remote::operationQuestionKindText(c.kind).toStdString() + " [y/N] ";
+        EXPECT_NE(child.err().find(text), std::string::npos) << child.err();
+        const auto question = child.remoteEvent(QStringLiteral("question"));
+        ASSERT_TRUE(question.has_value()) << child.out();
+        EXPECT_EQ(
+            question.value_or(QJsonObject()).value(QStringLiteral("kind")).toString().toStdString(),
+            hwio::remote::tunnel::questionId(c.kind));
+        if (c.input != nullptr) {
+            child.write(c.input);
+        }
+        ASSERT_TRUE(runUntil([&] { return answer.has_value(); }, 10s)) << child.err();
+        EXPECT_EQ(answer.value_or(!c.expected), c.expected);
+        // The customer's Monitor cancels after a no (nothing changed) or goes on after a yes.
+        operations.finished(c.expected ? hwio::Status{}
+                                       : hwio::Status(std::unexpected(hwio::makeError(
+                                             hwio::ErrorCode::Cancelled, "cancelled"))));
+        ASSERT_TRUE(child.finish()) << child.err();
+        EXPECT_EQ(child.exitCode(), c.expected ? 0 : 130) << child.err();
+        // Confirmed 2026-11-12: support's own No is "cancelled by you"; no answer stays an error.
+        const bool declined = c.input != nullptr && !c.expected;
+        EXPECT_EQ(child.out().find("LTE firmware update cancelled by you (") != std::string::npos,
+                  declined)
+            << child.out();
+        if (declined) {
+            EXPECT_NE(child.out().find("). Nothing was changed."), std::string::npos)
+                << child.out();
+        }
+    }
+    EXPECT_TRUE(host.console.hasEvent("Support answered: continue."));
+    EXPECT_TRUE(host.console.hasEvent("Cancelled by support. Nothing was changed."));
+    EXPECT_TRUE(host.console.hasEvent("Support did not answer. Nothing was changed."));
+}
+
 TEST_F(RemoteCli, JoinOperationDenied) {
     FakeRelay relay;
     FakeOperations operations;
@@ -458,6 +578,241 @@ TEST_F(RemoteCli, JoinEndsWhenTheHostEndsSharing) {
     ASSERT_TRUE(child.finish(10s)) << child.err();
     EXPECT_NE(child.exitCode(), 0);
     EXPECT_EQ(child.lastErrorCode(), QStringLiteral("remote.host_ended")) << child.out();
+}
+
+#ifndef _WIN32
+// How the questions of a remote LTE update are answered (ADR-0366 / ADR-0368).
+enum class LteAnswers : std::uint8_t {
+    Customer,    // a joiner without the feature: the customer answers on the host's terminal
+    SupportYes,  // the joiner answers Continue: yes
+    SupportNo,   // the joiner answers Continue: no
+    SupportNone, // the joiner does not answer (the host's operation timeout, shortened)
+};
+
+// ADR-0363: `remote host` runs the guided LTE update of `chester lte flash --guided` for an allowed
+// lteUpdate request: the customer moves the cable (the fake board's connector file) and, for a
+// joiner without op-question, answers on stdin (HWIO_TEST_INTERACTIVE stands in for the
+// terminal); the joiner sees the phases and the result. ADR-0368: a joiner that answers gets the
+// question instead, the customer only the explanation; the copy is written back automatically.
+void runRemoteLteUpdate(const QString& home, const QProcessEnvironment& baseEnv,
+                        LteAnswers answers) {
+    const std::string appHex = hwio::firmware::test::hexRecord(0, 0x1000, {1, 2, 3, 4}) +
+                               hwio::firmware::test::eofRecord();
+    const QByteArray modem = hwio::firmware::test::zipBytes(
+        {{.name = "firmware.update.image.segments.0.hex", .data = appHex}});
+    const QByteArray bundle =
+        hwio::firmware::test::zipBytes({{.name = "modem.zip", .data = modem.toStdString()},
+                                        {.name = "application.hex", .data = appHex}});
+    hwio::firmware::test::HttpFixture http;
+    ASSERT_TRUE(http.listening());
+    http.set(QStringLiteral("/chester/lte.zip"),
+             hwio::firmware::test::HttpFixture::Response::ok(bundle));
+    const QString connector = home + QStringLiteral("/connector");
+    const auto moveCable = [&](const char* to) {
+        QFile file(connector);
+        ASSERT_TRUE(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        file.write(to);
+    };
+    moveCable("app");
+    {
+        QFile file(home + QStringLiteral("/scenario.json"));
+        ASSERT_TRUE(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        file.write(
+            QStringLiteral(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+            "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "boot banner\n"}]},
+            "connectors": {"file": "%1", "chips": {
+              "app": {"memory": [{"address": 4096, "hex": "a5a5a5a5"}]},
+              "lte": {"family": "nrf91"}}}}]})")
+                .arg(connector)
+                .toUtf8());
+    }
+    QProcessEnvironment env = baseEnv;
+    env.insert(QStringLiteral("HWIO_TEST_INTERACTIVE"), QStringLiteral("1"));
+    if (answers == LteAnswers::SupportNone) {
+        env.insert(QStringLiteral("HWIO_TEST_OPERATION_TIMEOUT_MS"), QStringLiteral("3000"));
+    }
+    env.insert(QStringLiteral("HWIO_DESIGNATED_URL"), http.baseUrl() + QStringLiteral("/lte.zip"));
+    env.insert(
+        QStringLiteral("HWIO_DESIGNATED_SHA256"),
+        QString::fromLatin1(QCryptographicHash::hash(bundle, QCryptographicHash::Sha256).toHex()));
+    FakeRelay relay;
+    QStringList args{QStringLiteral("--nrfutil"), QStringLiteral(HWIO_FAKE_NRFUTIL),
+                     QStringLiteral("remote"),    QStringLiteral("host"),
+                     QStringLiteral("--relay"),   relay.url().toString()};
+    Child child(args, env);
+    const auto waitErr = [&](const char* text) {
+        return runUntil([&] { return child.err().find(text) != std::string::npos; }, 30s);
+    };
+    ASSERT_TRUE(waitErr("Session code: ")) << child.err();
+    const std::string err = child.err();
+    const std::string code = err.substr(err.find("Session code: ") + 14, 7); // "482 913"
+
+    const auto target = hwio::remote::parseJoinInput(code);
+    ASSERT_TRUE(target.has_value()) << code;
+    hwio::remote::RemoteConsoleSession joiner(
+        hwio::remote::JoinOptions{.relay = relay.url(),
+                                  .code = target->code,
+                                  .appVersion = "2.1.0-support",
+                                  .relayLimits = {},
+                                  .transcript = {},
+                                  .idleNoticeAfter = std::chrono::minutes(30),
+                                  .consoleLog = nullptr});
+    ASSERT_TRUE(waitErr("Allow them to send commands")) << child.err();
+    child.write("y\n");
+    ASSERT_TRUE(runUntil(
+        [&] {
+            return joiner.hostHello() &&
+                   hwio::remote::tunnel::supports(*joiner.hostHello(),
+                                                  hwio::remote::tunnel::OpKind::LteUpdate);
+        },
+        30s))
+        << child.err();
+    EXPECT_TRUE(joiner.hostHello().value_or(hwio::remote::tunnel::HostHello{}).opQuestions);
+    hwio::remote::RemoteOperationClient client(joiner);
+    client.setAnswersQuestions(answers != LteAnswers::Customer);
+    std::vector<std::string> phases;
+    std::vector<hwio::remote::tunnel::OpQuestionKind> questions;
+    std::optional<std::pair<bool, hwio::Error>> result;
+    QObject::connect(&client, &hwio::remote::RemoteOperationClient::progress, &client,
+                     [&](const hwio::remote::tunnel::OpProgress& p) { phases.push_back(p.phase); });
+    QObject::connect(&client, &hwio::remote::RemoteOperationClient::question, &client,
+                     [&](hwio::remote::tunnel::OpQuestionKind kind) { questions.push_back(kind); });
+    QObject::connect(&client, &hwio::remote::RemoteOperationClient::finished, &client,
+                     [&](bool ok, const hwio::Error& error) { result.emplace(ok, error); });
+    ASSERT_TRUE(
+        client.request(hwio::remote::tunnel::OpKind::LteUpdate, hwio::remote::tunnel::OpTarget::Lte)
+            .has_value());
+    ASSERT_TRUE(waitErr("Support asks to update the LTE firmware to HARDWARIO LTE firmware 1.7.0"))
+        << child.err();
+    child.write("y\n");
+    // Plan 0046 (ADR-0366): the update stops before the application is erased; the joiner sees
+    // the phase "confirm" meanwhile.
+    ASSERT_TRUE(waitErr("The application on this CHESTER will be erased.")) << child.err();
+    ASSERT_TRUE(
+        runUntil([&] { return std::ranges::find(phases, "confirm") != phases.end(); }, 30s));
+    if (answers == LteAnswers::Customer) {
+        ASSERT_TRUE(waitErr("Continue? [y/N]")) << child.err();
+        child.write("y\n");
+    } else {
+        // ADR-0368: support confirms; the customer is told, not asked.
+        ASSERT_TRUE(waitErr("HARDWARIO Support confirms the update.")) << child.err();
+        ASSERT_TRUE(runUntil([&] { return client.openQuestion().has_value(); }, 30s));
+        EXPECT_EQ(child.err().find("Continue? [y/N]"), std::string::npos) << child.err();
+        ASSERT_EQ(questions.size(), 1U);
+        EXPECT_EQ(questions.front(), hwio::remote::tunnel::OpQuestionKind::Continue);
+        if (answers != LteAnswers::SupportNone) {
+            ASSERT_TRUE(client.answer(answers == LteAnswers::SupportYes).has_value());
+        }
+    }
+    if (answers == LteAnswers::SupportNo || answers == LteAnswers::SupportNone) {
+        // Cancelled before anything changed.
+        ASSERT_TRUE(runUntil([&] { return result.has_value(); }, 30s)) << child.err();
+        const auto [ok, error] = result.value_or(std::pair(true, hwio::Error{}));
+        EXPECT_FALSE(ok);
+        EXPECT_EQ(error.code, hwio::ErrorCode::Cancelled) << error.detail;
+        EXPECT_EQ(std::ranges::find(phases, "erase"), phases.end());
+        EXPECT_EQ(std::ranges::find(phases, "backup"), phases.end());
+        // Confirmed 2026-11-12: a timeout is not "cancelled by support".
+        ASSERT_TRUE(waitErr(answers == LteAnswers::SupportNo
+                                ? "Cancelled by support. Nothing was changed."
+                                : "Support did not answer. Nothing was changed."))
+            << child.err();
+        EXPECT_EQ(child.err().find(answers == LteAnswers::SupportNo ? "Support did not answer."
+                                                                    : "Cancelled by support."),
+                  std::string::npos)
+            << child.err();
+    } else {
+        ASSERT_TRUE(waitErr("Connect the J-Link cable to the LTE connector.")) << child.err();
+        moveCable("lte");
+        ASSERT_TRUE(waitErr("Move the cable to the APP connector.")) << child.err();
+        moveCable("app");
+        ASSERT_TRUE(runUntil([&] { return result.has_value(); }, 60s)) << child.err();
+        EXPECT_TRUE(result && result->first)
+            << (result ? result->second.detail : "") << child.err();
+        // "download" is not checked: the joiner did not see it on macOS CI (a fast local
+        // download); the later phases prove the update ran.
+        EXPECT_NE(std::ranges::find(phases, "connect-lte"), phases.end());
+        EXPECT_NE(std::ranges::find(phases, "restore"), phases.end()); // written back
+    }
+    EXPECT_EQ(joiner.joinState(), hwio::remote::JoinState::Allowed); // sharing stayed active
+    child.stop();
+    ASSERT_TRUE(child.finish());
+}
+
+TEST_F(RemoteCli, HostRunsTheGuidedLteUpdate) {
+    runRemoteLteUpdate(home(), fakeEnvironment(), LteAnswers::Customer);
+}
+
+// ADR-0368: support answers Continue; the copy is written back without a question.
+TEST_F(RemoteCli, HostLteUpdateSupportConfirms) {
+    runRemoteLteUpdate(home(), fakeEnvironment(), LteAnswers::SupportYes);
+}
+
+// ADR-0368: support answers no: cancelled before the copy and the erase.
+TEST_F(RemoteCli, HostLteUpdateSupportCancels) {
+    runRemoteLteUpdate(home(), fakeEnvironment(), LteAnswers::SupportNo);
+}
+
+// Confirmed 2026-11-12: no answer from support within the operation timeout: cancelled before
+// anything changed, and the customer is told that support did not answer.
+TEST_F(RemoteCli, HostLteUpdateSupportDoesNotAnswer) {
+    runRemoteLteUpdate(home(), fakeEnvironment(), LteAnswers::SupportNone);
+}
+#endif // _WIN32
+
+// ADR-0364: `remote host` learns its command tree (`help`) and sends it to an allowed joiner; a
+// joiner's learn request makes it ask `<command> -h` silently and send the grown tree.
+TEST_F(RemoteCli, HostSendsItsCommandTreeAndLearnsForTheJoiner) {
+    {
+        QFile file(home() + QStringLiteral("/scenario.json"));
+        ASSERT_TRUE(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        file.write(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+            "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "boot banner\n"}],
+                    "responses": {
+                      "help": "Please press the <Tab> button to see all available commands.\nYou can try to call commands with <-h> or <--help> parameter for more information.\n\nAvailable commands:\n  app   :Application commands\n  info  :Info commands\n",
+                      "app -h": "app - Application commands\nSubcommands:\n  config  :Configuration commands\n"}}}]})");
+    }
+    QProcessEnvironment env = fakeEnvironment();
+    env.insert(QStringLiteral("HWIO_TEST_INTERACTIVE"), QStringLiteral("1"));
+    FakeRelay relay;
+    QStringList args{QStringLiteral("remote"), QStringLiteral("host")};
+    args << relayArgs(relay);
+    Child child(args, env);
+    ASSERT_TRUE(
+        runUntil([&] { return child.err().find("Session code: ") != std::string::npos; }, 30s))
+        << child.err();
+    const std::string err = child.err();
+    const auto target =
+        hwio::remote::parseJoinInput(err.substr(err.find("Session code: ") + 14, 7));
+    ASSERT_TRUE(target.has_value());
+    hwio::remote::RemoteConsoleSession joiner(
+        hwio::remote::JoinOptions{.relay = relay.url(),
+                                  .code = target->code,
+                                  .appVersion = "2.1.0-support",
+                                  .relayLimits = {},
+                                  .transcript = {},
+                                  .idleNoticeAfter = std::chrono::minutes(30),
+                                  .consoleLog = nullptr});
+    ASSERT_TRUE(runUntil(
+        [&] { return child.err().find("Allow them to send commands") != std::string::npos; }, 30s))
+        << child.err();
+    child.write("y\n");
+    const std::vector<std::string> app{"app"};
+    ASSERT_TRUE(runUntil(
+        [&] { return joiner.commandTree() && joiner.commandTree()->find(app) != nullptr; }, 30s))
+        << child.err();
+    joiner.requestLearn(app);
+    const std::vector<std::string> config{"app", "config"};
+    ASSERT_TRUE(runUntil(
+        [&] { return joiner.commandTree() && joiner.commandTree()->find(config) != nullptr; }, 30s))
+        << child.err();
+    // The help queries are silent: support sees no `help` / `app -h` in the console.
+    for (const auto& line : joiner.log().linesSince(0)) {
+        EXPECT_NE(line.text, "app -h");
+        EXPECT_NE(line.text, "help");
+    }
+    child.stop();
+    ASSERT_TRUE(child.finish());
 }
 
 } // namespace

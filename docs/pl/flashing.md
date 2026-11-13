@@ -88,6 +88,10 @@ J-Link jest na złączu LTE) prowadzi więc przez całą procedurę:
 2. **APP connector** (złącze APP): podłącz J-Link do złącza APP. Kreator przechodzi dalej sam, gdy MCU aplikacji
    odpowie; na niewłaściwym złączu wyświetla **This is the LTE connector. Move the cable to the APP connector.** (to
    jest złącze LTE, przełóż kabel do złącza APP).
+   Zanim cokolwiek zostanie zmienione, krok **Ready to update the LTE MCU** (gotowe do aktualizacji MCU LTE) mówi, co
+   się stanie: aplikacja zostanie wymazana, przełożysz kabel J-Link do złącza LTE, a na końcu z powrotem do APP, i
+   aplikacja zostanie zapisana z powrotem. **Continue** (kontynuuj) to rozpoczyna; **Cancel** (anuluj) kończy kreator
+   bez żadnych zmian.
 3. **Stop the application** (zatrzymanie aplikacji): zapisywana jest kopia firmware aplikacji, a następnie aplikacja
    jest kasowana (**Erase application**: UICR i PIB pozostają). Jeśli nie da się wykonać kopii, na przykład gdy MCU ma
    ochronę przed odczytem, możesz wybrać **Continue without a copy** (kontynuuj bez kopii) i na końcu samodzielnie
@@ -113,12 +117,12 @@ Sekcja **Maintenance — application MCU** na dole strony jest domyślnie zwini�
 | **Reset** | Resetuje MCU | nie |
 | **Reset and halt** | Resetuje MCU i utrzymuje zatrzymany CPU | nie |
 | **Erase application** | Kasuje firmware; zachowuje UICR i PIB (tylko MCU aplikacji) | nie |
-| **Erase everything…** | Kasuje pamięć flash, UICR i PIB (tylko akcje eksperckie) | tak |
-| **Recover…** | Zobacz niżej (tylko akcje eksperckie) | tak |
+| **Erase everything…** | Kasuje pamięć flash, UICR i PIB (tylko w trybie Expert) | tak |
+| **Recover…** | Zobacz niżej (tylko w trybie Expert) | tak |
 
 **Erase everything…**, **Recover…** i konserwacja **LTE MCU** (wybór **Application MCU | LTE MCU** nad przyciskami)
-pojawiają się tylko przy włączonym **Settings › Advanced › Show expert maintenance actions** (pokaż eksperckie akcje
-konserwacji), ponieważ mogą skasować numer seryjny i konfigurację urządzenia. W MCU LTE wymagają J-Link na złączu LTE.
+pojawiają się tylko w [trybie](getting-started.md#modes) **Expert** (**Settings › General › Mode**), ponieważ mogą
+skasować numer seryjny i konfigurację urządzenia. W MCU LTE wymagają J-Link na złączu LTE.
 
 <a id="recover"></a>
 ### Odzyskiwanie (Recover)
@@ -127,7 +131,7 @@ Gdy MCU ma ochronę przed odczytem (approtect), J-Link nie może go odczytać an
 [target.protected](troubleshooting.md#target.protected). **Recover…** usuwa ochronę, kasując MCU całkowicie, łącznie z
 UICR i PIB. W MCU LTE następnie wgrywa mały obraz, który utrzymuje możliwość debugowania MCU. Po recover wgraj
 firmware ponownie. Recover nigdy nie uruchamia się samoczynnie. Gdy przewodnik rozwiązywania problemów dla chronionego
-MCU kieruje na stronę **Flash**, **Recover…** jest tam wyświetlane jeden raz, także bez ustawienia eksperckiego.
+MCU kieruje na stronę **Flash**, **Recover…** jest tam wyświetlane jeden raz, w każdym trybie.
 
 ## Wiersz poleceń
 

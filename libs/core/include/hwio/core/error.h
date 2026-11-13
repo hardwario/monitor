@@ -140,6 +140,8 @@ enum class ErrorCode : std::uint8_t {
     RemoteOperationUnsupportedPeer,
     RemoteFirmwareNotInCatalog,
     RemoteProtocolError,
+    // ADR-0363: a remote LTE update that updated the LTE MCU but did not write the application back
+    RemoteApplicationNotRestored,
 };
 
 // Wizards the UI can offer to fix an error (M4). Serialized as kebab-case ids.
@@ -447,6 +449,9 @@ inline constexpr std::array errorTable{
     ErrorInfo{.code = ErrorCode::RemoteProtocolError,
               .id = "remote.protocol_error",
               .category = ErrorCategory::Network},
+    ErrorInfo{.code = ErrorCode::RemoteApplicationNotRestored,
+              .id = "remote.application_not_restored",
+              .category = ErrorCategory::Cancelled},
 };
 
 // Compile-time checks of errorTable (ids unique and well-formed, index == enum value, every

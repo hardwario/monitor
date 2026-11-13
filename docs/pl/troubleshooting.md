@@ -103,7 +103,7 @@ Kod błędu: [`target.reset_during_update`](#target.reset_during_update).
 
 HARDWARIO Monitor łączy się z serwerem wsparcia `terminal.hardwario.com` przez `wss` (HTTPS, port 443). Zapora sieciowa lub proxy blokujące WebSockety uniemożliwia udostępnianie i dołączanie. Jeśli ktoś inny używa tego samego kodu sesji (bardzo rzadko), udostępnianie zostaje ze względów bezpieczeństwa zakończone: uruchom je ponownie, aby otrzymać nowy kod. Uczestnik, któremu nie zezwolono w ciągu 2 minut (lub któremu odmówiono), musi poprosić klienta o ponowne udostępnienie. Zobacz [Zdalne wsparcie](remote-support.md).
 
-Kody błędów: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error).
+Kody błędów: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored).
 
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Firmware modemu LTE wymaga nRF Util
@@ -493,7 +493,7 @@ Po nieudanym kroku aktualizacji LTE w rejestrze przyczyny resetu MCU LTE był us
 - **Probably:** Access port protection (APPROTECT) is enabled.
 - **What to do:** Recover the MCU (this erases it), then flash it again.
 
-Recover usuwa ochronę, ale kasuje MCU całkowicie, łącznie z blokiem informacji o produkcie (Product Information Block). Zobacz [Odzyskiwanie (Recover)](flashing.md#odzyskiwanie-recover). Dla konkretnego MCU sugestia brzmi „Run `hwio <profile> <target> recover` (erases the MCU).”; w aplikacji desktopowej użyj **Recover…** w sekcji **Maintenance** na stronie **Flash** (wyświetlane przy włączonym **Settings › Advanced › Show expert maintenance actions** lub jeden raz, gdy przewodnik rozwiązywania problemów tam skieruje).
+Recover usuwa ochronę, ale kasuje MCU całkowicie, łącznie z blokiem informacji o produkcie (Product Information Block). Zobacz [Odzyskiwanie (Recover)](flashing.md#odzyskiwanie-recover). Dla konkretnego MCU sugestia brzmi „Run `hwio <profile> <target> recover` (erases the MCU).”; w aplikacji desktopowej użyj **Recover…** w sekcji **Maintenance** na stronie **Flash** (wyświetlane w trybie Expert, **Settings › General › Mode**, lub jeden raz, gdy przewodnik rozwiązywania problemów tam skieruje).
 
 <a id="target.program_failed"></a>
 #### `target.program_failed`
@@ -784,6 +784,16 @@ Widzi go dołączający, gdy połączenie z serwerem zostało ostatecznie zakoń
 
 - **Probably:** The support server or the other participant sent data that HARDWARIO Monitor does not understand. It was ignored, or the session was ended for safety.
 - **What to do:** Report the issue with a diagnostic report.
+
+<a id="remote.application_not_restored"></a>
+#### `remote.application_not_restored`
+
+**Firmware LTE został zaktualizowany, ale aplikacja nie została zapisana z powrotem.**
+
+- **Prawdopodobnie:** Prowadzona aktualizacja LTE zakończyła się przed zapisaniem aplikacji z powrotem lub nie udało się zapisać kopii aplikacji. MCU aplikacji jest pusty.
+- **Co zrobić:** Wgraj aplikację: poproś klienta o jej wgranie lub poproś o wgranie firmware z katalogu.
+
+Zgłaszane dołączającemu po zdalnej aktualizacji LTE (**Poproś o aktualizację firmware LTE**, `hwio remote join --lte-update`).
 
 <a id="update.network"></a>
 #### `update.network`

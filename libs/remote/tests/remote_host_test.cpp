@@ -4,8 +4,10 @@
 #include "fake_console.h"
 #include "fake_relay.h"
 #include "hwio/core/error.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/session_events.h"
+#include "hwio/remote/consent.h"
 #include "hwio/remote/host_operations.h"
 #include "hwio/remote/remote_host.h"
 #include "hwio/remote/session_code.h"
@@ -13,22 +15,32 @@
 #include "remote_test_support.h"
 
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLatin1Char>
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QStringLiteral>
+#include <QtContainerFwd>
+#include <QtTypes>
 
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <expected>
+#include <format>
+#include <initializer_list>
 #include <memory>
 #include <optional>
 #include <string>
 #include <utility>
+#include <variant>
+#include <vector>
 
 namespace hwio::remote {
 namespace {
@@ -362,8 +374,9 @@ TEST(RemoteHost, WebTerminalJoinerHelloTimeoutIsAudited) {
 // ---- operations (ADR-0336) ----
 
 struct OpsFixture {
-    explicit OpsFixture(const FakeRelay& relay)
-        : f(optionsFor(relay), &operations), joiner(relay.url(), nsp) {}
+    explicit OpsFixture(const FakeRelay& relay) : OpsFixture(relay, optionsFor(relay)) {}
+    OpsFixture(const FakeRelay& relay, HostOptions options)
+        : f(std::move(options), &operations), joiner(relay.url(), nsp) {}
     FakeOperations operations;
     HostFixture f;
     RawParticipant joiner;
@@ -528,6 +541,304 @@ TEST(RemoteHostOperations, NoOperationsWithoutHostOperationsOrBeforeApproval) {
         });
     }));
     EXPECT_TRUE(f.console.sent.empty());
+}
+
+// ADR-0363: the guided LTE update - opKinds in the hello, the question names the recommended
+// firmware, phases go to the joiner (a new phase at once), the outcome passes through its code.
+TEST(RemoteHostOperations, LteUpdateAskedWithTheRecommendedFirmware) {
+    FakeRelay relay;
+    OpsFixture o(relay);
+    o.f.host.start();
+    ASSERT_TRUE(runUntil([&] { return o.f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return o.f.host.commandsAllowed(); }));
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::HostHello>().has_value(); }));
+    EXPECT_TRUE(tunnel::supports(o.last<tunnel::HostHello>().value_or(tunnel::HostHello{}),
+                                 tunnel::OpKind::LteUpdate));
+
+    o.requestOp(tunnel::OpRequest{.id = "lte1",
+                                  .kind = tunnel::OpKind::LteUpdate,
+                                  .target = tunnel::OpTarget::Lte,
+                                  .firmwareId = std::nullopt});
+    ASSERT_TRUE(runUntil([&] { return o.operations.started.size() == 1; }));
+    ASSERT_EQ(o.f.consent.operationQuestions.size(), 1U);
+    const QString question = operationQuestionText(o.f.consent.operationQuestions.front());
+    EXPECT_TRUE(question.contains(QStringLiteral("HARDWARIO LTE firmware 1.7.0")))
+        << question.toStdString();
+    EXPECT_TRUE(question.contains(QStringLiteral("move the J-Link cable")))
+        << question.toStdString();
+    o.operations.progress(OperationUpdate{.phase = "connect-app"});
+    o.operations.progress(OperationUpdate{.phase = "connect-lte"}); // within 250 ms: sent anyway
+    ASSERT_TRUE(runUntil([&] {
+        return o.last<tunnel::OpProgress>().value_or(tunnel::OpProgress{}).phase == "connect-lte";
+    }));
+    o.operations.finished(
+        std::unexpected(makeError(ErrorCode::RemoteApplicationNotRestored, "test")));
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpResult>().has_value(); }));
+    EXPECT_EQ(o.last<tunnel::OpResult>().value_or(tunnel::OpResult{}).code,
+              "remote.application_not_restored");
+    EXPECT_TRUE(o.f.console.hasEvent("Update the LTE firmware to HARDWARIO LTE firmware 1.7.0"));
+    // Plan 0046 (ADR-0366): the joiner's text while the customer confirms.
+    EXPECT_EQ(operationPhaseText("confirm"),
+              QStringLiteral("waiting for the confirmation before the erase"));
+}
+
+// ADR-0368: support answers the LTE update's questions - only a request with `questions` gets
+// AskSupport; an op-answer counts only for the open question (operation id and qid), once; no
+// answer within operationTimeout or the session's end answers no.
+TEST(RemoteHostOperations, LteUpdateQuestionsGoToSupport) {
+    FakeRelay relay;
+    HostOptions options = optionsFor(relay);
+    options.limits.operationTimeout = 1500ms;
+    OpsFixture o(relay, options);
+    o.f.host.start();
+    ASSERT_TRUE(runUntil([&] { return o.f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return o.f.host.commandsAllowed(); }));
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::HostHello>().has_value(); }));
+    EXPECT_TRUE(o.last<tunnel::HostHello>().value_or(tunnel::HostHello{}).opQuestions);
+
+    // Without `questions` the customer answers (ADR-0366): no AskSupport.
+    o.requestOp(tunnel::OpRequest{.id = "lte0",
+                                  .kind = tunnel::OpKind::LteUpdate,
+                                  .target = tunnel::OpTarget::Lte,
+                                  .firmwareId = std::nullopt,
+                                  .questions = false});
+    ASSERT_TRUE(runUntil([&] { return o.operations.started.size() == 1; }));
+    EXPECT_FALSE(static_cast<bool>(o.operations.ask));
+    o.operations.finished(Status{});
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpResult>().has_value(); }));
+
+    o.requestOp(tunnel::OpRequest{.id = "lte1",
+                                  .kind = tunnel::OpKind::LteUpdate,
+                                  .target = tunnel::OpTarget::Lte,
+                                  .firmwareId = std::nullopt,
+                                  .questions = true});
+    ASSERT_TRUE(runUntil([&] { return o.operations.started.size() == 2; }));
+    ASSERT_TRUE(static_cast<bool>(o.operations.ask));
+    std::vector<SupportAnswer> answers;
+    o.operations.ask(tunnel::OpQuestionKind::Continue,
+                     [&](SupportAnswer a) { answers.push_back(a); });
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpQuestion>().has_value(); }));
+    const tunnel::OpQuestion question = o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{});
+    EXPECT_EQ(question.id, "lte1");
+    EXPECT_EQ(question.question, tunnel::OpQuestionKind::Continue);
+    EXPECT_TRUE(o.f.console.hasEvent("waiting for support's answer"));
+    const auto answer = [&](const std::string& id, const std::string& qid, bool yes) {
+        o.joiner.emitEvent(QStringLiteral("write"), tunnel::encodeJoiner(tunnel::OpAnswer{
+                                                        .id = id, .qid = qid, .yes = yes}));
+    };
+    answer("lte1", "q-other", true);    // not the open question
+    answer("lte0", question.qid, true); // not this operation
+    runFor(300ms);
+    EXPECT_TRUE(answers.empty());
+    answer("lte1", question.qid, true);
+    ASSERT_TRUE(runUntil([&] { return answers.size() == 1; }));
+    EXPECT_EQ(answers.front(), SupportAnswer::Yes);
+    EXPECT_TRUE(o.f.console.hasEvent("Support answered: continue."));
+    answer("lte1", question.qid, false); // only once
+    runFor(300ms);
+    EXPECT_EQ(answers.size(), 1U);
+
+    // Support's No.
+    o.operations.ask(tunnel::OpQuestionKind::ContinueWithoutCopy,
+                     [&](SupportAnswer a) { answers.push_back(a); });
+    ASSERT_TRUE(runUntil([&] {
+        return o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{}).qid != question.qid;
+    }));
+    const std::string second = o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{}).qid;
+    answer("lte1", second, false);
+    ASSERT_TRUE(runUntil([&] { return answers.size() == 2; }));
+    EXPECT_EQ(answers.back(), SupportAnswer::No);
+    EXPECT_TRUE(o.f.console.hasEvent("Cancelled by support. Nothing was changed."));
+
+    // No answer in time (confirmed 2026-11-12: not "cancelled by support").
+    o.operations.ask(tunnel::OpQuestionKind::ContinueWithoutCopy,
+                     [&](SupportAnswer a) { answers.push_back(a); });
+    ASSERT_TRUE(runUntil([&] { return answers.size() == 3; }, 10s));
+    EXPECT_EQ(answers.back(), SupportAnswer::NoAnswer);
+    EXPECT_TRUE(o.f.console.hasEvent("Support did not answer. Nothing was changed."));
+    const std::string third = o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{}).qid;
+
+    // The session ends with a question open: no answer.
+    o.operations.ask(tunnel::OpQuestionKind::Continue,
+                     [&](SupportAnswer a) { answers.push_back(a); });
+    ASSERT_TRUE(runUntil(
+        [&] { return o.last<tunnel::OpQuestion>().value_or(tunnel::OpQuestion{}).qid != third; }));
+    auto ask = o.operations.ask; // abandon() clears the fake's copy
+    o.f.host.end();
+    ASSERT_EQ(answers.size(), 4U);
+    EXPECT_EQ(answers.back(), SupportAnswer::NoAnswer);
+    // After the end every question gets no answer (on the next turn).
+    ask(tunnel::OpQuestionKind::Continue, [&](SupportAnswer a) { answers.push_back(a); });
+    ASSERT_TRUE(runUntil([&] { return answers.size() == 5; }));
+    EXPECT_EQ(answers.back(), SupportAnswer::NoAnswer);
+}
+
+TEST(RemoteHostOperations, LteUpdateRefusedWhenTheHostHasNone) {
+    FakeRelay relay;
+    OpsFixture o(relay);
+    o.operations.lteUpdate = false;
+    o.f.host.start();
+    ASSERT_TRUE(runUntil([&] { return o.f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return o.f.host.commandsAllowed(); }));
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::HostHello>().has_value(); }));
+    EXPECT_FALSE(tunnel::supports(o.last<tunnel::HostHello>().value_or(tunnel::HostHello{}),
+                                  tunnel::OpKind::LteUpdate));
+    o.requestOp(tunnel::OpRequest{.id = "lte2",
+                                  .kind = tunnel::OpKind::LteUpdate,
+                                  .target = tunnel::OpTarget::Lte,
+                                  .firmwareId = std::nullopt});
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpDenied>().has_value(); }));
+    EXPECT_EQ(o.last<tunnel::OpDenied>().value_or(tunnel::OpDenied{}).code,
+              "remote.operation_unsupported_peer");
+    EXPECT_TRUE(o.f.consent.operationQuestions.empty());
+    EXPECT_TRUE(o.operations.started.empty());
+}
+
+// ADR-0364: the command tree goes to an allowed participant (not before), learn requests for known
+// commands pass rate-limited, others are dropped, and their count is audited at the end.
+std::shared_ptr<const device::CommandTree> treeOf(std::initializer_list<const char*> names) {
+    device::CommandTree tree;
+    std::vector<device::CommandEntry> entries;
+    for (const char* name : names) {
+        entries.push_back(device::CommandEntry{.name = name, .help = "help"});
+    }
+    EXPECT_TRUE(tree.setChildren({}, entries));
+    return std::make_shared<const device::CommandTree>(std::move(tree));
+}
+
+QList<tunnel::HostCommands> commandsOf(const RawParticipant& p) {
+    QList<tunnel::HostCommands> out;
+    for (const auto& r : p.named(QStringLiteral("at"))) {
+        if (auto m = tunnel::decodeHost(r.payload)) {
+            if (const auto* c = std::get_if<tunnel::HostCommands>(&*m)) {
+                out.append(*c);
+            }
+        }
+    }
+    return out;
+}
+
+TEST(RemoteHostCommands, TreeAfterAllowAndLearnLimits) {
+    FakeRelay relay;
+    HostOptions options = optionsFor(relay);
+    options.limits.learnPerSession = 3;
+    options.limits.commandsDelay = 10ms;
+    HostFixture f(options);
+    f.consent.joins = ScriptedConsent::Mode::Manual;
+    QStringList learned;
+    QObject::connect(&f.host, &RemoteHost::learnRequested,
+                     [&](const QStringList& path) { learned.append(path.join(u' ')); });
+    f.host.setCommandTree(treeOf({"app", "lte", "info"}));
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return static_cast<bool>(f.consent.pendingJoin); }));
+    const auto learn = [&](std::vector<std::string> path) {
+        monitor.emitEvent(QStringLiteral("write"),
+                          tunnel::encodeJoiner(tunnel::Learn{.path = std::move(path)}));
+    };
+    learn({"app"}); // before the approval: dropped
+    runFor(200ms);
+    EXPECT_TRUE(commandsOf(monitor).isEmpty());
+    std::exchange(f.consent.pendingJoin, {})(true);
+    ASSERT_TRUE(runUntil([&] { return commandsOf(monitor).size() == 1; }));
+    EXPECT_EQ(commandsOf(monitor).front().tree->nodeCount(), 3U);
+    EXPECT_TRUE(learned.isEmpty());
+
+    learn({"nope"}); // unknown command
+    learn({"app"});
+    learn({"lte"});
+    learn({"info"}); // the third within a second: dropped
+    ASSERT_TRUE(runUntil([&] { return learned.size() == 2; }));
+    runFor(1100ms);
+    learn({"info"});
+    learn({"app"}); // beyond the session limit (3)
+    ASSERT_TRUE(runUntil([&] { return learned.size() == 3; }));
+    runFor(200ms);
+    EXPECT_EQ(learned,
+              (QStringList{QStringLiteral("app"), QStringLiteral("lte"), QStringLiteral("info")}));
+    EXPECT_FALSE(f.console.hasEvent("command app")); // not audited as remote commands
+
+    // A grown tree is sent again; the same tree is not.
+    f.host.setCommandTree(treeOf({"app", "lte", "info", "time"}));
+    ASSERT_TRUE(runUntil([&] { return commandsOf(monitor).size() == 2; }));
+    f.host.end();
+    EXPECT_TRUE(f.console.hasEvent("Help of 3 command(s) read for support's autocomplete."));
+}
+
+std::shared_ptr<const device::CommandTree> wideTree(int commands) {
+    device::CommandTree tree;
+    std::vector<device::CommandEntry> entries;
+    entries.reserve(static_cast<std::size_t>(commands));
+    for (int i = 0; i < commands; ++i) {
+        entries.push_back(device::CommandEntry{.name = std::format("command{}", i),
+                                               .help = std::string(250, 'h')});
+    }
+    EXPECT_TRUE(tree.setChildren({}, entries));
+    return std::make_shared<const device::CommandTree>(std::move(tree));
+}
+
+qsizetype commandsDataBytes(const device::CommandTree& tree, bool withHelp) {
+    return QJsonDocument(
+               tunnel::encodeCommands(tree, withHelp).value(QStringLiteral("data")).toObject())
+        .toJson(QJsonDocument::Compact)
+        .size();
+}
+
+// ADR-0365: a tree within the joiner's bound (256 KiB, far over the old 64 KiB event limit) goes
+// with its help texts.
+TEST(RemoteHostCommands, LargeTreeWithHelpTexts) {
+    FakeRelay relay;
+    HostFixture f(optionsFor(relay));
+    const auto tree = wideTree(800);
+    ASSERT_GT(commandsDataBytes(*tree, true), 200 * 1024);
+    ASSERT_LE(commandsDataBytes(*tree, true), tunnel::maxCommandsBytes);
+    f.host.setCommandTree(tree);
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return commandsOf(monitor).size() == 1; }));
+    const auto received = commandsOf(monitor).front().tree;
+    EXPECT_EQ(received->nodeCount(), 800U);
+    const std::vector<std::string> last{"command799"};
+    EXPECT_EQ(received->find(last)->help, std::string(250, 'h'));
+}
+
+// ADR-0365 safety net: a tree over the joiner's bound goes without its help texts.
+TEST(RemoteHostCommands, TreeOverTheJoinerBoundWithoutHelpTexts) {
+    FakeRelay relay;
+    HostFixture f(optionsFor(relay));
+    const auto tree = wideTree(2000);
+    ASSERT_GT(commandsDataBytes(*tree, true), tunnel::maxCommandsBytes);
+    f.host.setCommandTree(tree);
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return commandsOf(monitor).size() == 1; }));
+    const auto received = commandsOf(monitor).front().tree;
+    EXPECT_EQ(received->nodeCount(), 2000U);
+    const std::vector<std::string> first{"command0"};
+    EXPECT_EQ(received->find(first)->help, "");
+}
+
+// ADR-0365: a host keeps the 64 KiB limit for incoming events.
+TEST(RemoteHost, DropsIncomingEventsOver64KiB) {
+    FakeRelay relay;
+    HostFixture f(optionsFor(relay));
+    QList<Error> warnings;
+    QObject::connect(&f.host, &RemoteHost::warning,
+                     [&](const Error& error) { warnings.append(error); });
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant joiner(relay.url(), nsp);
+    ASSERT_TRUE(joiner.waitConnected());
+    joiner.emitEvent(QStringLiteral("write"), QString(qsizetype{70} * 1024, QLatin1Char('x')));
+    ASSERT_TRUE(runUntil([&] { return warnings.size() == 1; }));
+    EXPECT_EQ(warnings.front().code, ErrorCode::RemoteProtocolError);
+    EXPECT_EQ(f.host.state(), HostState::Sharing);
 }
 
 } // namespace

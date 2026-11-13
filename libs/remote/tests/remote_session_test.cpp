@@ -5,6 +5,7 @@
 #include "fake_relay.h"
 #include "hwio/core/error.h"
 #include "hwio/core/firmware_identity.h"
+#include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
 #include "hwio/device/console_session.h"
@@ -18,11 +19,14 @@
 #include "remote_test_support.h"
 
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QStringLiteral>
+#include <QtContainerFwd>
 #include <QtTypes>
 
 #include <gtest/gtest.h>
@@ -31,6 +35,7 @@
 #include <chrono>
 #include <cstdint>
 #include <expected>
+#include <format>
 #include <memory>
 #include <optional>
 #include <string>
@@ -126,6 +131,32 @@ TEST(RemoteSession, MonitorToMonitorConsole) {
             return line.channel == device::Channel::Log && line.level == device::LogLevel::Warning;
         });
     }));
+    // Plan 0046 A5 (ADR-0171): hexdump continuation lines are log lines of level Hexdump (hidden
+    // by default like in a local tab), also '#'-prefixed ones (CHESTER over Bluetooth).
+    console.logLine("[00:00:12.345,000] <inf> app_lrw: Received:");
+    console.logLine("                                 44 74 4f 34 78 54 73 31  4b 36 69 41 73 41 "
+                    "53 4a |DtO4xTs1 K6iAsASJ");
+    console.shell("#   01 02 |..");
+    console.shell("not a hexdump |x");
+    ASSERT_TRUE(runUntil([&] {
+        return std::ranges::any_of(joiner.log().linesSince(0), [](const device::ConsoleLine& line) {
+            return line.text == "not a hexdump |x";
+        });
+    }));
+    int hexdumps = 0;
+    for (const device::ConsoleLine& line : joiner.log().linesSince(0)) {
+        if (line.text.ends_with("|DtO4xTs1 K6iAsASJ") || line.text == "#   01 02 |..") {
+            EXPECT_EQ(line.channel, device::Channel::Log) << line.text;
+            EXPECT_EQ(line.level, device::LogLevel::Hexdump) << line.text;
+            ++hexdumps;
+        } else if (line.text == "not a hexdump |x") {
+            EXPECT_EQ(line.channel, device::Channel::Shell);
+            EXPECT_EQ(line.level, device::LogLevel::None);
+        } else if (line.text.ends_with("app_lrw: Received:")) {
+            EXPECT_EQ(line.level, device::LogLevel::Info);
+        }
+    }
+    EXPECT_EQ(hexdumps, 2);
     EXPECT_FALSE(joiner.sendLine(std::string(600, 'x')).has_value());
     EXPECT_FALSE(joiner.sendLine("a\rb").has_value());
 }
@@ -184,15 +215,20 @@ TEST(RemoteSession, OperationClientTimesOutWithoutAnAnswer) {
     RawParticipant fakeHost(relay.url(), nsp);
     ASSERT_TRUE(fakeHost.waitConnected());
     ASSERT_TRUE(runUntil([&] { return joiner.joinState() == JoinState::Waiting; }));
-    fakeHost.emitEvent(QStringLiteral("at"),
-                       tunnel::encodeHost(tunnel::HostHello{
-                           .app = "hwio-monitor", .version = "2.1.0", .device = {}, .ops = true}));
+    fakeHost.emitEvent(
+        QStringLiteral("at"),
+        tunnel::encodeHost(tunnel::HostHello{
+            .app = "hwio-monitor", .version = "2.1.0", .device = {}, .ops = true, .opKinds = {}}));
     ASSERT_TRUE(runUntil([&] { return joiner.hostHello().has_value(); }));
     RemoteOperationClient client(
         joiner, RemoteOperationLimits{.responseTimeout = 200ms, .inactivityTimeout = 200ms});
     std::optional<Error> error;
     QObject::connect(&client, &RemoteOperationClient::finished,
                      [&](bool, const Error& e) { error = e; });
+    // ADR-0363: lteUpdate only when the hello lists it (this one lists nothing).
+    EXPECT_EQ(client.request(tunnel::OpKind::LteUpdate, tunnel::OpTarget::Lte).error().code,
+              ErrorCode::RemoteOperationUnsupportedPeer);
+    EXPECT_FALSE(client.busy());
     ASSERT_TRUE(client.request(tunnel::OpKind::Reset, tunnel::OpTarget::App).has_value());
     // A denial for another id is ignored.
     fakeHost.emitEvent(
@@ -321,6 +357,73 @@ TEST(RemoteSession, JoinerRelayUnreachable) {
     RemoteConsoleSession joiner(options);
     ASSERT_TRUE(runUntil([&] { return joiner.joinState() == JoinState::Ended; }));
     EXPECT_EQ(joiner.connection().error.value_or(Error{}).code, ErrorCode::RemoteRelayUnreachable);
+}
+
+// ADR-0364: a Monitor host's command tree reaches the joiner; learn goes to the host once.
+TEST(RemoteSession, CommandTreeAndLearn) {
+    FakeRelay relay;
+    FakeConsole console;
+    ScriptedConsent consent;
+    RemoteHost host(console, consent, nullptr, hostFor(relay));
+    QStringList learned;
+    QObject::connect(&host, &RemoteHost::learnRequested,
+                     [&](const QStringList& path) { learned.append(path.join(u' ')); });
+    device::CommandTree tree;
+    const std::vector<device::CommandEntry> top{{.name = "app", .help = "Application"}};
+    ASSERT_TRUE(tree.setChildren({}, top));
+    host.setCommandTree(std::make_shared<const device::CommandTree>(tree));
+    host.start();
+    ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
+    RemoteConsoleSession joiner(joinFor(relay));
+    int changes = 0;
+    QObject::connect(&joiner, &RemoteConsoleSession::commandTreeChanged, [&] { ++changes; });
+    ASSERT_TRUE(runUntil([&] { return joiner.commandTree() != nullptr; }));
+    EXPECT_EQ(changes, 1);
+    const std::vector<std::string> app{"app"};
+    ASSERT_NE(joiner.commandTree()->find(app), nullptr);
+    joiner.requestLearn(app);
+    joiner.requestLearn(app); // asked already
+    ASSERT_TRUE(runUntil([&] { return learned.size() == 1; }));
+    runFor(200ms);
+    EXPECT_EQ(learned.size(), 1);
+    // The host learns it: the grown tree follows.
+    const std::vector<device::CommandEntry> sub{{.name = "config", .help = "Configuration"}};
+    ASSERT_TRUE(tree.setChildren(app, sub));
+    host.setCommandTree(std::make_shared<const device::CommandTree>(tree));
+    const std::vector<std::string> config{"app", "config"};
+    ASSERT_TRUE(runUntil([&] { return joiner.commandTree()->find(config) != nullptr; }));
+}
+
+// ADR-0365: a joiner accepts a host's ~256 KiB command tree with its help texts (an event far over
+// the host's 64 KiB limit).
+TEST(RemoteSession, LargeCommandTreeWithHelpTexts) {
+    FakeRelay relay;
+    FakeConsole console;
+    ScriptedConsent consent;
+    RemoteHost host(console, consent, nullptr, hostFor(relay));
+    device::CommandTree tree;
+    std::vector<device::CommandEntry> entries;
+    entries.reserve(920);
+    for (int i = 0; i < 920; ++i) {
+        entries.push_back(device::CommandEntry{.name = std::format("command{}", i),
+                                               .help = std::string(250, 'h')});
+    }
+    ASSERT_TRUE(tree.setChildren({}, entries));
+    const qsizetype bytes =
+        QJsonDocument(tunnel::encodeCommands(tree, true).value(QStringLiteral("data")).toObject())
+            .toJson(QJsonDocument::Compact)
+            .size();
+    ASSERT_GT(bytes, 250 * 1024);
+    ASSERT_LE(bytes, tunnel::maxCommandsBytes);
+    host.setCommandTree(std::make_shared<const device::CommandTree>(std::move(tree)));
+    host.start();
+    ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
+    RemoteConsoleSession joiner(joinFor(relay));
+    ASSERT_TRUE(runUntil([&] { return joiner.commandTree() != nullptr; }));
+    EXPECT_EQ(joiner.commandTree()->nodeCount(), 920U);
+    const std::vector<std::string> last{"command919"};
+    ASSERT_NE(joiner.commandTree()->find(last), nullptr);
+    EXPECT_EQ(joiner.commandTree()->find(last)->help, std::string(250, 'h'));
 }
 
 } // namespace

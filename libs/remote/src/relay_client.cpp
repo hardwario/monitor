@@ -53,11 +53,11 @@ namespace {
 
 // lupdate 6.8 does not extract plural QCoreApplication::translate() calls, so the text is marked
 // with QT_TRANSLATE_N_NOOP.
-constexpr const char* droppedLinesText =
+constexpr const char* kDroppedLinesText =
     QT_TRANSLATE_N_NOOP("hwio::remote", "… %n line(s) dropped …");
 
 // QWebSocket refuses bigger frames (the relay's own maxPayload is 1 MB); smaller ones over
-// maxIncomingEventBytes are dropped by the worker with a warning.
+// RelayConfig::incomingEventBytes are dropped by the worker with a warning.
 constexpr qint64 maxSocketMessageBytes = 1024LL * 1024;
 
 // shutdown(): a CONNECT the relay refuses (no ^/\d+$ namespace) with a CONNECT_ERROR, without
@@ -229,7 +229,7 @@ void RelayWorker::enqueue(Outgoing packet) {
     QJsonObject notice;
     notice.insert(QStringLiteral("event"), QStringLiteral("read"));
     notice.insert(QStringLiteral("data"),
-                  QCoreApplication::translate("hwio::remote", droppedLinesText, nullptr,
+                  QCoreApplication::translate("hwio::remote", kDroppedLinesText, nullptr,
                                               static_cast<int>(dropped)));
     QString text = socketio::encodeEvent(m_nsp, QStringLiteral("at"), notice);
     const auto bytes = static_cast<std::size_t>(text.toUtf8().size());
@@ -330,13 +330,13 @@ void RelayWorker::handleEngineIo(const QString& message) {
 }
 
 void RelayWorker::handleSocketIo(const QString& data) {
-    if (std::cmp_greater(data.size(), maxIncomingEventBytes) ||
-        std::cmp_greater(data.toUtf8().size(), maxIncomingEventBytes)) {
+    const std::size_t limit = m_config.incomingEventBytes;
+    if (std::cmp_greater(data.size(), limit) || std::cmp_greater(data.toUtf8().size(), limit)) {
         protocolProblem(
             protocol(std::format("incoming event of {} characters dropped", data.size())), true);
         return;
     }
-    auto packet = socketio::parsePacket(data);
+    auto packet = socketio::parsePacket(data, limit);
     if (!packet) {
         protocolProblem(std::move(packet).error(), false);
         return;
