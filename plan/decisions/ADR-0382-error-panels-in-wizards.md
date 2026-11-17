@@ -1,6 +1,6 @@
 # ADR-0382 — Error panels inside a wizard show a troubleshooting link instead of Dismiss / Help me fix this
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by plan 0051 implementation notes: SourceCard panels keep their primary action in a wizard, 2026-11-17)
 - **Date:** 2026-11-17
 - **Decided by:** Matej Strnad (rc.4 issues, plan [0051](../features/0051-rc4-issues-5-11.md))
 
