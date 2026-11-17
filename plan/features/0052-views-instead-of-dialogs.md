@@ -1,6 +1,6 @@
 # 0052 — Wizards and content dialogs become views in the app window
 
-- **Status:** In progress (approved 2026-11-17, Matej Strnad; decisions D-1 to D-8)
+- **Status:** Done (approved 2026-11-17, Matej Strnad; decisions D-1 to D-8; implemented 2026-11-17)
 - **Milestone:** 2.0.0-rc.5
 - **Author:** Matej Strnad, Claude
 - **Related ADRs:** ADR-0386 (wizards are views of the device tab; supersedes ADR-0066), ADR-0387 (content dialogs
@@ -115,7 +115,7 @@ None (GUI only).
 - [x] A4 Screenshots (`tst_screenshots_*`), docs (all pages that say "dialog" for these, 5 languages), ADR-0066
       status Superseded, design-system.md (views, ViewFrame)
 - [x] C1 Translations (new strings: "Wizard", tooltips; 0 unfinished)
-- [ ] C2 Verification
+- [x] C2 Verification
 
 ## Tests and verification
 
@@ -204,4 +204,22 @@ Small choices made while implementing (not architectural; listed for the review)
   fake probes). Risks line "a probe picker in one wizard must not offer the probe of another tab": no registered
   wizard has its own probe picker (the LTE update uses the tab's probe); the tabs' pickers already mark a probe used
   by another tab ("In use (tab N)").
+
+## Verification (2026-11-17)
+
+linux-debug: full ctest 1860/1860 passed (HIL and the IntelHex corpus skipped; 1850 before this plan). One earlier
+full run had `StdinLineReader.NotifyAfterEachPushAndBlockingWhenFull` (CLI, untouched) fail once; it passed on every
+rerun. `linux-tidy` zero findings (the only warning is in the third-party replxx sources under `.cpm-cache`);
+`all_qmllint` clean; clang-format-21, `tools/check-includes.sh`, `tools/check-lfs.sh --untracked` pass;
+`check_translations`: 0 unfinished in every language, catalogs up to date.
+linux-asan (leak detection on, the project's LSan suppressions): `WizardTest`, `AppViewModelTest`, `FlashTest`,
+`DeviceTab*`, `ProbeFirmwareTest` and `tst_wizard`, `tst_shell`, `tst_flash`, `tst_remote`, `tst_probe_firmware`,
+`tst_settings`, `tst_components`: 127/127 passed.
+linux-tsan: `WizardTest`, `AppViewModelTest`, `FlashTest.TwoTabsRunTheLteUpdateGuideAtOnce` and `tst_wizard`,
+`tst_shell`, `tst_probe_firmware`, `tst_settings`, `tst_components`: 48/48 passed (the first TSan build stopped once
+with a spurious "null character" read of an unchanged header under load; the rebuild was clean). Other TSan suites
+were not run here.
+Not done: the manual checks in the running app (two tabs with wizards on the fake J-Link, switching to Console
+during the LTE update and back, every content view at 960 × 600 in Czech with the keyboard only) — covered only by the
+Qt Quick tests and the screenshots; no screen reader was used (accessible names and roles are set as described).
 
