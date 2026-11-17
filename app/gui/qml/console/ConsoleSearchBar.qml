@@ -1,7 +1,8 @@
 // The search bar of a console view (ADR-0056, design system § 5): under the log, always visible,
-// with a Search | Filter switch, the field with Aa / .* toggles, "3 / 128" ↑ ↓ × (Search) or
-// "Showing X of Y lines" + Clear filter (Filter), and the level chips D I W E. An active filter
-// stays visible as a chip in Search mode. The shell variant (`shellVariant`) has Search only.
+// with a Search | Filter switch, the field with Aa / .* toggles, "3 / 128" ↑ ↓ × (Search), and the
+// level chips D I W E H. One row that never wraps (ADR-0379): "Showing X of Y lines" (Filter) or
+// "Filter: text" (Search) is a suffix inside the field, an active filter a small ✕ right of the
+// level chips. The shell variant (`shellVariant`) has Search only.
 // Both modes keep their own query in the model (findText / filterText).
 // Keys in the field: Enter / Shift+Enter next / previous match; Esc clears the search and gives the
 // focus back to the view (`escaped`), where a second Esc clears the filter.
@@ -30,7 +31,8 @@ Rectangle {
         field.selectAll();
     }
 
-    implicitHeight: layout.implicitHeight + 2 * Theme.spacingXs
+    // ADR-0378: every console bottom bar has the same height.
+    implicitHeight: Theme.toolbarHeight
     color: Theme.surface
     Accessible.role: Accessible.ToolBar
     Accessible.name: bar.shellVariant ? qsTr("Search in shell") : qsTr("Search and filter the log")
@@ -49,7 +51,7 @@ Rectangle {
         checkable: true
         autoExclusive: true
         focusPolicy: Qt.StrongFocus
-        implicitHeight: 26
+        implicitHeight: Theme.controlHeight - 6
         implicitWidth: segmentLabel.implicitWidth + 2 * Theme.spacingS
         Accessible.role: Accessible.RadioButton
         Accessible.name: segment.text
@@ -161,7 +163,8 @@ Rectangle {
         }
     }
 
-    Flow {
+    // ADR-0379: one row that never wraps; the field takes the remaining width.
+    RowLayout {
         id: layout
 
         anchors.left: parent.left
@@ -174,7 +177,7 @@ Rectangle {
         Rectangle {
             visible: !bar.shellVariant
             implicitWidth: segments.implicitWidth + 4
-            implicitHeight: 30
+            implicitHeight: Theme.controlHeight
             radius: Theme.radiusS
             color: Theme.bg
             border.color: Theme.border
@@ -204,8 +207,10 @@ Rectangle {
         Rectangle {
             id: fieldBox
 
-            implicitWidth: Math.max(160, Math.min(300, bar.width - (bar.shellVariant ? 200 : 400)))
-            implicitHeight: 30
+            Layout.fillWidth: true
+            Layout.minimumWidth: 120
+            implicitWidth: 300
+            implicitHeight: Theme.controlHeight
             radius: Theme.radiusS
             color: Theme.bg
             border.width: field.activeFocus || bar.error !== "" ? 2 : 1
@@ -223,6 +228,7 @@ Rectangle {
                     objectName: "searchField"
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    Layout.minimumWidth: 40
                     background: null
                     leftPadding: 0
                     rightPadding: 0
@@ -234,7 +240,7 @@ Rectangle {
                     selectByMouse: true
                     text: bar.searchMode ? bar.model.findText : bar.model.filterText
                     Accessible.name: placeholder.text
-                    Accessible.description: bar.error
+                    Accessible.description: bar.error !== "" ? searchError.text : filterCount.visible ? filterCount.text : ""
                     // Own placeholder: Material's floats above the field.
                     Label {
                         id: placeholder
@@ -273,6 +279,70 @@ Rectangle {
                     }
                 }
 
+                // ADR-0379: "3 / 128" is a muted suffix inside the field, too.
+                Label {
+                    objectName: "matchCount"
+                    textFormat: Text.PlainText
+                    visible: bar.searchMode && bar.model.findText !== "" && bar.error === ""
+                    text: bar.model.currentMatch > 0
+                          ? qsTr("%1 / %2").arg(Qt.locale().toString(bar.model.currentMatch)).arg(Qt.locale().toString(bar.model.matchCount))
+                          : qsTr("%Ln matches", "", bar.model.matchCount)
+                    font: Theme.fontUiSmall
+                    color: Theme.textMuted
+                }
+
+                // ADR-0379: an invalid regular expression as a suffix inside the field (elided,
+                // the full text as tooltip).
+                Label {
+                    id: searchError
+
+                    objectName: "searchError"
+                    Layout.maximumWidth: Math.max(0, fieldBox.width * 0.6)
+                    visible: bar.error !== ""
+                    text: qsTr("Invalid regular expression: %1").arg(bar.error)
+                    textFormat: Text.PlainText
+                    elide: Text.ElideRight
+                    font: Theme.fontUiSmall
+                    color: Theme.error
+
+                    HoverHandler {
+                        id: errorHover
+                    }
+                    HToolTip {
+                        visible: errorHover.hovered && searchError.truncated
+                        text: searchError.text
+                        delay: 600
+                    }
+                }
+
+                // ADR-0379: "Showing X of Y lines" (Filter mode) or "Filter: text" (Search mode with
+                // a text filter) as a muted suffix inside the field; 0021 (user decision
+                // 2026-10-23): only for a filter changed from the default.
+                Label {
+                    id: filterCount
+
+                    objectName: "filterCount"
+                    Layout.maximumWidth: Math.max(0, fieldBox.width * 0.6)
+                    visible: bar.error === "" && !bar.shellVariant
+                             && (bar.searchMode ? bar.model.filterText !== "" : bar.model.filterActive)
+                    text: bar.searchMode
+                          ? qsTr("Filter: %1").arg(bar.model.filterText)
+                          : qsTr("Showing %1 of %2 lines").arg(Qt.locale().toString(bar.model.visibleLines)).arg(Qt.locale().toString(bar.model.totalLines))
+                    textFormat: Text.PlainText
+                    elide: Text.ElideRight
+                    font: Theme.fontUiSmall
+                    color: Theme.textMuted
+
+                    HoverHandler {
+                        id: countHover
+                    }
+                    HToolTip {
+                        visible: countHover.hovered && filterCount.truncated
+                        text: filterCount.text
+                        delay: 600
+                    }
+                }
+
                 Toggle {
                     objectName: "caseToggle"
                     text: "Aa"
@@ -305,20 +375,6 @@ Rectangle {
         Row {
             visible: bar.searchMode
             spacing: 2
-            height: 30
-
-            Label {
-                textFormat: Text.PlainText
-                objectName: "matchCount"
-                anchors.verticalCenter: parent.verticalCenter
-                rightPadding: Theme.spacingXs
-                visible: bar.model.findText !== "" && bar.error === ""
-                text: bar.model.currentMatch > 0
-                      ? qsTr("%1 / %2").arg(Qt.locale().toString(bar.model.currentMatch)).arg(Qt.locale().toString(bar.model.matchCount))
-                      : qsTr("%Ln matches", "", bar.model.matchCount)
-                font: Theme.fontUiSmall
-                color: Theme.textMuted
-            }
 
             HToolButton {
                 objectName: "previousMatch"
@@ -353,67 +409,14 @@ Rectangle {
             }
         }
 
-        // The active filter as a chip in Search mode.
-        HButton {
-            objectName: "filterChip"
-            visible: !bar.shellVariant && bar.searchMode && bar.model.filterActive
-            implicitHeight: 26
-            kind: "normal"
-            iconName: "close"
-            text: bar.model.filterText !== "" ? qsTr("Filter: %1").arg(bar.model.filterText) : qsTr("Filter: levels")
-            toolTipText: qsTr("Clear filter")
-            onClicked: bar.model.clearFilter()
-        }
-
-        // Filter: "Showing X of Y lines", Clear filter
-        Row {
-            visible: !bar.searchMode
-            spacing: Theme.spacingS
-            height: 30
-
-            Label {
-                textFormat: Text.PlainText
-                objectName: "filterCount"
-                anchors.verticalCenter: parent.verticalCenter
-                // 0021 (user decision 2026-10-23): only for a filter changed from the default
-                // (hexdump lines hidden by the default chips do not count).
-                visible: bar.model.filterActive
-                text: qsTr("Showing %1 of %2 lines").arg(Qt.locale().toString(bar.model.visibleLines)).arg(Qt.locale().toString(bar.model.totalLines))
-                font: Theme.fontUiSmall
-                color: Theme.textMuted
-            }
-
-            HButton {
-                objectName: "clearFilter"
-                anchors.verticalCenter: parent.verticalCenter
-                implicitHeight: 26
-                visible: bar.model.filterActive
-                text: qsTr("Clear filter")
-                onClicked: bar.model.clearFilter()
-            }
-        }
-
-        Label {
-            textFormat: Text.PlainText
-            objectName: "searchError"
-            height: 30
-            verticalAlignment: Text.AlignVCenter
-            visible: bar.error !== ""
-            text: qsTr("Invalid regular expression: %1").arg(bar.error)
-            font: Theme.fontUiSmall
-            color: Theme.error
-        }
-
         Row {
             visible: !bar.shellVariant
             spacing: Theme.spacingXs
-            height: 30
             Accessible.role: Accessible.Grouping
             Accessible.name: qsTr("Log levels")
 
             LevelChip {
                 objectName: "levelDebug"
-                anchors.verticalCenter: parent.verticalCenter
                 text: "D"
                 bit: 1
                 tint: Theme.logDebug
@@ -422,7 +425,6 @@ Rectangle {
 
             LevelChip {
                 objectName: "levelInfo"
-                anchors.verticalCenter: parent.verticalCenter
                 text: "I"
                 bit: 2
                 tint: Theme.text
@@ -431,7 +433,6 @@ Rectangle {
 
             LevelChip {
                 objectName: "levelWarning"
-                anchors.verticalCenter: parent.verticalCenter
                 text: "W"
                 bit: 4
                 tint: Theme.warning
@@ -440,7 +441,6 @@ Rectangle {
 
             LevelChip {
                 objectName: "levelError"
-                anchors.verticalCenter: parent.verticalCenter
                 text: "E"
                 bit: 8
                 tint: Theme.error
@@ -450,12 +450,22 @@ Rectangle {
             // 0021 (ADR-0171): hexdump continuation lines, off by default.
             LevelChip {
                 objectName: "levelHexdump"
-                anchors.verticalCenter: parent.verticalCenter
                 text: "H"
                 bit: 16
                 tint: Theme.textMuted
                 description: qsTr("Show hexdump lines")
             }
+        }
+
+        // ADR-0379: the active filter (changed from the default) is a small ✕ right of the level
+        // chips; its space is not reserved.
+        HToolButton {
+            objectName: "clearFilterIcon"
+            visible: !bar.shellVariant && bar.model.filterActive
+            iconName: "close"
+            text: qsTr("Clear filter")
+            display: AbstractButton.IconOnly
+            onClicked: bar.model.clearFilter()
         }
     }
 }
