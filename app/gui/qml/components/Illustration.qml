@@ -10,7 +10,7 @@ Rectangle {
 
     property string slot: ""
     property string caption: ""
-    readonly property url source: AppViewModel.wizard.illustrationUrl(illustration.slot, Theme.dark)
+    readonly property url source: AppViewModel.globalWizard.illustrationUrl(illustration.slot, Theme.dark)
 
     implicitWidth: 480
     implicitHeight: 270

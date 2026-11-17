@@ -128,7 +128,8 @@ ApplicationWindow {
                     // 0021 review F8: alive while the Settings tab is open (scroll position and
                     // half-typed fields survive switching tabs), shown while it is current.
                     active: AppViewModel.tabs.settingsOpen
-                    visible: AppViewModel.globalPage !== ""
+                    // Plan 0052: hidden (no focus beneath) while a view covers it.
+                    visible: AppViewModel.globalPage !== "" && !settingsViewHost.shown
                     source: AppViewModel.pages.qml("settings")
 
                     Binding {
@@ -138,12 +139,21 @@ ApplicationWindow {
                         when: globalPageLoader.status === Loader.Ready
                     }
                 }
+
+                // Plan 0052 (ADR-0387): a content view or the global wizard over the Settings tab
+                // (a device tab's own host is in its PageHost).
+                ContentViewHost {
+                    id: settingsViewHost
+
+                    anchors.fill: parent
+                    current: AppViewModel.globalPage !== ""
+                }
             }
         }
     }
 
-    // Plan 0028 (D21, ADR-0202): in the overlay layer above the modal dialogs (wizard, report), so
-    // a copy inside a dialog shows its toast; never focusable and never takes input.
+    // Plan 0028 (D21, ADR-0202): in the overlay layer above the modal dialogs, so a copy shows its
+    // toast also while a confirmation is open; never focusable and never takes input.
     Toast {
         id: toastColumn
 
@@ -158,9 +168,8 @@ ApplicationWindow {
 
     ShortcutOverlay {}
 
-    // M4 (plan/features/0007): the one wizard dialog and the diagnostic report dialog.
-    WizardDialog {}
-
+    // M4 (plan/features/0007): the diagnostic report dialog. Plan 0052 (ADR-0386): the wizards are
+    // views of their tab's page area (PageHost) or of ContentViewHost (global wizards).
     ReportDialog {}
 
     // Plan 0036: the J-Link firmware update.

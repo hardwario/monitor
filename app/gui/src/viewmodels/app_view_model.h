@@ -120,8 +120,9 @@ class AppViewModel : public QObject {
     Q_PROPERTY(QStringList toasts READ toasts NOTIFY toastsChanged)
     Q_PROPERTY(QString jlinkLibraryPath READ jlinkLibraryPath NOTIFY jlinkLibraryChanged)
     Q_PROPERTY(QString jlinkLibraryVersion READ jlinkLibraryVersion NOTIFY jlinkLibraryChanged)
-    // M4 (plan/features/0007): the open wizard, the launcher and the diagnostic report dialog.
-    Q_PROPERTY(hwio::gui::WizardViewModel* wizard READ wizard CONSTANT)
+    // M4 (plan/features/0007): the launcher and the diagnostic report. Plan 0052 (ADR-0386): the
+    // per-tab wizards are DeviceTabViewModel.wizard; globalWizard hosts the global ones (setup).
+    Q_PROPERTY(hwio::gui::WizardViewModel* globalWizard READ globalWizard CONSTANT)
     Q_PROPERTY(hwio::gui::WizardLauncher* launcher READ launcher CONSTANT)
     Q_PROPERTY(hwio::gui::ReportViewModel* report READ report CONSTANT)
     // Plan 0037 (ADR-0247): docs/<UI language>/index.md on GitHub at the release tag.
@@ -192,7 +193,7 @@ public:
     [[nodiscard]] QStringList toasts() const;
     [[nodiscard]] QString jlinkLibraryPath() const { return m_jlinkLibraryPath; }
     [[nodiscard]] QString jlinkLibraryVersion() const { return m_jlinkLibraryVersion; }
-    [[nodiscard]] WizardViewModel* wizard() const { return m_wizard; }
+    [[nodiscard]] WizardViewModel* globalWizard() const { return m_globalWizard; }
     [[nodiscard]] WizardLauncher* launcher() const { return m_launcher; }
     [[nodiscard]] ReportViewModel* report() const { return m_report; }
     [[nodiscard]] QString documentationUrl() const;
@@ -354,7 +355,9 @@ private:
     // M4: filled by registerExtensions; the worker is joined before the registry goes away.
     WizardRegistry m_wizardRegistry;
     std::unique_ptr<DiagWorker> m_diagWorker;
-    WizardViewModel* m_wizard = nullptr;  // child; deleted first by the destructor
+    // Plan 0052: the global wizards' host (per-tab ones are the tabs'); child, deleted first by
+    // the destructor.
+    WizardViewModel* m_globalWizard = nullptr;
     WizardLauncher* m_launcher = nullptr; // child
     ReportViewModel* m_report = nullptr;  // child
     // Console histories (plan 0005): saved when destroyed, after the tabs.

@@ -180,10 +180,10 @@ TestCase {
         verify(wizard.enabled);
         compare(wizard.text, "Help me fix this");
         mouseClick(wizard);
-        tryVerify(() => AppViewModel.wizard.open);
-        compare(AppViewModel.wizard.wizardId, "connect-device");
-        AppViewModel.wizard.cancel(false);
-        tryVerify(() => !AppViewModel.wizard.open);
+        tryVerify(() => AppViewModel.currentTabViewModel.wizard.open);
+        compare(AppViewModel.currentTabViewModel.wizard.wizardId, "connect-device");
+        AppViewModel.currentTabViewModel.wizard.cancel(false);
+        tryVerify(() => !AppViewModel.currentTabViewModel.wizard.open);
         // Details: code and detail, collapsed at first.
         verify(!findChild(panel, "errorDetails").visible);
         mouseClick(findChild(panel, "errorDetailsToggle"));

@@ -31,9 +31,10 @@ set(HWIO_GUI_QML_FILES
     qml/components/StateDot.qml
     qml/components/StepSpinBox.qml
     qml/components/Toast.qml
+    qml/components/ViewFrame.qml
     qml/components/WarningBanner.qml
-    qml/components/WizardDialog.qml
     qml/components/WizardStepList.qml
+    qml/components/WizardView.qml
     qml/console/Banners.qml
     qml/console/ConsoleRow.qml
     qml/console/ConsoleSearchBar.qml
@@ -75,6 +76,7 @@ set(HWIO_GUI_QML_FILES
     qml/settings/SettingsRow.qml
     qml/shell/AdvancedPopover.qml
     qml/shell/BleDeviceList.qml
+    qml/shell/ContentViewHost.qml
     qml/shell/CrashNoticeBanner.qml
     qml/shell/UpdateBanner.qml
     qml/shell/DeviceBar.qml

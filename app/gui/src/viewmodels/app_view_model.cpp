@@ -134,11 +134,11 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
                                                m_options.scanInterval)),
       m_ble(m_options.bluetooth ? std::make_unique<BleService>(m_options.bleApiFactory) : nullptr),
       m_diagWorker(std::make_unique<DiagWorker>()),
-      m_wizard(new WizardViewModel( // NOLINT(cppcoreguidelines-owning-memory)
+      m_globalWizard(new WizardViewModel( // NOLINT(cppcoreguidelines-owning-memory)
           m_wizardRegistry, this,
           [this](const QString& text) { copyToClipboard(text); })), // ADR-0202
       m_launcher(new WizardLauncher( // NOLINT(cppcoreguidelines-owning-memory)
-          m_wizardRegistry, *m_wizard,
+          m_wizardRegistry, *m_globalWizard,
           [this](int index) { return index < 0 ? currentTabViewModel() : m_tabs->at(index); },
           this)),
       m_report(new ReportViewModel( // NOLINT(cppcoreguidelines-owning-memory)
@@ -231,7 +231,7 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
             [this] { m_quitPending = false; });
 
     connect(m_scanner.get(), &ProbeScanner::scanned, this, &AppViewModel::onScan);
-    connect(m_wizard, &WizardViewModel::handOff, this, &AppViewModel::onHandOff);
+    connect(m_globalWizard, &WizardViewModel::handOff, this, &AppViewModel::onHandOff);
     connect(m_settings, &SettingsStore::valueChanged, this, [this](const QString& key) {
         if (key == QStringLiteral("jlink/libraryPath")) {
             updateLocatorOptions();
@@ -257,11 +257,12 @@ AppViewModel::~AppViewModel() {
     }
     m_update = nullptr;
     m_updateService = nullptr;
-    // The open wizard first (it may use a tab's session): its operation is cancelled.
-    if (m_wizard != nullptr) {
-        m_wizard->setParent(nullptr);
-        const std::unique_ptr<WizardViewModel> owned(m_wizard);
-        m_wizard = nullptr;
+    // The global wizard first: its operation is cancelled (a tab's wizard closes in the tab's
+    // shutdown()).
+    if (m_globalWizard != nullptr) {
+        m_globalWizard->setParent(nullptr);
+        const std::unique_ptr<WizardViewModel> owned(m_globalWizard);
+        m_globalWizard = nullptr;
     }
     // Tabs first: their sessions use the registry, their pickers the scanner.
     while (m_tabs->count() > 0) {
@@ -658,6 +659,7 @@ std::unique_ptr<DeviceTabViewModel> AppViewModel::makeTab() {
     context.openWizard = [this](const QString& wizardId, DeviceTabViewModel* tab) {
         (void)m_launcher->openForTab(wizardId, tab);
     };
+    context.wizards = &m_wizardRegistry;
     context.probeFirmware = m_probeFirmware;
     if (!m_firmwareCache) {
         m_firmwareCache =
@@ -692,6 +694,21 @@ DeviceTabViewModel* AppViewModel::addTab(std::unique_ptr<DeviceTabViewModel> tab
         }
     });
     connect(raw, &DeviceTabViewModel::busyChanged, this, [this] { checkQuit(); });
+    // Plan 0052 (ADR-0386): the tab's wizard. Opened or asked for again: its tab is shown with the
+    // wizard view.
+    WizardViewModel* wizard = raw->wizard();
+    connect(wizard, &WizardViewModel::handOff, this, &AppViewModel::onHandOff);
+    const auto showWizard = [this, raw] {
+        if (!raw->wizard()->isOpen()) {
+            return;
+        }
+        if (const int index = m_tabs->indexOf(raw); index >= 0) {
+            setCurrentTab(index);
+        }
+        raw->setCurrentPage(DeviceTabViewModel::wizardPageId());
+    };
+    connect(wizard, &WizardViewModel::openChanged, this, showWizard);
+    connect(wizard, &WizardViewModel::raiseRequested, this, showWizard);
     return raw;
 }
 
@@ -780,9 +797,9 @@ void AppViewModel::removeTab(int index) {
         return;
     }
     tab->disconnect(this);
-    // The wizard working on this tab closes first, while the tab and its session still exist
+    tab->wizard()->disconnect(this);
+    // shutdown() closes the tab's wizard first, while the tab and its session still exist
     // (review V2): the wizard holds the tab as QPointer, but its operation runs on the session.
-    m_wizard->tabClosing(tab.get());
     tab->shutdown();
     // Deleted later, after QML has destroyed its delegates (they were scheduled for deletion by
     // the row removal, before this). The call may also come from the tab's own signal or from a
@@ -833,7 +850,13 @@ void AppViewModel::showPage(const QString& pageId) {
         // A per-tab page from the Settings tab: back to the last device tab.
         setCurrentTab(std::clamp(m_lastDeviceTab, 0, m_tabs->count() - 1));
     }
-    if (DeviceTabViewModel* tab = currentTabViewModel(); tab != nullptr && !tab->choosing()) {
+    DeviceTabViewModel* const current = currentTabViewModel();
+    if (current != nullptr && pageId == DeviceTabViewModel::wizardPageId()) {
+        // Plan 0052 (ADR-0386): the rail's "Wizard" entry, also while choosing a device.
+        current->setCurrentPage(pageId);
+        return;
+    }
+    if (DeviceTabViewModel* tab = current; tab != nullptr && !tab->choosing()) {
         // Plan 0012: a page the tab cannot use says why.
         if (const QString reason = tab->pageDisabledReason(pageId); !reason.isEmpty()) {
             showToast(reason);

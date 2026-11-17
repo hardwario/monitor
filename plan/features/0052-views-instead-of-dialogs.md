@@ -1,6 +1,6 @@
 # 0052 — Wizards and content dialogs become views in the app window
 
-- **Status:** Approved (2026-11-17, Matej Strnad; decisions D-1 to D-8)
+- **Status:** In progress (approved 2026-11-17, Matej Strnad; decisions D-1 to D-8)
 - **Milestone:** 2.0.0-rc.5
 - **Author:** Matej Strnad, Claude
 - **Related ADRs:** ADR-0386 (wizards are views of the device tab; supersedes ADR-0066), ADR-0387 (content dialogs
@@ -105,9 +105,9 @@ None (GUI only).
 
 ## Implementation steps
 
-- [ ] A1 Per-tab `WizardViewModel`, global instance, launcher per instance; C++ tests (two tabs run wizards at
+- [x] A1 Per-tab `WizardViewModel`, global instance, launcher per instance; C++ tests (two tabs run wizards at
       once; second wizard in one tab refused; tab close ends its wizard; the hand-offs)
-- [ ] A2 `ViewFrame.qml`, `WizardView.qml` in the tab's page area, rail entry and badge, tab badge; remove
+- [x] A2 `ViewFrame.qml`, `WizardView.qml` in the tab's page area, rail entry and badge, tab badge; remove
       `WizardDialog.qml`; Qt Quick tests (`tst_wizard.qml`, `tst_flash.qml` LTE update, rail switch and back keeps
       the step, Esc / Enter, 960 × 600 Czech fits)
 - [ ] A3 Content views: report, J-Link firmware, join, share, mode choice, shortcuts; `overlayView`; Qt Quick tests
@@ -130,3 +130,36 @@ update and back, every content view at 960 × 600 in Czech, keyboard only (Tab /
   probe (one session per probe), so no new sharing — but a probe picker in one wizard must not offer the probe of
   another tab (existing rule; verify).
 - Large QML change: every Qt Quick test that finds `wizardDialog` changes.
+
+## Implementation notes
+
+Small choices made while implementing (not architectural; listed for the review).
+
+- **A1** The tab owns its `WizardViewModel` (a Qt child, created from `TabContext::wizards`, the application's
+  `WizardRegistry`; a tab built without one gets an empty registry). `DeviceTabViewModel::shutdown()` closes the
+  tab's wizard first (review V2), so `AppViewModel::removeTab` and the destructor need no own call. The page id
+  `wizard` is accepted by `setCurrentPage` only while the wizard is open (also while choosing a device); it is not a
+  registered page (no Ctrl+N shortcut, no page view model) and is never saved (`ui/tabs` has no page).
+- **A1** Closing a wizard shows the page that was shown before the wizard view was shown the last time (after Console
+  → Wizard → Cancel that is Console), unless a hand-off chose another page meanwhile (the hand-off comes before
+  `finished`, so "Open console" is kept).
+- **A1** Opening a tab's wizard, and refusing a second one in the same tab, makes that tab current and shows its
+  wizard view (`raiseRequested` / `openChanged` handled in `AppViewModel::addTab`).
+- **A1** Tests: `registerGlobalTestWizard` (the test wizard as `first-run-setup`, not per tab) covers the global
+  instance, which no production wizard uses yet.
+- **A2** `ViewFrame` is a `FocusScope` with the page background (`Theme.bg`; the fade uses it too). Header, content and
+  footer share one centred column of at most 880 px; the scroll bar stays at the right edge of the page area.
+- **A2** The wizard footer stays one `RowLayout` (Back left; actions, default button, Cancel right) — at the minimum
+  window size the page area is about 900 px wide, so no wrapping was needed in Czech (the test checks every footer
+  button lies inside the view).
+- **A2** The rail entry and the tab badge use the existing `info` icon: a new Material Symbols glyph would have to
+  be downloaded from the pinned upstream commit (ADR-0060), which this session did not do. A dedicated glyph can
+  replace it later by adding the file only.
+- **A2** While the tab chooses a device the other rail items stay disabled as before; the Choose device page comes
+  back when the wizard closes.
+- **A2** The Checks step's `CheckList` is created only on a Checks step (a Loader): hidden inside the new layout it
+  sized itself from its own width ("recursive rearrange" warnings).
+- **A2** The wizard's Cancel confirmation (`ConfirmDialog`) is centred over the wizard view (its parent).
+- **A2** Global wizards are shown by `ContentViewHost` in the page area of the current tab (or over Settings); a tab
+  switch does not close them (they are app-wide; a second one is refused).
+

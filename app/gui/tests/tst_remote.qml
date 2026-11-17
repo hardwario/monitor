@@ -189,18 +189,16 @@ TestCase {
         tryVerify(() => operation.opened, 5000);
         tryVerify(() => findChild(operation.footer, "dialogReject").activeFocus, 5000);
         mouseClick(findChild(operation.footer, "dialogAccept")); // Allow
-        tryVerify(() => AppViewModel.wizard.open, 10000);
-        compare(AppViewModel.wizard.wizardId, "lte-update");
+        tryVerify(() => AppViewModel.currentTabViewModel.wizard.open, 10000);
+        compare(AppViewModel.currentTabViewModel.wizard.wizardId, "lte-update");
         const wizard = testSupport.openWizard();
         compare(wizard.lteSource.lteSource, FirmwareSourceViewModel.Designated);
         tryVerify(() => testSupport.remoteLastResult() === "dependency.nrfutil_not_found", 20000, testSupport.remoteLastResult());
-        verify(AppViewModel.wizard.open);
+        verify(AppViewModel.currentTabViewModel.wizard.open);
         verify(share.sharing);
-        AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open, 5000);
-        // The modal dialog blocks the clicks of the next test until it has really closed.
-        const wizardDialog = findChild(window, "wizardDialog");
-        tryVerify(() => !wizardDialog || !wizardDialog.visible, 5000);
+        AppViewModel.currentTabViewModel.wizard.cancel(true);
+        tryVerify(() => !AppViewModel.currentTabViewModel.wizard.open, 5000);
+        tryVerify(() => findAll(window.contentItem, "wizardView").filter(effectivelyVisible).length === 0, 5000);
         share.endSharing();
         tryVerify(() => !share.sharing, 5000);
     }
