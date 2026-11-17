@@ -272,15 +272,14 @@ TestCase {
         AppViewModel.closeGlobalPage();
         verify(testSupport.setSetting("ui/mode", "advanced"));
 
-        // The first-start dialog (Advanced preselected).
+        // The first-start choice (Advanced preselected; plan 0052: a view of the page area).
         verify(testSupport.resetUiMode());
-        const modeDialog = findChild(window, "modeChoiceDialog");
-        tryVerify(() => modeDialog.opened);
+        tryVerify(() => find("modeChoiceDialog") !== null);
         save("s07-mode-choice");
         window.width = 960;
         window.height = 600;
         save("s08-mode-choice-960x600");
-        modeDialog.accept();
-        tryVerify(() => !modeDialog.visible);
+        mouseClick(findChild(find("modeChoiceDialog"), "modeChoiceContinue"));
+        tryVerify(() => find("modeChoiceDialog") === null);
     }
 }

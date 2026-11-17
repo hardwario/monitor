@@ -113,8 +113,13 @@ class AppViewModel : public QObject {
     Q_PROPERTY(QString settingsSection READ settingsSection NOTIFY settingsSectionRequested)
     Q_PROPERTY(int windowWidth READ windowWidth WRITE setWindowWidth NOTIFY railCompactChanged)
     Q_PROPERTY(bool railCompact READ railCompact NOTIFY railCompactChanged) // width < 1100
+    // Plan 0052: the "shortcuts" content view is open (F1, Ctrl+/; tests).
     Q_PROPERTY(bool shortcutOverlayVisible READ shortcutOverlayVisible WRITE
                    setShortcutOverlayVisible NOTIFY shortcutOverlayVisibleChanged)
+    // Plan 0052 (ADR-0387): the content view shown over the page area of the current tab (or the
+    // Settings tab): "report", "probeFirmware", "join", "share", "modeChoice", "shortcuts", or ""
+    // (none, or the open one belongs to another tab).
+    Q_PROPERTY(QString overlayView READ overlayView NOTIFY overlayViewChanged)
     Q_PROPERTY(hwio::gui::ShortcutRegistry* shortcuts READ shortcuts CONSTANT)
     Q_PROPERTY(hwio::gui::SettingsStore* settings READ settingsStore CONSTANT)
     Q_PROPERTY(QStringList toasts READ toasts NOTIFY toastsChanged)
@@ -132,7 +137,7 @@ class AppViewModel : public QObject {
     Q_PROPERTY(bool crashedLastRun READ crashedLastRun NOTIFY crashedLastRunChanged)
     // Plan 0016 C2 (ADR-0116): the update banner and the update block of Settings > About.
     Q_PROPERTY(hwio::gui::UpdateViewModel* update READ update CONSTANT)
-    // Plan 0036: the J-Link firmware update (ProbeFirmwareDialog).
+    // Plan 0036: the J-Link firmware update (ProbeFirmwareView, plan 0052).
     Q_PROPERTY(hwio::gui::ProbeFirmwareViewModel* probeFirmware READ probeFirmware CONSTANT)
     // Plan 0045 (ADR-0359): the user mode Basic / Advanced / Expert and the first-start choice.
     Q_PROPERTY(hwio::gui::UiModeController* uiMode READ uiMode CONSTANT)
@@ -186,8 +191,24 @@ public:
     [[nodiscard]] int windowWidth() const noexcept { return m_windowWidth; }
     void setWindowWidth(int width);
     [[nodiscard]] bool railCompact() const noexcept { return m_windowWidth < railBreakpoint; }
-    [[nodiscard]] bool shortcutOverlayVisible() const noexcept { return m_shortcutOverlay; }
+    [[nodiscard]] bool shortcutOverlayVisible() const { return m_overlayId == shortcutsView(); }
     void setShortcutOverlayVisible(bool visible);
+    // Plan 0052 (ADR-0387): the content views. One at a time app-wide; it belongs to the tab (or
+    // the Settings tab) that was current when it opened. A tab switch closes it unless it runs an
+    // operation (the report collecting or saving: it stays with its tab and is shown on return;
+    // the J-Link firmware update: the switch is refused). The report and the J-Link firmware
+    // update open their views themselves (ReportViewModel::show, ProbeFirmwareViewModel), the mode
+    // choice while the mode is not chosen.
+    [[nodiscard]] QString overlayView() const;
+    // Opens `viewId` (one of the ids above) on the current tab. Another open view is closed first
+    // (as by closeView()); while it runs an operation the request is refused (false) and the
+    // running view is shown (its tab becomes current).
+    Q_INVOKABLE bool openView(const QString& viewId);
+    // × / Esc / Close: closes the open view; the report stops collecting, the J-Link firmware
+    // update is cancelled (not while it writes: refused), the mode choice stores the
+    // preselection.
+    Q_INVOKABLE void closeView();
+    [[nodiscard]] static QString shortcutsView() { return QStringLiteral("shortcuts"); }
     [[nodiscard]] ShortcutRegistry* shortcuts() const { return m_shortcuts; }
     [[nodiscard]] SettingsStore* settingsStore() const { return m_settings; }
     [[nodiscard]] QStringList toasts() const;
@@ -304,6 +325,7 @@ signals:
     void settingsSectionRequested(const QString& sectionId);
     void railCompactChanged();
     void shortcutOverlayVisibleChanged();
+    void overlayViewChanged(); // plan 0052
     void toastsChanged();
     void jlinkLibraryChanged();
     void crashedLastRunChanged();
@@ -337,6 +359,11 @@ private:
     // A wizard's hand-off (plan/features/0007): "open-console", "open-flash-page",
     // "open-settings[:<section>]".
     void onHandOff(const QString& action, DeviceTabViewModel* tab);
+    // Plan 0052: the open content view.
+    [[nodiscard]] bool overlayBusy() const;    // it runs an operation
+    [[nodiscard]] bool overlayCurrent() const; // it belongs to the current tab
+    void setOverlay(const QString& viewId);    // "" = none; the owner is the current tab
+    void syncOverlay();                        // the report, the firmware update, the mode choice
     [[nodiscard]] QJsonArray tabsJson() const;
 
     AppOptions m_options;
@@ -371,7 +398,11 @@ private:
     int m_lastDeviceTab = 0; // the device tab to return to from the Settings tab
     QString m_settingsSection;
     int m_windowWidth = 1280;
-    bool m_shortcutOverlay = false;
+    // Plan 0052: the open content view and the tab it belongs to (m_overlayTab; or the Settings
+    // tab: m_overlayOnSettings).
+    QString m_overlayId;
+    QPointer<DeviceTabViewModel> m_overlayTab;
+    bool m_overlayOnSettings = false;
     bool m_reducedMotion = false;
     bool m_quitPending = false;
     bool m_restoring = false;

@@ -22,6 +22,26 @@ Item {
     readonly property bool current: host.tab !== null && host.tab === AppViewModel.currentTabViewModel
                                     && AppViewModel.globalPage === ""
 
+    // Plan 0052: the focus goes back to the page when a view closes.
+    function focusPage() {
+        if (!host.current)
+            return;
+        if (host.choosing) {
+            choosePage.forceActiveFocus();
+            return;
+        }
+        for (let i = 0; i < pageRepeater.count; ++i) {
+            const loader = pageRepeater.itemAt(i) as Loader;
+            const page = loader ? loader.item as Item : null;
+            if (loader && loader.visible && page) {
+                page.forceActiveFocus();
+                return;
+            }
+        }
+    }
+
+    onWizardShownChanged: if (!host.wizardShown) Qt.callLater(host.focusPage)
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
@@ -180,6 +200,8 @@ Item {
             Layout.fillHeight: true
 
             ChooseDevicePage {
+                id: choosePage
+
                 anchors.fill: parent
                 visible: host.choosing
                 tab: host.tab
@@ -189,6 +211,8 @@ Item {
             }
 
             Repeater {
+                id: pageRepeater
+
                 model: AppViewModel.pages
 
                 delegate: Loader {
@@ -245,5 +269,6 @@ Item {
 
         anchors.fill: parent
         current: host.current
+        onClosed: Qt.callLater(host.focusPage)
     }
 }

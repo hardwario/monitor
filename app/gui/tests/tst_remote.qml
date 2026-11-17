@@ -85,9 +85,13 @@ TestCase {
         const share = tab().remoteShare;
         tryVerify(() => share.available, 5000);
         mouseClick(one("shareButton"));
-        const shareDialog = findChild(one("shareButton"), "remoteShareDialog");
-        tryVerify(() => shareDialog.opened, 5000);
-        mouseClick(findChild(shareDialog.footer, "dialogAccept")); // Start sharing
+        // Plan 0052 (ADR-0387): a view of the page area; Cancel has the focus.
+        tryVerify(() => shown("remoteShareDialog").length === 1, 5000);
+        const shareDialog = one("remoteShareDialog");
+        tryVerify(() => findChild(shareDialog, "remoteShareCancel").activeFocus, 5000);
+        verify(findChild(shareDialog, "remoteShareBody").text !== "");
+        mouseClick(findChild(shareDialog, "remoteShareStart")); // Start sharing
+        tryVerify(() => shown("remoteShareDialog").length === 0, 5000);
         tryVerify(() => share.state === "sharing", 10000);
         tryVerify(() => shown("remoteShareBanner").length === 1, 5000);
         verify(share.code.length === 7, share.code); // "482 913"
@@ -128,12 +132,14 @@ TestCase {
     function test_joinAWebTerminalHost() {
         AppViewModel.showPage("console");
         mouseClick(one("joinSupportSession"));
-        const input = findChild(one("transportBar").parent, "remoteJoinInputDialog");
-        tryVerify(() => input.opened, 5000);
-        const field = findChild(input.contentItem, "remoteCodeField");
-        const joinButton = findChild(input.footer, "remoteJoinButton");
+        // Plan 0052 (ADR-0387): a view of the page area; the code field has the focus.
+        tryVerify(() => shown("remoteJoinInputDialog").length === 1, 5000);
+        const input = one("remoteJoinInputDialog");
+        const field = findChild(input, "remoteCodeField");
+        const joinButton = findChild(input, "remoteJoinButton");
+        tryVerify(() => field.activeFocus, 5000);
         field.text = "12a";
-        tryVerify(() => findChild(input.contentItem, "remoteCodeError").visible, 5000);
+        tryVerify(() => findChild(input, "remoteCodeError").visible, 5000);
         verify(!joinButton.enabled);
         field.text = "12 345";
         tryVerify(() => joinButton.enabled, 5000);
@@ -141,6 +147,7 @@ TestCase {
         verify(testSupport.remoteJoin("12345"));
         mouseClick(joinButton);
         tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        compare(AppViewModel.overlayView, "");
         tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
         tryVerify(() => shown("remoteJoinBanner").length === 1, 5000);
 

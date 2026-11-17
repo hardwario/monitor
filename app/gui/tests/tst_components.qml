@@ -1,5 +1,5 @@
 // Base components in light and dark (plan 0004, A3): HButton, HToolButton, ErrorPanel,
-// WarningBanner, Toast, ConfirmDialog, EmptyState, ShortcutOverlay, PhaseStepper.
+// WarningBanner, Toast, ConfirmDialog, EmptyState, ShortcutsView, PhaseStepper.
 import QtQuick
 import QtQuick.Controls
 import QtTest
@@ -84,7 +84,10 @@ TestCase {
     Component {
         id: overlayComponent
 
-        ShortcutOverlay {}
+        ShortcutsView {
+            width: 800
+            height: 560
+        }
     }
 
     function themes() {
@@ -451,12 +454,14 @@ TestCase {
         compare(findChild(toasts, "toast").color, Theme.text);
     }
 
+    // Plan 0052 (ADR-0387): the keyboard shortcuts view; Esc closes it (AppViewModel.closeView).
     function test_shortcutOverlay() {
-        const overlay = createTemporaryObject(overlayComponent, testCase);
         AppViewModel.shortcutOverlayVisible = true;
-        tryVerify(() => overlay.opened);
+        compare(AppViewModel.overlayView, "shortcuts");
+        const overlay = createTemporaryObject(overlayComponent, testCase);
         verify(AppViewModel.shortcuts.groups.length >= 2);
-        verify(findChild(overlay.contentItem, "shortcutKeys") !== null);
+        verify(findChild(overlay, "shortcutKeys") !== null);
+        tryVerify(() => findChild(overlay, "shortcutsTitle").activeFocus);
         keyClick(Qt.Key_Escape);
         tryCompare(AppViewModel, "shortcutOverlayVisible", false);
     }

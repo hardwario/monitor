@@ -272,6 +272,8 @@ TestCase {
         verify(v.x >= rail.x + rail.w - 0.5, "right of the rail");
         verify(v.y > 0 && v.x + v.w <= window.width + 0.5 && v.y + v.h <= window.height + 0.5);
         verify(v.h > 400, "the view uses the page area: " + v.h);
+        const content = rect(part("wizardContent"));
+        verify(content.h > 250, "the content takes the free height: " + content.h);
         // Every footer button lies inside the view.
         for (const name of ["wizardPrimary", "wizardCancel"]) {
             const r = rect(part(name));
@@ -316,18 +318,57 @@ TestCase {
         verify(String(unknown.source).endsWith("/placeholder.svg"));
     }
 
+    // Plan 0052 (ADR-0387): the report is a view of the page area; Close returns to the page.
     function test_reportDialog() {
         AppViewModel.report.show();
-        const report = findChild(window, "reportDialog");
-        tryVerify(() => report.opened);
+        tryVerify(() => find("reportDialog") !== null);
+        compare(AppViewModel.overlayView, "report");
+        const report = find("reportDialog");
+        tryVerify(() => findChild(report, "reportTitle").activeFocus);
         tryCompare(AppViewModel.report, "state", "ready", 30000);
         verify(findChild(report, "reportSummaryText").text.indexOf("HARDWARIO Monitor diagnostic report") === 0);
         verify(findChild(report, "reportNote").visible);
         verify(findChild(report, "reportSave").visible);
         verify(findChild(report, "reportCopy").visible);
         mouseClick(findChild(report, "reportClose"));
-        tryVerify(() => !report.visible);
+        tryVerify(() => find("reportDialog") === null);
         verify(!AppViewModel.report.open);
+        compare(AppViewModel.overlayView, "");
+        // Help → Create diagnostic report… opens it through the view; Esc closes it.
+        verify(AppViewModel.openView("report"));
+        verify(AppViewModel.report.open);
+        tryVerify(() => find("reportDialog") !== null);
+        tryVerify(() => findChild(find("reportDialog"), "reportTitle").activeFocus);
+        keyClick(Qt.Key_Escape);
+        tryVerify(() => find("reportDialog") === null);
+        verify(!AppViewModel.report.open);
+    }
+
+    // Plan 0052: every content view at 960 x 600 in Czech: inside the page area, footer buttons
+    // inside the view.
+    function test_contentViewsAt960InCzech_data() {
+        return [{ tag: "report", footer: "reportClose" }, { tag: "join", footer: "remoteJoinButton" },
+                { tag: "shortcuts", footer: "shortcutsClose" }, { tag: "share", footer: "remoteShareStart" }];
+    }
+
+    function test_contentViewsAt960InCzech(data) {
+        AppViewModel.setLanguage("cs");
+        window.width = 960;
+        window.height = 600;
+        verify(AppViewModel.openView(data.tag));
+        const names = { report: "reportDialog", join: "remoteJoinInputDialog", shortcuts: "shortcutOverlay",
+                        share: "remoteShareDialog" };
+        tryVerify(() => find(names[data.tag]) !== null);
+        waitForRendering(window.contentItem);
+        const v = rect(find(names[data.tag]));
+        const rail = rect(find("navRail"));
+        verify(v.x >= rail.x + rail.w - 0.5 && v.x + v.w <= window.width + 0.5 && v.y + v.h <= window.height + 0.5);
+        const button = rect(findAll(find(names[data.tag]), data.footer)[0]);
+        verify(button.x >= v.x - 0.5 && button.x + button.w <= v.x + v.w + 0.5, data.footer);
+        verify(button.y >= v.y - 0.5 && button.y + button.h <= v.y + v.h + 0.5, data.footer);
+        AppViewModel.closeView();
+        tryVerify(() => find(names[data.tag]) === null);
+        AppViewModel.setLanguage("en");
     }
 
     name: "Wizard"

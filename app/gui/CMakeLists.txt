@@ -27,7 +27,7 @@ set(HWIO_GUI_QML_FILES
     qml/components/Icon.qml
     qml/components/Illustration.qml
     qml/components/PhaseStepper.qml
-    qml/components/ShortcutOverlay.qml
+    qml/components/ShortcutsView.qml
     qml/components/StateDot.qml
     qml/components/StepSpinBox.qml
     qml/components/Toast.qml
@@ -42,8 +42,8 @@ set(HWIO_GUI_QML_FILES
     qml/console/HistoryPopup.qml
     qml/console/ShellInput.qml
     qml/console/SuggestionList.qml
-    qml/dialogs/ProbeFirmwareDialog.qml
-    qml/dialogs/ReportDialog.qml
+    qml/dialogs/ProbeFirmwareView.qml
+    qml/dialogs/ReportView.qml
     qml/flash/FlashBar.qml
     qml/flash/FlashCard.qml
     qml/flash/KindCards.qml
@@ -60,11 +60,11 @@ set(HWIO_GUI_QML_FILES
     qml/pages/FlashPage.qml
     qml/pages/PlaceholderPage.qml
     qml/pages/SettingsPage.qml
-    qml/remote/JoinDialog.qml
+    qml/remote/JoinView.qml
     qml/remote/RemoteBanner.qml
     qml/remote/RemoteFlashCard.qml
     qml/remote/RemoteSessionDialogs.qml
-    qml/remote/ShareDialog.qml
+    qml/remote/ShareView.qml
     qml/settings/AboutSection.qml
     qml/settings/ExpertSection.qml
     qml/settings/GeneralSection.qml
@@ -82,7 +82,7 @@ set(HWIO_GUI_QML_FILES
     qml/shell/DeviceBar.qml
     qml/shell/DeviceTabBar.qml
     qml/shell/HelpMenu.qml
-    qml/shell/ModeChoiceDialog.qml
+    qml/shell/ModeChoiceView.qml
     qml/shell/NavRail.qml
     qml/shell/PageHost.qml
     qml/settings/ConsoleSection.qml

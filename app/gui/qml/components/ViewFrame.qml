@@ -76,6 +76,9 @@ FocusScope {
         spacing: 0
 
         ColumnLayout {
+            objectName: frame.namePrefix + "Header"
+            // A nested layout fills by default: only the content takes the free height.
+            Layout.fillHeight: false
             Layout.preferredWidth: frame.columnWidth
             Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: Theme.spacingL
@@ -207,6 +210,8 @@ FocusScope {
         ColumnLayout {
             id: footerArea
 
+            objectName: frame.namePrefix + "Footer"
+            Layout.fillHeight: false
             Layout.preferredWidth: frame.columnWidth
             Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: Theme.spacingM

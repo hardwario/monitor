@@ -110,7 +110,7 @@ None (GUI only).
 - [x] A2 `ViewFrame.qml`, `WizardView.qml` in the tab's page area, rail entry and badge, tab badge; remove
       `WizardDialog.qml`; Qt Quick tests (`tst_wizard.qml`, `tst_flash.qml` LTE update, rail switch and back keeps
       the step, Esc / Enter, 960 × 600 Czech fits)
-- [ ] A3 Content views: report, J-Link firmware, join, share, mode choice, shortcuts; `overlayView`; Qt Quick tests
+- [x] A3 Content views: report, J-Link firmware, join, share, mode choice, shortcuts; `overlayView`; Qt Quick tests
       updated (`tst_report*`, `tst_remote.qml`, mode choice, shortcuts)
 - [ ] A4 Screenshots (`tst_screenshots_*`), docs (all pages that say "dialog" for these, 5 languages), ADR-0066
       status Superseded, design-system.md (views, ViewFrame)
@@ -162,4 +162,27 @@ Small choices made while implementing (not architectural; listed for the review)
 - **A2** The wizard's Cancel confirmation (`ConfirmDialog`) is centred over the wizard view (its parent).
 - **A2** Global wizards are shown by `ContentViewHost` in the page area of the current tab (or over Settings); a tab
   switch does not close them (they are app-wide; a second one is refused).
+- **A2** `ViewFrame`'s header and footer layouts set `Layout.fillHeight: false` (nested layouts fill by default), so
+  the content takes all free height; the tests check the content height at 960 × 600.
+- **A3** `AppViewModel.overlayView` is the id of the open view only while its tab (or the Settings tab) is current;
+  internally the view remembers its tab (`QPointer`). The report and the J-Link firmware update open and close their
+  views themselves (`ReportViewModel::show()` from the Help menu or the crash notice, the firmware banner), so
+  `AppViewModel` follows their state; `openView("report")` starts collecting. `shortcutOverlayVisible` stays as the
+  property of the "shortcuts" view (F1, Ctrl+/, tests).
+- **A3** "Runs an operation" = the report collecting or saving, the J-Link firmware update writing. While it writes,
+  a tab switch is refused with the toast "Wait until the J-Link firmware update has finished." (new string), and the
+  rail does not replace the view either; while the report collects a rail click is ignored (its Cancel is in the
+  view). Closing the tab of a running view moves the view to the tab shown next.
+- **A3** Closing the mode choice in any way (×, Esc, a tab switch, another view) stores the preselection, as Esc did;
+  otherwise it would stay unchosen and come back.
+- **A3** A tab's wizard that opens closes an idle content view of that tab (the wizard would be hidden beneath it); a
+  global wizard does so too.
+- **A3** Focus: a view focuses its title heading when it opens, except Join (the code field), Share (Cancel, the
+  default), the mode choice (Continue) and the J-Link firmware confirmation (Cancel, ADR-0132) — as the dialogs did.
+  Closing a view or the wizard view gives the focus back to the page.
+- **A3** Footers: the content views keep their right-aligned `Flow` (wraps when narrow); the J-Link firmware update
+  uses a row [Cancel] [Update] so that Tab goes from Cancel to Update as before. Share now names its buttons
+  `remoteShareStart` / `remoteShareCancel` (it is no `ConfirmDialog` any more); the other object names are kept
+  (`reportDialog`, `probeFirmwareDialog`, `remoteJoinInputDialog`, `remoteShareDialog`, `modeChoiceDialog`,
+  `shortcutOverlay`). Content widths: wizard and report 880 px, shortcuts 720 px, join / share / mode choice 560 px.
 
