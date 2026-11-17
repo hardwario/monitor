@@ -45,6 +45,20 @@ Dialog {
 
     onOpened: dialog.focusHeading()
 
+    // ADR-0384: scrolls the content so that `item` is in view, its top at the top of the view as
+    // far as possible (animated).
+    function ensureVisible(item: Item) {
+        const flick = frame.flickable;
+        if (item === null || flick === null)
+            return;
+        const top = item.mapToItem(flick.contentItem, 0, 0).y;
+        const target = Math.max(0, Math.min(top, flick.contentHeight - flick.height));
+        scrollAnimation.stop();
+        scrollAnimation.from = flick.contentY;
+        scrollAnimation.to = target;
+        scrollAnimation.start();
+    }
+
     Connections {
         target: dialog.wizard
 
@@ -110,178 +124,244 @@ Dialog {
         }
     }
 
-    contentItem: ScrollView {
-        id: scroll
+    // ADR-0384: scrolls into view (`ensureVisible`), shows its scroll bar while the content
+    // overflows and fades out at the bottom edge while more content is below.
+    contentItem: Item {
+        id: frame
 
-        objectName: "wizardContent"
-        clip: true
-        contentWidth: availableWidth
+        readonly property Flickable flickable: scroll.contentItem as Flickable
+        readonly property bool overflows: frame.flickable !== null
+                                          && frame.flickable.contentHeight > frame.flickable.height + 1
+        readonly property bool moreBelow: frame.overflows
+                                          && frame.flickable.contentY + frame.flickable.height
+                                             < frame.flickable.contentHeight - 1
 
-        Keys.onReturnPressed: dialog.wizard.primary()
-        Keys.onEnterPressed: dialog.wizard.primary()
-        Keys.onEscapePressed: dialog.wizard.cancel(false)
+        implicitWidth: scroll.implicitWidth
+        implicitHeight: scroll.implicitHeight
 
-        ColumnLayout {
-            width: scroll.availableWidth
-            spacing: Theme.spacingM
+        ScrollView {
+            id: scroll
 
-            Illustration {
-                objectName: "wizardIllustration"
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: Math.min(480, scroll.availableWidth)
-                Layout.preferredHeight: Layout.preferredWidth * 270 / 480
-                visible: dialog.step.illustration !== undefined && dialog.step.illustration !== ""
-                slot: dialog.step.illustration !== undefined ? dialog.step.illustration : ""
-                caption: dialog.step.heading !== undefined ? dialog.step.heading : ""
+            objectName: "wizardContent"
+            anchors.fill: parent
+            clip: true
+            contentWidth: availableWidth
+            // ADR-0384: the scroll bar stays visible while the content is taller than the view.
+            ScrollBar.vertical: ScrollBar {
+                objectName: "wizardScrollBar"
+                parent: scroll
+                x: scroll.mirrored ? 0 : scroll.width - width
+                y: scroll.topPadding
+                height: scroll.availableHeight
+                active: scroll.ScrollBar.horizontal.active
+                policy: frame.overflows ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
             }
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Theme.spacingS
+            Keys.onReturnPressed: dialog.wizard.primary()
+            Keys.onEnterPressed: dialog.wizard.primary()
+            Keys.onEscapePressed: dialog.wizard.cancel(false)
 
-                Icon {
-                    visible: dialog.step.kind === StepKind.Done
-                    symbol: "success"
-                    color: Theme.success
-                    size: 28
+            ColumnLayout {
+                width: scroll.availableWidth
+                spacing: Theme.spacingM
+
+                Illustration {
+                    objectName: "wizardIllustration"
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: Math.min(480, scroll.availableWidth)
+                    Layout.preferredHeight: Layout.preferredWidth * 270 / 480
+                    visible: dialog.step.illustration !== undefined && dialog.step.illustration !== ""
+                    slot: dialog.step.illustration !== undefined ? dialog.step.illustration : ""
+                    caption: dialog.step.heading !== undefined ? dialog.step.heading : ""
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spacingS
+
+                    Icon {
+                        visible: dialog.step.kind === StepKind.Done
+                        symbol: "success"
+                        color: Theme.success
+                        size: 28
+                    }
+
+                    Label {
+                        id: heading
+
+                        textFormat: Text.PlainText
+                        objectName: "wizardHeading"
+                        Layout.fillWidth: true
+                        text: dialog.step.heading !== undefined ? dialog.step.heading : ""
+                        font: Theme.fontTitle
+                        color: Theme.text
+                        wrapMode: Text.Wrap
+                        focusPolicy: Qt.StrongFocus
+                        activeFocusOnTab: true
+                        Accessible.role: Accessible.Heading
+                        Accessible.name: heading.text
+                        Keys.onReturnPressed: dialog.wizard.primary()
+                        Keys.onEnterPressed: dialog.wizard.primary()
+                        Keys.onEscapePressed: dialog.wizard.cancel(false)
+                    }
                 }
 
                 Label {
-                    id: heading
-
-                    textFormat: Text.PlainText
-                    objectName: "wizardHeading"
+                    objectName: "wizardBody"
                     Layout.fillWidth: true
-                    text: dialog.step.heading !== undefined ? dialog.step.heading : ""
-                    font: Theme.fontTitle
+                    visible: text !== ""
+                    text: dialog.step.body !== undefined ? dialog.step.body : ""
+                    textFormat: Text.StyledText
                     color: Theme.text
                     wrapMode: Text.Wrap
-                    focusPolicy: Qt.StrongFocus
-                    activeFocusOnTab: true
-                    Accessible.role: Accessible.Heading
-                    Accessible.name: heading.text
-                    Keys.onReturnPressed: dialog.wizard.primary()
-                    Keys.onEnterPressed: dialog.wizard.primary()
-                    Keys.onEscapePressed: dialog.wizard.cancel(false)
                 }
-            }
 
-            Label {
-                objectName: "wizardBody"
-                Layout.fillWidth: true
-                visible: text !== ""
-                text: dialog.step.body !== undefined ? dialog.step.body : ""
-                textFormat: Text.StyledText
-                color: Theme.text
-                wrapMode: Text.Wrap
-            }
+                HButton {
+                    objectName: "wizardLink"
+                    visible: dialog.step.linkText !== undefined && dialog.step.linkText !== ""
+                    kind: "ghost"
+                    text: dialog.step.linkText !== undefined ? dialog.step.linkText + " ↗" : ""
+                    onClicked: Qt.openUrlExternally(dialog.step.linkUrl)
+                }
 
-            HButton {
-                objectName: "wizardLink"
-                visible: dialog.step.linkText !== undefined && dialog.step.linkText !== ""
-                kind: "ghost"
-                text: dialog.step.linkText !== undefined ? dialog.step.linkText + " ↗" : ""
-                onClicked: Qt.openUrlExternally(dialog.step.linkUrl)
-            }
+                CheckList {
+                    objectName: "wizardChecks"
+                    Layout.fillWidth: true
+                    visible: dialog.step.kind === StepKind.Checks
+                    model: dialog.wizard.checks
+                }
 
-            CheckList {
-                objectName: "wizardChecks"
-                Layout.fillWidth: true
-                visible: dialog.step.kind === StepKind.Checks
-                model: dialog.wizard.checks
-            }
+                ColumnLayout {
+                    objectName: "wizardChoices"
+                    Layout.fillWidth: true
+                    visible: dialog.step.kind === StepKind.Choice
+                    spacing: Theme.spacingS
 
-            ColumnLayout {
-                objectName: "wizardChoices"
-                Layout.fillWidth: true
-                visible: dialog.step.kind === StepKind.Choice
-                spacing: Theme.spacingS
+                    Repeater {
+                        model: dialog.step.kind === StepKind.Choice ? dialog.step.choices : []
 
-                Repeater {
-                    model: dialog.step.kind === StepKind.Choice ? dialog.step.choices : []
+                        delegate: AbstractButton {
+                            id: card
 
-                    delegate: AbstractButton {
-                        id: card
+                            required property var modelData
 
-                        required property var modelData
+                            objectName: "wizardChoice"
+                            Layout.fillWidth: true
+                            checkable: true
+                            checked: card.modelData.selected === true
+                            focusPolicy: Qt.StrongFocus
+                            implicitHeight: cardContent.implicitHeight + 2 * Theme.spacingM
+                            Accessible.role: Accessible.RadioButton
+                            Accessible.name: card.modelData.title
+                            Accessible.description: card.modelData.subtitle !== undefined ? card.modelData.subtitle : ""
+                            onClicked: dialog.wizard.choose(card.modelData.id)
 
-                        objectName: "wizardChoice"
-                        Layout.fillWidth: true
-                        checkable: true
-                        checked: card.modelData.selected === true
-                        focusPolicy: Qt.StrongFocus
-                        implicitHeight: cardContent.implicitHeight + 2 * Theme.spacingM
-                        Accessible.role: Accessible.RadioButton
-                        Accessible.name: card.modelData.title
-                        Accessible.description: card.modelData.subtitle !== undefined ? card.modelData.subtitle : ""
-                        onClicked: dialog.wizard.choose(card.modelData.id)
+                            background: Rectangle {
+                                radius: Theme.radiusM
+                                color: card.checked ? Theme.accentSoft : Theme.bg
+                                border.color: card.checked ? Theme.accent : Theme.border
+                                border.width: card.checked ? 2 : 1
 
-                        background: Rectangle {
-                            radius: Theme.radiusM
-                            color: card.checked ? Theme.accentSoft : Theme.bg
-                            border.color: card.checked ? Theme.accent : Theme.border
-                            border.width: card.checked ? 2 : 1
-
-                            FocusRing {
-                                control: card
-                            }
-                        }
-
-                        contentItem: ColumnLayout {
-                            id: cardContent
-
-                            spacing: 2
-
-                            Label {
-                                textFormat: Text.PlainText
-                                Layout.fillWidth: true
-                                Layout.leftMargin: Theme.spacingM
-                                Layout.rightMargin: Theme.spacingM
-                                text: card.modelData.title
-                                font: Theme.fontUiStrong
-                                color: Theme.text
-                                wrapMode: Text.Wrap
+                                FocusRing {
+                                    control: card
+                                }
                             }
 
-                            Label {
-                                textFormat: Text.PlainText
-                                Layout.fillWidth: true
-                                Layout.leftMargin: Theme.spacingM
-                                Layout.rightMargin: Theme.spacingM
-                                visible: text !== ""
-                                text: card.modelData.subtitle !== undefined ? card.modelData.subtitle : ""
-                                color: Theme.textMuted
-                                wrapMode: Text.Wrap
+                            contentItem: ColumnLayout {
+                                id: cardContent
+
+                                spacing: 2
+
+                                Label {
+                                    textFormat: Text.PlainText
+                                    Layout.fillWidth: true
+                                    Layout.leftMargin: Theme.spacingM
+                                    Layout.rightMargin: Theme.spacingM
+                                    text: card.modelData.title
+                                    font: Theme.fontUiStrong
+                                    color: Theme.text
+                                    wrapMode: Text.Wrap
+                                }
+
+                                Label {
+                                    textFormat: Text.PlainText
+                                    Layout.fillWidth: true
+                                    Layout.leftMargin: Theme.spacingM
+                                    Layout.rightMargin: Theme.spacingM
+                                    visible: text !== ""
+                                    text: card.modelData.subtitle !== undefined ? card.modelData.subtitle : ""
+                                    color: Theme.textMuted
+                                    wrapMode: Text.Wrap
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            Loader {
-                id: embeddedLoader
+                Loader {
+                    id: embeddedLoader
 
-                objectName: "wizardEmbedded"
-                Layout.fillWidth: true
-                active: dialog.step.kind === StepKind.Embedded
-                visible: embeddedLoader.active
-                source: dialog.wizard.embeddedSource
+                    objectName: "wizardEmbedded"
+                    Layout.fillWidth: true
+                    active: dialog.step.kind === StepKind.Embedded
+                    visible: embeddedLoader.active
+                    source: dialog.wizard.embeddedSource
 
-                Binding {
-                    target: embeddedLoader.item
-                    property: "vm"
-                    value: dialog.wizard.embedded
-                    when: embeddedLoader.status === Loader.Ready
+                    Binding {
+                        target: embeddedLoader.item
+                        property: "vm"
+                        value: dialog.wizard.embedded
+                        when: embeddedLoader.status === Loader.Ready
+                    }
+
+                    // ADR-0384: an embedded step may ask to scroll a part of it into view.
+                    Connections {
+                        target: embeddedLoader.item
+                        ignoreUnknownSignals: true
+
+                        function onScrollIntoViewRequested(item: Item) {
+                            dialog.ensureVisible(item);
+                        }
+                    }
+                }
+
+                CommandBlock {
+                    objectName: "wizardCommands"
+                    Layout.fillWidth: true
+                    visible: dialog.step.kind === StepKind.Commands
+                    commands: dialog.step.commands !== undefined ? dialog.step.commands : []
+                    onCopyRequested: text => dialog.wizard.copyText(text)
                 }
             }
+        }
 
-            CommandBlock {
-                objectName: "wizardCommands"
-                Layout.fillWidth: true
-                visible: dialog.step.kind === StepKind.Commands
-                commands: dialog.step.commands !== undefined ? dialog.step.commands : []
-                onCopyRequested: text => dialog.wizard.copyText(text)
+        Rectangle {
+            objectName: "wizardFade"
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: frame.overflows ? scroll.ScrollBar.vertical.width : 0
+            height: 24
+            visible: frame.moreBelow
+            gradient: Gradient {
+                GradientStop {
+                    position: 0
+                    color: Qt.rgba(Theme.surfaceRaised.r, Theme.surfaceRaised.g, Theme.surfaceRaised.b, 0)
+                }
+                GradientStop {
+                    position: 1
+                    color: Theme.surfaceRaised
+                }
             }
+        }
+
+        NumberAnimation {
+            id: scrollAnimation
+
+            target: frame.flickable
+            property: "contentY"
+            duration: Theme.animationMs
+            easing.type: Easing.OutCubic
         }
     }
 
@@ -342,6 +422,8 @@ Dialog {
         // Plan 0033: a wizard may name the buttons ("Cancel anyway" / "Back").
         acceptText: dialog.wizard.cancelAcceptText !== "" ? dialog.wizard.cancelAcceptText : qsTr("Cancel and close")
         rejectText: dialog.wizard.cancelRejectText !== "" ? dialog.wizard.cancelRejectText : qsTr("Keep going")
+        alternativeText: dialog.wizard.cancelAlternativeText // plan 0051 (ADR-0381): "Write back"
         onAccepted: dialog.wizard.cancel(true)
+        onAlternative: dialog.wizard.cancelAlternative()
     }
 }

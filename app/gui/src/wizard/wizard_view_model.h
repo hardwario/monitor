@@ -52,6 +52,7 @@ class WizardViewModel : public QObject {
     Q_PROPERTY(bool canCancel READ canCancel NOTIFY changed)
     Q_PROPERTY(QString cancelAcceptText READ cancelAcceptText NOTIFY changed)
     Q_PROPERTY(QString cancelRejectText READ cancelRejectText NOTIFY changed)
+    Q_PROPERTY(QString cancelAlternativeText READ cancelAlternativeText NOTIFY changed) // 0051
     Q_PROPERTY(hwio::gui::CheckListModel* checks READ checks NOTIFY changed)
     Q_PROPERTY(QObject* embedded READ embedded NOTIFY changed)
     Q_PROPERTY(QUrl embeddedSource READ embeddedSource NOTIFY changed)
@@ -90,6 +91,7 @@ public:
     [[nodiscard]] bool canCancel() const;
     [[nodiscard]] QString cancelAcceptText() const;
     [[nodiscard]] QString cancelRejectText() const;
+    [[nodiscard]] QString cancelAlternativeText() const;
     [[nodiscard]] CheckListModel* checks() const;
     [[nodiscard]] QObject* embedded() const;
     [[nodiscard]] QUrl embeddedSource() const;
@@ -103,6 +105,8 @@ public:
     Q_INVOKABLE void action(const QString& actionId);
     // Esc / ×. While busy and !force: cancelConfirmationNeeded(busyCancelText).
     Q_INVOKABLE void cancel(bool force = false);
+    // Plan 0051 (ADR-0381): the third button of the Cancel confirmation; the dialog stays open.
+    Q_INVOKABLE void cancelAlternative();
     Q_INVOKABLE void copyText(const QString& text); // CommandBlock [Copy]
 
     // ADR-0076: the image of an illustration slot: <slot>-dark.svg in the dark theme when it

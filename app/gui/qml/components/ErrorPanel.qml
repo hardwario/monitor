@@ -5,7 +5,10 @@
 // Details expander (code, detail, Copy). Plan 0012: a page may replace the primary action by its own
 // (`customActionText`, e.g. [Pair]) and add a `note` below the suggestion.
 // `compact` (window height < 700 px) collapses it to the headline, the primary action and an
-// expand chevron.
+// expand chevron. Plan 0051 (ADR-0382): inside a wizard (`inWizard`, found from the wizard's
+// content) "Help me fix this" and the primary action are hidden (the wizard footer is the way on)
+// and the docs link reads "Troubleshooting"; a panel whose primary action works inside the wizard
+// (`keepPrimaryInWizard`, e.g. the firmware picker's Retry) keeps it.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -26,6 +29,10 @@ Rectangle {
     // The tab whose wizard "Help me fix this" opens (-1 = the current tab).
     property int tabIndex: -1
     property bool detailsExpanded: false
+    // ADR-0382: set when the panel is inside WizardDialog's content (objectName "wizardContent").
+    property bool inWizard: false
+    property bool keepPrimaryInWizard: false
+    readonly property bool showPrimary: !panel.inWizard || panel.keepPrimaryInWizard
     property bool userExpanded: false
     readonly property bool collapsed: panel.compact && !panel.userExpanded
     readonly property var actionTexts: [qsTr("Reconnect"), qsTr("Choose another file"),
@@ -35,6 +42,16 @@ Rectangle {
     signal secondaryActionTriggered
     signal customActionTriggered
 
+    function findWizard(): bool {
+        for (let item = panel.parent; item; item = item.parent) {
+            if (item.objectName === "wizardContent")
+                return true;
+        }
+        return false;
+    }
+
+    Component.onCompleted: panel.inWizard = panel.findWizard()
+    onParentChanged: panel.inWizard = panel.findWizard()
     visible: panel.error.valid
     implicitHeight: content.implicitHeight + 2 * Theme.spacingM
     implicitWidth: content.implicitWidth + 2 * Theme.spacingM + 4
@@ -90,7 +107,7 @@ Rectangle {
 
                 HButton {
                     objectName: "errorPrimaryCompact"
-                    visible: panel.collapsed
+                    visible: panel.collapsed && panel.showPrimary
                     kind: "primary"
                     text: panel.customActionText !== "" ? panel.customActionText : panel.actionTexts[panel.primaryAction]
                     onClicked: panel.customActionText !== "" ? panel.customActionTriggered() : panel.actionTriggered(panel.primaryAction)
@@ -132,8 +149,9 @@ Rectangle {
                 visible: !panel.collapsed && panel.error.valid
                          && AppViewModel.errorDocsLink(panel.error.code) !== ""
                 kind: "ghost"
-                text: qsTr("Learn more ↗")
-                Accessible.name: qsTr("Learn more about this error (opens browser)")
+                text: panel.inWizard ? qsTr("Troubleshooting ↗") : qsTr("Learn more ↗")
+                Accessible.name: panel.inWizard ? qsTr("Troubleshooting for this error (opens browser)")
+                                                : qsTr("Learn more about this error (opens browser)")
                 onClicked: Qt.openUrlExternally(AppViewModel.errorDocsLink(panel.error.code))
             }
 
@@ -155,6 +173,7 @@ Rectangle {
 
                 HButton {
                     objectName: "errorPrimary"
+                    visible: panel.showPrimary
                     kind: "primary"
                     text: panel.customActionText !== "" ? panel.customActionText : panel.actionTexts[panel.primaryAction]
                     onClicked: panel.customActionText !== "" ? panel.customActionTriggered() : panel.actionTriggered(panel.primaryAction)
@@ -170,7 +189,8 @@ Rectangle {
                 // M4 (plan/features/0007): shown only when the error's wizard is registered.
                 HButton {
                     objectName: "errorWizard"
-                    visible: AppViewModel.launcher.canOpen(panel.error.wizard)
+                    // ADR-0382: not inside a wizard (one wizard at a time, ADR-0066).
+                    visible: !panel.inWizard && AppViewModel.launcher.canOpen(panel.error.wizard)
                     text: qsTr("Help me fix this")
                     onClicked: AppViewModel.launcher.open(panel.error.wizard, panel.error, panel.tabIndex)
                 }
