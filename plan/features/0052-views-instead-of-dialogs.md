@@ -112,9 +112,9 @@ None (GUI only).
       the step, Esc / Enter, 960 × 600 Czech fits)
 - [x] A3 Content views: report, J-Link firmware, join, share, mode choice, shortcuts; `overlayView`; Qt Quick tests
       updated (`tst_report*`, `tst_remote.qml`, mode choice, shortcuts)
-- [ ] A4 Screenshots (`tst_screenshots_*`), docs (all pages that say "dialog" for these, 5 languages), ADR-0066
+- [x] A4 Screenshots (`tst_screenshots_*`), docs (all pages that say "dialog" for these, 5 languages), ADR-0066
       status Superseded, design-system.md (views, ViewFrame)
-- [ ] C1 Translations (new strings: "Wizard", tooltips; 0 unfinished)
+- [x] C1 Translations (new strings: "Wizard", tooltips; 0 unfinished)
 - [ ] C2 Verification
 
 ## Tests and verification
@@ -186,4 +186,12 @@ Small choices made while implementing (not architectural; listed for the review)
   `remoteShareStart` / `remoteShareCancel` (it is no `ConfirmDialog` any more); the other object names are kept
   (`reportDialog`, `probeFirmwareDialog`, `remoteJoinInputDialog`, `remoteShareDialog`, `modeChoiceDialog`,
   `shortcutOverlay`). Content widths: wizard and report 880 px, shortcuts 720 px, join / share / mode choice 560 px.
+- **A4** Screenshots: `tst_screenshots` and `tst_screenshots_flash` take the views as before (wizard steps, report,
+  shortcuts, mode choice); a selection is in [0052-screenshots](0052-screenshots/) (Git LFS). ADR-0066 was already
+  marked superseded by ADR-0386 when the plan was approved. The docs describe the views in a new section "Guides and
+  other views" of the getting-started page (all five languages); historical plans and ADRs keep the old dialog names.
+- **C1** The renamed views keep their translations: lupdate gives them new contexts (`WizardView`, `ReportView`, …), so
+  the translations were moved from the old dialog contexts (checked: no source/translation pair changed). New
+  strings: "Wizard" (rail), "Wizard: %1" (tab badge) and the J-Link firmware update toast; the terms follow
+  `i18n/GLOSSARY.md` (průvodce, Assistent, kreator, sprievodca).
 
