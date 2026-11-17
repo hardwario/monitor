@@ -168,12 +168,17 @@ TestCase {
         const current = AppViewModel.currentTab;
         AppViewModel.newTab();
         compare(AppViewModel.currentTab, current);
+        compare(AppViewModel.tabs.count, tabs); // no tab is added meanwhile
         verify(AppViewModel.toasts.indexOf("Wait until the J-Link firmware update has finished.") >= 0);
+        AppViewModel.openSettings("");
+        verify(!AppViewModel.tabs.settingsOpen);
+        compare(AppViewModel.globalPage, "");
+        AppViewModel.closeTab(current);
+        compare(AppViewModel.tabs.count, tabs);
         AppViewModel.showPage("flash"); // the rail does not replace it either
         compare(AppViewModel.overlayView, "probeFirmware");
+        verify(!find("probeChip").enabled); // the device bar waits: its probe is reserved
         waitIdle();
-        if (AppViewModel.tabs.count > tabs)
-            AppViewModel.closeTab(AppViewModel.tabs.count - 1);
         AppViewModel.showPage("console");
         // ADR-0256: the tab connects again.
         tryVerify(() => tab().state === DeviceTabViewModel.Connected

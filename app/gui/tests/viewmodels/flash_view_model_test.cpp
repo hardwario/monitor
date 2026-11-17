@@ -1415,6 +1415,63 @@ TEST_F(FlashTest, LteUpdateWizardCancelBeforeContinueChangesNothing) {
     ASSERT_TRUE(waitFor([this] { return tab().state() == DeviceTabViewModel::Connected; }));
 }
 
+// Plan 0052 (ADR-0386): one wizard per tab - two tabs run the LTE update guide at the same time,
+// each on its own probe and session, independently.
+TEST_F(FlashTest, TwoTabsRunTheLteUpdateGuideAtOnce) {
+    moveCable("app");
+    const std::string connector = (root() / "connector").generic_string();
+    const auto probe = [&connector](int serial) {
+        return std::string(R"({"serialNumber": )") + std::to_string(serial) +
+               R"(, "product": "Test Probe", "firmware": "J-Link V11 compiled Sep 21 2023 10:38:43",
+            "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted\n"}]},
+            "connectors": {"file": ")" +
+               connector +
+               R"(", "chips": {"app": {"memory": [{"address": 4096, "hex": "a5a5a5a5"}]},
+            "lte": {"family": "nrf91"}}}})";
+    };
+    start(R"({"libraryVersion": 81000, "probes": [)" + probe(801000001) + ", " + probe(801000002) +
+          "]}");
+    DeviceTabViewModel& first = tab();
+    app().newTab();
+    DeviceTabViewModel& second = tab();
+    ASSERT_NE(&first, &second);
+    ASSERT_TRUE(second.configure(QStringLiteral("chester"), QStringLiteral("app"), 801000002,
+                                 QStringLiteral("Test Probe")));
+
+    first.openWizard(QStringLiteral("lte-update"));
+    second.openWizard(QStringLiteral("lte-update"));
+    auto* one = qobject_cast<hwio::gui::LteUpdateWizard*>(first.wizard()->wizard());
+    auto* two = qobject_cast<hwio::gui::LteUpdateWizard*>(second.wizard()->wizard());
+    ASSERT_NE(one, nullptr);
+    ASSERT_NE(two, nullptr);
+    ASSERT_NE(one, two);
+    EXPECT_EQ(first.wizard()->tab(), &first);
+    EXPECT_EQ(second.wizard()->tab(), &second);
+    ASSERT_NE(one->lteSource(), two->lteSource());
+
+    for (hwio::gui::LteUpdateWizard* wizard : {one, two}) {
+        wizard->lteSource()->setLteSource(FirmwareSourceViewModel::OwnFile);
+        ASSERT_TRUE(loadInto(*wizard->lteSource(), hexFile("lte.hex")));
+        ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
+        wizard->primary();
+    }
+    ASSERT_TRUE(reachStage(*one, hwio::gui::LteUpdateWizard::Confirm));
+    ASSERT_TRUE(reachStage(*two, hwio::gui::LteUpdateWizard::Confirm));
+    EXPECT_TRUE(first.isBusy()); // each guide pauses its own tab
+    EXPECT_TRUE(second.isBusy());
+
+    // Cancelling one guide leaves the other where it is.
+    second.wizard()->cancel(false); // no question before Continue
+    EXPECT_FALSE(second.wizard()->isOpen());
+    EXPECT_TRUE(first.wizard()->isOpen());
+    EXPECT_EQ(one->stage(), hwio::gui::LteUpdateWizard::Confirm);
+    ASSERT_TRUE(waitFor([&] { return !second.isBusy(); }));
+    EXPECT_TRUE(first.isBusy());
+    first.wizard()->cancel(false);
+    EXPECT_FALSE(first.wizard()->isOpen());
+    ASSERT_TRUE(waitFor([&] { return !first.isBusy(); }));
+}
+
 // ADR-0368: in a remote LTE update support answers Continue; the customer's wizard shows the
 // explanation without a button, and the copy of the application is written back automatically.
 // A no cancels before anything changed.

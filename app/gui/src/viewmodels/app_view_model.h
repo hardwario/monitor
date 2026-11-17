@@ -360,7 +360,11 @@ private:
     // "open-settings[:<section>]".
     void onHandOff(const QString& action, DeviceTabViewModel* tab);
     // Plan 0052: the open content view.
-    [[nodiscard]] bool overlayBusy() const;    // it runs an operation
+    [[nodiscard]] bool overlayBusy() const; // it runs an operation
+    // The J-Link firmware update writes: tab changes are refused (with a toast, true).
+    [[nodiscard]] bool tabSwitchBlocked();
+    // The J-Link firmware update view is open (its probe is reserved): no connect / reconnect.
+    [[nodiscard]] bool probeFirmwareShown() const;
     [[nodiscard]] bool overlayCurrent() const; // it belongs to the current tab
     void setOverlay(const QString& viewId);    // "" = none; the owner is the current tab
     void syncOverlay();                        // the report, the firmware update, the mode choice

@@ -608,9 +608,7 @@ void AppViewModel::setCurrentTab(int index) {
     }
     // Plan 0052 (ADR-0387): the J-Link firmware update keeps its tab while it writes (the probe is
     // busy; the dialog could not be left either). Not when a tab was removed (m_currentTab = -1).
-    if (index != m_currentTab && m_currentTab >= 0 && m_overlayId == probeFirmwareView &&
-        overlayBusy()) {
-        showToast(tr("Wait until the J-Link firmware update has finished."));
+    if (index != m_currentTab && m_currentTab >= 0 && tabSwitchBlocked()) {
         return;
     }
     if (index < m_tabs->count()) {
@@ -675,6 +673,19 @@ bool AppViewModel::overlayCurrent() const {
     }
     return !m_overlayTab.isNull() && globalPage().isEmpty() &&
            currentTabViewModel() == m_overlayTab.data();
+}
+
+bool AppViewModel::tabSwitchBlocked() {
+    if (m_overlayId != probeFirmwareView || !overlayBusy()) {
+        return false;
+    }
+    showToast(tr("Wait until the J-Link firmware update has finished."));
+    return true;
+}
+
+bool AppViewModel::probeFirmwareShown() const {
+    return m_overlayId == probeFirmwareView && m_probeFirmware != nullptr &&
+           m_probeFirmware->state() != ProbeFirmwareViewModel::Idle;
 }
 
 bool AppViewModel::overlayBusy() const {
@@ -908,7 +919,7 @@ bool AppViewModel::joinRemoteSession(const QString& text, bool allowForeignRelay
 }
 
 void AppViewModel::newTab() {
-    if (!m_tabs->canAdd()) {
+    if (!m_tabs->canAdd() || tabSwitchBlocked()) { // plan 0052: no tab is added meanwhile
         return;
     }
     if (addTab(makeTab()) != nullptr) {
@@ -921,6 +932,9 @@ DeviceTabViewModel* AppViewModel::appendTab() {
 }
 
 void AppViewModel::closeTab(int index, bool force) {
+    if (index == m_currentTab && tabSwitchBlocked()) { // plan 0052: the updating tab stays
+        return;
+    }
     if (index >= 0 && index == m_tabs->settingsRow()) {
         closeSettings(); // 0021 (ADR-0172)
         return;
@@ -1056,6 +1070,9 @@ void AppViewModel::openGlobalPage(const QString& pageId) {
 void AppViewModel::closeGlobalPage() { closeSettings(); }
 
 void AppViewModel::openSettings(const QString& sectionId, const QString& rowId) {
+    if (m_currentTab != m_tabs->settingsRow() && tabSwitchBlocked()) { // plan 0052
+        return;
+    }
     m_tabs->openSettings();
     setCurrentTab(m_tabs->settingsRow());
     // Plan 0045 (ADR-0361): a section or row hidden by the mode is shown for this visit.
@@ -1089,12 +1106,18 @@ QObject* AppViewModel::globalPageViewModel(const QString& pageId) const {
 }
 
 void AppViewModel::toggleConnection() const {
+    if (probeFirmwareShown()) { // plan 0052: its probe is reserved for the update
+        return;
+    }
     if (DeviceTabViewModel* tab = currentTabViewModel(); tab != nullptr && !tab->choosing()) {
         tab->connection()->toggleConnection();
     }
 }
 
 void AppViewModel::reconnect() const {
+    if (probeFirmwareShown()) { // plan 0052
+        return;
+    }
     if (DeviceTabViewModel* tab = currentTabViewModel(); tab != nullptr && !tab->choosing()) {
         tab->reconnect();
     }
