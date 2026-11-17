@@ -95,7 +95,9 @@ konektoru LTE) vás proto provede celým postupem:
 7. **Aplikace**: zapíše se zpět kopie (výchozí), nebo zvolte firmware z katalogu či ze souboru.
 8. **Hotovo**: aplikace znovu běží a konzole se znovu připojí.
 
-Během průvodce je konzole karty pozastavená (**Pozastaveno kvůli aktualizaci firmwaru LTE**). Zrušit lze kdykoli kromě
+Průvodce nahradí plochu stránky karty; mezitím se můžete podívat do konzole a vrátit se tlačítkem **Průvodce** nahoře
+v liště ([Průvodci a další zobrazení](getting-started.md#průvodci-a-další-zobrazení)). Během průvodce je konzole karty
+pozastavená (**Pozastaveno kvůli aktualizaci firmwaru LTE**). Zrušit lze kdykoli kromě
 zápisu do MCU. Po kroku 3 se průvodce nejprve zeptá: **Aplikační MCU je smazaný. Zapsat nejdřív aplikaci zpět?**
 
 - **Zapsat zpět**: průvodce požádá o J-Link na konektoru APP, zapíše kopii zpět a skončí zprávou **Firmware LTE nebyl

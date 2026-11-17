@@ -99,7 +99,9 @@ v banneri, keď je J-Link na konektore LTE) vás preto prevedie celým postupom:
 7. **Application** (aplikácia): zapíše sa späť kópia (predvolené), alebo zvoľte firmvér z katalógu alebo zo súboru.
 8. **Done** (hotovo): aplikácia znova beží a konzola sa znova pripojí.
 
-Kým sprievodca beží, konzola karty je pozastavená (**Paused for the LTE firmware update**). Zrušiť sa dá kedykoľvek
+Sprievodca nahradí plochu stránky karty; medzitým sa môžete pozrieť do konzoly a vrátiť sa cez **Wizard** (sprievodca)
+hore v lište ([Sprievodcovia a ďalšie zobrazenia](getting-started.md#sprievodcovia-a-ďalšie-zobrazenia)). Kým
+sprievodca beží, konzola karty je pozastavená (**Paused for the LTE firmware update**). Zrušiť sa dá kedykoľvek
 okrem zápisu do MCU. Po kroku 3 sa sprievodca najprv spýta: **The application MCU is erased. Write the application
 back first?** (Aplikačný MCU je vymazaný. Najprv zapísať aplikáciu späť?)
 

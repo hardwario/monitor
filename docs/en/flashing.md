@@ -97,7 +97,9 @@ when the J-Link is on the LTE connector) therefore guides you through the whole 
 7. **Application**: the copy is written back (default), or choose firmware from the catalog or a file.
 8. **Done**: the application runs again and the console reconnects.
 
-While the guide runs, the tab's console is paused (**Paused for the LTE firmware update**). Cancel works except while
+The guide replaces the page area of the tab; you can look at the console meanwhile and come back with **Wizard** at the
+top of the rail ([Guides and other views](getting-started.md#guides-and-views)). While the guide runs, the tab's
+console is paused (**Paused for the LTE firmware update**). Cancel works except while
 the MCU is being written. After step 3 it asks first: **The application MCU is erased. Write the application back
 first?**
 

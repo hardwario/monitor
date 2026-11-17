@@ -316,7 +316,7 @@ W systemie Linux częstą przyczyną jest brak uprawnień USB; zobacz [Dostęp U
 - **Probably:** The J-Link firmware differs from the firmware bundled with the J-Link Software.
 - **What to do:** Run `hwio jlink update-firmware`.
 
-To jest ostrzeżenie; J-Link nadal działa. `hwio doctor` również je zgłasza. W HARDWARIO Monitor pasek nad konsolą oferuje **Rozłącz i zaktualizuj…**: karta się rozłącza, okno dialogowe pokazuje obecne i nowe firmware, a po **Aktualizuj** J-Link zostaje zaktualizowany (ok. 10–30 s; nie odłączaj go) i karta łączy się ponownie. **Nie teraz** ukrywa pasek dla tego J-Linka do zamknięcia aplikacji. Gdy firmware sondy jest nowsze niż biblioteka, komunikat brzmi „The J-Link firmware is newer than the J-Link library.” W takim przypadku zaktualizuj zamiast tego J-Link Software.
+To jest ostrzeżenie; J-Link nadal działa. `hwio doctor` również je zgłasza. W HARDWARIO Monitor pasek nad konsolą oferuje **Rozłącz i zaktualizuj…**: karta się rozłącza, strona pokazuje obecne i nowe firmware, a po **Aktualizuj** J-Link zostaje zaktualizowany (ok. 10–30 s; nie odłączaj go) i karta łączy się ponownie. **Nie teraz** ukrywa pasek dla tego J-Linka do zamknięcia aplikacji. Gdy firmware sondy jest nowsze niż biblioteka, komunikat brzmi „The J-Link firmware is newer than the J-Link library.” W takim przypadku zaktualizuj zamiast tego J-Link Software.
 
 <a id="probe.firmware_update_failed"></a>
 #### `probe.firmware_update_failed`
