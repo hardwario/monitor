@@ -7,8 +7,10 @@
 //                                     NDJSON progress lines and a task_end result
 //
 // Behaviour from the environment:
-//   HWIO_FAKE_NRFUTIL_MODE  ok (default) | fail | hang | flood | nodevice | old | slowversion
-//                          (slowversion: `--version` answers after 30 s)
+//   HWIO_FAKE_NRFUTIL_MODE  ok (default) | fail | lowvoltage | hang | flood | nodevice | old |
+//                          slowversion (slowversion: `--version` answers after 30 s; lowvoltage:
+//                          the output of rc.4 issue #9, "Failed to configure Coresight:
+//                          LOW_VOLTAGE")
 //   HWIO_FAKE_NRFUTIL_LOG   a file; every invocation appends its arguments as one line
 //   HWIO_FAKE_NRFUTIL_STEP_MS  delay between progress lines (default 20)
 
@@ -45,6 +47,15 @@ int program(const std::string& mode) {
             std::cout << junk << '\n';
             std::cerr << junk << '\n';
         }
+    }
+    if (mode == "lowvoltage") { // plan 0051 (ADR-0383): nRF Util's output of issue #9
+        std::cout
+            << R"json({"type":"task_end","data":{"task":{"id":"1"},"result":"fail","message":"Failed, Device error: Failed to configure Coresight: LOW_VOLTAGE"}})json"
+            << '\n'
+            << std::flush;
+        std::cerr << "Error: One or more program tasks failed:\n * 822005110: Device error: Failed "
+                     "to configure Coresight: LOW_VOLTAGE (Generic)\n";
+        return 1;
     }
     for (int percent = 0; percent <= 100; percent += 25) {
         progressLine(percent);

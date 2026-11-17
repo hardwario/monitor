@@ -21,6 +21,12 @@
 //   ChooseApplication restoreApplication(): the copy (default) or another image; skipped with
 //                     Options::autoRestore when there is a copy
 //   Restore           flash(app) - programs, verifies and resets (the application runs)
+//   OfferRestore      plan 0051 (ADR-0381): cancel() after the erase with a copy asks whether to
+//                     write the application back first: restoreAfterCancel() (ConnectAppAgain →
+//                     Restore → Cancelled with the application written back; ChooseApplication is
+//                     skipped) or leaveErased() (Cancelled, erased). With
+//                     Options::restoreOnCancel (remote, ADR-0368) cancel() writes back without
+//                     asking. A second cancel() on the way back ends erased.
 //   Done | Failed | Cancelled
 // The session is held (SessionHold, D4) from start() until Done or Cancelled (and while this
 // object lives): RTT and auto-reconnect are paused; releasing the hold reconnects the console.
@@ -79,6 +85,7 @@ public:
         ConnectAppAgain,
         ChooseApplication,
         Restore,
+        OfferRestore, // plan 0051 (ADR-0381)
         Done,
         Failed,
         Cancelled,
@@ -99,6 +106,9 @@ public:
         std::chrono::milliseconds pollInterval{1000};
         std::filesystem::path backupDirectory; // empty = ApplicationBackup::defaultDirectory()
         bool autoRestore = false;              // CLI: write the copy back without waiting
+        // ADR-0381 / ADR-0368: a cancel after the erase writes the copy back without OfferRestore
+        // (a remote-started update: support decides, the copy is always written back).
+        bool restoreOnCancel = false;
         // Test seam: the time in the backup's file name (system_clock::now by default).
         std::function<std::chrono::system_clock::time_point()> now;
     };
@@ -122,8 +132,13 @@ public:
     [[nodiscard]] Status
     restoreApplication(std::shared_ptr<const firmware::FirmwareImage> image = nullptr,
                        FlashOptions options = {});
-    // Refused (false) while Erase, UpdateLte or Restore runs and after the end.
+    // Refused (false) while Erase, UpdateLte or Restore runs and after the end. After the erase
+    // with a copy: OfferRestore (or, autoRestore, the write-back), else Cancelled.
     bool cancel();
+    // OfferRestore (ADR-0381): write the copy back, then end as Cancelled.
+    void restoreAfterCancel();
+    // OfferRestore (ADR-0381): end as Cancelled with the application MCU erased.
+    void leaveErased();
     // Failed after Erase, UpdateLte or Restore: back to that step's connector step.
     void retry();
 
@@ -137,7 +152,17 @@ public:
     // The application MCU was erased by this procedure and nothing was written back yet.
     [[nodiscard]] bool applicationErased() const noexcept { return m_erased; }
     [[nodiscard]] bool hasBackup() const noexcept { return !m_backupFile.empty(); }
+    // Cancelled after the copy was written back (ADR-0381); the write-back after a cancel runs
+    // (restoringAfterCancel).
+    [[nodiscard]] bool writtenBack() const noexcept {
+        return m_step == Step::Cancelled && m_restoreAfterCancel && !m_erased;
+    }
+    [[nodiscard]] bool restoringAfterCancel() const noexcept { return m_restoreAfterCancel; }
+    // The LTE MCU was updated (UpdateLte succeeded).
+    [[nodiscard]] bool lteUpdated() const noexcept { return m_lteUpdated; }
     [[nodiscard]] const std::filesystem::path& backupFile() const noexcept { return m_backupFile; }
+    // The device's serial number read from the PIB before the copy ("" = unknown).
+    [[nodiscard]] const std::string& serial() const noexcept { return m_serial; }
     // The connector step found the other MCU (the cable is on the wrong connector).
     [[nodiscard]] bool wrongConnector() const noexcept { return m_wrongConnector; }
     // The text of the current step (translated): the connector prompt, "Saving a copy of the
@@ -155,6 +180,8 @@ public:
     [[nodiscard]] std::string_view lteTargetId() const noexcept;
 
     [[nodiscard]] static std::string_view stepId(Step step) noexcept; // "connect-app", ... (logs)
+    // ADR-0381: the question of OfferRestore (translated).
+    [[nodiscard]] static QString offerRestoreText();
 
 signals:
     void changed();         // step, prompt, error
@@ -174,6 +201,8 @@ private:
     void startRestore();
     void afterConnector();
     void endHold();
+    void endCancelled();
+    void startRestoreAfterCancel();
     void cancelRunning();
     // The connector step that precedes an operation step.
     [[nodiscard]] static Step connectorStepBefore(Step step) noexcept;
@@ -197,6 +226,8 @@ private:
     bool m_erased = false;
     bool m_erasedBefore = false; // m_erased when the current erase started
     bool m_backupSkipped = false;
+    bool m_lteUpdated = false;         // UpdateLte succeeded
+    bool m_restoreAfterCancel = false; // ADR-0381: the write-back after a cancel
     std::optional<Error> m_error;
     OperationProgress m_progress;
     QTimer m_pollTimer;
@@ -208,6 +239,7 @@ private:
     bool m_backupCheck = false; // an identify after a failed backup read is in flight
     std::vector<std::byte> m_backupData;
     std::filesystem::path m_backupFile;
+    std::shared_ptr<const firmware::FirmwareImage> m_backupImage; // the copy (ADR-0381)
     std::shared_ptr<const firmware::FirmwareImage> m_restoreImage;
     FlashOptions m_restoreOptions;
 };
