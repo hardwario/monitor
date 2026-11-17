@@ -170,6 +170,9 @@ Small choices made while implementing (not architectural; listed for the review)
   views themselves (`ReportViewModel::show()` from the Help menu or the crash notice, the firmware banner), so
   `AppViewModel` follows their state; `openView("report")` starts collecting. `shortcutOverlayVisible` stays as the
   property of the "shortcuts" view (F1, Ctrl+/, tests).
+- **A3** The content views are hosted per page area (`ContentViewHost` in each tab's `PageHost`, and one over the
+  Settings page in `Main.qml`) instead of one Loader in `Main.qml` over the whole stack: so the device bar and the
+  remote banner of the tab stay visible, and only the current tab's host instantiates the view.
 - **A3** "Runs an operation" = the report collecting or saving, the J-Link firmware update writing. While it writes,
   a tab switch is refused with the toast "Wait until the J-Link firmware update has finished." (new string), and the
   rail does not replace the view either; while the report collects a rail click is ignored (its Cancel is in the
