@@ -162,8 +162,9 @@ Small choices made while implementing (not architectural; listed for the review)
 - **A2** The wizard's Cancel confirmation (`ConfirmDialog`) is centred over the wizard view (its parent).
 - **A2** Global wizards are shown by `ContentViewHost` in the page area of the current tab (or over Settings); a tab
   switch does not close them (they are app-wide; a second one is refused).
-- **A2** `ViewFrame`'s header and footer layouts set `Layout.fillHeight: false` (nested layouts fill by default), so
-  the content takes all free height; the tests check the content height at 960 × 600.
+- **A2** `ViewFrame`'s header and footer layouts set `Layout.fillWidth: false` and `Layout.fillHeight: false` (nested
+  layouts fill by default), so they keep the centred column width and the content takes all free height; the tests
+  check the content height at 960 × 600.
 - **A3** `AppViewModel.overlayView` is the id of the open view only while its tab (or the Settings tab) is current;
   internally the view remembers its tab (`QPointer`). The report and the J-Link firmware update open and close their
   views themselves (`ReportViewModel::show()` from the Help menu or the crash notice, the firmware banner), so
