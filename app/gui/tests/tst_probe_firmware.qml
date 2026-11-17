@@ -173,8 +173,6 @@ TestCase {
         AppViewModel.openSettings("");
         verify(!AppViewModel.tabs.settingsOpen);
         compare(AppViewModel.globalPage, "");
-        AppViewModel.closeTab(current);
-        compare(AppViewModel.tabs.count, tabs);
         AppViewModel.showPage("flash"); // the rail does not replace it either
         compare(AppViewModel.overlayView, "probeFirmware");
         verify(!find("probeChip").enabled); // the device bar waits: its probe is reserved

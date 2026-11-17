@@ -124,12 +124,7 @@ DeviceTabViewModel::DeviceTabViewModel(TabContext context, QObject* parent)
     // Plan 0044: sharing this console / the joiner state (children, Qt parent ownership).
     m_remoteShare = new RemoteShareViewModel(this); // NOLINT(cppcoreguidelines-owning-memory)
     m_remoteJoin = new RemoteJoinViewModel(this);   // NOLINT(cppcoreguidelines-owning-memory)
-    // Plan 0052 (ADR-0386): the tab's wizard (a child, Qt parent ownership).
-    m_wizard = new WizardViewModel( // NOLINT(cppcoreguidelines-owning-memory)
-        m_context.wizards != nullptr ? *m_context.wizards : emptyWizardRegistry(), this,
-        [this](const QString& text) { copyToClipboard(text); }); // ADR-0202
-    connect(m_wizard, &WizardViewModel::openChanged, this,
-            &DeviceTabViewModel::onWizardOpenChanged);
+    createWizard();
 
     if (m_context.pages != nullptr) {
         for (const PageDescriptor& page : m_context.pages->pages()) {
@@ -174,6 +169,15 @@ void DeviceTabViewModel::createBlePicker() {
                     connectDevice();
                 }
             });
+}
+
+// Plan 0052 (ADR-0386): the tab's wizard (a child, Qt parent ownership).
+void DeviceTabViewModel::createWizard() {
+    m_wizard = new WizardViewModel( // NOLINT(cppcoreguidelines-owning-memory)
+        m_context.wizards != nullptr ? *m_context.wizards : emptyWizardRegistry(), this,
+        [this](const QString& text) { copyToClipboard(text); }); // ADR-0202
+    connect(m_wizard, &WizardViewModel::openChanged, this,
+            &DeviceTabViewModel::onWizardOpenChanged);
 }
 
 DeviceTabViewModel::~DeviceTabViewModel() { shutdown(); }

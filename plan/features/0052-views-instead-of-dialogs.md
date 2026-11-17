@@ -196,8 +196,9 @@ Small choices made while implementing (not architectural; listed for the review)
   `i18n/GLOSSARY.md` (průvodce, Assistent, kreator, sprievodca).
 - **C2 review** Things the modal dialogs used to block: page shortcuts follow the page's visibility, so they are off
   under a view (Flash Ctrl+Enter, the console's); while the J-Link firmware update view is open its probe is reserved,
-  so the device bar is disabled and Ctrl+Shift+D / F4 do nothing; while it writes, a new tab, the Settings tab and
-  closing the tab are refused with the same toast as a tab switch. The device bar stays usable during a wizard (D-2);
+  so the device bar is disabled and Ctrl+Shift+D / F4 do nothing; while it writes, a new tab and the Settings tab are
+  refused with the same toast as a tab switch. Closing the tab stays possible (as for MCP before, test
+  `ProbeFirmwareTest.TabClosedDuringTheUpdate`): the update goes on and its view moves to the tab shown next. The device bar stays usable during a wizard (D-2);
   the wizards already guard their operations by the tab's busy state.
 - **C2 review** Two LTE update guides in two tabs run independently (test `TwoTabsRunTheLteUpdateGuideAtOnce`, two
   fake probes). Risks line "a probe picker in one wizard must not offer the probe of another tab": no registered

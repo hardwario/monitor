@@ -365,6 +365,7 @@ private:
     [[nodiscard]] Status openBleSession();
     [[nodiscard]] Status openRemoteSession(); // plan 0044
     void createBlePicker();
+    void createWizard(); // plan 0052
     // Connects the signals of a new session (either transport) and publishes it.
     void adoptSession(device::ConsoleSession& session);
     [[nodiscard]] Status promoteSession();

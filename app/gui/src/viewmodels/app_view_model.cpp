@@ -932,9 +932,6 @@ DeviceTabViewModel* AppViewModel::appendTab() {
 }
 
 void AppViewModel::closeTab(int index, bool force) {
-    if (index == m_currentTab && tabSwitchBlocked()) { // plan 0052: the updating tab stays
-        return;
-    }
     if (index >= 0 && index == m_tabs->settingsRow()) {
         closeSettings(); // 0021 (ADR-0172)
         return;
