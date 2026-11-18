@@ -133,7 +133,12 @@ update and back, every content view at 960 × 600 in Czech, keyboard only (Tab /
 
 ## Implementation notes
 
-Small choices made while implementing (not architectural; listed for the review).
+Small choices made while implementing (not architectural; listed for the review). Confirmed by the user on
+2026-11-18: the mode choice keeps its preselection however it is left; the tab updating the J-Link firmware can
+still be closed (the update goes on, its view moves to the next tab); the global wizard stays open across tab
+switches; while choosing a device with a wizard shown the other rail items stay disabled; automatic tab switches
+(remote question, MCP) close an idle content view; the device bar stays usable during a wizard; the Wizard rail
+entry and tab badge use the existing `info` icon.
 
 - **A1** The tab owns its `WizardViewModel` (a Qt child, created from `TabContext::wizards`, the application's
   `WizardRegistry`; a tab built without one gets an empty registry). `DeviceTabViewModel::shutdown()` closes the
