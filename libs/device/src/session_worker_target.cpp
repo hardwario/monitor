@@ -119,7 +119,8 @@ Result<std::vector<MemoryZone>> runMemoryZones(WorkflowContext& context) {
 
 Result<jlink::ChipInfo> runWriteFlash(WorkflowContext& context,
                                       const firmware::FirmwareImage& image, bool allowUicr) {
-    return runFlash(context, image, FlashOptions{.halt = false, .allowUicr = allowUicr});
+    return runFlash(context, image,
+                    FlashOptions{.halt = false, .allowUicr = allowUicr, .guided = false});
 }
 
 } // namespace hwio::device::detail

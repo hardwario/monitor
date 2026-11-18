@@ -194,6 +194,16 @@ QString WizardViewModel::cancelAcceptText() const {
     return !m_wizard.isNull() ? m_wizard->cancelAcceptText() : QString();
 }
 
+QString WizardViewModel::cancelAlternativeText() const {
+    return !m_wizard.isNull() ? m_wizard->cancelAlternativeText() : QString();
+}
+
+void WizardViewModel::cancelAlternative() {
+    if (!m_wizard.isNull() && m_wizard->canCancel() && !cancelAlternativeText().isEmpty()) {
+        m_wizard->cancelAlternative();
+    }
+}
+
 QString WizardViewModel::cancelRejectText() const {
     return !m_wizard.isNull() ? m_wizard->cancelRejectText() : QString();
 }

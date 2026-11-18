@@ -184,7 +184,9 @@ TestCase {
     function test_illustrationSlotsResolve() {
         for (const slot of ["jlink-usb", "chester-app-cable", "chester-lte-cable", "chester-power", "placeholder"]) {
             const item = createTemporaryObject(illustrationComponent, testCase, { slot: slot });
-            verify(String(item.source).endsWith("/" + slot + ".svg"), slot);
+            // Plan 0051 (ADR-0380): the cable slots have a dark variant.
+            verify(String(item.source).endsWith("/" + slot + ".svg") || String(item.source).endsWith("/" + slot + "-dark.svg"),
+                   slot + ": " + item.source);
             const image = findChild(item, "illustrationImage");
             tryCompare(image, "status", Image.Ready);
         }

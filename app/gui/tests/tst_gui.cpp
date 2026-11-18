@@ -557,6 +557,12 @@ public:
                           {.name = "application.hex", .data = file.readAll().toStdString()}}));
     }
 
+    // Plan 0051: a text file in the test folder (e.g. the fake J-Link's connector file); its
+    // local path.
+    Q_INVOKABLE [[nodiscard]] QString writeText(const QString& name, const QString& text) const {
+        return write(name, text.toUtf8()).toLocalFile();
+    }
+
     Q_INVOKABLE [[nodiscard]] QUrl writeModemZip() const {
         return write(
             QStringLiteral("mfw_nrf91x1_2.0.2.zip"),

@@ -108,12 +108,18 @@ public:
     IModemUpdater& operator=(IModemUpdater&&) = delete;
 
     // Programs the modem firmware zip through the probe `probeSn` (our session has released the
-    // probe). Progress phase Modem. Errors: firmware.modem_update_failed, timeout, cancelled.
+    // probe). Progress phase Modem. Errors: firmware.modem_update_failed, target.low_voltage
+    // (modemFailureCode), timeout, cancelled.
     [[nodiscard]] virtual Status updateModem(const std::filesystem::path& modemZip,
                                              std::uint32_t probeSn,
                                              const firmware::ProgressFn& progress,
                                              std::stop_token stop) = 0;
 };
+
+// Plan 0051 (ADR-0383): the error code of a failed `device program` from its output (the JSON
+// message and the stderr tail): target.low_voltage when nRF Util reports LOW_VOLTAGE (e.g. "Failed
+// to configure Coresight: LOW_VOLTAGE"), else firmware.modem_update_failed.
+[[nodiscard]] ErrorCode modemFailureCode(std::string_view output) noexcept;
 
 struct ModemUpdaterTiming {
     std::chrono::milliseconds overallTimeout{std::chrono::minutes(10)};

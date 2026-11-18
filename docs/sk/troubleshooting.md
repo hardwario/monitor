@@ -96,7 +96,12 @@ Kód chyby: [`target.other_connector`](#target.other_connector).
 
 Obyčajná aktualizácia LTE (`hwio chester lte flash` alebo balík, firmvér modemu či aplikácie pre LTE MCU) nechá aplikáciu na aplikačnom MCU bežať. Keď LTE MCU chvíľu neodpovedá, aplikačný firmvér CHESTER ho resetuje cez jeho resetovací pin a aktualizácia sa preruší. Aplikácia potom prečíta dôvod resetu LTE MCU a nahlási **The LTE MCU was reset during the update.** Použite namiesto toho sprievodcu: **Update LTE firmware…** na stránke **Flash** alebo `hwio chester lte flash --guided`. Sprievodca uloží kópiu aplikácie, vymaže ju, aktualizuje LTE MCU a aplikáciu zapíše späť. Pozrite si [aktualizáciu LTE firmvéru](flashing.md#aktualizácia-lte-firmvéru).
 
-Kód chyby: [`target.reset_during_update`](#target.reset_during_update).
+V sprievodcovi aktualizáciou sa aplikácia najprv vymaže, takže LTE MCU resetovať nemôže: neúspešný krok si tam
+ponechá vlastnú chybu (dôvod resetu sa len zapíše do záznamu). Keď nRF Util nahlási **LOW_VOLTAGE** (napríklad "Failed
+to configure Coresight: LOW_VOLTAGE"), chyba je [`target.low_voltage`](#target.low_voltage): skontrolujte napájanie
+alebo batérie zariadenia CHESTER a kábel J-Link na konektore LTE a potom kliknite na **Try again** (skúsiť znova).
+
+Kódy chýb: [`target.reset_during_update`](#target.reset_during_update), [`target.low_voltage`](#target.low_voltage).
 
 <a id="remote-support-session-problems"></a>
 ### Problémy s reláciou vzdialenej podpory
@@ -483,7 +488,17 @@ Na zariadení CHESTER správa znie "The J-Link is connected to the LTE MCU.", pr
 - **Probably:** The application firmware on the application MCU reset the LTE MCU through its reset pin while the LTE MCU was being updated.
 - **What to do:** Use the guided update, which stops the application first: Flash › Update LTE firmware… in the desktop app, or `hwio chester lte flash --guided`.
 
-Po neúspešnom kroku aktualizácie LTE bol v registri dôvodu resetu LTE MCU nastavený bit resetovacieho pinu. Podrobnosti obsahujú pôvodnú chybu (napríklad `target.program_failed` alebo `firmware.modem_update_failed`) a hodnotu registra. Pozrite si [Aktualizácia LTE zlyhá: LTE MCU bol resetovaný](#the-lte-update-fails-the-lte-mcu-was-reset).
+Po neúspešnom kroku aktualizácie LTE bol v registri dôvodu resetu LTE MCU nastavený bit resetovacieho pinu. Podrobnosti obsahujú pôvodnú chybu (napríklad `target.program_failed` alebo `firmware.modem_update_failed`) a hodnotu registra. Pozrite si [Aktualizácia LTE zlyhá: LTE MCU bol resetovaný](#the-lte-update-fails-the-lte-mcu-was-reset). Hlási ju len obyčajná aktualizácia LTE; v sprievodcovi aktualizáciou zostane pôvodná chyba.
+
+<a id="target.low_voltage"></a>
+#### `target.low_voltage`
+
+**The LTE MCU reports too low supply voltage.**
+
+- **Probably:** The CHESTER is not powered enough (battery, power supply) or the J-Link cable does not connect the supply reference.
+- **What to do:** Check the power supply or batteries of the CHESTER and the J-Link cable on the connector, then try again.
+
+nRF Util nahlásil LOW_VOLTAGE pri programovaní firmvéru modemu ("Failed to configure Coresight: LOW_VOLTAGE"); jeho výstup je v **Details**. V sprievodcovi aktualizáciou znie odporúčanie "Check the power supply of the CHESTER and the J-Link cable on the LTE connector, then click Try again."
 
 <a id="target.protected"></a>
 #### `target.protected`
@@ -724,7 +739,7 @@ Zobrazí sa, keď nahrávate firmvér podľa 32-znakového ID firmvéru. Správa
 - **Probably:** The modem firmware zip is wrong, the connection was lost, or nRF Util reported an error (see Details).
 - **What to do:** Check the cable and power, then flash the modem firmware again.
 
-Firmvér LTE modemu zapisuje nRF Util; jeho výstup je v **Details**. Pozrite si [Nordic nRF Util](install.md#nordic-nrf-util-len-firmvér-lte-modemu).
+Firmvér LTE modemu zapisuje nRF Util; jeho výstup je v **Details**. Pozrite si [Nordic nRF Util](install.md#nordic-nrf-util-len-firmvér-lte-modemu). V sprievodcovi aktualizáciou znie odporúčanie "Check the power supply of the CHESTER and the J-Link cable on the LTE connector, then click Try again."
 
 <a id="firmware.checksum_mismatch"></a>
 #### `firmware.checksum_mismatch`

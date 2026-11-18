@@ -101,6 +101,10 @@ public:
     [[nodiscard]] virtual bool canCancel() const { return true; }
     [[nodiscard]] virtual QString cancelAcceptText() const { return {}; }
     [[nodiscard]] virtual QString cancelRejectText() const { return {}; }
+    // Plan 0051 (ADR-0381): a third button of the Cancel confirmation ("" = none) and its action
+    // (e.g. the LTE update's "Write back": the wizard stays open and ends by itself).
+    [[nodiscard]] virtual QString cancelAlternativeText() const { return {}; }
+    virtual void cancelAlternative() {}
     virtual void cancelOperation() {}
     [[nodiscard]] virtual CheckListModel* checks() { return nullptr; }     // Checks steps
     [[nodiscard]] virtual QObject* embeddedViewModel() { return nullptr; } // Embedded steps
