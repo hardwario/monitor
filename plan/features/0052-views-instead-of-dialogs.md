@@ -231,3 +231,8 @@ Not done: the manual checks in the running app (two tabs with wizards on the fak
 during the LTE update and back, every content view at 960 × 600 in Czech with the keyboard only) — covered only by the
 Qt Quick tests and the screenshots; no screen reader was used (accessible names and roles are set as described).
 
+
+## Manual check (2026-11-18)
+
+The user tried the views in the running app (linux-debug, fake J-Link CHESTER with two connectors, fake BLE):
+looks good. Not done: real hardware, screen reader.
