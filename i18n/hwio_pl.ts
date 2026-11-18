@@ -327,100 +327,100 @@
         <translation>Dołącz do sesji wsparcia…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="134"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="130"/>
         <source>No J-Link probe found</source>
         <translation>Nie znaleziono programatora J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="135"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="131"/>
         <source>Connect the J-Link to USB and to the device.</source>
         <translation>Podłącz J-Link do USB i do urządzenia.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="136"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="273"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="132"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="269"/>
         <source>Refresh</source>
         <translation>Odśwież</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="152"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="148"/>
         <source>J-Link Software found (%1)</source>
         <translation>Znaleziono oprogramowanie J-Link (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="153"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="149"/>
         <source>J-Link Software not found</source>
         <translation>Nie znaleziono oprogramowania J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="168"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="164"/>
         <source>Is the USB cable connected?</source>
         <translation>Czy kabel USB jest podłączony?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="184"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="180"/>
         <source>Help me fix this</source>
         <translation>Pomóż mi to rozwiązać</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="185"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="194"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="181"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="190"/>
         <source>Coming soon</source>
         <translation>Wkrótce</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="222"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="218"/>
         <source>Choose a device to connect</source>
         <translation>Wybierz urządzenie do połączenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="230"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="226"/>
         <source>J-Link probes connected to this computer. The list refreshes automatically.</source>
         <translation>Programatory J-Link podłączone do tego komputera. Lista odświeża się automatycznie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="265"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="261"/>
         <source>Probe</source>
         <translation>Programator</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="289"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="285"/>
         <source>Looking for J-Link probes…</source>
         <translation>Wyszukiwanie programatorów J-Link…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="395"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="391"/>
         <source>FW %1</source>
         <translation>FW %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="411"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="407"/>
         <source>Updating firmware…</source>
         <translation>Aktualizacja firmware…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="412"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="408"/>
         <source>In use by another program (%1)</source>
         <translation>Używany przez inny program (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="413"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="409"/>
         <source>In use (tab %1)</source>
         <translation>W użyciu (karta %1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="451"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="470"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="447"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="466"/>
         <source>Device</source>
         <translation>Urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="497"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="493"/>
         <source>Choose a free probe in the list above.</source>
         <translation>Wybierz wolny programator z powyższej listy.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="510"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="506"/>
         <source>Connect</source>
         <translation>Połącz</translation>
     </message>
@@ -573,124 +573,124 @@
         <translation>Udostępnij wsparciu…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="283"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="277"/>
         <source>Reconnect</source>
         <translation>Połącz ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="293"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="287"/>
         <source>Batch…</source>
         <translation>Wsad…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="305"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="299"/>
         <source>Batch files — documentation</source>
         <translation>Pliki wsadowe — dokumentacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="315"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="309"/>
         <source>Clear</source>
         <translation>Wyczyść</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="318"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="312"/>
         <source>Opens the clear menu</source>
         <translation>Otwiera menu czyszczenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="325"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="615"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="319"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="609"/>
         <source>Shell</source>
         <translation>Powłoka</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="330"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="673"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="324"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="667"/>
         <source>Log</source>
         <translation>Dziennik</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="335"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="329"/>
         <source>Both</source>
         <translation>Oba</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="344"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="338"/>
         <source>Save view…</source>
         <translation>Zapisz widok…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="367"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="361"/>
         <source>Batch %1 / %2</source>
         <translation>Wsad %1 / %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="375"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="369"/>
         <source>Stop the batch</source>
         <translation>Zatrzymaj wsad</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="389"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="383"/>
         <source>Follow</source>
         <translation>Śledź</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="401"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="395"/>
         <source>Pause</source>
         <translation>Wstrzymaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="415"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="409"/>
         <source>More</source>
         <translation>Więcej</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="423"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="417"/>
         <source>Open log file</source>
         <translation>Otwórz plik dziennika</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="428"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="422"/>
         <source>Open log folder</source>
         <translation>Otwórz folder dzienników</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="435"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="429"/>
         <source>Show timestamps</source>
         <translation>Pokaż znaczniki czasu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="442"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="436"/>
         <source>Wrap lines</source>
         <translation>Zawijaj wiersze</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="449"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="443"/>
         <source>Swap panes</source>
         <translation>Zamień panele</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="456"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="450"/>
         <source>Stacked layout</source>
         <translation>Panele jeden pod drugim</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="502"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="496"/>
         <source>Not connected</source>
         <translation>Nie połączono</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="503"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="497"/>
         <source>Connect to see the device console.</source>
         <translation>Połącz się, aby zobaczyć konsolę urządzenia.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="504"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="498"/>
         <source>Connect</source>
         <translation>Połącz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="555"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="549"/>
         <source>Resize the shell and the log</source>
         <translation>Zmień rozmiar powłoki i dziennika</translation>
     </message>
@@ -995,32 +995,37 @@
 <context>
     <name>DeviceTabBar</name>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="18"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="19"/>
         <source>Device tabs</source>
         <translation>Karty urządzeń</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="179"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="203"/>
         <source>Close tab</source>
         <translation>Zamknij kartę</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="153"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="177"/>
         <source>AI</source>
         <translation>AI</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="166"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="50"/>
+        <source>Wizard: %1</source>
+        <translation>Kreator: %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="190"/>
         <source>Opened by %1</source>
         <translation>Otworzone przez %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="202"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="226"/>
         <source>New device</source>
         <translation>Nowe urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="218"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="242"/>
         <source>At most %1 devices can be open.</source>
         <translation>Można otworzyć najwyżej %1 urządzeń.</translation>
     </message>
@@ -1354,39 +1359,39 @@
     </message>
 </context>
 <context>
-    <name>JoinDialog</name>
+    <name>JoinView</name>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="25"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="22"/>
         <source>Join a support session</source>
         <translation>Dołącz do sesji wsparcia</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="53"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="39"/>
         <source>Type the session code the customer reads to you, or paste the link.</source>
         <translation>Wpisz kod sesji, który podaje Ci klient, albo wklej link.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="63"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="49"/>
         <source>482 913</source>
         <translation>482 913</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="65"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="51"/>
         <source>Session code or link</source>
         <translation>Kod sesji lub link</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="88"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="71"/>
         <source>This link uses another server: %1. Join on it anyway</source>
         <translation>Ten link używa innego serwera: %1. Mimo to dołącz na nim</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="101"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="82"/>
         <source>Join</source>
         <translation>Dołącz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="107"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="89"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
@@ -1455,28 +1460,28 @@
         <translation>HARDWARIO Monitor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="202"/>
+        <location filename="../app/gui/qml/Main.qml" line="195"/>
         <source>Close the tab?</source>
         <translation>Zamknąć kartę?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="203"/>
+        <location filename="../app/gui/qml/Main.qml" line="196"/>
         <source>Cancel and close</source>
         <translation>Anuluj i zamknij</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="204"/>
-        <location filename="../app/gui/qml/Main.qml" line="214"/>
+        <location filename="../app/gui/qml/Main.qml" line="197"/>
+        <location filename="../app/gui/qml/Main.qml" line="207"/>
         <source>Keep running</source>
         <translation>Kontynuuj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="212"/>
+        <location filename="../app/gui/qml/Main.qml" line="205"/>
         <source>Quit HARDWARIO Monitor?</source>
         <translation>Zakończyć HARDWARIO Monitor?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="213"/>
+        <location filename="../app/gui/qml/Main.qml" line="206"/>
         <source>Cancel and quit</source>
         <translation>Anuluj i zakończ</translation>
     </message>
@@ -1722,19 +1727,19 @@
     </message>
 </context>
 <context>
-    <name>ModeChoiceDialog</name>
+    <name>ModeChoiceView</name>
     <message>
-        <location filename="../app/gui/qml/shell/ModeChoiceDialog.qml" line="21"/>
+        <location filename="../app/gui/qml/shell/ModeChoiceView.qml" line="24"/>
         <source>How do you want to use HARDWARIO Monitor?</source>
         <translation>Jak chcesz używać HARDWARIO Monitor?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/ModeChoiceDialog.qml" line="112"/>
+        <location filename="../app/gui/qml/shell/ModeChoiceView.qml" line="92"/>
         <source>You can change it at any time in Settings › General.</source>
         <translation>Możesz to zmienić w dowolnej chwili w Ustawienia › Ogólne.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/ModeChoiceDialog.qml" line="130"/>
+        <location filename="../app/gui/qml/shell/ModeChoiceView.qml" line="108"/>
         <source>Continue</source>
         <translation>Dalej</translation>
     </message>
@@ -1742,17 +1747,22 @@
 <context>
     <name>NavRail</name>
     <message>
-        <location filename="../app/gui/qml/shell/NavRail.qml" line="23"/>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="26"/>
         <source>Pages</source>
         <translation>Strony</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/NavRail.qml" line="50"/>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="55"/>
         <source>Busy</source>
         <translation>Trwa operacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/NavRail.qml" line="166"/>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="124"/>
+        <source>Wizard</source>
+        <translation>Kreator</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="186"/>
         <source>Help</source>
         <translation>Pomoc</translation>
     </message>
@@ -1842,22 +1852,22 @@
 <context>
     <name>PageHost</name>
     <message>
-        <location filename="../app/gui/qml/shell/PageHost.qml" line="61"/>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="90"/>
         <source>Update LTE firmware…</source>
         <translation>Aktualizuj firmware LTE…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/PageHost.qml" line="68"/>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="97"/>
         <source>Retry</source>
         <translation>Spróbuj ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/PageHost.qml" line="120"/>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="149"/>
         <source>Disconnect and update…</source>
         <translation>Rozłącz i zaktualizuj…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/PageHost.qml" line="138"/>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="167"/>
         <source>Not now</source>
         <translation>Nie teraz</translation>
     </message>
@@ -1983,75 +1993,76 @@
     </message>
 </context>
 <context>
-    <name>ProbeFirmwareDialog</name>
+    <name>ProbeFirmwareView</name>
     <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="33"/>
-        <source>Update J-Link firmware?</source>
-        <translation>Zaktualizować firmware J-Linka?</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="33"/>
-        <source>J-Link firmware update</source>
-        <translation>Aktualizacja firmware J-Linka</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="70"/>
-        <source>%1 · SN %2</source>
-        <translation>%1 · SN %2</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="71"/>
-        <source>SN %1</source>
-        <translation>SN %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="90"/>
-        <source>Updating J-Link firmware…</source>
-        <translation>Aktualizowanie firmware J-Linka…</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="91"/>
-        <source>Reading the J-Link…</source>
-        <translation>Odczytywanie J-Linka…</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="109"/>
-        <source>Current:</source>
-        <translation>Obecne:</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="125"/>
-        <source>New:</source>
-        <translation>Nowe:</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="146"/>
-        <source>The J-Link firmware status could not be determined. Update anyway?</source>
-        <translation>Nie udało się ustalić stanu firmware J-Linka. Zaktualizować mimo to?</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="156"/>
-        <source>Do not unplug the J-Link during the update (about 10–30 s).</source>
-        <translation>Nie odłączaj J-Linka podczas aktualizacji (ok. 10–30 s).</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="167"/>
-        <source>HARDWARIO Monitor quits when the update has finished.</source>
-        <translation>HARDWARIO Monitor zamknie się po zakończeniu aktualizacji.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="178"/>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="179"/>
-        <source>Close</source>
-        <translation>Zamknij</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="201"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="31"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="194"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="210"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="33"/>
+        <source>Update J-Link firmware?</source>
+        <translation>Zaktualizować firmware J-Linka?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="33"/>
+        <source>J-Link firmware update</source>
+        <translation>Aktualizacja firmware J-Linka</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="60"/>
+        <source>%1 · SN %2</source>
+        <translation>%1 · SN %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="61"/>
+        <source>SN %1</source>
+        <translation>SN %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="80"/>
+        <source>Updating J-Link firmware…</source>
+        <translation>Aktualizowanie firmware J-Linka…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="81"/>
+        <source>Reading the J-Link…</source>
+        <translation>Odczytywanie J-Linka…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="99"/>
+        <source>Current:</source>
+        <translation>Obecne:</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="115"/>
+        <source>New:</source>
+        <translation>Nowe:</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="136"/>
+        <source>The J-Link firmware status could not be determined. Update anyway?</source>
+        <translation>Nie udało się ustalić stanu firmware J-Linka. Zaktualizować mimo to?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="146"/>
+        <source>Do not unplug the J-Link during the update (about 10–30 s).</source>
+        <translation>Nie odłączaj J-Linka podczas aktualizacji (ok. 10–30 s).</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="157"/>
+        <source>HARDWARIO Monitor quits when the update has finished.</source>
+        <translation>HARDWARIO Monitor zamknie się po zakończeniu aktualizacji.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="168"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="169"/>
+        <source>Close</source>
+        <translation>Zamknij</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="202"/>
         <source>Update</source>
         <translation>Aktualizuj</translation>
     </message>
@@ -2250,69 +2261,71 @@
     </message>
 </context>
 <context>
-    <name>ReportDialog</name>
+    <name>ReportView</name>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="27"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="24"/>
         <source>Create diagnostic report</source>
         <translation>Utwórz raport diagnostyczny</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="61"/>
-        <source>Collecting information…</source>
-        <translation>Zbieranie informacji…</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="89"/>
-        <source>Report summary</source>
-        <translation>Podsumowanie raportu</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="102"/>
-        <source>The report contains this summary, the recent application logs and the settings file. Your user name and home folder are replaced. The report stays on your computer — attach it to your support request.</source>
-        <translation>Raport zawiera to podsumowanie, ostatnie dzienniki aplikacji i plik ustawień. Twoja nazwa użytkownika i folder domowy są zastępowane. Raport pozostaje na Twoim komputerze — dołącz go do zgłoszenia do pomocy technicznej.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="113"/>
-        <source>The logs may contain device output. Values that look like passwords, tokens or keys are replaced by &lt;redacted&gt;; check the report before sending it.</source>
-        <translation>Dzienniki mogą zawierać dane wyjściowe urządzenia. Wartości wyglądające jak hasła, tokeny lub klucze są zastępowane tekstem &lt;redacted&gt;; przed wysłaniem sprawdź raport.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="132"/>
-        <source>Saved to %1</source>
-        <translation>Zapisano w %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="148"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="25"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="125"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="148"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="25"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="125"/>
         <source>Close</source>
         <translation>Zamknij</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="155"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="41"/>
+        <source>Collecting information…</source>
+        <translation>Zbieranie informacji…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="70"/>
+        <source>Report summary</source>
+        <translation>Podsumowanie raportu</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="83"/>
+        <source>The report contains this summary, the recent application logs and the settings file. Your user name and home folder are replaced. The report stays on your computer — attach it to your support request.</source>
+        <translation>Raport zawiera to podsumowanie, ostatnie dzienniki aplikacji i plik ustawień. Twoja nazwa użytkownika i folder domowy są zastępowane. Raport pozostaje na Twoim komputerze — dołącz go do zgłoszenia do pomocy technicznej.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="94"/>
+        <source>The logs may contain device output. Values that look like passwords, tokens or keys are replaced by &lt;redacted&gt;; check the report before sending it.</source>
+        <translation>Dzienniki mogą zawierać dane wyjściowe urządzenia. Wartości wyglądające jak hasła, tokeny lub klucze są zastępowane tekstem &lt;redacted&gt;; przed wysłaniem sprawdź raport.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="113"/>
+        <source>Saved to %1</source>
+        <translation>Zapisano w %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="132"/>
         <source>Copy summary</source>
         <translation>Kopiuj podsumowanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="162"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="139"/>
         <source>Show in folder</source>
         <translation>Pokaż w folderze</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="171"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="148"/>
         <source>Save report…</source>
         <translation>Zapisz raport…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="179"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="156"/>
         <source>Save diagnostic report</source>
         <translation>Zapisz raport diagnostyczny</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="181"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="158"/>
         <source>Zip archives (*.zip)</source>
         <translation>Archiwa zip (*.zip)</translation>
     </message>
@@ -2367,24 +2380,24 @@
     </message>
 </context>
 <context>
-    <name>ShareDialog</name>
+    <name>ShareView</name>
     <message>
-        <location filename="../app/gui/qml/remote/ShareDialog.qml" line="17"/>
+        <location filename="../app/gui/qml/remote/ShareView.qml" line="22"/>
         <source>Share this console with HARDWARIO Support</source>
         <translation>Udostępnij tę konsolę wsparciu HARDWARIO</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/ShareDialog.qml" line="19"/>
+        <location filename="../app/gui/qml/remote/ShareView.qml" line="39"/>
         <source>Read the code only to HARDWARIO Support.</source>
         <translation>Podawaj kod tylko wsparciu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/ShareDialog.qml" line="20"/>
+        <location filename="../app/gui/qml/remote/ShareView.qml" line="53"/>
         <source>Start sharing</source>
         <translation>Rozpocznij udostępnianie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/ShareDialog.qml" line="21"/>
+        <location filename="../app/gui/qml/remote/ShareView.qml" line="66"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
@@ -2410,19 +2423,6 @@
         <location filename="../app/gui/qml/console/ShellInput.qml" line="249"/>
         <source>Send</source>
         <translation>Wyślij</translation>
-    </message>
-</context>
-<context>
-    <name>ShortcutOverlay</name>
-    <message>
-        <location filename="../app/gui/qml/components/ShortcutOverlay.qml" line="19"/>
-        <source>Keyboard shortcuts</source>
-        <translation>Skróty klawiszowe</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/components/ShortcutOverlay.qml" line="108"/>
-        <source>Close</source>
-        <translation>Zamknij</translation>
     </message>
 </context>
 <context>
@@ -2510,45 +2510,45 @@
         <translation>Wybierz plik firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="442"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="470"/>
         <source>New device tab</source>
         <translation>Nowa karta urządzenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="445"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="473"/>
         <source>Close the device tab</source>
         <translation>Zamknij kartę urządzenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="448"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="451"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="476"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="479"/>
         <source>Next tab</source>
         <translation>Następna karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="454"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="457"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="482"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="485"/>
         <source>Previous tab</source>
         <translation>Poprzednia karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="460"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="488"/>
         <source>Settings</source>
         <translation>Ustawienia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="463"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="491"/>
         <source>Connect or disconnect</source>
         <translation>Połącz lub rozłącz</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="466"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="494"/>
         <source>Reconnect</source>
         <translation>Połącz ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="469"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="472"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="497"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="500"/>
         <source>Keyboard shortcuts</source>
         <translation>Skróty klawiszowe</translation>
     </message>
@@ -2561,6 +2561,19 @@
         <location filename="../app/gui/src/viewmodels/shortcut_registry.cpp" line="136"/>
         <source>General</source>
         <translation>Ogólne</translation>
+    </message>
+</context>
+<context>
+    <name>ShortcutsView</name>
+    <message>
+        <location filename="../app/gui/qml/components/ShortcutsView.qml" line="17"/>
+        <source>Keyboard shortcuts</source>
+        <translation>Skróty klawiszowe</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ShortcutsView.qml" line="81"/>
+        <source>Close</source>
+        <translation>Zamknij</translation>
     </message>
 </context>
 <context>
@@ -2695,6 +2708,14 @@
     </message>
 </context>
 <context>
+    <name>ViewFrame</name>
+    <message>
+        <location filename="../app/gui/qml/components/ViewFrame.qml" line="23"/>
+        <source>Close</source>
+        <translation>Zamknij</translation>
+    </message>
+</context>
+<context>
     <name>WarningBanner</name>
     <message>
         <location filename="../app/gui/qml/components/WarningBanner.qml" line="73"/>
@@ -2748,35 +2769,35 @@
     </message>
 </context>
 <context>
-    <name>WizardDialog</name>
+    <name>WizardView</name>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="102"/>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="411"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="29"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="280"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="376"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="249"/>
         <source>Back</source>
         <translation>Wstecz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="411"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="280"/>
         <source>Close</source>
         <translation>Zamknij</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="421"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="293"/>
         <source>Cancel the wizard?</source>
         <translation>Anulować kreatora?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="423"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="295"/>
         <source>Cancel and close</source>
         <translation>Anuluj i zamknij</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="424"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="296"/>
         <source>Keep going</source>
         <translation>Kontynuuj</translation>
     </message>
@@ -5397,12 +5418,17 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="719"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="613"/>
+        <source>Wait until the J-Link firmware update has finished.</source>
+        <translation>Poczekaj na zakończenie aktualizacji firmware J-Linka.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="893"/>
         <source>Close a tab first: at most %1 device tabs can be open.</source>
         <translation>Najpierw zamknij kartę: otwartych może być najwyżej %1 kart urządzeń.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1257"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1458"/>
         <source>Copied to clipboard.</source>
         <translation>Skopiowano do schowka.</translation>
     </message>
@@ -5937,54 +5963,54 @@
 <context>
     <name>hwio::gui::DeviceTabViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="186"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="200"/>
         <source>New device</source>
         <translation>Nowe urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="218"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="232"/>
         <source>Flashing needs a J-Link. Open a J-Link tab to flash this device.</source>
         <translation>Wgrywanie firmware wymaga J-Linka. Aby wgrać firmware do tego urządzenia, otwórz kartę z J-Linkiem.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="639"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="712"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="678"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="751"/>
         <source>— disconnected: %1 —</source>
         <translation>— rozłączono: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="653"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="713"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="692"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="752"/>
         <source>— disconnected —</source>
         <translation>— rozłączono —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="702"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="741"/>
         <source>— connected (remote) —</source>
         <translation>— połączono (zdalnie) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="704"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="743"/>
         <source>— connected —</source>
         <translation>— połączono —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="700"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="739"/>
         <source>— connected (Bluetooth) —</source>
         <translation>— połączono (Bluetooth) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="178"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="192"/>
         <source>Session %1</source>
         <translation>Sesja %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="834"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="873"/>
         <source>— paused: %1 —</source>
         <translation>— wstrzymano: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="847"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="886"/>
         <source>— resumed —</source>
         <translation>— wznowiono —</translation>
     </message>
@@ -6010,141 +6036,141 @@
 <context>
     <name>hwio::gui::FirmwareSourceViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="197"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="198"/>
         <source>%1 · LTE bundle (application + modem firmware)</source>
         <translation>%1 · pakiet LTE (aplikacja + firmware modemu)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="201"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="202"/>
         <source>Loading %1…</source>
         <translation>Wczytywanie %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="204"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="205"/>
         <source>Downloading %1…</source>
         <translation>Pobieranie %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="220"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="221"/>
         <source>%1 · LTE application · %2 · %3</source>
         <translation>%1 · aplikacja LTE · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="223"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="224"/>
         <source>%1 · Intel HEX · %2 · %3</source>
         <translation>%1 · Intel HEX · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="226"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="227"/>
         <source>%1 · LTE bundle (application + modem firmware) · %2</source>
         <translation>%1 · pakiet LTE (aplikacja + firmware modemu) · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="230"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="231"/>
         <source>%1 · Modem firmware (modem only) · %2</source>
         <translation>%1 · firmware modemu (tylko modem) · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="232"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="233"/>
         <source>%1 · Modem firmware %2 (modem only) · %3</source>
         <translation>%1 · firmware modemu %2 (tylko modem) · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="281"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="282"/>
         <source>This is LTE firmware — switch to LTE firmware?</source>
         <translation>To jest firmware LTE — przełączyć na firmware LTE?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="322"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="323"/>
         <source>Intel HEX files (*.hex)</source>
         <translation>Pliki Intel HEX (*.hex)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="322"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="324"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="323"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="325"/>
         <source>All files (*)</source>
         <translation>Wszystkie pliki (*)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="324"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="325"/>
         <source>LTE firmware (*.hex *.zip)</source>
         <translation>Firmware LTE (*.hex *.zip)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="329"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="330"/>
         <source>Drop a .hex file here</source>
         <translation>Upuść tutaj plik .hex</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="331"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="332"/>
         <source>Drop a .hex file, an LTE bundle .zip or a modem firmware .zip here</source>
         <translation>Upuść tutaj plik .hex, pakiet LTE .zip lub firmware modemu .zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="359"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="360"/>
         <source>%1 %2 (recommended)</source>
         <translation>%1 %2 (zalecane)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="367"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="368"/>
         <source>Downloading… %1 / %2 MB</source>
         <translation>Pobieranie… %1 / %2 MB</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="369"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="370"/>
         <source>Downloading…</source>
         <translation>Pobieranie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="371"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="372"/>
         <source>Ready</source>
         <translation>Gotowe</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="453"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="454"/>
         <source>The downloaded file is damaged. Try again.</source>
         <translation>Pobrany plik jest uszkodzony. Spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="455"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="456"/>
         <source>You can also choose your own file.</source>
         <translation>Możesz też wybrać własny plik.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="494"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="495"/>
         <source>Looking up the firmware…</source>
         <translation>Wyszukiwanie firmware…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="497"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="498"/>
         <source>Unknown firmware — it can still be flashed.</source>
         <translation>Nieznany firmware — mimo to można go wgrać.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="504"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="505"/>
         <source>%1 · uploaded %2</source>
         <translation>%1 · wgrano %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="600"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="619"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="971"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="601"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="620"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="972"/>
         <source>The ID has 32 characters 0–9 a–f.</source>
         <translation>Identyfikator ma 32 znaki 0–9 a–f.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="635"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="962"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="636"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="963"/>
         <source>Catalog ID %1</source>
         <translation>ID z katalogu %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="780"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="781"/>
         <source>Application copy of %1 from %2</source>
         <translation>Kopia aplikacji urządzenia %1 z %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="781"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="782"/>
         <source>Application copy from %1</source>
         <translation>Kopia aplikacji z %1</translation>
     </message>
@@ -6991,23 +7017,23 @@
 <context>
     <name>hwio::gui::RecentSourcesModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="62"/>
-        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="65"/>
+        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="63"/>
+        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="66"/>
         <source>Catalog ID %1</source>
         <translation>ID z katalogu %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="69"/>
+        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="70"/>
         <source>Catalog ID</source>
         <translation>ID z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="72"/>
+        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="73"/>
         <source>Zip archive</source>
         <translation>Archiwum zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="73"/>
+        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="74"/>
         <source>HEX file</source>
         <translation>Plik HEX</translation>
     </message>

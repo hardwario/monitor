@@ -17,6 +17,9 @@ Rectangle {
     readonly property bool choosing: bar.tab.state === DeviceTabViewModel.ChoosingDevice
 
     implicitHeight: Theme.deviceBarHeight
+    // Plan 0052: the J-Link firmware update view covers the page area, not the bar; its probe is
+    // reserved, so the bar's actions wait until it has closed (the dialog blocked them before).
+    enabled: AppViewModel.overlayView !== "probeFirmware"
     color: Theme.surface
 
     Rectangle {

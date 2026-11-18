@@ -29,7 +29,7 @@ class CheckListModel : public QAbstractListModel {
     QML_UNCREATABLE("Owned by a wizard")
 
     Q_PROPERTY(int count READ count NOTIFY countChanged)
-    // A check is Running (the dialog shows a spinner and disables [Check again]).
+    // A check is Running (the wizard shows a spinner and disables [Check again]).
     Q_PROPERTY(bool running READ running NOTIFY rowsChanged)
     // Ok or Warning or Skipped everywhere, nothing pending or running.
     Q_PROPERTY(bool allPassed READ allPassed NOTIFY rowsChanged)
