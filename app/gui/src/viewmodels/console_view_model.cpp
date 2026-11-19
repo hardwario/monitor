@@ -19,6 +19,7 @@
 #include "hwio/device/operation.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
+#include "hwio/remote/remote_console_session.h"
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/connection_view_model.h"
 #include "viewmodels/console_line_model.h"
@@ -26,6 +27,7 @@
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
 #include "viewmodels/history_store.h"
+#include "viewmodels/remote_share_view_model.h"
 #include "workers/batch_runner.h"
 
 #include <QChar>
@@ -60,6 +62,7 @@
 #include <optional>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace hwio::gui {
 
@@ -89,9 +92,23 @@ ConsoleViewModel::ConsoleViewModel(DeviceTabViewModel* tab, ConsoleContext conte
       m_learner(new device::CommandTreeLearner( // NOLINT(cppcoreguidelines-owning-memory)
           tab->shellQueries(), &m_treeCache, this)) {
     connect(m_learner, &device::CommandTreeLearner::treeChanged, this, [this] {
+        if (m_tab->isRemote()) {
+            return; // plan 0044 (ADR-0364): a remote tab uses the host's tree
+        }
         m_commandTree = m_learner->tree();
+        // Plan 0044 (ADR-0364): a shared console gives its tree to support's autocomplete.
+        m_tab->remoteShare()->setCommandTree(m_commandTree);
         commandTreeChanged(); // signal
     });
+    // Plan 0044 (ADR-0364): support's autocomplete needs a command's subcommands.
+    connect(m_tab->remoteShare(), &RemoteShareViewModel::learnRequested, this,
+            [this](const QStringList& path) {
+                std::vector<std::string> words;
+                for (const QString& word : path) {
+                    words.push_back(toStdString(word));
+                }
+                m_learner->requestChildren(words); // `<command> -h`, once, silent
+            });
     connect(m_learner, &device::CommandTreeLearner::readingChanged, this,
             &ConsoleViewModel::commandTreeChanged);
     // After `info show` of an attach: the cached tree of this firmware, else `help` (on connect
@@ -128,6 +145,12 @@ ConsoleViewModel::ConsoleViewModel(DeviceTabViewModel* tab, ConsoleContext conte
     connect(m_batch, &BatchRunner::finished, this, &ConsoleViewModel::onBatchFinished);
 
     connect(m_tab, &DeviceTabViewModel::sessionChanged, this, &ConsoleViewModel::attachSession);
+    // Plan 0044: a remote session replaced the log with the host's history.
+    connect(m_tab, &DeviceTabViewModel::consoleReplaced, this, [this] {
+        m_shell->reloadRows();
+        m_log->reloadRows();
+        scheduleRefresh();
+    });
     connect(m_tab, &DeviceTabViewModel::stateChanged, this, [this] {
         stateChanged(); // signal
         scheduleRefresh();
@@ -188,6 +211,16 @@ void ConsoleViewModel::attachSession() {
     m_learningStarted = false;
     m_session = session;
     m_operations = m_tab->session();
+    // Plan 0044 (ADR-0364): a remote tab completes from the host's command tree.
+    if (remote::RemoteConsoleSession* remote = m_tab->remoteSession();
+        remote != nullptr && remote == session) {
+        m_commandTree = remote->commandTree();
+        connect(remote, &remote::RemoteConsoleSession::commandTreeChanged, this, [this, remote] {
+            m_commandTree = remote->commandTree();
+            commandTreeChanged(); // signal
+        });
+        commandTreeChanged(); // signal
+    }
     if (!m_session.isNull()) {
         connect(m_session, &device::ConsoleSession::linesReceived, this,
                 &ConsoleViewModel::scheduleRefresh);
@@ -559,6 +592,16 @@ void ConsoleViewModel::learnFor(const QString& text) {
     if (m_context.settings != nullptr && !m_context.settings->suggestions()) {
         return;
     }
+    // Plan 0044 (ADR-0364): a remote tab asks the host (tunnel `learn`); no learner, no queries.
+    if (remote::RemoteConsoleSession* remote = m_tab->remoteSession(); remote != nullptr) {
+        if (m_commandTree) {
+            const device::Completer completer(m_commandTree.get());
+            if (auto path = completer.pathToLearn(toStdString(text))) {
+                remote->requestLearn(*path);
+            }
+        }
+        return;
+    }
     if (m_session.isNull() || m_session->connection().state != device::ConnectionState::Connected ||
         !m_learningStarted) {
         return; // learning starts after the attach's `info show` (the cache key)
@@ -622,6 +665,9 @@ QVariantMap ConsoleViewModel::complete(const QString& text) {
 
 void ConsoleViewModel::setCommandTree(std::optional<device::CommandTree> tree) {
     m_commandTree = tree ? std::make_shared<const device::CommandTree>(std::move(*tree)) : nullptr;
+    if (!m_tab->isRemote()) {
+        m_tab->remoteShare()->setCommandTree(m_commandTree); // as a learned tree (ADR-0364)
+    }
     commandTreeChanged(); // signal
 }
 

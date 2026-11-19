@@ -77,13 +77,40 @@ Naraz beží len jedno okno aplikácie. Jej opätovné spustenie prenesie otvore
 
 | Sekcia | Čo obsahuje |
 |---|---|
-| **General** | **Language** (System, English, Čeština), **Theme** (System, Light, Dark), **Reopen tabs at start** |
+| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark), **Reopen tabs at start** |
 | **Console** | veľkosť písma, časové značky, zalamovanie riadkov, návrhy príkazov, história príkazov, súbory konzoly a ich priečinok |
 | **J-Link** | knižnica J-Link (**Automatic** alebo **Custom path**) a predvolené možnosti pripojenia |
 | **nRF Util** | program nRF Util (**Automatic** alebo **Custom path**), potrebný len pre firmvér LTE modemu |
+| **AI assistants (MCP)** | [server MCP](../en/mcp.md) pre AI asistentov |
+| **Expert** | [server podpory](remote-support.md#settings) |
 | **About** | verzia (s tlačidlom **Copy** pre podporu), [kontrola aktualizácií](privacy.md#kontrola-aktualizácií), príkaz `hwio` tejto inštalácie, licencie, odkazy |
 
-Zmeny sa uplatnia okamžite.
+Zmeny sa uplatnia okamžite. V slovenskom rozhraní sa režimy volajú **Základný**, **Pokročilý** a **Expertný**.
+
+<a id="modes"></a>
+### Režimy
+
+**Mode** (režim) určuje, koľko toho nastavenia ukazujú. Pri prvom spustení (a raz po aktualizácii z verzie 2.0.0-rc.3
+alebo staršej) sa aplikácia opýta **How do you want to use HARDWARIO Monitor?**: vyberte režim a kliknite na
+**Continue**. Predvybraný je **Advanced**; ak ste v staršej verzii mali zapnutú voľbu **Show expert maintenance
+actions**, je to **Expert**. Zatvorením dialógu zostane predvybraný režim. Zmeniť ho môžete kedykoľvek v **Settings ›
+General › Mode**.
+
+| Zobrazené | Basic | Advanced | Expert |
+|---|---|---|---|
+| **General**: Mode, Language, Theme, Reopen tabs at start | ✓ | ✓ | ✓ |
+| **Console**: veľkosť písma, časové značky, zalamovanie riadkov, súbory konzoly, priečinok záznamov | ✓ | ✓ | ✓ |
+| **Console**: návrhy príkazov, načítanie zoznamu príkazov, **Remember commands**, **Clear history** | | ✓ | ✓ |
+| **J-Link**: Library, Default speed, Auto-reconnect | | ✓ | ✓ |
+| **J-Link**: RTT latency, Reset on connect | | | ✓ |
+| **nRF Util**, **AI assistants (MCP)** | | ✓ | ✓ |
+| **Expert**: Support server | | | ✓ |
+| **About**, v režimoch Advanced a Expert s **Include pre-releases** | ✓ | ✓ | ✓ |
+| **Flash › Maintenance**: **Erase everything…**, **Recover…**, LTE MCU | | | ✓ |
+
+Režim nastavenia len skrýva: skryté nastavenie si ponechá svoju hodnotu a ďalej sa používa (napríklad vlastná cesta ku
+knižnici J-Link v režime Basic). Keď chyba alebo sprievodca otvorí nastavenie, ktoré režim skrýva (**Open Settings**),
+zobrazí sa počas tejto návštevy s poznámkou "Shown because it was needed."; režim sa nezmení.
 
 ## Pomocník
 

@@ -129,6 +129,7 @@ public:
     [[nodiscard]] const hwio::device::DeviceProfile& profile() const override { return *m_profile; }
     [[nodiscard]] std::string_view consoleTargetId() const override { return "app"; }
     [[nodiscard]] std::filesystem::path consoleFile() const override { return {}; }
+    [[nodiscard]] hwio::Status recordRemoteEvent(std::string /*text*/) override { return {}; }
     [[nodiscard]] hwio::Status
     setFirmwareIdentity(std::optional<hwio::device::FirmwareIdentity> identity,
                         std::uint64_t attach) override {

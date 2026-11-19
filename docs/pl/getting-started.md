@@ -77,13 +77,40 @@ Jednocześnie działa tylko jedno okno aplikacji. Ponowne uruchomienie aplikacji
 
 | Sekcja | Zawartość |
 |---|---|
-| **General** | **Language** (System, English, Čeština), **Theme** (System, Light, Dark), **Reopen tabs at start** |
+| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark), **Reopen tabs at start** |
 | **Console** | rozmiar czcionki, znaczniki czasu, zawijanie wierszy, podpowiedzi poleceń, historia poleceń, pliki konsoli i ich folder |
 | **J-Link** | biblioteka J-Link (**Automatic** lub **Custom path**) i domyślne opcje połączenia |
 | **nRF Util** | program nRF Util (**Automatic** lub **Custom path**), potrzebny tylko do firmware modemu LTE |
+| **AI assistants (MCP)** | [serwer MCP](../en/mcp.md) dla asystentów AI |
+| **Expert** | [serwer wsparcia](remote-support.md#settings) |
 | **About** | wersja (z przyciskiem **Copy** dla wsparcia technicznego), [sprawdzanie aktualizacji](privacy.md#sprawdzanie-aktualizacji), polecenie `hwio` tej instalacji, licencje, odnośniki |
 
-Zmiany obowiązują natychmiast.
+Zmiany obowiązują natychmiast. W polskim interfejsie tryby nazywają się **Podstawowy**, **Zaawansowany** i **Ekspert**.
+
+<a id="modes"></a>
+### Tryby
+
+**Mode** (tryb) decyduje, ile pokazują ustawienia. Przy pierwszym uruchomieniu (i jeden raz po aktualizacji z wersji
+2.0.0-rc.3 lub starszej) aplikacja pyta **How do you want to use HARDWARIO Monitor?**: wybierz tryb i kliknij
+**Continue**. Wstępnie wybrany jest **Advanced**; jeśli w starszej wersji było włączone **Show expert maintenance
+actions**, jest to **Expert**. Zamknięcie okna zachowuje wstępnie wybrany tryb. Zmienisz go w dowolnej chwili w
+**Settings › General › Mode**.
+
+| Wyświetlane | Basic | Advanced | Expert |
+|---|---|---|---|
+| **General**: Mode, Language, Theme, Reopen tabs at start | ✓ | ✓ | ✓ |
+| **Console**: rozmiar czcionki, znaczniki czasu, zawijanie wierszy, pliki konsoli, folder dzienników | ✓ | ✓ | ✓ |
+| **Console**: podpowiedzi poleceń, odczyt listy poleceń, **Remember commands**, **Clear history** | | ✓ | ✓ |
+| **J-Link**: Library, Default speed, Auto-reconnect | | ✓ | ✓ |
+| **J-Link**: RTT latency, Reset on connect | | | ✓ |
+| **nRF Util**, **AI assistants (MCP)** | | ✓ | ✓ |
+| **Expert**: Support server | | | ✓ |
+| **About**, w trybach Advanced i Expert z **Include pre-releases** | ✓ | ✓ | ✓ |
+| **Flash › Maintenance**: **Erase everything…**, **Recover…**, MCU LTE | | | ✓ |
+
+Tryb tylko ukrywa ustawienia: ukryte ustawienie zachowuje swoją wartość i nadal jest używane (na przykład własna
+ścieżka do biblioteki J-Link w trybie Basic). Gdy błąd lub przewodnik otworzy ustawienie ukryte przez tryb (**Open
+Settings**), jest ono wyświetlane podczas tej wizyty z uwagą „Shown because it was needed.”; tryb się nie zmienia.
 
 ## Pomoc
 

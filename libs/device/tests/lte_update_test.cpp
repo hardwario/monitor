@@ -152,6 +152,15 @@ protected:
         return waitFor([&] { return m_procedure->step() == step; }, timeout);
     }
 
+    // Plan 0046 (ADR-0366): the procedure waits for Continue once the APP connector answers.
+    bool confirmOnApp() {
+        if (!reach(Step::Confirm)) {
+            return false;
+        }
+        m_procedure->confirm();
+        return true;
+    }
+
     std::vector<std::byte> read(const char* target, std::uint32_t address, std::size_t size) {
         // A cancelled identify of the procedure may still be ending (internal.busy otherwise).
         EXPECT_TRUE(waitFor([this] { return !m_session->runningOperation().has_value(); }));
@@ -320,7 +329,15 @@ TEST_F(LteUpdate, HappyPathBacksUpErasesUpdatesAndWritesTheApplicationBack) {
     LteUpdateProcedure& update = procedure();
     ASSERT_TRUE(update.start(lteImage()));
     EXPECT_TRUE(session.held());
-    // On APP already: the copy and the erase run by themselves, then it waits for LTE.
+    // On APP already: it says what will happen and waits (ADR-0366).
+    ASSERT_TRUE(reach(Step::Confirm));
+    EXPECT_EQ(update.promptText(),
+              QStringLiteral("The application on this CHESTER will be erased. Then you move the "
+                             "J-Link cable to the LTE connector, and at the end back to APP; the "
+                             "application is written back."));
+    EXPECT_TRUE(update.canCancel());
+    update.confirm();
+    // The copy and the erase run by themselves, then it waits for LTE.
     ASSERT_TRUE(reach(Step::ConnectLte));
     EXPECT_TRUE(update.hasBackup());
     EXPECT_TRUE(update.applicationErased());
@@ -368,6 +385,7 @@ TEST_F(LteUpdate, StartsOnTheWrongConnectorAndWaits) {
     hwio::device::test::spin(200ms);
     EXPECT_FALSE(update.applicationErased());
     moveCable("app");
+    ASSERT_TRUE(confirmOnApp());
     ASSERT_TRUE(reach(Step::ConnectLte));
     moveCable("lte");
     ASSERT_TRUE(reach(Step::ConnectAppAgain));
@@ -394,12 +412,41 @@ TEST_F(LteUpdate, CancelBeforeTheEraseLeavesTheApplication) {
     EXPECT_EQ(read("app", 0x1000, 4), bytes({0xa5, 0xa5, 0xa5, 0xa5}));
 }
 
+// Plan 0046 (ADR-0366): on the APP connector the procedure stops before the copy and the erase;
+// Cancel there changes nothing.
+TEST_F(LteUpdate, WaitsForContinueAndCancelThereChangesNothing) {
+    useBoard("app");
+    DeviceSession& session = open();
+    ASSERT_TRUE(hwio::device::waitUntilConnected(session, 10s));
+    LteUpdateProcedure& update = procedure(true);
+    ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(reach(Step::Confirm));
+    EXPECT_EQ(LteUpdateProcedure::stepId(Step::Confirm), "confirm");
+    EXPECT_TRUE(update.connectorLabel().isEmpty());
+    hwio::device::test::spin(300ms);
+    EXPECT_EQ(update.step(), Step::Confirm); // waits, also with autoRestore (the CLI)
+    EXPECT_FALSE(update.applicationErased());
+    EXPECT_FALSE(update.hasBackup());
+    EXPECT_FALSE(session.runningOperation().has_value());
+    update.continueWithoutBackup(); // not this step's answer
+    EXPECT_EQ(update.step(), Step::Confirm);
+    EXPECT_TRUE(update.cancel());
+    EXPECT_EQ(update.step(), Step::Cancelled);
+    EXPECT_EQ(update.promptText(), QStringLiteral("The LTE firmware update was cancelled."));
+    EXPECT_FALSE(session.held());
+    EXPECT_FALSE(fs::exists(backups()));
+    update.confirm(); // too late: ignored
+    EXPECT_EQ(update.step(), Step::Cancelled);
+    EXPECT_EQ(read("app", 0x1000, 4), bytes({0xa5, 0xa5, 0xa5, 0xa5}));
+}
+
 TEST_F(LteUpdate, CancelAfterTheEraseSaysSoAndKeepsTheCopy) {
     useBoard("app");
     DeviceSession& session = open();
     ASSERT_TRUE(hwio::device::waitUntilConnected(session, 10s));
     LteUpdateProcedure& update = procedure();
     ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(confirmOnApp());
     ASSERT_TRUE(reach(Step::ConnectLte));
     EXPECT_TRUE(update.cancel());
     EXPECT_EQ(update.promptText(), QStringLiteral("The application MCU is erased. The device will "
@@ -414,6 +461,7 @@ TEST_F(LteUpdate, AProtectedApplicationGoesOnWithoutACopy) {
     ASSERT_TRUE(waitFor([&] { return session.connection().state != ConnectionState::Connecting; }));
     LteUpdateProcedure& update = procedure(true);
     ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(confirmOnApp());
     ASSERT_TRUE(reach(Step::BackupFailed));
     ASSERT_TRUE(update.error().has_value());
     EXPECT_EQ(update.error().value_or(hwio::Error{}).code, ErrorCode::TargetProtected);
@@ -435,6 +483,7 @@ TEST_F(LteUpdate, WithoutACopyTheApplicationMustBeChosen) {
     ASSERT_TRUE(erase);
     ASSERT_TRUE(hwio::device::waitForOperation(session, *erase).status);
     ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(confirmOnApp());
     ASSERT_TRUE(reach(Step::ConnectLte));
     EXPECT_FALSE(update.hasBackup());
     moveCable("lte");
@@ -458,6 +507,7 @@ TEST_F(LteUpdate, AFailedLteFlashCanBeRetried) {
     ASSERT_TRUE(hwio::device::waitUntilConnected(session, 10s));
     LteUpdateProcedure& update = procedure(true);
     ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(confirmOnApp());
     ASSERT_TRUE(reach(Step::ConnectLte));
     moveCable("lte");
     ASSERT_TRUE(reach(Step::Failed));
@@ -478,6 +528,7 @@ TEST_F(LteUpdate, AFailedRestoreCanBeRetried) {
     ASSERT_TRUE(hwio::device::waitUntilConnected(session, 10s));
     LteUpdateProcedure& update = procedure();
     ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(confirmOnApp());
     ASSERT_TRUE(reach(Step::ConnectLte));
     moveCable("lte");
     ASSERT_TRUE(reach(Step::ConnectAppAgain));
@@ -498,6 +549,7 @@ TEST_F(LteUpdate, NothingCanBeCancelledDuringAFlashAndAClosedSessionFails) {
     ASSERT_TRUE(hwio::device::waitUntilConnected(session, 10s));
     LteUpdateProcedure& update = procedure();
     ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(confirmOnApp());
     ASSERT_TRUE(reach(Step::ConnectLte));
     moveCable("lte");
     ASSERT_TRUE(reach(Step::UpdateLte));
@@ -516,6 +568,7 @@ TEST_F(LteUpdate, ACableMovedAfterTheCheckWaitsForTheConnectorAgain) {
     ASSERT_TRUE(hwio::device::waitUntilConnected(session, 10s));
     LteUpdateProcedure& update = procedure(true);
     ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(confirmOnApp());
     ASSERT_TRUE(reach(Step::Backup));
     moveCable("lte"); // during the copy
     ASSERT_TRUE(
@@ -523,7 +576,11 @@ TEST_F(LteUpdate, ACableMovedAfterTheCheckWaitsForTheConnectorAgain) {
     EXPECT_FALSE(update.applicationErased());
     EXPECT_FALSE(update.error().has_value());
     moveCable("app");
-    ASSERT_TRUE(reach(Step::ConnectLte));
+    // Confirmed once: the repeated connector step goes on without asking again.
+    ASSERT_TRUE(waitFor([&] {
+        EXPECT_NE(update.step(), Step::Confirm);
+        return update.step() == Step::ConnectLte;
+    }));
     EXPECT_TRUE(update.hasBackup());
 }
 

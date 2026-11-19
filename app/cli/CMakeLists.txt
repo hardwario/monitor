@@ -37,6 +37,7 @@ add_library(hwio_cli_impl STATIC
     src/flag_consent_broker.cpp
     src/flag_consent_broker.h
     src/flash_commands.cpp
+    src/guided_lte.h
     src/flash_commands.h
     src/jlink_commands.cpp
     src/jlink_commands.h
@@ -52,6 +53,8 @@ add_library(hwio_cli_impl STATIC
     src/probe_options.h
     src/progress_ui.cpp
     src/progress_ui.h
+    src/remote_commands.cpp
+    src/remote_commands.h
     src/selftest.cpp
     src/selftest.h
     src/signals.cpp
@@ -67,7 +70,8 @@ add_library(hwio_cli_impl STATIC
 hwio_apply_target_defaults(hwio_cli_impl)
 target_include_directories(hwio_cli_impl PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_link_libraries(hwio_cli_impl PUBLIC
-    hwio::core hwio::device hwio::diag hwio::mcp hwio::mcp_tools hwio::update Qt6::Core CLI11::CLI11)
+    hwio::core hwio::device hwio::diag hwio::mcp hwio::mcp_tools hwio::remote hwio::update Qt6::Core
+    CLI11::CLI11)
 # replxx (ADR-0033) only for the interactive console; the backend never links it.
 target_link_libraries(hwio_cli_impl PRIVATE replxx::replxx)
 if(WIN32)

@@ -2,7 +2,8 @@
 // PageRegistry::addSettingsSection and rendered by the Settings page (plan 0006): font size,
 // timestamps, line wrapping, console log files, the log folder and the retention of the files;
 // amended by 0021 (ADR-0170): command suggestions while typing and reading the command list on
-// connect; by 0025 (ADR-0186): "Remember commands" and "Clear history".
+// connect; by 0025 (ADR-0186): "Remember commands" and "Clear history"; by 0045 (ADR-0359): the
+// command options only in the Advanced and Expert modes.
 // Binds to ConsoleSettings (the console/* keys of the SettingsStore).
 import QtQuick
 import QtQuick.Controls
@@ -55,50 +56,58 @@ ColumnLayout {
         onToggled: ConsoleSettings.wrapLines = checked
     }
 
-    Switch {
-        objectName: "consoleSuggestions"
+    // Plan 0045 (ADR-0359): the command options are part of the Advanced mode.
+    SettingsGroup {
+        objectName: "consoleCommands"
         Layout.fillWidth: true
-        text: qsTr("Suggest commands while typing")
-        checked: ConsoleSettings.suggestions
-        onToggled: ConsoleSettings.suggestions = checked
-    }
-
-    Switch {
-        objectName: "consoleReadCommands"
-        Layout.fillWidth: true
-        text: qsTr("Read the command list from the device on connect (sends “help”)")
-        checked: ConsoleSettings.readCommandsOnConnect
-        onToggled: ConsoleSettings.readCommandsOnConnect = checked
-    }
-
-    // 0025 (ADR-0186): recording the command history; "Clear history" deletes it for all devices.
-    RowLayout {
-        Layout.fillWidth: true
-        spacing: Theme.spacingM
+        minimumMode: UiMode.Advanced
+        rowId: "consoleCommands"
 
         Switch {
-            objectName: "consoleRememberCommands"
+            objectName: "consoleSuggestions"
             Layout.fillWidth: true
-            text: qsTr("Remember commands")
-            checked: ConsoleSettings.rememberCommands
-            onToggled: ConsoleSettings.rememberCommands = checked
+            text: qsTr("Suggest commands while typing")
+            checked: ConsoleSettings.suggestions
+            onToggled: ConsoleSettings.suggestions = checked
         }
 
-        HButton {
-            objectName: "consoleClearHistory"
-            text: qsTr("Clear history")
-            onClicked: clearHistoryDialog.open()
+        Switch {
+            objectName: "consoleReadCommands"
+            Layout.fillWidth: true
+            text: qsTr("Read the command list from the device on connect (sends “help”)")
+            checked: ConsoleSettings.readCommandsOnConnect
+            onToggled: ConsoleSettings.readCommandsOnConnect = checked
         }
-    }
 
-    // Review R8: why "Clear history" failed (e.g. a file is locked by another program).
-    ErrorPanel {
-        objectName: "consoleClearHistoryError"
-        Layout.fillWidth: true
-        visible: ConsoleSettings.historyError.valid
-        error: ConsoleSettings.historyError
-        primaryAction: ErrorAction.Dismiss
-        onActionTriggered: ConsoleSettings.dismissHistoryError()
+        // 0025 (ADR-0186): recording the command history; "Clear history" deletes it for all devices.
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Theme.spacingM
+
+            Switch {
+                objectName: "consoleRememberCommands"
+                Layout.fillWidth: true
+                text: qsTr("Remember commands")
+                checked: ConsoleSettings.rememberCommands
+                onToggled: ConsoleSettings.rememberCommands = checked
+            }
+
+            HButton {
+                objectName: "consoleClearHistory"
+                text: qsTr("Clear history")
+                onClicked: clearHistoryDialog.open()
+            }
+        }
+
+        // Review R8: why "Clear history" failed (e.g. a file is locked by another program).
+        ErrorPanel {
+            objectName: "consoleClearHistoryError"
+            Layout.fillWidth: true
+            visible: ConsoleSettings.historyError.valid
+            error: ConsoleSettings.historyError
+            primaryAction: ErrorAction.Dismiss
+            onActionTriggered: ConsoleSettings.dismissHistoryError()
+        }
     }
 
     ConfirmDialog {

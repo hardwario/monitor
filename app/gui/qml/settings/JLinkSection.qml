@@ -126,6 +126,8 @@ ColumnLayout {
     SettingsRow {
         Layout.fillWidth: true
         label: qsTr("RTT latency (ms)")
+        minimumMode: UiMode.Expert // plan 0045
+        rowId: "jlinkLatency"
 
         StepSpinBox {
             id: latencyBox
@@ -156,6 +158,8 @@ ColumnLayout {
     SettingsRow {
         Layout.fillWidth: true
         label: qsTr("Reset on connect")
+        minimumMode: UiMode.Expert // plan 0045
+        rowId: "jlinkResetOnConnect"
 
         Switch {
             objectName: "defaultResetOnConnect"

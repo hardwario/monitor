@@ -3,6 +3,7 @@
 #include "mcp/mcp_controller.h"
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/page_registry.h"
+#include "viewmodels/ui_mode.h"
 
 #include <QString>
 #include <QStringLiteral>
@@ -19,7 +20,8 @@ McpController& registerMcp(AppViewModel& app, McpController::Options options) {
         .id = QStringLiteral("mcp"),
         .titleSourceText = QT_TRANSLATE_NOOP("Pages", "AI assistants (MCP)"),
         .qml = QUrl(QStringLiteral("qrc:/qt/qml/HardwarioMonitor/qml/settings/McpSection.qml")),
-        .order = 50});
+        .order = 50,
+        .minimumMode = UiMode::Advanced}); // plan 0045
     // Qt parent ownership: the AppViewModel (constructor).
     // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
     auto* controller = new McpController(app, std::move(options));

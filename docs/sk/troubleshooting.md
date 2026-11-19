@@ -99,6 +99,13 @@ Obyčajná aktualizácia LTE (`hwio chester lte flash` alebo balík, firmvér mo
 
 Kód chyby: [`target.reset_during_update`](#target.reset_during_update).
 
+<a id="remote-support-session-problems"></a>
+### Problémy s reláciou vzdialenej podpory
+
+HARDWARIO Monitor sa k serveru podpory `terminal.hardwario.com` pripája cez `wss` (HTTPS, port 443). Firewall alebo proxy, ktoré blokujú WebSockety, znemožnia zdieľanie aj pripojenie k relácii. Ak rovnaký kód relácie používa niekto iný (veľmi zriedkavé), zdieľanie sa z bezpečnostných dôvodov ukončí: spustite ho znova a dostanete nový kód. Ten, kto sa pripája a nie je do 2 minút povolený (alebo je odmietnutý), musí zákazníka požiadať, aby zdieľanie spustil znova. Pozrite si [Vzdialená podpora](remote-support.md).
+
+Kódy chýb: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored).
+
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Firmvér LTE modemu potrebuje nRF Util
 
@@ -487,7 +494,7 @@ Po neúspešnom kroku aktualizácie LTE bol v registri dôvodu resetu LTE MCU na
 - **Probably:** Access port protection (APPROTECT) is enabled.
 - **What to do:** Recover the MCU (this erases it), then flash it again.
 
-Obnovenie odstráni ochranu, ale úplne vymaže MCU vrátane bloku informácií o produkte (Product Information Block). Pozrite si [Obnovenie](flashing.md#obnovenie). Pre konkrétny MCU odporúčanie znie "Run `hwio <profile> <target> recover` (erases the MCU)."; v desktopovej aplikácii použite **Recover…** v časti **Maintenance** na stránke **Flash** (zobrazí sa so zapnutou voľbou **Settings › Advanced › Show expert maintenance actions** alebo raz, keď vás tam pošle sprievodca riešením problémov).
+Obnovenie odstráni ochranu, ale úplne vymaže MCU vrátane bloku informácií o produkte (Product Information Block). Pozrite si [Obnovenie](flashing.md#obnovenie). Pre konkrétny MCU odporúčanie znie "Run `hwio <profile> <target> recover` (erases the MCU)."; v desktopovej aplikácii použite **Recover…** v časti **Maintenance** na stránke **Flash** (zobrazí sa v režime Expert, **Settings › General › Mode**, alebo raz, keď vás tam pošle sprievodca riešením problémov).
 
 Pri čipe STM32 (RDP úroveň 1) správa znie "The chip is read-out protected (RDP level 1). Unlocking erases the whole chip, including its data EEPROM." a odporúčanie "Unlock the chip (this erases it): `hwio stm32 unlock --chip <chip>`." V desktopovej aplikácii stlačte **Unlock…** v chybe alebo **Unlock (erase)…** v časti **Maintenance**. Firmvér v čipe sa stratí a vopred sa nedá zálohovať. Pozrite si [Nahrávanie firmvéru do čipov STM32](flashing.md#stm32-chips).
 
@@ -674,6 +681,14 @@ Odomknutie čaká až 60 s, kým sa čip vymaže a ozve sa s RDP úrovňou 0. Po
 <a id="category-firmware"></a>
 ### Firmvér (návratový kód 7)
 
+<a id="remote.firmware_not_in_catalog"></a>
+#### `remote.firmware_not_in_catalog`
+
+**This firmware is not in the HARDWARIO catalog.**
+
+- **Probably:** Remote flashing accepts only firmware from the HARDWARIO firmware catalog, identified by its ID.
+- **What to do:** Check the firmware ID, or ask the customer to flash a file locally.
+
 <a id="firmware.hex_parse_error"></a>
 #### `firmware.hex_parse_error`
 
@@ -776,6 +791,52 @@ V desktopovej aplikácii zadajte **Start address** na karte firmvéru; v CLI pou
 - **What to do:** Check the internet connection and try again.
 
 Správa môže uvádzať firmvér, napríklad "Downloading firmware `<id>` failed." alebo "Downloading `<name>` failed." V desktopovej aplikácii môžete namiesto toho zvoliť aj vlastný súbor.
+
+<a id="remote.relay_unreachable"></a>
+#### `remote.relay_unreachable`
+
+**Cannot reach the support server.**
+
+- **Probably:** The network, a proxy or a firewall blocks the connection to the support server (wss://terminal.hardwario.com).
+- **What to do:** Check the internet connection or try another network.
+
+Z relácie vzdialenej podpory (**Zdieľať s podporou…**, **Pripojiť sa k relácii podpory…**, `hwio remote`). Po strate spojenia sa pripojenie 5 minút opakuje. Pozrite si [Problémy s reláciou vzdialenej podpory](#remote-support-session-problems).
+
+<a id="remote.code_collision"></a>
+#### `remote.code_collision`
+
+**Another device is using this session code.**
+
+- **Probably:** Someone else shares a console under the same session code. The session was ended for safety.
+- **What to do:** Start sharing again to get a new code.
+
+<a id="remote.host_ended"></a>
+#### `remote.host_ended`
+
+**The remote session ended.**
+
+- **Probably:** The customer ended sharing, or their device or HARDWARIO Monitor disconnected.
+- **What to do:** Ask the customer to share the console again if you need more time.
+
+Zobrazí sa tomu, kto sa pripojil, keď sa spojenie so serverom definitívne skončilo.
+
+<a id="remote.protocol_error"></a>
+#### `remote.protocol_error`
+
+**Unexpected data in the remote session.**
+
+- **Probably:** The support server or the other participant sent data that HARDWARIO Monitor does not understand. It was ignored, or the session was ended for safety.
+- **What to do:** Report the issue with a diagnostic report.
+
+<a id="remote.application_not_restored"></a>
+#### `remote.application_not_restored`
+
+**Firmvér LTE bol aktualizovaný, ale aplikácia nebola zapísaná späť.**
+
+- **Pravdepodobne:** Riadená aktualizácia LTE skončila skôr, ako bola aplikácia zapísaná späť, alebo sa nepodarilo uložiť kópiu aplikácie. MCU aplikácie je prázdny.
+- **Čo robiť:** Nahrajte aplikáciu: požiadajte zákazníka, aby ju nahral, alebo požiadajte o nahratie firmvéru z katalógu.
+
+Hlási sa pripojenému po vzdialenej aktualizácii LTE (**Požiadať o aktualizáciu firmvéru LTE**, `hwio remote join --lte-update`).
 
 <a id="update.network"></a>
 #### `update.network`
@@ -933,6 +994,24 @@ Len CLI, s `-o FILE --force`.
 
 Správa zvyčajne presne uvádza, ktorá hodnota je nesprávna, napríklad chybná možnosť (odporúčanie potom znie "Run `hwio --help`."), neznámy profil zariadenia alebo cieľ, rýchlosť J-Linku alebo latencia mimo rozsahu, chybná adresa alebo dĺžka, ID firmvéru, ktoré nemá 32 šestnástkových číslic, alebo viacero zariadení Bluetooth zodpovedajúcich `--name` (použite `--address`). V desktopovej aplikácii zahŕňa aj dávkové súbory konzoly, ktoré sú príliš veľké, obsahujú príliš dlhý príkaz alebo neobsahujú žiadne príkazy. Pozrite si [CLI](../en/cli.md).
 
+<a id="remote.code_invalid"></a>
+#### `remote.code_invalid`
+
+**The session code is not valid.**
+
+- **Probably:** The session code must be a number: 6 digits from HARDWARIO Monitor, up to 6 digits from the web Terminal.
+- **What to do:** Check the code and type it again.
+
+<a id="remote.operation_unsupported_peer"></a>
+#### `remote.operation_unsupported_peer`
+
+**The customer's application supports only the console.**
+
+- **Probably:** The customer uses the web Terminal, which cannot flash, erase, recover or reset the device remotely.
+- **What to do:** Ask the customer to share the console from HARDWARIO Monitor.
+
+Aj vtedy, keď zákazník zdieľa konzolu cez Bluetooth, ktorá nahrávanie firmvéru nemá.
+
 <a id="usage.confirmation_required"></a>
 #### `usage.confirmation_required`
 
@@ -1043,6 +1122,22 @@ Varovanie z `hwio doctor` alebo z diagnostickej správy. Správa môže uvádza�
 - **What to do:** Run the operation again if needed.
 
 Zobrazí sa, keď stlačíte Ctrl+C alebo **Cancel**, na potvrdenie odpoviete Nie alebo zatvoríte zariadenie. Variant "The output was closed." znamená, že program, ktorý číta výstup `hwio`, skončil, napríklad `hwio ... --json | head`.
+
+<a id="remote.join_not_allowed"></a>
+#### `remote.join_not_allowed`
+
+**The customer did not allow you to join.**
+
+- **Probably:** The customer ended the session instead of allowing you, or did not answer within 2 minutes.
+- **What to do:** Ask the customer to share the console again and to allow you when you join.
+
+<a id="remote.operation_denied"></a>
+#### `remote.operation_denied`
+
+**The customer denied the request.**
+
+- **Probably:** The customer denied the operation, or did not answer within 60 seconds.
+- **What to do:** Ask the customer to allow the operation and try again.
 
 <a id="mcp.consent_denied"></a>
 #### `mcp.consent_denied`

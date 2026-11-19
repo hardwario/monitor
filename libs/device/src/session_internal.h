@@ -48,7 +48,12 @@ namespace detail {
 
 struct SendLineCommand {
     std::string line;
-    std::uint64_t origin = 0; // ConsoleLine::origin of the echo (plan 0021, ADR-0175)
+    std::uint64_t origin = 0;              // ConsoleLine::origin of the echo (plan 0021, ADR-0175)
+    LineSource source = LineSource::Local; // ConsoleLine::source of the echo (plan 0044)
+};
+// Plan 0044 (ADR-0333): ConsoleSession::recordRemoteEvent().
+struct RemoteEventCommand {
+    std::string text;
 };
 struct ReconnectCommand {};
 struct SuspendCommand {};
@@ -97,7 +102,7 @@ struct OperationCommand {
 using Command =
     std::variant<SendLineCommand, ReconnectCommand, SuspendCommand, ResumeCommand, OperationCommand,
                  StartConnectionCommand, DetachProbeCommand, ReattachProbeCommand,
-                 SetRttAddressCommand, SetFirmwareIdentityCommand, HoldCommand>;
+                 SetRttAddressCommand, SetFirmwareIdentityCommand, HoldCommand, RemoteEventCommand>;
 
 // ---- events (worker -> owner thread) ----------------------------------------------------------
 

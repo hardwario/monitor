@@ -156,6 +156,38 @@ TestCase {
         verify(find("mcpRule_memory-write") !== null);
     }
 
+    // Clicking the option that is already selected keeps it selected (both radio buttons used to
+    // toggle off, leaving the rule without a visible choice).
+    function test_permissionsReclickKeepsSelection() {
+        openSection();
+        // Every rule change replaces the rules list and rebuilds the rows, so look the buttons up
+        // again after each click.
+        const ask = () => find("mcpAsk_flash");
+        const allow = () => find("mcpAllow_flash");
+        // Real mouse clicks: wait for the page's own scroll to the section, then bring the rule
+        // (below the fold of the 800 px window) into view.
+        tryCompare(AppViewModel, "settingsSection", "", 5000);
+        const flickable = findAll(window.contentItem, "settingsScroll")[0].contentItem;
+        const y = allow().mapToItem(flickable.contentItem, 0, 0).y;
+        flickable.contentY = Math.max(0, Math.min(y - 60, flickable.contentHeight - flickable.height));
+        waitForRendering(window.contentItem);
+        verify(ask().checked && !allow().checked);
+        mouseClick(ask());
+        verify(ask().checked && !allow().checked);
+        compare(testSupport.setting("mcp/consent/flash"), "ask");
+        mouseClick(allow());
+        compare(testSupport.setting("mcp/consent/flash"), "allow");
+        tryVerify(() => allow().checked && !ask().checked);
+        mouseClick(allow());
+        verify(allow().checked && !ask().checked);
+        compare(testSupport.setting("mcp/consent/flash"), "allow");
+        // Not a double click with the previous press (a double click does not emit clicked()).
+        wait(Qt.styleHints.mouseDoubleClickInterval + 50);
+        mouseClick(ask());
+        compare(testSupport.setting("mcp/consent/flash"), "ask");
+        tryVerify(() => ask().checked && !allow().checked);
+    }
+
     function test_consentWindow_data() {
         return [
             { tag: "flash", tool: "flash", categories: ["flash", "uicr"],

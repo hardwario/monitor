@@ -136,6 +136,7 @@ public:
     [[nodiscard]] std::string_view consoleTargetId() const override;
     [[nodiscard]] std::filesystem::path consoleFile() const override;
     // Plan 0028 (D9): posted to the BLE host; the handler renames the console file.
+    [[nodiscard]] Status recordRemoteEvent(std::string text) override; // plan 0044
     [[nodiscard]] Status setFirmwareIdentity(std::optional<FirmwareIdentity> identity,
                                              std::uint64_t attach) override;
     // The last RSSI a background scan saw (nullopt before any).
@@ -178,9 +179,14 @@ private:
     bool m_scanning = false; // a background scan was requested (autoReconnect)
     std::chrono::steady_clock::time_point m_nextScan; // background scan restarts (B2)
     std::optional<ErrorCode> m_scanErrorShown;        // reported once per code (B2)
-    // The origin tokens (ConsoleLine::origin, plan 0021) of the lines not written or rejected yet,
-    // in order: each gets exactly one echo or rejection. <= maxLinesInFlight (B4).
-    std::deque<std::uint64_t> m_linesInFlight;
+    // The origin tokens (ConsoleLine::origin, plan 0021) and sources (plan 0044) of the lines not
+    // written or rejected yet, in order: each gets exactly one echo or rejection.
+    // <= maxLinesInFlight (B4).
+    struct LineInFlight {
+        std::uint64_t origin = 0;
+        LineSource source = LineSource::Local;
+    };
+    std::deque<LineInFlight> m_linesInFlight;
     bool m_attemptPending = false; // an automatic attempt was posted and has not ended
     std::chrono::steady_clock::time_point m_nextRetry;
     QTimer m_retryTimer;

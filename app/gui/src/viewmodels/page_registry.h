@@ -12,6 +12,8 @@
 //
 // Ownership: a value member of AppViewModel. Thread safety: GUI thread only.
 
+#include "viewmodels/ui_mode.h"
+
 #include <QString>
 #include <QUrl>
 
@@ -45,6 +47,9 @@ struct SettingsSectionDescriptor {    // a section of the global Settings page (
     const char* titleSourceText = ""; // QT_TRANSLATE_NOOP("Pages", "Console")
     QUrl qml;                         // section component; binds to SettingsStore keys of its plan
     int order = 0;
+    // Plan 0045 (ADR-0359): the lowest user mode that shows the section (its rows declare their
+    // own minimum in QML, SettingsRow.minimumMode).
+    UiMode minimumMode = UiMode::Basic;
 };
 
 class PageRegistry {
@@ -59,6 +64,8 @@ public:
     }
     // nullptr when no page has this id.
     [[nodiscard]] const PageDescriptor* find(const QString& id) const;
+    // nullptr when no settings section has this id.
+    [[nodiscard]] const SettingsSectionDescriptor* findSettingsSection(const QString& id) const;
 
     // The page title in the current language.
     [[nodiscard]] static QString title(const PageDescriptor& page);

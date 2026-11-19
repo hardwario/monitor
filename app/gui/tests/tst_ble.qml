@@ -117,6 +117,39 @@ TestCase {
         compare(tab().title, "CHESTER · CHESTER-ABC123");
     }
 
+    // The arrow keys move the selection between the rows; Down in the filter enters the list and
+    // Up from the first row returns to the filter.
+    function test_arrowKeys() {
+        showBluetooth();
+        const picker = tab().blePicker;
+        const filter = visibleOne("bleFilter");
+        const rows = () => visibleAll("bleRow");
+        filter.forceActiveFocus();
+        picker.selectedRow = -1;
+        keyClick(Qt.Key_Down);
+        compare(picker.selectedRow, 0);
+        verify(rows()[0].activeFocus, "Down in the filter focuses the first row");
+        keyClick(Qt.Key_Down);
+        compare(picker.selectedRow, 1);
+        verify(rows()[1].activeFocus);
+        keyClick(Qt.Key_Down); // the last row: stays
+        compare(picker.selectedRow, 1);
+        verify(rows()[1].activeFocus);
+        keyClick(Qt.Key_Up);
+        compare(picker.selectedRow, 0);
+        verify(rows()[0].activeFocus);
+        keyClick(Qt.Key_Up); // back to the filter, the selection is kept
+        verify(filter.activeFocus, "Up from the first row returns to the filter");
+        compare(picker.selectedRow, 0);
+        keyClick(Qt.Key_Down); // enters at the selected row
+        verify(rows()[0].activeFocus);
+        keyClick(Qt.Key_Down);
+        const second = rows()[1].name;
+        keyClick(Qt.Key_Return);
+        tryCompare(tab(), "state", DeviceTabViewModel.Connected, 10000);
+        compare(tab().title, "CHESTER · " + second);
+    }
+
     // Plan 0033 (ADR-0235): the order is frozen while the pointer is over the list or a row has
     // the keyboard focus.
     function test_orderFrozenWhilePointedAt() {

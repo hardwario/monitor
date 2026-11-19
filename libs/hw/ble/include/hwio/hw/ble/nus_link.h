@@ -101,6 +101,8 @@ public:
                              std::uint64_t attach) {
         m_handler->onFirmwareIdentity(identity, attach);
     }
+    // Plan 0044: forwards to the handler (BleHost RecordNote).
+    void recordNote(std::string text) { m_handler->onNote(std::move(text)); }
 
     // IBleApi events of this link (the worker routes them by LinkId).
     [[nodiscard]] std::optional<LinkId> link() const noexcept { return m_link; }

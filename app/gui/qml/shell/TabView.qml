@@ -26,6 +26,21 @@ ColumnLayout {
         tab: view.stableTab
     }
 
+    // Plan 0044: the remote support session of this tab (on every page).
+    RemoteBanner {
+        Layout.fillWidth: true
+        visible: hostVisible || joinVisible
+        readonly property bool hostVisible: view.stableTab !== null && view.stableTab.remoteShare.sharing
+        readonly property bool joinVisible: view.stableTab !== null && view.stableTab.remoteJoin.active
+                                            && view.stableTab.remoteJoin.bannerText !== ""
+        tab: view.stableTab
+    }
+
+    RemoteSessionDialogs {
+        tab: view.stableTab
+        tabIndex: view.index
+    }
+
     PageHost {
         Layout.fillWidth: true
         Layout.fillHeight: true

@@ -90,7 +90,7 @@ jobs:
           version: ${{ env.QT_VERSION }}
           arch: linux_gcc_64
           aqtversion: ${{ env.AQT_VERSION }}
-          modules: qtconnectivity
+          modules: qtconnectivity qtwebsockets
           # Review L-5 (plan/features/0025): signed release artifacts never use Qt from the
           # Actions cache (a poisoned entry would feed the signed binaries).
           cache: false
@@ -170,7 +170,7 @@ jobs:
           version: ${{ env.QT_VERSION }}
           arch: clang_64
           aqtversion: ${{ env.AQT_VERSION }}
-          modules: qtconnectivity
+          modules: qtconnectivity qtwebsockets
           # Review L-5 (plan/features/0025): signed release artifacts never use Qt from the
           # Actions cache (a poisoned entry would feed the signed binaries).
           cache: false
@@ -230,7 +230,7 @@ jobs:
           version: ${{ env.QT_VERSION }}
           arch: win64_msvc2022_64
           aqtversion: ${{ env.AQT_VERSION }}
-          modules: qtconnectivity
+          modules: qtconnectivity qtwebsockets
           # Review L-5 (plan/features/0025): signed release artifacts never use Qt from the
           # Actions cache (a poisoned entry would feed the signed binaries).
           cache: false

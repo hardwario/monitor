@@ -80,13 +80,41 @@ Es läuft jeweils nur ein Fenster der App. Ein erneuter Start holt das geöffnet
 
 | Abschnitt | Inhalt |
 |---|---|
-| **General** | **Language** (System, English, Čeština), **Theme** (System, Light, Dark), **Reopen tabs at start** |
+| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark), **Reopen tabs at start** |
 | **Console** | Schriftgröße, Zeitstempel, Zeilenumbruch, Befehlsvorschläge, Befehlsverlauf, Konsolendateien und ihr Ordner |
 | **J-Link** | die J-Link-Bibliothek (**Automatic** oder **Custom path**) und die Standard-Verbindungsoptionen |
 | **nRF Util** | das Programm nRF Util (**Automatic** oder **Custom path**), nur für die LTE-Modem-Firmware nötig |
+| **AI assistants (MCP)** | der [MCP-Server](../en/mcp.md) für KI-Assistenten |
+| **Expert** | der [Support-Server](remote-support.md#settings) |
 | **About** | die Version (mit **Copy** für den Support), die [Update-Prüfung](privacy.md#update-prüfung), der `hwio`-Befehl dieser Installation, Lizenzen, Links |
 
-Änderungen gelten sofort.
+Änderungen gelten sofort. In der deutschen Oberfläche heißen die Modi **Einfach**, **Erweitert** und **Experte**.
+
+<a id="modes"></a>
+### Modi
+
+Der **Mode** (Modus) bestimmt, wie viel die Einstellungen zeigen. Beim ersten Start (und einmal nach dem Update von
+2.0.0-rc.3 oder älter) fragt die App **How do you want to use HARDWARIO Monitor?**: Wählen Sie einen Modus und
+klicken Sie auf **Continue**. Vorausgewählt ist **Advanced**; hatten Sie in einer älteren Version **Show expert
+maintenance actions** eingeschaltet, ist es **Expert**. Wenn Sie den Dialog schließen, bleibt der vorausgewählte Modus.
+Sie können ihn jederzeit unter **Settings › General › Mode** ändern.
+
+| Angezeigt | Basic | Advanced | Expert |
+|---|---|---|---|
+| **General**: Mode, Language, Theme, Reopen tabs at start | ✓ | ✓ | ✓ |
+| **Console**: Schriftgröße, Zeitstempel, Zeilenumbruch, Konsolendateien, Log-Ordner | ✓ | ✓ | ✓ |
+| **Console**: Befehlsvorschläge, Einlesen der Befehlsliste, **Remember commands**, **Clear history** | | ✓ | ✓ |
+| **J-Link**: Library, Default speed, Auto-reconnect | | ✓ | ✓ |
+| **J-Link**: RTT latency, Reset on connect | | | ✓ |
+| **nRF Util**, **AI assistants (MCP)** | | ✓ | ✓ |
+| **Expert**: Support server | | | ✓ |
+| **About**, in Advanced und Expert mit **Include pre-releases** | ✓ | ✓ | ✓ |
+| **Flash › Maintenance**: **Erase everything…**, **Recover…**, die LTE-MCU | | | ✓ |
+
+Ein Modus blendet Einstellungen nur aus: Eine ausgeblendete Einstellung behält ihren Wert und wird weiter verwendet
+(zum Beispiel ein eigener Pfad zur J-Link-Bibliothek im Modus Basic). Öffnet ein Fehler oder eine Anleitung eine
+Einstellung, die der Modus ausblendet (**Open Settings**), wird sie für diesen Besuch mit dem Hinweis „Shown because it
+was needed.“ angezeigt; der Modus ändert sich nicht.
 
 ## Hilfe
 

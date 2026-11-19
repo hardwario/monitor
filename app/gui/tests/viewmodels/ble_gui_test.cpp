@@ -419,7 +419,11 @@ TEST_F(BleGuiTest, ChoosingTheDeviceOfAnotherTabSwitchesToIt) {
     picker.choose(0);
     ASSERT_EQ(activation.count(), 1);
     EXPECT_EQ(activation.first().first().toInt(), 0);
-    EXPECT_EQ(picker.selectedRow(), 1); // the free CHESTER stays preselected
+    EXPECT_EQ(picker.selectedRow(), 1);   // the free CHESTER stays preselected
+    EXPECT_FALSE(picker.isSelectable(0)); // the arrow keys skip the device of another tab
+    EXPECT_TRUE(picker.isSelectable(1));
+    EXPECT_FALSE(picker.isSelectable(-1));
+    EXPECT_FALSE(picker.isSelectable(picker.count()));
 }
 
 TEST_F(BleGuiTest, PairFromTheErrorPanelThenConnects) {

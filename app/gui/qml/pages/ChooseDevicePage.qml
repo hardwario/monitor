@@ -31,7 +31,8 @@ Item {
         value: page.active && page.bluetooth
     }
 
-    // Connect via [J-Link | Bluetooth] (shown when the application has Bluetooth).
+    // Connect via [J-Link | Bluetooth] (shown when the application has Bluetooth) and, plan 0044,
+    // [Join support session…] (always).
     Rectangle {
         id: transportBar
 
@@ -39,7 +40,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        visible: page.tab.bluetoothAvailable
+        visible: true
         height: transportBar.visible ? transportRow.implicitHeight + 2 * Theme.spacingM : 0
         color: "transparent"
 
@@ -52,11 +53,13 @@ Item {
             spacing: Theme.spacingM
 
             Label {
+                visible: page.tab.bluetoothAvailable
                 text: qsTr("Connect via")
                 color: Theme.textMuted
             }
 
             Row {
+                visible: page.tab.bluetoothAvailable
                 objectName: "transportSwitch"
                 spacing: 0
                 Accessible.role: Accessible.Grouping
@@ -88,7 +91,18 @@ Item {
             Item {
                 Layout.fillWidth: true
             }
+
+            HButton {
+                objectName: "joinSupportSession"
+                iconName: "share"
+                text: qsTr("Join support session…")
+                onClicked: joinDialog.open()
+            }
         }
+    }
+
+    JoinDialog {
+        id: joinDialog
     }
 
     BleDeviceList {

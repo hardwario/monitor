@@ -12,10 +12,12 @@
 #include "hwio/device/device_session.h"
 #include "hwio/device/session_registry.h"
 #include "hwio/diag/environment.h"
+#include "hwio/firmware/firmware_cache.h"
 #include "hwio/hw/ble/types.h"
 #include "hwio/hw/jlink/library_locator.h"
 #include "hwio/hw/jlink/types.h"
 #include "hwio/hw/nrfutil/nrfutil.h"
+#include "hwio/remote/session_code.h"
 #include "hwio/update/semver.h"
 #include "language_manager.h"
 #include "report_view_model.h"
@@ -29,7 +31,10 @@
 #include "viewmodels/page_list_model.h"
 #include "viewmodels/page_registry.h"
 #include "viewmodels/probe_firmware_view_model.h"
+#include "viewmodels/remote_join_view_model.h"
+#include "viewmodels/settings_view_model.h"
 #include "viewmodels/shortcut_registry.h"
+#include "viewmodels/ui_mode_controller.h"
 #include "viewmodels/update_view_model.h"
 #include "wizard_launcher.h"
 #include "wizard_view_model.h"
@@ -119,8 +124,10 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
       // children of this object (destroyed explicitly in the right order by the destructor).
       m_settings(new SettingsStore( // NOLINT(cppcoreguidelines-owning-memory)
           std::move(m_options.settings), this)),
-      m_shortcuts(new ShortcutRegistry(this)),      // NOLINT(cppcoreguidelines-owning-memory)
-      m_pageList(new PageListModel(m_pages, this)), // NOLINT(cppcoreguidelines-owning-memory)
+      m_shortcuts(new ShortcutRegistry(this)), // NOLINT(cppcoreguidelines-owning-memory)
+      // Plan 0045: the user mode (read after registerShellKeys, below).
+      m_uiMode(new UiModeController(*m_settings, this)), // NOLINT(cppcoreguidelines-owning-memory)
+      m_pageList(new PageListModel(m_pages, this)),      // NOLINT(cppcoreguidelines-owning-memory)
       m_registry(std::make_unique<device::SessionRegistry>(m_options.registry)),
       m_scanner(std::make_unique<ProbeScanner>(m_options.registry.instanceRoot,
                                                m_options.registry.lockDirectory,
@@ -155,6 +162,9 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
     }
 
     registerShellKeys(*m_settings);
+    // Plan 0045: the user mode, read before the extensions (the Settings and Flash view models use
+    // it).
+    m_uiMode->reload();
     registerShellShortcuts();
     // Plan 0036 (ADR-0257): the J-Link firmware update. Qt parent ownership: a child, deleted by
     // the destructor after the tabs. Created before the extensions: the MCP controller (plan 0014)
@@ -321,10 +331,33 @@ void AppViewModel::registerShellKeys(SettingsStore& store) {
                    .validator = validators::maxLength(1024)},
         SettingKey{
             .path = restoreTabsKey, .type = QMetaType::Bool, .defaultValue = true, .validator = {}},
+        // Plan 0045 (ADR-0359): the user mode; "" = not chosen yet (the first-start dialog).
+        SettingKey{.path = UiModeController::modeKey,
+                   .type = QMetaType::QString,
+                   .defaultValue = QString(),
+                   .validator =
+                       validators::oneOf({QString(), QStringLiteral("basic"),
+                                          QStringLiteral("advanced"), QStringLiteral("expert")})},
+        // Plan 0033 (ADR-0236): the rc.3 switch "Show expert maintenance actions", replaced by
+        // Expert mode (ADR-0360); read only for the preselection of upgrading users (ADR-0362).
+        SettingKey{.path = UiModeController::legacyExpertKey,
+                   .type = QMetaType::Bool,
+                   .defaultValue = false,
+                   .validator = {}},
         SettingKey{.path = tabsKey,
                    .type = QMetaType::QString,
                    .defaultValue = QString(),
                    .validator = validators::maxLength(4096)},
+        // Plan 0044 (ADR-0330): the remote support relay; "" = https://terminal.hardwario.com.
+        SettingKey{.path = toQString(remote::relayUrlSetting.path),
+                   .type = QMetaType::QString,
+                   .defaultValue = QString(),
+                   .validator =
+                       [](const QVariant& value) {
+                           const QString text = value.toString();
+                           return text.isEmpty() ||
+                                  remote::parseRelayUrl(toStdString(text)).has_value();
+                       }},
         // 0 = the profile's value (ADR-0052); for the speed 0 = automatic (ADR-0111).
         SettingKey{.path = QStringLiteral("jlink/speedKhz"),
                    .type = QMetaType::Int,
@@ -626,6 +659,11 @@ std::unique_ptr<DeviceTabViewModel> AppViewModel::makeTab() {
         (void)m_launcher->openForTab(wizardId, tab);
     };
     context.probeFirmware = m_probeFirmware;
+    if (!m_firmwareCache) {
+        m_firmwareCache =
+            std::make_unique<firmware::FirmwareCache>(firmware::FirmwareCache::defaultDirectory());
+    }
+    context.firmwareCache = m_firmwareCache.get();
     return std::make_unique<DeviceTabViewModel>(std::move(context), nullptr);
 }
 
@@ -655,6 +693,44 @@ DeviceTabViewModel* AppViewModel::addTab(std::unique_ptr<DeviceTabViewModel> tab
     });
     connect(raw, &DeviceTabViewModel::busyChanged, this, [this] { checkQuit(); });
     return raw;
+}
+
+QUrl AppViewModel::relayUrl() const { return remote::configuredRelayUrl(m_settings->settings()); }
+
+QVariantMap AppViewModel::checkJoinInput(const QString& text) const {
+    return RemoteJoinViewModel::checkJoinInput(text, relayUrl());
+}
+
+bool AppViewModel::joinRemoteSession(const QString& text, bool allowForeignRelay) {
+    auto target = remote::parseJoinInput(toStdString(text));
+    if (!target) {
+        return false;
+    }
+    QUrl relay = relayUrl();
+    if (target->relay && !remote::sameRelay(*target->relay, relay)) {
+        if (!allowForeignRelay) {
+            return false;
+        }
+        relay = *target->relay;
+    }
+    DeviceTabViewModel* tab = currentTabViewModel();
+    if (tab == nullptr || !tab->choosing()) {
+        if (!m_tabs->canAdd()) {
+            showToast(tr("Close a tab first: at most %1 device tabs can be open.").arg(maxTabs()));
+            return false;
+        }
+        tab = addTab(makeTab());
+        if (tab == nullptr) {
+            return false;
+        }
+        setCurrentTab(m_tabs->indexOf(tab));
+    }
+    if (!tab->configureRemote(toQString(target->code.text()), relay)) {
+        return false;
+    }
+    qCInfo(lcGui) << "Remote: joining session" << toQString(target->code.text()) << relay.host();
+    tab->connectDevice();
+    return true;
 }
 
 void AppViewModel::newTab() {
@@ -778,9 +854,15 @@ void AppViewModel::openGlobalPage(const QString& pageId) {
 
 void AppViewModel::closeGlobalPage() { closeSettings(); }
 
-void AppViewModel::openSettings(const QString& sectionId) {
+void AppViewModel::openSettings(const QString& sectionId, const QString& rowId) {
     m_tabs->openSettings();
     setCurrentTab(m_tabs->settingsRow());
+    // Plan 0045 (ADR-0361): a section or row hidden by the mode is shown for this visit.
+    if (auto* settings =
+            qobject_cast<SettingsViewModel*>(globalPageViewModel(SettingsViewModel::pageId));
+        settings != nullptr) {
+        settings->openAt(sectionId, rowId);
+    }
     m_settingsSection = sectionId;
     settingsSectionRequested(sectionId); // signal: the page scrolls to the section
 }
@@ -1315,6 +1397,7 @@ void AppViewModel::onHandOff(const QString& action, DeviceTabViewModel* tab) {
 }
 
 void AppViewModel::retranslate() {
+    m_uiMode->retranslate();
     m_update->retranslate();
     m_pageList->retranslate();
     m_tabs->retranslate();

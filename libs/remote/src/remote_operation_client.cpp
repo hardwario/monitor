@@ -1,0 +1,184 @@
+#include "hwio/remote/remote_operation_client.h"
+
+#include "hwio/core/error.h"
+#include "hwio/core/result.h"
+#include "hwio/remote/remote_console_session.h"
+#include "hwio/remote/tunnel.h"
+
+#include <QCoreApplication>
+#include <QObject>
+#include <QRandomGenerator>
+#include <QTimer>
+#include <QtCore/qtmetamacros.h>
+
+#include <expected>
+#include <format>
+#include <optional>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <variant>
+
+namespace hwio::remote {
+
+namespace {
+
+// The host's error code as an Error of this process (translated here).
+Error fromHostCode(const std::string& code, bool reportedResult) {
+    const std::optional<ErrorCode> known = errorCodeFromId(code);
+    Error error = makeError(known.value_or(ErrorCode::RemoteProtocolError), "host: " + code);
+    if (reportedResult) {
+        error.message =
+            QCoreApplication::translate("hwio::remote", "Reported by the customer's Monitor: %1")
+                .arg(QString::fromStdString(error.message))
+                .toStdString();
+    }
+    return error;
+}
+
+} // namespace
+
+RemoteOperationClient::RemoteOperationClient(RemoteConsoleSession& session,
+                                             RemoteOperationLimits limits, QObject* parent)
+    : QObject(parent), m_session(&session), m_limits(limits) {
+    m_timer.setSingleShot(true);
+    connect(&m_timer, &QTimer::timeout, this, [this] {
+        Error error = makeError(ErrorCode::Timeout, "no answer from the customer's Monitor");
+        error.message = QCoreApplication::translate(
+                            "hwio::remote", "The customer's Monitor did not answer in time.")
+                            .toStdString();
+        finish(std::move(error));
+    });
+    connect(&session, &RemoteConsoleSession::hostMessage, this, &RemoteOperationClient::onMessage);
+    connect(&session, &RemoteConsoleSession::joinStateChanged, this, [this] {
+        if (!m_session.isNull() && m_session->joinState() == JoinState::Ended) {
+            finish(makeError(ErrorCode::RemoteHostEnded));
+        }
+    });
+    connect(&session, &QObject::destroyed, this,
+            [this] { finish(makeError(ErrorCode::RemoteHostEnded)); });
+}
+
+Result<std::string> RemoteOperationClient::request(tunnel::OpKind kind, tunnel::OpTarget target,
+                                                   std::optional<std::string> firmwareId) {
+    if (m_pending) {
+        return std::unexpected(makeError(ErrorCode::InternalBusy, "a remote operation is pending"));
+    }
+    if (m_session.isNull()) {
+        return std::unexpected(makeError(ErrorCode::RemoteHostEnded));
+    }
+    if (kind == tunnel::OpKind::LteUpdate &&
+        (!m_session->hostHello() || !tunnel::supports(*m_session->hostHello(), kind))) {
+        // ADR-0363: only a host that lists it in its hello's opKinds.
+        return std::unexpected(makeError(ErrorCode::RemoteOperationUnsupportedPeer,
+                                         "the host has no remote LTE update"));
+    }
+    if ((kind == tunnel::OpKind::Flash) != firmwareId.has_value()) {
+        return std::unexpected(makeError(ErrorCode::UsageInvalidArgument,
+                                         "a firmware ID goes with flash, and only with flash"));
+    }
+    m_declined = false;
+    std::string id = std::format("op-{:08x}{:08x}", QRandomGenerator::system()->generate(),
+                                 QRandomGenerator::system()->generate());
+    // ADR-0368: support answers the LTE update's questions when both sides can.
+    const bool questions = m_answers && kind == tunnel::OpKind::LteUpdate &&
+                           m_session->hostHello() && m_session->hostHello()->opQuestions;
+    const tunnel::OpRequest request{.id = id,
+                                    .kind = kind,
+                                    .target = target,
+                                    .firmwareId = std::move(firmwareId),
+                                    .questions = questions};
+    if (Status sent = m_session->sendTunnel(request); !sent) {
+        return std::unexpected(std::move(sent).error());
+    }
+    m_pending = id;
+    m_accepted = false;
+    m_timer.start(m_limits.responseTimeout);
+    return id;
+}
+
+void RemoteOperationClient::onMessage(const tunnel::HostMessage& message) {
+    if (!m_pending) {
+        return;
+    }
+    // ADR-0336: only the answers for our own pending id.
+    std::visit(
+        [this](const auto& m) {
+            using T = std::decay_t<decltype(m)>;
+            if constexpr (std::is_same_v<T, tunnel::HostHello> ||
+                          std::is_same_v<T, tunnel::HostEnd> ||
+                          std::is_same_v<T, tunnel::HostCommands>) {
+                return; // the session handles these; HostEnd ends it (joinStateChanged)
+            } else {
+                if (m.id != *m_pending) {
+                    return;
+                }
+                if constexpr (std::is_same_v<T, tunnel::OpAccepted>) {
+                    m_accepted = true;
+                    m_timer.start(m_limits.inactivityTimeout);
+                    emit accepted();
+                } else if constexpr (std::is_same_v<T, tunnel::OpDenied>) {
+                    finish(fromHostCode(m.code, false));
+                } else if constexpr (std::is_same_v<T, tunnel::OpProgress>) {
+                    if (m_accepted) {
+                        m_timer.start(m_limits.inactivityTimeout);
+                        emit progress(m);
+                    }
+                } else if constexpr (std::is_same_v<T, tunnel::OpQuestion>) {
+                    onQuestion(m);
+                } else if constexpr (std::is_same_v<T, tunnel::OpResult>) {
+                    if (m.ok) {
+                        finish(std::nullopt);
+                    } else {
+                        finish(fromHostCode(m.code.value_or(""), true));
+                    }
+                }
+            }
+        },
+        message);
+}
+
+void RemoteOperationClient::onQuestion(const tunnel::OpQuestion& question) {
+    if (!m_accepted || !m_answers) {
+        return; // ADR-0368: only for an accepted request that offered answers
+    }
+    m_timer.start(m_limits.inactivityTimeout);
+    m_question = question;
+    emit this->question(question.question);
+}
+
+Status RemoteOperationClient::answer(bool yes) {
+    if (!m_pending || !m_question) {
+        return std::unexpected(makeError(ErrorCode::UsageInvalidArgument, "no open question"));
+    }
+    if (m_session.isNull()) {
+        return std::unexpected(makeError(ErrorCode::RemoteHostEnded));
+    }
+    m_declined = m_declined || !yes;
+    const tunnel::OpAnswer message{.id = m_question->id, .qid = m_question->qid, .yes = yes};
+    m_question.reset();
+    emit questionClosed();
+    return m_session->sendTunnel(message);
+}
+
+void RemoteOperationClient::finish(const std::optional<Error>& error) {
+    if (!m_pending) {
+        return;
+    }
+    m_pending.reset();
+    m_accepted = false;
+    m_timer.stop();
+    if (std::exchange(m_question, std::nullopt)) {
+        emit questionClosed();
+    }
+    emit finished(!error.has_value(), error.value_or(Error{}));
+}
+
+void RemoteOperationClient::abandon() {
+    m_question.reset();
+    m_pending.reset();
+    m_accepted = false;
+    m_timer.stop();
+}
+
+} // namespace hwio::remote

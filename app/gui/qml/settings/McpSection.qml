@@ -310,7 +310,9 @@ ColumnLayout {
                     objectName: "mcpAsk_" + rule.modelData.id
                     Layout.preferredWidth: 90
                     checked: !rule.modelData.allow
-                    autoExclusive: false
+                    // Display-only check state: the rule from the backend drives `checked`; a click
+                    // never toggles it locally, so clicking the selected option keeps it selected.
+                    checkable: false
                     Accessible.name: qsTr("%1: ask").arg(rule.modelData.title)
                     onClicked: section.mcp.setConsentRule(rule.modelData.id, false)
                 }
@@ -319,7 +321,9 @@ ColumnLayout {
                     objectName: "mcpAllow_" + rule.modelData.id
                     Layout.preferredWidth: 110
                     checked: rule.modelData.allow
-                    autoExclusive: false
+                    // Display-only check state: the rule from the backend drives `checked`; a click
+                    // never toggles it locally, so clicking the selected option keeps it selected.
+                    checkable: false
                     Accessible.name: qsTr("%1: always allow").arg(rule.modelData.title)
                     onClicked: section.mcp.setConsentRule(rule.modelData.id, true)
                 }

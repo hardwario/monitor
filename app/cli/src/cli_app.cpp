@@ -11,6 +11,7 @@
 #include "hwio/core/version.h"
 #include "jlink_commands.h"
 #include "mcp_command.h"
+#include "remote_commands.h"
 #include "selftest.h"
 #include "stm32_commands.h"
 #include "update_commands.h"
@@ -94,6 +95,7 @@ CliApp::CliApp()
     registerConsoleCommands(app, m_slot);
     registerDiagCommands(app, m_slot, m_options);
     registerMcpCommand(app, m_slot, m_options);
+    registerRemoteCommands(app, m_slot, m_options);
     registerUpdateCommands(app, m_slot);
 }
 

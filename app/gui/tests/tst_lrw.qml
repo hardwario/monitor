@@ -57,7 +57,7 @@ TestCase {
         window.destroy();
         wait(50);
         verify(testSupport.useScenario(""));
-        verify(testSupport.setSetting("advanced/expertActions", false));
+        verify(testSupport.setSetting("ui/mode", "advanced"));
         AppViewModel.theme = "system";
         AppViewModel.setLanguage("en");
     }
@@ -167,7 +167,7 @@ TestCase {
 
     // Expert maintenance: the module is the third MCU; its actions open the wizard.
     function test_maintenanceOfTheModule() {
-        verify(testSupport.setSetting("advanced/expertActions", true));
+        verify(testSupport.setSetting("ui/mode", "expert"));
         const flash = openBoard(0);
         mouseClick(find("maintenanceHeader"));
         tryVerify(() => find("maintenanceTarget_lrw") !== null);

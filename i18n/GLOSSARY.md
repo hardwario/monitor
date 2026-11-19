@@ -58,7 +58,22 @@ change a term here should change it in the whole catalog.
 | application MCU / LTE MCU | MCU aplikace / LTE MCU | Anwendungs-MCU / LTE-MCU | MCU aplikacji / MCU LTE | MCU aplikácie / LTE MCU |
 | guide (LTE update) | průvodce | Assistent | kreator | sprievodca |
 | move the cable (to a connector) | přepojit | umstecken | przełożyć | prepojiť |
+| mode (user mode, plan 0045) | režim | Modus | tryb | režim |
+| Basic (mode) | Základní | Einfach | Podstawowy | Základný |
+| Advanced (mode) | Pokročilý | Erweitert | Zaawansowany | Pokročilý |
+| Expert (mode) | Expertní | Experte | Ekspert | Expertný |
+| Expert (Settings section) | Expertní | Experte | Ekspert | Expertné |
 | expert maintenance actions | odborné akce údržby | Experten-Wartungsaktionen | zaawansowane czynności serwisowe | odborné akcie údržby |
 | Copy / Copied to clipboard. | Kopírovat / Zkopírováno do schránky. | Kopieren / In die Zwischenablage kopiert. | Kopiuj / Skopiowano do schowka. | Kopírovať / Skopírované do schránky. |
 | Cancel / Close / Retry | Zrušit / Zavřít / Zkusit znovu | Abbrechen / Schließen / Erneut versuchen | Anuluj / Zamknij / Spróbuj ponownie | Zrušiť / Zavrieť / Skúsiť znova |
 | System (language/theme) | Systém | System | Systemowy | Systém |
+| remote support (session) (plan 0044) | vzdálená podpora (relace) | Fernsupport (Sitzung) | zdalne wsparcie (sesja) | vzdialená podpora (relácia) |
+| share (a console) / sharing | sdílet / sdílení | freigeben / Freigabe | udostępnić / udostępnianie | zdieľať / zdieľanie |
+| join (a session) | připojit se (k relaci) | (einer Sitzung) beitreten | dołączyć (do sesji) | pripojiť sa (k relácii) |
+| session code | kód relace | Sitzungscode | kod sesji | kód relácie |
+| support server (relay) | server podpory | Support-Server | serwer wsparcia | server podpory |
+| customer / support (roles) | zákazník / podpora | Kunde / Support | klient / wsparcie | zákazník / podpora |
+| participant | účastník | Teilnehmer | uczestnik | účastník |
+| allow / deny | povolit / zamítnout | erlauben / ablehnen | zezwól / odmów | povoliť / zamietnuť |
+| End sharing / End session | Ukončit sdílení / Ukončit relaci | Freigabe beenden / Sitzung beenden | Zakończ udostępnianie / Zakończ sesję | Ukončiť zdieľanie / Ukončiť reláciu |
+| web Terminal | webový Terminal | Web-Terminal | Terminal webowy | webový Terminal |

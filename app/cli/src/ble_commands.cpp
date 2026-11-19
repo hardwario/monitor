@@ -600,6 +600,48 @@ void addDeviceOptions(CLI::App& command, DeviceOptions& options) {
 
 } // namespace
 
+Result<OpenedBleSession> openBleSession(const Context& context, const BleDeviceSelection& selection,
+                                        bool autoReconnect,
+                                        std::optional<std::filesystem::path> consoleFile,
+                                        std::function<void(std::string_view)> print) {
+    auto profile = bleProfile(selection.profile);
+    if (!profile) {
+        return std::unexpected(std::move(profile).error());
+    }
+    OpenedBleSession opened;
+    opened.profile = *profile;
+    opened.host = std::make_unique<ble::BleHost>();
+    if (auto adapter = readyAdapter(context, *opened.host); !adapter) {
+        return std::unexpected(std::move(adapter).error());
+    }
+    const DeviceOptions device{
+        .address = selection.address, .name = selection.name, .profile = selection.profile};
+    auto resolved = resolveDevice(context, *opened.host, device, **profile);
+    if (!resolved) {
+        return std::unexpected(std::move(resolved).error());
+    }
+    opened.description = describe(*resolved);
+    opened.registry = std::make_unique<device::SessionRegistry>();
+    auto session =
+        device::BleSession::open(*opened.registry, *opened.host,
+                                 device::BleSessionOptions{.profile = *profile,
+                                                           .deviceId = resolved->id,
+                                                           .deviceName = resolved->name,
+                                                           .autoReconnect = autoReconnect,
+                                                           .consoleFile = std::move(consoleFile),
+                                                           .consoleLog = nullptr});
+    if (!session) {
+        return std::unexpected(std::move(session).error());
+    }
+    opened.session = std::move(*session);
+    const device::DeviceProfile* bleProfilePtr = *profile;
+    QObject::connect(opened.session.get(), &device::BleSession::pairingPrompt, opened.session.get(),
+                     [context, bleProfilePtr, print = std::move(print)] {
+                         showPairingPrompt(context, *bleProfilePtr, print);
+                     });
+    return opened;
+}
+
 void registerBleCommands(CLI::App& app, CommandSlot& slot, const GlobalOptions& /*globals*/) {
     CLI::App* ble = app.add_subcommand("ble", "Bluetooth LE devices (console over NUS)");
     ble->require_subcommand(1);

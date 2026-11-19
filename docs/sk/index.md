@@ -14,8 +14,9 @@ komunikuje cez sondu SEGGER J-Link a cez Bluetooth LE.
 3. [Konzola](console.md): shell a log, vyhľadávanie a filter, história, dávkové súbory, súbory konzoly
 4. [Nahrávanie firmvéru](flashing.md): aplikačný a LTE firmvér, ID z katalógu, UICR, vymazanie, obnovenie
 5. [Bluetooth LE](bluetooth.md): konzola cez Bluetooth, párovanie
-6. [Riešenie problémov](troubleshooting.md): časté problémy a všetky kódy chýb
-7. [Súkromie a uložené údaje](privacy.md): kontrola aktualizácií, diagnostická správa, kde sú uložené údaje
+6. [Vzdialená podpora](remote-support.md): zdieľanie konzoly s podporou HARDWARIO, pripojenie k relácii
+7. [Riešenie problémov](troubleshooting.md): časté problémy a všetky kódy chýb
+8. [Súkromie a uložené údaje](privacy.md): kontrola aktualizácií, diagnostická správa, kde sú uložené údaje
 
 ## Referenčná príručka (len v angličtine)
 
