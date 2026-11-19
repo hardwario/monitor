@@ -51,9 +51,18 @@ struct ConsentRequest {
     QJsonObject details;
 };
 
-// Success = allowed. Otherwise the error the tool returns: mcp.tool_not_allowed (CLI, call-site
-// text naming the --allow flag), mcp.consent_denied, mcp.consent_timeout (GUI).
-using ConsentDecision = hwio::Status;
+// How an allowed request was allowed (plan 0050, ADR-0377), reported to the client in the
+// result's "consent" object: Prompted - the user answered a prompt for this request (GUI "Allow
+// once" or "Allow for this client"); Remembered - an earlier "Allow for this client" answer;
+// Flag - the CLI's --allow flag.
+enum class ConsentGrant : std::uint8_t { Prompted, Remembered, Flag };
+
+// "prompted", "remembered", "allowed_by_flag".
+[[nodiscard]] std::string_view consentGrantId(ConsentGrant grant) noexcept;
+
+// Success = allowed, and how. Otherwise the error the tool returns: mcp.tool_not_allowed (CLI,
+// call-site text naming the --allow flag), mcp.consent_denied, mcp.consent_timeout (GUI).
+using ConsentDecision = hwio::Result<ConsentGrant>;
 
 class IConsentBroker {
 public:

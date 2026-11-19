@@ -81,17 +81,17 @@ constexpr const char* recoverDescription =
     "the Product Information Block is lost). J-Link only.";
 
 QJsonObject operationOutputSchema() {
-    return objectOf({{"status", typed("string")},
-                     {"file", typed("string")},
-                     {"catalog_id", typed("string")},
-                     {"target", typed("string")},
-                     {"operation", typed("string")},
-                     {"duration", typed("number")},
-                     {"chip", nullable("string")},
-                     {"verified", typed("boolean")},
-                     {"log_cursor_end", typed("integer")},
-                     {"terminal_cursor_end", typed("integer")}},
-                    {QStringLiteral("status"), QStringLiteral("target")});
+    return withDownload(objectOf({{"status", typed("string")},
+                                  {"file", typed("string")},
+                                  {"catalog_id", typed("string")},
+                                  {"target", typed("string")},
+                                  {"operation", typed("string")},
+                                  {"duration", typed("number")},
+                                  {"chip", nullable("string")},
+                                  {"verified", typed("boolean")},
+                                  {"log_cursor_end", typed("integer")},
+                                  {"terminal_cursor_end", typed("integer")}},
+                                 {QStringLiteral("status"), QStringLiteral("target")}));
 }
 
 QJsonObject operationJson(std::string_view target, const OperationResult& result) {
@@ -230,6 +230,7 @@ private:
                 json.insert(m_fromFile ? QStringLiteral("file") : QStringLiteral("catalog_id"),
                             m_source);
                 json.insert(QStringLiteral("verified"), true);
+                insertDownload(json, result.download); // ADR-0376
                 succeed(std::move(json), result.duration);
             });
     }
@@ -301,6 +302,7 @@ private:
             m_start = [id, zip = modem->path](DeviceSession& s) { return s.updateModem(id, zip); };
         } else {
             kind = QStringLiteral("hex");
+            m_hex = true;
             auto shared = std::make_shared<const hwio::firmware::FirmwareImage>(
                 std::move(std::get<hwio::firmware::AppHex>(input).image));
             m_start = [id, shared, options](DeviceSession& s) {
@@ -321,6 +323,9 @@ private:
         run(m_start, [this](const OperationResult& result) {
             QJsonObject json = operationJson(m_target, result);
             json.insert(QStringLiteral("file"), m_path);
+            if (m_hex) {
+                insertDownload(json, result.download); // ADR-0376: an application hex only
+            }
             succeed(std::move(json), result.duration);
         });
     }
@@ -328,6 +333,7 @@ private:
     std::string m_target;
     QString m_path;
     QString m_name;
+    bool m_hex = false; // an application hex (not a bundle or modem firmware)
     OperationStart m_start;
     hwio::mcp::Offloader::Handle m_classify; // the offloaded classification
 };
@@ -443,12 +449,13 @@ hwio::Status addErase(hwio::mcp::Registry& registry, ToolsContext& context) {
                                                             "the target's usual scope)."))
                                   .enumValues({QStringLiteral("code"), QStringLiteral("all")}))
                     .json(),
-            .outputSchema = objectOf({{"scope", typed("string")},
-                                      {"target", typed("string")},
-                                      {"duration", typed("number")},
-                                      {"log_cursor_end", typed("integer")},
-                                      {"terminal_cursor_end", typed("integer")}},
-                                     {QStringLiteral("scope"), QStringLiteral("duration")}),
+            .outputSchema =
+                withDownload(objectOf({{"scope", typed("string")},
+                                       {"target", typed("string")},
+                                       {"duration", typed("number")},
+                                       {"log_cursor_end", typed("integer")},
+                                       {"terminal_cursor_end", typed("integer")}},
+                                      {QStringLiteral("scope"), QStringLiteral("duration")})),
             .annotations = destructive,
             .consent = hwio::mcp::ConsentCategory::Erase,
             .marker = true,
@@ -487,6 +494,7 @@ hwio::Status addErase(hwio::mcp::Registry& registry, ToolsContext& context) {
                             json.insert(QStringLiteral("scope"), scopeText);
                             json.insert(QStringLiteral("target"), qs(id));
                             json.insert(QStringLiteral("duration"), seconds(r.duration));
+                            insertDownload(json, r.download); // ADR-0376: scope code only
                             return json;
                         }};
                 }),

@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/device/command_capture.h"
@@ -17,6 +18,7 @@
 #include <QTimer>
 #include <QtCore/qtmetamacros.h>
 #include <QtLogging>
+#include <QtTranslation>
 
 #include <algorithm>
 #include <chrono>
@@ -196,9 +198,8 @@ Status waitForConnection(ConsoleSession& session, std::chrono::milliseconds time
         if (!result) {
             Error error = makeError(ErrorCode::Timeout,
                                     std::format("not connected within {} ms", timeout.count()));
-            error.message =
-                QCoreApplication::translate("hwio::device", "The device did not connect in time.")
-                    .toStdString();
+            setText(error, ErrorText::Message, "hwio::device",
+                    QT_TRANSLATE_NOOP("hwio::device", "The device did not connect in time."));
             result = std::unexpected(std::move(error));
         }
         loop.quit();

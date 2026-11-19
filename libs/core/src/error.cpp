@@ -1,5 +1,6 @@
 #include "hwio/core/error.h"
 
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 
 #include <QCoreApplication>
@@ -1434,15 +1435,18 @@ Error makeError(ErrorCode code, std::string detail) {
                  .message = translate(texts.message),
                  .cause = translate(texts.cause),
                  .suggestion = translate(texts.suggestion),
+                 .messageEn = texts.message.source,
+                 .causeEn = texts.cause.source,
+                 .suggestionEn = texts.suggestion.source,
                  .detail = std::move(detail),
                  .wizard = texts.wizard};
 }
 
 Error outputClosedError(std::string detail) {
     Error error = makeError(ErrorCode::Cancelled, std::move(detail));
-    error.message = QCoreApplication::translate("hwio::core", "The output was closed.",
-                                                "cancelled message when the stdout was closed")
-                        .toStdString();
+    constexpr SourceText outputClosed = QT_TRANSLATE_NOOP3(
+        "hwio::core", "The output was closed.", "cancelled message when the stdout was closed");
+    setText(error, ErrorText::Message, "hwio::core", outputClosed.source, {}, outputClosed.comment);
     return error;
 }
 
@@ -1490,10 +1494,15 @@ std::string_view categoryId(ErrorCategory category) noexcept {
 
 std::unexpected<Error> fail(ErrorCode code, std::string message, std::string cause,
                             std::string suggestion, std::string detail) {
+    // The texts are used for both languages (ADR-0374): callers pass English-only texts (tests,
+    // tools without translations); translated texts go through hwio::setText().
     return std::unexpected<Error>(Error{.code = code,
-                                        .message = std::move(message),
-                                        .cause = std::move(cause),
-                                        .suggestion = std::move(suggestion),
+                                        .message = message,
+                                        .cause = cause,
+                                        .suggestion = suggestion,
+                                        .messageEn = std::move(message),
+                                        .causeEn = std::move(cause),
+                                        .suggestionEn = std::move(suggestion),
                                         .detail = std::move(detail),
                                         .wizard = std::nullopt});
 }

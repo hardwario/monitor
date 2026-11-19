@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/device/console_line.h"
@@ -300,7 +301,8 @@ Result<DeviceRef> CliDeviceProvider::openSession(const hwio::mcp::tools::OpenReq
     const device::DeviceProfile* profile = device::ProfileRegistry::find(profileId);
     if (profile == nullptr || profile->targets.empty()) {
         Error error = makeError(ErrorCode::UsageInvalidArgument, std::string(profileId));
-        error.message = std::format("Unknown device profile \"{}\".", profileId);
+        setUntranslatedText(error, ErrorText::Message,
+                            std::format("Unknown device profile \"{}\".", profileId));
         return std::unexpected(std::move(error));
     }
     const device::TargetProfile* target = request.targetId.empty()
@@ -308,8 +310,9 @@ Result<DeviceRef> CliDeviceProvider::openSession(const hwio::mcp::tools::OpenReq
                                               : device::findTarget(*profile, request.targetId);
     if (target == nullptr) {
         Error error = makeError(ErrorCode::UsageInvalidArgument, request.targetId);
-        error.message =
-            std::format("The profile {} has no target \"{}\".", profileId, request.targetId);
+        setUntranslatedText(
+            error, ErrorText::Message,
+            std::format("The profile {} has no target \"{}\".", profileId, request.targetId));
         return std::unexpected(std::move(error));
     }
     auto located = location();

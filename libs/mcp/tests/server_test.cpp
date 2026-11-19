@@ -23,6 +23,7 @@
 
 #include <QByteArray>
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QObject>
@@ -198,6 +199,32 @@ TEST_F(ServerTest, CancellationIsScopedToTheConnection) {
                    channel, stdio(1));
     ASSERT_TRUE(runUntil([&] { return !channel->messages.empty(); }));
     EXPECT_EQ(channel->messages.back().value(QStringLiteral("id")), QJsonValue(5));
+}
+
+// Plan 0050 (ADR-0377): a consent-gated result carries "consent"; its output schema lists it.
+TEST_F(ServerTest, ConsentGatedResultSaysHowItWasAllowed) {
+    consent.mode = FakeConsentBroker::Mode::Manual;
+    auto channel = std::make_shared<RecordingReplyChannel>(true, true);
+    server->handle(initialize(), channel, stdio());
+    server->handle(callTool(2, QStringLiteral("flash_fake"), {}, false), channel, stdio());
+    ASSERT_EQ(consent.requests.size(), 1U);
+    consent.decide(0, ConsentGrant::Remembered);
+    ASSERT_TRUE(runUntil([&] { return channel->messages.size() == 2U; }));
+    const QJsonObject result = channel->messages.back().value(QStringLiteral("result")).toObject();
+    const QJsonObject structured = result.value(QStringLiteral("structuredContent")).toObject();
+    EXPECT_EQ(structured.value(QStringLiteral("consent")).toObject(),
+              (QJsonObject{{QStringLiteral("flash"), QStringLiteral("remembered")}}));
+    EXPECT_TRUE(structured.value(QStringLiteral("flashed")).toBool());
+    // The text block is still the compact JSON of the structured content.
+    EXPECT_EQ(QJsonDocument::fromJson(result.value(QStringLiteral("content"))
+                                          .toArray()
+                                          .at(0)
+                                          .toObject()
+                                          .value(QStringLiteral("text"))
+                                          .toString()
+                                          .toUtf8())
+                  .object(),
+              structured);
 }
 
 TEST_F(ServerTest, CancellationBeforeStartWithdrawsTheConsentPrompt) {

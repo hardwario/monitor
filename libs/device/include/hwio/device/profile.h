@@ -7,12 +7,14 @@
 //
 // Adding a device = one new file in src/profiles/ + one registration line in profile.cpp + tests.
 
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/firmware/designated_firmware.h"
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/hw/jlink/programmer.h"
 
 #include <QString>
+#include <QtTranslation>
 
 #include <cstddef>
 #include <cstdint>
@@ -206,6 +208,8 @@ matchSensitiveOutput(std::string_view line, std::span<const std::string_view> ke
 
 // The translated display name of `target` (ADR-0027), e.g. "application".
 [[nodiscard]] QString targetDisplayName(const TargetProfile& target);
+// The same with its English source (an argument of hwio::setText(), ADR-0374).
+[[nodiscard]] LocalizedText targetDisplayNameText(const TargetProfile& target);
 
 // The translated title / body of a connection guide step and the translated power hint of a
 // profile (ADR-0077).

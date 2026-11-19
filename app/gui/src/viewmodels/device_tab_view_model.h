@@ -36,6 +36,7 @@
 //
 // Ownership: child of DeviceTabListModel (Qt parent). GUI thread only.
 
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_info.h"
 #include "hwio/device/device_info_watcher.h"
@@ -196,7 +197,10 @@ public:
     [[nodiscard]] QObjectList pageViewModels() const { return m_pageViewModels; }
     [[nodiscard]] QString currentPage() const { return m_currentPage; }
     // ADR-0369: a status line in the console ("— text —", a marker kept in the log and its file).
-    void addStatusLine(const QString& text) { addMarker(QStringLiteral("— %1 —").arg(text)); }
+    void addStatusLine(const QString& text) {
+        const QString line = QStringLiteral("— %1 —").arg(text);
+        addMarker(LocalizedText{.translated = line, .english = line}); // remote: non-goal of 0050
+    }
     void setCurrentPage(const QString& pageId);
     [[nodiscard]] QString busyPage() const;
     [[nodiscard]] QString busyText() const;
@@ -355,7 +359,12 @@ private:
     [[nodiscard]] bool sessionFailed() const;
     void releaseSession();
     void onConnectionChanged(const device::ConnectionEvent& event);
-    void addMarker(const QString& text);
+    // A marker in both channels: the translated text for the GUI and console files, the English
+    // one for MCP (ConsoleLine::textEn, ADR-0374).
+    void addMarker(const LocalizedText& text);
+    // localizedText() in this class's tr() context.
+    [[nodiscard]] static LocalizedText markerText(const char* source,
+                                                  std::initializer_list<TextArg> args = {});
     void updateState();
     void resetInfoWatcher();
 

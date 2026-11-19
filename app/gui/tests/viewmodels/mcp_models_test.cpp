@@ -206,6 +206,13 @@ protected:
     static bool allowed(const Outcome& outcome) {
         return outcome.decision.has_value() && outcome.decision->has_value();
     }
+    // Plan 0050 (ADR-0377): how an allowed request was allowed.
+    static std::optional<hwio::mcp::ConsentGrant> grant(const Outcome& outcome) {
+        if (!outcome.decision.has_value() || !outcome.decision->has_value()) {
+            return std::nullopt;
+        }
+        return outcome.decision->value();
+    }
     static std::string detail(const Outcome& outcome) {
         return outcome.decision.has_value() && !outcome.decision->has_value()
                    ? outcome.decision->error().detail
@@ -246,6 +253,7 @@ TEST_F(McpConsent, AllowOnceAndDeny) {
     answer(GuiConsentBroker::Answer::AllowOnce);
     ASSERT_TRUE(first->decision.has_value());
     EXPECT_TRUE(allowed(*first));
+    EXPECT_EQ(grant(*first), hwio::mcp::ConsentGrant::Prompted);
     EXPECT_FALSE(second->decision.has_value()); // asked again: allowed once only
     answer(GuiConsentBroker::Answer::Deny);
     EXPECT_EQ(code(*second), "mcp.consent_denied");
@@ -261,7 +269,9 @@ TEST_F(McpConsent, GrantsPerClientAndCategory) {
     answer(GuiConsentBroker::Answer::AllowForClient);
     EXPECT_TRUE(a1->decision && a1->decision.value().has_value());
     EXPECT_TRUE(a2->decision && a2->decision.value().has_value()); // queued, now covered
-    EXPECT_FALSE(b1->decision.has_value());                        // another client: still asked
+    EXPECT_EQ(grant(*a1), hwio::mcp::ConsentGrant::Prompted);
+    EXPECT_EQ(grant(*a2), hwio::mcp::ConsentGrant::Remembered);
+    EXPECT_FALSE(b1->decision.has_value()); // another client: still asked
     ASSERT_EQ(broker().grants().size(), 1U);
     EXPECT_EQ(broker().grants().front().clientName, QStringLiteral("Claude Code"));
     EXPECT_EQ(grantsChanged.count(), 1);
@@ -273,7 +283,9 @@ TEST_F(McpConsent, GrantsPerClientAndCategory) {
     EXPECT_FALSE(erase->decision.has_value());
     answer(GuiConsentBroker::Answer::Deny);
     // The grant holds without a prompt...
-    EXPECT_TRUE(ask("Claude Code", ConsentCategory::Flash)->decision.has_value());
+    const auto again = ask("Claude Code", ConsentCategory::Flash);
+    EXPECT_TRUE(again->decision.has_value());
+    EXPECT_EQ(grant(*again), hwio::mcp::ConsentGrant::Remembered);
     // ...until the client is gone.
     broker().clientGone("Claude Code");
     EXPECT_TRUE(broker().grants().empty());

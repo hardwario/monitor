@@ -3,6 +3,7 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/profile.h"
 #include "hwio/firmware/designated_firmware.h"
@@ -26,6 +27,7 @@
 #include <QUrl>
 #include <QVariantMap>
 #include <QtContainerFwd>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <cstdint>
@@ -435,7 +437,9 @@ void FirmwareSourceViewModel::onDesignatedFinished() {
             qCInfo(lcGui).noquote()
                 << "Designated firmware:" << toQString(idOf(error.code)) << toQString(error.detail);
             if (error.code == ErrorCode::FirmwareChecksumMismatch) {
-                error.message = tr("The downloaded file is damaged. Try again.").toStdString();
+                setText(error, ErrorText::Message, "hwio::gui::FirmwareSourceViewModel",
+                        QT_TRANSLATE_NOOP("hwio::gui::FirmwareSourceViewModel",
+                                          "The downloaded file is damaged. Try again."));
             } else if (error.code == ErrorCode::NetworkDownloadFailed) {
                 error.suggestion += " " + tr("You can also choose your own file.").toStdString();
             }

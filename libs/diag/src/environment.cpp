@@ -4,6 +4,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/settings.h"
 #include "hwio/device/probe_lock.h"
@@ -199,10 +200,9 @@ CheckResult checkHolders(const Check& check, const EnvironmentContext& context,
                 QCoreApplication::translate("hwio::diag", "Could not be checked").toStdString());
         }
         Error error = makeError(ErrorCode::DiagCheckTimeout, holders.error().detail);
-        error.message =
-            QCoreApplication::translate("hwio::diag", "The check \"%1\" did not finish in time.")
-                .arg(QString::fromStdString(checkTitle(check.titleSourceText)))
-                .toStdString();
+        setText(error, ErrorText::Message, "hwio::diag",
+                QT_TRANSLATE_NOOP("hwio::diag", "The check \"%1\" did not finish in time."),
+                {localizedText("hwio::diag", check.titleSourceText)});
         return problemResult(check, CheckStatus::Warning, std::move(error),
                              QCoreApplication::translate("hwio::diag", "Incomplete").toStdString());
     }
@@ -221,14 +221,12 @@ CheckResult checkHolders(const Check& check, const EnvironmentContext& context,
     }
     const ProcessMatch& first = holders->front();
     Error error = makeError(ErrorCode::ProbeHeldByProgram, detail);
-    error.message = QCoreApplication::translate(
-                        "hwio::diag", "%1 (PID %2) is running and may be using the J-Link.")
-                        .arg(QString::fromStdString(first.displayName))
-                        .arg(first.pid)
-                        .toStdString();
-    error.suggestion = QCoreApplication::translate("hwio::diag", "Close %1 and try again.")
-                           .arg(QString::fromStdString(first.displayName))
-                           .toStdString();
+    setText(error, ErrorText::Message, "hwio::diag",
+            QT_TRANSLATE_NOOP("hwio::diag", "%1 (PID %2) is running and may be using the J-Link."),
+            {QString::fromStdString(first.displayName), first.pid});
+    setText(error, ErrorText::Suggestion, "hwio::diag",
+            QT_TRANSLATE_NOOP("hwio::diag", "Close %1 and try again."),
+            {QString::fromStdString(first.displayName)});
     return problemResult(check, CheckStatus::Warning, std::move(error),
                          running.join(QStringLiteral("; ")).toStdString());
 }
@@ -295,9 +293,9 @@ Error outdatedError(std::uint32_t serial, const device::ProbeDetails& details) {
                             std::format("J-Link {} firmware: {}; library: {}", serial,
                                         details.probe.firmware, details.libraryFirmware));
     if (details.firmwareStatus == jlink::FirmwareStatus::Newer) {
-        error.message = QCoreApplication::translate(
-                            "hwio::device", "The J-Link firmware is newer than the J-Link library.")
-                            .toStdString();
+        setText(error, ErrorText::Message, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device",
+                                  "The J-Link firmware is newer than the J-Link library."));
     }
     return error;
 }

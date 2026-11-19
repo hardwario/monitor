@@ -111,7 +111,8 @@ GuiConsentBroker::request(hwio::mcp::ConsentRequest request,
     request.client.version = clientDisplayUtf8(request.client.version); // review M4
     clientSeen(toQString(request.clientKey));                           // signal
     if (covered(request)) {
-        done({});
+        // ADR-0377: an earlier "Allow for this client" (or an "always allow" rule) covers it.
+        done(hwio::mcp::ConsentGrant::Remembered);
         return {};
     }
     if (m_queue.size() > m_options.maxQueued) { // the shown one + maxQueued waiting
@@ -181,7 +182,7 @@ void GuiConsentBroker::answer(std::uint64_t promptId, Answer answer) {
             std::unexpected(makeError(ErrorCode::McpConsentDenied, prompt->request.tool)));
         return;
     case Answer::AllowOnce:
-        finishCurrent({});
+        finishCurrent(hwio::mcp::ConsentGrant::Prompted);
         return;
     case Answer::AllowForClient: {
         const hwio::mcp::ConsentRequest& request = prompt->request;
@@ -207,7 +208,10 @@ void GuiConsentBroker::answer(std::uint64_t promptId, Answer answer) {
         }
         showNext();
         for (Prompt& next : allowed) {
-            next.done({}); // may queue another request
+            // ADR-0377: the answered prompt was prompted; the waiting ones are allowed by its
+            // remembered answer.
+            next.done(next.id == promptId ? hwio::mcp::ConsentGrant::Prompted
+                                          : hwio::mcp::ConsentGrant::Remembered); // may queue
         }
         return;
     }

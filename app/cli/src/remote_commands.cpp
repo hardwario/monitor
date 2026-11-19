@@ -10,6 +10,7 @@
 #include "guided_lte.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
 #include "hwio/core/version.h"
@@ -679,8 +680,11 @@ Result<QUrl> joinRelay(const Context& context, const JoinCommandOptions& options
         return *target.relay;
     }
     Error error = makeError(ErrorCode::UsageInvalidArgument, other);
-    error.message = std::format("The link uses another support server: {}.", other);
-    error.suggestion = "Join with the code only, or pass --relay with this server if you trust it.";
+    setUntranslatedText(error, ErrorText::Message,
+                        std::format("The link uses another support server: {}.", other));
+    setUntranslatedText(
+        error, ErrorText::Suggestion,
+        "Join with the code only, or pass --relay with this server if you trust it.");
     return std::unexpected(std::move(error));
 }
 
@@ -815,10 +819,12 @@ Result<CommandResult> joinOperation(const Context& context, remote::RemoteConsol
     const QString time = QTime::currentTime().toString(QStringLiteral("HH:mm"));
     if (!outcome->first) {
         Error error = outcome->second;
-        error.message = toStdString(
-            error.code == ErrorCode::Cancelled && client.declined()
-                ? remote::lteUpdateDeclinedText(time) // ADR-0368: support's own No
-                : remote::operationFailedText(kind, *target, time, toQString(error.message)));
+        setUntranslatedText(
+            error, ErrorText::Message,
+            toStdString(
+                error.code == ErrorCode::Cancelled && client.declined()
+                    ? remote::lteUpdateDeclinedText(time) // ADR-0368: support's own No
+                    : remote::operationFailedText(kind, *target, time, toQString(error.message))));
         return std::unexpected(std::move(error));
     }
     QJsonObject data;
