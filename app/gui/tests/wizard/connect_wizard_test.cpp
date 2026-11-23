@@ -50,6 +50,7 @@ using hwio::gui::AppViewModel;
 using hwio::gui::ConnectWizard;
 using hwio::gui::DeviceTabViewModel;
 using hwio::gui::StepKind;
+using hwio::gui::test::tabWizard;
 using hwio::gui::test::waitFor;
 using Outcome = ConnectWizard::Outcome;
 
@@ -79,9 +80,9 @@ protected:
         qputenv("HWIO_NRFUTIL", (root() / "no-nrfutil" / "nrfutil").string().c_str());
     }
     void TearDown() override {
-        if (m_app && m_app->wizard()->isOpen()) {
-            m_app->wizard()->cancel(true);
-            (void)waitFor([this] { return !m_app->wizard()->isOpen(); });
+        if (m_app && tabWizard(*m_app).isOpen()) {
+            tabWizard(*m_app).cancel(true);
+            (void)waitFor([this] { return !tabWizard(*m_app).isOpen(); });
         }
         m_app.reset();
         qunsetenv("HWIO_NRFUTIL");
@@ -107,7 +108,7 @@ protected:
         } else {
             tab().openWizard(ConnectWizard::wizardId);
         }
-        return qobject_cast<ConnectWizard*>(app().wizard()->wizard());
+        return qobject_cast<ConnectWizard*>(tabWizard(app()).wizard());
     }
 
     static bool checked(const ConnectWizard& wizard,
@@ -124,7 +125,7 @@ TEST_F(ConnectWizardTest, FullFlowFromAnEmptyTab) {
     start(scenario(), false);
     ConnectWizard* wizard = open();
     ASSERT_NE(wizard, nullptr);
-    EXPECT_EQ(app().wizard()->title(), QStringLiteral("Connect a device"));
+    EXPECT_EQ(tabWizard(app()).title(), QStringLiteral("Connect a device"));
     // The step list: Probe · Cable · Power · Check · Done (no Device step, ADR-0249).
     QStringList titles;
     for (const hwio::gui::WizardStep& step : wizard->plannedSteps()) {
@@ -161,7 +162,7 @@ TEST_F(ConnectWizardTest, FullFlowFromAnEmptyTab) {
     ASSERT_EQ(wizard->step(), ConnectWizard::Check);
     EXPECT_EQ(wizard->checks()->count(), 6);
     EXPECT_EQ(tab().busyPage(), QStringLiteral("connect-device"));
-    EXPECT_EQ(app().wizard()->busyCancelText(),
+    EXPECT_EQ(tabWizard(app()).busyCancelText(),
               QStringLiteral("The connection is being checked. Cancel it and close the wizard?"));
     ASSERT_TRUE(checked(*wizard));
     EXPECT_EQ(wizard->outcome(), Outcome::Passed);
@@ -182,11 +183,11 @@ TEST_F(ConnectWizardTest, FullFlowFromAnEmptyTab) {
               QStringLiteral("Connected to CHESTER · Application MCU (nRF52840) · 801000001."));
     EXPECT_EQ(wizard->current().primaryText, QStringLiteral("Open console"));
     EXPECT_FALSE(wizard->canBack());
-    QSignalSpy handOff(app().wizard(), &hwio::gui::WizardViewModel::handOff);
-    app().wizard()->primary();
+    QSignalSpy handOff(&tabWizard(app()), &hwio::gui::WizardViewModel::handOff);
+    tabWizard(app()).primary();
     ASSERT_EQ(handOff.count(), 1);
     EXPECT_EQ(handOff.at(0).at(0).toString(), QStringLiteral("open-console"));
-    EXPECT_FALSE(app().wizard()->isOpen());
+    EXPECT_FALSE(tabWizard(app()).isOpen());
     EXPECT_EQ(tab().currentPage(), QStringLiteral("console"));
     EXPECT_EQ(tab().state(), DeviceTabViewModel::Connected);
 }
@@ -207,8 +208,8 @@ TEST_F(ConnectWizardTest, AConnectedTabIsAPureCheck) {
     EXPECT_EQ(wizard->current().kind, StepKind::Done);
     EXPECT_EQ(tab().session(), session);
     // Close keeps the connected tab.
-    app().wizard()->cancel(false);
-    EXPECT_FALSE(app().wizard()->isOpen());
+    tabWizard(app()).cancel(false);
+    EXPECT_FALSE(tabWizard(app()).isOpen());
     EXPECT_EQ(tab().state(), DeviceTabViewModel::Connected);
 }
 
@@ -225,17 +226,17 @@ TEST_F(ConnectWizardTest, ErrorsOpenAtTheirStep) {
     ASSERT_NE(wizard, nullptr);
     EXPECT_EQ(wizard->step(), ConnectWizard::Power);
     EXPECT_TRUE(wizard->canBack()); // back to the cable
-    app().wizard()->cancel(false);
+    tabWizard(app()).cancel(false);
 
     wizard = open(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetConnectFailed)));
     EXPECT_EQ(wizard->step(), ConnectWizard::Cable);
     EXPECT_FALSE(wizard->canBack()); // the Probe step was not shown
-    app().wizard()->cancel(false);
+    tabWizard(app()).cancel(false);
 
     wizard = open(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetNotConnected)));
     EXPECT_EQ(wizard->step(), ConnectWizard::Check);
     ASSERT_TRUE(checked(*wizard));
-    app().wizard()->cancel(false);
+    tabWizard(app()).cancel(false);
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
 
     // probe.not_found: the tab returns to its picker; its probe is preselected.
@@ -285,8 +286,8 @@ TEST_F(ConnectWizardTest, TheCableOnTheLteConnector) {
     ASSERT_TRUE(checked(*wizard));
     wizard->action(QStringLiteral("lte-update"));
     ASSERT_TRUE(waitFor([this] {
-        return app().wizard()->isOpen() &&
-               app().wizard()->wizardId() == QStringLiteral("lte-update");
+        return tabWizard(app()).isOpen() &&
+               tabWizard(app()).wizardId() == QStringLiteral("lte-update");
     }));
 }
 
@@ -300,11 +301,11 @@ TEST_F(ConnectWizardTest, AProtectedMcuCanStillConnect) {
     EXPECT_EQ(wizard->current().primaryText, QStringLiteral("Connect"));
     EXPECT_TRUE(wizard->canPrimary());
     EXPECT_TRUE(actionIds(wizard->current()).contains(QStringLiteral("open-flash-page")));
-    QSignalSpy handOff(app().wizard(), &hwio::gui::WizardViewModel::handOff);
+    QSignalSpy handOff(&tabWizard(app()), &hwio::gui::WizardViewModel::handOff);
     wizard->action(QStringLiteral("open-flash-page"));
     ASSERT_EQ(handOff.count(), 1);
     EXPECT_EQ(handOff.at(0).at(0).toString(), QStringLiteral("open-flash-page:recover:app"));
-    EXPECT_FALSE(app().wizard()->isOpen());
+    EXPECT_FALSE(tabWizard(app()).isOpen());
 }
 
 TEST_F(ConnectWizardTest, NoConsoleOffersFlashingOrConnectAnyway) {
@@ -320,7 +321,7 @@ TEST_F(ConnectWizardTest, NoConsoleOffersFlashingOrConnectAnyway) {
     EXPECT_EQ(wizard->current().primaryText, QStringLiteral("Connect anyway"));
     EXPECT_EQ(actionIds(wizard->current()),
               (QStringList{QStringLiteral("flash-firmware"), QStringLiteral("check-again")}));
-    QSignalSpy handOff(app().wizard(), &hwio::gui::WizardViewModel::handOff);
+    QSignalSpy handOff(&tabWizard(app()), &hwio::gui::WizardViewModel::handOff);
     wizard->action(QStringLiteral("flash-firmware"));
     ASSERT_EQ(handOff.count(), 1);
     EXPECT_EQ(handOff.at(0).at(0).toString(), QStringLiteral("open-wizard:flash-firmware"));
@@ -340,11 +341,11 @@ TEST_F(ConnectWizardTest, AProbeThatCannotBeOpenedHandsOffToTroubleshooting) {
     ASSERT_TRUE(actionIds(wizard->current()).contains(QStringLiteral("help-me-fix-this")));
     wizard->action(QStringLiteral("help-me-fix-this"));
     ASSERT_TRUE(waitFor([this] {
-        return app().wizard()->isOpen() &&
-               app().wizard()->wizardId() == QStringLiteral("troubleshooting");
+        return tabWizard(app()).isOpen() &&
+               tabWizard(app()).wizardId() == QStringLiteral("troubleshooting");
     }));
     const auto* troubleshooting =
-        qobject_cast<hwio::gui::TroubleshootingWizard*>(app().wizard()->wizard());
+        qobject_cast<hwio::gui::TroubleshootingWizard*>(tabWizard(app()).wizard());
     ASSERT_NE(troubleshooting, nullptr);
     ASSERT_NE(troubleshooting->topic(), nullptr);
     EXPECT_EQ(troubleshooting->topic()->id, "probe-busy");
@@ -356,10 +357,10 @@ TEST_F(ConnectWizardTest, CancelDuringTheCheckClosesTheProbeOnlySession) {
         open(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetNotConnected)));
     ASSERT_NE(wizard, nullptr);
     ASSERT_TRUE(wizard->running());
-    app().wizard()->cancel(false);
-    EXPECT_TRUE(app().wizard()->isOpen()); // asks first
-    app().wizard()->cancel(true);
-    ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }, std::chrono::seconds(20)));
+    tabWizard(app()).cancel(false);
+    EXPECT_TRUE(tabWizard(app()).isOpen()); // asks first
+    tabWizard(app()).cancel(true);
+    ASSERT_TRUE(waitFor([this] { return !tabWizard(app()).isOpen(); }, std::chrono::seconds(20)));
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }, std::chrono::seconds(20)));
     EXPECT_TRUE(tab().busyPage().isEmpty());
     EXPECT_EQ(tab().state(), DeviceTabViewModel::Disconnected);
@@ -372,8 +373,8 @@ TEST_F(ConnectWizardTest, CancelRestoresTheTabsProbe) {
     ConnectWizard* wizard = open(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::ProbeNotFound)));
     ASSERT_NE(wizard, nullptr);
     EXPECT_TRUE(tab().choosing());
-    app().wizard()->cancel(false);
-    EXPECT_FALSE(app().wizard()->isOpen());
+    tabWizard(app()).cancel(false);
+    EXPECT_FALSE(tabWizard(app()).isOpen());
     EXPECT_FALSE(tab().choosing());
     EXPECT_EQ(tab().probeSerial(), std::optional<std::uint32_t>(801000001));
 }
@@ -394,7 +395,7 @@ TEST_F(ConnectWizardTest, CheckAgainAfterAFailedConnectionLeavesNoSession) {
     ASSERT_EQ(wizard->step(), ConnectWizard::Check);
     ASSERT_TRUE(checked(*wizard));
     EXPECT_TRUE(tab().wizardOwnsSession());
-    app().wizard()->cancel(false);
+    tabWizard(app()).cancel(false);
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
 }
 
@@ -411,13 +412,13 @@ TEST_F(ConnectWizardTest, AChainedWizardTakesOverTheSession) {
     ASSERT_NE(session, nullptr);
     wizard->action(QStringLiteral("flash-firmware"));
     ASSERT_TRUE(waitFor([this] {
-        return app().wizard()->isOpen() &&
-               app().wizard()->wizardId() == QStringLiteral("flash-firmware");
+        return tabWizard(app()).isOpen() &&
+               tabWizard(app()).wizardId() == QStringLiteral("flash-firmware");
     }));
     hwio::gui::test::spin(std::chrono::milliseconds(200));
     EXPECT_EQ(tab().session(), session); // kept for the flash wizard
-    app().wizard()->cancel(true);
-    ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }, std::chrono::seconds(20)));
+    tabWizard(app()).cancel(true);
+    ASSERT_TRUE(waitFor([this] { return !tabWizard(app()).isOpen(); }, std::chrono::seconds(20)));
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }, std::chrono::seconds(20)));
 }
 
@@ -432,8 +433,8 @@ TEST_F(ConnectWizardTest, AHandOffToTheSetupWizardReleasesTheSession) {
     emit wizard->handOffError(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::UsbAccessDenied)));
     emit wizard->finished(false);
     ASSERT_TRUE(waitFor([this] {
-        return app().wizard()->isOpen() &&
-               app().wizard()->wizardId() == QStringLiteral("first-run-setup");
+        return tabWizard(app()).isOpen() &&
+               tabWizard(app()).wizardId() == QStringLiteral("first-run-setup");
     }));
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
 }
@@ -444,11 +445,11 @@ TEST_F(ConnectWizardTest, AHandOffToAClosedTabOpensNothing) {
     app().newTab();
     ASSERT_EQ(app().tabs()->count(), 2);
     DeviceTabViewModel* second = app().currentTabViewModel();
-    emit app().wizard() -> handOffError(
+    emit hwio::gui::test::tabWizard(app()).handOffError(
                   hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetRttNotFound)), second);
     app().closeTab(1, true);
     hwio::gui::test::spin(std::chrono::milliseconds(300));
-    EXPECT_FALSE(app().wizard()->isOpen());
+    EXPECT_FALSE(tabWizard(app()).isOpen());
 }
 
 } // namespace

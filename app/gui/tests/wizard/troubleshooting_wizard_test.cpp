@@ -51,6 +51,7 @@ using hwio::gui::DeviceTabViewModel;
 using hwio::gui::StepKind;
 using hwio::gui::TopicStepKind;
 using hwio::gui::TroubleshootingWizard;
+using hwio::gui::test::tabWizard;
 using hwio::gui::test::waitFor;
 
 std::string scenario(const std::string& probe = {}) {
@@ -75,9 +76,9 @@ protected:
         qputenv("HWIO_NRFUTIL", (root() / "no-nrfutil" / "nrfutil").string().c_str());
     }
     void TearDown() override {
-        if (m_app && m_app->wizard()->isOpen()) {
-            m_app->wizard()->cancel(true);
-            (void)waitFor([this] { return !m_app->wizard()->isOpen(); });
+        if (m_app && tabWizard(*m_app).isOpen()) {
+            tabWizard(*m_app).cancel(true);
+            (void)waitFor([this] { return !tabWizard(*m_app).isOpen(); });
         }
         m_app.reset();
         qunsetenv("HWIO_NRFUTIL");
@@ -101,11 +102,11 @@ protected:
         EXPECT_TRUE(app().launcher()->open(
             TroubleshootingWizard::wizardId,
             hwio::gui::ErrorInfo(hwio::makeError(code, std::move(detail))), 0));
-        return qobject_cast<TroubleshootingWizard*>(app().wizard()->wizard());
+        return qobject_cast<TroubleshootingWizard*>(tabWizard(app()).wizard());
     }
     TroubleshootingWizard* openList() {
         EXPECT_TRUE(app().launcher()->start(TroubleshootingWizard::wizardId, 0));
-        return qobject_cast<TroubleshootingWizard*>(app().wizard()->wizard());
+        return qobject_cast<TroubleshootingWizard*>(tabWizard(app()).wizard());
     }
 
     static bool idle(const TroubleshootingWizard& wizard) {
@@ -132,7 +133,7 @@ TEST_F(TroubleshootingWizardTest, WithoutAnErrorTheTopicListComesFirst) {
     start();
     TroubleshootingWizard* wizard = openList();
     ASSERT_NE(wizard, nullptr);
-    EXPECT_EQ(app().wizard()->title(), QStringLiteral("Troubleshooting"));
+    EXPECT_EQ(tabWizard(app()).title(), QStringLiteral("Troubleshooting"));
     hwio::gui::WizardStep step = wizard->current();
     EXPECT_EQ(step.kind, StepKind::Choice);
     EXPECT_EQ(step.heading, QStringLiteral("What is the problem?"));
@@ -165,7 +166,7 @@ TEST_F(TroubleshootingWizardTest, WithoutAnErrorTheTopicListComesFirst) {
     EXPECT_TRUE(wizard->canPrimary());
     // [Update LTE firmware…] hands off to the LTE update.
     wizard->primary();
-    QSignalSpy handOff(app().wizard(), &hwio::gui::WizardViewModel::handOff);
+    QSignalSpy handOff(&tabWizard(app()), &hwio::gui::WizardViewModel::handOff);
     wizard->action(QStringLiteral("step-action"));
     ASSERT_EQ(handOff.count(), 1);
     EXPECT_EQ(handOff.at(0).at(0).toString(), QStringLiteral("open-wizard:lte-update"));
@@ -187,7 +188,7 @@ TEST_F(TroubleshootingWizardTest, AnErrorOpensItsTopic) {
     EXPECT_EQ(step.embeddedOptions.value(QStringLiteral("showMessage")), QVariant(false));
     EXPECT_FALSE(step.showInStepList);
     EXPECT_EQ(wizard->shownError().detail(), QStringLiteral("no control block"));
-    EXPECT_EQ(app().wizard()->embedded(), wizard);
+    EXPECT_EQ(tabWizard(app()).embedded(), wizard);
     wizard->primary();
     // A Diagnose (all): six rows on a probe-only session; the tab is busy meanwhile.
     ASSERT_NE(wizard->topicStep(), nullptr);
@@ -221,7 +222,7 @@ TEST_F(TroubleshootingWizardTest, AnErrorOpensItsTopic) {
     EXPECT_EQ(actionIds(step), QStringList{QStringLiteral("report")});
     // [Create diagnostic report…]: this wizard closes, the report dialog opens.
     wizard->action(QStringLiteral("report"));
-    EXPECT_FALSE(app().wizard()->isOpen());
+    EXPECT_FALSE(tabWizard(app()).isOpen());
     EXPECT_TRUE(app().report()->isOpen());
     app().report()->close();
     // The probe-only session of the checks was released.
@@ -247,8 +248,8 @@ TEST_F(TroubleshootingWizardTest, EveryTopicRunsEndToEnd) {
             ASSERT_EQ(wizard->topic(), &topic);
         }
         ASSERT_TRUE(walkToEnd(*wizard)) << wizard->stepId().toStdString();
-        app().wizard()->cancel(false);
-        ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }));
+        tabWizard(app()).cancel(false);
+        ASSERT_TRUE(waitFor([this] { return !tabWizard(app()).isOpen(); }));
         ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr && !tab().isBusy(); }));
     }
 }
@@ -265,7 +266,7 @@ TEST_F(TroubleshootingWizardTest, ATabWithoutAProbeChoosesOneBeforeTheChecks) {
     EXPECT_EQ(wizard->stepId(), QStringLiteral("probe"));
     EXPECT_EQ(wizard->current().embedded, QStringLiteral("probe-picker"));
     ASSERT_NE(wizard->picker(), nullptr);
-    EXPECT_EQ(app().wizard()->embedded(), wizard->picker());
+    EXPECT_EQ(tabWizard(app()).embedded(), wizard->picker());
     ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
     wizard->primary();
     EXPECT_FALSE(tab().choosing());
@@ -298,7 +299,7 @@ TEST_F(TroubleshootingWizardTest, UseOneThousandKilohertz) {
     wizard->primary();
     ASSERT_TRUE(idle(*wizard));
     EXPECT_EQ(wizard->checks()->status(QStringLiteral("identify")), CheckStatus::Ok);
-    app().wizard()->cancel(false);
+    tabWizard(app()).cancel(false);
     // The wizard's probe-only session is released when the wizard is deleted.
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
 
@@ -353,12 +354,12 @@ TEST_F(TroubleshootingWizardTest, AFailedNrfUtilCheckOpensTheSetupWizard) {
     ASSERT_TRUE(idle(*wizard));
     EXPECT_NE(wizard->checks()->status(QStringLiteral("nrfutil")), CheckStatus::Ok);
     ASSERT_TRUE(actionIds(wizard->current()).contains(QStringLiteral("setup")));
-    QSignalSpy handOffError(app().wizard(), &hwio::gui::WizardViewModel::handOffError);
+    QSignalSpy handOffError(&tabWizard(app()), &hwio::gui::WizardViewModel::handOffError);
     wizard->action(QStringLiteral("setup"));
     ASSERT_EQ(handOffError.count(), 1);
     ASSERT_TRUE(waitFor([this] {
-        return app().wizard()->isOpen() &&
-               app().wizard()->wizardId() == QStringLiteral("first-run-setup");
+        return tabWizard(app()).isOpen() &&
+               tabWizard(app()).wizardId() == QStringLiteral("first-run-setup");
     }));
 }
 
@@ -384,8 +385,8 @@ TEST_F(TroubleshootingWizardTest, CancelDuringDiagnose) {
     ASSERT_NE(wizard, nullptr);
     wizard->primary();
     ASSERT_TRUE(wizard->running());
-    app().wizard()->cancel(true);
-    ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }, std::chrono::seconds(20)));
+    tabWizard(app()).cancel(true);
+    ASSERT_TRUE(waitFor([this] { return !tabWizard(app()).isOpen(); }, std::chrono::seconds(20)));
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }, std::chrono::seconds(20)));
     EXPECT_TRUE(tab().busyPage().isEmpty());
 }
@@ -443,13 +444,13 @@ TEST_F(TroubleshootingWizardTest, ClosingTheLastChainedWizardReleasesTheSession)
     emit wizard->handOffError(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetNoPower)));
     emit wizard->finished(false);
     ASSERT_TRUE(waitFor([this] {
-        return app().wizard()->isOpen() &&
-               app().wizard()->wizardId() == QStringLiteral("connect-device");
+        return tabWizard(app()).isOpen() &&
+               tabWizard(app()).wizardId() == QStringLiteral("connect-device");
     }));
     hwio::gui::test::spin(std::chrono::milliseconds(200));
     EXPECT_EQ(tab().session(), session);
     EXPECT_TRUE(tab().wizardOwnsSession());
-    app().wizard()->cancel(true);
+    tabWizard(app()).cancel(true);
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
 }
 

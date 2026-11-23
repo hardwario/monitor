@@ -56,26 +56,36 @@ using hwio::gui::test::waitFor;
 
 class WizardTest : public hwio::gui::test::GuiTest {
 protected:
-    [[nodiscard]] std::unique_ptr<AppViewModel> makeWizardApp(bool withWizard = true) const {
+    [[nodiscard]] std::unique_ptr<AppViewModel> makeWizardApp(bool withWizard = true,
+                                                              bool withGlobal = false) const {
         return std::make_unique<AppViewModel>(hwio::gui::AppOptions{
             .settings = openSettings(),
             .registry = registryOptions(),
             .scanInterval = std::chrono::milliseconds(200),
             .registerExtensions =
-                [withWizard](AppViewModel& app) {
-                    // The test wizard first: it keeps the id "connect-device" (the first
-                    // registration wins; the real Connect wizard of plan 0009 is then not added).
+                [withWizard, withGlobal](AppViewModel& app) {
+                    // The test wizards first: they keep the ids "connect-device" and
+                    // "first-run-setup" (the first registration wins; the real Connect and
+                    // Setup wizards of plans 0008/0009 are then not added).
                     if (withWizard) {
                         hwio::gui::test::registerTestWizard(
                             app, QUrl(QStringLiteral("qrc:/TestEmbedded.qml")));
+                    }
+                    if (withGlobal) {
+                        hwio::gui::test::registerGlobalTestWizard(app); // plan 0052
                     }
                     hwio::gui::registerBuiltInPages(app);
                 },
             .crashDirectory = {}});
     }
 
+    // Plan 0052: the current tab's wizard.
+    static WizardViewModel* tabWizard(AppViewModel& app) {
+        return app.currentTabViewModel()->wizard();
+    }
+
     static TestWizard* testWizard(AppViewModel& app) {
-        return qobject_cast<TestWizard*>(app.wizard()->wizard());
+        return qobject_cast<TestWizard*>(tabWizard(app)->wizard());
     }
 
     static int stepKind(const WizardViewModel& wizard) {
@@ -93,7 +103,7 @@ TEST_F(WizardTest, LauncherOffersOnlyRegisteredWizards) {
     EXPECT_FALSE(app->launcher()->canOpen(QString()));
     EXPECT_FALSE(app->launcher()->canOpen(QStringLiteral("nonsense")));
     EXPECT_FALSE(app->launcher()->start(QStringLiteral("ble-pairing")));
-    EXPECT_FALSE(app->wizard()->isOpen());
+    EXPECT_FALSE(tabWizard(*app)->isOpen());
 
     // Without the test wizard, connect-device is the real Connect wizard (plan 0009).
     const auto without = makeWizardApp(false);
@@ -102,7 +112,7 @@ TEST_F(WizardTest, LauncherOffersOnlyRegisteredWizards) {
 
 TEST_F(WizardTest, NavigationThroughEveryStepKind) {
     const auto app = makeWizardApp();
-    WizardViewModel& wizard = *app->wizard();
+    WizardViewModel& wizard = *tabWizard(*app);
     ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
     ASSERT_TRUE(wizard.isOpen());
     EXPECT_EQ(wizard.wizardId(), QStringLiteral("connect-device"));
@@ -165,22 +175,22 @@ TEST_F(WizardTest, ErrorContextStartsAtTheExplainingStep) {
     const ErrorInfo error(hwio::makeError(ErrorCode::ProbeNotFound));
     ASSERT_EQ(error.wizard(), QStringLiteral("connect-device"));
     ASSERT_TRUE(app->launcher()->open(error.wizard(), error, 0));
-    EXPECT_EQ(stepKind(*app->wizard()), StepKind::Checks);
+    EXPECT_EQ(stepKind(*tabWizard(*app)), StepKind::Checks);
     EXPECT_EQ(testWizard(*app)->context().code(), QStringLiteral("probe.not_found"));
 }
 
 TEST_F(WizardTest, OnlyOneWizardAtATime) {
     const auto app = makeWizardApp();
     ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
-    QSignalSpy raised(app->wizard(), &WizardViewModel::raiseRequested);
+    QSignalSpy raised(tabWizard(*app), &WizardViewModel::raiseRequested);
     EXPECT_FALSE(app->launcher()->start(QStringLiteral("connect-device")));
     EXPECT_EQ(raised.count(), 1);
-    EXPECT_TRUE(app->wizard()->isOpen());
+    EXPECT_TRUE(tabWizard(*app)->isOpen());
 }
 
 TEST_F(WizardTest, CancelWhileBusyAsksFirst) {
     const auto app = makeWizardApp();
-    WizardViewModel& wizard = *app->wizard();
+    WizardViewModel& wizard = *tabWizard(*app);
     ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
     DeviceTabViewModel* tab = app->currentTabViewModel();
     testWizard(*app)->goTo(4);
@@ -209,12 +219,12 @@ TEST_F(WizardTest, CancelWhileBusyAsksFirst) {
 TEST_F(WizardTest, CancelWhenIdleClosesAtOnce) {
     const auto app = makeWizardApp();
     ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
-    QSignalSpy confirm(app->wizard(), &WizardViewModel::cancelConfirmationNeeded);
-    app->wizard()->cancel(false);
+    QSignalSpy confirm(tabWizard(*app), &WizardViewModel::cancelConfirmationNeeded);
+    tabWizard(*app)->cancel(false);
     EXPECT_EQ(confirm.count(), 0);
-    EXPECT_FALSE(app->wizard()->isOpen());
+    EXPECT_FALSE(tabWizard(*app)->isOpen());
     // The wizard object is deleted on the next event-loop turn.
-    EXPECT_TRUE(waitFor([&] { return app->wizard()->findChildren<TestWizard*>().isEmpty(); }));
+    EXPECT_TRUE(waitFor([&] { return tabWizard(*app)->findChildren<TestWizard*>().isEmpty(); }));
 }
 
 TEST_F(WizardTest, ClosingTheTabClosesItsWizard) {
@@ -225,16 +235,18 @@ TEST_F(WizardTest, ClosingTheTabClosesItsWizard) {
     ASSERT_TRUE(tab->configure(QStringLiteral("chester"), QStringLiteral("app"), 801000001));
     ASSERT_TRUE(tab->ensureSession(false)); // a wizard's probe-only session
     ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device"), 1));
-    EXPECT_EQ(app->wizard()->tab(), tab);
-    const QPointer<TestWizard> wizard = testWizard(*app);
+    const QPointer<WizardViewModel> host = tab->wizard();
+    EXPECT_EQ(host->tab(), tab);
+    const QPointer<TestWizard> wizard = qobject_cast<TestWizard*>(host->wizard());
     ASSERT_FALSE(wizard.isNull());
     app->closeTab(1);
     // Review V2: closed at once, before the tab shut its session down (not on `destroyed`).
-    EXPECT_FALSE(app->wizard()->isOpen());
+    ASSERT_FALSE(host.isNull()); // the tab and its wizard host are deleted later
+    EXPECT_FALSE(host->isOpen());
     ASSERT_FALSE(wizard.isNull()); // deleted later
     EXPECT_EQ(wizard->cancelCalls(), 1);
     EXPECT_TRUE(wizard->tabSessionAtCancel());
-    EXPECT_TRUE(waitFor([&] { return wizard.isNull(); }));
+    EXPECT_TRUE(waitFor([&] { return wizard.isNull() && host.isNull(); }));
 }
 
 TEST_F(WizardTest, ClosingAnotherTabKeepsTheWizard) {
@@ -242,22 +254,185 @@ TEST_F(WizardTest, ClosingAnotherTabKeepsTheWizard) {
     app->newTab();
     ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device"), 0));
     app->closeTab(1);
-    EXPECT_TRUE(app->wizard()->isOpen());
-    EXPECT_EQ(app->wizard()->tab(), app->tabs()->at(0));
+    WizardViewModel* host = app->tabs()->at(0)->wizard();
+    EXPECT_TRUE(host->isOpen());
+    EXPECT_EQ(host->tab(), app->tabs()->at(0));
+}
+
+// Plan 0052 (ADR-0386): one wizard per tab; two tabs run their wizards at the same time.
+TEST_F(WizardTest, TwoTabsRunWizardsAtOnce) {
+    const auto app = makeWizardApp();
+    app->newTab();
+    ASSERT_EQ(app->tabs()->count(), 2);
+    DeviceTabViewModel* first = app->tabs()->at(0);
+    DeviceTabViewModel* second = app->tabs()->at(1);
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device"), 0));
+    EXPECT_EQ(app->currentTab(), 0); // the tab that opened the wizard is shown
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device"), 1));
+    EXPECT_EQ(app->currentTab(), 1);
+    ASSERT_TRUE(first->wizard()->isOpen());
+    ASSERT_TRUE(second->wizard()->isOpen());
+    EXPECT_EQ(first->wizard()->tab(), first);
+    EXPECT_EQ(second->wizard()->tab(), second);
+    EXPECT_FALSE(app->globalWizard()->isOpen());
+    EXPECT_EQ(first->currentPage(), DeviceTabViewModel::wizardPageId());
+    EXPECT_EQ(second->currentPage(), DeviceTabViewModel::wizardPageId());
+
+    // An operation in one wizard keeps only its tab busy; the other wizard goes on.
+    auto* firstWizard = qobject_cast<TestWizard*>(first->wizard()->wizard());
+    auto* secondWizard = qobject_cast<TestWizard*>(second->wizard()->wizard());
+    ASSERT_NE(firstWizard, nullptr);
+    ASSERT_NE(secondWizard, nullptr);
+    firstWizard->goTo(4);
+    first->wizard()->primary();
+    EXPECT_TRUE(first->isBusy());
+    EXPECT_FALSE(second->isBusy());
+    second->wizard()->primary();
+    EXPECT_EQ(secondWizard->stepIndex(), 1);
+    EXPECT_EQ(firstWizard->stepIndex(), 4);
+
+    second->wizard()->cancel(false);
+    EXPECT_FALSE(second->wizard()->isOpen());
+    EXPECT_TRUE(first->wizard()->isOpen());
+    firstWizard->finishOperation();
+    EXPECT_FALSE(first->isBusy());
+}
+
+// Plan 0052: a second wizard in the same tab is refused and the open one is shown (its tab
+// becomes current, its page is the wizard view).
+TEST_F(WizardTest, SecondWizardInATabIsRefusedAndShown) {
+    const auto app = makeWizardApp();
+    app->newTab();
+    DeviceTabViewModel* first = app->tabs()->at(0);
+    ASSERT_TRUE(first->configure(QStringLiteral("chester"), QStringLiteral("app"), 801000001));
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device"), 0));
+    first->setCurrentPage(QStringLiteral("console"));
+    app->setCurrentTab(1);
+    QSignalSpy raised(first->wizard(), &WizardViewModel::raiseRequested);
+    EXPECT_FALSE(app->launcher()->start(QStringLiteral("connect-device"), 0));
+    EXPECT_EQ(raised.count(), 1);
+    EXPECT_EQ(app->currentTab(), 0);
+    EXPECT_EQ(first->currentPage(), DeviceTabViewModel::wizardPageId());
+    EXPECT_TRUE(first->wizard()->isOpen());
+    EXPECT_FALSE(app->tabs()->at(1)->wizard()->isOpen());
+}
+
+// Plan 0052 (ADR-0386): the rail stays usable; the "Wizard" entry shows the wizard again where
+// it was; when the wizard closes, the page shown before it comes back.
+TEST_F(WizardTest, RailSwitchKeepsTheWizardAndItsStep) {
+    const auto app = makeWizardApp();
+    DeviceTabViewModel* tab = app->currentTabViewModel();
+    ASSERT_TRUE(tab->configure(QStringLiteral("chester"), QStringLiteral("app"), 801000001));
+    app->showPage(QStringLiteral("flash"));
+    EXPECT_EQ(tab->currentPage(), QStringLiteral("flash"));
+    // "wizard" is not a page while no wizard is open.
+    app->showPage(DeviceTabViewModel::wizardPageId());
+    EXPECT_EQ(tab->currentPage(), QStringLiteral("flash"));
+
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
+    EXPECT_EQ(tab->currentPage(), DeviceTabViewModel::wizardPageId());
+    tabWizard(*app)->primary();
+    EXPECT_EQ(testWizard(*app)->stepIndex(), 1);
+    app->showPage(QStringLiteral("console"));
+    EXPECT_EQ(tab->currentPage(), QStringLiteral("console"));
+    EXPECT_TRUE(tabWizard(*app)->isOpen());
+    app->showPage(DeviceTabViewModel::wizardPageId());
+    EXPECT_EQ(tab->currentPage(), DeviceTabViewModel::wizardPageId());
+    EXPECT_EQ(testWizard(*app)->stepIndex(), 1);
+
+    tabWizard(*app)->cancel(false);
+    // The page shown before the wizard view was shown the last time.
+    EXPECT_EQ(tab->currentPage(), QStringLiteral("console"));
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
+    tabWizard(*app)->cancel(false);
+    EXPECT_EQ(tab->currentPage(), QStringLiteral("console"));
+    app->showPage(QStringLiteral("flash"));
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
+    tabWizard(*app)->cancel(false);
+    EXPECT_EQ(tab->currentPage(), QStringLiteral("flash"));
+
+    // Closed while another page is shown: that page stays.
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
+    app->showPage(QStringLiteral("console"));
+    tabWizard(*app)->cancel(false);
+    EXPECT_EQ(tab->currentPage(), QStringLiteral("console"));
+}
+
+// Plan 0052: a wizard opened while the tab chooses a device replaces the Choose device page.
+TEST_F(WizardTest, WizardWhileChoosingADevice) {
+    const auto app = makeWizardApp();
+    DeviceTabViewModel* tab = app->currentTabViewModel();
+    ASSERT_TRUE(tab->choosing());
+    const QString before = tab->currentPage();
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
+    EXPECT_EQ(tab->currentPage(), DeviceTabViewModel::wizardPageId());
+    tab->setCurrentPage(before);
+    app->showPage(DeviceTabViewModel::wizardPageId()); // the rail's "Wizard" entry
+    EXPECT_EQ(tab->currentPage(), DeviceTabViewModel::wizardPageId());
+    tabWizard(*app)->cancel(false);
+    EXPECT_EQ(tab->currentPage(), before);
+}
+
+// Plan 0052: the hand-offs show the page in the wizard's tab; closing the wizard keeps it.
+TEST_F(WizardTest, HandOffShowsThePageOfItsTab) {
+    const auto app = makeWizardApp();
+    app->newTab();
+    DeviceTabViewModel* first = app->tabs()->at(0);
+    ASSERT_TRUE(first->configure(QStringLiteral("chester"), QStringLiteral("app"), 801000001));
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device"), 0));
+    testWizard(*app)->goTo(5);
+    app->setCurrentTab(1);
+    first->wizard()->action(QStringLiteral("open-flash-page"));
+    EXPECT_EQ(app->currentTab(), 0);
+    EXPECT_EQ(first->currentPage(), QStringLiteral("flash"));
+    EXPECT_TRUE(first->wizard()->isOpen());
+    first->wizard()->primary(); // Finish
+    EXPECT_FALSE(first->wizard()->isOpen());
+    EXPECT_EQ(first->currentPage(), QStringLiteral("flash"));
+
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device"), 0));
+    testWizard(*app)->goTo(5);
+    first->wizard()->action(QStringLiteral("open-console"));
+    first->wizard()->primary();
+    EXPECT_EQ(first->currentPage(), QStringLiteral("console"));
+}
+
+// Plan 0052: global wizards (setup) run in the global instance, one at a time, next to the tabs'.
+TEST_F(WizardTest, GlobalWizardIsHostedByTheApplication) {
+    const auto app = makeWizardApp(true, true);
+    DeviceTabViewModel* tab = app->currentTabViewModel();
+    const QString page = tab->currentPage();
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("first-run-setup")));
+    WizardViewModel& global = *app->globalWizard();
+    ASSERT_TRUE(global.isOpen());
+    EXPECT_EQ(global.wizardId(), QStringLiteral("first-run-setup"));
+    EXPECT_EQ(global.tab(), nullptr);
+    EXPECT_FALSE(tab->wizard()->isOpen());
+    EXPECT_EQ(tab->currentPage(), page); // no wizard page in the tab
+    QSignalSpy raised(&global, &WizardViewModel::raiseRequested);
+    EXPECT_FALSE(app->launcher()->start(QStringLiteral("first-run-setup")));
+    EXPECT_EQ(raised.count(), 1);
+    // A tab's wizard runs at the same time.
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
+    EXPECT_TRUE(tab->wizard()->isOpen());
+    EXPECT_TRUE(global.isOpen());
+    global.cancel(false);
+    EXPECT_FALSE(global.isOpen());
+    EXPECT_TRUE(tab->wizard()->isOpen());
 }
 
 TEST_F(WizardTest, OpenWizardFromTheTab) {
     const auto app = makeWizardApp();
     DeviceTabViewModel* tab = app->currentTabViewModel();
     tab->openWizard(QStringLiteral("connect-device"));
-    ASSERT_TRUE(app->wizard()->isOpen());
-    EXPECT_EQ(app->wizard()->tab(), tab);
+    ASSERT_TRUE(tabWizard(*app)->isOpen());
+    EXPECT_EQ(tabWizard(*app)->tab(), tab);
 }
 
 TEST_F(WizardTest, CopyTextGoesToTheClipboard) {
     const auto app = makeWizardApp();
     ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
-    app->wizard()->copyText(QStringLiteral("sudo udevadm trigger"));
+    tabWizard(*app)->copyText(QStringLiteral("sudo udevadm trigger"));
     QClipboard* clipboard = QGuiApplication::clipboard();
     ASSERT_NE(clipboard, nullptr);
     EXPECT_EQ(clipboard->text(), QStringLiteral("sudo udevadm trigger"));

@@ -272,7 +272,7 @@ TEST_F(Operations, FlashHaltLeavesTheSessionDisconnected) {
     ASSERT_TRUE(session);
     const OperationResult* result =
         finish(session->flash("app", std::make_shared<FirmwareImage>(appImage()),
-                              FlashOptions{.halt = true, .allowUicr = false}));
+                              FlashOptions{.halt = true, .allowUicr = false, .guided = false}));
     ASSERT_NE(result, nullptr);
     ASSERT_TRUE(result->status);
     EXPECT_TRUE(events().reached(ConnectionState::Disconnected));
@@ -617,6 +617,35 @@ TEST_F(Operations, LteDownloadFailureOnALostLinkReadsTheResetReasonAfterAReopen)
         EXPECT_NE(std::find(closed, sequence.end(), "connect:NRF9151_XXCA"), sequence.end());
     }
     target().set([](ScriptedTarget& t) { t.pinResetLosesTheLink = false; });
+}
+
+// Plan 0051 (ADR-0383): an operation of the guided update (`guided`) keeps its own error after a
+// pin reset; the reset reason is still read (logged).
+TEST_F(Operations, GuidedLteFailureAfterAPinResetKeepsItsError) {
+    auto session = openConnected(options("lte", false));
+    ASSERT_TRUE(session);
+    const hwio::device::FlashOptions guided{.halt = false, .allowUicr = false, .guided = true};
+    modem().mode = ModemScript::Mode::Fail;
+    modem().pinReset = true;
+    clearOps();
+    const OperationResult* modemFailed =
+        finish(session->updateModem("lte", root() / "mfw.zip", guided));
+    ASSERT_FALSE(modemFailed->status);
+    EXPECT_EQ(modemFailed->status.error().code, ErrorCode::FirmwareModemUpdateFailed);
+    const OperationResult* bundleFailed = finish(session->flashLteBundle("lte", bundle(), guided));
+    ASSERT_FALSE(bundleFailed->status);
+    EXPECT_EQ(bundleFailed->status.error().code, ErrorCode::FirmwareModemUpdateFailed);
+    const auto sequence = ops();
+    EXPECT_NE(std::ranges::find(sequence, "clearResetReason"), sequence.end()); // still armed
+    modem().mode = ModemScript::Mode::Succeed;
+    modem().pinReset = false;
+
+    target().set([](ScriptedTarget& t) { t.pinResetDuringDownload = true; });
+    const OperationResult* flashed =
+        finish(session->flash("lte", std::make_shared<FirmwareImage>(appImage()), guided));
+    ASSERT_FALSE(flashed->status);
+    EXPECT_EQ(flashed->status.error().code, ErrorCode::TargetProgramFailed);
+    target().set([](ScriptedTarget& t) { t.pinResetDuringDownload = false; });
 }
 
 // The application MCU has no reset reason register in the profile: nothing is cleared there.

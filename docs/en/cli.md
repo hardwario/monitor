@@ -119,6 +119,8 @@ after the command was echoed. Writes a console file per run unless `--console-fi
 
 ```sh
 hwio chester app flash [--halt] [--allow-uicr] [--no-cache] [HEX_FILE_OR_ID]
+hwio chester app flash --backup latest|PATH [--force]
+hwio chester app backups [--serial N]
 ```
 
 Flashes a HEX file, or a 32-digit firmware ID from the catalog. Without an argument it looks for the build output in
@@ -130,6 +132,13 @@ Block are kept ([Flashing](flashing.md#uicr-and-the-product-information-block)).
 | `--halt` | Leave the CPU halted after flashing |
 | `--allow-uicr` | Also program the image's UICR records (the PIB is kept) |
 | `--no-cache` | Download a catalog firmware even when it is in the cache |
+| `--backup latest\|PATH` | Flash an application copy saved by the guided LTE update: `latest` is the newest copy of the connected device (by the serial number in its PIB); `PATH` a copy's file (or its name in the backups folder) |
+| `--force` | With `--backup`: also flash a copy of another device (refused otherwise) |
+
+`hwio chester app backups` lists the application copies of the guided LTE update, newest first: time, serial number,
+size and path (`--json`: `directory`, `serial`, `backups[]` with `time`, `serial`, `path`, `size`). Without
+`--serial` it lists the copies of the connected device when a J-Link reaches it, else all copies. The backups folder
+keeps the newest 10 copies ([Privacy and stored data](privacy.md)).
 
 | Command | Does | Asks first |
 |---|---|---|
@@ -170,13 +179,18 @@ The LTE MCU has no console. Modem firmware needs nRF Util.
 J-Link on the APP connector; it says what will happen and asks `Continue? [y/N]` (no: exit code 130, nothing
 changed), then saves a copy of the application, erases the application, asks you to move the J-Link
 to the LTE connector, updates the LTE MCU, asks you to move it back and writes the application back. Each step
-continues by itself as soon as the J-Link reaches the right MCU; the copy's path is printed at the end. When there is
+continues by itself as soon as the J-Link reaches the right MCU; the copy's path is printed at the end. Ctrl+C after
+the erase asks `Write the application back first? [Y/n]`: yes (or Enter, or the end of the input) waits for the J-Link
+on the APP connector, writes the copy back and ends with exit code 130 and "LTE firmware not updated. The application
+was written back."; `n` leaves the application MCU erased. When there is
 no copy to write back (an empty or unreadable application), the command ends with exit code 130 and the application
 MCU stays empty: flash an application with `hwio chester app flash`. It needs an
 interactive terminal (not with `--json`). Without `--guided` the command flashes only the LTE MCU, as py-hardwario's
 `hardwario chester lte flash` does, and leaves the application running; it first warns (human output only) that the
 application firmware can reset the LTE MCU during the update. When that happens the command fails with
-[`target.reset_during_update`](troubleshooting.md#target.reset_during_update): use `--guided`.
+[`target.reset_during_update`](troubleshooting.md#target.reset_during_update): use `--guided`. With `--guided` a
+failed step keeps its own error (the reset reason is only logged); too low supply voltage reported by nRF Util is
+[`target.low_voltage`](troubleshooting.md#target.low_voltage).
 
 ## Bluetooth LE (`hwio ble`)
 

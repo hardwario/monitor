@@ -20,8 +20,10 @@
 #include <QModelIndex>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QStringLiteral>
 #include <QVariant>
+#include <QtContainerFwd>
 #include <QtCore/qnamespace.h>
 
 #include <cstddef>
@@ -54,10 +56,15 @@ QVariant RecentSourcesModel::data(const QModelIndex& index, int role) const {
     switch (role) {
     case NameRole:
     case Qt::DisplayRole:
+        if (catalog && !entry.name.isEmpty()) {
+            return entry.version.isEmpty() ? entry.name
+                                           : QStringLiteral("%1 %2").arg(entry.name, entry.version);
+        }
         return catalog ? tr("Catalog ID %1").arg(entry.source.mid(catalogPrefix.size()))
                        : QFileInfo(entry.source).fileName();
     case DetailRole:
-        return catalog ? entry.source.mid(catalogPrefix.size()) : entry.source;
+        return catalog ? tr("Catalog ID %1").arg(entry.source.mid(catalogPrefix.size()))
+                       : entry.source;
     case TypeRole:
         if (catalog) {
             return tr("Catalog ID");
@@ -113,7 +120,9 @@ std::vector<RecentSourcesModel::Entry> RecentSourcesModel::entries() const {
         Entry entry{.kind = std::move(kind),
                     .source = object.value(QStringLiteral("source")).toString(),
                     .time = QDateTime::fromString(object.value(QStringLiteral("time")).toString(),
-                                                  Qt::ISODate)};
+                                                  Qt::ISODate),
+                    .name = object.value(QStringLiteral("name")).toString(),
+                    .version = object.value(QStringLiteral("version")).toString()};
         if (!entry.kind.isEmpty() && !entry.source.isEmpty()) {
             result.push_back(std::move(entry));
         }
@@ -121,12 +130,24 @@ std::vector<RecentSourcesModel::Entry> RecentSourcesModel::entries() const {
     return result;
 }
 
-void RecentSourcesModel::add(const QString& kindId, const QString& source) {
+void RecentSourcesModel::add(const QString& kindId, const QString& source, const QString& name,
+                             const QString& version) {
     std::vector<Entry> list = entries();
+    Entry added{.kind = kindId,
+                .source = source,
+                .time = QDateTime::currentDateTimeUtc(),
+                .name = name,
+                .version = version};
+    for (const Entry& entry : list) {
+        if (name.isEmpty() && entry.source == source && !entry.name.isEmpty()) {
+            added.name = entry.name; // known from before (ADR-0385)
+            added.version = entry.version;
+            break;
+        }
+    }
     std::erase_if(
         list, [&](const Entry& entry) { return entry.kind == kindId && entry.source == source; });
-    list.insert(list.begin(),
-                Entry{.kind = kindId, .source = source, .time = QDateTime::currentDateTimeUtc()});
+    list.insert(list.begin(), std::move(added));
     if (list.size() > maxEntries) {
         list.resize(maxEntries);
     }
@@ -145,6 +166,35 @@ void RecentSourcesModel::remove(int row) {
     store(list);
 }
 
+void RecentSourcesModel::setName(const QString& source, const QString& name,
+                                 const QString& version) {
+    if (name.isEmpty()) {
+        return;
+    }
+    std::vector<Entry> list = entries();
+    bool changed = false;
+    for (Entry& entry : list) {
+        if (entry.source == source && (entry.name != name || entry.version != version)) {
+            entry.name = name;
+            entry.version = version;
+            changed = true;
+        }
+    }
+    if (changed) {
+        store(list);
+    }
+}
+
+QStringList RecentSourcesModel::unnamedCatalogIds() const {
+    QStringList ids;
+    for (const Entry& entry : m_rows) {
+        if (entry.name.isEmpty() && entry.source.startsWith(catalogPrefix)) {
+            ids.append(entry.source.mid(catalogPrefix.size()));
+        }
+    }
+    return ids;
+}
+
 QString RecentSourcesModel::sourceAt(int row) const {
     return row >= 0 && row < count() ? m_rows.at(static_cast<std::size_t>(row)).source : QString();
 }
@@ -161,9 +211,14 @@ void RecentSourcesModel::store(const std::vector<Entry>& entries) {
     }
     QJsonArray array;
     for (const Entry& entry : entries) {
-        array.append(QJsonObject{{QStringLiteral("kind"), entry.kind},
-                                 {QStringLiteral("source"), entry.source},
-                                 {QStringLiteral("time"), entry.time.toString(Qt::ISODate)}});
+        QJsonObject object{{QStringLiteral("kind"), entry.kind},
+                           {QStringLiteral("source"), entry.source},
+                           {QStringLiteral("time"), entry.time.toString(Qt::ISODate)}};
+        if (!entry.name.isEmpty()) { // ADR-0385
+            object.insert(QStringLiteral("name"), entry.name);
+            object.insert(QStringLiteral("version"), entry.version);
+        }
+        array.append(object);
     }
     const QString json = QString::fromUtf8(QJsonDocument(array).toJson(QJsonDocument::Compact));
     if (const Status status = m_settings->setValue(FirmwareServices::recentKey, json); !status) {

@@ -96,13 +96,9 @@ Item {
                 objectName: "joinSupportSession"
                 iconName: "share"
                 text: qsTr("Join support session…")
-                onClicked: joinDialog.open()
+                onClicked: AppViewModel.openView("join") // plan 0052: a view of the page area
             }
         }
-    }
-
-    JoinDialog {
-        id: joinDialog
     }
 
     BleDeviceList {

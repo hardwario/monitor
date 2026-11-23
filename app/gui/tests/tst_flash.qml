@@ -3,6 +3,7 @@
 // Cancel is the default and Esc cancels), "Guide me" shown for application firmware only (plan
 // 0010), both themes, and the layout at 960 x 600 in Czech (geometry assertions).
 import QtQuick
+import QtQuick.Controls
 import QtTest
 import HardwarioMonitor
 
@@ -174,10 +175,10 @@ TestCase {
     function test_lteDesignatedFirmware() {
         mouseClick(find("kindCard" + FirmwareSourceViewModel.LteFirmware));
         mouseClick(find("lteUpdateButton"));
-        const dialog = findChild(window, "wizardDialog");
-        tryVerify(() => dialog.opened);
+        tryVerify(() => find("wizardView") !== null); // plan 0052: the wizard view of the tab
+        const dialog = find("wizardView");
         const part = name => {
-            const items = findAll(dialog.contentItem, name).filter(effectivelyVisible);
+            const items = findAll(dialog, name).filter(effectivelyVisible);
             return items.length > 0 ? items[0] : null;
         };
         const wizard = testSupport.openWizard();
@@ -190,14 +191,42 @@ TestCase {
         tryCompare(part("designatedStatusText"), "text", "Ready");
         verify(!part("dropText"));
         tryVerify(() => part("ltePrerequisite") !== null, 10000); // nRF Util is missing
-        verify(!AppViewModel.wizard.canPrimary);
+        verify(!AppViewModel.currentTabViewModel.wizard.canPrimary);
         mouseClick(part("ownFileRadio"));
         compare(wizard.lteSource.lteSource, FirmwareSourceViewModel.OwnFile);
         verify(part("dropText") !== null);
         mouseClick(part("designatedRadio"));
         compare(wizard.lteSource.lteSource, FirmwareSourceViewModel.Designated);
-        AppViewModel.wizard.cancel(false);
-        tryVerify(() => !AppViewModel.wizard.open);
+        AppViewModel.currentTabViewModel.wizard.cancel(false);
+        tryVerify(() => !AppViewModel.currentTabViewModel.wizard.open);
+    }
+
+    // Plan 0052 (ADR-0386): the rail stays usable during the LTE update: Console shows the console
+    // page, the guide keeps its stage, and the rail's "Wizard" entry shows it again.
+    function test_lteUpdateRailSwitchKeepsTheGuide() {
+        mouseClick(find("kindCard" + FirmwareSourceViewModel.LteFirmware));
+        mouseClick(find("lteUpdateButton"));
+        tryVerify(() => find("wizardView") !== null);
+        const wizard = testSupport.openWizard();
+        tryVerify(() => find("lteSourceCard") !== null, 10000);
+        compare(wizard.stage, LteUpdateWizard.Firmware);
+        mouseClick(find("ownFileRadio"));
+        compare(wizard.lteSource.lteSource, FirmwareSourceViewModel.OwnFile);
+        const consoleItem = findAll(find("navRail"), "railItem").filter(item => item.text === "Console")[0];
+        mouseClick(consoleItem);
+        tryVerify(() => find("wizardView") === null);
+        compare(AppViewModel.currentTabViewModel.currentPage, "console");
+        verify(AppViewModel.currentTabViewModel.wizard.open);
+        waitForRendering(window.contentItem);
+        mouseClick(find("railWizard"));
+        tryVerify(() => find("wizardView") !== null);
+        compare(wizard.stage, LteUpdateWizard.Firmware);
+        compare(wizard.lteSource.lteSource, FirmwareSourceViewModel.OwnFile);
+        verify(find("dropText") !== null);
+        AppViewModel.currentTabViewModel.wizard.cancel(false);
+        tryVerify(() => find("wizardView") === null);
+        compare(AppViewModel.currentTabViewModel.currentPage, "console");
+        AppViewModel.showPage("flash");
     }
 
     // Plan 0034 (B4): at 960 x 600 (Czech, own file) the missing nRF Util is shown above the firmware
@@ -207,10 +236,10 @@ TestCase {
         AppViewModel.setLanguage("cs");
         mouseClick(find("kindCard" + FirmwareSourceViewModel.LteFirmware));
         mouseClick(find("lteUpdateButton"));
-        const dialog = findChild(window, "wizardDialog");
-        tryVerify(() => dialog.opened);
+        tryVerify(() => find("wizardView") !== null); // plan 0052: the wizard view of the tab
+        const dialog = find("wizardView");
         const part = name => {
-            const items = findAll(dialog.contentItem, name).filter(effectivelyVisible);
+            const items = findAll(dialog, name).filter(effectivelyVisible);
             return items.length > 0 ? items[0] : null;
         };
         const wizard = testSupport.openWizard();
@@ -222,7 +251,7 @@ TestCase {
         window.height = 600;
         tryVerify(() => part("ltePrerequisite") !== null, 10000);
         waitForRendering(window.contentItem);
-        verify(!AppViewModel.wizard.canPrimary);
+        verify(!AppViewModel.currentTabViewModel.wizard.canPrimary);
         const content = rect(findChild(dialog, "wizardContent"));
         const prerequisite = rect(part("ltePrerequisite"));
         const card = part("lteSourceCard");
@@ -239,17 +268,17 @@ TestCase {
     function test_lteUpdateAsksBeforeTheErase() {
         mouseClick(find("kindCard" + FirmwareSourceViewModel.LteFirmware));
         mouseClick(find("lteUpdateButton"));
-        const dialog = findChild(window, "wizardDialog");
-        tryVerify(() => dialog.opened);
+        tryVerify(() => find("wizardView") !== null); // plan 0052: the wizard view of the tab
+        const dialog = find("wizardView");
         const part = name => {
-            const items = findAll(dialog.contentItem, name).filter(effectivelyVisible);
+            const items = findAll(dialog, name).filter(effectivelyVisible);
             return items.length > 0 ? items[0] : null;
         };
         const wizard = testSupport.openWizard();
         tryVerify(() => part("ownFileRadio") !== null, 10000);
         mouseClick(part("ownFileRadio"));
         wizard.lteSource.loadFile(testSupport.writeHex("lte.hex", 4096, false));
-        tryVerify(() => AppViewModel.wizard.canPrimary, 10000);
+        tryVerify(() => AppViewModel.currentTabViewModel.wizard.canPrimary, 10000);
         const primary = findChild(dialog, "wizardPrimary");
         mouseClick(primary);
         tryVerify(() => wizard.stage === LteUpdateWizard.Confirm, 20000);
@@ -262,17 +291,109 @@ TestCase {
         const cancel = findChild(dialog, "wizardCancel");
         verify(cancel.enabled);
         mouseClick(cancel);
-        tryVerify(() => !AppViewModel.wizard.open, 5000);
+        tryVerify(() => !AppViewModel.currentTabViewModel.wizard.open, 5000);
         tryCompare(AppViewModel.currentTabViewModel, "busyPage", "", 5000); // the closed wizard is deleted later
     }
 
     function cleanup() {
-        if (AppViewModel.wizard.open)
-            AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open);
-        // The modal dialog blocks the clicks of the next test until it has really closed.
-        const dialog = findChild(window, "wizardDialog");
-        tryVerify(() => !dialog || !dialog.visible);
+        verify(testSupport.useScenario("")); // plan 0051: a test may use a two-connector board
+        if (AppViewModel.currentTabViewModel.wizard.open)
+            AppViewModel.currentTabViewModel.wizard.cancel(true);
+        tryVerify(() => !AppViewModel.currentTabViewModel.wizard.open);
+        tryVerify(() => find("wizardView") === null);
+    }
+
+    // Plan 0051: the guide on a two-connector board (the test moves the J-Link cable) up to step 7.
+    function runLteUpdateToTheApplicationStep() {
+        const connector = testSupport.writeText("connector", "app");
+        verify(testSupport.useScenario(JSON.stringify({ probes: [{ serialNumber: 801000001, product: "Test Probe",
+            connectors: { file: connector, chips: { app: { memory: [{ address: 4096, hex: "a5a5a5a5" }] },
+                                                    lte: { family: "nrf91" } } } }] })));
+        verify(testSupport.configureTab(0, "app", 801000001, "Test Probe"));
+        AppViewModel.showPage("flash");
+        tryVerify(() => find("kindCard" + FirmwareSourceViewModel.LteFirmware) !== null, 5000);
+        mouseClick(find("kindCard" + FirmwareSourceViewModel.LteFirmware));
+        mouseClick(find("lteUpdateButton"));
+        tryVerify(() => find("wizardView") !== null); // plan 0052: the wizard view of the tab
+        const dialog = find("wizardView");
+        const wizard = testSupport.openWizard();
+        tryVerify(() => wizard.lteSource !== null);
+        wizard.lteSource.lteSource = FirmwareSourceViewModel.OwnFile;
+        wizard.lteSource.loadFile(testSupport.writeHex("lte.hex", 4096, false));
+        tryVerify(() => AppViewModel.currentTabViewModel.wizard.canPrimary, 10000);
+        AppViewModel.currentTabViewModel.wizard.primary();
+        tryVerify(() => wizard.stage === LteUpdateWizard.Confirm, 20000);
+        AppViewModel.currentTabViewModel.wizard.primary(); // [Continue]
+        tryVerify(() => wizard.stage === LteUpdateWizard.Connector
+                        && findChild(dialog, "wizardHeading").text === "Connect the J-Link to the LTE connector", 20000);
+        testSupport.writeText("connector", "lte");
+        tryVerify(() => findChild(dialog, "wizardHeading").text === "Connect the J-Link to the APP connector", 30000);
+        testSupport.writeText("connector", "app");
+        tryVerify(() => wizard.stage === LteUpdateWizard.Application, 20000);
+        return { dialog: dialog, wizard: wizard };
+    }
+
+    // Plan 0051 (ADR-0384): step 7 at 960 x 600: the scroll bar and the fade show the hidden part;
+    // choosing "Firmware from the catalog or a file" scrolls the picker into view (its Recent list
+    // header inside the view).
+    function test_lteApplicationStepScrollsThePickerIntoView() {
+        verify(testSupport.setSetting("flash/recent", JSON.stringify([
+            { kind: "app", source: "/fw/app-1.hex", time: "2026-11-01T10:00:00Z" },
+            { kind: "app", source: "/fw/app-2.hex", time: "2026-11-01T09:00:00Z" }])));
+        window.width = 960;
+        window.height = 600;
+        const run = runLteUpdateToTheApplicationStep();
+        const dialog = run.dialog;
+        const part = name => {
+            const items = findAll(dialog, name).filter(effectivelyVisible);
+            return items.length > 0 ? items[0] : null;
+        };
+        tryVerify(() => part("useOtherFirmware") !== null, 5000);
+        mouseClick(part("useOtherFirmware"));
+        tryVerify(() => part("recentHeader") !== null, 5000);
+        const content = findChild(dialog, "wizardContent");
+        const flickable = content.contentItem;
+        tryVerify(() => findChild(dialog, "wizardScrollBar").policy === ScrollBar.AlwaysOn, 5000,
+                  `the scroll bar shows: content ${flickable.contentHeight}, view ${flickable.height}`);
+        tryVerify(() => {
+            const view = rect(content);
+            const header = rect(part("recentHeader"));
+            return header.y >= view.y - 0.5 && header.y + header.h <= view.y + view.h + 0.5;
+        }, 5000, "the Recent list header is in view");
+        // The fade only while more content is below.
+        const flick = content.contentItem;
+        flick.contentY = 0;
+        tryVerify(() => findChild(dialog, "wizardFade").visible);
+        flick.contentY = flick.contentHeight - flick.height;
+        tryVerify(() => !findChild(dialog, "wizardFade").visible);
+    }
+
+    // Plan 0051 (ADR-0382): an error inside the guide has no Dismiss and no "Help me fix this",
+    // but the Troubleshooting link of the error (a remaining LTE MCU target after a failure).
+    function test_errorInsideTheWizardHasNoDeadButtons() {
+        mouseClick(find("kindCard" + FirmwareSourceViewModel.LteFirmware));
+        mouseClick(find("lteUpdateButton"));
+        tryVerify(() => find("wizardView") !== null);
+        const dialog = find("wizardView");
+        const step = findAll(dialog, "lteUpdateStep")[0];
+        verify(step !== undefined);
+        const panel = findAll(step, "lteError")[0];
+        verify(panel.inWizard, "found from the wizard content");
+        panel.error = testSupport.defaultError("target.low_voltage");
+        panel.visible = true;
+        waitForRendering(dialog);
+        verify(!effectivelyVisible(findAll(panel, "errorPrimary")[0]), "no Dismiss");
+        verify(!effectivelyVisible(findAll(panel, "errorWizard")[0]), "no Help me fix this");
+        const link = findAll(panel, "errorLearnMore")[0];
+        verify(effectivelyVisible(link));
+        compare(link.text, "Troubleshooting ↗");
+        // Outside a wizard the panel keeps its buttons.
+        const outside = Qt.createComponent("HardwarioMonitor", "ErrorPanel").createObject(window.contentItem,
+            { error: testSupport.defaultError("probe.open_failed") });
+        verify(!outside.inWizard);
+        verify(findAll(outside, "errorPrimary")[0].visible);
+        compare(findAll(outside, "errorLearnMore")[0].text, "Learn more ↗");
+        outside.destroy();
     }
 
     // 0021 (ADR-0167): "Find firmware IDs ↗" is the documentation in the UI language.

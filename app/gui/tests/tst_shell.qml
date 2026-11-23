@@ -327,10 +327,52 @@ TestCase {
         findChild(menu, "helpShortcuts").triggered();
         menu.close();
         compare(AppViewModel.shortcutOverlayVisible, true);
-        const overlay = findChild(window, "shortcutOverlay");
-        tryVerify(() => overlay.opened);
+        compare(AppViewModel.overlayView, "shortcuts");
+        tryVerify(() => findAll(window.contentItem, "shortcutOverlay").some(effectivelyVisible));
         AppViewModel.shortcutOverlayVisible = false;
-        tryVerify(() => !overlay.visible);
+        tryVerify(() => !findAll(window.contentItem, "shortcutOverlay").some(effectivelyVisible));
+    }
+
+    // Plan 0052 (ADR-0387): a content view replaces the page area of its tab; a tab switch closes
+    // it, except the report while it collects (it stays with its tab and is shown on return);
+    // opening another view replaces an idle one; the rail closes it; Esc closes it.
+    function test_contentViewsInThePageArea() {
+        const visibleView = name => findAll(window.contentItem, name).filter(effectivelyVisible)[0] || null;
+        verify(AppViewModel.openView("shortcuts"));
+        tryVerify(() => visibleView("shortcutOverlay") !== null);
+        verify(visibleView("navRail") !== null, "the rail stays");
+        verify(visibleView("deviceTabBar") !== null, "the tab bar stays");
+        tryVerify(() => findChild(visibleView("shortcutOverlay"), "shortcutsTitle").activeFocus);
+        keyClick(Qt.Key_Escape);
+        tryCompare(AppViewModel, "overlayView", "");
+
+        // Another view replaces an idle one; a tab switch closes it.
+        verify(AppViewModel.openView("shortcuts"));
+        verify(AppViewModel.openView("join"));
+        compare(AppViewModel.overlayView, "join");
+        tryVerify(() => visibleView("remoteJoinInputDialog") !== null);
+        AppViewModel.newTab();
+        compare(AppViewModel.overlayView, "");
+        AppViewModel.currentTab = 0;
+        compare(AppViewModel.overlayView, "");
+
+        // The report collects: it stays with its tab, another view is refused.
+        AppViewModel.openView("report");
+        compare(AppViewModel.overlayView, "report");
+        if (AppViewModel.report.state === "collecting") {
+            AppViewModel.currentTab = 1;
+            compare(AppViewModel.overlayView, "");
+            verify(AppViewModel.report.open, "still collecting");
+            verify(!AppViewModel.openView("shortcuts"));
+            compare(AppViewModel.currentTab, 0, "the running view is shown");
+            compare(AppViewModel.overlayView, "report");
+        }
+        tryCompare(AppViewModel.report, "state", "ready", 30000);
+        // The rail closes an idle view and shows the page.
+        AppViewModel.showPage("console");
+        compare(AppViewModel.overlayView, "");
+        verify(!AppViewModel.report.open);
+        testSupport.resetTabs();
     }
 
     function test_toast() {
@@ -338,12 +380,11 @@ TestCase {
         tryVerify(() => findChild(window.toastLayer, "toast") !== null);
     }
 
-    // Plan 0028 (D21): toasts are drawn above an open modal dialog and never take input.
+    // Plan 0028 (D21): toasts are drawn above the views and never take input.
     function test_toastAboveTheReportDialog() {
-        const report = findChild(window, "reportDialog");
-        verify(report !== null);
         AppViewModel.report.show();
-        tryVerify(() => report.opened);
+        tryVerify(() => findAll(window.contentItem, "reportDialog").some(effectivelyVisible));
+        const report = findAll(window.contentItem, "reportDialog").filter(effectivelyVisible)[0];
         AppViewModel.copyToClipboard("summary text");
         const toasts = window.toastLayer;
         tryVerify(() => findAll(toasts, "toast").some(toast => toast.visible && toast.Accessible.name === "Copied to clipboard."));
@@ -351,7 +392,7 @@ TestCase {
         verify(toasts.parent !== window.contentItem);
         compare(toasts.enabled, false);
         AppViewModel.report.close();
-        tryVerify(() => !report.visible);
+        tryVerify(() => !findAll(window.contentItem, "reportDialog").some(effectivelyVisible));
     }
 
     name: "Shell"

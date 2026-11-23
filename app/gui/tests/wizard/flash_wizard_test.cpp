@@ -61,6 +61,7 @@ using hwio::gui::DeviceTabViewModel;
 using hwio::gui::FirmwareSourceViewModel;
 using hwio::gui::FlashWizard;
 using hwio::gui::StepKind;
+using hwio::gui::test::tabWizard;
 using hwio::gui::test::waitFor;
 
 // One probe with RTT; `chip` is the scenario's chip object (default: an nRF52840).
@@ -79,9 +80,9 @@ protected:
         qputenv("HWIO_NRFUTIL", (root() / "no-nrfutil" / "nrfutil").string().c_str());
     }
     void TearDown() override {
-        if (m_app && m_app->wizard()->isOpen()) {
-            m_app->wizard()->cancel(true);
-            (void)waitFor([this] { return !m_app->wizard()->isOpen(); });
+        if (m_app && tabWizard(*m_app).isOpen()) {
+            tabWizard(*m_app).cancel(true);
+            (void)waitFor([this] { return !tabWizard(*m_app).isOpen(); });
         }
         m_app.reset();
         qunsetenv("HWIO_NRFUTIL");
@@ -108,7 +109,7 @@ protected:
         } else {
             tab().openWizard(FlashWizard::wizardId);
         }
-        return qobject_cast<FlashWizard*>(app().wizard()->wizard());
+        return qobject_cast<FlashWizard*>(tabWizard(app()).wizard());
     }
 
     static bool reach(const FlashWizard& wizard, FlashWizard::Step step,
@@ -175,15 +176,15 @@ TEST_F(FlashWizardTest, FullFlowFromAnEmptyTab) {
     ASSERT_TRUE(tab().choosing());
     FlashWizard* wizard = open();
     ASSERT_NE(wizard, nullptr);
-    EXPECT_EQ(app().wizard()->wizardId(), QStringLiteral("flash-firmware"));
-    EXPECT_EQ(app().wizard()->title(), QStringLiteral("Flash application firmware"));
+    EXPECT_EQ(tabWizard(app()).wizardId(), QStringLiteral("flash-firmware"));
+    EXPECT_EQ(tabWizard(app()).title(), QStringLiteral("Flash application firmware"));
     // Probe: the probe picker in wizard mode; the one free probe is preselected.
     EXPECT_EQ(wizard->step(), FlashWizard::Probe);
     EXPECT_EQ(wizard->current().kind, StepKind::Embedded);
     EXPECT_EQ(wizard->current().embedded, QStringLiteral("probe-picker"));
     ASSERT_NE(wizard->picker(), nullptr);
     EXPECT_TRUE(wizard->picker()->wizardMode());
-    EXPECT_EQ(app().wizard()->embedded(), wizard->picker());
+    EXPECT_EQ(tabWizard(app()).embedded(), wizard->picker());
     ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
     EXPECT_FALSE(wizard->canBack());
     wizard->primary();
@@ -202,7 +203,7 @@ TEST_F(FlashWizardTest, FullFlowFromAnEmptyTab) {
     // Firmware: the source card; Next needs a ready file.
     ASSERT_EQ(wizard->step(), FlashWizard::Firmware);
     EXPECT_EQ(wizard->current().embedded, QStringLiteral("firmware-source"));
-    EXPECT_EQ(app().wizard()->embedded(), wizard);
+    EXPECT_EQ(tabWizard(app()).embedded(), wizard);
     EXPECT_EQ(wizard->source()->kind(), FirmwareSourceViewModel::AppFirmware);
     EXPECT_FALSE(wizard->canPrimary());
     EXPECT_TRUE(wizard->explanation().isEmpty());
@@ -223,9 +224,9 @@ TEST_F(FlashWizardTest, FullFlowFromAnEmptyTab) {
     // Flash: the tab is busy; Cancel asks.
     EXPECT_EQ(wizard->step(), FlashWizard::Flash);
     EXPECT_EQ(tab().busyPage(), QStringLiteral("flash-firmware"));
-    EXPECT_EQ(app().wizard()->busyCancelText(),
+    EXPECT_EQ(tabWizard(app()).busyCancelText(),
               QStringLiteral("Flashing is in progress. Cancel it and close the wizard?"));
-    EXPECT_FALSE(app().wizard()->canBack());
+    EXPECT_FALSE(tabWizard(app()).canBack());
     EXPECT_FALSE(wizard->phases().isEmpty());
     ASSERT_TRUE(finished(*wizard));
     // Done.
@@ -239,11 +240,11 @@ TEST_F(FlashWizardTest, FullFlowFromAnEmptyTab) {
     // The source is in the recent list (flash/recent, as on the page).
     EXPECT_GE(wizard->source()->recent()->rowCount(), 1);
     // [Open console]: the wizard closes and the tab connects with RTT.
-    QSignalSpy handOff(app().wizard(), &hwio::gui::WizardViewModel::handOff);
-    app().wizard()->primary();
+    QSignalSpy handOff(&tabWizard(app()), &hwio::gui::WizardViewModel::handOff);
+    tabWizard(app()).primary();
     ASSERT_EQ(handOff.count(), 1);
     EXPECT_EQ(handOff.at(0).at(0).toString(), QStringLiteral("open-console"));
-    EXPECT_FALSE(app().wizard()->isOpen());
+    EXPECT_FALSE(tabWizard(app()).isOpen());
     ASSERT_TRUE(waitFor([this] { return tab().state() == DeviceTabViewModel::Connected; }));
     EXPECT_EQ(tab().currentPage(), QStringLiteral("console"));
 }
@@ -262,8 +263,8 @@ TEST_F(FlashWizardTest, ATabWithAProbeSkipsTheProbeAndCableSteps) {
     EXPECT_FALSE(wizard->canBack());
     EXPECT_EQ(wizard->current().primaryText, QStringLiteral("Next"));
     // Closing without a hand-off releases the probe-only session the wizard opened.
-    app().wizard()->cancel(false);
-    EXPECT_FALSE(app().wizard()->isOpen());
+    tabWizard(app()).cancel(false);
+    EXPECT_FALSE(tabWizard(app()).isOpen());
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
     EXPECT_EQ(tab().state(), DeviceTabViewModel::Disconnected);
 }
@@ -276,7 +277,7 @@ TEST_F(FlashWizardTest, AConnectedTabKeepsItsSession) {
     FlashWizard* wizard = open();
     ASSERT_NE(wizard, nullptr);
     ASSERT_TRUE(reach(*wizard, FlashWizard::Firmware));
-    app().wizard()->cancel(false);
+    tabWizard(app()).cancel(false);
     EXPECT_EQ(tab().session(), session);
     EXPECT_EQ(tab().state(), DeviceTabViewModel::Connected);
 }
@@ -298,10 +299,10 @@ TEST_F(FlashWizardTest, TheCableOnTheLteConnectorOffersTheLteUpdate) {
     // [Update LTE firmware…]: this wizard closes and the LTE update opens on the same tab.
     wizard->action(QStringLiteral("lte-update"));
     ASSERT_TRUE(waitFor([this] {
-        return app().wizard()->isOpen() &&
-               app().wizard()->wizardId() == QStringLiteral("lte-update");
+        return tabWizard(app()).isOpen() &&
+               tabWizard(app()).wizardId() == QStringLiteral("lte-update");
     }));
-    EXPECT_EQ(app().wizard()->tab(), &tab());
+    EXPECT_EQ(tabWizard(app()).tab(), &tab());
 }
 
 TEST_F(FlashWizardTest, AProtectedMcuIsInformationWithTheFlashPageHandOff) {
@@ -316,11 +317,11 @@ TEST_F(FlashWizardTest, AProtectedMcuIsInformationWithTheFlashPageHandOff) {
               QStringLiteral("The MCU is protected. Flashing removes the protection only "
                              "through Recover, which erases everything."));
     ASSERT_EQ(step.actions.size(), 1);
-    QSignalSpy handOff(app().wizard(), &hwio::gui::WizardViewModel::handOff);
+    QSignalSpy handOff(&tabWizard(app()), &hwio::gui::WizardViewModel::handOff);
     wizard->action(QStringLiteral("open-flash-page"));
     ASSERT_EQ(handOff.count(), 1);
     EXPECT_EQ(handOff.at(0).at(0).toString(), QStringLiteral("open-flash-page:recover:app"));
-    EXPECT_FALSE(app().wizard()->isOpen());
+    EXPECT_FALSE(tabWizard(app()).isOpen());
     auto* flash =
         qobject_cast<hwio::gui::FlashViewModel*>(tab().pageViewModel(QStringLiteral("flash")));
     ASSERT_NE(flash, nullptr);
@@ -339,14 +340,14 @@ TEST_F(FlashWizardTest, StartPointsExplainTheError) {
     // A file that loads ends the explanation.
     ASSERT_TRUE(load(*wizard, hexFile()));
     EXPECT_TRUE(wizard->explanation().isEmpty());
-    app().wizard()->cancel(false);
+    tabWizard(app()).cancel(false);
 
     wizard = open(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::FirmwareInvalidImage)));
     ASSERT_TRUE(reach(*wizard, FlashWizard::Firmware));
     EXPECT_EQ(wizard->explanation(),
               QStringLiteral("This file is not CHESTER firmware. Application and LTE firmware are "
                              ".hex files; LTE bundles and modem firmware are .zip files."));
-    app().wizard()->cancel(false);
+    tabWizard(app()).cancel(false);
 
     wizard = open(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::FirmwareNotFoundInCatalog)));
     ASSERT_TRUE(reach(*wizard, FlashWizard::Firmware));
@@ -355,7 +356,7 @@ TEST_F(FlashWizardTest, StartPointsExplainTheError) {
                              "again."));
     EXPECT_TRUE(wizard->explanationOffersCatalog());
     EXPECT_FALSE(wizard->explanationOffersLteUpdate());
-    app().wizard()->cancel(false);
+    tabWizard(app()).cancel(false);
 
     // firmware.out_of_range without an LTE image on the Flash page: the 0010 text.
     wizard = open(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::FirmwareOutOfRange)));
@@ -403,8 +404,8 @@ TEST_F(FlashWizardTest, AnImageThatDoesNotFitTheApplicationMcuCannotBeFlashed) {
     EXPECT_TRUE(wizard->lteUpdateAvailable());
     wizard->updateLteFirmware();
     ASSERT_TRUE(waitFor([this] {
-        return app().wizard()->isOpen() &&
-               app().wizard()->wizardId() == QStringLiteral("lte-update");
+        return tabWizard(app()).isOpen() &&
+               tabWizard(app()).wizardId() == QStringLiteral("lte-update");
     }));
 }
 
@@ -438,10 +439,10 @@ TEST_F(FlashWizardTest, CancelDuringTheFlash) {
     ASSERT_TRUE(waitFor([&] { return wizard->progressText().contains(QStringLiteral("%")); },
                         std::chrono::seconds(30)));
     // The footer Cancel asks; Keep going changes nothing.
-    QSignalSpy asked(app().wizard(), &hwio::gui::WizardViewModel::cancelConfirmationNeeded);
-    app().wizard()->cancel(false);
+    QSignalSpy asked(&tabWizard(app()), &hwio::gui::WizardViewModel::cancelConfirmationNeeded);
+    tabWizard(app()).cancel(false);
     EXPECT_EQ(asked.count(), 1);
-    EXPECT_TRUE(app().wizard()->isOpen());
+    EXPECT_TRUE(tabWizard(app()).isOpen());
     wizard->cancelFlash();
     EXPECT_TRUE(wizard->cancelling());
     EXPECT_EQ(wizard->progressText(), QStringLiteral("Cancelling…"));
@@ -463,9 +464,9 @@ TEST_F(FlashWizardTest, CancelAndCloseWhileFlashing) {
     ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
     wizard->primary();
     ASSERT_EQ(wizard->step(), FlashWizard::Flash);
-    app().wizard()->cancel(true); // [Cancel and close]: closes when the operation has ended
-    EXPECT_TRUE(app().wizard()->closing());
-    ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }, std::chrono::seconds(60)));
+    tabWizard(app()).cancel(true); // [Cancel and close]: closes when the operation has ended
+    EXPECT_TRUE(tabWizard(app()).closing());
+    ASSERT_TRUE(waitFor([this] { return !tabWizard(app()).isOpen(); }, std::chrono::seconds(60)));
     ASSERT_TRUE(waitFor([this] { return !tab().isBusy(); }));
 }
 
@@ -503,23 +504,23 @@ TEST_F(FlashWizardTest, HelpMeFixThisOpensTheMatchingTopic) {
     wizard->primary();
     ASSERT_TRUE(finished(*wizard));
     ASSERT_EQ(wizard->stage(), FlashWizard::Failed);
-    QSignalSpy handOffError(app().wizard(), &hwio::gui::WizardViewModel::handOffError);
+    QSignalSpy handOffError(&tabWizard(app()), &hwio::gui::WizardViewModel::handOffError);
     wizard->action(QStringLiteral("help-me-fix-this"));
     ASSERT_EQ(handOffError.count(), 1);
     ASSERT_TRUE(waitFor([this] {
-        return app().wizard()->isOpen() &&
-               app().wizard()->wizardId() == QStringLiteral("troubleshooting");
+        return tabWizard(app()).isOpen() &&
+               tabWizard(app()).wizardId() == QStringLiteral("troubleshooting");
     }));
     const auto* troubleshooting =
-        qobject_cast<hwio::gui::TroubleshootingWizard*>(app().wizard()->wizard());
+        qobject_cast<hwio::gui::TroubleshootingWizard*>(tabWizard(app()).wizard());
     ASSERT_NE(troubleshooting, nullptr);
     ASSERT_NE(troubleshooting->topic(), nullptr);
     EXPECT_EQ(troubleshooting->topic()->id, "program-failed");
     EXPECT_EQ(troubleshooting->shownError().code(), QStringLiteral("target.program_failed"));
     EXPECT_FALSE(troubleshooting->shownError().detail().isEmpty()); // the detail is kept
     // ADR-0300: troubleshooting took over the wizards' session; closing it releases it.
-    app().wizard()->cancel(true);
-    ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }));
+    tabWizard(app()).cancel(true);
+    ASSERT_TRUE(waitFor([this] { return !tabWizard(app()).isOpen(); }));
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
 }
 
@@ -535,7 +536,7 @@ TEST_F(FlashWizardTest, AHandOffToSettingsReleasesTheSession) {
     ASSERT_TRUE(tab().wizardOwnsSession());
     DeviceTabViewModel* flashed = &tab(); // the Settings page becomes current
     wizard->triggerErrorAction(hwio::gui::error_action::OpenSettings);
-    EXPECT_FALSE(app().wizard()->isOpen());
+    EXPECT_FALSE(tabWizard(app()).isOpen());
     ASSERT_TRUE(waitFor([flashed] { return flashed->session() == nullptr; }));
 }
 
@@ -548,9 +549,9 @@ TEST_F(FlashWizardTest, ClosingDuringTheCableCheckCancelsIt) {
     ASSERT_NE(wizard, nullptr);
     ASSERT_EQ(wizard->step(), FlashWizard::Cable);
     ASSERT_TRUE(wizard->cableRunning());
-    EXPECT_FALSE(app().wizard()->busyCancelText().isEmpty()); // Cancel asks first
-    app().wizard()->cancel(true);
-    ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen(); }, std::chrono::seconds(20)));
+    EXPECT_FALSE(tabWizard(app()).busyCancelText().isEmpty()); // Cancel asks first
+    tabWizard(app()).cancel(true);
+    ASSERT_TRUE(waitFor([this] { return !tabWizard(app()).isOpen(); }, std::chrono::seconds(20)));
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }, std::chrono::seconds(20)));
     EXPECT_TRUE(tab().busyPage().isEmpty());
 }
@@ -610,7 +611,7 @@ TEST_F(FlashWizardTest, ClosingTheTabMidFlashCancelsAndCloses) {
     app().closeTabObject(closing.data(), true);
     EXPECT_TRUE(wizard->cancelling());
     ASSERT_TRUE(waitFor([&closing] { return closing.isNull(); }, std::chrono::seconds(30)));
-    EXPECT_FALSE(app().wizard()->isOpen());
+    EXPECT_FALSE(tabWizard(app()).isOpen());
 }
 
 } // namespace

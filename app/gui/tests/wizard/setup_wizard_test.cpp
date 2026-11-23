@@ -96,7 +96,7 @@ protected:
     }
 
     [[nodiscard]] AppViewModel& app() { return *m_app; }
-    [[nodiscard]] WizardViewModel& wizard() { return *m_app->wizard(); }
+    [[nodiscard]] WizardViewModel& wizard() { return *m_app->globalWizard(); }
     [[nodiscard]] SetupWizard* setup() { return qobject_cast<SetupWizard*>(wizard().wizard()); }
     [[nodiscard]] QString stepId() { return setup() != nullptr ? setup()->stepId() : QString(); }
     void recreateApp() {
@@ -124,7 +124,7 @@ protected:
         // Qt parent ownership: WizardViewModel::start takes it.
         auto* created =
             new SetupWizard(*m_app, std::move(opts), // NOLINT(cppcoreguidelines-owning-memory)
-                            m_app->wizard());
+                            m_app->globalWizard());
         return wizard().start(created, context, nullptr);
     }
 
@@ -312,8 +312,12 @@ TEST_F(SetupWizardTest, ConnectDeviceHandsOffToTheConnectWizard) {
     EXPECT_EQ(done.at(0).toMap().value(QStringLiteral("text")).toString(),
               QStringLiteral("Connect a device"));
     wizard().action(QStringLiteral("connect-device"));
-    ASSERT_TRUE(waitFor([&] { return wizard().wizardId() == QStringLiteral("connect-device"); }));
-    EXPECT_EQ(wizard().tab(), app().currentTabViewModel());
+    // Plan 0056: the setup wizard (global) closes; the Connect wizard opens on the current tab.
+    ASSERT_TRUE(waitFor([&] {
+        return hwio::gui::test::tabWizard(app()).wizardId() == QStringLiteral("connect-device");
+    }));
+    EXPECT_FALSE(wizard().isOpen());
+    EXPECT_EQ(hwio::gui::test::tabWizard(app()).tab(), app().currentTabViewModel());
 }
 
 TEST_F(SetupWizardTest, DontShowAtStartAndLanguage) {

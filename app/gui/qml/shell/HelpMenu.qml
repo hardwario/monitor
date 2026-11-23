@@ -58,7 +58,7 @@ Menu {
     HelpItem {
         objectName: "helpReport"
         text: qsTr("Create diagnostic report…")
-        onTriggered: AppViewModel.report.show()
+        onTriggered: AppViewModel.openView("report")
     }
 
     HelpItem {

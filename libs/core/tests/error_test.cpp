@@ -378,6 +378,32 @@ TEST(MakeError, OutputClosedIsCancelledWithItsOwnMessage) {
     EXPECT_EQ(error.detail, "the standard output was closed");
 }
 
+// Plan 0051 (ADR-0383): target.low_voltage and the guided suggestion of the LTE update.
+TEST(MakeError, LowVoltageAndGuidedSuggestion) {
+    EXPECT_EQ(hwio::idOf(ErrorCode::TargetLowVoltage), "target.low_voltage");
+    EXPECT_EQ(hwio::categoryOf(ErrorCode::TargetLowVoltage), ErrorCategory::Target);
+    const hwio::Error low = hwio::makeError(ErrorCode::TargetLowVoltage, "LOW_VOLTAGE");
+    EXPECT_EQ(low.message, "The LTE MCU reports too low supply voltage.");
+    EXPECT_EQ(low.cause, "The CHESTER is not powered enough (battery, power supply) or the J-Link "
+                         "cable does not connect the supply reference.");
+    EXPECT_EQ(low.suggestion, "Check the power supply or batteries of the CHESTER and the J-Link "
+                              "cable on the connector, then try again.");
+    const std::string guided = "Check the power supply of the CHESTER and the J-Link cable on the "
+                               "LTE connector, then click Try again.";
+    for (const ErrorCode code :
+         {ErrorCode::TargetLowVoltage, ErrorCode::FirmwareModemUpdateFailed}) {
+        const hwio::Error plain = hwio::makeError(code, "detail");
+        const hwio::Error error = hwio::withGuidedLteSuggestion(plain);
+        EXPECT_EQ(error.suggestion, guided);
+        EXPECT_EQ(error.message, plain.message);
+        EXPECT_EQ(error.cause, plain.cause);
+        EXPECT_EQ(error.detail, "detail");
+        EXPECT_EQ(error.suggestion.find("guided"), std::string::npos);
+    }
+    const hwio::Error other = hwio::makeError(ErrorCode::TargetProgramFailed);
+    EXPECT_EQ(hwio::withGuidedLteSuggestion(other), other);
+}
+
 TEST(Fail, FullFormKeepsAllTexts) {
     const hwio::Status status =
         hwio::fail(ErrorCode::IoReadFailed, "message", "cause", "suggestion", "detail");

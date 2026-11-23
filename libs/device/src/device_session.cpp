@@ -559,7 +559,8 @@ Result<OperationId> DeviceSession::recover(std::string_view targetId) {
 }
 
 Result<OperationId> DeviceSession::updateModem(std::string_view targetId,
-                                               std::filesystem::path modemZip) {
+                                               std::filesystem::path modemZip,
+                                               FlashOptions options) {
     if (modemZip.empty()) {
         return std::unexpected(invalidOption(
             QCoreApplication::translate("hwio::device", "No modem firmware file was given."), {}));
@@ -567,6 +568,7 @@ Result<OperationId> DeviceSession::updateModem(std::string_view targetId,
     detail::OperationCommand command;
     command.kind = OperationKind::Modem;
     command.modemZip = std::move(modemZip);
+    command.flash.guided = options.guided; // ADR-0383
     if (m_internals->nrfUtilProvider) {
         command.nrfUtil = m_internals->nrfUtilProvider(); // ADR-0114: at request time
     }
@@ -713,7 +715,7 @@ Result<OperationId> DeviceSession::writeFlash(std::string_view targetId, std::ui
     detail::OperationCommand command;
     command.kind = OperationKind::WriteFlash;
     command.image = std::make_shared<const firmware::FirmwareImage>(std::move(*image));
-    command.flash = FlashOptions{.halt = false, .allowUicr = allowUicr};
+    command.flash = FlashOptions{.halt = false, .allowUicr = allowUicr, .guided = false};
     return startOperation(std::move(command), targetId);
 }
 

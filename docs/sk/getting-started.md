@@ -97,7 +97,7 @@ Zmeny sa uplatnia okamžite. V slovenskom rozhraní sa režimy volajú **Základ
 **Mode** (režim) určuje, koľko toho nastavenia ukazujú. Pri prvom spustení (a raz po aktualizácii z verzie 2.0.0-rc.3
 alebo staršej) sa aplikácia opýta **How do you want to use HARDWARIO Monitor?**: vyberte režim a kliknite na
 **Continue**. Predvybraný je **Advanced**; ak ste v staršej verzii mali zapnutú voľbu **Show expert maintenance
-actions**, je to **Expert**. Zatvorením dialógu zostane predvybraný režim. Zmeniť ho môžete kedykoľvek v **Settings ›
+actions**, je to **Expert**. Zatvorením otázky zostane predvybraný režim. Zmeniť ho môžete kedykoľvek v **Settings ›
 General › Mode**.
 
 | Zobrazené | Basic | Advanced | Expert |
@@ -128,6 +128,17 @@ zobrazí sa počas tejto návštevy s poznámkou "Shown because it was needed.";
 - **Create diagnostic report…**: súbor zip pre podporu HARDWARIO ([Súkromie](privacy.md#diagnostická-správa)).
 - **Documentation ↗**: tieto stránky na GitHube, pre nainštalovanú verziu aplikácie a v jazyku aplikácie (anglicky,
   ak stránka nie je preložená).
+
+<a id="sprievodcovia-a-ďalšie-zobrazenia"></a>
+### Sprievodcovia a ďalšie zobrazenia
+
+Sprievodcovia (napríklad **Update LTE firmware…**), diagnostická správa, klávesové skratky, aktualizácia firmvéru
+J-Linku, **Join support session…** a **Share with support…** sa otvoria v ploche stránky karty vedľa lišty; karty a
+lišta zostanú. **×** alebo <kbd>Esc</kbd> ich zatvorí a vráti sa predchádzajúca stránka. Prepnutie na inú kartu ich
+zatvorí tiež, okrem času, keď pracujú (zber diagnostickej správy, zápis firmvéru J-Linku).
+
+Kým sprievodca beží, môžete otvoriť ďalšie stránky karty, napríklad konzolu: **Wizard** (sprievodca) hore v lište (a
+malý odznak na karte zariadenia) vráti sprievodcu tam, kde bol. Každá karta zariadenia môže mať vlastného sprievodcu.
 
 Keď niečo zlyhá, aplikácia ukáže, čo sa stalo, pravdepodobnú príčinu (**Probably:**) a čo robiť (**What to do:**).
 **Details** zobrazí kód chyby; [Riešenie problémov](troubleshooting.md) uvádza všetky kódy.

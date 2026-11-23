@@ -2,6 +2,7 @@
 
 #include "error_info.h"
 #include "gui_log.h"
+#include "viewmodels/device_tab_view_model.h"
 #include "wizard.h"
 #include "wizard/wizard_registry.h"
 #include "wizard/wizard_view_model.h"
@@ -16,9 +17,9 @@
 
 namespace hwio::gui {
 
-WizardLauncher::WizardLauncher(const WizardRegistry& registry, WizardViewModel& wizard,
+WizardLauncher::WizardLauncher(const WizardRegistry& registry, WizardViewModel& global,
                                std::function<DeviceTabViewModel*(int)> tabAt, QObject* parent)
-    : QObject(parent), m_registry(registry), m_wizard(wizard), m_tabAt(std::move(tabAt)) {}
+    : QObject(parent), m_registry(registry), m_global(global), m_tabAt(std::move(tabAt)) {}
 
 bool WizardLauncher::canOpen(const QString& wizardId) const {
     return !wizardId.isEmpty() && m_registry.has(wizardId);
@@ -44,17 +45,21 @@ bool WizardLauncher::launch(const QString& wizardId, const ErrorInfo& context,
         qCInfo(lcGui).noquote() << "Wizard" << wizardId << "is not registered";
         return false;
     }
-    if (m_wizard.isOpen()) {
-        emit m_wizard.raiseRequested(); // ADR-0066: one at a time
-        return false;
-    }
     if (descriptor->perTab && tab == nullptr) {
         qCInfo(lcGui).noquote() << "Wizard" << wizardId << "needs a tab";
         return false;
     }
+    // Plan 0052 (ADR-0386): one wizard per tab, one global wizard.
+    WizardViewModel& instance = descriptor->perTab ? *tab->wizard() : m_global;
+    if (instance.isOpen()) {
+        qCInfo(lcGui).noquote() << "Wizard" << wizardId << "refused:" << instance.wizardId()
+                                << "is open";
+        emit instance.raiseRequested(); // the open one is shown
+        return false;
+    }
     // Ownership: the factory creates the wizard with the WizardViewModel as Qt parent.
-    Wizard* wizard = descriptor->create(&m_wizard);
-    return m_wizard.start(wizard, context, descriptor->perTab ? tab : nullptr);
+    Wizard* wizard = descriptor->create(&instance);
+    return instance.start(wizard, context, descriptor->perTab ? tab : nullptr);
 }
 
 } // namespace hwio::gui

@@ -13,7 +13,7 @@ Other languages: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-
 ## Share your console
 
 1. Connect the device (J-Link or Bluetooth) and open the **Console** page.
-2. Click **Share with support…**. The dialog explains what support can do. Click **Start sharing**.
+2. Click **Share with support…**. A page explains what support can do. Click **Start sharing**.
 3. A banner shows **Shared with support — code 482 913**. Read the code to HARDWARIO Support. **Copy link** copies a
    link with the code.
 4. When someone joins, HARDWARIO Monitor asks: *Someone joined session 482 913. Allow them to send commands to the

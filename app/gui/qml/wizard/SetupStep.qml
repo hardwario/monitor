@@ -99,7 +99,7 @@ Item {
             width: column.width
             visible: step.vm !== null && step.vm.commands.length > 0
             commands: step.vm !== null ? step.vm.commands : []
-            onCopyRequested: text => AppViewModel.wizard.copyText(text)
+            onCopyRequested: text => AppViewModel.globalWizard.copyText(text)
         }
 
         Flow {
@@ -119,7 +119,7 @@ Item {
                         if (modelData.file)
                             fileDialog.open();
                         else
-                            AppViewModel.wizard.action(modelData.id);
+                            AppViewModel.globalWizard.action(modelData.id);
                     }
                 }
             }

@@ -122,6 +122,7 @@ FlashCard {
                 visible: card.source ? card.source.designatedError.valid : false
                 error: card.source ? card.source.designatedError : card.noError
                 primaryAction: ErrorAction.Retry
+                keepPrimaryInWizard: true // a working Retry also in the LTE update wizard
                 onActionTriggered: card.source.retryDesignated()
             }
         }
@@ -375,6 +376,7 @@ FlashCard {
         Layout.fillWidth: true
         visible: card.source ? card.source.error.valid : false
         error: card.source ? card.source.error : card.noError
+        keepPrimaryInWizard: true // Choose another file / Dismiss work in a wizard, too
         onActionTriggered: action => action === ErrorAction.ChooseFile ? card.browseRequested()
                                                                         : card.source.clear()
     }
@@ -402,13 +404,76 @@ FlashCard {
         }
     }
 
+    // Plan 0051 (ADR-0381): the application copies of the guided LTE update (newest first), loaded
+    // like a file; the menu lists all of them; Open backups folder.
+    RowLayout {
+        objectName: "backupRow"
+        Layout.fillWidth: true
+        visible: card.source ? card.ownFile && card.source.kind === FirmwareSourceViewModel.AppFirmware
+                               && card.source.backups.length > 0 : false
+        spacing: Theme.spacingS
+        onVisibleChanged: if (visible && card.source) card.source.refreshBackups()
+        Component.onCompleted: if (card.source) card.source.refreshBackups()
+
+        HButton {
+            objectName: "backupLatest"
+            Layout.fillWidth: true
+            Layout.minimumWidth: 0
+            kind: "ghost"
+            iconName: "history"
+            text: card.source && card.source.backups.length > 0 ? card.source.backups[0].text : ""
+            onClicked: card.source.loadBackup(0)
+        }
+
+        HToolButton {
+            objectName: "backupMenuButton"
+            visible: card.source ? card.source.backups.length > 1 : false
+            iconName: "expand"
+            text: qsTr("All application copies")
+            display: AbstractButton.IconOnly
+            onClicked: backupMenu.popup()
+
+            Menu {
+                id: backupMenu
+
+                objectName: "backupMenu"
+
+                Instantiator {
+                    model: card.source ? card.source.backups : []
+
+                    delegate: MenuItem {
+                        required property int index
+                        required property var modelData
+
+                        text: modelData.text
+                        onTriggered: card.source.loadBackup(index)
+                    }
+
+                    onObjectAdded: (index, object) => backupMenu.insertItem(index, object)
+                    onObjectRemoved: (index, object) => backupMenu.removeItem(object)
+                }
+            }
+        }
+
+        HButton {
+            objectName: "openBackupsFolder"
+            kind: "ghost"
+            text: qsTr("Open backups folder")
+            onClicked: card.source.openBackupsFolder()
+        }
+    }
+
     // Recent sources of this kind.
     ColumnLayout {
         Layout.fillWidth: true
         visible: card.source ? card.ownFile && card.source.recent.count > 0 : false
         spacing: 0
+        // ADR-0385: names of older catalog entries are looked up while the list is shown.
+        onVisibleChanged: if (visible && card.source) card.source.resolveRecentNames()
+        Component.onCompleted: if (visible && card.source) card.source.resolveRecentNames()
 
         Label {
+            objectName: "recentHeader"
             text: qsTr("Recent")
             font: Theme.fontUiSmall
             color: Theme.textMuted

@@ -15,7 +15,7 @@ z webového Terminalu (len konzola) alebo z HARDWARIO Monitor.
 ## Zdieľanie konzoly
 
 1. Pripojte zariadenie (J-Link alebo Bluetooth) a otvorte stránku **Konzola**.
-2. Kliknite na **Zdieľať s podporou…**. Dialóg vysvetlí, čo môže podpora robiť. Kliknite na **Začať zdieľanie**.
+2. Kliknite na **Zdieľať s podporou…**. Stránka vysvetlí, čo môže podpora robiť. Kliknite na **Začať zdieľanie**.
 3. Lišta zobrazí **Zdieľané s podporou — kód 482 913**. Prečítajte kód podpore HARDWARIO. **Kopírovať odkaz**
    skopíruje odkaz s kódom.
 4. Keď sa niekto pripojí, HARDWARIO Monitor sa opýta: *K relácii 482 913 sa niekto pripojil. Povoliť mu posielať

@@ -26,6 +26,7 @@
 #include <array>
 #include <cstddef>
 #include <optional>
+#include <utility>
 #include <vector>
 
 namespace hwio::gui::test {
@@ -38,8 +39,8 @@ const std::array<QString, 6> stepIds{QStringLiteral("info"),     QStringLiteral(
 
 } // namespace
 
-TestWizard::TestWizard(AppViewModel& app, QObject* parent)
-    : Wizard(parent), m_app(&app),
+TestWizard::TestWizard(AppViewModel& app, QObject* parent, QString id)
+    : Wizard(parent), m_app(&app), m_id(std::move(id)),
       // Qt parent ownership: the check list and the embedded view model are children.
       m_checks(new CheckListModel(this)),        // NOLINT(cppcoreguidelines-owning-memory)
       m_embedded(new TestWizardEmbedded(this)) { // NOLINT(cppcoreguidelines-owning-memory)
@@ -276,6 +277,17 @@ void registerTestWizard(AppViewModel& app, const QUrl& embeddedQml) {
             return new TestWizard(app, parent); // NOLINT(cppcoreguidelines-owning-memory)
         }});
     (void)app.wizardRegistry().addEmbedded(QStringLiteral("test-embedded"), embeddedQml);
+}
+
+void registerGlobalTestWizard(AppViewModel& app) {
+    (void)app.wizardRegistry().add(
+        WizardDescriptor{.id = WizardId::FirstRunSetup,
+                         .perTab = false,
+                         // Qt parent ownership: the WizardViewModel.
+                         .create = [&app](QObject* parent) -> Wizard* {
+                             // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
+                             return new TestWizard(app, parent, QStringLiteral("first-run-setup"));
+                         }});
 }
 
 } // namespace hwio::gui::test

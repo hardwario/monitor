@@ -13,6 +13,7 @@
 #include <QDateTime>
 #include <QDir>
 #include <QFileDevice>
+#include <QFileInfo>
 #include <QIODevice>
 #include <QLoggingCategory>
 #include <QSaveFile>
@@ -32,6 +33,7 @@
 #include <expected>
 #include <filesystem>
 #include <format>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -156,6 +158,50 @@ Result<fs::path> ApplicationBackup::save(const fs::path& directory, std::string_
     removeOldBackups(dir);
     return fs::path(path.toStdU16String());
 }
+
+std::vector<ApplicationBackup::Entry>
+ApplicationBackup::list(const fs::path& directory, const std::optional<std::string>& serial) {
+    std::vector<Entry> result;
+    const QDir dir(QString::fromStdU16String(directory.u16string()));
+    if (!dir.exists()) {
+        return result;
+    }
+    const std::optional<std::string> wanted =
+        serial ? std::optional<std::string>(safeSerial(*serial)) : std::nullopt;
+    constexpr qsizetype stampLength = 15; // yyyyMMdd-HHmmss
+    const QFileInfoList files =
+        dir.entryInfoList({QStringLiteral("*.hex")}, QDir::Files, QDir::Name);
+    for (const QFileInfo& info : files) {
+        const QString stem = info.completeBaseName();
+        if (stem.size() < stampLength + 2 || stem.at(stem.size() - stampLength - 1) != u'-') {
+            continue;
+        }
+        const QDateTime stamp =
+            QDateTime::fromString(stem.right(stampLength), QStringLiteral("yyyyMMdd-HHmmss"));
+        if (!stamp.isValid()) {
+            continue;
+        }
+        const std::string fileSerial = stem.left(stem.size() - stampLength - 1).toStdString();
+        if (wanted && fileSerial != *wanted) {
+            continue;
+        }
+        const QDateTime utc(stamp.date(), stamp.time(), QTimeZone::UTC);
+        result.push_back(
+            Entry{.path = fs::path(info.absoluteFilePath().toStdU16String()),
+                  .serial = fileSerial,
+                  .time = std::chrono::system_clock::time_point(
+                      std::chrono::milliseconds(utc.toMSecsSinceEpoch())),
+                  .size = static_cast<std::uintmax_t>(std::max<qint64>(info.size(), 0))});
+    }
+    std::ranges::stable_sort(result,
+                             [](const Entry& a, const Entry& b) { return a.time > b.time; });
+    if (result.size() > keepFiles) {
+        result.resize(keepFiles);
+    }
+    return result;
+}
+
+std::string ApplicationBackup::fileSerial(std::string_view serial) { return safeSerial(serial); }
 
 fs::path ApplicationBackup::defaultDirectory() {
     const QString base = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);

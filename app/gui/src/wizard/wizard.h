@@ -3,10 +3,10 @@
 // The wizard contract (plan/features/0007 § GUI wizard contract, ADR-0066, ADR-0067). Wizards
 // 0008-0010 implement it: one Wizard subclass per wizard, registered with a WizardDescriptor in the
 // WizardRegistry. A Wizard is a C++ step machine; QML renders the current step by its kind with a
-// fixed component (WizardDialog). Texts are translated in C++ (ADR-0027); no logic in QML.
+// fixed component (WizardView). Texts are translated in C++ (ADR-0027); no logic in QML.
 //
 // Ownership: a Wizard is created by its descriptor's factory with the WizardViewModel as Qt parent
-// and deleted (deleteLater) when the dialog closes. GUI thread only.
+// and deleted (deleteLater) when the wizard closes. GUI thread only.
 
 #include "hwio/core/error.h"
 #include "viewmodels/error_info.h"
@@ -51,7 +51,7 @@ struct WizardStep {
     StepKind kind = StepKind::Info;
     QString title;   // short, shown in the step list (translated)
     QString heading; // translated
-    // Translated; simple rich text (<b>, <br>) allowed. WizardDialog.qml shows it as StyledText,
+    // Translated; simple rich text (<b>, <br>) allowed. WizardView.qml shows it as StyledText,
     // the only rich-text label of the app (ADR-0184): `body` must be a constant translated string,
     // never built with .arg() from error details, device names, paths or other runtime data.
     QString body;
@@ -71,7 +71,7 @@ struct WizardStep {
     bool showInStepList = true;
     // Additions to the plan's sketch (documented in plan 0007 Implementation notes):
     QString linkText; // Info: an optional link below the body
-    QString linkUrl;  // opened by WizardDialog: a constant URL, never runtime data (ADR-0184)
+    QString linkUrl;  // opened by WizardView: a constant URL, never runtime data (ADR-0184)
     // Done (and others): extra buttons [{id, text, enabled}] -> Wizard::action; `enabled` is
     // optional (default true; plan 0008: a disabled button that names why, ADR-0291).
     QVariantList actions;
@@ -93,7 +93,7 @@ public:
     //
     // The tab is not owned and may close while the wizard is open. A wizard keeps it only as
     // QPointer<DeviceTabViewModel> (never a raw pointer or reference) and checks it before every
-    // use. When the tab closes, WizardViewModel calls cancelOperation() and closes the dialog
+    // use. When the tab closes, WizardViewModel calls cancelOperation() and closes the wizard
     // before the tab shuts down its session (review V2); the wizard must not start anything on
     // the tab after that. The test wizard (app/gui/tests/support/test_wizard.*) shows the pattern.
     virtual void start(const ErrorInfo& context, DeviceTabViewModel* tab) = 0;
@@ -111,6 +111,10 @@ public:
     [[nodiscard]] virtual bool canCancel() const { return true; }
     [[nodiscard]] virtual QString cancelAcceptText() const { return {}; }
     [[nodiscard]] virtual QString cancelRejectText() const { return {}; }
+    // Plan 0051 (ADR-0381): a third button of the Cancel confirmation ("" = none) and its action
+    // (e.g. the LTE update's "Write back": the wizard stays open and ends by itself).
+    [[nodiscard]] virtual QString cancelAlternativeText() const { return {}; }
+    virtual void cancelAlternative() {}
     virtual void cancelOperation() {}
     [[nodiscard]] virtual CheckListModel* checks() { return nullptr; }     // Checks steps
     [[nodiscard]] virtual QObject* embeddedViewModel() { return nullptr; } // Embedded steps
@@ -122,7 +126,7 @@ public:
 
 signals:
     void changed();                // step, buttons or checks changed
-    void finished(bool completed); // the dialog closes
+    void finished(bool completed); // the wizard closes
     // "open-console", "open-flash-page", "open-settings:<id>"; plan 0033: the target.protected
     // topic hands off "open-flash-page:recover:<target>" ([Recover…] shown once, ADR-0236).
     void handOff(const QString& action);

@@ -6,6 +6,7 @@
 // handle's focus ring (K11), a command that was not sent stays in the input (K9); Down keeps the
 // typed text when not walking the history; plan 0021 phase 2: device commands learned on connect
 // or lazily (fake Zephyr shell).
+// Plan 0051: the bottom bars line up (ADR-0378); the log toolbar is one row (ADR-0379).
 // Lines are added to the tab's log by testSupport (no device needed).
 import QtQuick
 import QtTest
@@ -193,7 +194,9 @@ TestCase {
         keySequence("Ctrl+F");
         compare(bar.mode, "search");
         compare(field.text, "upl");
-        one("filterChip"); // the active filter stays visible in Search mode
+        // ADR-0379: the active filter stays visible in Search mode as the ✕ and the field's suffix.
+        one("clearFilterIcon");
+        compare(one("filterCount").text, "Filter: ctr");
 
         // Esc clears the search and returns to the log; a second Esc clears the filter.
         keyClick(Qt.Key_Escape);
@@ -778,6 +781,77 @@ TestCase {
         // The bottom bar of the log and the command input stay inside the window.
         checkInside([one("logSearchBar"), one("commandInput"), one("sendButton")]);
         checkInside(findAll(one("logSearchBar"), "levelError").concat(findAll(one("logSearchBar"), "searchField")));
+
+        // ADR-0379: one row; the height does not change with the filter, in either mode.
+        const bar = one("logSearchBar");
+        const height = bar.height;
+        compare(height, Theme.toolbarHeight);
+        const rowItems = () => ["searchModeButton", "searchField", "levelDebug", "levelHexdump", "clearFilterIcon"]
+                                   .map(name => findAll(bar, name)[0]).filter(effectivelyVisible);
+        const check = () => {
+            compare(bar.height, height);
+            const items = rowItems();
+            checkInside(items);
+            checkNoOverlap(items);
+            for (const item of items) {
+                const r = rect(item);
+                const b = rect(bar);
+                verify(r.y >= b.y && r.y + r.h <= b.y + b.h + 0.5, `${r.name} is outside the bar`);
+            }
+        };
+        verify(effectivelyVisible(findAll(bar, "clearFilterIcon")[0]));
+        check();
+        mouseClick(findAll(bar, "levelDebug")[0]);
+        waitForRendering(window.contentItem);
+        check();
+        mouseClick(findAll(bar, "filterModeButton")[0]);
+        waitForRendering(window.contentItem);
+        verify(effectivelyVisible(findAll(bar, "filterCount")[0]));
+        check();
+        mouseClick(findAll(bar, "levelDebug")[0]);
+        vm().log.filterText = "";
+        waitForRendering(window.contentItem);
+        verify(!effectivelyVisible(findAll(bar, "clearFilterIcon")[0])); // the default filter: no ✕
+        check();
+        mouseClick(findAll(bar, "searchModeButton")[0]);
+
+        // The widest row: Search mode with a match count, ↑ ↓ ×, and an active filter (✕).
+        vm().log.filterText = "ctr";
+        vm().log.findText = "upl";
+        waitForRendering(window.contentItem);
+        verify(effectivelyVisible(findAll(bar, "clearSearch")[0]));
+        const wide = ["searchModeButton", "searchField", "matchCount", "nextMatch", "clearSearch",
+                      "levelDebug", "levelHexdump", "clearFilterIcon"]
+                         .map(name => findAll(bar, name)[0]).filter(effectivelyVisible);
+        compare(bar.height, height);
+        checkNoOverlap(wide);
+        const b = rect(bar);
+        for (const item of wide) {
+            const r = rect(item);
+            verify(r.x >= b.x - 0.5 && r.x + r.w <= b.x + b.w + 0.5, `${r.name} is outside the bar: x=${r.x} w=${r.w}, bar x=${b.x} w=${b.w}`);
+        }
+        vm().log.findText = "";
+    }
+
+    // ADR-0378: side by side, the command input and the log search bar have the same height and top
+    // edge; the shell search bar has the same height.
+    function test_bottomBarsAligned() {
+        addLogLines();
+        window.width = 1280;
+        waitForRendering(window.contentItem);
+        verify(!vm().stackedLayout);
+        const input = rect(one("shellInput"));
+        const log = rect(one("logSearchBar"));
+        compare(input.h, Theme.toolbarHeight);
+        compare(log.h, input.h);
+        compare(log.y, input.y);
+        const field = rect(one("commandInput"));
+        const search = rect(findAll(one("logSearchBar"), "searchField")[0]);
+        verify(Math.abs(field.y + field.h / 2 - (search.y + search.h / 2)) <= 1, "the fields are centred alike");
+        shown("consoleList").filter(l => l.model === vm().shell)[0].forceActiveFocus();
+        keySequence("Ctrl+F");
+        compare(rect(one("shellSearchBar")).h, input.h);
+        keyClick(Qt.Key_Escape);
     }
 
     // Plan 0028 (ADR-0201): Save view opens in the remembered folder (else Documents) with a

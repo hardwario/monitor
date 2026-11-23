@@ -1,7 +1,8 @@
-// The wizard dialog with the test wizard (plan/features/0007, C2-C5): every step kind in light and
-// dark, keyboard (Enter, Esc, focus on the heading), busy cancel confirmation, the 960 x 600 window
-// in Czech (geometry, compact step list), the illustration slots and the report dialog. Plan 0035
-// (A3, ADR-0252): the Embedded `probe-picker` step with the test wizard (light/dark, in-use rows,
+// The wizard view with the test wizard (plan/features/0007, C2-C5; plan 0052, ADR-0386): every step
+// kind in light and dark, keyboard (Enter, Esc, focus on the heading), busy cancel confirmation, the
+// rail entry and the tab badge, two tabs with wizards, the global wizard, the 960 x 600 window in
+// Czech (geometry, compact step list), the illustration slots and the report. Plan 0035 (A3,
+// ADR-0252): the Embedded `probe-picker` step with the test wizard (light/dark, in-use rows,
 // keyboard-only selection).
 import QtQuick
 import QtQuick.Controls
@@ -19,8 +20,7 @@ TestCase {
     }
 
     function cleanupTestCase() {
-        if (AppViewModel.wizard.open)
-            AppViewModel.wizard.cancel(true);
+        testSupport.resetTabs();
         if (window)
             window.destroy();
         wait(50);
@@ -36,28 +36,68 @@ TestCase {
     }
 
     function cleanup() {
-        if (AppViewModel.wizard.open) {
-            const wizard = testSupport.openWizard();
-            if (wizard && wizard.busy)
-                wizard.finishOperation();
-            AppViewModel.wizard.cancel(true);
+        for (let i = 0; i < AppViewModel.tabs.count; ++i) {
+            const tab = AppViewModel.tabs.at(i);
+            if (tab && tab.wizard.open) {
+                const wizard = testSupport.tabWizard(i);
+                if (wizard && wizard.busy)
+                    wizard.finishOperation();
+                tab.wizard.cancel(true);
+            }
         }
-        tryVerify(() => !AppViewModel.wizard.open);
+        if (AppViewModel.globalWizard.open)
+            AppViewModel.globalWizard.cancel(true);
+        tryVerify(() => !AppViewModel.currentTabViewModel || !AppViewModel.currentTabViewModel.wizard.open);
         if (AppViewModel.report.open)
             AppViewModel.report.close();
     }
 
-    function dialog() {
-        return findChild(window, "wizardDialog");
+    function findAll(parent, name) {
+        let result = [];
+        const children = parent && parent.children ? parent.children : [];
+        for (let i = 0; i < children.length; ++i) {
+            if (children[i].objectName === name)
+                result.push(children[i]);
+            result = result.concat(findAll(children[i], name));
+        }
+        return result;
+    }
+
+    function effectivelyVisible(item) {
+        for (let current = item; current; current = current.parent) {
+            if (!current.visible)
+                return false;
+        }
+        return true;
+    }
+
+    function find(name) {
+        const items = findAll(window.contentItem, name).filter(effectivelyVisible);
+        return items.length > 0 ? items[0] : null;
+    }
+
+    function rect(item) {
+        const point = item.mapToItem(window.contentItem, 0, 0);
+        return { x: point.x, y: point.y, w: item.width, h: item.height };
+    }
+
+    // Plan 0052: the wizard view shown now (of the current tab), or null.
+    function view() {
+        return find("wizardView");
     }
 
     function part(name) {
-        return findChild(dialog(), name);
+        const items = findAll(view(), name).filter(effectivelyVisible);
+        return items.length > 0 ? items[0] : null;
+    }
+
+    function wizard() {
+        return AppViewModel.currentTabViewModel.wizard;
     }
 
     function openWizard() {
         verify(AppViewModel.launcher.start("connect-device", 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
     }
 
     function test_everyStepKind_data() {
@@ -67,83 +107,159 @@ TestCase {
     function test_everyStepKind(data) {
         AppViewModel.theme = data.theme;
         openWizard();
+        // Plan 0052: the view replaces the page area; the rail and the tab show the wizard.
+        verify(find("railWizard") !== null);
+        verify(find("tabWizardBadge") !== null);
+        compare(AppViewModel.currentTabViewModel.currentPage, "wizard");
         // Info: illustration, heading (focused), body, link; no Back on the first step.
         compare(part("wizardTitle").text, "Test wizard");
         compare(part("wizardHeading").text, "Connect the J-Link");
         tryVerify(() => part("wizardHeading").activeFocus);
-        verify(part("wizardIllustration").visible);
-        verify(part("wizardLink").visible);
-        verify(!part("wizardBack").visible);
+        verify(part("wizardIllustration") !== null);
+        verify(part("wizardLink") !== null);
+        verify(part("wizardBack") === null);
         compare(part("wizardPrimary").text, "Next");
-        verify(part("wizardStepList").visible);
-        compare(dialog().title, "Test wizard");
+        verify(part("wizardStepList") !== null);
+        compare(view().title, "Test wizard");
 
         // Enter = the default button.
         keyClick(Qt.Key_Return);
         tryCompare(part("wizardHeading"), "text", "Which MCU do you want to connect?");
-        verify(part("wizardBack").visible);
-        verify(part("wizardChoices").visible);
-        verify(!part("wizardIllustration").visible);
+        verify(part("wizardBack") !== null);
+        verify(part("wizardChoices") !== null);
+        verify(part("wizardIllustration") === null);
 
-        AppViewModel.wizard.primary();
+        wizard().primary();
         // Checks: one failed row with cause and suggestion.
-        verify(part("wizardChecks").visible);
+        verify(part("wizardChecks") !== null);
         compare(part("wizardPrimary").text, "Check again");
         tryVerify(() => findChild(part("wizardChecks"), "checkCause") !== null);
         mouseClick(part("wizardPrimary"));
         compare(part("wizardPrimary").text, "Next");
 
-        AppViewModel.wizard.primary();
-        verify(part("wizardCommands").visible);
+        wizard().primary();
+        verify(part("wizardCommands") !== null);
         verify(findChild(part("wizardCommands"), "commandCopy") !== null);
 
-        AppViewModel.wizard.primary();
-        tryVerify(() => findChild(dialog().contentItem, "testEmbedded") !== null);
-        compare(findChild(dialog().contentItem, "testEmbedded").text, "Embedded control");
+        wizard().primary();
+        tryVerify(() => part("testEmbedded") !== null);
+        compare(part("testEmbedded").text, "Embedded control");
         compare(part("wizardPrimary").text, "Flash");
 
-        AppViewModel.wizard.primary(); // the operation starts
-        const wizard = testSupport.openWizard();
-        verify(wizard.busy);
-        verify(!part("wizardBack").visible);
+        wizard().primary(); // the operation starts
+        const test = testSupport.openWizard();
+        verify(test.busy);
+        verify(part("wizardBack") === null);
         compare(AppViewModel.currentTabViewModel.busyPage, "connect-device");
-        wizard.finishOperation();
+        tryVerify(() => findChild(find("railWizard"), "railBusy").visible);
+        test.finishOperation();
         compare(part("wizardHeading").text, "Connected");
         compare(part("wizardCancel").text, "Close");
-        verify(findChild(dialog().footer, "wizardAction") !== null);
+        verify(findChild(part("wizardFooter"), "wizardAction") !== null);
         compare(part("wizardPrimary").text, "Finish");
         mouseClick(part("wizardPrimary"));
-        tryVerify(() => !dialog().visible);
+        tryVerify(() => view() === null);
+        verify(find("railWizard") === null);
+        verify(find("tabWizardBadge") === null);
+        verify(AppViewModel.currentTabViewModel.currentPage !== "wizard");
     }
 
     function test_escapeWhileBusyAsks() {
         openWizard();
-        const wizard = testSupport.openWizard();
-        wizard.cancelFinishesImmediately = false;
-        wizard.goTo(4);
-        AppViewModel.wizard.primary();
-        verify(wizard.busy);
+        const test = testSupport.openWizard();
+        test.cancelFinishesImmediately = false;
+        test.goTo(4);
+        wizard().primary();
+        verify(test.busy);
         part("wizardHeading").forceActiveFocus();
         keyClick(Qt.Key_Escape);
-        const confirm = findChild(dialog(), "wizardCancelConfirm");
+        const confirm = findChild(view(), "wizardCancelConfirm");
         tryVerify(() => confirm.opened);
         compare(findChild(confirm, "dialogAccept").text, "Cancel and close");
         compare(findChild(confirm, "dialogReject").text, "Keep going");
+        // Plan 0052: centred over the view that asked.
+        const v = rect(view());
+        const c = rect(confirm.contentItem.parent);
+        verify(c.x >= v.x && c.x + c.w <= v.x + v.w, "the confirmation lies over the view");
         mouseClick(findChild(confirm, "dialogReject"));
         tryVerify(() => !confirm.visible);
-        verify(dialog().visible);
-        AppViewModel.wizard.cancel(true);
-        verify(AppViewModel.wizard.closing);
-        verify(dialog().visible); // until the operation has ended
-        wizard.finishOperation();
-        tryVerify(() => !dialog().visible);
+        verify(view() !== null);
+        AppViewModel.currentTabViewModel.wizard.cancel(true);
+        verify(wizard().closing);
+        verify(view() !== null); // until the operation has ended
+        test.finishOperation();
+        tryVerify(() => view() === null);
     }
 
     function test_escapeWhenIdleCloses() {
         openWizard();
         part("wizardHeading").forceActiveFocus();
         keyClick(Qt.Key_Escape);
-        tryVerify(() => !dialog().visible);
+        tryVerify(() => view() === null);
+    }
+
+    // Plan 0052 (ADR-0386): the rail stays usable; the wizard keeps its step and comes back from
+    // the rail's "Wizard" entry with the focus on its heading.
+    function test_railSwitchKeepsTheStep() {
+        verify(testSupport.configureTab(0, "app", 801000001, "Test Probe"));
+        AppViewModel.showPage("console");
+        openWizard();
+        wizard().primary();
+        compare(part("wizardHeading").text, "Which MCU do you want to connect?");
+        const consoleItem = findAll(find("navRail"), "railItem").filter(item => item.text === "Console")[0];
+        mouseClick(consoleItem);
+        tryVerify(() => view() === null);
+        compare(AppViewModel.currentTabViewModel.currentPage, "console");
+        verify(wizard().open);
+        verify(find("railWizard") !== null);
+        verify(!find("railWizard").selected);
+        verify(find("tabWizardBadge") !== null);
+        waitForRendering(window.contentItem); // the rail has laid the entry out
+        mouseClick(find("railWizard"));
+        tryCompare(AppViewModel.currentTabViewModel, "currentPage", "wizard");
+        tryVerify(() => view() !== null);
+        verify(find("railWizard").selected);
+        compare(part("wizardHeading").text, "Which MCU do you want to connect?");
+        tryVerify(() => part("wizardHeading").activeFocus);
+        wizard().cancel(false);
+        tryVerify(() => view() === null);
+        compare(AppViewModel.currentTabViewModel.currentPage, "console");
+    }
+
+    // Plan 0052 (ADR-0386): one wizard per tab; another tab runs its own.
+    function test_twoTabsRunWizards() {
+        AppViewModel.newTab();
+        compare(AppViewModel.tabs.count, 2);
+        verify(AppViewModel.launcher.start("connect-device", 0));
+        verify(AppViewModel.launcher.start("connect-device", 1));
+        compare(AppViewModel.currentTab, 1);
+        tryVerify(() => view() !== null);
+        testSupport.tabWizard(1).goTo(3);
+        tryVerify(() => part("wizardHeading").text !== "Connect the J-Link");
+        const second = part("wizardHeading").text;
+        AppViewModel.currentTab = 0;
+        tryVerify(() => view() !== null && part("wizardHeading").text === "Connect the J-Link");
+        AppViewModel.currentTab = 1;
+        tryVerify(() => view() !== null && part("wizardHeading").text === second);
+        // A second wizard in the same tab is refused and the open one is shown.
+        AppViewModel.currentTab = 0;
+        verify(!AppViewModel.launcher.start("connect-device", 1));
+        compare(AppViewModel.currentTab, 1);
+    }
+
+    // Plan 0052: a global wizard (setup) is a view over the page area of the current tab.
+    function test_globalWizardView() {
+        testSupport.registerGlobalTestWizard();
+        verify(AppViewModel.launcher.start("first-run-setup"));
+        const global = () => find("globalWizardView");
+        tryVerify(() => global() !== null);
+        compare(findAll(global(), "wizardTitle")[0].text, "Test wizard");
+        verify(!AppViewModel.currentTabViewModel.wizard.open);
+        verify(find("railWizard") === null);
+        tryVerify(() => findAll(global(), "wizardHeading")[0].activeFocus);
+        keyClick(Qt.Key_Escape);
+        tryVerify(() => global() === null);
+        verify(!AppViewModel.globalWizard.open);
     }
 
     function test_minimumWindowInCzech() {
@@ -151,19 +267,27 @@ TestCase {
         window.width = 960;
         window.height = 600;
         openWizard();
-        const d = dialog();
-        verify(d.width <= 720 && d.height <= 552);
-        verify(d.x >= 0 && d.y >= 0);
-        verify(d.x + d.width <= window.width && d.y + d.height <= window.height);
-        // Every footer button lies inside the dialog.
+        waitForRendering(window.contentItem);
+        const v = rect(view());
+        // The page area: right of the rail, below the tab bar and the device bar.
+        const rail = rect(find("navRail"));
+        verify(v.x >= rail.x + rail.w - 0.5, "right of the rail");
+        verify(v.y > 0 && v.x + v.w <= window.width + 0.5 && v.y + v.h <= window.height + 0.5);
+        verify(v.h > 400, "the view uses the page area: " + v.h);
+        const content = rect(part("wizardContent"));
+        verify(content.h > 250, "the content takes the free height: " + content.h);
+        // Every footer button lies inside the view.
         for (const name of ["wizardPrimary", "wizardCancel"]) {
-            const button = part(name);
-            const p = button.mapToItem(d.contentItem.parent, 0, 0);
-            verify(p.x >= 0 && p.x + button.width <= d.width + 1, name);
+            const r = rect(part(name));
+            verify(r.x >= v.x - 0.5 && r.x + r.w <= v.x + v.w + 0.5, name);
+            verify(r.y >= v.y - 0.5 && r.y + r.h <= v.y + v.h + 0.5, name);
         }
         testSupport.openWizard().goTo(2);
-        const steps = part("wizardStepList");
-        verify(steps.visible);
+        verify(part("wizardStepList") !== null);
+        for (const name of ["wizardBack", "wizardPrimary", "wizardCancel"]) {
+            const r = rect(part(name));
+            verify(r.x >= v.x - 0.5 && r.x + r.w <= v.x + v.w + 0.5, name);
+        }
         AppViewModel.setLanguage("en");
     }
 
@@ -186,7 +310,9 @@ TestCase {
     function test_illustrationSlotsResolve() {
         for (const slot of ["jlink-usb", "chester-app-cable", "chester-lte-cable", "chester-power", "placeholder"]) {
             const item = createTemporaryObject(illustrationComponent, testCase, { slot: slot });
-            verify(String(item.source).endsWith("/" + slot + ".svg"), slot);
+            // Plan 0051 (ADR-0380): the cable slots have a dark variant.
+            verify(String(item.source).endsWith("/" + slot + ".svg") || String(item.source).endsWith("/" + slot + "-dark.svg"),
+                   slot + ": " + item.source);
             const image = findChild(item, "illustrationImage");
             tryCompare(image, "status", Image.Ready);
         }
@@ -194,18 +320,57 @@ TestCase {
         verify(String(unknown.source).endsWith("/placeholder.svg"));
     }
 
+    // Plan 0052 (ADR-0387): the report is a view of the page area; Close returns to the page.
     function test_reportDialog() {
         AppViewModel.report.show();
-        const report = findChild(window, "reportDialog");
-        tryVerify(() => report.opened);
+        tryVerify(() => find("reportDialog") !== null);
+        compare(AppViewModel.overlayView, "report");
+        const report = find("reportDialog");
+        tryVerify(() => findChild(report, "reportTitle").activeFocus);
         tryCompare(AppViewModel.report, "state", "ready", 30000);
         verify(findChild(report, "reportSummaryText").text.indexOf("HARDWARIO Monitor diagnostic report") === 0);
         verify(findChild(report, "reportNote").visible);
         verify(findChild(report, "reportSave").visible);
         verify(findChild(report, "reportCopy").visible);
         mouseClick(findChild(report, "reportClose"));
-        tryVerify(() => !report.visible);
+        tryVerify(() => find("reportDialog") === null);
         verify(!AppViewModel.report.open);
+        compare(AppViewModel.overlayView, "");
+        // Help → Create diagnostic report… opens it through the view; Esc closes it.
+        verify(AppViewModel.openView("report"));
+        verify(AppViewModel.report.open);
+        tryVerify(() => find("reportDialog") !== null);
+        tryVerify(() => findChild(find("reportDialog"), "reportTitle").activeFocus);
+        keyClick(Qt.Key_Escape);
+        tryVerify(() => find("reportDialog") === null);
+        verify(!AppViewModel.report.open);
+    }
+
+    // Plan 0052: every content view at 960 x 600 in Czech: inside the page area, footer buttons
+    // inside the view.
+    function test_contentViewsAt960InCzech_data() {
+        return [{ tag: "report", footer: "reportClose" }, { tag: "join", footer: "remoteJoinButton" },
+                { tag: "shortcuts", footer: "shortcutsClose" }, { tag: "share", footer: "remoteShareStart" }];
+    }
+
+    function test_contentViewsAt960InCzech(data) {
+        AppViewModel.setLanguage("cs");
+        window.width = 960;
+        window.height = 600;
+        verify(AppViewModel.openView(data.tag));
+        const names = { report: "reportDialog", join: "remoteJoinInputDialog", shortcuts: "shortcutOverlay",
+                        share: "remoteShareDialog" };
+        tryVerify(() => find(names[data.tag]) !== null);
+        waitForRendering(window.contentItem);
+        const v = rect(find(names[data.tag]));
+        const rail = rect(find("navRail"));
+        verify(v.x >= rail.x + rail.w - 0.5 && v.x + v.w <= window.width + 0.5 && v.y + v.h <= window.height + 0.5);
+        const button = rect(findAll(find(names[data.tag]), data.footer)[0]);
+        verify(button.x >= v.x - 0.5 && button.x + button.w <= v.x + v.w + 0.5, data.footer);
+        verify(button.y >= v.y - 0.5 && button.y + button.h <= v.y + v.h + 0.5, data.footer);
+        AppViewModel.closeView();
+        tryVerify(() => find(names[data.tag]) === null);
+        AppViewModel.setLanguage("en");
     }
 
     // ---- plan 0035: the probe-picker step -----------------------------------------------------
@@ -215,12 +380,12 @@ TestCase {
         const wizard = testSupport.openWizard();
         wizard.useProbePicker();
         wizard.goTo(4);
-        tryVerify(() => findChild(dialog().contentItem, "probePickerStep") !== null);
+        tryVerify(() => findChild(view(), "probePickerStep") !== null);
         return wizard;
     }
 
     function probeRows() {
-        const list = findChild(dialog().contentItem, "probeList");
+        const list = findChild(view(), "probeList");
         const rows = [];
         if (!list)
             return rows;
@@ -248,7 +413,7 @@ TestCase {
         verify(testSupport.configureTab(1, "app", 801000002, "Test Probe"));
         AppViewModel.currentTab = 0;
         const wizard = openProbePickerStep();
-        const step = findChild(dialog().contentItem, "probePickerStep");
+        const step = findChild(view(), "probePickerStep");
         verify(step.vm !== null);
         tryVerify(() => probeRows().length === 2, 5000);
         // No Connect, no J-Link Software error panel in the step.
@@ -268,8 +433,8 @@ TestCase {
         compare(wizard.selectedSerial, "801000001");
         // The check rows of the wizard below the list.
         verify(findChild(step, "probePickerChecks").visible);
-        AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open);
+        AppViewModel.currentTabViewModel.wizard.cancel(true);
+        tryVerify(() => !AppViewModel.currentTabViewModel.wizard.open);
         AppViewModel.theme = "system";
     }
 
@@ -292,7 +457,7 @@ TestCase {
 
     function test_probePickerReleasesTheScanner() {
         const wizard = openProbePickerStep();
-        const picker = findChild(dialog().contentItem, "probePickerStep").vm;
+        const picker = findChild(view(), "probePickerStep").vm;
         verify(picker.active);
         wizard.goTo(3); // another step: the scanner is released
         verify(!picker.active);

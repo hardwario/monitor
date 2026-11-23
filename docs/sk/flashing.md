@@ -103,9 +103,35 @@ v banneri, keď je J-Link na konektore LTE) vás preto prevedie celým postupom:
 7. **Application** (aplikácia): zapíše sa späť kópia (predvolené), alebo zvoľte firmvér z katalógu alebo zo súboru.
 8. **Done** (hotovo): aplikácia znova beží a konzola sa znova pripojí.
 
-Kým sprievodca beží, konzola karty je pozastavená (**Paused for the LTE firmware update**). Zrušiť sa dá kedykoľvek
-okrem zápisu do MCU. Po kroku 3 sa sprievodca najprv spýta: aplikačný MCU je vymazaný a zariadenie nebeží, kým
-nenahráte aplikáciu. Kópia zostane v priečinku `backups` ([Súkromie a uložené údaje](privacy.md)).
+Sprievodca nahradí plochu stránky karty; medzitým sa môžete pozrieť do konzoly a vrátiť sa cez **Wizard** (sprievodca)
+hore v lište ([Sprievodcovia a ďalšie zobrazenia](getting-started.md#sprievodcovia-a-ďalšie-zobrazenia)). Kým
+sprievodca beží, konzola karty je pozastavená (**Paused for the LTE firmware update**). Zrušiť sa dá kedykoľvek
+okrem zápisu do MCU. Po kroku 3 sa sprievodca najprv spýta: **The application MCU is erased. Write the application
+back first?** (Aplikačný MCU je vymazaný. Najprv zapísať aplikáciu späť?)
+
+- **Write back** (zapísať späť): sprievodca požiada o J-Link na konektore APP, zapíše kópiu späť a skončí správou
+  **LTE firmware not updated. The application was written back.** (LTE firmvér nebol aktualizovaný, aplikácia bola
+  zapísaná späť).
+- **Leave it erased** (nechať vymazané): sprievodca sa zavrie; zariadenie nebeží, kým nenahráte aplikáciu. Správa
+  povie, kde je kópia.
+- **Back** (späť): sprievodca pokračuje.
+
+Bez kópie (prázdna aplikácia) Cancel oznámi, že aplikačný MCU je vymazaný. Kópie zostávajú v priečinku `backups`
+([Súkromie a uložené údaje](privacy.md)); uchováva sa 10 najnovších.
+
+<a id="application-copies"></a>
+### Kópie aplikácie
+
+Keď priečinok `backups` obsahuje kópie pripojeného zariadenia CHESTER, karta **Application firmware** (aplikačný
+firmvér; stránka **Flash** a krok 7 sprievodcu) zobrazí **Application copy from** (kópia aplikácie z) s dátumom a
+časom najnovšej kópie; šípka vypíše všetky kópie zariadenia (až 10). Zvolená kópia sa načíta ako súbor. **Open backups
+folder** (otvoriť priečinok záloh) priečinok otvorí a dialóg výberu súboru v ňom začína. Kým sériové číslo zariadenia
+nie je známe (napríklad keď je aplikácia vymazaná), karta vypíše všetky kópie s ich sériovými číslami. V termináli:
+`hwio chester app backups` a `hwio chester app flash --backup latest` ([Príkazový riadok](../en/cli.md)).
+
+Keď krok sprievodcu zlyhá, panel chyby namiesto tlačidiel stránky Flash zobrazí **Troubleshooting** (riešenie
+problémov, dokumentácia chyby); **Try again** (skúsiť znova) a **Cancel** (zrušiť) v dolnej časti sprievodcu
+pokračujú.
 
 ## Údržba
 

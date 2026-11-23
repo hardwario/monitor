@@ -76,7 +76,7 @@ void StartupCheck::openWizard() {
     const Decision decision =
         decide(!settings.value(QStringLiteral("setup/completedVersion")).toString().isEmpty(),
                m_jlinkOk, settings.value(QStringLiteral("setup/showAtStart")).toBool());
-    WizardViewModel& wizard = *m_app.wizard();
+    WizardViewModel& wizard = *m_app.globalWizard();
     if (decision != Decision::None && wizard.isOpen()) {
         if (!m_waiting) {
             // 0035 § C: once more when that wizard closes.
@@ -84,7 +84,7 @@ void StartupCheck::openWizard() {
             m_waitConnection = connect(
                 &wizard, &WizardViewModel::openChanged, this,
                 [this] {
-                    if (!m_app.wizard()->isOpen()) {
+                    if (!m_app.globalWizard()->isOpen()) {
                         disconnect(m_waitConnection);
                         openWizard();
                     }

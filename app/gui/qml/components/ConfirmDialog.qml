@@ -18,6 +18,11 @@ Dialog {
     property string acceptText: qsTr("OK")
     property string rejectText: qsTr("Cancel")
     property bool destructive: true
+    // Plan 0051 (ADR-0381): an optional third button between the two ("" = none), the recommended
+    // way out (primary); `alternative` is emitted and the dialog closes.
+    property string alternativeText: ""
+
+    signal alternative
 
     modal: true
     anchors.centerIn: Overlay.overlay
@@ -92,6 +97,17 @@ Dialog {
             kind: dialog.destructive ? "danger" : "primary"
             text: dialog.acceptText
             onClicked: dialog.accept()
+        }
+
+        HButton {
+            objectName: "dialogAlternative"
+            visible: dialog.alternativeText !== ""
+            kind: "primary"
+            text: dialog.alternativeText
+            onClicked: {
+                dialog.close();
+                dialog.alternative();
+            }
         }
 
         HButton {

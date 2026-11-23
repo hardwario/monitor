@@ -18,7 +18,7 @@ Item {
     property ProbePickerViewModel vm: null
     // Plan 0008 step 5: informational rows only (no selection).
     property bool readOnly: false
-    readonly property CheckListModel checks: AppViewModel.wizard.checks
+    readonly property CheckListModel checks: AppViewModel.currentTabViewModel.wizard.checks
 
     objectName: "probePickerStep"
     implicitHeight: column.implicitHeight

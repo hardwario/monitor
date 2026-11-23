@@ -100,7 +100,7 @@ Es läuft jeweils nur ein Fenster der App. Ein erneuter Start holt das geöffnet
 Der **Mode** (Modus) bestimmt, wie viel die Einstellungen zeigen. Beim ersten Start (und einmal nach dem Update von
 2.0.0-rc.3 oder älter) fragt die App **How do you want to use HARDWARIO Monitor?**: Wählen Sie einen Modus und
 klicken Sie auf **Continue**. Vorausgewählt ist **Advanced**; hatten Sie in einer älteren Version **Show expert
-maintenance actions** eingeschaltet, ist es **Expert**. Wenn Sie den Dialog schließen, bleibt der vorausgewählte Modus.
+maintenance actions** eingeschaltet, ist es **Expert**. Wenn Sie die Frage schließen, bleibt der vorausgewählte Modus.
 Sie können ihn jederzeit unter **Settings › General › Mode** ändern.
 
 | Angezeigt | Basic | Advanced | Expert |
@@ -134,6 +134,19 @@ was needed.“ angezeigt; der Modus ändert sich nicht.
   ([Datenschutz](privacy.md#diagnosebericht)).
 - **Documentation ↗**: diese Seiten auf GitHub, passend zur installierten Version der App und in der Sprache der App
   (Englisch, wenn eine Seite nicht übersetzt ist).
+
+<a id="assistenten-und-weitere-ansichten"></a>
+### Assistenten und weitere Ansichten
+
+Assistenten (zum Beispiel **Update LTE firmware…**), der Diagnosebericht, die Tastenkürzel, das Update der
+J-Link-Firmware, **Join support session…** und **Share with support…** öffnen sich im Seitenbereich des Tabs neben der
+Leiste; die Tabs und die Leiste bleiben sichtbar. **×** oder <kbd>Esc</kbd> schließt sie, und die vorherige Seite
+erscheint wieder. Auch der Wechsel zu einem anderen Tab schließt sie, außer während sie arbeiten (der Bericht wird
+gesammelt, die J-Link-Firmware wird geschrieben).
+
+Während ein Assistent läuft, können Sie die anderen Seiten des Tabs öffnen, zum Beispiel die Konsole: **Wizard**
+(Assistent) oben in der Leiste (und ein kleines Symbol am Geräte-Tab) zeigt den Assistenten wieder dort, wo er war.
+Jeder Geräte-Tab kann seinen eigenen Assistenten ausführen.
 
 Wenn etwas fehlschlägt, zeigt die App, was passiert ist, die wahrscheinliche Ursache (**Probably:**) und was zu tun
 ist (**What to do:**). **Details** zeigt den Fehlercode; [Fehlerbehebung](troubleshooting.md) listet alle Codes auf.
