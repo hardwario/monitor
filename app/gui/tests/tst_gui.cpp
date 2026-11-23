@@ -37,6 +37,7 @@
 #include "viewmodels/error_info.h"
 #include "viewmodels/history_store.h"
 #include "viewmodels/ui_mode_controller.h"
+#include "wizard/wizard_view_model.h"
 #include "zip_builder.h"
 
 #include <QByteArray>
@@ -427,6 +428,11 @@ public:
 
     // Keeps one Choose device tab (busy pages are finished first).
     Q_INVOKABLE void resetTabs() {
+        // Plan 0052: the open wizards (per tab and global) close first.
+        for (int i = 0; i < m_app->tabs()->count(); ++i) {
+            m_app->tabs()->at(i)->wizard()->cancel(true);
+        }
+        m_app->globalWizard()->cancel(true);
         while (m_app->tabs()->count() > 1) {
             finishWork(m_app->tabs()->count() - 1);
             m_app->closeTab(m_app->tabs()->count() - 1);
@@ -520,7 +526,31 @@ public:
     }
 
     // The open test wizard (its test hooks: goTo, startOperation, finishOperation), or null.
-    Q_INVOKABLE [[nodiscard]] QObject* openWizard() const { return m_app->wizard()->wizard(); }
+    // Plan 0052: the current tab's wizard, else the global one, else another tab's.
+    Q_INVOKABLE [[nodiscard]] QObject* openWizard() const {
+        if (const auto* tab = m_app->currentTabViewModel();
+            tab != nullptr && tab->wizard()->isOpen()) {
+            return tab->wizard()->wizard();
+        }
+        if (m_app->globalWizard()->isOpen()) {
+            return m_app->globalWizard()->wizard();
+        }
+        for (int i = 0; i < m_app->tabs()->count(); ++i) {
+            if (m_app->tabs()->at(i)->wizard()->isOpen()) {
+                return m_app->tabs()->at(i)->wizard()->wizard();
+            }
+        }
+        return nullptr;
+    }
+    // Plan 0052: the open test wizard of tab `index`, or null.
+    Q_INVOKABLE [[nodiscard]] QObject* tabWizard(int index) const {
+        const auto* tab = m_app->tabs()->at(index);
+        return tab != nullptr ? tab->wizard()->wizard() : nullptr;
+    }
+    // Plan 0052: registers the global test wizard ("first-run-setup").
+    Q_INVOKABLE void registerGlobalTestWizard() const {
+        hwio::gui::test::registerGlobalTestWizard(*m_app);
+    }
 
     // ---- plan 0006 (Flash page) ----
     // The Flash page view model of a tab.
@@ -555,6 +585,12 @@ public:
                      hwio::firmware::test::zipBytes(
                          {{.name = "modem.zip", .data = modem.toStdString()},
                           {.name = "application.hex", .data = file.readAll().toStdString()}}));
+    }
+
+    // Plan 0051: a text file in the test folder (e.g. the fake J-Link's connector file); its
+    // local path.
+    Q_INVOKABLE [[nodiscard]] QString writeText(const QString& name, const QString& text) const {
+        return write(name, text.toUtf8()).toLocalFile();
     }
 
     Q_INVOKABLE [[nodiscard]] QUrl writeModemZip() const {

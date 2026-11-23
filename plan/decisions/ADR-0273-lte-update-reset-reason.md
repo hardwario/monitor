@@ -1,6 +1,6 @@
 # ADR-0273 — An LTE update reports a pin reset of the LTE MCU (target.reset_during_update)
 
-- **Status:** Accepted
+- **Status:** Accepted (partly superseded for the guided flow by ADR-0383)
 - **Date:** 2026-11-05
 - **Decided by:** Matej Strnad (rc.3 HIL finding H5, plan [0033](../features/0033-rc2-feedback.md))
 

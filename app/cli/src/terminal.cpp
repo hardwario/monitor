@@ -210,14 +210,17 @@ bool stderrIsTerminal() {
 
 bool stdoutColors() { return stdoutIsTerminal() && qEnvironmentVariableIsEmpty("NO_COLOR"); }
 
-bool askYesNo(const std::string& question) {
+bool askYesNo(const std::string& question, bool defaultYes) {
     std::cerr << question << std::flush;
     std::string answer;
     if (!std::getline(std::cin, answer)) {
-        return false;
+        return defaultYes;
     }
     std::ranges::transform(answer, answer.begin(),
                            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    if (defaultYes && answer.empty()) {
+        return true;
+    }
     return answer == "y" || answer == "yes";
 }
 

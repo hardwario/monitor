@@ -157,6 +157,7 @@ consteval bool isEnumerator(ErrorCode code) {
     case ErrorCode::RemoteFirmwareNotInCatalog:
     case ErrorCode::RemoteProtocolError:
     case ErrorCode::RemoteApplicationNotRestored:
+    case ErrorCode::TargetLowVoltage:
         return true;
     }
     return false;
@@ -1400,6 +1401,22 @@ constexpr std::array defaultTexts{
             "Flash an application: ask the customer to flash it, or ask to flash catalog firmware.",
             "remote.application_not_restored suggestion"),
     },
+    // Plan 0051 (ADR-0383): nRF Util reports LOW_VOLTAGE ("Failed to configure Coresight:
+    // LOW_VOLTAGE").
+    DefaultTexts{
+        .code = ErrorCode::TargetLowVoltage,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "The LTE MCU reports too low supply voltage.",
+                                      "target.low_voltage message"),
+        .cause = QT_TRANSLATE_NOOP3("hwio::core",
+                                    "The CHESTER is not powered enough (battery, power supply) or "
+                                    "the J-Link cable does not connect the supply reference.",
+                                    "target.low_voltage cause"),
+        .suggestion = QT_TRANSLATE_NOOP3("hwio::core",
+                                         "Check the power supply or batteries of the CHESTER and "
+                                         "the J-Link cable on the connector, then try again.",
+                                         "target.low_voltage suggestion"),
+        .wizard = WizardId::Troubleshooting,
+    },
 };
 
 consteval bool defaultTextsComplete() {
@@ -1440,6 +1457,20 @@ Error makeError(ErrorCode code, std::string detail) {
                  .suggestionEn = texts.suggestion.source,
                  .detail = std::move(detail),
                  .wizard = texts.wizard};
+}
+
+Error withGuidedLteSuggestion(Error error) {
+    if (error.code == ErrorCode::FirmwareModemUpdateFailed ||
+        error.code == ErrorCode::TargetLowVoltage) {
+        // Both languages (plan 0050, ADR-0374).
+        constexpr SourceText guided = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "Check the power supply of the CHESTER and the J-Link cable on the "
+            "LTE connector, then click Try again.",
+            "suggestion of an LTE update failure in the guided update (ADR-0383)");
+        setText(error, ErrorText::Suggestion, "hwio::core", guided.source, {}, guided.comment);
+    }
+    return error;
 }
 
 Error outputClosedError(std::string detail) {

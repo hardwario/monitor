@@ -41,6 +41,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace hwio::gui {
@@ -107,10 +108,11 @@ FlashViewModel::FlashViewModel(DeviceTabViewModel* tab, FirmwareServices& servic
         // [Recover…] is hidden again (plan 0033).
         m_maintenanceTarget = m_tab->consoleTargetId();
         m_revealedRecover.clear();
-        kindChanged();        // signal
-        textsChanged();       // signal: the MCU names of the profile
-        maintenanceChanged(); // signal
-        stateChanged();       // signal
+        m_source->setDeviceSerial({}); // ADR-0381: another device
+        kindChanged();                 // signal
+        textsChanged();                // signal: the MCU names of the profile
+        maintenanceChanged();          // signal
+        stateChanged();                // signal
     });
     // Plan 0045 (ADR-0360): the expert actions follow the user mode.
     connect(&m_mode, &UiModeController::modeChanged, this, &FlashViewModel::onExpertActionsChanged);
@@ -338,7 +340,8 @@ void FlashViewModel::flash() {
         .targetId = targetId(),
         .source = *loaded,
         .options = device::FlashOptions{.halt = haltAvailable() && m_halt,
-                                        .allowUicr = m_source->hasUicr() && m_source->allowUicr()},
+                                        .allowUicr = m_source->hasUicr() && m_source->allowUicr(),
+                                        .guided = false},
         .sourceName = m_source->sourceName()});
 }
 
@@ -733,6 +736,11 @@ void FlashViewModel::stopDeviceInfoWatch() {
 
 void FlashViewModel::onDeviceInfoChanged() {
     deviceInfoChanged(); // signal
+    // Plan 0051 (ADR-0381): the copies of this device (the last known serial is kept, e.g. while
+    // the application is erased).
+    if (const std::string_view serial = m_tab->deviceInfoFields().deviceSerial(); !serial.empty()) {
+        m_source->setDeviceSerial(toQString(serial));
+    }
     if (!m_deviceInfoDeadline.isActive()) {
         return;
     }

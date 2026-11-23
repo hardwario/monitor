@@ -96,7 +96,13 @@ Fehlercode: [`target.other_connector`](#target.other_connector).
 
 Ein einfaches LTE-Update (`hwio chester lte flash` oder ein Bundle, eine Modem- oder Anwendungsdatei für die LTE-MCU) lässt die Anwendung auf der Anwendungs-MCU weiterlaufen. Antwortet die LTE-MCU eine Weile nicht, setzt die CHESTER-Anwendungsfirmware sie über ihren Reset-Pin zurück, und das Update bricht ab. Die App liest dann den Reset-Grund der LTE-MCU und meldet **The LTE MCU was reset during the update.** Verwenden Sie stattdessen das geführte Update: **Update LTE firmware…** auf der Seite **Flash** oder `hwio chester lte flash --guided`. Es sichert eine Kopie der Anwendung, löscht sie, aktualisiert die LTE-MCU und schreibt die Anwendung zurück. Siehe [LTE-Firmware-Update](flashing.md#lte-firmware-update).
 
-Fehlercode: [`target.reset_during_update`](#target.reset_during_update).
+Beim geführten Update wird die Anwendung zuerst gelöscht, sodass sie die LTE-MCU nicht zurücksetzen kann: Ein
+fehlgeschlagener Schritt behält dort seinen eigenen Fehler (der Reset-Grund wird nur ins Protokoll geschrieben). Meldet
+nRF Util **LOW_VOLTAGE** (zum Beispiel „Failed to configure Coresight: LOW_VOLTAGE“), ist der Fehler
+[`target.low_voltage`](#target.low_voltage): Prüfen Sie die Stromversorgung oder die Batterien des CHESTER und das
+J-Link-Kabel am LTE-Anschluss, und klicken Sie dann auf **Try again** (Erneut versuchen).
+
+Fehlercodes: [`target.reset_during_update`](#target.reset_during_update), [`target.low_voltage`](#target.low_voltage).
 
 <a id="remote-support-session-problems"></a>
 ### Probleme mit der Fernsupport-Sitzung
@@ -310,7 +316,7 @@ Unter Linux sind fehlende USB-Berechtigungen eine häufige Ursache; siehe [USB-Z
 - **Probably:** The J-Link firmware differs from the firmware bundled with the J-Link Software.
 - **What to do:** Run `hwio jlink update-firmware`.
 
-Dies ist eine Warnung; der J-Link funktioniert weiter. `hwio doctor` meldet es ebenfalls. In HARDWARIO Monitor bietet die Leiste über der Konsole **Trennen und aktualisieren…** an: Der Tab wird getrennt, ein Dialog zeigt die aktuelle und die neue Firmware, und nach **Aktualisieren** wird der J-Link aktualisiert (etwa 10–30 s; nicht abziehen) und der Tab verbindet sich wieder. **Nicht jetzt** blendet die Leiste für diesen J-Link aus, bis die App geschlossen wird. Ist die Firmware der Probe neuer als die Bibliothek, lautet die Meldung „The J-Link firmware is newer than the J-Link library.“ Aktualisieren Sie in diesem Fall stattdessen die J-Link Software.
+Dies ist eine Warnung; der J-Link funktioniert weiter. `hwio doctor` meldet es ebenfalls. In HARDWARIO Monitor bietet die Leiste über der Konsole **Trennen und aktualisieren…** an: Der Tab wird getrennt, eine Seite zeigt die aktuelle und die neue Firmware, und nach **Aktualisieren** wird der J-Link aktualisiert (etwa 10–30 s; nicht abziehen) und der Tab verbindet sich wieder. **Nicht jetzt** blendet die Leiste für diesen J-Link aus, bis die App geschlossen wird. Ist die Firmware der Probe neuer als die Bibliothek, lautet die Meldung „The J-Link firmware is newer than the J-Link library.“ Aktualisieren Sie in diesem Fall stattdessen die J-Link Software.
 
 <a id="probe.firmware_update_failed"></a>
 #### `probe.firmware_update_failed`
@@ -483,7 +489,17 @@ Bei CHESTER lautet die Meldung „The J-Link is connected to the LTE MCU.“, di
 - **Probably:** The application firmware on the application MCU reset the LTE MCU through its reset pin while the LTE MCU was being updated.
 - **What to do:** Use the guided update, which stops the application first: Flash › Update LTE firmware… in the desktop app, or `hwio chester lte flash --guided`.
 
-Nach einem fehlgeschlagenen Schritt eines LTE-Updates war im Reset-Grund-Register der LTE-MCU das Bit des Reset-Pins gesetzt. Die Details enthalten den ursprünglichen Fehler (zum Beispiel `target.program_failed` oder `firmware.modem_update_failed`) und den Registerwert. Siehe [Das LTE-Update schlägt fehl: die LTE-MCU wurde zurückgesetzt](#the-lte-update-fails-the-lte-mcu-was-reset).
+Nach einem fehlgeschlagenen Schritt eines LTE-Updates war im Reset-Grund-Register der LTE-MCU das Bit des Reset-Pins gesetzt. Die Details enthalten den ursprünglichen Fehler (zum Beispiel `target.program_failed` oder `firmware.modem_update_failed`) und den Registerwert. Siehe [Das LTE-Update schlägt fehl: die LTE-MCU wurde zurückgesetzt](#the-lte-update-fails-the-lte-mcu-was-reset). Nur ein einfaches LTE-Update meldet ihn; beim geführten Update bleibt der ursprüngliche Fehler.
+
+<a id="target.low_voltage"></a>
+#### `target.low_voltage`
+
+**The LTE MCU reports too low supply voltage.**
+
+- **Probably:** The CHESTER is not powered enough (battery, power supply) or the J-Link cable does not connect the supply reference.
+- **What to do:** Check the power supply or batteries of the CHESTER and the J-Link cable on the connector, then try again.
+
+nRF Util hat beim Programmieren der Modem-Firmware LOW_VOLTAGE gemeldet („Failed to configure Coresight: LOW_VOLTAGE“); seine Ausgabe steht in **Details**. Beim geführten Update lautet der Vorschlag „Check the power supply of the CHESTER and the J-Link cable on the LTE connector, then click Try again.“
 
 <a id="target.protected"></a>
 #### `target.protected`
@@ -724,7 +740,7 @@ Erscheint, wenn Sie über eine 32-stellige Firmware-ID flashen. Die Meldung kann
 - **Probably:** The modem firmware zip is wrong, the connection was lost, or nRF Util reported an error (see Details).
 - **What to do:** Check the cable and power, then flash the modem firmware again.
 
-Die LTE-Modem-Firmware wird von nRF Util geschrieben; seine Ausgabe steht in **Details**. Siehe [Nordic nRF Util](install.md#nordic-nrf-util-nur-für-die-lte-modem-firmware).
+Die LTE-Modem-Firmware wird von nRF Util geschrieben; seine Ausgabe steht in **Details**. Siehe [Nordic nRF Util](install.md#nordic-nrf-util-nur-für-die-lte-modem-firmware). Beim geführten Update lautet der Vorschlag „Check the power supply of the CHESTER and the J-Link cable on the LTE connector, then click Try again.“
 
 <a id="firmware.checksum_mismatch"></a>
 #### `firmware.checksum_mismatch`

@@ -82,7 +82,8 @@ Rectangle {
     }
 
     objectName: "shellInput"
-    implicitHeight: row.implicitHeight + 2 * Theme.spacingS
+    // ADR-0378: the same height as the log search bar beside it.
+    implicitHeight: Theme.toolbarHeight
     color: Theme.surface
 
     Rectangle {

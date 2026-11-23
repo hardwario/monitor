@@ -103,10 +103,36 @@ J-Link jest na złączu LTE) prowadzi więc przez całą procedurę:
    pliku.
 8. **Done** (gotowe): aplikacja znowu działa, a konsola łączy się ponownie.
 
-Podczas działania kreatora konsola karty jest wstrzymana (**Paused for the LTE firmware update**). Anulowanie działa
-zawsze, z wyjątkiem zapisu do MCU. Po kroku 3 kreator najpierw pyta: MCU aplikacji jest skasowane i urządzenie nie
-działa, dopóki nie wgrasz aplikacji. Kopia pozostaje w folderze `backups` ([Prywatność i przechowywane
-dane](privacy.md)).
+Kreator zastępuje obszar strony karty; w międzyczasie możesz zajrzeć do konsoli i wrócić przez **Wizard** (kreator) na
+górze paska bocznego ([Kreatory i inne widoki](getting-started.md#kreatory-i-inne-widoki)). Podczas działania kreatora
+konsola karty jest wstrzymana (**Paused for the LTE firmware update**). Anulowanie działa
+zawsze, z wyjątkiem zapisu do MCU. Po kroku 3 kreator najpierw pyta: **The application MCU is erased. Write the
+application back first?** (MCU aplikacji jest wymazane. Najpierw zapisać aplikację z powrotem?)
+
+- **Write back** (zapisz z powrotem): kreator prosi o J-Link na złączu APP, zapisuje kopię z powrotem i kończy
+  komunikatem **LTE firmware not updated. The application was written back.** (firmware LTE nie został
+  zaktualizowany, aplikacja została zapisana z powrotem).
+- **Leave it erased** (pozostaw wymazane): kreator się zamyka; urządzenie nie działa, dopóki nie wgrasz aplikacji.
+  Komunikat mówi, gdzie jest kopia.
+- **Back** (wstecz): kreator działa dalej.
+
+Bez kopii (pusta aplikacja) Cancel informuje, że MCU aplikacji jest wymazane. Kopie pozostają w folderze `backups`
+([Prywatność i przechowywane dane](privacy.md)); przechowywanych jest 10 najnowszych.
+
+<a id="application-copies"></a>
+### Kopie aplikacji
+
+Gdy folder `backups` zawiera kopie podłączonego urządzenia CHESTER, karta **Application firmware** (firmware
+aplikacji; strona **Flash** i krok 7 kreatora) pokazuje **Application copy from** (kopia aplikacji z) z datą i
+godziną najnowszej kopii; strzałka wyświetla wszystkie kopie urządzenia (do 10). Wybrana kopia jest wczytywana jak
+plik. **Open backups folder** (otwórz folder kopii zapasowych) otwiera folder, a okno wyboru pliku startuje w nim.
+Dopóki numer seryjny urządzenia nie jest znany (na przykład gdy aplikacja jest wymazana), karta wyświetla wszystkie
+kopie z ich numerami seryjnymi. W terminalu: `hwio chester app backups` i `hwio chester app flash --backup latest`
+([Wiersz poleceń](../en/cli.md)).
+
+Gdy krok kreatora się nie powiedzie, panel błędu zamiast przycisków strony Flash pokazuje **Troubleshooting**
+(rozwiązywanie problemów, dokumentacja błędu); **Try again** (spróbuj ponownie) i **Cancel** (anuluj) na dole kreatora
+działają dalej.
 
 ## Konserwacja
 

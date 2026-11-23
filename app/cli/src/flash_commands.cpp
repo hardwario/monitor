@@ -10,6 +10,7 @@
 #include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
+#include "hwio/device/application_backup.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/lte_update_procedure.h"
 #include "hwio/device/operation.h"
@@ -31,10 +32,12 @@
 #include "terminal.h"
 
 #include <QByteArrayView>
+#include <QDateTime>
 #include <QEventLoop>
 #include <QFile>
 #include <QFileDevice>
 #include <QIODevice>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QLoggingCategory>
@@ -42,7 +45,9 @@
 #include <QObject>
 #include <QString>
 #include <QStringLiteral>
+#include <QTimeZone>
 #include <QTimer>
+#include <QtCore/qnamespace.h>
 #include <QtEnvironmentVariables>
 #include <QtLogging>
 #include <QtTypes>
@@ -193,6 +198,8 @@ struct AppFlashOptions {
     bool halt = false;
     bool allowUicr = false;
     bool noCache = false;
+    std::string backup; // plan 0051 (ADR-0381): "latest" or a copy's path
+    bool force = false; // a copy of another device
 };
 
 struct LoadedImage {
@@ -267,14 +274,84 @@ Result<LoadedImage> loadAppImage(const Context& context, const AppFlashOptions& 
     return LoadedImage{.image = downloaded->image, .json = std::move(json)};
 }
 
+Result<std::string> readDeviceSerial(const Context& context, const GlobalOptions& globals,
+                                     const ProbeOptions& group, const ProbeOptions& own);
+
+// Plan 0051 (ADR-0381): `app flash --backup latest|PATH` - the copy of this device's application
+// that the guided LTE update saved (latest: the newest of the device's serial). A copy of another
+// serial is refused unless --force.
+Result<AppFlashOptions> resolveBackup(const Context& context, const GlobalOptions& globals,
+                                      const ProbeOptions& group, AppFlashOptions options) {
+    if (!options.input.empty()) {
+        return std::unexpected(usage(
+            QStringLiteral("Give either a HEX file or ID, or --backup, not both."), "app flash"));
+    }
+    const fs::path directory = device::ApplicationBackup::defaultDirectory();
+    auto serial = readDeviceSerial(context, globals, group, options.probe);
+    if (!serial) {
+        return std::unexpected(std::move(serial).error());
+    }
+    fs::path copy;
+    std::string copySerial;
+    if (options.backup == "latest") {
+        const auto copies = device::ApplicationBackup::list(directory, *serial);
+        if (copies.empty()) {
+            return std::unexpected(
+                usage(QStringLiteral("There is no application copy of the device %1 in %2.")
+                          .arg(toQString(*serial), toQString(toUtf8(directory))),
+                      "app flash --backup latest"));
+        }
+        copy = copies.front().path;
+        copySerial = copies.front().serial;
+    } else {
+        copy = toPath(options.backup);
+        std::error_code ec;
+        if (!fs::exists(copy, ec) && !copy.has_parent_path()) {
+            copy = directory / copy; // a file name of the backups folder
+        }
+        if (!fs::is_regular_file(copy, ec)) {
+            return std::unexpected(usage(QStringLiteral("The application copy %1 does not exist.")
+                                             .arg(toQString(toUtf8(copy))),
+                                         "app flash --backup"));
+        }
+        // The serial of the file name ("<serial>-yyyyMMdd-HHmmss.hex").
+        for (const auto& entry : device::ApplicationBackup::list(copy.parent_path())) {
+            if (entry.path.filename() == copy.filename()) {
+                copySerial = entry.serial;
+            }
+        }
+    }
+    const std::string deviceSerial = device::ApplicationBackup::fileSerial(*serial);
+    if (!options.force && copySerial != deviceSerial) {
+        Error error = usage(
+            QStringLiteral("The application copy %1 is not of this device (serial number %2).")
+                .arg(toQString(toUtf8(copy)), toQString(*serial)),
+            std::format(R"(copy serial "{}", device "{}")", copySerial, deviceSerial));
+        setUntranslatedText(error, ErrorText::Suggestion,
+                            "Choose a copy of this device, or use --force to flash it anyway.");
+        return std::unexpected(std::move(error));
+    }
+    options.input = toUtf8(copy);
+    return options;
+}
+
 Result<CommandResult> appFlash(const Context& context, const GlobalOptions& globals,
-                               const ProbeOptions& group, const AppFlashOptions& options) {
+                               const ProbeOptions& group, const AppFlashOptions& requested) {
     ProgressUi ui(context, std::cerr, stderrIsTerminal());
+    AppFlashOptions options = requested;
+    if (!requested.backup.empty()) {
+        auto resolved = resolveBackup(context, globals, group, requested);
+        if (!resolved) {
+            return std::unexpected(std::move(resolved).error());
+        }
+        options = std::move(*resolved);
+    }
     auto loaded = loadAppImage(context, options, ui);
     if (!loaded) {
         return std::unexpected(std::move(loaded).error());
     }
-    const device::FlashOptions flash{.halt = options.halt, .allowUicr = options.allowUicr};
+    const device::FlashOptions flash{
+        .halt = options.halt, .allowUicr = options.allowUicr, .guided = false};
     auto outcome = runOperation(
         context, globals, group, options.probe, "app", ui,
         [&](device::DeviceSession& session) { return session.flash("app", loaded->image, flash); });
@@ -394,6 +471,66 @@ Result<CommandResult> pibRead(const Context& context, const GlobalOptions& globa
     text += std::format("Serial number: {}\n", pib->serialNumber);
     text += std::format("Claim token: {}\n", pib->claimToken);
     text += std::format("BLE passkey: {}", pib->blePasskey);
+    return CommandResult{.data = data, .humanText = text, .streamed = false};
+}
+
+// Plan 0051 (ADR-0381): the device's serial number from its PIB ("" when the PIB has none).
+Result<std::string> readDeviceSerial(const Context& context, const GlobalOptions& globals,
+                                     const ProbeOptions& group, const ProbeOptions& own) {
+    auto bytes = readPibBytes(context, globals, group, own);
+    if (!bytes) {
+        return std::unexpected(std::move(bytes).error());
+    }
+    if (bytes->size() != device::pibSize) {
+        return std::unexpected(makeError(ErrorCode::InternalUnexpected, "short PIB read"));
+    }
+    auto pib = device::decodePib(std::span<const std::byte, 128>(bytes->data(), 128));
+    return pib ? pib->serialNumber : std::string();
+}
+
+// Plan 0051 (ADR-0381): `app backups` - the application copies of the guided LTE update, newest
+// first. Without --serial: the connected device's copies when a probe answers, else all.
+Result<CommandResult> appBackups(const Context& context, const GlobalOptions& globals,
+                                 const ProbeOptions& group, const ProbeOptions& own,
+                                 const std::string& serialOption) {
+    std::optional<std::string> serial;
+    if (!serialOption.empty()) {
+        serial = serialOption;
+    } else if (auto read = readDeviceSerial(context, globals, group, own); read) {
+        serial = *read;
+    } else {
+        qCInfo(lcCli).noquote() << "app backups: no device serial ("
+                                << toQString(idOf(read.error().code)) << "); all copies";
+    }
+    const fs::path directory = device::ApplicationBackup::defaultDirectory();
+    const auto copies = device::ApplicationBackup::list(directory, serial);
+    QJsonArray list;
+    std::string text;
+    for (const auto& copy : copies) {
+        const QDateTime time = QDateTime::fromMSecsSinceEpoch(
+            std::chrono::duration_cast<std::chrono::milliseconds>(copy.time.time_since_epoch())
+                .count(),
+            QTimeZone::UTC);
+        list.append(QJsonObject{{QStringLiteral("time"), time.toString(Qt::ISODate)},
+                                {QStringLiteral("serial"), toQString(copy.serial)},
+                                {QStringLiteral("path"), toQString(toUtf8(copy.path))},
+                                {QStringLiteral("size"), static_cast<qint64>(copy.size)}});
+        text += std::format(
+            "{}  {}  {}  {}\n",
+            time.toLocalTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss")).toStdString(),
+            copy.serial, kib(copy.size), toUtf8(copy.path));
+    }
+    if (copies.empty()) {
+        text = serial ? std::format("No application copies of the device {} in {}.", *serial,
+                                    toUtf8(directory))
+                      : std::format("No application copies in {}.", toUtf8(directory));
+    } else {
+        text.pop_back(); // the last newline
+    }
+    QJsonObject data{{QStringLiteral("directory"), toQString(toUtf8(directory))},
+                     {QStringLiteral("serial"),
+                      serial ? QJsonValue(toQString(*serial)) : QJsonValue(QJsonValue::Null)},
+                     {QStringLiteral("backups"), list}};
     return CommandResult{.data = data, .humanText = text, .streamed = false};
 }
 
@@ -597,7 +734,7 @@ Result<LteJob> prepareLte(const Context& context, const GlobalOptions& globals, 
         }
         input = std::move(*classified);
     }
-    const device::FlashOptions flash{.halt = false, .allowUicr = allowUicr};
+    const device::FlashOptions flash{.halt = false, .allowUicr = allowUicr, .guided = false};
     using SourceKind = device::LteUpdateProcedure::Source::Kind;
     if (designated) {
         const firmware::DesignatedFirmware& entry = designatedLte();
@@ -737,6 +874,12 @@ Result<CommandResult> guidedResult(const device::LteUpdateProcedure& procedure, 
                             "Flash an application with `hwio chester app flash`.");
         return std::unexpected(std::move(error));
     }
+    if (procedure.writtenBack()) {
+        // Plan 0051 (ADR-0381): cancelled after the erase, the copy was written back.
+        Error error = makeError(ErrorCode::Cancelled, "guided LTE update: written back");
+        setUntranslatedText(error, ErrorText::Message, toStdString(procedure.promptText()));
+        return std::unexpected(std::move(error));
+    }
     if (procedure.step() == Step::Cancelled) {
         Error error = makeError(ErrorCode::Cancelled, "guided LTE update");
         if (procedure.applicationErased()) {
@@ -752,6 +895,13 @@ Result<CommandResult> guidedResult(const device::LteUpdateProcedure& procedure, 
     }
     Error error = procedure.error().value_or(
         makeError(ErrorCode::InternalUnexpected, "the guided LTE update ended unexpectedly"));
+    // ADR-0383 in a terminal: there is no Try again button; the command is run again.
+    if (error.code == ErrorCode::FirmwareModemUpdateFailed ||
+        error.code == ErrorCode::TargetLowVoltage) {
+        setUntranslatedText(error, ErrorText::Suggestion,
+                            "Check the power supply of the CHESTER and the J-Link cable on the "
+                            "LTE connector, then run the command again.");
+    }
     if (procedure.applicationErased() && !backup.empty()) {
         error.detail += std::format("; the copy of the application: {}", backup);
     }
@@ -781,6 +931,7 @@ Result<CommandResult> lteGuided(const Context& context, const GlobalOptions& glo
         device::LteUpdateProcedure::Options{.pollInterval = std::chrono::seconds(1),
                                             .backupDirectory = {},
                                             .autoRestore = true,
+                                            .restoreOnCancel = false, // asks (ADR-0381)
                                             .now = {}});
     GuidedTerminal terminal(context, ui, procedure);
     if (Status started = procedure.start(job->source); !started) {
@@ -810,7 +961,7 @@ designatedLteSource(const Context& context, const GlobalOptions& globals, Progre
         .bundle = downloaded->bundle,
         .modemZip = {},
         .name = std::format("{} {}", entry.name, entry.version),
-        .options = device::FlashOptions{.halt = false, .allowUicr = false}};
+        .options = device::FlashOptions{.halt = false, .allowUicr = false, .guided = false}};
 }
 
 Result<FlashInput> resolveFlashInput(const std::string& argument, const fs::path& directory) {
@@ -864,10 +1015,38 @@ void registerAppFlashCommands(CLI::App& appGroup, const std::shared_ptr<ProbeOpt
         "Also program the image's UICR records (the Product Information Block is kept)");
     flash->add_flag("--no-cache", flashOptions->noCache,
                     "Download a catalog firmware even when it is cached");
+    flash
+        ->add_option("--backup", flashOptions->backup,
+                     "Flash an application copy of the guided LTE update: 'latest' (the newest "
+                     "copy of this device) or the copy's file")
+        ->option_text("latest|PATH");
+    flash->add_flag("--force", flashOptions->force,
+                    "With --backup: also flash a copy of another device");
     addProbeOptions(*flash, flashOptions->probe);
     flash->callback([&slot, &globals, group, flashOptions] {
         slot.command = [&globals, group, flashOptions](const Context& context) {
             return appFlash(context, globals, *group, *flashOptions);
+        };
+    });
+
+    // Plan 0051 (ADR-0381): the application copies of the guided LTE update.
+    struct BackupsOptions {
+        ProbeOptions probe;
+        std::string serial;
+    };
+    auto backupsOptions = std::make_shared<BackupsOptions>();
+    CLI::App* backupsCommand = appGroup.add_subcommand(
+        "backups", "List the application copies saved by the guided LTE update (newest first)");
+    backupsCommand
+        ->add_option("--serial", backupsOptions->serial,
+                     "Only the copies of this serial number (default: the connected device's, "
+                     "else all)")
+        ->option_text("N");
+    addProbeOptions(*backupsCommand, backupsOptions->probe);
+    backupsCommand->callback([&slot, &globals, group, backupsOptions] {
+        slot.command = [&globals, group, backupsOptions](const Context& context) {
+            return appBackups(context, globals, *group, backupsOptions->probe,
+                              backupsOptions->serial);
         };
     });
 

@@ -34,7 +34,7 @@
 <context>
     <name>ConsoleSearchBar</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/qml/console/ConsoleSearchBar.qml" line="318"/>
+        <location filename="../../../app/gui/qml/console/ConsoleSearchBar.qml" line="289"/>
         <source>%Ln matches</source>
         <translation>
             <numerusform>%Ln match</numerusform>
