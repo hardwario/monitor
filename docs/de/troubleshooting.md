@@ -316,7 +316,7 @@ Unter Linux sind fehlende USB-Berechtigungen eine häufige Ursache; siehe [USB-Z
 - **Probably:** The J-Link firmware differs from the firmware bundled with the J-Link Software.
 - **What to do:** Run `hwio jlink update-firmware`.
 
-Dies ist eine Warnung; der J-Link funktioniert weiter. `hwio doctor` meldet es ebenfalls. In HARDWARIO Monitor bietet die Leiste über der Konsole **Trennen und aktualisieren…** an: Der Tab wird getrennt, ein Dialog zeigt die aktuelle und die neue Firmware, und nach **Aktualisieren** wird der J-Link aktualisiert (etwa 10–30 s; nicht abziehen) und der Tab verbindet sich wieder. **Nicht jetzt** blendet die Leiste für diesen J-Link aus, bis die App geschlossen wird. Ist die Firmware der Probe neuer als die Bibliothek, lautet die Meldung „The J-Link firmware is newer than the J-Link library.“ Aktualisieren Sie in diesem Fall stattdessen die J-Link Software.
+Dies ist eine Warnung; der J-Link funktioniert weiter. `hwio doctor` meldet es ebenfalls. In HARDWARIO Monitor bietet die Leiste über der Konsole **Trennen und aktualisieren…** an: Der Tab wird getrennt, eine Seite zeigt die aktuelle und die neue Firmware, und nach **Aktualisieren** wird der J-Link aktualisiert (etwa 10–30 s; nicht abziehen) und der Tab verbindet sich wieder. **Nicht jetzt** blendet die Leiste für diesen J-Link aus, bis die App geschlossen wird. Ist die Firmware der Probe neuer als die Bibliothek, lautet die Meldung „The J-Link firmware is newer than the J-Link library.“ Aktualisieren Sie in diesem Fall stattdessen die J-Link Software.
 
 <a id="probe.firmware_update_failed"></a>
 #### `probe.firmware_update_failed`

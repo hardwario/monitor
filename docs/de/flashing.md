@@ -113,7 +113,10 @@ deshalb durch den ganzen Ablauf:
    oder eine Datei.
 8. **Done** (Fertig): Die Anwendung läuft wieder, und die Konsole verbindet sich neu.
 
-Während der Assistent läuft, ist die Konsole des Tabs angehalten (**Paused for the LTE firmware update**). Abbrechen
+Der Assistent ersetzt den Seitenbereich des Tabs; Sie können währenddessen die Konsole ansehen und mit **Wizard**
+(Assistent) oben in der Leiste zurückkehren ([Assistenten und weitere
+Ansichten](getting-started.md#assistenten-und-weitere-ansichten)). Während der Assistent läuft, ist die Konsole des
+Tabs angehalten (**Paused for the LTE firmware update**). Abbrechen
 ist jederzeit möglich, außer während die MCU beschrieben wird. Nach Schritt 3 fragt der Assistent zuerst nach: **The
 application MCU is erased. Write the application back first?** (Die Anwendungs-MCU ist gelöscht. Zuerst die Anwendung
 zurückschreiben?)

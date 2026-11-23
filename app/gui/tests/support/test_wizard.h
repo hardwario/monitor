@@ -42,9 +42,10 @@ public:
     static inline const QString busyText =
         QStringLiteral("The operation is in progress. Cancel it and close the wizard?");
 
-    explicit TestWizard(QObject* parent);
+    // Plan 0052: `id` "first-run-setup" for the global test wizard.
+    explicit TestWizard(QObject* parent, QString id = QStringLiteral("connect-device"));
 
-    [[nodiscard]] QString id() const override { return QStringLiteral("connect-device"); }
+    [[nodiscard]] QString id() const override { return m_id; }
     [[nodiscard]] QString title() const override { return QStringLiteral("Test wizard"); }
     void start(const ErrorInfo& context, DeviceTabViewModel* tab) override;
     [[nodiscard]] std::vector<WizardStep> plannedSteps() const override;
@@ -77,6 +78,7 @@ public:
 private:
     void showResults();
 
+    QString m_id;
     CheckListModel* m_checks;       // child
     TestWizardEmbedded* m_embedded; // child
     // The wizard contract: the tab only as QPointer (it may close while the wizard is open).
@@ -93,6 +95,8 @@ private:
 // Registers the test wizard (id "connect-device", per tab) and its embedded control
 // "test-embedded" (`embeddedQml`).
 void registerTestWizard(AppViewModel& app, const QUrl& embeddedQml);
+// Plan 0052: the same wizard as a global wizard (id "first-run-setup", not per tab).
+void registerGlobalTestWizard(AppViewModel& app);
 
 } // namespace test
 } // namespace hwio::gui

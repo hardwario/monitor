@@ -1,7 +1,7 @@
 #pragma once
 
 // RemoteShareViewModel - sharing a device tab's console with HARDWARIO Support (plan/features/0044
-// § Host, ADR-0334, ADR-0335, ADR-0324): the Share dialog texts, the banner with the code, the join
+// § Host, ADR-0334, ADR-0335, ADR-0324): the Share view texts, the banner with the code, the join
 // approval and the operation confirmation (it is the GUI's remote::ConsentProvider), the idle
 // warning. It owns the RemoteHost (and, for a J-Link console, its DeviceSessionOperations) while
 // sharing. Sharing ends when the tab's session changes (disconnect, another device, tab close,
@@ -55,7 +55,7 @@ class RemoteShareViewModel : public QObject,
     Q_PROPERTY(QString code READ code NOTIFY changed)    // "482 913" (grouped)
     Q_PROPERTY(QString link READ link NOTIFY changed)
     Q_PROPERTY(QString relayHost READ relayHost NOTIFY changed)
-    // The Share dialog's explanation (the relay host name, the limits, the warning).
+    // The Share view's explanation (the relay host name, the limits, the warning).
     Q_PROPERTY(QString shareExplanation READ shareExplanation NOTIFY changed)
     Q_PROPERTY(bool participantAllowed READ participantAllowed NOTIFY changed)
     Q_PROPERTY(bool joinQuestionOpen READ joinQuestionOpen NOTIFY questionsChanged)
@@ -95,7 +95,7 @@ public:
     [[nodiscard]] bool idleWarning() const { return m_idleWarning; }
     [[nodiscard]] QString endMessage() const { return m_endMessage; }
 
-    // [Start sharing] in the Share dialog.
+    // [Start sharing] in the Share view.
     Q_INVOKABLE void startSharing();
     // [End sharing].
     Q_INVOKABLE void endSharing();

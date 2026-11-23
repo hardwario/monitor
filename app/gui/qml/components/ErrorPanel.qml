@@ -29,7 +29,7 @@ Rectangle {
     // The tab whose wizard "Help me fix this" opens (-1 = the current tab).
     property int tabIndex: -1
     property bool detailsExpanded: false
-    // ADR-0382: set when the panel is inside WizardDialog's content (objectName "wizardContent").
+    // ADR-0382: set when the panel is inside WizardView's content (objectName "wizardContent").
     property bool inWizard: false
     property bool keepPrimaryInWizard: false
     readonly property bool showPrimary: !panel.inWizard || panel.keepPrimaryInWizard

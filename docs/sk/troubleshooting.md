@@ -315,7 +315,7 @@ V Linuxe sú častou príčinou chýbajúce oprávnenia USB; pozrite si [Prístu
 - **Probably:** The J-Link firmware differs from the firmware bundled with the J-Link Software.
 - **What to do:** Run `hwio jlink update-firmware`.
 
-Ide o varovanie; J-Link ďalej funguje. Hlási to aj `hwio doctor`. V HARDWARIO Monitore ponúka pruh nad konzolou **Odpojiť a aktualizovať…**: karta sa odpojí, dialóg ukáže súčasný a nový firmvér a po **Aktualizovať** sa J-Link aktualizuje (asi 10–30 s; neodpájajte ho) a karta sa znova pripojí. **Teraz nie** skryje pruh pre tento J-Link do zatvorenia aplikácie. Keď je firmvér sondy novší ako knižnica, správa znie "The J-Link firmware is newer than the J-Link library." V takom prípade namiesto toho aktualizujte J-Link Software.
+Ide o varovanie; J-Link ďalej funguje. Hlási to aj `hwio doctor`. V HARDWARIO Monitore ponúka pruh nad konzolou **Odpojiť a aktualizovať…**: karta sa odpojí, stránka ukáže súčasný a nový firmvér a po **Aktualizovať** sa J-Link aktualizuje (asi 10–30 s; neodpájajte ho) a karta sa znova pripojí. **Teraz nie** skryje pruh pre tento J-Link do zatvorenia aplikácie. Keď je firmvér sondy novší ako knižnica, správa znie "The J-Link firmware is newer than the J-Link library." V takom prípade namiesto toho aktualizujte J-Link Software.
 
 <a id="probe.firmware_update_failed"></a>
 #### `probe.firmware_update_failed`

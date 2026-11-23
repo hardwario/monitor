@@ -103,7 +103,9 @@ J-Link jest na złączu LTE) prowadzi więc przez całą procedurę:
    pliku.
 8. **Done** (gotowe): aplikacja znowu działa, a konsola łączy się ponownie.
 
-Podczas działania kreatora konsola karty jest wstrzymana (**Paused for the LTE firmware update**). Anulowanie działa
+Kreator zastępuje obszar strony karty; w międzyczasie możesz zajrzeć do konsoli i wrócić przez **Wizard** (kreator) na
+górze paska bocznego ([Kreatory i inne widoki](getting-started.md#kreatory-i-inne-widoki)). Podczas działania kreatora
+konsola karty jest wstrzymana (**Paused for the LTE firmware update**). Anulowanie działa
 zawsze, z wyjątkiem zapisu do MCU. Po kroku 3 kreator najpierw pyta: **The application MCU is erased. Write the
 application back first?** (MCU aplikacji jest wymazane. Najpierw zapisać aplikację z powrotem?)
 
