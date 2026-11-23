@@ -675,9 +675,11 @@ Result<OperationId> DeviceSession::writeMemory(std::string_view targetId, std::u
     return startOperation(std::move(command), targetId);
 }
 
-Result<OperationId> DeviceSession::readRegisters(std::string_view targetId) {
+Result<OperationId> DeviceSession::readRegisters(std::string_view targetId,
+                                                 ReadRegistersOptions options) {
     detail::OperationCommand command;
     command.kind = OperationKind::ReadRegisters;
+    command.haltIfRunning = options.haltIfRunning;
     return startOperation(std::move(command), targetId);
 }
 

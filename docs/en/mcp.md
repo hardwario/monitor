@@ -129,7 +129,7 @@ connected. `target` is `app` or `lte` (default: the console's target).
 | `reset` | Resets the MCU (`halt` keeps it halted) |
 | `halt`, `go` | Halt the CPU or let it run |
 | `read_memory` | Reads memory (`address`, `length` up to 16 MiB, `width`); up to 64 KiB inline, more with `to_file` |
-| `read_registers` | The CPU registers (the CPU must be halted) |
+| `read_registers` | The CPU registers (the CPU must be halted, or `halt` halts it for the read and lets it run again) |
 | `memory_zones` | The memory zones of the target |
 | `read_pib` | The Product Information Block, as `hwio chester app pib read --json` |
 | `read_uicr` | The UICR customer area, as `hwio chester app uicr read` |

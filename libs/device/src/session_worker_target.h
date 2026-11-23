@@ -34,7 +34,13 @@ namespace hwio::device::detail {
 [[nodiscard]] Status runWriteMemory(WorkflowContext& context, std::uint32_t address,
                                     std::span<const std::byte> data, AccessWidth width);
 // Errors: target.not_halted, those of IProgrammer::readRegisters.
-[[nodiscard]] Result<std::vector<RegisterValue>> runReadRegisters(WorkflowContext& context);
+// Plan 0049 (ADR-0372): with `haltIfRunning` a running core is halted for the read and let run
+// again afterwards - also when the read failed; an already halted core stays halted. When go
+// fails the result is the go error after a successful read, else the read error (the first error
+// wins). Not cancellable between halt and go (one halt, the bounded reads, one go). Errors also
+// those of IProgrammer::isHalted / halt / go.
+[[nodiscard]] Result<std::vector<RegisterValue>> runReadRegisters(WorkflowContext& context,
+                                                                  bool haltIfRunning = false);
 [[nodiscard]] Result<std::vector<MemoryZone>> runMemoryZones(WorkflowContext& context);
 // runFlash() of the raw bytes (one segment) with the CPU running afterwards: reset + halt,
 // program, verify, reset (go). Range rules of planImage() (M2): outside flash / UICR or inside

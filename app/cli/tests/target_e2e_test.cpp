@@ -149,9 +149,31 @@ TEST_F(TargetCli, RegsOnARunningCore) {
     const RunResult human = app(args({"regs"}));
     EXPECT_EQ(human.exitCode, 6) << human.err;
     EXPECT_NE(human.err.find("The CPU is running."), std::string::npos) << human.err;
+    // Plan 0049: the CLI suggests `regs --halt`.
+    EXPECT_NE(human.err.find("Use `regs --halt` to halt the CPU for the read"), std::string::npos)
+        << human.err;
     const RunResult json = app(args({"regs"}), true);
     EXPECT_EQ(json.exitCode, 6);
     EXPECT_EQ(errorCode(json), QStringLiteral("target.not_halted"));
+}
+
+// Plan 0049 (ADR-0372): `regs --halt` halts the running fake target for the read and lets it run
+// again, in one process; human and --json output as without the option.
+TEST_F(TargetCli, RegsHaltOnARunningCore) {
+    const RunResult human = app(args({"regs", "--halt"}));
+    ASSERT_EQ(human.exitCode, 0) << human.err;
+    EXPECT_EQ(human.out, "R0  0x00000001\nPC  0x00001234\n");
+    const RunResult json = app(args({"regs", "--halt"}), true);
+    ASSERT_EQ(json.exitCode, 0) << json.out << json.err;
+    ASSERT_EQ(envelopes(json.out).size(), 1U) << json.out;
+    const QJsonObject registers = lastData(json).value(QStringLiteral("registers")).toObject();
+    EXPECT_EQ(registers.size(), 2);
+    EXPECT_EQ(registers.value(QStringLiteral("PC")).toString(), QStringLiteral("0x00001234"));
+    const RunResult status = app(args({"status"}), true);
+    ASSERT_EQ(status.exitCode, 0) << status.out << status.err;
+    EXPECT_FALSE(lastData(status).value(QStringLiteral("halted")).toBool());
+    const RunResult help = app(args({"regs", "--help"}));
+    EXPECT_NE(help.out.find("--halt"), std::string::npos) << help.out;
 }
 
 TEST_F(TargetCli, Zones) {

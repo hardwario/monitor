@@ -1251,7 +1251,7 @@ private:
         case OperationKind::WriteMemory:
             return runWriteMemory(run.context, command.address, command.data, command.width);
         case OperationKind::ReadRegisters: {
-            auto registers = runReadRegisters(run.context);
+            auto registers = runReadRegisters(run.context, command.haltIfRunning);
             if (!registers) {
                 return std::unexpected(std::move(registers).error());
             }

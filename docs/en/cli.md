@@ -144,7 +144,7 @@ Block are kept ([Flashing](flashing.md#uicr-and-the-product-information-block)).
 |---|---|
 | `status` | Whether the CPU is halted, its core ID and the J-Link device |
 | `halt`, `go` | Halt the CPU or let it run, without a reset |
-| `regs` | The CPU registers (the CPU must be halted) |
+| `regs [--halt]` | The CPU registers. The CPU must be halted, or `--halt` halts it for the read and lets it run again |
 | `zones` | The memory zones the J-Link library reports |
 | `mem read [-l LEN] [-w 8\|16\|32] [-o FILE] ADDR` | Print memory as a hexdump (default 64 bytes, at most 16 MiB), or save the raw bytes to a new FILE |
 | `mem write [-i FILE] [-w 8\|16\|32] [--yes] ADDR [HEX]` | Write bytes (for example `0102aabb`) to RAM or peripheral registers, at most 64 KiB (asks first) |

@@ -87,8 +87,9 @@ constexpr const char* readMemoryDescription =
 
 constexpr const char* readRegistersDescription =
     "Read the core registers (R0-R15, xPSR, MSP, PSP, ...) as hex strings. The CPU must be "
-    "halted first (halt), else target.not_halted. PC/LR/SP show where the firmware is. J-Link "
-    "only.";
+    "halted first (halt), else target.not_halted - or pass halt=true to halt it for the read and "
+    "let it run again if it was running (a halted CPU stays halted). PC/LR/SP show where the "
+    "firmware is. J-Link only.";
 
 constexpr const char* memoryZonesDescription =
     "List the memory zones the J-Link library reports for the target (often none). J-Link only.";
@@ -716,7 +717,15 @@ hwio::Status addReadRegisters(hwio::mcp::Registry& registry, ToolsContext& conte
             .name = "read_registers",
             .title = "Read core registers",
             .description = readRegistersDescription,
-            .inputSchema = deviceTargetSchema(),
+            .inputSchema =
+                Schema::object()
+                    .property(QStringLiteral("device"), deviceArgument())
+                    .property(QStringLiteral("target"), targetArgument())
+                    .property(QStringLiteral("halt"),
+                              Schema::boolean(QStringLiteral("Halt a running CPU for the read and "
+                                                             "let it run again."))
+                                  .defaultValue(false))
+                    .json(),
             .outputSchema =
                 objectOf({{"registers", typed("object")}}, {QStringLiteral("registers")}),
             .annotations = readOnly,
@@ -724,17 +733,23 @@ hwio::Status addReadRegisters(hwio::mcp::Registry& registry, ToolsContext& conte
             .marker = false,
             .start = operationStart(
                 context,
-                [](const QJsonObject&, const ResolvedDevice&,
+                [](const QJsonObject& args, const ResolvedDevice&,
                    const hwio::device::TargetProfile& target,
                    const hwio::mcp::ToolLimits& limits) -> hwio::Result<SimpleOperation> {
                     const std::string id(target.id);
                     const std::size_t max = limits.maxRegisters;
+                    // Plan 0049 (ADR-0372): the prior run state is restored, so it stays readOnly.
+                    const bool halt = args.value(QStringLiteral("halt")).toBool();
                     return SimpleOperation{
                         .settings = readSettings("read_registers"),
                         .consent = {},
                         .details = {},
                         .action = {},
-                        .start = [id](DeviceSession& s) { return s.readRegisters(id); },
+                        .start =
+                            [id, halt](DeviceSession& s) {
+                                return s.readRegisters(
+                                    id, hwio::device::ReadRegistersOptions{.haltIfRunning = halt});
+                            },
                         .result = [max](const OperationResult& r) -> hwio::Result<QJsonObject> {
                             QJsonObject registers;
                             std::size_t count = 0;

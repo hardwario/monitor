@@ -623,7 +623,7 @@ Správa môže uvádzať zariadenie, napríklad "The Bluetooth connection to `<n
 - **Probably:** Registers can be read only while the core is halted.
 - **What to do:** Halt the core first.
 
-Z príkazu `hwio chester app regs` (alebo `lte regs`) a z MCP servera (`hwio mcp`). Jadro najprv zastavte príkazom `hwio chester app halt`.
+Z príkazu `hwio chester app regs` (alebo `lte regs`) a z MCP servera (`hwio mcp`). Použite `hwio chester app regs --halt`: zastaví CPU len na čas čítania a potom ho nechá znova bežať (v MCP `read_registers` s `halt: true`). Predchádzajúci `hwio chester app halt` nepomôže, pretože pri pripojení ďalšieho príkazu CPU opäť beží.
 
 <a id="target.address_out_of_range"></a>
 #### `target.address_out_of_range`

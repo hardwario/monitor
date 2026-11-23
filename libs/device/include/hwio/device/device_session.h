@@ -147,6 +147,13 @@ inline constexpr int maxLatencyMs = 1000;
 
 class DeviceSession;
 
+// Plan 0049 (ADR-0372): the options of DeviceSession::readRegisters().
+struct ReadRegistersOptions {
+    // Halt the core if it runs, read, then let it run again; an already halted core stays halted
+    // (ADR-0372). Without it a running core gives target.not_halted.
+    bool haltIfRunning = false;
+};
+
 // Plan 0033 (D4, ADR-0234): while a SessionHold exists the session's RTT is detached (the console
 // reports Stopped without an error), it never re-attaches by itself and reconnect() is ignored;
 // operations still run (on the console target nothing is restored or attached after them, the
@@ -254,8 +261,12 @@ public:
     // or the denied range), and those above.
     [[nodiscard]] Result<OperationId> writeMemory(std::string_view targetId, std::uint32_t address,
                                                   std::vector<std::byte> data, AccessWidth width);
-    // Result: registers (<= maxRegisters). Worker error: target.not_halted.
-    [[nodiscard]] Result<OperationId> readRegisters(std::string_view targetId);
+    // Result: registers (<= maxRegisters). Worker error: target.not_halted (a running core
+    // without options.haltIfRunning). Plan 0049 (ADR-0372): with haltIfRunning a running core is
+    // halted for the read and let run again afterwards, also when the read failed (the first
+    // error wins); the session's halt state (review S7) does not change.
+    [[nodiscard]] Result<OperationId> readRegisters(std::string_view targetId,
+                                                    ReadRegistersOptions options = {});
     // Result: zones (<= maxMemoryZones; empty when the library reports none).
     [[nodiscard]] Result<OperationId> memoryZones(std::string_view targetId);
     // Raw bytes into flash (1..maxWriteFlashBytes): reset + halt, program (the flash loader keeps
