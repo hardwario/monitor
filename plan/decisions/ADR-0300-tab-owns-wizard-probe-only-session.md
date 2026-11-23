@@ -1,6 +1,6 @@
 # ADR-0300 — The tab owns the wizards' probe-only session
 
-- **Status:** Accepted (plan 0009 review; refines ADR-0295 and ADR-0297)
+- **Status:** Accepted (plan 0009 review; refines ADR-0295 and ADR-0297; amended by ADR-0391 (2026-11-23): the chain state lives in the tab (DeviceTabViewModel::setWizardChainPending), the tab keeps / releases the session from its own wizard's open state)
 - **Date:** 2026-11-09
 - **Decided by:** Matej Strnad (2026-11-09, decision A of the 0009 review)
 

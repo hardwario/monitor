@@ -248,9 +248,11 @@ TestCase {
     }
 
     // Plan 0052: a global wizard (setup) is a view over the page area of the current tab.
+    // Plan 0056 (B8): the global test wizard is registered by tst_gui before the real setup wizard.
     function test_globalWizardView() {
-        testSupport.registerGlobalTestWizard();
         verify(AppViewModel.launcher.start("first-run-setup"));
+        compare(AppViewModel.globalWizard.title, "Test wizard");
+        verify(testSupport.globalWizard() !== null);
         const global = () => find("globalWizardView");
         tryVerify(() => global() !== null);
         compare(findAll(global(), "wizardTitle")[0].text, "Test wizard");

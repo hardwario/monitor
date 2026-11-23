@@ -16,9 +16,11 @@ Item {
     id: step
 
     property ProbePickerViewModel vm: null
+    // Plan 0056 (embedded contract): the WizardViewModel showing this control (set by WizardView).
+    property WizardViewModel host: null
     // Plan 0008 step 5: informational rows only (no selection).
     property bool readOnly: false
-    readonly property CheckListModel checks: AppViewModel.currentTabViewModel.wizard.checks
+    readonly property CheckListModel checks: step.host !== null ? step.host.checks : null
 
     objectName: "probePickerStep"
     implicitHeight: column.implicitHeight

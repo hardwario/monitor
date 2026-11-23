@@ -93,9 +93,11 @@ Změny se projeví okamžitě.
 ### Režimy
 
 **Režim** určuje, kolik toho Nastavení ukazuje. Při prvním spuštění (a jednou po aktualizaci z verze 2.0.0-rc.3 nebo
-starší) se aplikace zeptá **Jak chcete HARDWARIO Monitor používat?**: vyberte režim a klikněte na **Pokračovat**.
-Předvybraný je **Pokročilý**; pokud jste ve starší verzi měli zapnutou volbu **Zobrazit odborné akce údržby**, je to
-**Expertní**. Zavřením otázky zůstane předvybraný režim. Změnit ho můžete kdykoli v **Nastavení › Obecné › Režim**.
+starší) se v prvním kroku průvodce nastavením, **Vítejte**, aplikace zeptá **Jak chcete HARDWARIO Monitor používat?**:
+klikněte na režim, nebo ho vyberte pomocí <kbd>↑</kbd> / <kbd>↓</kbd>. Předvybraný je **Pokročilý**; pokud jste ve
+starší verzi měli zapnutou volbu **Zobrazit odborné akce údržby**, je to **Expertní**. Vybraný režim se uloží, ať krok
+opustíte jakkoli: **Další**, **Přeskočit nastavení**, **Zrušit**, **×** nebo <kbd>Esc</kbd>. Změnit ho můžete kdykoli v
+**Nastavení › Obecné › Režim**.
 
 | Zobrazeno | Základní | Pokročilý | Expertní |
 |---|---|---|---|
@@ -122,20 +124,33 @@ nastavení**), zobrazí se pro tuto návštěvu s poznámkou „Zobrazeno, proto
 - **Připojit zařízení…**: průvodce připojením (programátor, kabel, napájení, živá kontrola, připojení).
 - **Řešit potíže s připojením…**: vyberte problém; průvodce spustí kontroly a provede vás krok za krokem.
 - **Nahrát firmware (s průvodcem)…**: nahraje aplikační firmware krok za krokem ([Nahrávání](flashing.md)).
+
+Tyto tři pracují s aktuální kartou zařízení (z karty Nastavení: s naposledy zobrazenou kartou zařízení). Pracují se
+zařízením připojeným k tomuto počítači: na kartě [relace podpory](remote-support.md#join-a-session) se neotevřou a
+oznámí to.
 - **Vytvořit diagnostickou zprávu…**: soubor zip pro podporu HARDWARIO ([Soukromí](privacy.md#diagnostická-zpráva)).
 - **Dokumentace ↗**: tyto stránky na GitHubu, pro nainstalovanou verzi aplikace a v jazyce aplikace (anglicky,
   pokud stránka není přeložená).
 
+<a id="guides-and-views"></a>
 <a id="průvodci-a-další-zobrazení"></a>
 ### Průvodci a další zobrazení
 
-Průvodci (například **Aktualizovat firmware LTE…**), diagnostická zpráva, klávesové zkratky, aktualizace firmwaru
-J-Linku, **Připojit se k relaci podpory…** a **Sdílet s podporou…** se otevřou v ploše stránky karty vedle lišty;
-karty a lišta zůstanou. **×** nebo <kbd>Esc</kbd> je zavře a vrátí se předchozí stránka. Přepnutí na jinou kartu je
-zavře také, kromě doby, kdy pracují (sběr diagnostické zprávy, zápis firmwaru J-Linku).
+Průvodci (průvodce nastavením, průvodce připojením, průvodce řešením potíží, nahrávání s průvodcem a **Aktualizovat
+firmware LTE…**), diagnostická zpráva, klávesové zkratky, aktualizace firmwaru J-Linku, **Připojit se k relaci
+podpory…** a **Sdílet s podporou…** se otevřou v ploše stránky karty vedle lišty; karty a lišta zůstanou. **×** nebo
+<kbd>Esc</kbd> je zavře a vrátí se předchozí stránka. Přepnutí na jinou kartu je zavře také, kromě doby, kdy pracují
+(sběr diagnostické zprávy, zápis firmwaru J-Linku).
 
 Během průvodce můžete otevřít další stránky karty, například konzoli: **Průvodce** nahoře v liště (a malý odznak na
 kartě zařízení) vrátí průvodce tam, kde byl. Každá karta zařízení může mít vlastního průvodce.
+Když je otevřený průvodce připojením, průvodce řešením potíží nebo nahrávání s průvodcem, **Vybrat jiné zařízení** této
+karty počká, dokud ho nezavřete: zařízení karty vybírá průvodce. Připojení a odpojení zůstanou dostupné a průvodce je
+sleduje.
+
+Průvodce nastavením, dokud je otevřený, zakrývá plochu stránky všech karet. Průvodce, který běží v kartě, pokračuje pod
+ním (jeho odznak zůstane) a znovu se ukáže, až se průvodce nastavením zavře. Ostatní průvodci se spustí, až když je
+průvodce nastavením zavřený (**Nejprve dokončete nebo zavřete průvodce nastavením.**).
 
 Když něco selže, aplikace ukáže, co se stalo, pravděpodobnou příčinu (**Pravděpodobně:**) a co dělat
 (**Co dělat:**). **Podrobnosti** ukážou kód chyby; [Řešení problémů](troubleshooting.md) uvádí všechny kódy.

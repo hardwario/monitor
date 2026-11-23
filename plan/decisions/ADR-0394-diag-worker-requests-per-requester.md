@@ -2,7 +2,8 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-23
-- **Decided by:** — (plan [0056](../features/0056-wizards-as-views-rc5.md) D-10, awaiting Matej Strnad)
+- **Decided by:** Matej Strnad, 2026-11-23 (plan [0056](../features/0056-wizards-as-views-rc5.md) D-10, as
+  recommended)
 
 ## Context
 
@@ -19,7 +20,7 @@ pending request and resubmit in turn — a loop of queued calls on the GUI threa
 
 ## Decision
 
-Proposed: option 1. `ChecksRequest` carries a requester token (`std::uint64_t` from `DiagWorker::newRequester()`, a
+Decided: option 1. `ChecksRequest` carries a requester token (`std::uint64_t` from `DiagWorker::newRequester()`, a
 counter; each wizard and `StartupCheck` takes one; 0 keeps the old same-kind rule). `maxQueued` = 12 (8 tabs, the global wizard, `StartupCheck`, report collect and
 save). A full queue still drops the oldest pending request with `requestDropped`. Report requests keep the
 same-kind rule.

@@ -134,6 +134,7 @@ private:
     CheckListModel* m_checks = nullptr;       // child
     DiagnoseRunner* m_runner = nullptr;       // child
     ProbePickerViewModel* m_picker = nullptr; // child (created for the probe step)
+    std::uint64_t m_requester = 0;            // DiagWorker::newRequester (ADR-0394)
     std::uint64_t m_generation = 0;           // DiagWorker run (0 = none)
     std::shared_ptr<diag::EnvironmentFacts> m_pendingFacts;
     std::shared_ptr<diag::EnvironmentFacts> m_facts; // of the last finished check run

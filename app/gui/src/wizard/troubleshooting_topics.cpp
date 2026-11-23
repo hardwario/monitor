@@ -115,7 +115,8 @@ constexpr std::array probeBusySteps{
 };
 
 // ---- no-power: The device has no power or does not respond ----
-constexpr std::array noPowerCodes{ErrorCode::TargetNoPower};
+// Plan 0056 (2026-11-23, Matej Strnad): target.low_voltage (plan 0051, ADR-0383) opens this topic.
+constexpr std::array noPowerCodes{ErrorCode::TargetNoPower, ErrorCode::TargetLowVoltage};
 constexpr std::array noPowerSteps{
     TopicStep{.kind = K::Manual,
               .checkIds = {},

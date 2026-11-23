@@ -17,6 +17,8 @@
 #include "viewmodels/error_info.h"
 #include "viewmodels/probe_firmware_view_model.h"
 #include "viewmodels/probe_picker_view_model.h"
+#include "viewmodels/ui_mode.h"
+#include "viewmodels/ui_mode_controller.h"
 #include "wizard/check_list_model.h"
 #include "wizard/setup_wizard.h"
 #include "wizard/wizard.h"
@@ -273,6 +275,72 @@ TEST_F(SetupWizardTest, SkipSetupWritesTheCompletedVersion) {
     wizard().action(QStringLiteral("skip-setup"));
     EXPECT_FALSE(wizard().isOpen());
     EXPECT_EQ(setting("setup/completedVersion"), AppViewModel::version());
+}
+
+// ---- plan 0056 (ADR-0392): the mode question on Welcome ----------------------------------------
+
+// A fresh install: Welcome asks the mode, Advanced preselected; a click only selects; [Next]
+// stores it.
+TEST_F(SetupWizardTest, FreshInstallAsksTheModeOnWelcome) {
+    ASSERT_FALSE(app().uiMode()->chosen());
+    ASSERT_TRUE(open(options(Platform::Linux)));
+    EXPECT_EQ(stepId(), QStringLiteral("welcome"));
+    EXPECT_TRUE(setup()->modeChoice());
+    EXPECT_EQ(setup()->modes().size(), 3);
+    EXPECT_EQ(setup()->selectedMode(), static_cast<int>(hwio::gui::UiMode::Advanced));
+    setup()->selectMode(static_cast<int>(hwio::gui::UiMode::Basic));
+    setup()->selectMode(42); // ignored
+    EXPECT_EQ(setup()->selectedMode(), static_cast<int>(hwio::gui::UiMode::Basic));
+    EXPECT_FALSE(app().uiMode()->chosen());
+    wizard().primary(); // Next
+    EXPECT_EQ(stepId(), QStringLiteral("jlink"));
+    EXPECT_FALSE(setup()->modeChoice());
+    EXPECT_TRUE(app().uiMode()->chosen());
+    EXPECT_EQ(app().uiMode()->mode(), hwio::gui::UiMode::Basic);
+    EXPECT_EQ(setting("ui/mode"), QStringLiteral("basic"));
+}
+
+// An rc.3 upgrade with the expert switch on: Expert preselected (ADR-0362); × stores it (D-4) and
+// removes the switch (ADR-0360).
+TEST_F(SetupWizardTest, Rc3UpgradeWithExpertActionsPreselectsExpert) {
+    ASSERT_TRUE(app().settingsStore()->setValue(QStringLiteral("advanced/expertActions"), true));
+    app().uiMode()->reload();
+    ASSERT_TRUE(open(options(Platform::Linux)));
+    EXPECT_TRUE(setup()->modeChoice());
+    EXPECT_EQ(setup()->selectedMode(), static_cast<int>(hwio::gui::UiMode::Expert));
+    wizard().cancel(false); // × / Esc / Cancel
+    EXPECT_FALSE(wizard().isOpen());
+    EXPECT_EQ(setting("ui/mode"), QStringLiteral("expert"));
+    EXPECT_FALSE(app().settingsStore()->value(QStringLiteral("advanced/expertActions")).toBool());
+}
+
+// An rc.3 upgrade without the switch: Advanced; [Skip setup] stores it.
+TEST_F(SetupWizardTest, SkipSetupStoresTheSelectedMode) {
+    ASSERT_TRUE(open(options(Platform::Linux)));
+    EXPECT_EQ(setup()->selectedMode(), static_cast<int>(hwio::gui::UiMode::Advanced));
+    wizard().action(QStringLiteral("skip-setup"));
+    EXPECT_FALSE(wizard().isOpen());
+    EXPECT_EQ(setting("ui/mode"), QStringLiteral("advanced"));
+}
+
+// An rc.4 user (mode chosen) and Help › Setup wizard…: no mode block; the mode does not change.
+TEST_F(SetupWizardTest, AChosenModeIsNotAskedAgain) {
+    ASSERT_TRUE(app().uiMode()->choose(hwio::gui::UiMode::Basic).has_value());
+    ASSERT_TRUE(open(options(Platform::Linux)));
+    EXPECT_FALSE(setup()->modeChoice());
+    wizard().cancel(false);
+    EXPECT_EQ(app().uiMode()->mode(), hwio::gui::UiMode::Basic);
+    EXPECT_EQ(setting("ui/mode"), QStringLiteral("basic"));
+}
+
+// Started from an error: no Welcome, no mode question, nothing stored.
+TEST_F(SetupWizardTest, StartedFromAnErrorDoesNotAskTheMode) {
+    ASSERT_TRUE(
+        open(options(Platform::Linux), ErrorInfo(hwio::makeError(ErrorCode::UsbAccessDenied))));
+    EXPECT_NE(stepId(), QStringLiteral("welcome"));
+    EXPECT_FALSE(setup()->modeChoice());
+    wizard().cancel(false);
+    EXPECT_FALSE(app().uiMode()->chosen());
 }
 
 TEST_F(SetupWizardTest, DoneWritesTheCompletedVersionAndSummarises) {
@@ -550,9 +618,13 @@ protected:
         EXPECT_TRUE(waitFor([&] { return check.decision().has_value(); }));
         return check.decision().value_or(Decision::None);
     }
-    void complete() {
+    // Plan 0056 (D-3): completed = setup/completedVersion and a chosen mode.
+    void complete(bool chooseMode = true) {
         ASSERT_TRUE(app().settingsStore()->setValue(QStringLiteral("setup/completedVersion"),
                                                     QStringLiteral("2.0.0")));
+        if (chooseMode) {
+            ASSERT_TRUE(app().uiMode()->choose(hwio::gui::UiMode::Advanced).has_value());
+        }
     }
     void closeWizard() {
         wizard().cancel();
@@ -588,23 +660,48 @@ TEST_F(StartupCheckTest, CompletedWithoutJLinkOpensTheNeededVariantUntilDontShow
     EXPECT_FALSE(wizard().isOpen());
 }
 
-TEST_F(StartupCheckTest, WaitsForAnotherWizard) {
+// Plan 0056 (D-5): Welcome opens at once (no J-Link check), also while a tab's wizard runs.
+TEST_F(StartupCheckTest, WelcomeOpensAtOnceBesideATabWizard) {
     recreateApp(); // the Connect wizard of plan 0009
     ASSERT_TRUE(app().launcher()->start(QStringLiteral("connect-device")));
     StartupCheck check(app(), nullptr);
     check.run();
-    hwio::gui::test::spin(std::chrono::milliseconds(500));
-    EXPECT_EQ(wizard().wizardId(), QStringLiteral("connect-device"));
-    EXPECT_FALSE(check.decision().has_value());
-    closeWizard();
-    ASSERT_TRUE(waitFor([&] { return check.decision().has_value(); }));
+    ASSERT_TRUE(check.decision().has_value()); // decided synchronously
     EXPECT_EQ(check.decision(), std::optional<Decision>(Decision::Welcome));
     EXPECT_EQ(wizard().wizardId(), QStringLiteral("first-run-setup"));
+    EXPECT_TRUE(hwio::gui::test::tabWizard(app()).isOpen()); // keeps running underneath
+}
+
+// 0035 § C (plan 0056: any wizard): the "J-Link Software is needed" variant waits for the open
+// wizards to close.
+TEST_F(StartupCheckTest, TheNeededVariantWaitsForTheOpenWizards) {
+    recreateApp(); // the Connect wizard of plan 0009
+    complete();
+    qputenv("HWIO_JLINK_LIBRARY", QByteArray("/nonexistent/libjlinkarm.so"));
+    ASSERT_TRUE(app().launcher()->start(QStringLiteral("connect-device")));
+    hwio::gui::WizardViewModel& tabWizard = hwio::gui::test::tabWizard(app());
+    StartupCheck check(app(), nullptr);
+    check.run();
+    hwio::gui::test::spin(std::chrono::milliseconds(1500));
+    EXPECT_FALSE(check.decision().has_value());
+    EXPECT_FALSE(wizard().isOpen());
+    tabWizard.cancel(true);
+    ASSERT_TRUE(waitFor([&] { return check.decision().has_value(); }));
+    EXPECT_EQ(check.decision(), std::optional<Decision>(Decision::JLinkNeeded));
+    EXPECT_EQ(wizard().wizardId(), QStringLiteral("first-run-setup"));
+}
+
+// Plan 0056 (D-3): a completed setup without a chosen mode is not completed.
+TEST_F(StartupCheckTest, CompletedWithoutAModeOpensWelcome) {
+    complete(false);
+    EXPECT_EQ(runCheck(), Decision::Welcome);
+    EXPECT_EQ(stepId(), QStringLiteral("welcome"));
 }
 
 // Review 0009 F7: a wizard's checks may replace the start-up check's pending request; it runs
 // again, so decided() still comes.
 TEST_F(StartupCheckTest, AReplacedRequestRunsAgain) {
+    complete(); // the J-Link check runs only after a completed setup (plan 0056, D-5)
     QSignalSpy dropped(&app().diagWorker(), &hwio::gui::DiagWorker::requestDropped);
     StartupCheck check(app(), nullptr);
     // Keep the worker busy so that the check's request is still pending when it is replaced.

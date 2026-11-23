@@ -14,8 +14,8 @@
 // While `active` (the page is visible) the picker holds the scanner (2 s scans).
 //
 // Wizard mode (plan 0035, ADR-0252): the picker of a wizard's Embedded `probe-picker` step. Rows
-// used by another tab are not selectable (a modal wizard does not switch tabs), choose() never
-// emits tabActivationRequested and connectSelected() does nothing; the wizard reads
+// used by another tab are not selectable (a wizard never takes another tab's probe, ADR-0391),
+// choose() never emits tabActivationRequested and connectSelected() does nothing; the wizard reads
 // selectedSerial().
 //
 // Ownership: child of its DeviceTabViewModel, or of the wizard that created it with

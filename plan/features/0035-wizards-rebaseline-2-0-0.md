@@ -15,6 +15,8 @@
 - **Works with:** [0036](0036-jlink-firmware-update-gui.md) (J-Link firmware update hooks in 0008/0009),
   [0037](0037-docs-links.md) ("Learn more" and docs links in wizard steps)
 
+> **Amendment (plan [0056](0056-wizards-as-views-rc5.md), 2026-11-23):** wizards are views, not modal: every wizard has its own wizard-mode picker (≤ 9); "In use (tab N)" rows stay not selectable (D-9); the start-up check's wait for another wizard applies only to the "J-Link Software is needed" variant and waits for any wizard (tab or global).
+
 ## Context
 
 The user decided on 2026-11-04 that all three M4 wizards ship in 2.0.0 (ADR-0245): 0008 first-run setup, 0009 connect

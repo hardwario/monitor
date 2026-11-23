@@ -4,12 +4,14 @@
 // (plan/features/0007 § Data flow and threading, ADR-0068, ADR-0075).
 //
 // One owned std::jthread for the application (owned by AppViewModel). Requests go into a bounded
-// queue (maxQueued = 4): a new request replaces a pending one of the same kind, otherwise a full
-// queue drops the oldest pending request; the dropped request's generation gets no result but
-// requestDropped(generation) (queued), so its caller can submit it again (review 0009 F7). Every
-// request has a generation (counts from 1); results carry it, so a caller drops stale ones.
-// cancel() stops the running request's stop token (the CheckRunner and the report writer honour
-// it).
+// queue (maxQueued = 12: 8 tabs' wizards, the global wizard, StartupCheck, report collect and
+// save): a new request replaces a pending one of the same kind and the same requester (ADR-0394;
+// newRequester() hands out the tokens, one per wizard / StartupCheck; requester 0 = none replaces a
+// pending one of the same kind, as before), otherwise a full queue drops the oldest pending
+// request; the dropped request's generation gets no result but requestDropped(generation) (queued),
+// so its caller can submit it again (review 0009 F7). Every request has a generation (counts from
+// 1); results carry it, so a caller drops stale ones. cancel() stops the running request's stop
+// token (the CheckRunner and the report writer honour it).
 //
 // Results are handed over in a mutex-protected, bounded list (maxResults; when full the oldest
 // progress events are dropped, never final results) and the GUI thread is woken with one
@@ -49,7 +51,7 @@ class DiagWorker : public QObject {
     Q_OBJECT
 
 public:
-    static constexpr std::size_t maxQueued = 4;
+    static constexpr std::size_t maxQueued = 12;
     static constexpr std::size_t maxResults = 64;
 
     struct ChecksRequest {
@@ -57,6 +59,8 @@ public:
         // empty = all environment checks; else these and (transitively) the checks they depend
         // on, whose results are reported too (in the run order of environmentChecks()).
         std::vector<std::string> ids;
+        // ADR-0394: who asks (newRequester()); 0 = none.
+        std::uint64_t requester = 0;
     };
     struct CollectRequest {
         diag::EnvironmentContext context; // its `facts` is set by the worker
@@ -74,6 +78,9 @@ public:
     DiagWorker& operator=(const DiagWorker&) = delete;
     DiagWorker(DiagWorker&&) = delete;
     DiagWorker& operator=(DiagWorker&&) = delete;
+
+    // ADR-0394: a token for ChecksRequest::requester (counts from 1). GUI thread.
+    [[nodiscard]] std::uint64_t newRequester() noexcept { return m_nextRequester++; }
 
     // Each returns the request's generation.
     std::uint64_t runChecks(ChecksRequest request);
@@ -98,6 +105,10 @@ private:
         std::uint64_t generation = 0;
         std::variant<ChecksRequest, CollectRequest, SaveRequest> payload;
         [[nodiscard]] Kind kind() const { return static_cast<Kind>(payload.index()); }
+        [[nodiscard]] std::uint64_t requester() const {
+            const auto* checks = std::get_if<ChecksRequest>(&payload);
+            return checks != nullptr ? checks->requester : 0;
+        }
     };
     struct Progress {
         std::uint64_t generation = 0;
@@ -133,6 +144,8 @@ private:
     std::uint64_t m_nextGeneration = 1;
     std::uint64_t m_running = 0; // generation of the running request (0 = none)
     std::optional<std::stop_source> m_runningStop;
+
+    std::uint64_t m_nextRequester = 1; // GUI thread only (newRequester)
 
     std::atomic<bool> m_deliverPending{false};
     std::jthread m_worker; // last member: started last, joined first

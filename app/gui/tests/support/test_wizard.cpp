@@ -20,6 +20,7 @@
 #include <QVariantMap>
 #include <QtContainerFwd>
 #include <QtCore/qtmetamacros.h>
+#include <QtLogging>
 #include <QtTypes>
 
 #include <algorithm>
@@ -269,25 +270,31 @@ void TestWizard::goTo(int stepIndex) {
 }
 
 void registerTestWizard(AppViewModel& app, const QUrl& embeddedQml) {
-    (void)app.wizardRegistry().add(WizardDescriptor{
-        .id = WizardId::ConnectDevice,
-        .perTab = true,
-        // Qt parent ownership: the WizardViewModel.
-        .create = [&app](QObject* parent) -> Wizard* {
-            return new TestWizard(app, parent); // NOLINT(cppcoreguidelines-owning-memory)
-        }});
+    // Plan 0056 (B8): a collision with an earlier registration must not pass silently.
+    if (!app.wizardRegistry().add(WizardDescriptor{
+            .id = WizardId::ConnectDevice,
+            .perTab = true,
+            // Qt parent ownership: the WizardViewModel.
+            .create = [&app](QObject* parent) -> Wizard* {
+                return new TestWizard(app, parent); // NOLINT(cppcoreguidelines-owning-memory)
+            }})) {
+        qFatal("registerTestWizard: connect-device is registered already");
+    }
     (void)app.wizardRegistry().addEmbedded(QStringLiteral("test-embedded"), embeddedQml);
 }
 
 void registerGlobalTestWizard(AppViewModel& app) {
-    (void)app.wizardRegistry().add(
-        WizardDescriptor{.id = WizardId::FirstRunSetup,
-                         .perTab = false,
-                         // Qt parent ownership: the WizardViewModel.
-                         .create = [&app](QObject* parent) -> Wizard* {
-                             // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-                             return new TestWizard(app, parent, QStringLiteral("first-run-setup"));
-                         }});
+    // Plan 0056 (B8): registered before the built-in pages, else the real SetupWizard wins.
+    if (!app.wizardRegistry().add(WizardDescriptor{
+            .id = WizardId::FirstRunSetup,
+            .perTab = false,
+            // Qt parent ownership: the WizardViewModel.
+            .create = [&app](QObject* parent) -> Wizard* {
+                // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
+                return new TestWizard(app, parent, QStringLiteral("first-run-setup"));
+            }})) {
+        qFatal("registerGlobalTestWizard: first-run-setup is registered already");
+    }
 }
 
 } // namespace hwio::gui::test

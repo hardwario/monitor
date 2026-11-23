@@ -10,8 +10,8 @@
 #include "support/fake_jlink_scenario.h"
 #include "support/test_page_view_model.h"
 #include "viewmodels/app_view_model.h"
-#include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/device_tab_list_model.h"
+#include "viewmodels/device_tab_view_model.h"
 #include "wizard/wizard_view_model.h"
 
 #include <QCoreApplication>
@@ -56,6 +56,15 @@ inline void spin(std::chrono::milliseconds duration) {
 inline WizardViewModel& tabWizard(AppViewModel& app, int index = -1) {
     DeviceTabViewModel* tab = index < 0 ? app.currentTabViewModel() : app.tabs()->at(index);
     return *tab->wizard();
+}
+
+// Plan 0056: cancels every open wizard (the tabs' and the global one) and waits until they closed.
+inline void closeAllWizards(AppViewModel& app) {
+    for (int i = 0; i < app.tabs()->count(); ++i) {
+        app.tabs()->at(i)->wizard()->cancel(true);
+    }
+    app.globalWizard()->cancel(true);
+    (void)waitFor([&app] { return !app.anyWizardOpen(); });
 }
 
 class GuiTest : public ::testing::Test {

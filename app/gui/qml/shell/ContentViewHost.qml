@@ -1,6 +1,6 @@
 // The views shown over a page area (plan 0052, ADR-0386, ADR-0387): the content views of
-// AppViewModel.overlayView (report, J-Link firmware update, join and share a support session, mode
-// choice, keyboard shortcuts) and, while none is open, the global wizard (setup). One host per page
+// AppViewModel.overlayView (report, J-Link firmware update, join and share a support session,
+// keyboard shortcuts; plan 0056: the mode choice is the setup wizard's Welcome) and, while none is open, the global wizard (setup). One host per page
 // area (each device tab's PageHost and the Settings tab); only the host of the current tab
 // (`current`) shows a view, so a view is never instantiated twice at once. While it shows a view
 // the host covers the page area and the page beneath is hidden (`shown`); `closed` is emitted when
@@ -40,8 +40,6 @@ Item {
                 return joinView;
             case "share":
                 return shareView;
-            case "modeChoice":
-                return modeChoiceView;
             case "shortcuts":
                 return shortcutsView;
             case "globalWizard":
@@ -74,12 +72,6 @@ Item {
         id: shareView
 
         ShareView {}
-    }
-
-    Component {
-        id: modeChoiceView
-
-        ModeChoiceView {}
     }
 
     Component {

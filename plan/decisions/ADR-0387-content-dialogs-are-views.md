@@ -1,6 +1,6 @@
 # ADR-0387 — Content dialogs are views of the page area; confirmations stay dialogs
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0392 (2026-11-23): "Choose mode" is no content view any more (the setup wizard's Welcome step))
 - **Date:** 2026-11-17
 - **Decided by:** Matej Strnad (plan [0052](../features/0052-views-instead-of-dialogs.md))
 

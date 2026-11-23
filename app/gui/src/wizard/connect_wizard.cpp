@@ -79,7 +79,8 @@ ConnectWizard::ConnectWizard(AppViewModel& app, QObject* parent)
     : Wizard(parent), m_app(app),
       m_probeChecks(new CheckListModel(this)),       // NOLINT(cppcoreguidelines-owning-memory)
       m_checks(new CheckListModel(this)),            // NOLINT(cppcoreguidelines-owning-memory)
-      m_runner(new DiagnoseRunner(wizardId, this)) { // NOLINT(cppcoreguidelines-owning-memory)
+      m_runner(new DiagnoseRunner(wizardId, this)),  //  NOLINT(cppcoreguidelines-owning-memory)
+      m_requester(app.diagWorker().newRequester()) { // ADR-0394
     connect(m_checks, &CheckListModel::rowsChanged, this, &Wizard::changed);
     connect(m_probeChecks, &CheckListModel::rowsChanged, this, &Wizard::changed);
     connect(m_runner, &DiagnoseRunner::changed, this, &Wizard::changed);
@@ -467,7 +468,7 @@ void ConnectWizard::enterProbe() {
     if (!m_tab.isNull() && !m_tab->choosing() && !m_tab->isBle()) {
         // The tab's probe would show as used by this tab: the tab returns to its picker first.
         m_preferSerial = m_tab->probeSerial();
-        m_tab->chooseAnotherProbe();
+        m_tab->chooseAnotherProbeForWizard(); // plan 0056 (D-11)
     }
     if (m_picker == nullptr) {
         // Qt parent ownership: this wizard.
@@ -524,8 +525,8 @@ void ConnectWizard::runProbeChecks() {
         }
     }
     m_probeChecks->reset(rowIds, titles);
-    m_probeCheckRun =
-        m_app.diagWorker().runChecks(DiagWorker::ChecksRequest{.context = context, .ids = ids});
+    m_probeCheckRun = m_app.diagWorker().runChecks(
+        DiagWorker::ChecksRequest{.context = context, .ids = ids, .requester = m_requester});
     emit changed();
 }
 

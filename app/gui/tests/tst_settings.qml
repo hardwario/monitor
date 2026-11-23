@@ -218,71 +218,102 @@ TestCase {
         tryVerify(() => find("settingsPage") !== null);
     }
 
-    // ADR-0359: the first-start choice - Advanced preselected, Continue stores the choice, not
-    // shown again; ADR-0362: with the rc.3 expert switch on, Expert is preselected and Esc keeps it.
-    // Plan 0052 (ADR-0387): a view of the page area (here over the Settings page).
-    function test_modeChoiceDialog() {
-        verify(find("modeChoiceDialog") === null);
+    // Plan 0056 (ADR-0392): the first-start mode question is the setup wizard's Welcome step (no
+    // separate view); ADR-0359: Advanced preselected; ADR-0362: Expert with the rc.3 switch on;
+    // D-4: leaving Welcome in any way (Next, Esc) stores the selected card.
+    function closeSetup() {
+        if (AppViewModel.globalWizard.open)
+            AppViewModel.globalWizard.cancel(true);
+        tryVerify(() => !AppViewModel.globalWizard.open);
+    }
+
+    function setupView() {
+        return find("globalWizardView");
+    }
+
+    function test_modeChoiceOnTheWelcomeStep() {
         verify(testSupport.resetUiMode());
-        tryVerify(() => find("modeChoiceDialog") !== null);
-        const dialog = find("modeChoiceDialog");
-        compare(AppViewModel.overlayView, "modeChoice");
-        verify(find("settingsPage") === null, "the page beneath is hidden");
-        verify(!AppViewModel.uiMode.chosen);
-        compare(dialog.selected, UiMode.Advanced);
-        tryVerify(() => findChild(dialog, "modeChoiceContinue").activeFocus);
-        compare(findChild(dialog, "modeCard_" + UiMode.Advanced).Accessible.checked, true);
+        wait(100);
+        compare(AppViewModel.overlayView, ""); // no mode view (D-3)
+        verify(find("modeChoiceDialog") === null);
+        verify(AppViewModel.launcher.start("first-run-setup", -1));
+        tryVerify(() => setupView() !== null);
+        const view = setupView();
+        tryVerify(() => findChild(view, "setupModeCards") !== null && findChild(view, "setupModeCards").visible);
+        const cards = findChild(view, "setupModeCards");
+        compare(cards.selected, UiMode.Advanced);
+        compare(findChild(cards, "modeCard_" + UiMode.Advanced).Accessible.checked, true);
+        verify(findChild(cards, "modeChoiceHint").visible);
+        view.ensureVisible(findChild(cards, "modeCard_" + UiMode.Basic));
         waitForRendering(window.contentItem);
-        mouseClick(findChild(dialog, "modeCard_" + UiMode.Basic));
-        compare(dialog.selected, UiMode.Basic);
-        mouseClick(findChild(dialog, "modeChoiceContinue"));
-        tryVerify(() => find("modeChoiceDialog") === null);
-        verify(find("settingsPage") !== null);
+        mouseClick(findChild(cards, "modeCard_" + UiMode.Basic));
+        compare(cards.selected, UiMode.Basic);
+        verify(!AppViewModel.uiMode.chosen); // a click only selects
+        // Keyboard: Down moves the selection, Space selects too.
+        findChild(cards, "modeCard_" + UiMode.Basic).forceActiveFocus();
+        keyClick(Qt.Key_Down);
+        compare(cards.selected, UiMode.Advanced);
+        keyClick(Qt.Key_Up);
+        compare(cards.selected, UiMode.Basic);
+        // [Next] stores it.
+        AppViewModel.globalWizard.primary();
         verify(AppViewModel.uiMode.chosen);
         compare(AppViewModel.uiMode.mode, UiMode.Basic);
         compare(testSupport.setting("ui/mode"), "basic");
-        wait(100);
-        verify(find("modeChoiceDialog") === null); // not shown again
+        closeSetup();
+        // The mode is chosen: Help › Setup wizard… has no mode block (D-2).
+        verify(AppViewModel.launcher.start("first-run-setup", -1));
+        tryVerify(() => setupView() !== null);
+        verify(!findChild(setupView(), "setupModeCards").visible);
+        closeSetup();
 
+        // ADR-0362: Expert preselected; Esc on Welcome stores the selection (D-4).
         verify(testSupport.setSetting("advanced/expertActions", true));
         verify(testSupport.resetUiMode());
-        tryVerify(() => find("modeChoiceDialog") !== null);
-        const again = find("modeChoiceDialog");
+        verify(AppViewModel.launcher.start("first-run-setup", -1));
+        tryVerify(() => setupView() !== null);
+        const again = findChild(setupView(), "setupModeCards");
+        tryVerify(() => again.visible);
         compare(again.selected, UiMode.Expert);
-        waitForRendering(window.contentItem);
-        mouseClick(findChild(again, "modeCard_" + UiMode.Basic));
-        keyClick(Qt.Key_Escape); // closing keeps the preselection
-        tryVerify(() => find("modeChoiceDialog") === null);
+        tryVerify(() => findChild(setupView(), "wizardHeading").activeFocus);
+        keyClick(Qt.Key_Escape);
+        tryVerify(() => !AppViewModel.globalWizard.open);
         compare(AppViewModel.uiMode.mode, UiMode.Expert);
         compare(testSupport.setting("ui/mode"), "expert");
         compare(testSupport.setting("advanced/expertActions"), "false"); // removed (ADR-0360)
     }
 
-    // The view fits at 960 x 600 in the longest languages.
-    function test_modeChoiceDialogLayout_data() {
-        return [{ tag: "de" }, { tag: "pl" }, { tag: "cs" }, { tag: "sk" }];
+    // The Welcome step with the cards fits at 960 x 600 in five languages: the cards and the footer
+    // lie inside the window, each card is fully visible above the footer once scrolled to.
+    function test_modeChoiceLayout_data() {
+        return [{ tag: "en" }, { tag: "de" }, { tag: "pl" }, { tag: "cs" }, { tag: "sk" }];
     }
 
-    function test_modeChoiceDialogLayout(data) {
+    function test_modeChoiceLayout(data) {
         AppViewModel.setLanguage(data.tag);
         window.width = 960;
         window.height = 600;
         verify(testSupport.resetUiMode());
-        tryVerify(() => find("modeChoiceDialog") !== null);
-        const dialog = find("modeChoiceDialog");
+        verify(AppViewModel.launcher.start("first-run-setup", -1));
+        tryVerify(() => setupView() !== null);
+        const view = setupView();
+        tryVerify(() => findChild(view, "setupModeCards") !== null && findChild(view, "setupModeCards").visible);
         waitForRendering(window.contentItem);
-        const d = dialog.mapToItem(window.contentItem, 0, 0);
-        verify(d.y >= 0 && d.y + dialog.height <= window.height + 0.5, `view height ${dialog.height}`);
-        const button = findChild(dialog, "modeChoiceContinue");
-        const r = button.mapToItem(window.contentItem, 0, 0);
-        verify(r.y + button.height <= window.height + 0.5 && r.x + button.width <= window.width + 0.5);
-        for (let mode = UiMode.Basic; mode <= UiMode.Expert; ++mode) {
-            const card = findChild(dialog, "modeCard_" + mode);
-            const c = card.mapToItem(window.contentItem, 0, 0);
-            verify(c.y + card.height <= r.y + 0.5, `card ${mode} is visible above the footer`);
+        for (const name of ["wizardPrimary", "wizardCancel", "wizardAction"]) {
+            const button = findChild(view, name);
+            const r = button.mapToItem(window.contentItem, 0, 0);
+            verify(r.y + button.height <= window.height + 0.5 && r.x + button.width <= window.width + 0.5, name);
+            verify(button.width >= button.implicitWidth - 0.5, `${name} is narrower than its text`);
         }
-        mouseClick(button);
-        tryVerify(() => find("modeChoiceDialog") === null);
+        const footer = findChild(view, "wizardPrimary").mapToItem(window.contentItem, 0, 0);
+        for (let mode = UiMode.Basic; mode <= UiMode.Expert; ++mode) {
+            const card = findChild(view, "modeCard_" + mode);
+            view.ensureVisible(card); // animated (ADR-0384)
+            const c = () => card.mapToItem(window.contentItem, 0, 0);
+            verify(c().x >= 0 && c().x + card.width <= window.width + 0.5, `card ${mode} is inside the window`);
+            tryVerify(() => c().y >= 0 && c().y + card.height <= footer.y + 0.5, 2000, `card ${mode} is visible above the footer`);
+        }
+        closeSetup();
         verify(AppViewModel.uiMode.chosen);
     }
 

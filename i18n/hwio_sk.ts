@@ -1123,38 +1123,38 @@
 <context>
     <name>FirmwareSourceStep</name>
     <message>
-        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="71"/>
-        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="142"/>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="73"/>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="144"/>
         <source>Update LTE firmware…</source>
         <translation>Aktualizovať firmvér LTE…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="81"/>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="83"/>
         <source>Open firmware catalog ↗</source>
         <translation>Otvoriť katalóg firmvéru ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="82"/>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="84"/>
         <source>Open firmware catalog (opens browser)</source>
         <translation>Otvoriť katalóg firmvéru (otvorí prehliadač)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="106"/>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="108"/>
         <source>Allow writing UICR</source>
         <translation>Povoliť zápis UICR</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="115"/>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="117"/>
         <source>The firmware contains UICR configuration. Writing it changes the device configuration; the Product Information Block is kept.</source>
         <translation>Firmvér obsahuje konfiguráciu UICR. Jej zápisom sa zmení konfigurácia zariadenia; blok informácií o produkte (PIB) zostane zachovaný.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="133"/>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="135"/>
         <source>Updating the LTE firmware?</source>
         <translation>Aktualizujete firmvér LTE?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="150"/>
+        <location filename="../app/gui/qml/wizard/FirmwareSourceStep.qml" line="152"/>
         <source>Choose a firmware file</source>
         <translation>Vyberte súbor s firmvérom</translation>
     </message>
@@ -1434,32 +1434,32 @@
 <context>
     <name>LteUpdateStep</name>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="82"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="84"/>
         <source>Set path in Settings</source>
         <translation>Nastaviť cestu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="91"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="93"/>
         <source>Download nRF Util ↗</source>
         <translation>Stiahnuť nRF Util ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="98"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="100"/>
         <source>How to install ↗</source>
         <translation>Ako nainštalovať ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="150"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="152"/>
         <source>The application that was in the device</source>
         <translation>Aplikácia, ktorá bola v zariadení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="170"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="172"/>
         <source>Firmware from the catalog or a file</source>
         <translation>Firmvér z katalógu alebo zo súboru</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="207"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="209"/>
         <source>Choose a firmware file</source>
         <translation>Vyberte súbor s firmvérom</translation>
     </message>
@@ -1739,21 +1739,16 @@
     </message>
 </context>
 <context>
-    <name>ModeChoiceView</name>
+    <name>ModeCards</name>
     <message>
-        <location filename="../app/gui/qml/shell/ModeChoiceView.qml" line="24"/>
+        <location filename="../app/gui/qml/components/ModeCards.qml" line="37"/>
         <source>How do you want to use HARDWARIO Monitor?</source>
         <translation>Ako chcete HARDWARIO Monitor používať?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/ModeChoiceView.qml" line="92"/>
+        <location filename="../app/gui/qml/components/ModeCards.qml" line="108"/>
         <source>You can change it at any time in Settings › General.</source>
         <translation>Kedykoľvek to môžete zmeniť v Nastavenia › Všeobecné.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/shell/ModeChoiceView.qml" line="108"/>
-        <source>Continue</source>
-        <translation>Pokračovať</translation>
     </message>
 </context>
 <context>
@@ -2008,7 +2003,7 @@
     <name>ProbeFirmwareView</name>
     <message>
         <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="31"/>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="206"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="207"/>
         <source>Cancel</source>
         <translation>Zrušiť</translation>
     </message>
@@ -2068,18 +2063,18 @@
         <translation>HARDWARIO Monitor sa ukončí po dokončení aktualizácie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="172"/>
         <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="173"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="174"/>
         <source>Close</source>
         <translation>Zavrieť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="172"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="173"/>
         <source>Help me fix this</source>
         <translation>Pomôžte mi to vyriešiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="214"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="215"/>
         <source>Update</source>
         <translation>Aktualizovať</translation>
     </message>
@@ -2442,18 +2437,18 @@
 <context>
     <name>SetupStep</name>
     <message>
-        <location filename="../app/gui/qml/wizard/SetupStep.qml" line="40"/>
+        <location filename="../app/gui/qml/wizard/SetupStep.qml" line="43"/>
         <source>Settings were created by a newer version and are read-only. The setup cannot save anything.</source>
         <translation>Nastavenia vytvorila novšia verzia a sú len na čítanie. Sprievodca nastavením nemôže nič uložiť.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/wizard/SetupStep.qml" line="52"/>
-        <location filename="../app/gui/qml/wizard/SetupStep.qml" line="63"/>
+        <location filename="../app/gui/qml/wizard/SetupStep.qml" line="55"/>
+        <location filename="../app/gui/qml/wizard/SetupStep.qml" line="66"/>
         <source>Language</source>
         <translation>Jazyk</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/wizard/SetupStep.qml" line="72"/>
+        <location filename="../app/gui/qml/wizard/SetupStep.qml" line="85"/>
         <source>Don&apos;t show at start</source>
         <translation>Nezobrazovať pri spustení</translation>
     </message>
@@ -2589,45 +2584,45 @@
         <translation>Vybrať súbor s firmvérom</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="480"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="483"/>
         <source>New device tab</source>
         <translation>Nová karta zariadenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="483"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="486"/>
         <source>Close the device tab</source>
         <translation>Zavrieť kartu zariadenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="486"/>
         <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="489"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="492"/>
         <source>Next tab</source>
         <translation>Ďalšia karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="492"/>
         <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="495"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="498"/>
         <source>Previous tab</source>
         <translation>Predchádzajúca karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="498"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="501"/>
         <source>Settings</source>
         <translation>Nastavenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="501"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="504"/>
         <source>Connect or disconnect</source>
         <translation>Pripojiť alebo odpojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="504"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="507"/>
         <source>Reconnect</source>
         <translation>Znova pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="507"/>
         <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="510"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="513"/>
         <source>Keyboard shortcuts</source>
         <translation>Klávesové skratky</translation>
     </message>
@@ -3339,12 +3334,12 @@
 <context>
     <name>WizardErrorStep</name>
     <message>
-        <location filename="../app/gui/qml/wizard/WizardErrorStep.qml" line="46"/>
+        <location filename="../app/gui/qml/wizard/WizardErrorStep.qml" line="48"/>
         <source>Probably: %1</source>
         <translation>Pravdepodobne: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/wizard/WizardErrorStep.qml" line="56"/>
+        <location filename="../app/gui/qml/wizard/WizardErrorStep.qml" line="58"/>
         <source>What to do: %1</source>
         <translation>Čo robiť: %1</translation>
     </message>
@@ -3353,32 +3348,32 @@
     <name>WizardView</name>
     <message>
         <location filename="../app/gui/qml/components/WizardView.qml" line="29"/>
-        <location filename="../app/gui/qml/components/WizardView.qml" line="294"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="302"/>
         <source>Cancel</source>
         <translation>Zrušiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardView.qml" line="261"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="269"/>
         <source>Back</source>
         <translation>Späť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardView.qml" line="294"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="302"/>
         <source>Close</source>
         <translation>Zavrieť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardView.qml" line="307"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="315"/>
         <source>Cancel the wizard?</source>
         <translation>Zrušiť sprievodcu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardView.qml" line="309"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="317"/>
         <source>Cancel and close</source>
         <translation>Zrušiť a zavrieť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardView.qml" line="310"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="318"/>
         <source>Keep going</source>
         <translation>Pokračovať</translation>
     </message>
@@ -6004,17 +5999,17 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="692"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="707"/>
         <source>Wait until the J-Link firmware update has finished.</source>
         <translation>Počkajte na dokončenie aktualizácie firmvéru J-Linku.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="919"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="926"/>
         <source>Close a tab first: at most %1 device tabs can be open.</source>
         <translation>Najprv zatvorte kartu: otvorených môže byť najviac %1 kariet zariadení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1506"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1513"/>
         <source>Copied to clipboard.</source>
         <translation>Skopírované do schránky.</translation>
     </message>
@@ -6092,159 +6087,159 @@
 <context>
     <name>hwio::gui::ConnectWizard</name>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="120"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="121"/>
         <source>Connect a device</source>
         <translation>Pripojiť zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="242"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="243"/>
         <source>Probe</source>
         <translation>Programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="249"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="250"/>
         <source>Cable</source>
         <translation>Kábel</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="253"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="254"/>
         <source>Power</source>
         <translation>Napájanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="257"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="258"/>
         <source>Check</source>
         <translation>Kontrola</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="261"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="262"/>
         <source>Done</source>
         <translation>Hotovo</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="279"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="280"/>
         <source>Choose the J-Link</source>
         <translation>Vyberte J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="280"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="281"/>
         <source>Connect the J-Link to your computer with a USB cable.</source>
         <translation>Pripojte J-Link k počítaču káblom USB.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="282"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="297"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="307"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="283"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="298"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="308"/>
         <source>Next</source>
         <translation>Ďalej</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="285"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="351"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="355"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="359"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="366"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="370"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="380"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="286"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="352"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="356"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="360"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="367"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="371"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="381"/>
         <source>Check again</source>
         <translation>Skontrolovať znova</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="290"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="291"/>
         <source>Connect the J-Link to the device</source>
         <translation>Pripojte J-Link k zariadeniu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="302"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="303"/>
         <source>Power the device</source>
         <translation>Napájajte zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="322"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="323"/>
         <source>Checking the connection</source>
         <translation>Kontrola pripojenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="326"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="330"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="336"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="327"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="331"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="337"/>
         <source>Connect</source>
         <translation>Pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="329"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="330"/>
         <source>The device answers</source>
         <translation>Zariadenie odpovedá</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="333"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="334"/>
         <source>The MCU is read-back protected. Recover removes the protection but erases the MCU completely.</source>
         <translation>MCU je chránené proti čítaniu. Obnovenie odstráni ochranu, ale MCU úplne vymaže.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="335"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="336"/>
         <source>Open Flash page</source>
         <translation>Otvoriť stránku Nahrať</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="339"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="340"/>
         <source>The device has no console. It may need firmware with the CHESTER shell.</source>
         <translation>Zariadenie nemá konzolu. Možno potrebuje firmvér so shellom CHESTER.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="341"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="342"/>
         <source>Flash firmware…</source>
         <translation>Nahrať firmvér…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="343"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="344"/>
         <source>Connect anyway</source>
         <translation>Napriek tomu pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="346"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="347"/>
         <source>The J-Link is on the LTE connector. Move it to the APP connector.</source>
         <translation>J-Link je na konektore LTE. Presuňte ho na konektor APP.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="347"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="354"/>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="358"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="348"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="355"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="359"/>
         <source>Show me how</source>
         <translation>Ukážte mi ako</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="349"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="350"/>
         <source>Update LTE firmware…</source>
         <translation>Aktualizovať firmvér LTE…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="364"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="365"/>
         <source>Help me fix this</source>
         <translation>Pomôžte mi to vyriešiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="378"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="379"/>
         <source>Could not connect</source>
         <translation>Nepodarilo sa pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="385"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="386"/>
         <source>Connecting…</source>
         <translation>Pripájanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="397"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="398"/>
         <source>Connected to %1 · %2 · %3.</source>
         <translation>Pripojené k %1 · %2 · %3.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="401"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="402"/>
         <source>Open console</source>
         <translation>Otvoriť konzolu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="739"/>
+        <location filename="../app/gui/src/wizard/connect_wizard.cpp" line="740"/>
         <source>The connection is being checked. Cancel it and close the wizard?</source>
         <translation>Prebieha kontrola pripojenia. Zrušiť ju a zatvoriť sprievodcu?</translation>
     </message>
@@ -6709,54 +6704,59 @@
 <context>
     <name>hwio::gui::DeviceTabViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="204"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="205"/>
         <source>New device</source>
         <translation>Nové zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="236"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="237"/>
         <source>Flashing needs a J-Link. Open a J-Link tab to flash this device.</source>
         <translation>Nahrávanie firmvéru vyžaduje J-Link. Na nahratie do tohto zariadenia otvorte kartu s J-Linkom.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="737"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="810"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="761"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="852"/>
         <source>— disconnected: %1 —</source>
         <translation>— odpojené: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="751"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="811"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="775"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="853"/>
         <source>— disconnected —</source>
         <translation>— odpojené —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="800"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="796"/>
+        <source>Close the wizard first: it works on this tab&apos;s device.</source>
+        <translation>Najprv zatvorte sprievodcu: pracuje so zariadením tejto karty.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="842"/>
         <source>— connected (remote) —</source>
         <translation>— pripojené (na diaľku) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="802"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="844"/>
         <source>— connected —</source>
         <translation>— pripojené —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="798"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="840"/>
         <source>— connected (Bluetooth) —</source>
         <translation>— pripojené (Bluetooth) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="196"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="197"/>
         <source>Session %1</source>
         <translation>Relácia %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="932"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="974"/>
         <source>— paused: %1 —</source>
         <translation>— pozastavené: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="945"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="987"/>
         <source>— resumed —</source>
         <translation>— obnovené —</translation>
     </message>
@@ -7346,252 +7346,252 @@
 <context>
     <name>hwio::gui::FlashWizard</name>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="179"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="180"/>
         <source>Flash application firmware</source>
         <translation>Nahrať aplikačný firmvér</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="258"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="259"/>
         <source>Probe</source>
         <translation>Programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="258"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="259"/>
         <source>Cable</source>
         <translation>Kábel</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="258"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="259"/>
         <source>Firmware</source>
         <translation>Firmvér</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="259"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="260"/>
         <source>Confirm</source>
         <translation>Potvrdenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="259"/>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="335"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="260"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="336"/>
         <source>Flash</source>
         <translation>Nahranie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="259"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="260"/>
         <source>Done</source>
         <translation>Hotovo</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="297"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="298"/>
         <source>Choose the J-Link</source>
         <translation>Vyberte J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="298"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="299"/>
         <source>Connect the J-Link to your computer with a USB cable.</source>
         <translation>Pripojte J-Link k počítaču káblom USB.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="299"/>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="322"/>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="329"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="300"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="323"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="330"/>
         <source>Next</source>
         <translation>Ďalej</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="303"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="304"/>
         <source>Connect the J-Link to the device</source>
         <translation>Pripojte J-Link k zariadeniu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="311"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="312"/>
         <source>The J-Link answers from the LTE MCU. Move the flat cable to the APP connector and check again, or update the LTE firmware.</source>
         <translation>J-Link odpovedá z LTE MCU. Prepojte plochý kábel na konektor APP a skontrolujte znova, alebo aktualizujte firmvér LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="314"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="315"/>
         <source>Update LTE firmware…</source>
         <translation>Aktualizovať firmvér LTE…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="317"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="318"/>
         <source>The MCU is protected. Flashing removes the protection only through Recover, which erases everything.</source>
         <translation>MCU je chránený. Ochranu možno pri nahrávaní odstrániť len pomocou Obnoviť (recover), ktoré vymaže všetko.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="320"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="321"/>
         <source>Open Flash page</source>
         <translation>Otvoriť stránku Nahrať</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="322"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="323"/>
         <source>Check again</source>
         <translation>Skontrolovať znova</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="328"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="329"/>
         <source>Choose the firmware</source>
         <translation>Vyberte firmvér</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="334"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="335"/>
         <source>Ready to flash</source>
         <translation>Pripravené na nahratie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="340"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="341"/>
         <source>Flashing</source>
         <translation>Nahrávanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="347"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="348"/>
         <source>Flashing failed</source>
         <translation>Nahrávanie zlyhalo</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="348"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="349"/>
         <source>Try again</source>
         <translation>Skúsiť znova</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="351"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="352"/>
         <source>Help me fix this</source>
         <translation>Pomôžte mi to vyriešiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="357"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="358"/>
         <source>Flashing was cancelled</source>
         <translation>Nahrávanie bolo zrušené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="358"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="359"/>
         <source>The device may not start until you flash it again.</source>
         <translation>Zariadenie sa nemusí spustiť, kým firmvér znova nenahráte.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="359"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="360"/>
         <source>Flash again</source>
         <translation>Nahrať znova</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="364"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="365"/>
         <source>Open console</source>
         <translation>Otvoriť konzolu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="366"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="367"/>
         <source>Flash another</source>
         <translation>Nahrať ďalší</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="701"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="702"/>
         <source>Not checked</source>
         <translation>Neskontrolované</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="765"/>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="796"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="766"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="797"/>
         <source>This is LTE firmware. Update it with the LTE firmware update, which moves the J-Link between the connectors.</source>
         <translation>Toto je firmvér LTE. Nahrajte ho aktualizáciou firmvéru LTE, ktorá prevedie prepojenie J-Linku medzi konektormi.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="768"/>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="798"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="769"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="799"/>
         <source>This firmware is for another MCU. Check whether it is application or LTE firmware.</source>
         <translation>Tento firmvér je pre iný MCU. Skontrolujte, či ide o aplikačný firmvér, alebo firmvér LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="783"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="784"/>
         <source>The file is not a valid HEX file (line %1). Use the .hex file produced by the build, or download it from the catalog again.</source>
         <translation>Súbor nie je platný súbor HEX (riadok %1). Použite súbor .hex vytvorený zostavením, alebo ho znova stiahnite z katalógu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="787"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="788"/>
         <source>The file is not a valid HEX file. Use the .hex file produced by the build, or download it from the catalog again.</source>
         <translation>Súbor nie je platný súbor HEX. Použite súbor .hex vytvorený zostavením, alebo ho znova stiahnite z katalógu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="791"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="792"/>
         <source>This file is not CHESTER firmware. Application and LTE firmware are .hex files; LTE bundles and modem firmware are .zip files.</source>
         <translation>Tento súbor nie je firmvér pre CHESTER. Aplikačný firmvér a firmvér LTE sú súbory .hex; balíky LTE a firmvér modemu sú súbory .zip.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="802"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="803"/>
         <source>No firmware has this ID. Copy the ID from the firmware catalog again.</source>
         <translation>Žiadny firmvér nemá toto ID. Skopírujte ID z katalógu firmvéru znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="837"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="838"/>
         <source>The device tab was closed</source>
         <translation>Karta zariadenia bola zatvorená</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="840"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="841"/>
         <source>Choose a firmware file</source>
         <translation>Vyberte súbor s firmvérom</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="843"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="844"/>
         <source>Another operation is running</source>
         <translation>Prebieha iná operácia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="862"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="863"/>
         <source>%1 (Intel HEX, %2) → %3 of %4 via J-Link %5.</source>
         <translation>%1 (Intel HEX, %2) → %3 zariadenia %4 cez J-Link %5.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="868"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="869"/>
         <source>The current application firmware is replaced. The UICR configuration is also written; the Product Information Block is kept.</source>
         <translation>Súčasný aplikačný firmvér bude nahradený. Zapíše sa aj konfigurácia UICR; blok informácií o produkte (PIB) zostane zachovaný.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="871"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="872"/>
         <source>The current application firmware is replaced. Configuration and the Product Information Block are kept.</source>
         <translation>Súčasný aplikačný firmvér bude nahradený. Konfigurácia a blok informácií o produkte (PIB) zostanú zachované.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="915"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="916"/>
         <source>Flashing…</source>
         <translation>Nahrávanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="916"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="917"/>
         <source>Flashing is in progress. Cancel it and close the tab?</source>
         <translation>Prebieha nahrávanie. Zrušiť ho a zavrieť kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1003"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1004"/>
         <source>Flashing is in progress. Cancel it and close the wizard?</source>
         <translation>Prebieha nahrávanie. Zrušiť ho a zavrieť sprievodcu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1006"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1007"/>
         <source>The connection is being checked. Cancel it and close the wizard?</source>
         <translation>Prebieha kontrola pripojenia. Zrušiť ju a zatvoriť sprievodcu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1065"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1066"/>
         <source>Flashing %1 to the %2 MCU</source>
         <translation>Nahrávanie %1 do MCU %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1092"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1093"/>
         <source>Cancelling…</source>
         <translation>Rušenie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1112"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1113"/>
         <source>Firmware flashed and verified in %1 s.</source>
         <translation>Firmvér nahraný a overený za %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1114"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1115"/>
         <source>Chip: %1</source>
         <translation>Čip: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1122"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1123"/>
         <source>Flashing was interrupted. The firmware may be partly written: flash it again.</source>
         <translation>Nahrávanie bolo prerušené. Firmvér môže byť zapísaný len čiastočne: nahrajte ho znova.</translation>
     </message>
@@ -8235,274 +8235,274 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
 <context>
     <name>hwio::gui::SetupWizard</name>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="173"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="176"/>
         <source>Setup</source>
         <translation>Nastavenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="215"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="223"/>
         <source>Welcome</source>
         <translation>Vitajte</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="217"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="742"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="225"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="755"/>
         <source>J-Link</source>
         <translation>J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="219"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="367"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="738"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="227"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="375"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="751"/>
         <source>USB access</source>
         <translation>Prístup cez USB</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="221"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="740"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="229"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="753"/>
         <source>nRF Util</source>
         <translation>nRF Util</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="223"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="231"/>
         <source>Test</source>
         <translation>Test</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="225"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="233"/>
         <source>Done</source>
         <translation>Hotovo</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="287"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="295"/>
         <source>Test with a probe</source>
         <translation>Test s programátorom</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="288"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="296"/>
         <source>Connect a J-Link to your computer. You do not need a device for this test.&lt;br&gt;No J-Link yet? You can test later from Help → Setup wizard.</source>
         <translation>Pripojte J-Link k počítaču. Zariadenie na tento test nepotrebujete.&lt;br&gt;Ešte nemáte J-Link? Otestovať to môžete neskôr v Pomocník → Sprievodca nastavením.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="290"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="311"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="333"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="370"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="376"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="383"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="385"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="397"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="298"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="319"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="341"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="378"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="384"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="391"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="393"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="405"/>
         <source>Next</source>
         <translation>Ďalej</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="295"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="303"/>
         <source>Setup finished</source>
         <translation>Nastavenie je dokončené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="297"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="305"/>
         <source>Connect a device</source>
         <translation>Pripojiť zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="307"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="315"/>
         <source>J-Link Software is needed</source>
         <translation>Je potrebný J-Link Software</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="308"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="316"/>
         <source>Welcome to HARDWARIO Monitor</source>
         <translation>Vitajte v HARDWARIO Monitor</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="309"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="317"/>
         <source>This assistant checks that your computer is ready to work with CHESTER over a J-Link probe. It takes about two minutes.</source>
         <translation>Tento sprievodca skontroluje, či je váš počítač pripravený pracovať s CHESTER cez programátor J-Link. Zaberie to asi dve minúty.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="312"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="320"/>
         <source>Skip setup</source>
         <translation>Preskočiť nastavenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="318"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="326"/>
         <source>Choose the 64-bit DEB or RPM installer.</source>
         <translation>Zvoľte 64-bitový inštalátor DEB alebo RPM.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="320"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="328"/>
         <source>Choose the macOS universal installer.</source>
         <translation>Zvoľte univerzálny inštalátor pre macOS.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="322"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="330"/>
         <source>Choose the Windows 64-bit installer.</source>
         <translation>Zvoľte 64-bitový inštalátor pre Windows.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="330"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="736"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="338"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="749"/>
         <source>J-Link Software</source>
         <translation>J-Link Software</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="333"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="375"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="382"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="386"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="405"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="341"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="383"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="390"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="394"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="413"/>
         <source>Check again</source>
         <translation>Skontrolovať znova</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="340"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="348"/>
         <source>HARDWARIO Monitor uses the J-Link Software from SEGGER. Install version 8.00 or newer, then press Check again.</source>
         <translation>HARDWARIO Monitor používa J-Link Software od firmy SEGGER. Nainštalujte verziu 8.00 alebo novšiu a potom stlačte Skontrolovať znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="345"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="353"/>
         <source>This J-Link Software is too old. Install version 8.00 or newer.</source>
         <translation>Tento J-Link Software je príliš starý. Nainštalujte verziu 8.00 alebo novšiu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="348"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="356"/>
         <source>The J-Link library was found but could not be loaded. Reinstall J-Link Software.</source>
         <translation>Knižnica J-Link sa našla, ale nepodarilo sa ju načítať. Preinštalujte J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="355"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="363"/>
         <source>Download J-Link Software</source>
         <translation>Stiahnuť J-Link Software</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="359"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="367"/>
         <source>You can continue without J-Link, but you cannot connect to a device.</source>
         <translation>Môžete pokračovať bez J-Linku, ale nepripojíte sa k zariadeniu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="361"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="369"/>
         <source>Continue anyway</source>
         <translation>Napriek tomu pokračovať</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="372"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="380"/>
         <source>Linux needs a rule that allows your user to use SEGGER USB devices. Run these commands in a terminal, then unplug and reconnect the J-Link.</source>
         <translation>Linux potrebuje pravidlo, ktoré vášmu používateľovi dovolí používať USB zariadenia SEGGER. Spustite tieto príkazy v termináli a potom J-Link odpojte a znova pripojte.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="379"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="387"/>
         <source>Every user account on this computer can use the J-Link. Run these commands in a terminal to allow it only for your user, then unplug and reconnect the J-Link.</source>
         <translation>J-Link môže používať každý používateľský účet na tomto počítači. Spustite tieto príkazy v termináli, aby ho mohol používať len váš používateľ, a potom J-Link odpojte a znova pripojte.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="393"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="401"/>
         <source>nRF Util (optional)</source>
         <translation>nRF Util (voliteľné)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="394"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="402"/>
         <source>Needed only to update the LTE modem firmware. Everything else works without it.</source>
         <translation>Potrebné len na aktualizáciu firmvéru LTE modemu. Všetko ostatné funguje aj bez neho.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="401"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="409"/>
         <source>How to install nRF Util</source>
         <translation>Ako nainštalovať nRF Util</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="404"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="412"/>
         <source>Skip</source>
         <translation>Preskočiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="425"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="433"/>
         <source>Update J-Link firmware %1…</source>
         <translation>Aktualizovať firmvér J-Linku %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="760"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="773"/>
         <source>Not checked</source>
         <translation>Neskontrolované</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="765"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="778"/>
         <source>Ready</source>
         <translation>Pripravené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="768"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="781"/>
         <source>Skipped</source>
         <translation>Preskočené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="771"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="784"/>
         <source>Not ready</source>
         <translation>Nepripravené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="800"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="840"/>
         <source>System default</source>
         <translation>Podľa systému</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="854"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="894"/>
         <source>J-Link Software %1 found in %2.</source>
         <translation>J-Link Software %1 nájdený v %2.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="861"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="901"/>
         <source>Your user can access the J-Link.</source>
         <translation>Váš používateľ má k J-Linku prístup.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="863"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="903"/>
         <source>Connect the J-Link to check USB access.</source>
         <translation>Pripojte J-Link, aby sa dal skontrolovať prístup cez USB.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="870"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="910"/>
         <source>nRF Util %1 with device command %2.</source>
         <translation>nRF Util %1 s príkazom device %2.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="876"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="916"/>
         <source>Minimum versions: nRF Util %1, device command %2.</source>
         <translation>Minimálne verzie: nRF Util %1, príkaz device %2.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="916"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="956"/>
         <source>It is installed elsewhere…</source>
         <translation>Je nainštalovaný inde…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="920"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="960"/>
         <source>Use automatic detection</source>
         <translation>Použiť automatické hľadanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="926"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="966"/>
         <source>Choose the nrfutil program</source>
         <translation>Vyberte program nrfutil</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="927"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="967"/>
         <source>Choose the JLinkARM library</source>
         <translation>Vyberte knižnicu JLinkARM</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="935"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="975"/>
         <source>nRF Util (%1)</source>
         <translation>nRF Util (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="935"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="948"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="975"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="988"/>
         <source>All files (*)</source>
         <translation>Všetky súbory (*)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="948"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="988"/>
         <source>J-Link library (%1)</source>
         <translation>Knižnica J-Link (%1)</translation>
     </message>
@@ -8510,126 +8510,126 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
 <context>
     <name>hwio::gui::TroubleshootingWizard</name>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="93"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="94"/>
         <source>The device was reset.</source>
         <translation>Zariadenie bolo resetované.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="122"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="123"/>
         <source>Troubleshooting</source>
         <translation>Riešenie problémov</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="343"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="345"/>
         <source>Not checked: no J-Link chosen</source>
         <translation>Neskontrolované: nie je vybraný žiadny J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="372"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="374"/>
         <source>Problem</source>
         <translation>Problém</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="377"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="379"/>
         <source>Error</source>
         <translation>Chyba</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="382"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="384"/>
         <source>Probe</source>
         <translation>Programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="390"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="392"/>
         <source>Support</source>
         <translation>Podpora</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="418"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="420"/>
         <source>The J-Link is on the LTE connector. Move it to the APP connector.</source>
         <translation>J-Link je na konektore LTE. Presuňte ho na konektor APP.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="429"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="431"/>
         <source>Learn more</source>
         <translation>Viac informácií</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="436"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="519"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="530"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="537"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="438"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="521"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="532"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="539"/>
         <source>Next</source>
         <translation>Ďalej</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="445"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="447"/>
         <source>Setup wizard…</source>
         <translation>Sprievodca nastavením…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="449"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="451"/>
         <source>Found — connect now</source>
         <translation>Nájdené — pripojte sa</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="452"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="463"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="454"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="465"/>
         <source>Check again</source>
         <translation>Skontrolovať znova</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="460"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="462"/>
         <source>Connect a device</source>
         <translation>Pripojiť zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="508"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="510"/>
         <source>What is the problem?</source>
         <translation>Aký je problém?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="527"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="529"/>
         <source>Let&apos;s find the cause.</source>
         <translation>Poďme nájsť príčinu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="535"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="537"/>
         <source>Choose the J-Link</source>
         <translation>Vyberte J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="536"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="538"/>
         <source>The checks need a J-Link. Choose the one connected to the device.</source>
         <translation>Kontroly potrebujú J-Link. Vyberte ten, ktorý je pripojený k zariadeniu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="544"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="546"/>
         <source>Still not working?</source>
         <translation>Stále to nefunguje?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="545"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="547"/>
         <source>Create a diagnostic report and send it to HARDWARIO support.</source>
         <translation>Vytvorte diagnostickú správu a pošlite ju podpore HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="546"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="548"/>
         <source>Create diagnostic report…</source>
         <translation>Vytvoriť diagnostickú správu…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="735"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="737"/>
         <source>J-Link speed set to 1000 kHz for this probe.</source>
         <translation>Rýchlosť J-Linku pre tento programátor nastavená na 1000 kHz.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="765"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="767"/>
         <source>Update J-Link firmware %1…</source>
         <translation>Aktualizovať firmvér J-Linku %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="800"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="802"/>
         <source>A check is running. Cancel it and close the wizard?</source>
         <translation>Prebieha kontrola. Zrušiť ju a zatvoriť sprievodcu?</translation>
     </message>
@@ -8693,14 +8693,27 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
     </message>
 </context>
 <context>
+    <name>hwio::gui::WizardLauncher</name>
+    <message>
+        <location filename="../app/gui/src/wizard/wizard_launcher.cpp" line="27"/>
+        <source>This wizard works only with a device connected to this computer, not in a support session.</source>
+        <translation>Tento sprievodca funguje len so zariadením pripojeným k tomuto počítaču, nie v relácii podpory.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/wizard_launcher.cpp" line="31"/>
+        <source>Finish or close the setup wizard first.</source>
+        <translation>Najprv dokončite alebo zatvorte sprievodcu nastavením.</translation>
+    </message>
+</context>
+<context>
     <name>hwio::gui::WizardViewModel</name>
     <message>
-        <location filename="../app/gui/src/wizard/wizard_view_model.cpp" line="167"/>
+        <location filename="../app/gui/src/wizard/wizard_view_model.cpp" line="164"/>
         <source>Step %1 of %2 · %3</source>
         <translation>Krok %1 z %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/wizard_view_model.cpp" line="181"/>
+        <location filename="../app/gui/src/wizard/wizard_view_model.cpp" line="178"/>
         <source>Step %1 of %2, %3</source>
         <translation>Krok %1 z %2, %3</translation>
     </message>

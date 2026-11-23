@@ -1,4 +1,4 @@
-// The setup wizard in the dialog (plan/features/0008 as amended by 0035): every step in light and
+// The setup wizard as a global view (plan/features/0008 as amended by 0035 and 0056): every step in light and
 // dark, the language combo on Welcome (ADR-0254), the read-only probe step through embeddedOptions
 // (ADR-0290), CommandBlock [Copy], a keyboard-only walk-through, every step at 960 x 600 in Czech
 // and German, and screenshots of every step (light/dark, EN/CS/DE) when HWIO_SCREENSHOT_DIR is
@@ -23,8 +23,8 @@ TestCase {
     }
 
     function cleanupTestCase() {
-        if (AppViewModel.wizard.open)
-            AppViewModel.wizard.cancel(true);
+        if (AppViewModel.globalWizard.open)
+            AppViewModel.globalWizard.cancel(true);
         if (window)
             window.destroy();
         wait(50);
@@ -40,19 +40,40 @@ TestCase {
     }
 
     function cleanup() {
-        if (AppViewModel.wizard.open)
-            AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open);
+        if (AppViewModel.globalWizard.open)
+            AppViewModel.globalWizard.cancel(true);
+        tryVerify(() => !AppViewModel.globalWizard.open);
         AppViewModel.setLanguage("en");
         AppViewModel.theme = "system";
     }
 
-    function dialog() {
-        return findChild(window, "wizardDialog");
+    // Plan 0056: the setup wizard is a global view over the page area (ContentViewHost), or null.
+    function findAll(parent, name) {
+        let result = [];
+        const children = parent && parent.children ? parent.children : [];
+        for (let i = 0; i < children.length; ++i) {
+            if (children[i].objectName === name)
+                result.push(children[i]);
+            result = result.concat(findAll(children[i], name));
+        }
+        return result;
+    }
+
+    function effectivelyVisible(item) {
+        for (let current = item; current; current = current.parent) {
+            if (!current.visible)
+                return false;
+        }
+        return true;
+    }
+
+    function view() {
+        const items = findAll(window.contentItem, "globalWizardView").filter(effectivelyVisible);
+        return items.length > 0 ? items[0] : null;
     }
 
     function part(name) {
-        return findChild(dialog(), name);
+        return findChild(view(), name);
     }
 
     function setup() {
@@ -60,12 +81,12 @@ TestCase {
     }
 
     function control() {
-        return findChild(dialog().contentItem, "setupStep");
+        return findChild(view(), "setupStep");
     }
 
     function openSetup() {
         verify(AppViewModel.launcher.start("first-run-setup", -1));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
     }
 
     // The step's checks have finished (the default button is enabled again).
@@ -80,12 +101,12 @@ TestCase {
         const id = setup().stepId;
         const before = id;
         if (id === "jlink" && part("wizardPrimary").text !== "Next")
-            AppViewModel.wizard.action("continue-anyway");
-        else if (id === "usb" && AppViewModel.wizard.step.actions.length > 0 && AppViewModel.wizard.step.actions[0].id === "next")
-            AppViewModel.wizard.action("next");
+            AppViewModel.globalWizard.action("continue-anyway");
+        else if (id === "usb" && AppViewModel.globalWizard.step.actions.length > 0 && AppViewModel.globalWizard.step.actions[0].id === "next")
+            AppViewModel.globalWizard.action("next");
         else
-            AppViewModel.wizard.primary();
-        tryVerify(() => setup() === null || setup().stepId !== before, 5000, "left " + before + " (" + part("wizardPrimary").text + ", " + JSON.stringify(AppViewModel.wizard.step.actions) + ")");
+            AppViewModel.globalWizard.primary();
+        tryVerify(() => setup() === null || setup().stepId !== before, 5000, "left " + before + " (" + part("wizardPrimary").text + ", " + JSON.stringify(AppViewModel.globalWizard.step.actions) + ")");
     }
 
     function walkTo(id) {
@@ -95,16 +116,16 @@ TestCase {
         settle();
     }
 
-    // Every footer button and the step's control lie inside the dialog.
+    // Every footer button and the step's control lie inside the view.
     function verifyInside(name) {
-        const d = dialog();
+        const d = view();
         for (const button of [part("wizardPrimary"), part("wizardCancel"), part("wizardBack")]) {
             if (!button || !button.visible)
                 continue;
-            const p = button.mapToItem(d.contentItem.parent, 0, 0);
+            const p = button.mapToItem(d, 0, 0);
             verify(p.x >= 0 && p.x + button.width <= d.width + 1, name + ": " + button.objectName + " " + button.text);
         }
-        const footer = d.footer;
+        const footer = part("wizardFooter");
         verify(footer.implicitWidth <= d.width + 1, name + ": footer " + footer.implicitWidth + " > " + d.width);
     }
 
@@ -132,7 +153,7 @@ TestCase {
         tryVerify(() => control() !== null);
         verify(findChild(control(), "setupLanguage").visible);
         verify(!findChild(control(), "setupDontShow").visible);
-        compare(findChild(dialog().footer, "wizardAction").text, "Skip setup");
+        compare(part("wizardAction").text, "Skip setup");
         verify(!part("wizardBack").visible);
 
         forward(); // J-Link Software: the check row and the control
@@ -152,8 +173,8 @@ TestCase {
 
         forward(); // Test with a probe: the read-only picker (ADR-0290)
         compare(setup().stepId, "probe");
-        tryVerify(() => findChild(dialog().contentItem, "probePickerStep") !== null);
-        const step = findChild(dialog().contentItem, "probePickerStep");
+        tryVerify(() => findChild(view(), "probePickerStep") !== null);
+        const step = findChild(view(), "probePickerStep");
         verify(step.readOnly);
         tryVerify(() => step.vm !== null && step.vm.count === 2, 5000);
         verify(part("wizardPrimary").enabled);
@@ -165,9 +186,9 @@ TestCase {
         verify(testSupport.setting("setup/completedVersion") !== "");
         compare(part("wizardCancel").text, "Close");
         // The probe picker's control is gone (another control on this step).
-        tryVerify(() => findChild(dialog().contentItem, "probePickerStep") === null);
+        tryVerify(() => findChild(view(), "probePickerStep") === null);
         mouseClick(part("wizardCancel"));
-        tryVerify(() => !dialog().visible);
+        tryVerify(() => view() === null);
     }
 
     function test_languageComboRetranslatesLive() {
@@ -205,8 +226,8 @@ TestCase {
             settle();
             const before = setup().stepId;
             part("wizardHeading").forceActiveFocus();
-            if (before === "usb" && AppViewModel.wizard.step.primaryText === "Check again")
-                AppViewModel.wizard.action("next");
+            if (before === "usb" && AppViewModel.globalWizard.step.primaryText === "Check again")
+                AppViewModel.globalWizard.action("next");
             else
                 keyClick(Qt.Key_Return);
             tryVerify(() => setup().stepId !== before);
@@ -214,7 +235,7 @@ TestCase {
         compare(setup().stepId, "done");
         part("wizardHeading").forceActiveFocus();
         keyClick(Qt.Key_Escape);
-        tryVerify(() => !dialog().visible);
+        tryVerify(() => view() === null);
     }
 
     function test_minimumWindow_data() {
@@ -226,8 +247,9 @@ TestCase {
         window.width = 960;
         window.height = 600;
         openSetup();
-        const d = dialog();
-        verify(d.width <= 720 && d.height <= 552);
+        const d = view();
+        const origin = d.mapToItem(window.contentItem, 0, 0);
+        verify(origin.x >= 0 && origin.x + d.width <= window.width + 1 && origin.y + d.height <= window.height + 1);
         for (let i = 0; i < 8; ++i) {
             settle();
             verifyInside(data.language + "/" + setup().stepId);

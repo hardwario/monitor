@@ -11,7 +11,9 @@ Every error has a short message, a probable cause and a suggestion.
 - **Desktop app (`hwio-monitor`):** the error panel shows the message, **Probably:** (the cause) and **What to do:** (the suggestion), with a button for the next step, such as **Reconnect**, **Open Settings** or **Retry**. **Details** shows the error code (for example `probe.not_found`) and technical details; **Copy** copies them. **Learn more ↗** opens the entry of the error code on this page.
 - **Help me fix this** in the error panel opens the wizard for the error: the Connect wizard, the setup wizard,
   the guided flash, or the troubleshooting topic of the error. **Help** › **Troubleshoot connection…** lists the
-  common problems.
+  common problems. The wizards open in the page area of the tab
+  ([Guides and other views](getting-started.md#guides-and-views)); on a support session tab the Connect,
+  Troubleshooting and guided flash wizards are not available.
 - **CLI (`hwio`):** the error is written to stderr:
 
   ```text

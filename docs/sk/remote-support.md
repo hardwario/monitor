@@ -88,6 +88,10 @@ konzole nezobrazujú; konzolový súbor zaznamená, koľko ich bolo.
    skopírovať. Pokračovať bez kópie?*. Nie alebo žiadna odpoveď do 60 sekúnd aktualizáciu zruší skôr, než sa čokoľvek
    zmení. Kópia sa zapíše späť automaticky. Po vašom Nie karta ukáže *Aktualizáciu firmvéru LTE ste zrušili (14:02). Nič sa nezmenilo.* Zákazník so starším HARDWARIO Monitorom odpovedá na tieto otázky sám.
 
+Sprievodca pripojením, sprievodca riešením problémov a nahrávanie so sprievodcom pracujú so zariadením pripojeným k
+vášmu vlastnému počítaču: na karte relácie podpory sa neotvoria (*Tento sprievodca funguje len so zariadením pripojeným
+k tomuto počítaču, nie v relácii podpory.*) a relácia pokračuje.
+
 Keď zákazník ukončí zdieľanie, HARDWARIO Monitor to nie vždy rozpozná: server to neoznamuje. Po 30 minútach bez
 akejkoľvek aktivity to lišta oznámi a ponúkne **Opustiť**. Karta zostane otvorená, takže konzolu môžete stále uložiť.
 

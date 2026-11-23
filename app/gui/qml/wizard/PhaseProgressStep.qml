@@ -14,6 +14,8 @@ ColumnLayout {
     id: step
 
     property FlashWizard vm: null
+    // Plan 0056 (embedded contract): the WizardViewModel showing this control (set by WizardView).
+    property WizardViewModel host: null
     property errorInfo noError // default-constructed: invalid (no error)
     readonly property bool flashing: step.vm !== null && step.vm.stage === FlashWizard.Flashing
     readonly property bool failed: step.vm !== null && step.vm.stage === FlashWizard.Failed

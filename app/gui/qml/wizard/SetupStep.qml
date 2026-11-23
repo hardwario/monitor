@@ -1,9 +1,10 @@
 // The control "setup-step" of the setup wizard (plan/features/0008, SetupWizard): shown by
-// WizardDialog below the step's own content. Welcome: the language (ADR-0254) and "Don't show at
-// start" (ADR-0071). J-Link / USB access / nRF Util: the result with versions and paths (plain
-// text), the commands with [Copy], "It is installed elsewhere…" (file dialog) and "Use automatic
-// detection". Done: the summary. A read-only banner while the settings are read-only.
-// Presentation only: `vm` is the SetupWizard.
+// WizardView below the step's own content. Welcome: the language (ADR-0254), the user mode cards
+// while the mode is not chosen (plan 0056, ADR-0392) and "Don't show at start" (ADR-0071).
+// J-Link / USB access / nRF Util: the result with versions and paths (plain text), the commands
+// with [Copy], "It is installed elsewhere…" (file dialog) and "Use automatic detection". Done:
+// the summary. A read-only banner while the settings are read-only.
+// Presentation only: `vm` is the SetupWizard, `host` its WizardViewModel.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -18,6 +19,8 @@ Item {
     id: step
 
     property SetupWizard vm: null
+    // Plan 0056 (embedded contract): the WizardViewModel showing this control (set by WizardView).
+    property WizardViewModel host: null
     readonly property string stepId: step.vm !== null ? step.vm.stepId : ""
 
     objectName: "setupStep"
@@ -65,6 +68,16 @@ Item {
             }
         }
 
+        // Plan 0056 (ADR-0392): the user mode on Welcome while it is not chosen.
+        ModeCards {
+            objectName: "setupModeCards"
+            width: column.width
+            visible: step.vm !== null && step.vm.modeChoice
+            modes: step.vm !== null ? step.vm.modes : []
+            selected: step.vm !== null ? step.vm.selectedMode : UiMode.Advanced
+            onModeSelected: mode => step.vm.selectMode(mode)
+        }
+
         CheckBox {
             objectName: "setupDontShow"
             visible: step.vm !== null && step.vm.showAtStartChoice
@@ -99,7 +112,7 @@ Item {
             width: column.width
             visible: step.vm !== null && step.vm.commands.length > 0
             commands: step.vm !== null ? step.vm.commands : []
-            onCopyRequested: text => AppViewModel.globalWizard.copyText(text)
+            onCopyRequested: text => step.host.copyText(text)
         }
 
         Flow {
@@ -119,7 +132,7 @@ Item {
                         if (modelData.file)
                             fileDialog.open();
                         else
-                            AppViewModel.globalWizard.action(modelData.id);
+                            step.host.action(modelData.id);
                     }
                 }
             }

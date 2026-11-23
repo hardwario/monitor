@@ -2,16 +2,29 @@
 // name a wizard in libs/core/src/error.cpp has a start step or topic in that wizard. The test
 // landed with the first wizard (0008) and grew with 0010 and 0009.
 
+#include "gui_test_support.h"
 #include "hwio/core/error.h"
+#include "viewmodels/app_view_model.h"
 #include "wizard/connect_wizard.h"
 #include "wizard/flash_wizard.h"
 #include "wizard/setup_wizard.h"
 #include "wizard/troubleshooting_topics.h"
+#include "wizard/wizard_registry.h"
+
+#include <QFile>
+#include <QIODevice>
+#include <QString>
+#include <QStringList>
+#include <QStringLiteral>
+#include <QUrl>
+#include <QtContainerFwd>
 
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <cstddef>
+#include <filesystem>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -68,6 +81,10 @@ TEST(WizardCoverage, EveryCodeNamingAWizardHasAStartStep) {
     EXPECT_EQ(connectDevice, 5U);
     EXPECT_GT(troubleshooting, 0U);
     EXPECT_FALSE(hwio::gui::FlashWizard::startStepFor(ErrorCode::ProbeNotFound).has_value());
+    // Plan 0056 (user decision 2026-11-23): target.low_voltage opens the no-power topic.
+    const hwio::gui::Topic* lowVoltage = hwio::gui::topicFor(ErrorCode::TargetLowVoltage);
+    ASSERT_NE(lowVoltage, nullptr);
+    EXPECT_EQ(lowVoltage, hwio::gui::topicById("no-power"));
 }
 
 // Plan 0009: the codes of the topic table are exactly the codes naming ConnectDevice or
@@ -102,6 +119,41 @@ TEST(WizardCoverage, TopicCodesNameConnectOrTroubleshooting) {
 // ADR-0250: ble.permission_denied names no wizard until the setup wizard's Bluetooth step (0032).
 TEST(WizardCoverage, BlePermissionDeniedHasNoWizard) {
     EXPECT_FALSE(hwio::makeError(ErrorCode::BlePermissionDenied).wizard.has_value());
+}
+
+// Plan 0056 (embedded contract): every registered embedded control declares
+// `property WizardViewModel host` (WizardView binds it; a missing one would only warn at run time).
+class EmbeddedContract : public hwio::gui::test::GuiTest {};
+
+bool declaresHost(const QUrl& url) {
+    QFile file(url.scheme() == QStringLiteral("qrc") ? QLatin1Char(':') + url.path()
+                                                     : url.toLocalFile());
+    if (!file.open(QIODevice::ReadOnly)) {
+        return false;
+    }
+    return QString::fromUtf8(file.readAll())
+        .contains(QStringLiteral("property WizardViewModel host"));
+}
+
+TEST_F(EmbeddedContract, EveryRegisteredControlDeclaresHost) {
+    const std::unique_ptr<hwio::gui::AppViewModel> app = makeApp();
+    const QStringList names = app->wizardRegistry().embeddedNames();
+    for (const QString& expected :
+         {QStringLiteral("probe-picker"), QStringLiteral("setup-step"),
+          QStringLiteral("wizard-error"), QStringLiteral("firmware-source"),
+          QStringLiteral("flash-summary"), QStringLiteral("phase-progress"),
+          QStringLiteral("lte-update")}) {
+        EXPECT_TRUE(names.contains(expected)) << expected.toStdString();
+    }
+    for (const QString& name : names) {
+        const QUrl url = app->wizardRegistry().embedded(name);
+        EXPECT_TRUE(declaresHost(url)) << name.toStdString() << " " << url.toString().toStdString();
+    }
+    // test-embedded (tests/qml/TestEmbedded.qml; its registration in the C++ tests is a dummy URL).
+    const std::filesystem::path testEmbedded =
+        std::filesystem::path(__FILE__).parent_path().parent_path() / "qml" / "TestEmbedded.qml";
+    EXPECT_TRUE(
+        declaresHost(QUrl::fromLocalFile(QString::fromStdU16String(testEmbedded.u16string()))));
 }
 
 } // namespace

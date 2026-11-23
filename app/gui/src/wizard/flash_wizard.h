@@ -253,6 +253,7 @@ private:
     Step m_step = Probe;
     bool m_probeStepShown = false;     // the tab had no probe at start: Back from Cable re-chooses
     bool m_skipCableOnPass = false;    // the first Diagnose passes at once -> Firmware
+    std::uint64_t m_requester = 0;     // DiagWorker::newRequester (ADR-0394)
     std::uint64_t m_probeCheckRun = 0; // DiagWorker generation (0 = none)
     std::optional<DiagnoseRun> m_diagnose;
     std::optional<FlashRun> m_flash;

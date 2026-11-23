@@ -14,6 +14,8 @@ Item {
     id: step
 
     property var vm: null
+    // Plan 0056 (embedded contract): the WizardViewModel showing this control (set by WizardView).
+    property WizardViewModel host: null
     // ADR-0290 option: false when the step's heading is the error's message already.
     property bool showMessage: true
     readonly property var shownError: step.vm !== null ? step.vm.shownError : undefined

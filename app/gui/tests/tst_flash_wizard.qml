@@ -1,4 +1,4 @@
-// The flash wizard (plan/features/0010 with the 0035 amendments) in the wizard dialog against the
+// The flash wizard (plan/features/0010 with the 0035 amendments) in the wizard view against the
 // fake J-Link library: the flow from a new tab with the keyboard only (probe picker, cable check,
 // file, confirm, flash, Open console) in light and dark, Esc while flashing asks, the entry points
 // (Flash page "Guide me" for application firmware only, the Choose device link, Help), the
@@ -42,14 +42,37 @@ TestCase {
         return items.length > 0 ? items[0] : null;
     }
 
-    function dialog() {
-        return findChild(window, "wizardDialog");
+    // Plan 0052 / 0056: the wizard view shown now (a tab's or the global one), or null.
+    function view() {
+        return find("wizardView") || find("globalWizardView");
+    }
+
+    // The wizard instance of the current tab (the global one while Settings is current).
+    function host() {
+        return AppViewModel.currentTabViewModel ? AppViewModel.currentTabViewModel.wizard : AppViewModel.globalWizard;
+    }
+
+    function closeWizards() {
+        for (let i = 0; i < AppViewModel.tabs.count; ++i) {
+            const tab = AppViewModel.tabs.at(i);
+            if (tab && tab.wizard.open)
+                tab.wizard.cancel(true);
+        }
+        if (AppViewModel.globalWizard.open)
+            AppViewModel.globalWizard.cancel(true);
+        tryVerify(() => {
+            for (let i = 0; i < AppViewModel.tabs.count; ++i) {
+                const tab = AppViewModel.tabs.at(i);
+                if (tab && tab.wizard.open)
+                    return false;
+            }
+            return !AppViewModel.globalWizard.open;
+        }, 60000);
     }
 
     function part(name) {
-        const d = dialog();
-        const items = findAll(d.contentItem, name).concat(findAll(d.footer, name)).concat(findAll(d.header, name))
-                      .filter(effectivelyVisible);
+        const v = view();
+        const items = v ? findAll(v, name).filter(effectivelyVisible) : [];
         return items.length > 0 ? items[0] : null;
     }
 
@@ -63,9 +86,7 @@ TestCase {
     }
 
     function cleanupTestCase() {
-        if (AppViewModel.wizard.open)
-            AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open, 60000);
+        closeWizards();
         testSupport.resetTabs();
         window.destroy();
         wait(50);
@@ -84,14 +105,12 @@ TestCase {
     }
 
     function cleanup() {
-        if (AppViewModel.wizard.open)
-            AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open, 60000);
+        closeWizards();
         testSupport.useScenario("");
     }
 
     function probeRows() {
-        const list = findChild(dialog().contentItem, "probeList");
+        const list = findChild(view(), "probeList");
         const rows = [];
         if (!list)
             return rows;
@@ -112,7 +131,7 @@ TestCase {
     function openAtFirmware() {
         verify(testSupport.configureTab(0, "app", 801000001, "Test Probe"));
         verify(AppViewModel.launcher.start("flash-firmware", 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
         const wizard = testSupport.openWizard();
         tryCompare(wizard, "stage", FlashWizard.FirmwareStage, 20000);
         tryVerify(() => part("firmwareSourceStep") !== null);
@@ -128,7 +147,7 @@ TestCase {
         // Help › Flash firmware (guided)… on the Choose device tab.
         verify(AppViewModel.launcher.canOpen("flash-firmware"));
         verify(AppViewModel.launcher.start("flash-firmware", 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
         compare(part("wizardTitle").text, "Flash application firmware");
         const wizard = testSupport.openWizard();
         compare(wizard.stage, FlashWizard.ProbeStage);
@@ -179,7 +198,7 @@ TestCase {
         verify(part("wizardAction") !== null); // Flash another
         tryVerify(() => part("wizardHeading").activeFocus);
         keyClick(Qt.Key_Return);
-        tryVerify(() => !AppViewModel.wizard.open);
+        tryVerify(() => !host().open);
         tryCompare(AppViewModel.currentTabViewModel, "currentPage", "console");
         tryCompare(AppViewModel.currentTabViewModel, "state", DeviceTabViewModel.Connected, 20000);
     }
@@ -189,22 +208,22 @@ TestCase {
         const wizard = openAtFirmware();
         wizard.source.loadFile(testSupport.writeHex("big.hex", 65536, false));
         tryVerify(() => part("wizardPrimary").enabled, 5000);
-        AppViewModel.wizard.primary();
+        host().primary();
         tryCompare(wizard, "stage", FlashWizard.ConfirmStage);
         tryVerify(() => part("wizardPrimary").enabled, 10000);
-        AppViewModel.wizard.primary();
+        host().primary();
         tryCompare(wizard, "stage", FlashWizard.Flashing);
         verify(part("flashPhaseStepper") !== null);
         compare(AppViewModel.currentTabViewModel.busyPage, "flash-firmware");
         verify(!part("wizardBack"));
         part("wizardHeading").forceActiveFocus();
         keyClick(Qt.Key_Escape);
-        const confirm = findChild(window, "wizardCancelConfirm");
+        const confirm = findChild(view(), "wizardCancelConfirm");
         tryVerify(() => confirm.opened);
         compare(confirm.body, "Flashing is in progress. Cancel it and close the wizard?");
         confirm.reject();
         tryVerify(() => !confirm.opened);
-        verify(AppViewModel.wizard.open);
+        verify(host().open);
         // The stepper's Cancel: the "cancelled" step.
         wizard.cancelFlash();
         tryCompare(wizard, "stage", FlashWizard.Cancelled, 60000);
@@ -215,10 +234,10 @@ TestCase {
         // Choose device page (J-Link view): "Flash firmware with a guide".
         tryVerify(() => find("flashGuideLink") !== null, 5000);
         find("flashGuideLink").clicked(); // below the probe list (may be scrolled out of view)
-        tryVerify(() => dialog().opened);
-        compare(AppViewModel.wizard.wizardId, "flash-firmware");
-        AppViewModel.wizard.cancel(false);
-        tryVerify(() => !AppViewModel.wizard.open);
+        tryVerify(() => view() !== null);
+        compare(host().wizardId, "flash-firmware");
+        host().cancel(false);
+        tryVerify(() => !host().open);
         // Flash page "Guide me": application firmware only.
         verify(testSupport.configureTab(0, "app", 801000001, "Test Probe"));
         AppViewModel.showPage("flash");
@@ -229,8 +248,8 @@ TestCase {
         flash.kind = FirmwareSourceViewModel.AppFirmware;
         tryVerify(() => find("guideMe") !== null);
         find("guideMe").clicked();
-        tryVerify(() => dialog().opened);
-        compare(AppViewModel.wizard.wizardId, "flash-firmware");
+        tryVerify(() => view() !== null);
+        compare(host().wizardId, "flash-firmware");
     }
 
     function test_minimumWindow_data() {
@@ -242,19 +261,20 @@ TestCase {
         window.width = 960;
         window.height = 600;
         const wizard = openAtFirmware();
-        const d = dialog();
-        verify(d.x >= 0 && d.y >= 0);
-        verify(d.x + d.width <= window.width && d.y + d.height <= window.height);
+        const d = view();
+        const origin = d.mapToItem(window.contentItem, 0, 0);
+        verify(origin.x >= 0 && origin.y >= 0);
+        verify(origin.x + d.width <= window.width + 1 && origin.y + d.height <= window.height + 1);
         wizard.source.loadFile(testSupport.writeHex("app.hex", 4096, false));
         tryVerify(() => part("wizardPrimary").enabled, 5000);
         for (const name of ["wizardPrimary", "wizardCancel", "wizardBack"]) {
             const button = part(name);
             verify(button !== null, name);
-            const p = button.mapToItem(d.contentItem.parent, 0, 0);
+            const p = button.mapToItem(d, 0, 0);
             verify(p.x >= 0 && p.x + button.width <= d.width + 1, name);
             verify(button.width >= button.implicitWidth - 0.5, `${name} is narrower than its text`);
         }
-        AppViewModel.wizard.primary();
+        host().primary();
         tryCompare(wizard, "stage", FlashWizard.ConfirmStage);
         const summary = part("flashSummary");
         verify(summary.width > 0 && summary.width <= d.width);
@@ -281,25 +301,25 @@ TestCase {
         window.width = 960;
         window.height = 600;
         verify(AppViewModel.launcher.start("flash-firmware", 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
         const wizard = testSupport.openWizard();
         tryVerify(() => probeRows().length === 2, 5000);
         save("w10-01-probe");
         mouseClick(probeRows()[0]);
-        AppViewModel.wizard.primary();
+        host().primary();
         tryVerify(() => part("wizardPrimary").enabled, 20000);
         save("w10-02-cable");
-        AppViewModel.wizard.primary();
+        host().primary();
         tryCompare(wizard, "stage", FlashWizard.FirmwareStage);
         wizard.source.loadFile(testSupport.writeHex("chester-clime-v3.2.1.hex", 4096, true));
         tryVerify(() => part("wizardUicrOption") !== null, 5000);
         save("w10-03-firmware");
         wizard.source.allowUicr = true;
-        AppViewModel.wizard.primary();
+        host().primary();
         tryCompare(wizard, "stage", FlashWizard.ConfirmStage);
         tryVerify(() => part("wizardPrimary").enabled, 10000);
         save("w10-04-confirm");
-        AppViewModel.wizard.primary();
+        host().primary();
         tryCompare(wizard, "stage", FlashWizard.Succeeded, 60000);
         save("w10-05-done");
     }

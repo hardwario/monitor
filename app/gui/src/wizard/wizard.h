@@ -57,7 +57,7 @@ struct WizardStep {
     QString body;
     QString illustration; // slot id (ADR-0076) or ""
     // Embedded: "probe-picker" | "firmware-source" | "phase-progress" | ... (WizardRegistry::
-    // addEmbedded). ADR-0292: a step of another kind may name a control too; WizardDialog shows it
+    // addEmbedded). ADR-0292: a step of another kind may name a control too; WizardView shows it
     // below the step's own content (checks, choices), loaded with `vm` = embeddedViewModel().
     QString embedded;
     // ADR-0290: properties set on the loaded control (e.g. {readOnly: true} for the probe picker of
@@ -140,6 +140,8 @@ signals:
 struct WizardDescriptor {
     WizardId id = WizardId::Troubleshooting;
     bool perTab = true; // false: a global wizard (setup)
+    // ADR-0393: needs a device connected to this computer; refused on a remote-support tab.
+    bool localDeviceOnly = false;
     // Creates the wizard with `parent` as Qt parent (ownership).
     std::function<Wizard*(QObject* parent)> create;
 };

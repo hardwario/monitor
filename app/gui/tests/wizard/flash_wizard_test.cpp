@@ -12,6 +12,7 @@
 #include "hwio/device/session_events.h"
 #include "hwio/diag/check.h"
 #include "hwio/firmware/firmware_image.h"
+#include "settings_store.h"
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
@@ -22,6 +23,7 @@
 #include "wizard/flash_wizard.h"
 #include "wizard/troubleshooting_wizard.h"
 #include "wizard/wizard.h"
+#include "wizard/wizard_launcher.h"
 #include "wizard/wizard_view_model.h"
 
 #include <QByteArray>
@@ -80,9 +82,8 @@ protected:
         qputenv("HWIO_NRFUTIL", (root() / "no-nrfutil" / "nrfutil").string().c_str());
     }
     void TearDown() override {
-        if (m_app && tabWizard(*m_app).isOpen()) {
-            tabWizard(*m_app).cancel(true);
-            (void)waitFor([this] { return !tabWizard(*m_app).isOpen(); });
+        if (m_app) {
+            hwio::gui::test::closeAllWizards(*m_app);
         }
         m_app.reset();
         qunsetenv("HWIO_NRFUTIL");
@@ -536,7 +537,7 @@ TEST_F(FlashWizardTest, AHandOffToSettingsReleasesTheSession) {
     ASSERT_TRUE(tab().wizardOwnsSession());
     DeviceTabViewModel* flashed = &tab(); // the Settings page becomes current
     wizard->triggerErrorAction(hwio::gui::error_action::OpenSettings);
-    EXPECT_FALSE(tabWizard(app()).isOpen());
+    EXPECT_FALSE(flashed->wizard()->isOpen()); // the Settings tab has no wizard of its own
     ASSERT_TRUE(waitFor([flashed] { return flashed->session() == nullptr; }));
 }
 
@@ -612,6 +613,34 @@ TEST_F(FlashWizardTest, ClosingTheTabMidFlashCancelsAndCloses) {
     EXPECT_TRUE(wizard->cancelling());
     ASSERT_TRUE(waitFor([&closing] { return closing.isNull(); }, std::chrono::seconds(30)));
     EXPECT_FALSE(tabWizard(app()).isOpen());
+}
+
+// Plan 0056 (D-11): a flash started from the Flash page while the wizard waits on a step holds
+// the tab busy; the wizard's own flash refuses meanwhile.
+TEST_F(FlashWizardTest, TheWizardsFlashRefusesWhileTheFlashPageHoldsTheTab) {
+    start(probeScenario());
+    FlashWizard* wizard = toConfirm(hexFile());
+    ASSERT_NE(wizard, nullptr);
+    ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
+    tab().setBusy(QStringLiteral("flash"), QStringLiteral("Flashing…"), QString(), [] {});
+    EXPECT_FALSE(wizard->canPrimary());
+    tab().clearBusy(QStringLiteral("flash"));
+    EXPECT_TRUE(wizard->canPrimary());
+}
+
+// Plan 0056 (U-2, ADR-0393): the flash wizard refuses a remote-support tab with a toast.
+TEST_F(FlashWizardTest, RefusesARemoteTab) {
+    start(probeScenario(), false);
+    ASSERT_TRUE(app().settingsStore()->setValue(QStringLiteral("remote/relayUrl"),
+                                                QStringLiteral("http://127.0.0.1:9")));
+    ASSERT_TRUE(app().joinRemoteSession(QStringLiteral("12345"), false));
+    ASSERT_TRUE(tab().isRemote());
+    EXPECT_FALSE(app().launcher()->start(QStringLiteral("flash-firmware"))); // Help, "Guide me"
+    EXPECT_FALSE(tabWizard(app()).isOpen());
+    EXPECT_TRUE(app().toasts().contains(hwio::gui::WizardLauncher::localDeviceOnlyText()));
+    EXPECT_TRUE(tab().isRemote());
+    // The LTE update guide is not refused by U-2.
+    EXPECT_TRUE(app().launcher()->canStart(QStringLiteral("lte-update")));
 }
 
 } // namespace

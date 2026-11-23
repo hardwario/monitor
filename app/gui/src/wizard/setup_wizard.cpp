@@ -14,6 +14,8 @@
 #include "viewmodels/error_info.h"
 #include "viewmodels/probe_firmware_view_model.h"
 #include "viewmodels/probe_picker_view_model.h"
+#include "viewmodels/ui_mode.h"
+#include "viewmodels/ui_mode_controller.h"
 #include "wizard/check_list_model.h"
 #include "wizard/probe_picker_step.h"
 #include "wizard/wizard.h"
@@ -97,8 +99,9 @@ QVariantMap actionOf(const QString& id, const QString& text, bool enabled = true
 SetupWizard::SetupWizard(AppViewModel& app, Options options, QObject* parent)
     : Wizard(parent), m_app(app), m_settings(*app.settingsStore()), m_options(std::move(options)),
       // Qt parent ownership: the check list and the summary are children.
-      m_checks(new CheckListModel(this)),   // NOLINT(cppcoreguidelines-owning-memory)
-      m_summary(new CheckListModel(this)) { // NOLINT(cppcoreguidelines-owning-memory)
+      m_checks(new CheckListModel(this)),            // NOLINT(cppcoreguidelines-owning-memory)
+      m_summary(new CheckListModel(this)),           //  NOLINT(cppcoreguidelines-owning-memory)
+      m_requester(app.diagWorker().newRequester()) { // ADR-0394
     if (!m_options.environment) {
         m_options.environment = [&app] { return app.diagEnvironment(); };
     }
@@ -195,6 +198,11 @@ void SetupWizard::start(const ErrorInfo& context, DeviceTabViewModel* /*tab*/) {
         }
     }
     m_fromError = !first.isEmpty();
+    // Plan 0056 (D-2): the mode question only while the mode is not chosen (snapshot: it stays
+    // when the mode is changed in Settings meanwhile); never when started from an error.
+    const UiModeController* uiMode = m_app.uiMode();
+    m_askMode = !m_fromError && uiMode != nullptr && !uiMode->chosen();
+    m_selectedMode = static_cast<int>(uiMode != nullptr ? uiMode->mode() : UiMode::Advanced);
     m_steps = stepIds();
     m_index = 0;
     if (m_fromError) {
@@ -471,6 +479,7 @@ void SetupWizard::back() {
 
 void SetupWizard::action(const QString& actionId) {
     if (actionId == skipAction) {
+        applyMode(); // plan 0056 (D-4)
         complete();
         emit finished(false);
     } else if (actionId == continueAction || actionId == nextAction) {
@@ -510,6 +519,9 @@ QObject* SetupWizard::embeddedViewModel() {
 void SetupWizard::goTo(int index) {
     if (index < 0 || std::cmp_greater_equal(index, m_steps.size()) || index == m_index) {
         return;
+    }
+    if (stepId() == welcomeStep) {
+        applyMode(); // plan 0056 (D-4): leaving Welcome stores the selected mode
     }
     record();
     m_index = index;
@@ -595,8 +607,8 @@ void SetupWizard::runChecks(std::optional<std::filesystem::path> candidate) {
     m_pendingFacts = std::make_shared<diag::EnvironmentFacts>();
     context.facts = m_pendingFacts;
     m_checks->setAllPending();
-    m_generation = m_app.diagWorker().runChecks(
-        DiagWorker::ChecksRequest{.context = std::move(context), .ids = std::move(ids)});
+    m_generation = m_app.diagWorker().runChecks(DiagWorker::ChecksRequest{
+        .context = std::move(context), .ids = std::move(ids), .requester = m_requester});
     emit changed();
 }
 
@@ -777,8 +789,9 @@ void SetupWizard::fillSummary() {
 }
 
 void SetupWizard::connectDevice() {
-    // One wizard at a time (ADR-0066): this one closes first, then the launcher opens
-    // connect-device on the current tab (the launcher outlives this wizard).
+    // This one closes first (a tab's wizard is refused while the setup wizard is open, plan 0056
+    // D-6), then the launcher opens connect-device on the current device tab (the launcher
+    // outlives this wizard).
     QPointer<WizardLauncher> launcher = m_app.launcher();
     emit finished(true);
     QTimer::singleShot(0, launcher.data(), [launcher] {
@@ -789,6 +802,33 @@ void SetupWizard::connectDevice() {
 }
 
 // ---- Welcome ------------------------------------------------------------------------------------
+
+bool SetupWizard::modeChoice() const { return m_askMode && stepId() == welcomeStep; }
+
+QVariantList SetupWizard::modes() { return UiModeController::modes(); }
+
+void SetupWizard::selectMode(int mode) {
+    if (!uiModeFromInt(mode).has_value() || mode == m_selectedMode) {
+        return;
+    }
+    m_selectedMode = mode;
+    emit changed();
+}
+
+void SetupWizard::applyMode() {
+    if (!m_askMode) {
+        return;
+    }
+    if (UiModeController* uiMode = m_app.uiMode(); uiMode != nullptr) {
+        uiMode->chooseMode(m_selectedMode); // a failed write: UiModeController::writeFailed
+    }
+}
+
+void SetupWizard::aboutToClose() {
+    if (stepId() == welcomeStep) {
+        applyMode(); // plan 0056 (D-4): ×, Esc, Cancel on Welcome
+    }
+}
 
 QVariantList SetupWizard::languages() const {
     QVariantList list;

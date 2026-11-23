@@ -13,6 +13,8 @@ ColumnLayout {
     id: step
 
     property FlashWizard vm: null
+    // Plan 0056 (embedded contract): the WizardViewModel showing this control (set by WizardView).
+    property WizardViewModel host: null
 
     objectName: "flashSummaryStep"
     spacing: Theme.spacingM

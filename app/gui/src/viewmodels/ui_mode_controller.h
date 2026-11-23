@@ -4,7 +4,7 @@
 // ADR-0359, ADR-0360, ADR-0362).
 //
 // Reads and writes ui/mode ("basic" | "advanced" | "expert"; missing or invalid = not chosen yet).
-// Until the mode is chosen (the first-start view, ModeChoiceView.qml) `mode` is the
+// Until the mode is chosen (the setup wizard's Welcome step, plan 0056 / ADR-0392) `mode` is the
 // preselection: Expert when the rc.3 switch advanced/expertActions was on (upgrading users,
 // ADR-0362), otherwise Advanced. Choosing stores ui/mode and removes advanced/expertActions
 // (ADR-0360). A failed write (read-only settings file) keeps the mode for this run and reports
@@ -32,7 +32,7 @@ class UiModeController : public QObject {
 
     // UiMode.Basic / Advanced / Expert (the preselection while !chosen).
     Q_PROPERTY(int mode READ modeValue NOTIFY modeChanged)
-    // False until the mode is chosen (first start, upgrade from rc.3): AppViewModel shows the view.
+    // False until the mode is chosen (first start, upgrade from rc.3): the setup wizard asks it.
     Q_PROPERTY(bool chosen READ chosen NOTIFY chosenChanged)
     // [{mode, name, description}] in mode order, translated.
     Q_PROPERTY(QVariantList modes READ modes NOTIFY textsChanged)
@@ -53,14 +53,14 @@ public:
     // Expert when advanced/expertActions is on, otherwise Advanced (ADR-0362).
     [[nodiscard]] UiMode preselection() const;
     [[nodiscard]] static QVariantList modes();
-    // The description line of a mode (Settings › General, the first-start view).
+    // The description line of a mode (Settings › General, the setup wizard's Welcome step).
     [[nodiscard]] static QString description(UiMode mode);
     [[nodiscard]] static QString name(UiMode mode);
 
     // Applies and stores the mode, marks it chosen and removes advanced/expertActions. The mode
     // applies for this run even when the write fails (the error is returned and reported).
     [[nodiscard]] Status choose(UiMode mode);
-    // QML (the first-start view, the segmented control): UiMode values; others are ignored.
+    // QML (the segmented control) and SetupWizard: UiMode values; others are ignored.
     Q_INVOKABLE void chooseMode(int mode);
 
     // Reads ui/mode (at the start, when it changes through the store; tests reset it).

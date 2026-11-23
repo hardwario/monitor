@@ -19,6 +19,7 @@
 #include "wizard/wizard_view_model.h"
 #include "workers/diag_worker.h"
 
+#include <QByteArray>
 #include <QClipboard>
 #include <QFile>
 #include <QGuiApplication>
@@ -26,10 +27,12 @@
 #include <QPointer>
 #include <QSignalSpy>
 #include <QString>
+#include <QStringList>
 #include <QStringLiteral>
 #include <QUrl>
 #include <QVariantList>
 #include <QVariantMap>
+#include <QtEnvironmentVariables>
 #include <QtTypes>
 
 #include <gtest/gtest.h>
@@ -412,13 +415,143 @@ TEST_F(WizardTest, GlobalWizardIsHostedByTheApplication) {
     QSignalSpy raised(&global, &WizardViewModel::raiseRequested);
     EXPECT_FALSE(app->launcher()->start(QStringLiteral("first-run-setup")));
     EXPECT_EQ(raised.count(), 1);
-    // A tab's wizard runs at the same time.
-    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
-    EXPECT_TRUE(tab->wizard()->isOpen());
-    EXPECT_TRUE(global.isOpen());
+    // Plan 0056 (D-6): a tab's wizard is refused while the global one is open (toast, raised).
+    EXPECT_FALSE(app->launcher()->canStart(QStringLiteral("connect-device")));
+    EXPECT_FALSE(app->launcher()->start(QStringLiteral("connect-device")));
+    EXPECT_FALSE(tab->wizard()->isOpen());
+    EXPECT_EQ(raised.count(), 2);
+    EXPECT_TRUE(app->toasts().contains(hwio::gui::WizardLauncher::setupOpenText()));
     global.cancel(false);
     EXPECT_FALSE(global.isOpen());
+    // The global one opens while a tab's wizard runs; the tab's keeps running.
+    ASSERT_TRUE(app->launcher()->canStart(QStringLiteral("connect-device")));
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("first-run-setup")));
     EXPECT_TRUE(tab->wizard()->isOpen());
+    EXPECT_TRUE(global.isOpen());
+    EXPECT_TRUE(app->anyWizardOpen());
+    global.cancel(false);
+    EXPECT_TRUE(tab->wizard()->isOpen());
+}
+
+// Plan 0056 (D-6): support's LTE update request (fromRemote) opens while the setup wizard is open.
+TEST_F(WizardTest, ARemoteRequestOpensWhileTheSetupWizardIsOpen) {
+    const auto app = makeWizardApp(true, true);
+    DeviceTabViewModel* tab = app->currentTabViewModel();
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("first-run-setup")));
+    tab->openWizard(QStringLiteral("connect-device"));
+    EXPECT_FALSE(tab->wizard()->isOpen());
+    tab->openWizard(QStringLiteral("connect-device"), true);
+    EXPECT_TRUE(tab->wizard()->isOpen());
+    EXPECT_TRUE(app->globalWizard()->isOpen());
+}
+
+// Plan 0056 (D-12): from the Settings tab, the Help menu opens a tab's wizard on the last device
+// tab.
+TEST_F(WizardTest, HelpMenuFromTheSettingsTabUsesTheLastDeviceTab) {
+    const auto app = makeWizardApp();
+    app->newTab();
+    DeviceTabViewModel* second = app->tabs()->at(1);
+    app->openSettings();
+    ASSERT_EQ(app->currentTabViewModel(), nullptr);
+    ASSERT_TRUE(app->launcher()->canStart(QStringLiteral("connect-device")));
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
+    EXPECT_TRUE(second->wizard()->isOpen());
+    EXPECT_EQ(app->currentTab(), 1);
+    EXPECT_FALSE(app->tabs()->at(0)->wizard()->isOpen());
+}
+
+// Plan 0056 (D-8, ADR-0300 per tab): a hand-off to another wizard of the same tab keeps the
+// wizards' session and the wizard view; the last wizard's close releases the session.
+TEST_F(WizardTest, AChainWithinATabKeepsTheSessionAndThePage) {
+    const auto app = makeWizardApp();
+    DeviceTabViewModel* tab = app->currentTabViewModel();
+    ASSERT_TRUE(tab->configure(QStringLiteral("chester"), QStringLiteral("app"), 801000001));
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
+    ASSERT_TRUE(tab->ensureWizardSession().has_value());
+    ASSERT_TRUE(tab->wizardOwnsSession());
+    EXPECT_EQ(tab->currentPage(), DeviceTabViewModel::wizardPageId());
+    QStringList pages;
+    QObject::connect(tab, &DeviceTabViewModel::currentPageChanged, tab,
+                     [&] { pages.append(tab->currentPage()); });
+    testWizard(*app)->goTo(5);
+    tab->wizard()->action(QStringLiteral("open-wizard:connect-device"));
+    EXPECT_TRUE(tab->wizardChainPending());
+    tab->wizard()->primary(); // Finish: the chain is pending
+    EXPECT_FALSE(tab->wizard()->isOpen());
+    EXPECT_EQ(tab->currentPage(), DeviceTabViewModel::wizardPageId());
+    ASSERT_TRUE(waitFor([&] { return tab->wizard()->isOpen(); }));
+    EXPECT_FALSE(tab->wizardChainPending());
+    EXPECT_TRUE(pages.isEmpty()); // no flicker
+    hwio::gui::test::spin(std::chrono::milliseconds(100));
+    ASSERT_NE(tab->session(), nullptr); // kept for the next wizard
+    EXPECT_TRUE(tab->wizardOwnsSession());
+    tab->wizard()->cancel(false);
+    EXPECT_NE(tab->currentPage(), DeviceTabViewModel::wizardPageId());
+    ASSERT_TRUE(waitFor([&] { return tab->session() == nullptr; }));
+}
+
+// Plan 0056 (D-8): two tabs chaining in the same event-loop turn each keep their own state.
+TEST_F(WizardTest, TwoTabsChainInTheSameTurn) {
+    const auto app = makeWizardApp();
+    app->newTab();
+    std::array<DeviceTabViewModel*, 2> tabs{app->tabs()->at(0), app->tabs()->at(1)};
+    for (int i = 0; i < 2; ++i) {
+        ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device"), i));
+        qobject_cast<TestWizard*>(tabs.at(i)->wizard()->wizard())->goTo(5);
+    }
+    for (DeviceTabViewModel* tab : tabs) {
+        tab->wizard()->action(QStringLiteral("open-wizard:connect-device"));
+        tab->wizard()->primary();
+    }
+    for (DeviceTabViewModel* tab : tabs) {
+        EXPECT_TRUE(tab->wizardChainPending());
+        EXPECT_FALSE(tab->wizard()->isOpen());
+    }
+    ASSERT_TRUE(
+        waitFor([&] { return tabs.at(0)->wizard()->isOpen() && tabs.at(1)->wizard()->isOpen(); }));
+    for (DeviceTabViewModel* tab : tabs) {
+        EXPECT_FALSE(tab->wizardChainPending());
+        EXPECT_EQ(tab->currentPage(), DeviceTabViewModel::wizardPageId());
+    }
+}
+
+// Plan 0056 (D-8): a hand-off from a tab's wizard to the global setup wizard is not a chain: the
+// tab restores its page and releases the wizards' session.
+TEST_F(WizardTest, AHandOffToTheSetupWizardReleasesTheTabsSession) {
+    const auto app = makeWizardApp(true, true);
+    DeviceTabViewModel* tab = app->currentTabViewModel();
+    ASSERT_TRUE(tab->configure(QStringLiteral("chester"), QStringLiteral("app"), 801000001));
+    const QString page = tab->currentPage();
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
+    ASSERT_TRUE(tab->ensureWizardSession().has_value());
+    testWizard(*app)->goTo(5);
+    tab->wizard()->action(QStringLiteral("open-wizard:first-run-setup"));
+    EXPECT_FALSE(tab->wizardChainPending());
+    tab->wizard()->primary();
+    EXPECT_EQ(tab->currentPage(), page);
+    ASSERT_TRUE(waitFor([&] { return app->globalWizard()->isOpen(); }));
+    ASSERT_TRUE(waitFor([&] { return tab->session() == nullptr; }));
+}
+
+// Plan 0056 (D-8): a chained open that is refused restores the page and releases the session.
+TEST_F(WizardTest, ARefusedChainRestoresThePage) {
+    const auto app = makeWizardApp(true, true);
+    DeviceTabViewModel* tab = app->currentTabViewModel();
+    ASSERT_TRUE(tab->configure(QStringLiteral("chester"), QStringLiteral("app"), 801000001));
+    const QString page = tab->currentPage();
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("connect-device")));
+    ASSERT_TRUE(tab->ensureWizardSession().has_value());
+    testWizard(*app)->goTo(5);
+    tab->wizard()->action(QStringLiteral("open-wizard:connect-device"));
+    // The setup wizard opens meanwhile: the chained open is refused (D-6).
+    ASSERT_TRUE(app->launcher()->start(QStringLiteral("first-run-setup")));
+    tab->wizard()->primary();
+    EXPECT_EQ(tab->currentPage(), DeviceTabViewModel::wizardPageId());
+    ASSERT_TRUE(waitFor([&] { return !tab->wizardChainPending(); }));
+    EXPECT_FALSE(tab->wizard()->isOpen());
+    EXPECT_EQ(tab->currentPage(), page);
+    ASSERT_TRUE(waitFor([&] { return tab->session() == nullptr; }));
 }
 
 TEST_F(WizardTest, OpenWizardFromTheTab) {
@@ -540,6 +673,70 @@ TEST_F(WizardTest, DiagWorkerRunsChecksWithGenerations) {
     worker.cancel(second);
     const std::uint64_t third = worker.runChecks(request);
     ASSERT_TRUE(waitFor([&] { return finishedGeneration == third; }));
+}
+
+// ADR-0394 (plan 0056 D-10): a pending request is replaced only by one of the same requester;
+// requester 0 replaces any pending one of the same kind; the queue holds 12.
+TEST_F(WizardTest, DiagWorkerReplacesOnlyTheSameRequester) {
+    const std::filesystem::path log = root() / "nrfutil.log";
+    qputenv("HWIO_FAKE_NRFUTIL_MODE", "slowversion"); // the version probe answers after 30 s
+    qputenv("HWIO_FAKE_NRFUTIL_LOG", QByteArray::fromStdString(log.string()));
+    hwio::gui::DiagWorker worker;
+    std::vector<std::uint64_t> dropped;
+    QObject::connect(&worker, &hwio::gui::DiagWorker::requestDropped,
+                     [&dropped](quint64 generation) { dropped.push_back(generation); });
+    const auto request = [this](std::uint64_t requester) {
+        hwio::gui::DiagWorker::ChecksRequest checks;
+        checks.context.nrfutil.option = std::filesystem::path(HWIO_FAKE_NRFUTIL);
+        checks.context.instanceRoot = root() / "instances";
+        checks.context.lockDirectory = root() / "locks";
+        checks.context.settingsDir = root() / "settings";
+        checks.context.logDir = root() / "logs";
+        checks.ids = {"nrfutil"};
+        checks.requester = requester;
+        return checks;
+    };
+    const std::uint64_t first = worker.newRequester();
+    const std::uint64_t second = worker.newRequester();
+    EXPECT_GT(first, 0U);
+    EXPECT_NE(first, second);
+    // The worker is kept busy by the slow version probe.
+    const std::uint64_t blocker = worker.runChecks(request(worker.newRequester()));
+    ASSERT_TRUE(waitFor([&log] { return std::filesystem::exists(log); }));
+
+    // Two requesters keep their pending requests; the same requester replaces its own.
+    const std::uint64_t a = worker.runChecks(request(first));
+    const std::uint64_t b = worker.runChecks(request(second));
+    hwio::gui::test::spin(std::chrono::milliseconds(50));
+    EXPECT_TRUE(dropped.empty());
+    const std::uint64_t a2 = worker.runChecks(request(first));
+    ASSERT_TRUE(waitFor([&dropped] { return dropped.size() == 1; }));
+    EXPECT_EQ(dropped.front(), a);
+    // Requester 0 replaces a pending request of the same kind (the old rule): the oldest one.
+    const std::uint64_t anonymous = worker.runChecks(request(0));
+    ASSERT_TRUE(waitFor([&dropped] { return dropped.size() == 2; }));
+    EXPECT_EQ(dropped.back(), a2);
+
+    // Twelve pending requests fit; the thirteenth drops the oldest pending one (anonymous).
+    dropped.clear();
+    std::vector<std::uint64_t> pending{b};
+    for (int i = 0; i < 10; ++i) { // 2 pending + 10 = 12
+        pending.push_back(worker.runChecks(request(worker.newRequester())));
+    }
+    hwio::gui::test::spin(std::chrono::milliseconds(50));
+    EXPECT_TRUE(dropped.empty());
+    pending.push_back(worker.runChecks(request(worker.newRequester())));
+    ASSERT_TRUE(waitFor([&dropped] { return dropped.size() == 1; }));
+    EXPECT_EQ(dropped.front(), anonymous);
+    EXPECT_EQ(hwio::gui::DiagWorker::maxQueued, 12U);
+
+    // The pending requests (each would wait for the slow probe) and then the running one.
+    for (const std::uint64_t generation : pending) {
+        worker.cancel(generation);
+    }
+    worker.cancel(blocker); // stops the version probe
+    qunsetenv("HWIO_FAKE_NRFUTIL_MODE");
+    qunsetenv("HWIO_FAKE_NRFUTIL_LOG");
 }
 
 // Review V3: a subset of the checks runs with the checks it depends on (transitively), in order.

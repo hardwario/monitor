@@ -272,14 +272,16 @@ TestCase {
         AppViewModel.closeGlobalPage();
         verify(testSupport.setSetting("ui/mode", "advanced"));
 
-        // The first-start choice (Advanced preselected; plan 0052: a view of the page area).
+        // The first-start choice: the setup wizard's Welcome step with the mode cards (plan 0056,
+        // ADR-0392; Advanced preselected).
         verify(testSupport.resetUiMode());
-        tryVerify(() => find("modeChoiceDialog") !== null);
+        verify(AppViewModel.launcher.start("first-run-setup", -1));
+        tryVerify(() => find("setupModeCards") !== null);
         save("s07-mode-choice");
         window.width = 960;
         window.height = 600;
         save("s08-mode-choice-960x600");
-        mouseClick(findChild(find("modeChoiceDialog"), "modeChoiceContinue"));
-        tryVerify(() => find("modeChoiceDialog") === null);
+        AppViewModel.globalWizard.cancel(true);
+        tryVerify(() => !AppViewModel.globalWizard.open);
     }
 }

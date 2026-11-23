@@ -11,6 +11,8 @@
 - **Can run in parallel with:** [0008](0008-m4-first-run-setup.md), [0009](0009-m4-connect-and-troubleshooting.md)
 - **Design system:** [plan/gui/design-system.md](../gui/design-system.md) · **Mockups:** [plan/gui/mockups/](../gui/mockups/index.html)
 
+> **Amendment (plan [0056](0056-wizards-as-views-rc5.md), 2026-11-23):** the flash wizard is a view of its device tab (ADR-0391), refused on a remote-support tab (ADR-0393) and while the setup wizard is open; while it is open, the tab's "Choose another device" is refused with a toast (D-11); its checks use a DiagWorker requester token (ADR-0394).
+
 > **Amended by [0021](0021-gui-feedback-round-1.md) (approved 2026-10-20; ADR-0165, ADR-0166, ADR-0174; applied in this text,
 > marked *amended by 0021*):** step 2 shows the two kind cards of the Flash page (Application firmware, LTE
 > firmware); the Firmware step for LTE offers the designated LTE firmware (default) or an own file; catalog IDs show

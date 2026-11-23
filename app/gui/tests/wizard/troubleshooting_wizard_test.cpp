@@ -76,9 +76,8 @@ protected:
         qputenv("HWIO_NRFUTIL", (root() / "no-nrfutil" / "nrfutil").string().c_str());
     }
     void TearDown() override {
-        if (m_app && tabWizard(*m_app).isOpen()) {
-            tabWizard(*m_app).cancel(true);
-            (void)waitFor([this] { return !tabWizard(*m_app).isOpen(); });
+        if (m_app) {
+            hwio::gui::test::closeAllWizards(*m_app);
         }
         m_app.reset();
         qunsetenv("HWIO_NRFUTIL");
@@ -254,6 +253,16 @@ TEST_F(TroubleshootingWizardTest, EveryTopicRunsEndToEnd) {
     }
 }
 
+// Plan 0056 (user decision 2026-11-23): too low supply voltage of the LTE MCU (ADR-0383) opens the
+// no-power topic.
+TEST_F(TroubleshootingWizardTest, LowVoltageOpensTheNoPowerTopic) {
+    start();
+    TroubleshootingWizard* wizard = open(ErrorCode::TargetLowVoltage);
+    ASSERT_NE(wizard, nullptr);
+    wizard->primary(); // introduction
+    EXPECT_EQ(wizard->current().heading, QStringLiteral("Power the device"));
+}
+
 TEST_F(TroubleshootingWizardTest, ATabWithoutAProbeChoosesOneBeforeTheChecks) {
     start(scenario(), false);
     ASSERT_TRUE(tab().choosing());
@@ -357,10 +366,12 @@ TEST_F(TroubleshootingWizardTest, AFailedNrfUtilCheckOpensTheSetupWizard) {
     QSignalSpy handOffError(&tabWizard(app()), &hwio::gui::WizardViewModel::handOffError);
     wizard->action(QStringLiteral("setup"));
     ASSERT_EQ(handOffError.count(), 1);
+    // Plan 0056: the setup wizard is global.
     ASSERT_TRUE(waitFor([this] {
-        return tabWizard(app()).isOpen() &&
-               tabWizard(app()).wizardId() == QStringLiteral("first-run-setup");
+        return app().globalWizard()->isOpen() &&
+               app().globalWizard()->wizardId() == QStringLiteral("first-run-setup");
     }));
+    EXPECT_FALSE(tabWizard(app()).isOpen());
 }
 
 TEST_F(TroubleshootingWizardTest, ABluetoothTabCannotRunTheChecks) {

@@ -101,9 +101,12 @@ DiagWorker::enqueue(std::variant<ChecksRequest, CollectRequest, SaveRequest> pay
         const std::scoped_lock lock(m_mutex);
         generation = m_nextGeneration++;
         Request request{.generation = generation, .payload = std::move(payload)};
-        // The newest request replaces a pending one of the same kind.
-        const auto same = std::ranges::find_if(
-            m_queue, [&request](const Request& queued) { return queued.kind() == request.kind(); });
+        // The newest request replaces a pending one of the same kind and the same requester
+        // (ADR-0394; requester 0: any pending one of the same kind).
+        const auto same = std::ranges::find_if(m_queue, [&request](const Request& queued) {
+            return queued.kind() == request.kind() &&
+                   (request.requester() == 0 || queued.requester() == request.requester());
+        });
         if (same != m_queue.end()) {
             dropped = same->generation;
             *same = std::move(request);
@@ -137,7 +140,9 @@ void DiagWorker::cancel(std::uint64_t generation) {
 
 void DiagWorker::run(const std::stop_token& stop) {
     while (!stop.stop_requested()) {
-        Request request;
+        // Assigned from the queue below (ChecksRequest's default member initializer makes the
+        // variant not default-constructible inside DiagWorker's definition).
+        Request request{.generation = 0, .payload = ChecksRequest{}};
         std::stop_source requestStop;
         {
             std::unique_lock lock(m_mutex);

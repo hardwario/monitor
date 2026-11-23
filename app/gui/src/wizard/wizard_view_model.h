@@ -111,7 +111,7 @@ public:
     Q_INVOKABLE void cancelAlternative();
     Q_INVOKABLE void copyText(const QString& text); // CommandBlock [Copy]
     // ADR-0290: sets the current step's WizardStep::embeddedOptions on `item` (the loaded Embedded
-    // control; WizardDialog calls it when the control is loaded and on every change). A key that
+    // control; WizardView calls it when the control is loaded and on every change). A key that
     // is not a property of `item`, or "vm" (set by the dialog), is ignored with a warning. A key
     // set by an earlier step and missing now gets the value the control had before it was first
     // set (remembered per control object). Null `item` or no wizard: nothing happens.
@@ -134,10 +134,6 @@ signals:
     void handOff(const QString& action, hwio::gui::DeviceTabViewModel* tab);
     // ADR-0297: Wizard::handOffError with the wizard's tab.
     void handOffError(const hwio::gui::ErrorInfo& error, hwio::gui::DeviceTabViewModel* tab);
-    // ADR-0300: a wizard opened on / closed from `tab` (not emitted for global wizards). `closed`
-    // comes after the wizard's hand-off signals.
-    void openedOnTab(hwio::gui::DeviceTabViewModel* tab);
-    void closedOnTab(hwio::gui::DeviceTabViewModel* tab);
 
 private:
     void close(bool completed);

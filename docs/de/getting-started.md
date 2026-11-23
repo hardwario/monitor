@@ -98,10 +98,11 @@ Es läuft jeweils nur ein Fenster der App. Ein erneuter Start holt das geöffnet
 ### Modi
 
 Der **Mode** (Modus) bestimmt, wie viel die Einstellungen zeigen. Beim ersten Start (und einmal nach dem Update von
-2.0.0-rc.3 oder älter) fragt die App **How do you want to use HARDWARIO Monitor?**: Wählen Sie einen Modus und
-klicken Sie auf **Continue**. Vorausgewählt ist **Advanced**; hatten Sie in einer älteren Version **Show expert
-maintenance actions** eingeschaltet, ist es **Expert**. Wenn Sie die Frage schließen, bleibt der vorausgewählte Modus.
-Sie können ihn jederzeit unter **Settings › General › Mode** ändern.
+2.0.0-rc.3 oder älter) fragt der erste Schritt des Einrichtungsassistenten, **Willkommen**, **Wie möchten Sie HARDWARIO
+Monitor verwenden?**: Klicken Sie auf einen Modus oder wählen Sie ihn mit <kbd>↑</kbd> / <kbd>↓</kbd>. Vorausgewählt ist
+**Advanced**; hatten Sie in einer älteren Version **Show expert maintenance actions** eingeschaltet, ist es **Expert**.
+Der gewählte Modus wird gespeichert, egal wie Sie den Schritt verlassen: **Weiter**, **Einrichtung überspringen**,
+**Abbrechen**, **×** oder <kbd>Esc</kbd>. Sie können ihn jederzeit unter **Settings › General › Mode** ändern.
 
 | Angezeigt | Basic | Advanced | Expert |
 |---|---|---|---|
@@ -130,23 +131,36 @@ was needed.“ angezeigt; der Modus ändert sich nicht.
 - **Verbindungsprobleme beheben…**: Problem wählen; der Assistent führt Prüfungen aus und führt Sie Schritt für
   Schritt.
 - **Firmware flashen (mit Assistent)…**: flasht Anwendungsfirmware Schritt für Schritt ([Flashen](flashing.md)).
+
+Diese drei arbeiten mit dem aktuellen Geräte-Tab (vom Tab der Einstellungen aus: mit dem zuletzt angezeigten
+Geräte-Tab). Sie arbeiten mit einem Gerät, das an diesen Computer angeschlossen ist: Auf dem Tab einer
+[Support-Sitzung](remote-support.md#join-a-session) öffnen sie sich nicht und weisen darauf hin.
 - **Create diagnostic report…**: eine ZIP-Datei für den HARDWARIO-Support
   ([Datenschutz](privacy.md#diagnosebericht)).
 - **Documentation ↗**: diese Seiten auf GitHub, passend zur installierten Version der App und in der Sprache der App
   (Englisch, wenn eine Seite nicht übersetzt ist).
 
+<a id="guides-and-views"></a>
 <a id="assistenten-und-weitere-ansichten"></a>
 ### Assistenten und weitere Ansichten
 
-Assistenten (zum Beispiel **Update LTE firmware…**), der Diagnosebericht, die Tastenkürzel, das Update der
-J-Link-Firmware, **Join support session…** und **Share with support…** öffnen sich im Seitenbereich des Tabs neben der
-Leiste; die Tabs und die Leiste bleiben sichtbar. **×** oder <kbd>Esc</kbd> schließt sie, und die vorherige Seite
-erscheint wieder. Auch der Wechsel zu einem anderen Tab schließt sie, außer während sie arbeiten (der Bericht wird
-gesammelt, die J-Link-Firmware wird geschrieben).
+Assistenten (der Einrichtungs-, der Verbindungs- und der Fehlerbehebungsassistent, das geführte Flashen und **Update LTE
+firmware…**), der Diagnosebericht, die Tastenkürzel, das Update der J-Link-Firmware, **Join support session…** und
+**Share with support…** öffnen sich im Seitenbereich des Tabs neben der Leiste; die Tabs und die Leiste bleiben
+sichtbar. **×** oder <kbd>Esc</kbd> schließt sie, und die vorherige Seite erscheint wieder. Auch der Wechsel zu einem
+anderen Tab schließt sie, außer während sie arbeiten (der Bericht wird gesammelt, die J-Link-Firmware wird geschrieben).
 
 Während ein Assistent läuft, können Sie die anderen Seiten des Tabs öffnen, zum Beispiel die Konsole: **Wizard**
 (Assistent) oben in der Leiste (und ein kleines Symbol am Geräte-Tab) zeigt den Assistenten wieder dort, wo er war.
 Jeder Geräte-Tab kann seinen eigenen Assistenten ausführen.
+Solange der Verbindungs- oder der Fehlerbehebungsassistent oder das geführte Flashen geöffnet ist, wartet **Anderes
+Gerät wählen** dieses Tabs, bis Sie den Assistenten schließen: Der Assistent wählt das Gerät des Tabs. Verbinden und
+Trennen bleiben verfügbar, und der Assistent folgt ihnen.
+
+Der Einrichtungsassistent verdeckt, solange er geöffnet ist, den Seitenbereich aller Tabs. Ein Assistent, der in einem
+Tab läuft, arbeitet darunter weiter (sein Symbol bleibt) und erscheint wieder, wenn der Einrichtungsassistent
+geschlossen wird. Andere Assistenten starten erst, wenn der Einrichtungsassistent geschlossen ist (**Beenden oder
+schließen Sie zuerst den Einrichtungsassistenten.**).
 
 Wenn etwas fehlschlägt, zeigt die App, was passiert ist, die wahrscheinliche Ursache (**Probably:**) und was zu tun
 ist (**What to do:**). **Details** zeigt den Fehlercode; [Fehlerbehebung](troubleshooting.md) listet alle Codes auf.

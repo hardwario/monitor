@@ -93,6 +93,11 @@ Hilfeabfragen erscheinen nicht in Ihrer Konsole; die Konsolendatei hält fest, w
    bricht das Update ab, bevor etwas geändert wird. Die Kopie wird automatisch zurückgeschrieben. Nach Ihrem Nein zeigt die Karte *LTE-Firmware-Update von Ihnen abgebrochen (14:02). Es wurde nichts geändert.* Ein Kunde mit einem
    älteren HARDWARIO Monitor beantwortet diese Fragen selbst.
 
+Der Verbindungs- und der Fehlerbehebungsassistent sowie das geführte Flashen arbeiten mit einem Gerät, das an Ihren
+eigenen Computer angeschlossen ist: Auf dem Tab einer Support-Sitzung öffnen sie sich nicht (*Dieser Assistent
+funktioniert nur mit einem Gerät, das an diesen Computer angeschlossen ist, nicht in einer Support-Sitzung.*), und die
+Sitzung läuft weiter.
+
 Wenn der Kunde die Freigabe beendet, kann HARDWARIO Monitor das nicht immer erkennen: Der Server kündigt es nicht an.
 Nach 30 Minuten ohne jede Aktivität weist das Banner darauf hin und bietet **Verlassen** an. Der Tab bleibt offen,
 sodass Sie die Konsole noch speichern können.

@@ -164,9 +164,10 @@ ViewFrame {
         Layout.fillWidth: true
         visible: view.phase === ProbeFirmwareViewModel.Failed && view.vm.error.valid
         error: view.vm.error
-        // Plan 0036 P5: with the troubleshooting wizard registered (plan 0009), "Help me fix
-        // this" replaces [Close]: the view closes first, then the wizard opens with the error.
-        readonly property bool offersWizard: AppViewModel.launcher.canOpen(view.vm.error.wizard)
+        // Plan 0036 P5: when the troubleshooting wizard can start now (plan 0056: registered, not
+        // while the setup wizard is open, not on a remote tab), "Help me fix this" replaces
+        // [Close]: the view closes first, then the wizard opens with the error.
+        readonly property bool offersWizard: view.vm.error.valid && AppViewModel.launcher.canStart(view.vm.error.wizard, -1)
         showWizardButton: false
         // [Close] replaces the primary action; a dependency error keeps [Open Settings].
         customActionText: view.vm.error.primaryAction === ErrorAction.OpenSettings ? "" : (offersWizard ? qsTr("Help me fix this") : qsTr("Close"))

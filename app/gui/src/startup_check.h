@@ -3,16 +3,18 @@
 // StartupCheck - opens the setup wizard at start when it is needed (plan/features/0008 § Start-up
 // behaviour as amended by 0035 § C; ADR-0071).
 //
-// run() (main(), after the main window is shown) submits the `jlink-software` check to the
-// DiagWorker (≤ 5 s) and decides on the GUI thread when the result arrives:
-//   setup/completedVersion absent                         -> the wizard at Welcome
-//   else the check failed and setup/showAtStart           -> Welcome "J-Link Software is needed"
+// run() (main(), after the main window is shown) decides (plan 0056, ADR-0392):
+//   setup/completedVersion absent or ui/mode not chosen   -> the wizard at Welcome at once (with
+//                                                            the mode question while not chosen)
+//   else the `jlink-software` check (DiagWorker, ≤ 5 s) failed and setup/showAtStart
+//                                                         -> Welcome "J-Link Software is needed"
 //                                                            with "Don't show at start"
 //   else                                                  -> nothing
 // Nothing is opened when the settings are read-only (settings.newer_schema: completion could not
-// be recorded, the wizard would open at every start) or when the wizard is not registered. While
-// another wizard is open it waits for that one to close and decides once more (with the keys as
-// they are then). Nothing is blocked meanwhile.
+// be recorded, the wizard would open at every start) or when the wizard is not registered. Before
+// the "J-Link Software is needed" variant it waits while any wizard is open (a tab's or the global
+// one, AppViewModel::anyWizardOpen) and decides once more (with the keys as they are then). The
+// setup wizard runs in AppViewModel::globalWizard(). Nothing is blocked meanwhile.
 //
 // Ownership: created by main() with the AppViewModel as Qt parent. GUI thread only.
 
@@ -53,8 +55,10 @@ signals:
 private:
     void onFinished(quint64 generation, const std::vector<diag::CheckResult>& results);
     void openWizard();
+    [[nodiscard]] bool completed() const;
 
     AppViewModel& m_app;
+    std::uint64_t m_requester; // DiagWorker::newRequester (ADR-0394)
     std::uint64_t m_generation = 0;
     bool m_jlinkOk = true;
     bool m_waiting = false; // for another wizard to close (once)

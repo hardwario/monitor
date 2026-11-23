@@ -83,7 +83,7 @@ set(HWIO_GUI_QML_FILES
     qml/shell/DeviceBar.qml
     qml/shell/DeviceTabBar.qml
     qml/shell/HelpMenu.qml
-    qml/shell/ModeChoiceView.qml
+    qml/components/ModeCards.qml
     qml/shell/NavRail.qml
     qml/shell/PageHost.qml
     qml/settings/ConsoleSection.qml

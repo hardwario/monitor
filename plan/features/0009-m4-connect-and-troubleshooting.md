@@ -10,6 +10,8 @@
 - **Can run in parallel with:** [0008](0008-m4-first-run-setup.md), [0010](0010-m4-flash-wizard.md)
 - **Design system:** [plan/gui/design-system.md](../gui/design-system.md) · **Mockups:** [plan/gui/mockups/](../gui/mockups/index.html)
 
+> **Amendment (plan [0056](0056-wizards-as-views-rc5.md), 2026-11-23):** both wizards are views of their device tab (ADR-0391, one per tab), refused on a remote-support tab (ADR-0393) and while the setup wizard is open; while one is open, the tab's "Choose another device" is refused with a toast (D-11); the ADR-0300 chain state is per tab; their checks use a DiagWorker requester token (ADR-0394).
+
 > **Pending amendment from M5 ([0012](0012-m5-ble-gui-pairing.md), ADR-0084; applied when 0012 is approved):** the
 > coverage test also accepts error codes whose wizard is BlePairing when the BlePairing wizard maps them to a start
 > step; the Connect wizard stays J-Link only.

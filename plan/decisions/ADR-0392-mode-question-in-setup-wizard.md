@@ -2,8 +2,8 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-23
-- **Decided by:** Matej Strnad (the move into the setup wizard, 2026-11-23); open points D-1 … D-5 of plan
-  [0056](../features/0056-wizards-as-views-rc5.md) await confirmation
+- **Decided by:** Matej Strnad (the move into the setup wizard, 2026-11-23; D-1 … D-5 of plan
+  [0056](../features/0056-wizards-as-views-rc5.md) confirmed as recommended, 2026-11-23)
 
 ## Context
 
@@ -25,15 +25,15 @@ stores the preselected mode without the user choosing.
 
 - **Decided 2026-11-23 (Matej Strnad):** the mode question ("How do you want to use HARDWARIO Monitor?") becomes the
   first step of the setup wizard. The separate mode view is no longer shown at the first start.
-- Proposed (D-1 (A)): the three mode cards are on the Welcome step, below the language combo, with the hint "You can
+- Decided (D-1 (A)): the three mode cards are on the Welcome step, below the language combo, with the hint "You can
   change it at any time in Settings › General."; preselection as ADR-0362 (Expert when `advanced/expertActions` was on,
   else Advanced).
-- Proposed (D-2 (A)): shown only while `ui/mode` is not chosen.
-- Proposed (D-3 (A)): `StartupCheck` treats "mode not chosen" like "setup not completed"; `ModeChoiceView` and the
+- Decided (D-2 (A)): shown only while `ui/mode` is not chosen.
+- Decided (D-3 (A)): `StartupCheck` treats "mode not chosen" like "setup not completed"; `ModeChoiceView` and the
   `modeChoice` content view are removed.
-- Proposed (D-4 (A)): leaving the Welcome step in any way ([Next], [Skip setup], ×, Esc, Cancel) stores the selected
+- Decided (D-4 (A)): leaving the Welcome step in any way ([Next], [Skip setup], ×, Esc, Cancel) stores the selected
   card.
-- Proposed (D-5 (A)): when setup is not completed it opens at once, without waiting for the J-Link check.
+- Decided (D-5 (A)): when setup is not completed it opens at once, without waiting for the J-Link check.
 - Read-only settings: no setup wizard (ADR-0071), so no question; the preselection applies for the run.
 
 ## Consequences

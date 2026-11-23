@@ -71,9 +71,6 @@ bool WizardViewModel::start(Wizard* wizard, const ErrorInfo& context, DeviceTabV
         });
     }
     qCInfo(lcGui).noquote() << "Wizard" << wizard->id() << "opened";
-    if (tab != nullptr) {
-        emit openedOnTab(tab);
-    }
     wizard->start(context, tab);
     emit openChanged();
     emit changed();
@@ -385,9 +382,6 @@ void WizardViewModel::close(bool completed) {
     m_tabBound = false;
     m_closing = false;
     wizard->deleteLater(); // never inside its own signal
-    if (!tab.isNull() && !m_tabClosing) {
-        emit closedOnTab(tab.data());
-    }
     emit openChanged();
     emit changed();
 }

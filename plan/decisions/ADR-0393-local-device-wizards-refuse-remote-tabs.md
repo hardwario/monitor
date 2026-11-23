@@ -2,8 +2,8 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-23
-- **Decided by:** Matej Strnad (the refusal, 2026-11-23); open point D-7 of plan
-  [0056](../features/0056-wizards-as-views-rc5.md) awaits confirmation
+- **Decided by:** Matej Strnad (the refusal, 2026-11-23; D-7 of plan
+  [0056](../features/0056-wizards-as-views-rc5.md) confirmed as recommended, 2026-11-23)
 
 ## Context
 
@@ -26,7 +26,7 @@ session.
   while `DeviceTabViewModel::isRemote()` is true, also after the session ended.
 - Message (constant, translated): "This wizard works only with a device connected to this computer, not in a support
   session."
-- Proposed (D-7 (A)): shown as a toast; no entry point is hidden.
+- Decided (D-7 (A)): shown as a toast; no entry point is hidden.
 - The setup wizard (global) and the LTE update guide are not affected.
 
 ## Consequences

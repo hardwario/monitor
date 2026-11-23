@@ -89,6 +89,10 @@ Twojej konsoli; plik konsoli zapisuje, ile ich było.
    Kontynuować bez kopii?*. Nie lub brak odpowiedzi w ciągu 60 sekund anuluje aktualizację, zanim cokolwiek się zmieni.
    Kopia jest zapisywana z powrotem automatycznie. Po Twoim Nie karta pokaże *Aktualizacja firmware LTE anulowana przez Ciebie (14:02). Nic nie zostało zmienione.* Klient ze starszym HARDWARIO Monitor odpowiada na te pytania sam.
 
+Kreator połączenia, kreator rozwiązywania problemów i wgrywanie z kreatorem działają z urządzeniem podłączonym do
+Twojego komputera: na karcie sesji wsparcia się nie otwierają (*Ten kreator działa tylko z urządzeniem podłączonym do
+tego komputera, nie w sesji wsparcia.*), a sesja trwa dalej.
+
 HARDWARIO Monitor nie zawsze rozpozna, że klient zakończył udostępnianie: serwer tego nie ogłasza. Po 30 minutach bez
 żadnej aktywności baner o tym informuje i oferuje **Opuść**. Karta pozostaje otwarta, więc nadal możesz zapisać
 konsolę.

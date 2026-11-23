@@ -105,7 +105,8 @@ private:
 // Registers the test wizard (id "connect-device", per tab) and its embedded control
 // "test-embedded" (`embeddedQml`).
 void registerTestWizard(AppViewModel& app, const QUrl& embeddedQml);
-// Plan 0052: the same wizard as a global wizard (id "first-run-setup", not per tab).
+// Plan 0052: the same wizard as a global wizard (id "first-run-setup", not per tab). Plan 0056:
+// both qFatal when the id is registered already (call them before registerBuiltInPages).
 void registerGlobalTestWizard(AppViewModel& app);
 
 } // namespace test

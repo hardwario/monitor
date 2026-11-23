@@ -123,7 +123,9 @@ struct TabContext {
     std::function<void(const QString& text, const QString& toast)> copyToClipboard;
     // M4 (plan/features/0007): opens a wizard for this tab (AppViewModel's WizardLauncher); may be
     // empty.
-    std::function<void(const QString& wizardId, DeviceTabViewModel* tab)> openWizard;
+    // `fromRemote`: support's request on a shared tab (ADR-0363; plan 0056 D-6).
+    std::function<void(const QString& wizardId, DeviceTabViewModel* tab, bool fromRemote)>
+        openWizard;
     // Plan 0052: the registered wizards (embedded step controls) for the tab's WizardViewModel;
     // may be null (an empty registry).
     const WizardRegistry* wizards = nullptr; // outlives the tabs
@@ -257,8 +259,15 @@ public:
     [[nodiscard]] bool wizardOwnsSession() const noexcept { return m_wizardSession; }
     void releaseWizardSessionWhenIdle();
     void keepWizardSession();
+    // ADR-0300 per tab (plan 0056 D-8, ADR-0391): a hand-off to another per-tab wizard on this tab
+    // is pending (AppViewModel::openChainedWizard). While it is pending, the closing wizard leaves
+    // the page on the wizard view and keeps the wizards' session. Clearing it while no wizard is
+    // open (the chained open failed) restores the page and releases the session when idle.
+    void setWizardChainPending(bool pending);
+    [[nodiscard]] bool wizardChainPending() const noexcept { return m_wizardChainPending; }
     // M4 (plan/features/0007): opens the wizard `wizardId` for this tab (WizardLauncher).
-    Q_INVOKABLE void openWizard(const QString& wizardId);
+    // `fromRemote`: support's LTE update request (ADR-0363), opens while the setup wizard is open.
+    Q_INVOKABLE void openWizard(const QString& wizardId, bool fromRemote = false);
     [[nodiscard]] const device::DeviceProfile& profile() const;
     [[nodiscard]] QString consoleTargetId() const;
     // One log for all sessions of this tab (ADR-0063); passed as SessionOptions::consoleLog.
@@ -302,8 +311,13 @@ public:
     void connectDevice();
     void disconnectDevice();
     void reconnect();
-    // Back to the picker (closes the session, keeps the log).
+    // Back to the picker (closes the session, keeps the log). Plan 0056 (D-11, ADR-0391): refused
+    // with a toast while a wizard that works on this tab's device (localDeviceOnly: connect,
+    // troubleshooting, flash) is open on the tab; that wizard calls chooseAnotherProbeForWizard().
     void chooseAnotherProbe();
+    void chooseAnotherProbeForWizard();
+    // The D-11 toast.
+    [[nodiscard]] static QString wizardOwnsDeviceText();
     [[nodiscard]] bool isBusy() const noexcept { return m_busy.has_value(); }
     // 0021: the silent shell queries of this tab (one at a time; ADR-0175).
     [[nodiscard]] device::ShellQueryQueue& shellQueries() const { return *m_queries; }
@@ -390,6 +404,7 @@ private:
     void updateState();
     void resetInfoWatcher();
     void onWizardOpenChanged(); // plan 0052
+    void onWizardClosed();      // plan 0056: page restore and session release (ADR-0300)
 
     TabContext m_context;
     ProbePickerViewModel* m_picker = nullptr;         // child
@@ -424,6 +439,8 @@ private:
     bool m_closePending = false;
     bool m_wizardSession = false;        // ADR-0300: m_session was opened for wizards
     bool m_releaseWizardSession = false; // ADR-0300: close it when idle
+    bool m_wizardChainPending = false;   // ADR-0300 / plan 0056 D-8: a chained open is queued
+    bool m_shuttingDown = false;         // shutdown() runs: no release (the session closes)
     QMetaObject::Connection m_releaseWatch;
     State m_state = ChoosingDevice;
     bool m_hasError = false;

@@ -10,8 +10,9 @@ firmwarem nebo zadejte ID z katalogu**.
 Během flashování je konzole karty pozastavená a poté se sama obnoví.
 
 Pro nahrání aplikačního firmwaru s průvodcem (programátor, kontrola kabelu, soubor, potvrzení) použijte **Nápověda** ›
-**Nahrát firmware (s průvodcem)…**, **Provést mě** na této stránce nebo **Nahrát firmware s průvodcem** na
-stránce výběru zařízení.
+**Nahrát firmware (s průvodcem)…**, **Provést mě** na této stránce nebo **Nahrát firmware s průvodcem** na stránce
+výběru zařízení. Průvodce se otevře v ploše stránky karty ([Průvodci a další
+zobrazení](getting-started.md#guides-and-views)); na kartě relace podpory není k dispozici.
 
 ## 1. Co chcete nahrát?
 

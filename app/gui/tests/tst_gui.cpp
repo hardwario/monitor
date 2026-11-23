@@ -530,7 +530,7 @@ public:
     Q_INVOKABLE [[nodiscard]] bool setSetting(const QString& key, const QVariant& value) const {
         return static_cast<bool>(m_app->settingsStore()->setValue(key, value));
     }
-    // Plan 0045: as on the first start (ui/mode not stored; the first-start dialog opens).
+    // Plan 0045: as on the first start (ui/mode not stored; the setup wizard's Welcome asks it).
     Q_INVOKABLE [[nodiscard]] bool resetUiMode() const {
         if (!m_app->settingsStore()->removeGroup(QStringLiteral("ui/mode"))) {
             return false;
@@ -597,9 +597,9 @@ public:
         const auto* tab = m_app->tabs()->at(index);
         return tab != nullptr ? tab->wizard()->wizard() : nullptr;
     }
-    // Plan 0052: registers the global test wizard ("first-run-setup").
-    Q_INVOKABLE void registerGlobalTestWizard() const {
-        hwio::gui::test::registerGlobalTestWizard(*m_app);
+    // Plan 0056: the open wizard of the global instance (the setup wizard), or null.
+    Q_INVOKABLE [[nodiscard]] QObject* globalWizard() const {
+        return m_app->globalWizard()->wizard();
     }
 
     // ---- plan 0006 (Flash page) ----
@@ -931,6 +931,12 @@ public slots:
         const bool realConnectWizard = QCoreApplication::arguments()
                                            .join(QLatin1Char(' '))
                                            .contains(QStringLiteral("tst_connect_wizard"));
+        // Plan 0056 (B8): tst_wizard.qml tests the global instance with the global test wizard
+        // ("first-run-setup", registered before the real SetupWizard: the first registration
+        // wins); the other files get the real setup wizard.
+        const bool globalTestWizard = QCoreApplication::arguments()
+                                          .join(QLatin1Char(' '))
+                                          .contains(QStringLiteral("/tst_wizard.qml"));
         const std::filesystem::path root(m_dir.path().toStdU16String());
         std::optional<hwio::Settings> settings;
         if (auto opened = hwio::Settings::openFile(root / "Monitor.ini"); opened) {
@@ -947,7 +953,7 @@ public slots:
                                                           .consoleDirectory = root / "console"},
                 .scanInterval = std::chrono::milliseconds(300),
                 .registerExtensions =
-                    [realConnectWizard](hwio::gui::AppViewModel& app) {
+                    [realConnectWizard, globalTestWizard](hwio::gui::AppViewModel& app) {
                         // M4 (plan/features/0007): the test wizard as "connect-device". It is
                         // registered first, so it keeps that id and plan 0009's Connect wizard is
                         // not added - except for tst_connect_wizard.qml (one process per test
@@ -956,6 +962,9 @@ public slots:
                             hwio::gui::test::registerTestWizard(
                                 app, QUrl::fromLocalFile(QStringLiteral(QUICK_TEST_SOURCE_DIR
                                                                         "/qml/TestEmbedded.qml")));
+                        }
+                        if (globalTestWizard) {
+                            hwio::gui::test::registerGlobalTestWizard(app);
                         }
                         hwio::gui::registerBuiltInPages(app);
                         hwio::gui::test::registerTestPage(
@@ -971,7 +980,7 @@ public slots:
         if (!m_languageManager->apply(QStringLiteral("en"))) {
             qFatal("tst_gui: English could not be selected");
         }
-        // Plan 0045: the tests start in the default mode, chosen (no first-start dialog);
+        // Plan 0045: the tests start in the default mode, chosen (no mode question);
         // tst_settings resets it for the dialog test.
         if (!m_app->settingsStore()->setValue(QStringLiteral("ui/mode"),
                                               QStringLiteral("advanced"))) {

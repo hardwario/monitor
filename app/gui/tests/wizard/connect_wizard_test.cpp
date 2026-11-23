@@ -12,7 +12,9 @@
 #include "hwio/device/probe_lock.h"
 #include "hwio/device/session_events.h"
 #include "hwio/diag/check.h"
+#include "settings_store.h"
 #include "viewmodels/app_view_model.h"
+#include "viewmodels/connection_view_model.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
 #include "viewmodels/probe_picker_view_model.h"
@@ -20,7 +22,9 @@
 #include "wizard/connect_wizard.h"
 #include "wizard/troubleshooting_wizard.h"
 #include "wizard/wizard.h"
+#include "wizard/wizard_launcher.h"
 #include "wizard/wizard_view_model.h"
+#include "workers/diag_worker.h"
 
 #include <QObject>
 #include <QSignalSpy>
@@ -80,9 +84,8 @@ protected:
         qputenv("HWIO_NRFUTIL", (root() / "no-nrfutil" / "nrfutil").string().c_str());
     }
     void TearDown() override {
-        if (m_app && tabWizard(*m_app).isOpen()) {
-            tabWizard(*m_app).cancel(true);
-            (void)waitFor([this] { return !tabWizard(*m_app).isOpen(); });
+        if (m_app) {
+            hwio::gui::test::closeAllWizards(*m_app);
         }
         m_app.reset();
         qunsetenv("HWIO_NRFUTIL");
@@ -432,10 +435,12 @@ TEST_F(ConnectWizardTest, AHandOffToTheSetupWizardReleasesTheSession) {
     ASSERT_NE(tab().session(), nullptr);
     emit wizard->handOffError(hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::UsbAccessDenied)));
     emit wizard->finished(false);
+    // Plan 0056: the setup wizard is global; the tab's wizard has closed.
     ASSERT_TRUE(waitFor([this] {
-        return tabWizard(app()).isOpen() &&
-               tabWizard(app()).wizardId() == QStringLiteral("first-run-setup");
+        return app().globalWizard()->isOpen() &&
+               app().globalWizard()->wizardId() == QStringLiteral("first-run-setup");
     }));
+    EXPECT_FALSE(tabWizard(app()).isOpen());
     ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
 }
 
@@ -446,10 +451,121 @@ TEST_F(ConnectWizardTest, AHandOffToAClosedTabOpensNothing) {
     ASSERT_EQ(app().tabs()->count(), 2);
     DeviceTabViewModel* second = app().currentTabViewModel();
     emit hwio::gui::test::tabWizard(app()).handOffError(
-                  hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetRttNotFound)), second);
+        hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetRttNotFound)), second);
     app().closeTab(1, true);
     hwio::gui::test::spin(std::chrono::milliseconds(300));
     EXPECT_FALSE(tabWizard(app()).isOpen());
+}
+
+// Plan 0056 (D-11, ADR-0391): while the wizard is open, the tab's "Choose another device" is
+// refused with a toast; after it closed (and while the LTE update guide is open) it works.
+TEST_F(ConnectWizardTest, ChooseAnotherDeviceIsRefusedWhileTheWizardIsOpen) {
+    start(scenario());
+    ConnectWizard* wizard = open();
+    ASSERT_NE(wizard, nullptr);
+    ASSERT_EQ(wizard->step(), ConnectWizard::Cable);
+    tab().connection()->chooseAnotherProbe(); // the device bar
+    EXPECT_FALSE(tab().choosing());
+    EXPECT_TRUE(app().toasts().contains(DeviceTabViewModel::wizardOwnsDeviceText()));
+    EXPECT_TRUE(tabWizard(app()).isOpen());
+    tabWizard(app()).cancel(false);
+    ASSERT_FALSE(tabWizard(app()).isOpen());
+    tab().connection()->chooseAnotherProbe();
+    EXPECT_TRUE(tab().choosing());
+}
+
+TEST_F(ConnectWizardTest, ChooseAnotherDeviceWorksWhileTheLteGuideIsOpen) {
+    start(scenario());
+    tab().openWizard(QStringLiteral("lte-update"));
+    ASSERT_TRUE(tabWizard(app()).isOpen());
+    ASSERT_EQ(tabWizard(app()).wizardId(), QStringLiteral("lte-update"));
+    tab().connection()->chooseAnotherProbe();
+    EXPECT_TRUE(tab().choosing());
+}
+
+// Plan 0056 (D-11): connect / disconnect in the device bar stay usable; the wizard follows them.
+TEST_F(ConnectWizardTest, TheWizardFollowsConnectAndDisconnect) {
+    start(scenario());
+    ConnectWizard* wizard = open();
+    ASSERT_NE(wizard, nullptr);
+    ASSERT_EQ(wizard->step(), ConnectWizard::Cable);
+    QSignalSpy changed(wizard, &hwio::gui::Wizard::changed);
+    tab().connectDevice();
+    ASSERT_TRUE(waitFor([this] { return tab().state() == DeviceTabViewModel::Connected; }));
+    EXPECT_GT(changed.count(), 0);
+    EXPECT_TRUE(tabWizard(app()).isOpen());
+    changed.clear();
+    tab().disconnectDevice();
+    ASSERT_TRUE(waitFor([this] { return tab().session() == nullptr; }));
+    EXPECT_GT(changed.count(), 0);
+    EXPECT_TRUE(tabWizard(app()).isOpen());
+    EXPECT_EQ(wizard->step(), ConnectWizard::Cable);
+    // Check: the device bar's Connect after the check promotes the wizards' probe-only session
+    // (ADR-0300); the wizard follows the new state.
+    wizard->primary(); // Power
+    wizard->primary(); // Check
+    ASSERT_EQ(wizard->step(), ConnectWizard::Check);
+    ASSERT_TRUE(checked(*wizard));
+    ASSERT_NE(tab().session(), nullptr);
+    changed.clear();
+    tab().connectDevice();
+    ASSERT_TRUE(waitFor([this] { return tab().state() == DeviceTabViewModel::Connected; }));
+    EXPECT_GT(changed.count(), 0);
+    EXPECT_TRUE(tabWizard(app()).isOpen());
+    EXPECT_FALSE(tab().wizardOwnsSession());
+}
+
+// Plan 0056 (U-2, D-7, ADR-0393): on a remote-support tab (also after the session ended) the
+// connect and troubleshooting wizards refuse with a toast; the tab stays remote.
+TEST_F(ConnectWizardTest, LocalDeviceWizardsRefuseARemoteTab) {
+    start(scenario(), false);
+    ASSERT_TRUE(app().settingsStore()->setValue(QStringLiteral("remote/relayUrl"),
+                                                QStringLiteral("http://127.0.0.1:9")));
+    ASSERT_TRUE(app().joinRemoteSession(QStringLiteral("12345"), false));
+    ASSERT_TRUE(tab().isRemote());
+    for (const QString& id :
+         {QStringLiteral("connect-device"), QStringLiteral("troubleshooting")}) {
+        EXPECT_FALSE(app().launcher()->canStart(id)) << id.toStdString();
+        EXPECT_FALSE(app().launcher()->start(id)) << id.toStdString(); // Help menu
+        EXPECT_FALSE(tabWizard(app()).isOpen());
+    }
+    // "Help me fix this" of an error panel on the tab.
+    EXPECT_FALSE(app().launcher()->open(
+        QStringLiteral("troubleshooting"),
+        hwio::gui::ErrorInfo(hwio::makeError(ErrorCode::TargetConnectFailed)), 0));
+    EXPECT_TRUE(app().toasts().contains(hwio::gui::WizardLauncher::localDeviceOnlyText()));
+    EXPECT_FALSE(tabWizard(app()).isOpen());
+    EXPECT_TRUE(tab().isRemote());
+    // The setup wizard (global) is not affected.
+    EXPECT_TRUE(app().launcher()->canStart(QStringLiteral("first-run-setup")));
+}
+
+// Plan 0056 (D-9, D-10): two tabs' wizards with their own pickers. Their probe checks run at
+// once without replacing each other's requests; when tab 1 takes the probe, tab 2's picker shows
+// it in use and clears the selection.
+TEST_F(ConnectWizardTest, TwoTabsWithWizardPickers) {
+    start(scenario(), false);
+    app().newTab();
+    ASSERT_EQ(app().tabs()->count(), 2);
+    DeviceTabViewModel* first = app().tabs()->at(0);
+    DeviceTabViewModel* second = app().tabs()->at(1);
+    QSignalSpy dropped(&app().diagWorker(), &hwio::gui::DiagWorker::requestDropped);
+    ASSERT_TRUE(app().launcher()->start(ConnectWizard::wizardId, 0));
+    ASSERT_TRUE(app().launcher()->start(ConnectWizard::wizardId, 1));
+    auto* one = qobject_cast<ConnectWizard*>(first->wizard()->wizard());
+    auto* two = qobject_cast<ConnectWizard*>(second->wizard()->wizard());
+    ASSERT_NE(one, nullptr);
+    ASSERT_NE(two, nullptr);
+    ASSERT_EQ(one->step(), ConnectWizard::Probe);
+    ASSERT_EQ(two->step(), ConnectWizard::Probe);
+    ASSERT_TRUE(waitFor([&] { return one->canPrimary() && two->canPrimary(); }));
+    hwio::gui::test::spin(std::chrono::milliseconds(1000));
+    EXPECT_LE(dropped.count(), 2); // no ping-pong between the two wizards (ADR-0394)
+    one->primary();                // tab 1 takes 801000001
+    ASSERT_EQ(first->probeSerial(), std::optional<std::uint32_t>(801000001));
+    EXPECT_FALSE(two->picker()->selectedSerial().has_value());
+    EXPECT_FALSE(two->canPrimary());
+    EXPECT_FALSE(second->probeSerial().has_value());
 }
 
 } // namespace

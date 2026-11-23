@@ -222,6 +222,14 @@ ViewFrame {
             when: embeddedLoader.status === Loader.Ready
         }
 
+        // Plan 0056 (embedded contract): every registered control declares `host`.
+        Binding {
+            target: embeddedLoader.item
+            property: "host"
+            value: view.wizard
+            when: embeddedLoader.status === Loader.Ready
+        }
+
         Connections {
             target: view.wizard
 

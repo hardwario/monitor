@@ -10,6 +10,8 @@
 - **Can run in parallel with:** [0009](0009-m4-connect-and-troubleshooting.md), [0010](0010-m4-flash-wizard.md)
 - **Design system:** [plan/gui/design-system.md](../gui/design-system.md) · **Mockups:** [plan/gui/mockups/](../gui/mockups/index.html)
 
+> **Amendment (plan [0056](0056-wizards-as-views-rc5.md), 2026-11-23):** the setup wizard is a global view (`AppViewModel.globalWizard`, ADR-0391), not a modal dialog; its Welcome step asks the user mode while it is not chosen (ADR-0392); `StartupCheck` counts a missing mode as not completed and opens Welcome at once, without the J-Link check (ADR-0392). [Connect a device] opens the Connect wizard on the current device tab (from the Settings tab: the last device tab).
+
 > **Pending amendment from M5 ([0012](0012-m5-ble-gui-pairing.md), ADR-0088; applied when 0012 is approved — then
 > this plan needs re-approval):** optional **Bluetooth** step after nRF Util (adapter, macOS permission prompt);
 > `ble.permission_denied` starts the wizard at that step; the Done summary lists Bluetooth. This replaces the "macOS

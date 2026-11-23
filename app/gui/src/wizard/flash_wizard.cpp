@@ -121,8 +121,9 @@ FlashWizard::FlashWizard(AppViewModel& app, FirmwareServices& services, QObject*
       // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
       m_source(new FirmwareSourceViewModel(
           services, [this]() -> const device::DeviceProfile* { return profile(); }, this)),
-      m_probeChecks(new CheckListModel(this)),  // NOLINT(cppcoreguidelines-owning-memory)
-      m_cableChecks(new CheckListModel(this)) { // NOLINT(cppcoreguidelines-owning-memory)
+      m_probeChecks(new CheckListModel(this)),       // NOLINT(cppcoreguidelines-owning-memory)
+      m_cableChecks(new CheckListModel(this)),       //  NOLINT(cppcoreguidelines-owning-memory)
+      m_requester(app.diagWorker().newRequester()) { // ADR-0394
     // ADR-0245: application firmware only; the kind never changes.
     m_source->setKind(FirmwareSourceViewModel::AppFirmware);
     connect(m_source, &FirmwareSourceViewModel::sourceChanged, this, &Wizard::changed);
@@ -439,8 +440,8 @@ void FlashWizard::runProbeChecks() {
         }
     }
     m_probeChecks->reset(rowIds, titles);
-    m_probeCheckRun =
-        m_app.diagWorker().runChecks(DiagWorker::ChecksRequest{.context = context, .ids = ids});
+    m_probeCheckRun = m_app.diagWorker().runChecks(
+        DiagWorker::ChecksRequest{.context = context, .ids = ids, .requester = m_requester});
     emit changed();
 }
 
@@ -519,7 +520,7 @@ void FlashWizard::back() {
         // Another probe: the tab goes back to its picker (the wizard configured it).
         stopDiagnose();
         if (!m_tab.isNull()) {
-            m_tab->chooseAnotherProbe();
+            m_tab->chooseAnotherProbeForWizard(); // plan 0056 (D-11)
         }
         m_cableChecks->reset({}, {});
         goTo(Probe);
@@ -1160,6 +1161,7 @@ void registerFlashWizard(AppViewModel& app, FirmwareServices& services) {
     (void)app.wizardRegistry().add(
         WizardDescriptor{.id = WizardId::FlashFirmware,
                          .perTab = true,
+                         .localDeviceOnly = true, // ADR-0393
                          // Qt parent ownership: the WizardViewModel.
                          .create = [&app, &services](QObject* parent) -> Wizard* {
                              return new FlashWizard(

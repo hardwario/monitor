@@ -92,9 +92,10 @@ Changes apply immediately.
 ### Modes
 
 The **Mode** decides how much Settings shows. At the first start (and once after updating from 2.0.0-rc.3 or older)
-the app asks **How do you want to use HARDWARIO Monitor?**: choose a mode and click **Continue**. **Advanced** is
-preselected; if you had **Show expert maintenance actions** on in an older version, **Expert** is. Closing the
-question keeps the preselected mode. Change it at any time in **Settings › General › Mode**.
+the first step of the setup wizard, **Welcome**, asks **How do you want to use HARDWARIO Monitor?**: click a mode, or
+select it with <kbd>↑</kbd> / <kbd>↓</kbd>. **Advanced** is preselected; if you had **Show expert maintenance
+actions** on in an older version, **Expert** is. The selected mode is stored when you leave the step in any way:
+**Next**, **Skip setup**, **Cancel**, **×** or <kbd>Esc</kbd>. Change it at any time in **Settings › General › Mode**.
 
 | Shown | Basic | Advanced | Expert |
 |---|---|---|---|
@@ -121,6 +122,10 @@ for that visit with the note "Shown because it was needed."; the mode does not c
 - **Connect a device…**: the Connect wizard (probe, cable, power, a live check, connect).
 - **Troubleshoot connection…**: choose the problem; the wizard runs checks and guides you step by step.
 - **Flash firmware (guided)…**: flashes application firmware step by step ([Flashing](flashing.md)).
+
+These three work on the current device tab (from the Settings tab: on the device tab shown last). They work with a
+device connected to this computer: on a [support session](remote-support.md#join-a-session) tab they do not
+open and say so.
 - **Create diagnostic report…**: a zip file for HARDWARIO support ([Privacy](privacy.md#diagnostic-report)).
 - **Documentation ↗**: these pages on GitHub, for the installed version of the app and in the app language (English
   where a page is not translated).
@@ -128,13 +133,19 @@ for that visit with the note "Shown because it was needed."; the mode does not c
 <a id="guides-and-views"></a>
 ### Guides and other views
 
-Guides (for example **Update LTE firmware…**), the diagnostic report, the keyboard shortcuts, the J-Link firmware
-update, **Join support session…** and **Share with support…** open in the page area of the tab, next to the rail;
-the tabs and the rail stay. **×** or <kbd>Esc</kbd> closes them and the page shown before comes back. Switching to
+Guides (the setup, Connect, Troubleshooting and guided flash wizards and **Update LTE firmware…**), the diagnostic
+report, the keyboard shortcuts, the J-Link firmware update, **Join support session…** and **Share with support…** open
+in the page area of the tab, next to the rail; the tabs and the rail stay. **×** or <kbd>Esc</kbd> closes them and the page shown before comes back. Switching to
 another tab closes them too, except while they work (the report collecting, the J-Link firmware being written).
 
 While a guide runs you can open the other pages of the tab, for example the console: **Wizard** at the top of the rail
 (and a small badge on the device tab) brings the guide back where it was. Every device tab can run its own guide.
+While the Connect, Troubleshooting or guided flash wizard is open, **Choose another device** of that tab waits until
+you close it: the wizard chooses the tab's device. Connect and disconnect stay available, and the wizard follows them.
+
+The setup wizard covers the page area of every tab while it is open. A guide that runs in a tab goes on underneath
+(its badge stays) and is shown again when the setup wizard closes. Other guides start only after the setup wizard is
+closed (**Finish or close the setup wizard first.**).
 
 When something fails, the app shows what happened, the probable cause (**Probably:**) and what to do
 (**What to do:**). **Details** shows the error code; [Troubleshooting](troubleshooting.md) lists every code.

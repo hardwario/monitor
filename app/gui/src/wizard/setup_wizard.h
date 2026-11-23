@@ -4,7 +4,8 @@
 // 0035; ADR-0071, ADR-0072, ADR-0185, ADR-0252, ADR-0254, ADR-0255, ADR-0290, ADR-0291).
 //
 // Steps (global wizard, no tab):
-//   welcome  Info + control "setup-step": language combo (ADR-0254), "Don't show at start" in the
+//   welcome  Info + control "setup-step": language combo (ADR-0254), the user mode cards while the
+//            mode is not chosen (plan 0056, ADR-0392), "Don't show at start" in the
 //            "J-Link Software is needed" variant (ADR-0071); [Skip setup]
 //   jlink    Checks `jlink-software`; download link, "It is installed elsewhere…" (file dialog,
 //            validated by the check with the chosen path before it is saved to jlink/libraryPath),
@@ -86,6 +87,13 @@ class SetupWizard : public Wizard {
     Q_PROPERTY(bool running READ running NOTIFY changed)
     // Done: one row per step (J-Link Software, USB access, nRF Util, J-Link).
     Q_PROPERTY(hwio::gui::CheckListModel* summary READ summary CONSTANT)
+    // Plan 0056 (ADR-0392): Welcome asks the user mode (plan 0045) while it was not chosen when the
+    // wizard started: [{mode, name, description}] and the selected card (UiMode value; the
+    // preselection at the start). The selection is applied (UiModeController::chooseMode) when
+    // Welcome is left in any way: [Next], [Skip setup], ×, Esc, Cancel.
+    Q_PROPERTY(bool modeChoice READ modeChoice NOTIFY changed)
+    Q_PROPERTY(QVariantList modes READ modes NOTIFY changed)
+    Q_PROPERTY(int selectedMode READ selectedMode NOTIFY changed)
 
 public:
     enum class Platform : std::uint8_t { Linux, MacOS, Windows };
@@ -148,6 +156,12 @@ public:
     [[nodiscard]] QString fileDialogTitle() const;
     [[nodiscard]] QStringList fileNameFilters() const;
     [[nodiscard]] CheckListModel* summary() const { return m_summary; }
+    [[nodiscard]] bool modeChoice() const;
+    [[nodiscard]] static QVariantList modes();
+    [[nodiscard]] int selectedMode() const noexcept { return m_selectedMode; }
+    Q_INVOKABLE void selectMode(int mode);
+    // ×, Esc, Cancel on Welcome store the selected mode (D-4).
+    void aboutToClose() override;
     // "It is installed elsewhere…": the J-Link library (step jlink) or nrfutil (step nrfutil). The
     // path is checked first; only a passing check saves it.
     Q_INVOKABLE void choosePath(const QUrl& file);
@@ -189,6 +203,7 @@ private:
     void record();   // the current step's results into m_records
     void fillSummary();
     void connectDevice();
+    void applyMode(); // plan 0056: the selected mode, when Welcome asks it
 
     AppViewModel& m_app;
     SettingsStore& m_settings;
@@ -199,6 +214,9 @@ private:
     std::vector<QString> m_steps;             // ids in order (bounded: 6)
     int m_index = 0;
     bool m_fromError = false;
+    bool m_askMode = false;         // plan 0056: the mode was not chosen at the start (snapshot)
+    int m_selectedMode = 0;         // UiMode value
+    std::uint64_t m_requester = 0;  // DiagWorker::newRequester (ADR-0394)
     std::uint64_t m_generation = 0; // the running request (0 = none)
     std::shared_ptr<diag::EnvironmentFacts> m_pendingFacts;
     std::shared_ptr<const diag::EnvironmentFacts> m_facts; // of the last finished request

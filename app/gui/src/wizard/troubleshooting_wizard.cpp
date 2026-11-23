@@ -80,7 +80,8 @@ QVariantMap button(const QString& id, const QString& text, bool enabled = true) 
 TroubleshootingWizard::TroubleshootingWizard(AppViewModel& app, QObject* parent)
     : Wizard(parent), m_app(app),
       m_checks(new CheckListModel(this)),            // NOLINT(cppcoreguidelines-owning-memory)
-      m_runner(new DiagnoseRunner(wizardId, this)) { // NOLINT(cppcoreguidelines-owning-memory)
+      m_runner(new DiagnoseRunner(wizardId, this)),  //  NOLINT(cppcoreguidelines-owning-memory)
+      m_requester(app.diagWorker().newRequester()) { // ADR-0394
     connect(m_checks, &CheckListModel::rowsChanged, this, &Wizard::changed);
     connect(m_runner, &DiagnoseRunner::changed, this, &Wizard::changed);
     connect(m_runner, &DiagnoseRunner::finished, this, [this] {
@@ -281,8 +282,8 @@ void TroubleshootingWizard::runEnvironment(const TopicStep& step) {
     // Owned by the request: written by the worker while it runs, read after checksFinished.
     m_pendingFacts = std::make_shared<diag::EnvironmentFacts>();
     context.facts = m_pendingFacts;
-    m_generation = m_app.diagWorker().runChecks(
-        DiagWorker::ChecksRequest{.context = std::move(context), .ids = std::move(ids)});
+    m_generation = m_app.diagWorker().runChecks(DiagWorker::ChecksRequest{
+        .context = std::move(context), .ids = std::move(ids), .requester = m_requester});
 }
 
 void TroubleshootingWizard::onEnvProgress(quint64 generation, const diag::CheckResult& result) {
@@ -815,6 +816,7 @@ void registerConnectAndTroubleshootingWizards(AppViewModel& app) {
     (void)app.wizardRegistry().add(WizardDescriptor{
         .id = WizardId::ConnectDevice,
         .perTab = true,
+        .localDeviceOnly = true, // ADR-0393
         // Qt parent ownership: the WizardViewModel.
         .create = [&app](QObject* parent) -> Wizard* {
             return new ConnectWizard(app, parent); // NOLINT(cppcoreguidelines-owning-memory)
@@ -822,6 +824,7 @@ void registerConnectAndTroubleshootingWizards(AppViewModel& app) {
     (void)app.wizardRegistry().add(
         WizardDescriptor{.id = WizardId::Troubleshooting,
                          .perTab = true,
+                         .localDeviceOnly = true, // ADR-0393
                          .create = [&app](QObject* parent) -> Wizard* {
                              return new TroubleshootingWizard(
                                  app, parent); // NOLINT(cppcoreguidelines-owning-memory)

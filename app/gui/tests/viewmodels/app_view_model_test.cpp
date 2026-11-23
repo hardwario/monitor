@@ -456,23 +456,20 @@ TEST(TextAntialiasing, GrayUnlessTheEnvironmentHasAValue) {
     }
 }
 
-// Plan 0052 (ADR-0359, ADR-0387): the mode choice is a content view until the mode is chosen;
-// closing it (Esc, a tab switch) stores the preselection.
-TEST_F(AppViewModelTest, ModeChoiceIsAViewUntilTheModeIsChosen) {
+// Plan 0056 (D-3, ADR-0392): no mode view at the first start; the question is the setup
+// wizard's Welcome step (StartupCheck opens it).
+TEST_F(AppViewModelTest, NoModeViewAtTheFirstStart) {
     const auto app = makeApp();
     ASSERT_FALSE(app->uiMode()->chosen());
-    EXPECT_EQ(app->overlayView(), QStringLiteral("modeChoice"));
-    app->closeView();
     EXPECT_EQ(app->overlayView(), QString());
-    EXPECT_TRUE(app->uiMode()->chosen());
-    EXPECT_EQ(readRaw(QStringLiteral("ui/mode")), QStringLiteral("advanced"));
+    EXPECT_FALSE(app->openView(QStringLiteral("modeChoice")));
+    EXPECT_FALSE(app->uiMode()->chosen());
 }
 
 // Plan 0052 (ADR-0387): one content view at a time, on the current tab; a tab switch and the
 // rail close an idle one.
 TEST_F(AppViewModelTest, ContentViewsAreOneAtATimeAndCloseOnATabSwitch) {
     const auto app = makeApp();
-    app->closeView(); // the mode choice
     QSignalSpy shortcuts(app.get(), &AppViewModel::shortcutOverlayVisibleChanged);
     EXPECT_FALSE(app->openView(QStringLiteral("nonsense")));
     EXPECT_TRUE(app->openView(QStringLiteral("shortcuts")));
@@ -503,7 +500,6 @@ TEST_F(AppViewModelTest, ContentViewsAreOneAtATimeAndCloseOnATabSwitch) {
 // and the report is shown; closing it stops collecting.
 TEST_F(AppViewModelTest, ReportWhileCollectingStaysWithItsTab) {
     const auto app = makeApp();
-    app->closeView(); // the mode choice
     ASSERT_TRUE(app->openView(QStringLiteral("report")));
     hwio::gui::ReportViewModel& report = *app->report();
     ASSERT_TRUE(report.isOpen());

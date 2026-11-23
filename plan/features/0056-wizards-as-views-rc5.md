@@ -1,9 +1,9 @@
 # 0056 — The setup, connect, troubleshooting and flash wizards as views (2.0.0-rc.5)
 
-- **Status:** Approved (2026-11-23, Matej Strnad: "Approve all twelve" — D-1 to D-12 as recommended)
+- **Status:** In progress (approved 2026-11-23, Matej Strnad: "Approve all twelve" — D-1 to D-12 as recommended)
 - **Milestone:** 2.0.0-rc.5
 - **Author:** Matej Strnad, Claude
-- **Related ADRs:** proposed: ADR-0391 (the wizards of plans 0008–0010 and the probe picker follow the views model),
+- **Related ADRs:** ADR-0391 (the wizards of plans 0008–0010 and the probe picker follow the views model),
   ADR-0392 (the mode question is part of the setup wizard), ADR-0393 (local-device wizards refuse remote tabs),
   ADR-0394 (DiagWorker requests per requester). Builds on: ADR-0386, ADR-0387 (plan 0052), ADR-0067, ADR-0071,
   ADR-0252, ADR-0290, ADR-0291, ADR-0292, ADR-0297, ADR-0300, ADR-0359, ADR-0362, ADR-0382, ADR-0384.
@@ -87,6 +87,7 @@ A dry-run merge (`git merge-tree --write-tree HEAD origin/main`) conflicts in 15
 | U-1 | First start: the mode question ("How do you want to use HARDWARIO Monitor?", plan 0045) becomes the **first step of the setup wizard**, as ADR-0359 already says. The separate mode view is no longer shown at the first start. | ADR-0392 |
 | U-2 | Remote-support tabs (joined, no probe): the connect, flash and troubleshooting wizards **refuse to open with a short message** saying they work on a local device. | ADR-0393 |
 | U-3 | The three wizards and the probe picker are converted to the views model of plan 0052 and ship in 2.0.0-rc.5. | ADR-0391 |
+| U-4 | `target.low_voltage` (plan 0051, ADR-0383, came with the merge; it names the troubleshooting wizard, which had no topic for it) opens the troubleshooting wizard at its **no-power** topic. Matej Strnad, 2026-11-23: "Yes, no-power topic". | ADR-0391 |
 
 ## Goals / Non-goals
 
@@ -386,7 +387,7 @@ the session (check `pgrep -af 'ninja|clang|ctest'` and `free -g` first). Commit 
 
 **A. Merge**
 
-- [ ] A1 `git merge origin/main` into `strnad/wizards-rc5` (with the user's go-ahead). Resolve the 11 source
+- [x] A1 `git merge origin/main` into `strnad/wizards-rc5` (with the user's go-ahead). Resolve the 11 source
       conflicts: main's structure wins (`WizardView`, `ProbeFirmwareView`, per-tab `WizardViewModel`, `globalWizard`,
       `overlayView`); the branch's additions are carried into it as listed in "Class and file mapping" (WizardView:
       ADR-0290/0291/0292 and disabled actions; ErrorPanel: `showWizardButton` + `inWizard`; ProbeFirmwareView: P5;
@@ -394,19 +395,19 @@ the session (check `pgrep -af 'ninja|clang|ctest'` and `free -g` first). Commit 
       parameters; `CMakeLists.txt`: both file lists, without `WizardDialog.qml` / `ProbeFirmwareDialog.qml` /
       `ModeChoiceDialog.qml`; `tst_wizard.qml`, `wizard_test.cpp`: both sides' tests). Verify: no conflict markers
       (`git diff --check`), `git ls-files -u` empty.
-- [ ] A1b Compile fix (mechanical, same merge commit): `AppViewModel::wizard()` → the current tab's wizard or
+- [x] A1b Compile fix (mechanical, same merge commit): `AppViewModel::wizard()` → the current tab's wizard or
       `globalWizard()` (setup) in sources and C++ tests; `StartupCheck` → `globalWizard()`; `AppViewModel::addTab`
       connects `handOffError`, `openedOnTab`, `closedOnTab` of each tab instance and the constructor those of the global
       one (keeps `m_chainTab` for now); `SetupStep.qml` / `ProbePickerStep.qml` temporarily on
       `AppViewModel.globalWizard` / `AppViewModel.currentTabViewModel.wizard`. Verify: `linux-debug` builds all targets.
-- [ ] A2 Translations of the merge, method that loses nothing: for each language take main's `.ts` as `ours`, add the branch's messages that main lacks (a small
+- [x] A2 Translations of the merge, method that loses nothing: for each language take main's `.ts` as `ours`, add the branch's messages that main lacks (a small
       scratchpad script over both XML files, or `lconvert` with both inputs after checking how it treats duplicates),
       then `update_translations`. Check with a scratchpad script (not committed)
       that every finished entry (context, source, comment) of either parent is finished in the result with the
       translation of one parent, listing entries whose two parents differ (resolved by hand, main's text by default)
       and contexts renamed by 0052 (`WizardDialog` → `WizardView`, `ProbeFirmwareDialog` → `ProbeFirmwareView`):
       moved, not lost.
-- [ ] A3 Pass criterion of the merge commit: `linux-debug` configures and builds all targets; `ctest` passes except
+- [x] A3 Pass criterion of the merge commit: `linux-debug` configures and builds all targets; `ctest` passes except
       the suites listed in the commit message as ported in B/C (expected: `tst_connect_wizard`, `tst_flash_wizard`,
       `tst_setup_wizard`, `tst_screenshots*`, the global test of `tst_wizard`, `tst_settings` mode tests); every suite
       that exists only on `origin/main` passes; the A2 check reports no lost translation. The failing list goes into the
@@ -414,65 +415,65 @@ the session (check `pgrep -af 'ninja|clang|ctest'` and `free -g` first). Commit 
 
 **B. Model port (U-3)**
 
-- [ ] B1 `DeviceTabViewModel`: chain flag, keep/release from `onWizardOpenChanged`, no page restore while a chain is
+- [x] B1 `DeviceTabViewModel`: chain flag, keep/release from `onWizardOpenChanged`, no page restore while a chain is
       pending (D-8 (A)); remove `WizardViewModel::openedOnTab/closedOnTab`, `AppViewModel::m_chainTab`,
       `onWizardClosedOnTab`. C++ tests: chain within a tab keeps the session and the page; two tabs chaining in the same
       event turn; tab → setup hand-off releases the tab's session.
-- [ ] B2 `WizardLauncher`: `localDeviceOnly` registration flags (no refusal yet), D-6 rule with the remote LTE
+- [x] B2 `WizardLauncher`: `localDeviceOnly` registration flags (no refusal yet), D-6 rule with the remote LTE
       exemption, `canStart()`, toast callback, D-12 `tabAt(-1)`. C++ tests: per-tab refused while setup is open (toast,
       setup raised); remote LTE request opens anyway; setup opens while a tab wizard runs; Help menu from the Settings
       tab.
-- [ ] B3 `StartupCheck`: `globalWizard()`, `anyWizardOpen()` + `wizardsOpenChanged()` wait (JLinkNeeded only); tests.
-- [ ] B4 Embedded contract: `host` on every control, `WizardView` binding, `SetupStep.qml` / `ProbePickerStep.qml`
+- [x] B3 `StartupCheck`: `globalWizard()`, `anyWizardOpen()` + `wizardsOpenChanged()` wait (JLinkNeeded only); tests.
+- [x] B4 Embedded contract: `host` on every control, `WizardView` binding, `SetupStep.qml` / `ProbePickerStep.qml`
       use it; `WizardView` ADR-0292 loading and ADR-0290 options; coverage test.
-- [ ] B5 `ErrorPanel`, `ProbeFirmwareView` P5 with `canStart`.
-- [ ] B6 `DiagWorker` requester token (D-10 (A)), the five callers take one; `DiagWorkerTest` cases: two requesters
+- [x] B5 `ErrorPanel`, `ProbeFirmwareView` P5 with `canStart`.
+- [x] B6 `DiagWorker` requester token (D-10 (A)), the five callers take one; `DiagWorkerTest` cases: two requesters
       keep their pending requests; same requester replaces; requester 0 keeps the old rule; full queue at 12.
-- [ ] B7 D-11 (C): `chooseAnotherProbe()` refused on the wizard's tab (toast), `chooseAnotherProbeForWizard()` for the
+- [x] B7 D-11 (C): `chooseAnotherProbe()` refused on the wizard's tab (toast), `chooseAnotherProbeForWizard()` for the
       connect and flash wizards; C++ tests: device-bar choose / Ctrl+Shift+D refused while connect is open, allowed
       after it closed and while the LTE guide is open; disconnect during an idle Cable step and connect during Check
       are followed by the wizard; a Flash page flash during an idle flash-wizard step makes the wizard's flash refuse.
-- [ ] B8 Test support: global test wizard registered first for `tst_wizard` (`createApp`), `qFatal` on a failed
+- [x] B8 Test support: global test wizard registered first for `tst_wizard` (`createApp`), `qFatal` on a failed
       registration, `TestSupport::globalWizard()`, C++ `tabWizard(app)`. Verify: `tst_wizard` global test passes against
       the test wizard, not `SetupWizard`.
-- [ ] B9 Port the C++ wizard suites to `tabWizard(app)` / `globalWizard()` (`connect_wizard_test.cpp`,
+- [x] B9 Port the C++ wizard suites to `tabWizard(app)` / `globalWizard()` (`connect_wizard_test.cpp`,
       `troubleshooting_wizard_test.cpp`, `flash_wizard_test.cpp`, `setup_wizard_test.cpp`, the branch's cases in
       `flash_view_model_test.cpp`); each suite green on its own.
-- [ ] B10 Port `tst_wizard.qml` and `tst_components.qml` (`wizardDialog` / Popup API → `wizardView` /
+- [x] B10 Port `tst_wizard.qml` and `tst_components.qml` (`wizardDialog` / Popup API → `wizardView` /
       `globalWizardView`, footer object names; main's `tst_wizard.qml` is the pattern); green.
-- [ ] B11 Port `tst_connect_wizard.qml`; green.
-- [ ] B12 Port `tst_flash_wizard.qml` and the branch's cases in `tst_flash.qml`; green.
-- [ ] B13 Port `tst_setup_wizard.qml` (global view) and `tst_remote.qml`; green.
-- [ ] B14 Port `tst_screenshots.qml`, `tst_screenshots_flash.qml`, `tst_screenshots_ble.qml` (wizard steps as views);
+- [x] B11 Port `tst_connect_wizard.qml`; green.
+- [x] B12 Port `tst_flash_wizard.qml` and the branch's cases in `tst_flash.qml`; green.
+- [x] B13 Port `tst_setup_wizard.qml` (global view) and `tst_remote.qml`; green.
+- [x] B14 Port `tst_screenshots.qml`, `tst_screenshots_flash.qml`, `tst_screenshots_ble.qml` (wizard steps as views);
       green; changed images under Git LFS.
 
 **C. The user's decisions**
 
-- [ ] C1 U-1: mode block in `SetupWizard` + `SetupStep.qml` (`components/ModeCards.qml`), `StartupCheck` (D-3, D-5),
+- [x] C1 U-1: mode block in `SetupWizard` + `SetupStep.qml` (`components/ModeCards.qml`), `StartupCheck` (D-3, D-5),
       remove `ModeChoiceView.qml` and the `modeChoice` view; tests: fresh install, rc.3 upgrade with and without
       `advanced/expertActions`, rc.4 user, read-only settings, completed-but-unchosen, × / Esc / Skip setup store the
       selection (D-4), Help › Setup wizard… has no mode block, no mode view at start. Replace the tests of the removed
       view: `tst_settings.qml` `test_modeChoiceDialog` and `test_modeChoiceDialogLayout` (→ the Welcome step's cards,
       same layout checks at 960 × 600 in five languages), `tst_screenshots_flash.qml:277-283` (→ a Welcome screenshot);
       the `AppViewModelTest` cases on `syncOverlay` / `overlayView == "modeChoice"` if any.
-- [ ] C2 U-2: refusal in `launch()` with the toast (D-7); tests: each of the three wizards from the Help menu, an
+- [x] C2 U-2: refusal in `launch()` with the toast (D-7); tests: each of the three wizards from the Help menu, an
       `ErrorPanel` and the Flash page on a joined fake remote tab (also after the session ended) refuses, nothing opens
       and the session is untouched; setup and LTE update unaffected.
-- [ ] C3 Two tabs with wizard pickers: tests for "In use (tab N)" across wizards (D-9) and two wizards running checks at
+- [x] C3 Two tabs with wizard pickers: tests for "In use (tab N)" across wizards (D-9) and two wizards running checks at
       once (D-10).
 
 **D. Translations, docs, plans**
 
-- [ ] D1 `update_translations`; translate the new strings (U-2 toast, D-6 toast, any moved mode texts) in cs, de, pl,
+- [x] D1 `update_translations`; translate the new strings (U-2 toast, D-6 toast, any moved mode texts) in cs, de, pl,
       sk per `i18n/GLOSSARY.md` (wizard = průvodce / Assistent / kreator / sprievodca; support session = relace vzdálené
       podpory …); `check_translations` 0 unfinished.
-- [ ] D2 Docs in en, cs, de, pl, sk: `getting-started.md` (Modes: the question is the first step of the setup wizard;
+- [x] D2 Docs in en, cs, de, pl, sk: `getting-started.md` (Modes: the question is the first step of the setup wizard;
       "Guides and other views": the setup, connect, troubleshooting and flash wizards as views; setup hides tab wizards
       while open), `troubleshooting.md` and `flashing.md` (wizards open in the tab), `remote-support.md` (the three
       wizards are not available on a support-session tab); screenshots via `tst_screenshots*` (Git LFS).
-- [ ] D3 `packaging/release-notes/v2.0.0-rc.5.md`: the wizards (new in rc.5), the mode question moved into the setup
+- [x] D3 `packaging/release-notes/v2.0.0-rc.5.md`: the wizards (new in rc.5), the mode question moved into the setup
       wizard, rc.4 users see the setup wizard once.
-- [ ] D4 Plans and ADRs: ADR-0391…0394 status per the user's answers; amendment lines in ADR-0359, ADR-0362
+- [x] D4 Plans and ADRs: ADR-0391…0394 status per the user's answers; amendment lines in ADR-0359, ADR-0362
       (→ ADR-0392), ADR-0300, ADR-0252 (→ ADR-0391), ADR-0071 (→ ADR-0392 for D-3/D-5), ADR-0386 (→ ADR-0391: the D-6
       exception to "tabs run wizards independently" and D-11), ADR-0387 (→ ADR-0392: "Choose mode" is no content view
       any more), ADR-0068 (→ ADR-0394: the queue rule); amendment notes in plans 0008,
@@ -528,7 +529,7 @@ Manual checks (linux-debug, fake J-Link with two probes, fake BLE, a fake relay 
 6. Setup probe step → Update J-Link firmware → fail → [Close] (not "Help me fix this" while setup is open).
 7. Czech at 960 × 600: the Welcome step with the cards and the footer fit; keyboard only (Tab, Up/Down, Space, Enter,
    Esc); screen reader names of the cards.
-8. Connect wizard at the Cable step: Ctrl+Shift+D shows the D-11 toast; Disconnect / Connect in the device bar is
+8. Connect wizard at the Cable step: Choose another device (device bar) shows the D-11 toast (plan text said Ctrl+Shift+D, which is Connect / disconnect); Disconnect / Connect in the device bar is
    followed by the wizard; after closing it, Ctrl+Shift+D works.
 Not covered here: real hardware on Windows / macOS (rc.5 test round).
 
@@ -552,3 +553,59 @@ Not covered here: real hardware on Windows / macOS (rc.5 test round).
   generations); the queue still bounds it.
 - **Main's 0052 behaviour kept as is** (not re-decided here): content views close on a tab switch; the rail stays usable
   while a tab's wizard runs; no rail entry for the global wizard.
+
+## Implementation notes (2026-11-23)
+
+- **Merge commit** `f38dd44` (A1–A3). The A3 failing list was: ConnectWizardTest.AHandOffToTheSetupWizardReleasesTheSession,
+  FlashWizardTest.AHandOffToSettingsReleasesTheSession (null current tab in the fixture on the Settings tab),
+  StartupCheckTest.WaitsForAnotherWizard, TroubleshootingWizardTest.AFailedNrfUtilCheckOpensTheSetupWizard,
+  tst_connect_wizard, tst_flash_wizard, tst_setup_wizard, tst_wizard — all closed by B8–B13 / C1 — and
+  **WizardCoverage.EveryCodeNamingAWizardHasAStartStep**, which the merge commit message wrongly lists as "ported in
+  B/C": `target.low_voltage` (plan 0051, ADR-0383, on main) names the troubleshooting wizard, which had no topic for it
+  on this branch. Asked the user; decided 2026-11-23 (U-4, Matej Strnad: "Yes, no-power topic"): the code is in the
+  no-power topic's codes (`troubleshooting_topics.cpp`); tests `WizardCoverage.EveryCodeNamingAWizardHasAStartStep`,
+  `TroubleshootingWizardTest.LowVoltageOpensTheNoPowerTopic`.
+- A2 check (scratchpad script): no finished entry of either parent lost; parents never differ; contexts moved by 0052
+  and this plan (`ModeChoiceView` → `ModeCards`) carried over.
+- Order: the U-2 refusal (C2) was implemented together with B2 and D-3 / D-5 (C1) together with B3; their tests are in
+  C1 / C2.
+- `DiagWorker` (B6): a request with requester 0 replaces a pending request of the same kind of any requester (the old
+  rule); a request with a requester replaces only its own. `ChecksRequest`'s default member initializer made
+  `Request` not default-constructible inside the class: `run()` initialises it explicitly.
+- `DeviceTabViewModel` (B1): `m_shuttingDown` keeps `shutdown()` from restoring the page / releasing the session
+  while it closes the tab's wizard (the old `m_tabClosing` guard of `closedOnTab`).
+- Embedded contract (B4): `WizardRegistry::embeddedNames()` added; the coverage case (`EmbeddedContract`) reads each
+  registered control's QML source and checks `property WizardViewModel host` (no QML engine in `hwio_gui_tests`).
+- B14: the screenshot suites run against the views (mode choice → the Welcome step); no screenshot is committed in
+  `docs/`, so no LFS images changed.
+- C2 tests: C++ (`ConnectWizardTest.LocalDeviceWizardsRefuseARemoteTab`, `FlashWizardTest.RefusesARemoteTab`, a tab
+  whose session ended) and Qt Quick (`tst_remote` `test_joinerRefusesTheLocalDeviceWizards`, joined on the fake relay:
+  troubleshooting and flash refuse with the toast, the session goes on; the test wizard stands for connect-device in
+  `tst_remote`). Help menu, "Help me fix this" and Flash "Guide me" all call `WizardLauncher::start` / `open`; the
+  buttons themselves are manual check 5. LTE guide on a joined tab (Risks): the same test checks that its entry points
+  (Flash "Guide me", the other-connector banner's "Update LTE firmware…") are not shown there; nothing found that
+  opens it on a joined tab except support's own request.
+- D-11: Ctrl+Shift+D is "Connect or disconnect" (`device.toggle`), not "Choose another device" as this plan's UX text
+  and manual check 8 said; the refusal covers the device bar's **Choose another device** (and
+  `ConnectionViewModel::triggerSecondaryAction`), the only callers. Manual check 8 corrected.
+- `tst_setup_wizard` minimum window: the dialog size check (≤ 720 × 552) became "the view lies inside the window".
+- Sanitizers: the full ctest ran under ASan and TSan (a superset of `SAN_TESTS`).
+
+### Verification record (2026-11-23, final tree, after U-4)
+
+| Step | Result |
+|---|---|
+| linux-debug build | OK |
+| ctest linux-debug (full) | 1960 / 1960 pass (14 HIL tests skipped) |
+| all_qmllint | OK, no warnings |
+| check_translations | 0 unfinished in cs, de, pl, sk; catalogs up to date |
+| clang-format-21 dry run, check-includes, check-lfs --untracked | OK |
+| linux-tidy | 0 findings |
+| ctest linux-asan (full) | 1959 / 1959 pass (18 skipped) |
+| ctest linux-tsan (full) | 1895 / 1895 pass (18 skipped) |
+
+Earlier full runs: `FlashTest.LteUpdateWizardRunsABundleThroughEveryStep` failed once in linux-debug (5 / 5 passes
+alone; a polling race in the test, code untouched by this plan).
+
+Status stays In progress: the manual checks 1–8 are open (D5).
+

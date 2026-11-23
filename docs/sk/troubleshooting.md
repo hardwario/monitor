@@ -10,8 +10,10 @@ Každá chyba má krátku správu, pravdepodobnú príčinu a odporúčanie.
 
 - **Desktopová aplikácia (`hwio-monitor`):** panel chyby zobrazuje správu, **Probably:** (príčinu) a **What to do:** (odporúčanie) s tlačidlom pre ďalší krok, napríklad **Reconnect**, **Open Settings** alebo **Retry**. **Details** zobrazí kód chyby (napríklad `probe.not_found`) a technické podrobnosti; **Copy** ich skopíruje. **Learn more ↗** otvorí opis kódu chyby na tejto stránke.
 - **Pomôžte mi to vyriešiť** v paneli chyby otvorí sprievodcu pre danú chybu: sprievodcu pripojením, sprievodcu
-  nastavením, nahrávanie so sprievodcom alebo tému riešenia problémov pre danú chybu. **Pomocník** › **Riešiť
-  problémy s pripojením…** ponúkne časté problémy.
+  nastavením, nahrávanie so sprievodcom alebo tému riešenia problémov pre danú chybu. **Pomocník** › **Riešiť problémy s
+  pripojením…** ponúkne časté problémy. Sprievodcovia sa otvoria v ploche stránky karty ([Sprievodcovia a ďalšie
+  zobrazenia](getting-started.md#guides-and-views)); na karte relácie podpory nie sú sprievodca pripojením, sprievodca
+  riešením problémov a nahrávanie so sprievodcom k dispozícii.
 - **CLI (`hwio`):** chyba sa vypíše na stderr:
 
   ```text

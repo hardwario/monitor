@@ -123,15 +123,10 @@ void logFailure(const char* what, const Status& status) {
 // Plan 0052 (ADR-0387): the content views.
 const QString reportView = QStringLiteral("report");
 const QString probeFirmwareView = QStringLiteral("probeFirmware");
-const QString modeChoiceView = QStringLiteral("modeChoice");
 
 bool knownView(const QString& viewId) {
-    static const QStringList ids{reportView,
-                                 probeFirmwareView,
-                                 QStringLiteral("join"),
-                                 QStringLiteral("share"),
-                                 modeChoiceView,
-                                 AppViewModel::shortcutsView()};
+    static const QStringList ids{reportView, probeFirmwareView, QStringLiteral("join"),
+                                 QStringLiteral("share"), AppViewModel::shortcutsView()};
     return ids.contains(viewId);
 }
 
@@ -158,8 +153,15 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
           [this](const QString& text) { copyToClipboard(text); })), // ADR-0202
       m_launcher(new WizardLauncher( // NOLINT(cppcoreguidelines-owning-memory)
           m_wizardRegistry, *m_globalWizard,
-          [this](int index) { return index < 0 ? currentTabViewModel() : m_tabs->at(index); },
-          this)),
+          [this](int index) {
+              if (index >= 0) {
+                  return m_tabs->at(index);
+              }
+              // Plan 0056 (D-12): from the Settings tab, the last device tab.
+              DeviceTabViewModel* current = currentTabViewModel();
+              return current != nullptr ? current : m_tabs->at(m_lastDeviceTab);
+          },
+          [this](const QString& text) { showToast(text); }, this)),
       m_report(new ReportViewModel( // NOLINT(cppcoreguidelines-owning-memory)
           *m_diagWorker,
           ReportViewModel::Hooks{.environment = [this] { return diagEnvironment(); },
@@ -253,11 +255,8 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
 
     connect(m_scanner.get(), &ProbeScanner::scanned, this, &AppViewModel::onScan);
     connect(m_globalWizard, &WizardViewModel::handOff, this, &AppViewModel::onHandOff);
+    connect(m_globalWizard, &WizardViewModel::openChanged, this, &AppViewModel::wizardsOpenChanged);
     connect(m_globalWizard, &WizardViewModel::handOffError, this, &AppViewModel::onHandOffError);
-    connect(m_globalWizard, &WizardViewModel::openedOnTab, this,
-            [](DeviceTabViewModel* tab) { tab->keepWizardSession(); });
-    connect(m_globalWizard, &WizardViewModel::closedOnTab, this,
-            &AppViewModel::onWizardClosedOnTab);
     // Plan 0052 (ADR-0387): the content views of the report, the J-Link firmware update and the
     // mode choice follow their view models; a global wizard closes a content view.
     connect(m_report, &ReportViewModel::changed, this, &AppViewModel::syncOverlay);
@@ -369,7 +368,7 @@ void AppViewModel::registerShellKeys(SettingsStore& store) {
                    .validator = validators::maxLength(1024)},
         SettingKey{
             .path = restoreTabsKey, .type = QMetaType::Bool, .defaultValue = true, .validator = {}},
-        // Plan 0045 (ADR-0359): the user mode; "" = not chosen yet (the first-start dialog).
+        // Plan 0045 (ADR-0359): the user mode; "" = not chosen yet (the setup wizard asks it).
         SettingKey{.path = UiModeController::modeKey,
                    .type = QMetaType::QString,
                    .defaultValue = QString(),
@@ -650,6 +649,18 @@ QString AppViewModel::globalPage() const {
 
 DeviceTabViewModel* AppViewModel::currentTabViewModel() const { return m_tabs->at(m_currentTab); }
 
+bool AppViewModel::anyWizardOpen() const {
+    if (m_globalWizard->isOpen()) {
+        return true;
+    }
+    for (int i = 0; i < m_tabs->count(); ++i) {
+        if (m_tabs->at(i)->wizard()->isOpen()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void AppViewModel::setWindowWidth(int width) {
     if (width == m_windowWidth) {
         return;
@@ -764,8 +775,6 @@ void AppViewModel::closeView() {
     } else if (viewId == probeFirmwareView && m_probeFirmware != nullptr &&
                m_probeFirmware->state() != ProbeFirmwareViewModel::Idle) {
         m_probeFirmware->cancel();
-    } else if (viewId == modeChoiceView && !m_uiMode->chosen()) {
-        m_uiMode->chooseMode(static_cast<int>(m_uiMode->mode())); // Esc keeps the preselection
     }
 }
 
@@ -788,11 +797,6 @@ void AppViewModel::syncOverlay() {
         } else if (!active && m_overlayId == probeFirmwareView) {
             setOverlay(QString());
         }
-    }
-    if (!m_uiMode->chosen() && m_overlayId != modeChoiceView && m_tabs->count() > 0) {
-        (void)openView(modeChoiceView);
-    } else if (m_uiMode->chosen() && m_overlayId == modeChoiceView) {
-        setOverlay(QString());
     }
 }
 
@@ -831,8 +835,8 @@ std::unique_ptr<DeviceTabViewModel> AppViewModel::makeTab() {
     context.copyToClipboard = [this](const QString& text, const QString& toast) {
         copyToClipboard(text, toast);
     };
-    context.openWizard = [this](const QString& wizardId, DeviceTabViewModel* tab) {
-        (void)m_launcher->openForTab(wizardId, tab);
+    context.openWizard = [this](const QString& wizardId, DeviceTabViewModel* tab, bool fromRemote) {
+        (void)m_launcher->openForTab(wizardId, tab, ErrorInfo(), fromRemote);
     };
     context.wizards = &m_wizardRegistry;
     context.probeFirmware = m_probeFirmware;
@@ -875,9 +879,6 @@ DeviceTabViewModel* AppViewModel::addTab(std::unique_ptr<DeviceTabViewModel> tab
     WizardViewModel* wizard = raw->wizard();
     connect(wizard, &WizardViewModel::handOff, this, &AppViewModel::onHandOff);
     connect(wizard, &WizardViewModel::handOffError, this, &AppViewModel::onHandOffError);
-    connect(wizard, &WizardViewModel::openedOnTab, this,
-            [](DeviceTabViewModel* tab) { tab->keepWizardSession(); });
-    connect(wizard, &WizardViewModel::closedOnTab, this, &AppViewModel::onWizardClosedOnTab);
     const auto showWizard = [this, raw] {
         if (!raw->wizard()->isOpen()) {
             return;
@@ -891,6 +892,7 @@ DeviceTabViewModel* AppViewModel::addTab(std::unique_ptr<DeviceTabViewModel> tab
         raw->setCurrentPage(DeviceTabViewModel::wizardPageId());
     };
     connect(wizard, &WizardViewModel::openChanged, this, showWizard);
+    connect(wizard, &WizardViewModel::openChanged, this, &AppViewModel::wizardsOpenChanged);
     connect(wizard, &WizardViewModel::raiseRequested, this, showWizard);
     return raw;
 }
@@ -1673,36 +1675,27 @@ void AppViewModel::openChainedWizard(const QString& wizardId, DeviceTabViewModel
     if (descriptor == nullptr) {
         return;
     }
-    // ADR-0300: a per-tab wizard on the same tab takes over the wizards' session; a global one
-    // (setup) does not, so the closing wizard's tab releases it.
+    // ADR-0300 (plan 0056 D-8: per tab): a per-tab wizard on the same tab takes over the wizards'
+    // session and the wizard view; a global one (setup) does not, so the closing wizard's tab
+    // restores its page and releases the session.
     if (descriptor->perTab && tab != nullptr) {
-        m_chainTab = tab;
+        tab->setWizardChainPending(true);
     }
     QMetaObject::invokeMethod(
         this,
         [this, wizardId, context, hadTab = tab != nullptr,
          target = QPointer<DeviceTabViewModel>(tab)] {
-            if (m_chainTab == target) {
-                m_chainTab.clear();
-            }
             if (hadTab && target.isNull()) {
                 return; // review 0009 F6: the source tab is gone: nothing opens
             }
             DeviceTabViewModel* on = target.isNull() ? currentTabViewModel() : target.data();
-            if (!m_launcher->openForTab(wizardId, on, context) && !target.isNull()) {
-                target->releaseWizardSessionWhenIdle();
+            (void)m_launcher->openForTab(wizardId, on, context);
+            if (!target.isNull()) {
+                // Opened: nothing more; failed: the page comes back, the session is released.
+                target->setWizardChainPending(false);
             }
         },
         Qt::QueuedConnection);
-}
-
-void AppViewModel::onWizardClosedOnTab(DeviceTabViewModel* tab) {
-    // ADR-0300: the last wizard on the tab closed without a hand-off to another per-tab wizard:
-    // the wizards' probe-only session is released when idle (a promoted session is not theirs).
-    if (tab == nullptr || (m_chainTab == tab)) {
-        return;
-    }
-    tab->releaseWizardSessionWhenIdle();
 }
 
 void AppViewModel::retranslate() {

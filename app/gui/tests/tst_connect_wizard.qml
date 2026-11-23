@@ -1,5 +1,5 @@
 // The Connect and Troubleshooting wizards (plan/features/0009 with the 0035 amendments) in the
-// wizard dialog against the fake J-Link library: the Connect flow from a new tab with the keyboard
+// wizard view (plan 0052, 0056) against the fake J-Link library: the Connect flow from a new tab with the keyboard
 // only (probe picker, cable, power, check, connect, Open console) in light and dark, the expanded
 // row of a failed check with [Show me how], the entry points (Choose device "Guide me" and the
 // ghost link, Help menu), the troubleshooting topic list and a topic, the 960 x 600 window in Czech
@@ -44,14 +44,37 @@ TestCase {
         return items.length > 0 ? items[0] : null;
     }
 
-    function dialog() {
-        return findChild(window, "wizardDialog");
+    // Plan 0052 / 0056: the wizard view shown now (a tab's or the global one), or null.
+    function view() {
+        return find("wizardView") || find("globalWizardView");
+    }
+
+    // The wizard instance of the current tab (the global one while Settings is current).
+    function host() {
+        return AppViewModel.currentTabViewModel ? AppViewModel.currentTabViewModel.wizard : AppViewModel.globalWizard;
+    }
+
+    function closeWizards() {
+        for (let i = 0; i < AppViewModel.tabs.count; ++i) {
+            const tab = AppViewModel.tabs.at(i);
+            if (tab && tab.wizard.open)
+                tab.wizard.cancel(true);
+        }
+        if (AppViewModel.globalWizard.open)
+            AppViewModel.globalWizard.cancel(true);
+        tryVerify(() => {
+            for (let i = 0; i < AppViewModel.tabs.count; ++i) {
+                const tab = AppViewModel.tabs.at(i);
+                if (tab && tab.wizard.open)
+                    return false;
+            }
+            return !AppViewModel.globalWizard.open;
+        }, 60000);
     }
 
     function parts(name) {
-        const d = dialog();
-        return findAll(d.contentItem, name).concat(findAll(d.footer, name)).concat(findAll(d.header, name))
-               .filter(effectivelyVisible);
+        const v = view();
+        return v ? findAll(v, name).filter(effectivelyVisible) : [];
     }
 
     function part(name) {
@@ -69,9 +92,7 @@ TestCase {
     }
 
     function cleanupTestCase() {
-        if (AppViewModel.wizard.open)
-            AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open, 60000);
+        closeWizards();
         testSupport.resetTabs();
         window.destroy();
         wait(50);
@@ -90,9 +111,7 @@ TestCase {
     }
 
     function cleanup() {
-        if (AppViewModel.wizard.open)
-            AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open, 60000);
+        closeWizards();
         testSupport.resetTabs();
         testSupport.useScenario("");
     }
@@ -109,7 +128,7 @@ TestCase {
     function test_keyboardFlowFromANewTab(data) {
         AppViewModel.theme = data.theme;
         verify(AppViewModel.launcher.start("connect-device", 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
         compare(part("wizardTitle").text, "Connect a device");
         const wizard = testSupport.openWizard();
         compare(wizard.step, ConnectWizard.Probe);
@@ -132,7 +151,7 @@ TestCase {
         verify(part("wizardHeading").text.startsWith("Connected to CHESTER"));
         compare(part("wizardCancel").text, "Close");
         returnKey();
-        tryVerify(() => !AppViewModel.wizard.open);
+        tryVerify(() => !host().open);
         tryCompare(AppViewModel.currentTabViewModel, "currentPage", "console");
     }
 
@@ -140,7 +159,7 @@ TestCase {
         verify(testSupport.useScenario(lteConnector));
         verify(testSupport.configureTab(0, "app", 801000001, "Test Probe"));
         verify(AppViewModel.launcher.open("connect-device", testSupport.defaultError("target.not_connected"), 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
         const wizard = testSupport.openWizard();
         tryVerify(() => part("wizardPrimary").enabled && part("wizardPrimary").text === "Check again", 20000);
         // The failed row is expanded: its cause and what to do.
@@ -157,10 +176,10 @@ TestCase {
         // Choose device page: the ghost link below the probe list.
         tryVerify(() => find("connectGuideLink") !== null, 5000);
         find("connectGuideLink").clicked();
-        tryVerify(() => dialog().opened);
-        compare(AppViewModel.wizard.wizardId, "connect-device");
-        AppViewModel.wizard.cancel(false);
-        tryVerify(() => !AppViewModel.wizard.open);
+        tryVerify(() => view() !== null);
+        compare(host().wizardId, "connect-device");
+        host().cancel(false);
+        tryVerify(() => !host().open);
         // The empty state (no probe; shown only after a scan finds nothing): [Guide me] replaces
         // the former disabled "Help me fix this".
         const guide = findAll(window.contentItem, "noProbesHelp")[0];
@@ -168,38 +187,40 @@ TestCase {
         compare(guide.text, "Guide me");
         verify(guide.enabled);
         guide.clicked();
-        tryVerify(() => dialog().opened);
-        compare(AppViewModel.wizard.wizardId, "connect-device");
-        AppViewModel.wizard.cancel(false);
-        tryVerify(() => !AppViewModel.wizard.open);
+        tryVerify(() => view() !== null);
+        compare(host().wizardId, "connect-device");
+        host().cancel(false);
+        tryVerify(() => !host().open);
         // Help menu: both items are offered for registered wizards (tst_shell checks the menu).
         verify(AppViewModel.launcher.canOpen("connect-device"));
         verify(AppViewModel.launcher.canOpen("troubleshooting"));
         verify(AppViewModel.launcher.start("troubleshooting", -1));
-        tryVerify(() => dialog().opened);
-        compare(AppViewModel.wizard.wizardId, "troubleshooting");
+        tryVerify(() => view() !== null);
+        compare(host().wizardId, "troubleshooting");
     }
 
     function test_troubleshootingTopic() {
         verify(testSupport.configureTab(0, "app", 801000001, "Test Probe"));
         verify(AppViewModel.launcher.start("troubleshooting", 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
         compare(part("wizardHeading").text, "What is the problem?");
         const choices = parts("wizardChoice");
         compare(choices.length, 9);
         verify(!part("wizardPrimary").enabled);
+        view().ensureVisible(choices[2]); // the view scrolls (plan 0052)
+        waitForRendering(view());
         mouseClick(choices[2]); // The device has no power or does not respond
         tryVerify(() => part("wizardPrimary").enabled);
-        AppViewModel.wizard.primary();
+        host().primary();
         compare(part("wizardHeading").text, "Power the device");
-        AppViewModel.wizard.primary();
+        host().primary();
         verify(part("wizardChecks") !== null);
         tryVerify(() => part("wizardPrimary").enabled, 20000);
         // From an error: the introduction shows the cause as plain text.
-        AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open);
+        host().cancel(true);
+        tryVerify(() => !host().open);
         verify(AppViewModel.launcher.open("troubleshooting", testSupport.defaultError("target.rtt_not_found"), 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
         tryVerify(() => part("wizardErrorStep") !== null);
         verify(part("wizardErrorMessage") === null); // the heading is the message
         verify(part("wizardErrorCause").text.startsWith("Probably: "));
@@ -217,17 +238,18 @@ TestCase {
         verify(testSupport.useScenario(lteConnector));
         verify(testSupport.configureTab(0, "app", 801000001, "Test Probe"));
         verify(AppViewModel.launcher.open("connect-device", testSupport.defaultError("target.not_connected"), 0));
-        tryVerify(() => dialog().opened);
-        const d = dialog();
-        verify(d.x >= 0 && d.y >= 0);
-        verify(d.x + d.width <= window.width && d.y + d.height <= window.height);
+        tryVerify(() => view() !== null);
+        const d = view();
+        const origin = d.mapToItem(window.contentItem, 0, 0);
+        verify(origin.x >= 0 && origin.y >= 0);
+        verify(origin.x + d.width <= window.width + 1 && origin.y + d.height <= window.height + 1);
         // The widest footer: Show me how · Update LTE firmware… · Check again · Cancel.
         tryVerify(() => parts("wizardAction").length === 2, 20000);
         const names = ["wizardPrimary", "wizardCancel"];
         const buttons = names.map(name => part(name)).concat(parts("wizardAction"));
         for (const button of buttons) {
             verify(button !== null);
-            const p = button.mapToItem(d.contentItem.parent, 0, 0);
+            const p = button.mapToItem(d, 0, 0);
             verify(p.x >= 0 && p.x + button.width <= d.width + 1, button.text);
             verify(button.width >= button.implicitWidth - 0.5, `${button.text} is narrower than its text`);
         }
@@ -254,39 +276,39 @@ TestCase {
         window.width = 960;
         window.height = 600;
         verify(AppViewModel.launcher.start("connect-device", 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
         tryVerify(() => part("wizardPrimary").enabled, 5000);
         save("w09-01-probe");
-        AppViewModel.wizard.primary();
+        host().primary();
         save("w09-02-cable");
-        AppViewModel.wizard.primary();
+        host().primary();
         save("w09-03-power");
-        AppViewModel.wizard.primary();
+        host().primary();
         tryVerify(() => part("wizardPrimary").enabled, 20000);
         save("w09-04-check");
-        AppViewModel.wizard.primary();
+        host().primary();
         tryCompare(AppViewModel.currentTabViewModel, "state", DeviceTabViewModel.Connected, 20000);
         tryVerify(() => part("wizardPrimary").text !== "");
         save("w09-05-done");
-        AppViewModel.wizard.cancel(false);
-        tryVerify(() => !AppViewModel.wizard.open);
+        host().cancel(false);
+        tryVerify(() => !host().open);
         verify(AppViewModel.launcher.start("troubleshooting", 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
         save("w09-06-topics");
-        AppViewModel.wizard.cancel(false);
-        tryVerify(() => !AppViewModel.wizard.open);
+        host().cancel(false);
+        tryVerify(() => !host().open);
         verify(AppViewModel.launcher.open("troubleshooting", testSupport.defaultError("target.no_power"), 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
         save("w09-07-intro");
-        AppViewModel.wizard.primary();
+        host().primary();
         save("w09-08-topic-step");
         verify(testSupport.useScenario(lteConnector));
         testSupport.resetTabs();
         verify(testSupport.configureTab(0, "app", 801000001, "Test Probe"));
-        AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open);
+        host().cancel(true);
+        tryVerify(() => !host().open);
         verify(AppViewModel.launcher.open("connect-device", testSupport.defaultError("target.not_connected"), 0));
-        tryVerify(() => dialog().opened);
+        tryVerify(() => view() !== null);
         tryVerify(() => part("wizardPrimary").enabled, 20000);
         save("w09-09-wrong-connector");
     }

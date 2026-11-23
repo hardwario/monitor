@@ -159,6 +159,7 @@ private:
     CheckListModel* m_checks = nullptr;          // child (the Check step)
     DiagnoseRunner* m_runner = nullptr;          // child
     ProbePickerViewModel* m_picker = nullptr;    // child (created for the Probe step)
+    std::uint64_t m_requester = 0;               // DiagWorker::newRequester (ADR-0394)
     std::uint64_t m_probeCheckRun = 0;           // DiagWorker generation (0 = none)
     std::optional<std::uint32_t> m_preferSerial; // preselected on the Probe step
     struct OriginalProbe {

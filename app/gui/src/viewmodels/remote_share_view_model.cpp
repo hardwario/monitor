@@ -253,7 +253,8 @@ Status RemoteShareViewModel::start(Progress progress, Finished finished, remote:
     m_lteUpdate->setAskSupport(std::move(ask)); // ADR-0368
     m_lteUpdateOffered = true;
     qCInfo(lcGui) << "Remote: opening the LTE update for support";
-    m_tab->openWizard(QStringLiteral("lte-update")); // takes the request when it opens
+    // Plan 0056 (D-6): opens also while the customer's setup wizard is open.
+    m_tab->openWizard(QStringLiteral("lte-update"), true); // takes the request when it opens
     if (m_lteUpdateOffered) {
         m_lteUpdateOffered = false;
         m_lteUpdate->abandon();
