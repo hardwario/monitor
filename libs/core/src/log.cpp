@@ -44,6 +44,7 @@ Q_LOGGING_CATEGORY(lcFlash, "hwio.flash")
 Q_LOGGING_CATEGORY(lcDiag, "hwio.diag")
 Q_LOGGING_CATEGORY(lcBle, "hwio.ble")
 Q_LOGGING_CATEGORY(lcMcp, "hwio.mcp")
+Q_LOGGING_CATEGORY(lcRemote, "hwio.remote")
 Q_LOGGING_CATEGORY(lcUpdate, "hwio.update")
 
 namespace {

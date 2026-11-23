@@ -330,6 +330,11 @@ void ConsoleLineModel::resetRows() {
     searchingChanged(); // signal
 }
 
+void ConsoleLineModel::reloadRows() {
+    resetRows();
+    m_cursor = 0;
+}
+
 void ConsoleLineModel::setFollowing(bool following) {
     if (following == m_following) {
         return;

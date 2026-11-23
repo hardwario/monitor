@@ -60,10 +60,26 @@ Item {
 
     // The content exists only while the page has its view model (set by the PageHost after the
     // page was created).
+    // Plan 0044: a remote tab offers the remote operations only (catalog firmware, erase,
+    // recover, reset through the customer's Monitor).
+    ScrollView {
+        objectName: "remoteFlashContent"
+        anchors.fill: parent
+        visible: page.tab !== null && page.tab.transport === "remote"
+        contentWidth: availableWidth
+
+        RemoteFlashCard {
+            x: Theme.spacingXl
+            y: Theme.spacingXl
+            width: Math.min(820, parent.width - 2 * Theme.spacingXl)
+            join: page.tab ? page.tab.remoteJoin : null
+        }
+    }
+
     Loader {
         objectName: "flashContent"
         anchors.fill: parent
-        active: page.model !== null
+        active: page.model !== null && !(page.tab !== null && page.tab.transport === "remote")
         sourceComponent: Component {
             ColumnLayout {
                 spacing: 0

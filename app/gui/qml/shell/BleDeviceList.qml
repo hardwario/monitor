@@ -4,6 +4,8 @@
 // the list while the adapter cannot be used; an empty state after the first scan finds nothing.
 // Plan 0033 (ADR-0235): while the pointer is over the list or a row has keyboard focus the order is
 // frozen (picker.freezeOrder); new devices are appended until it is released.
+// The arrow keys move the selection between the rows that can be chosen (skipping devices in use);
+// Down in the filter enters the list and Up from its first row returns to the filter.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -27,6 +29,40 @@ Item {
     }
 
     objectName: "bleDeviceList"
+
+    // Chooses and focuses the next row in direction step (+1 / -1) after row from that can be
+    // chosen without switching tabs. Returns false when there is none.
+    function moveSelection(from, step) {
+        for (let i = from + step; i >= 0 && i < rows.count; i += step) {
+            const item = rows.itemAt(i);
+            if (item && item.enabled && view.picker.isSelectable(i)) {
+                view.picker.choose(i);
+                item.forceActiveFocus(Qt.TabFocusReason);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Moves the keyboard focus from the filter into the list: to the selected row, else the first
+    // row that can be chosen.
+    function enterList() {
+        const selected = rows.itemAt(view.picker.selectedRow);
+        if (selected && selected.enabled)
+            selected.forceActiveFocus(Qt.TabFocusReason);
+        else
+            view.moveSelection(-1, 1);
+    }
+
+    // Scrolls the page so that item (a row) is fully visible.
+    function ensureVisible(item) {
+        const flick = scroll.contentItem as Flickable;
+        const top = item.mapToItem(flick.contentItem, 0, 0).y;
+        if (top < flick.contentY)
+            flick.contentY = top;
+        else if (top + item.height > flick.contentY + flick.height)
+            flick.contentY = top + item.height - flick.height;
+    }
 
     Connections {
         target: view.picker
@@ -116,6 +152,7 @@ Item {
                             onTextEdited: view.picker.filterText = filterField.text
                             Keys.onReturnPressed: view.picker.connectSelected()
                             Keys.onEnterPressed: view.picker.connectSelected()
+                            Keys.onDownPressed: view.enterList()
                         }
 
                         CheckBox {
@@ -162,6 +199,8 @@ Item {
                             spacing: 0
 
                             Repeater {
+                                id: rows
+
                                 model: view.picker
 
                                 delegate: ItemDelegate {
@@ -190,7 +229,11 @@ Item {
                                     Accessible.name: row.displayName + ", " + row.profileName
                                     Accessible.description: [signalText.text, tag.text, staleTag.visible ? staleTag.text : ""]
                                                             .filter(part => part !== "").join(", ")
-                                    onActiveFocusChanged: view.focusedRows = Math.max(0, view.focusedRows + (row.activeFocus ? 1 : -1))
+                                    onActiveFocusChanged: {
+                                        view.focusedRows = Math.max(0, view.focusedRows + (row.activeFocus ? 1 : -1));
+                                        if (row.activeFocus)
+                                            view.ensureVisible(row);
+                                    }
                                     Component.onDestruction: {
                                         if (row.activeFocus)
                                             view.focusedRows = Math.max(0, view.focusedRows - 1);
@@ -207,6 +250,11 @@ Item {
                                     Keys.onEnterPressed: {
                                         view.picker.choose(row.index);
                                         view.picker.connectSelected();
+                                    }
+                                    Keys.onDownPressed: view.moveSelection(row.index, 1)
+                                    Keys.onUpPressed: {
+                                        if (!view.moveSelection(row.index, -1))
+                                            filterField.forceActiveFocus(Qt.BacktabFocusReason);
                                     }
                                     HToolTip {
                                         // macOS: the id (a UUID) only here (ADR-0229).

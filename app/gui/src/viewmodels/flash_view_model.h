@@ -22,9 +22,9 @@
 // Plan 0033 (ADR-0233, ADR-0234, ADR-0236): the LTE kind does not flash from this page - it starts
 // the LTE firmware update wizard (lteUpdateRequested; the Flash bar is disabled for it). The
 // maintenance actions work on their own MCU (maintenanceTarget): the application MCU, unless the
-// expert actions are on (advanced/expertActions), which add Erase everything, Recover and the
-// choice of the LTE MCU (cross-target, ADR-0057). revealRecover() (the troubleshooting hand-off of
-// target.protected) shows Recover for one MCU once, without changing the setting.
+// expert actions are on (Expert mode, plan 0045 / ADR-0360), which add Erase everything, Recover
+// and the choice of the LTE MCU (cross-target, ADR-0057). revealRecover() (the troubleshooting
+// hand-off of target.protected) shows Recover for one MCU once, in every mode.
 //
 // Ownership: child of its DeviceTabViewModel (Qt parent, created by the page registry). GUI thread
 // only.
@@ -60,6 +60,7 @@ namespace hwio::gui {
 
 class DeviceTabViewModel;
 class FirmwareServices;
+class UiModeController;
 
 class FlashViewModel : public QObject {
     Q_OBJECT
@@ -140,7 +141,8 @@ public:
     static constexpr std::chrono::milliseconds deviceInfoWindow{10000};
     static constexpr std::chrono::milliseconds deviceInfoRetryInterval{2500};
 
-    FlashViewModel(DeviceTabViewModel* tab, FirmwareServices& services);
+    // `mode`: the user mode (plan 0045), owned by AppViewModel, outlives this object.
+    FlashViewModel(DeviceTabViewModel* tab, FirmwareServices& services, UiModeController& mode);
     ~FlashViewModel() override;
     FlashViewModel(const FlashViewModel&) = delete;
     FlashViewModel& operator=(const FlashViewModel&) = delete;
@@ -291,6 +293,7 @@ private:
 
     DeviceTabViewModel* m_tab; // parent
     FirmwareServices& m_services;
+    UiModeController& m_mode;
     FirmwareSourceViewModel* m_source = nullptr; // child
     FirmwareSourceViewModel::Kind m_kind = FirmwareSourceViewModel::AppFirmware;
     // The kind was chosen in this tab (ADR-0055: remembered per tab for the session, in memory

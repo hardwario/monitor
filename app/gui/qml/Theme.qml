@@ -22,6 +22,11 @@ QtObject {
     readonly property color accent: dark ? "#79B8FF" : "#0B5FCC"
     readonly property color accentSoft: dark ? "#24344A" : "#E3EEFC"
     readonly property color onAccent: dark ? "#0B1A2E" : "#FFFFFF"
+    // Filled accent controls (highlighted buttons, checked segments and toggles; ADR-0367): a
+    // darker blue with white text in the dark theme. `accent` stays for text, icons and borders.
+    // (Not "onAccentFill": QML would read a property "on" + an existing property name as a handler.)
+    readonly property color accentFill: dark ? "#1D63D8" : "#0B5FCC"
+    readonly property color textOnAccentFill: "#FFFFFF"
     readonly property color success: dark ? "#56D364" : "#1A7F37"
     readonly property color warning: dark ? "#FFAB70" : "#8A5A00"
     readonly property color error: dark ? "#FF7B86" : "#C4232E"

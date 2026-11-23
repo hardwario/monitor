@@ -528,8 +528,11 @@ std::string JLinkLibrary::firmwareString() {
 
 std::expected<std::string, int> JLinkLibrary::embeddedFirmwareString(std::string_view id) {
     std::array<char, abi::textBufferSize> buffer{};
-    const std::string idText(id);
-    const int result = m_impl->fn.getEmbeddedFwString(idText.c_str(), buffer.data(),
+    // The library compares the ID with fixed-length memcmp (23 bytes seen with 9.84), past the end
+    // of a shorter string (ASan heap-buffer-overflow): pass it in a zero-filled buffer.
+    std::array<char, abi::textBufferSize> idText{};
+    std::copy_n(id.begin(), std::min(id.size(), idText.size() - 1), idText.begin());
+    const int result = m_impl->fn.getEmbeddedFwString(idText.data(), buffer.data(),
                                                       static_cast<std::uint32_t>(buffer.size()));
     if (result < 0) {
         return std::unexpected(result);

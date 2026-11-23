@@ -94,10 +94,13 @@ const device::TargetProfile& chesterApp() {
     return *device::findTarget(*profile, targetId);
 }
 
-Result<device::SessionOptions> sessionOptions(const ProbeOptions& group, const ProbeOptions& own,
-                                              int latencyMs, bool autoReconnect, bool reset,
-                                              const std::string& consoleFile,
-                                              bool consoleFileGiven) {
+} // namespace
+
+Result<device::SessionOptions> appConsoleSessionOptions(const ProbeOptions& group,
+                                                        const ProbeOptions& own, int latencyMs,
+                                                        bool autoReconnect, bool reset,
+                                                        const std::string& consoleFile,
+                                                        bool consoleFileGiven) {
     device::SessionOptions options;
     options.profile = device::ProfileRegistry::find(profileId);
     options.targetId = targetId;
@@ -116,6 +119,8 @@ Result<device::SessionOptions> sessionOptions(const ProbeOptions& group, const P
     }
     return options;
 }
+
+namespace {
 
 // ADR-0110: before connecting at a fixed speed below 125 kHz, where the console may not be found
 // within the (capped) attach deadline. Logged; on stderr in human mode (like the other warnings
@@ -144,8 +149,8 @@ Result<CommandResult> console(const Context& context, const GlobalOptions& globa
     }
     device::SessionRegistry registry;
     auto sessionOpts =
-        sessionOptions(group, options.probe, options.latencyMs, options.autoReconnect,
-                       options.reset, options.consoleFile, options.consoleFileGiven);
+        appConsoleSessionOptions(group, options.probe, options.latencyMs, options.autoReconnect,
+                                 options.reset, options.consoleFile, options.consoleFileGiven);
     if (!sessionOpts) {
         return std::unexpected(std::move(sessionOpts).error());
     }
@@ -233,8 +238,9 @@ Result<CommandResult> command(const Context& context, const GlobalOptions& globa
         return std::unexpected(std::move(location).error());
     }
     device::SessionRegistry registry;
-    auto sessionOpts = sessionOptions(group, options.probe, chesterApp().defaultLatencyMs, false,
-                                      options.reset, options.consoleFile, options.consoleFileGiven);
+    auto sessionOpts =
+        appConsoleSessionOptions(group, options.probe, chesterApp().defaultLatencyMs, false,
+                                 options.reset, options.consoleFile, options.consoleFileGiven);
     if (!sessionOpts) {
         return std::unexpected(std::move(sessionOpts).error());
     }
@@ -288,8 +294,8 @@ Result<CommandResult> info(const Context& context, const GlobalOptions& globals,
         return std::unexpected(std::move(location).error());
     }
     device::SessionRegistry registry;
-    auto sessionOpts = sessionOptions(group, options.probe, chesterApp().defaultLatencyMs, false,
-                                      false, {}, false);
+    auto sessionOpts = appConsoleSessionOptions(group, options.probe, chesterApp().defaultLatencyMs,
+                                                false, false, {}, false);
     if (!sessionOpts) {
         return std::unexpected(std::move(sessionOpts).error());
     }

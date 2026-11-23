@@ -14,8 +14,9 @@ Další jazyky: [English](../en/index.md) · [Deutsch](../de/index.md) · [Slove
 3. [Konzole](console.md): shell a log, hledání a filtr, historie, dávkové soubory, soubory konzole
 4. [Flashování](flashing.md): aplikační a LTE firmware, ID z katalogu, UICR, mazání, obnovení (recover)
 5. [Bluetooth LE](bluetooth.md): konzole přes Bluetooth, párování
-6. [Řešení problémů](troubleshooting.md): časté problémy a všechny kódy chyb
-7. [Soukromí a uložená data](privacy.md): kontrola aktualizací, diagnostická zpráva, kde se ukládají data
+6. [Vzdálená podpora](remote-support.md): sdílení konzole s podporou HARDWARIO, připojení k relaci
+7. [Řešení problémů](troubleshooting.md): časté problémy a všechny kódy chyb
+8. [Soukromí a uložená data](privacy.md): kontrola aktualizací, diagnostická zpráva, kde se ukládají data
 
 ## Referenční příručka (jen anglicky)
 

@@ -9,6 +9,7 @@
 #include "hwio/device/operation.h"
 #include "hwio/device/profile.h"
 #include "hwio/firmware/firmware_image.h"
+#include "hwio/remote/lte_update_report.h"
 #include "pages/firmware_services.h"
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/dependency_status.h"
@@ -16,6 +17,7 @@
 #include "viewmodels/error_info.h"
 #include "viewmodels/firmware_source_view_model.h"
 #include "viewmodels/flash_view_model.h"
+#include "viewmodels/remote_share_view_model.h"
 #include "viewmodels/settings_view_model.h"
 #include "wizard/wizard.h"
 #include "wizard/wizard_registry.h"
@@ -34,7 +36,10 @@
 #include <QtTypes>
 
 #include <array>
+#include <chrono>
 #include <cstddef>
+#include <cstdint>
+#include <expected>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -84,6 +89,9 @@ LteUpdateWizard::LteUpdateWizard(FirmwareServices& services, QObject* parent)
 }
 
 LteUpdateWizard::~LteUpdateWizard() {
+    if (!m_remote.isNull()) {
+        m_remote->finish(); // the wizard closed: the procedure's state is the request's result
+    }
     m_procedure.reset(); // releases the hold before the tab's busy state
     releaseTab();
 }
@@ -96,7 +104,68 @@ void LteUpdateWizard::start(const ErrorInfo& context, DeviceTabViewModel* tab) {
     if (needsNrfUtil()) {
         m_services.dependencies()->ensureChecked();
     }
+    // Plan 0044 (ADR-0363): a remote request starts with the recommended firmware by itself.
+    if (tab != nullptr && tab->remoteShare() != nullptr) {
+        m_remote = tab->remoteShare()->takeLteUpdateRequest();
+    }
+    if (!m_remote.isNull()) {
+        connect(m_remote.data(), &remote::LteUpdateReporter::supportQuestionChanged, this,
+                &Wizard::changed); // ADR-0368
+        m_lteSource->setLteSource(FirmwareSourceViewModel::Designated);
+        m_lteSource->prepareDesignated();
+        m_services.dependencies()->ensureChecked();
+        connect(m_lteSource, &FirmwareSourceViewModel::designatedChanged, this,
+                &LteUpdateWizard::checkRemoteStart);
+        connect(m_services.dependencies(), &DependencyStatus::nrfUtilChanged, this,
+                &LteUpdateWizard::checkRemoteStart);
+        checkRemoteStart();
+    }
     emit changed();
+}
+
+void LteUpdateWizard::checkRemoteStart() {
+    if (m_remote.isNull() || m_remoteStarted || m_remote->done()) {
+        return;
+    }
+    switch (m_lteSource->designatedState()) {
+    case FirmwareSourceViewModel::DesignatedFailed:
+        m_remoteStarted = true;
+        // Only the code reaches support (op-result).
+        m_remote->finish(std::unexpected(
+            makeError(errorCodeFromId(toStdString(m_lteSource->designatedError().code()))
+                          .value_or(ErrorCode::NetworkDownloadFailed),
+                      "the designated LTE firmware")));
+        return;
+    case FirmwareSourceViewModel::DesignatedReady:
+        break;
+    default: {
+        const qreal progress = m_lteSource->designatedProgress();
+        m_remote->download(progress < 0 ? 0 : static_cast<std::uint64_t>(progress * 1000.0),
+                           progress < 0 ? 0 : 1000);
+        return;
+    }
+    }
+    const DependencyStatus* dependencies = m_services.dependencies();
+    if (dependencies->nrfUtilState() == DependencyStatus::Problem &&
+        dependencies->nrfUtilProblem()) {
+        m_remoteStarted = true;
+        m_remote->finish(std::unexpected(*dependencies->nrfUtilProblem()));
+        return;
+    }
+    if (dependencies->nrfUtilState() != DependencyStatus::Found) {
+        return; // checked soon (nrfUtilChanged)
+    }
+    if (!canPrimary()) {
+        return;
+    }
+    m_remoteStarted = true;
+    startProcedure();
+    if (m_procedure) {
+        m_remote->follow(*m_procedure);
+    } else {
+        m_remote->finish(std::unexpected(
+            m_startError.value_or(makeError(ErrorCode::InternalUnexpected, "not started"))));
+    }
 }
 
 // ---- steps --------------------------------------------------------------------------------------
@@ -124,6 +193,7 @@ int LteUpdateWizard::stepIndex() const {
     case Step::Idle:
         return 0;
     case Step::ConnectApp:
+    case Step::Confirm: // plan 0046: the APP connector answered, nothing changed yet
         return 1;
     case Step::Backup:
     case Step::BackupFailed:
@@ -169,6 +239,8 @@ int LteUpdateWizard::stage() const {
     case Step::ConnectLte:
     case Step::ConnectAppAgain:
         return Connector;
+    case Step::Confirm:
+        return Confirm;
     case Step::Backup:
     case Step::Erase:
     case Step::UpdateLte:
@@ -213,6 +285,11 @@ WizardStep LteUpdateWizard::current() const {
                            ? tr("Connect the J-Link to the LTE connector")
                            : tr("Connect the J-Link to the APP connector");
         break;
+    case Confirm:
+        step.heading = tr("Ready to update the LTE MCU");
+        // ADR-0368: in a remote update support answers; the customer has no button.
+        step.primaryText = supportDecides() ? QString() : tr("Continue");
+        break;
     case Working:
         switch (m_procedure->step()) {
         case Step::Backup:
@@ -229,7 +306,7 @@ WizardStep LteUpdateWizard::current() const {
         break;
     case BackupFailed:
         step.heading = tr("No copy of the application");
-        step.primaryText = tr("Continue without a copy");
+        step.primaryText = supportDecides() ? QString() : tr("Continue without a copy");
         break;
     case Application:
         step.heading = tr("Put the application back");
@@ -281,8 +358,9 @@ bool LteUpdateWizard::canPrimary() const {
     switch (static_cast<Stage>(stage())) {
     case Firmware:
         return firmwareReady() && !m_tab.isNull() && !m_tab->choosing() && !m_tab->isBusy();
+    case Confirm:
     case BackupFailed:
-        return true;
+        return !supportDecides(); // ADR-0368: support answers in a remote update
     case Application:
         return (useBackup() && hasBackup()) || m_appSource->readySource() != nullptr;
     case Failed:
@@ -306,6 +384,9 @@ void LteUpdateWizard::primary() {
     switch (static_cast<Stage>(stage())) {
     case Firmware:
         startProcedure();
+        break;
+    case Confirm:
+        m_procedure->confirm(); // ADR-0366: the copy and the erase start now
         break;
     case BackupFailed:
         m_procedure->continueWithoutBackup();
@@ -365,8 +446,12 @@ void LteUpdateWizard::startProcedure() {
         emit changed();
         return;
     }
+    // ADR-0368: a remote update always writes the copy back (no question to the customer).
     m_procedure = std::make_unique<device::LteUpdateProcedure>(
-        *session, device::LteUpdateProcedure::Options{});
+        *session, device::LteUpdateProcedure::Options{.pollInterval = std::chrono::seconds(1),
+                                                      .backupDirectory = {},
+                                                      .autoRestore = !m_remote.isNull(),
+                                                      .now = {}});
     connect(m_procedure.get(), &device::LteUpdateProcedure::changed, this,
             &LteUpdateWizard::onProcedureChanged);
     connect(m_procedure.get(), &device::LteUpdateProcedure::progressChanged, this,
@@ -390,6 +475,11 @@ void LteUpdateWizard::startProcedure() {
 void LteUpdateWizard::onProcedureChanged() {
     if (m_procedure && m_procedure->step() == Step::ChooseApplication && !hasBackup()) {
         m_useBackup = false;
+        // ADR-0368: nothing to write back; support is told now (the LTE MCU is updated, the
+        // application not restored). The customer may still flash an application here.
+        if (!m_remote.isNull()) {
+            m_remote->finish();
+        }
     }
     emit changed();
 }
@@ -404,6 +494,10 @@ void LteUpdateWizard::onProcedureFinished() {
         releaseTab();
     }
     if (step == Step::Cancelled) {
+        // ADR-0368: support answered No, or did not answer; the customer is told why it closed.
+        if (!m_remote.isNull() && !m_remote->cancelledText().isEmpty() && !m_tab.isNull()) {
+            m_tab->showToast(m_remote->cancelledText());
+        }
         emit finished(false); // the dialog closes (also after Cancel and close)
         return;
     }
@@ -473,7 +567,21 @@ QString LteUpdateWizard::promptText() const {
                   "connectors. The guide stops the application, updates the LTE MCU and puts the "
                   "application back.");
     }
-    return m_procedure->promptText();
+    QString text = m_procedure->promptText();
+    // ADR-0368: support answers the remote update's questions.
+    if (supportDecides() && m_procedure->step() == Step::Confirm) {
+        text += QStringLiteral("\n\n") +
+                tr("HARDWARIO Support confirms the update. Keep the J-Link cable on the APP "
+                   "connector for now.");
+    } else if (supportDecides() && m_procedure->step() == Step::BackupFailed) {
+        text += QStringLiteral("\n\n") +
+                tr("HARDWARIO Support decides whether to continue without a copy.");
+    }
+    return text;
+}
+
+bool LteUpdateWizard::supportDecides() const {
+    return !m_remote.isNull() && m_remote->supportDecides();
 }
 
 QString LteUpdateWizard::illustration() const {

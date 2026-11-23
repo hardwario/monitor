@@ -166,6 +166,22 @@ ApplicationWindow {
     // Plan 0036: the J-Link firmware update.
     ProbeFirmwareDialog {}
 
+    // Plan 0045 (ADR-0359, ADR-0362): the user mode is chosen once, before the first tab is used.
+    ModeChoiceDialog {
+        id: modeChoice
+
+        Component.onCompleted: if (!AppViewModel.uiMode.chosen) modeChoice.open()
+
+        Connections {
+            target: AppViewModel.uiMode
+
+            function onChosenChanged() {
+                if (!AppViewModel.uiMode.chosen)
+                    modeChoice.open();
+            }
+        }
+    }
+
     // Plan 0014 (ADR-0108): the MCP consent prompt, a window of its own.
     ConsentWindow {
         id: consentPrompt

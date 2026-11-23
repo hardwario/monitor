@@ -22,8 +22,11 @@ add_executable(hwio_cli_tests
     terminal_test.cpp
     update_e2e_test.cpp)
 # `hwio ble` end-to-end tests need the fake BLE backend (ADR-0127).
+# `hwio remote` end-to-end tests (plan 0044): the fake relay is plain http on loopback, which only
+# test builds accept.
 if(HWIO_TEST_OVERRIDES)
-    target_sources(hwio_cli_tests PRIVATE ble_e2e_test.cpp)
+    target_sources(hwio_cli_tests PRIVATE ble_e2e_test.cpp remote_e2e_test.cpp)
+    target_link_libraries(hwio_cli_tests PRIVATE hwio_remote_fake_relay)
 endif()
 hwio_apply_target_defaults(hwio_cli_tests)
 target_link_libraries(hwio_cli_tests PRIVATE hwio_cli_impl hwio::miniz Qt6::Network GTest::gmock)
@@ -43,7 +46,7 @@ target_compile_definitions(hwio_cli_tests PRIVATE ${HWIO_TEST_OVERRIDES_DEFINE})
 # is uninstrumented Qt code, see libs/firmware/tests/CMakeLists.txt).
 set(_hwio_cli_test_filter "")
 if("thread" IN_LIST HWIO_SANITIZERS)
-    set(_hwio_cli_test_filter TEST_FILTER "-FlashCli.FlashByCatalogId:FlashCli.CatalogNetworkDown:FlashCli.LteFlashDesignatedFirmware:FlashCli.CatalogInfoAndVerifiedIdFlash:UpdateCli.*")
+    set(_hwio_cli_test_filter TEST_FILTER "-FlashCli.FlashByCatalogId:FlashCli.CatalogNetworkDown:FlashCli.LteFlashDesignatedFirmware:FlashCli.CatalogInfoAndVerifiedIdFlash:RemoteCli.HostRunsTheGuidedLteUpdate:RemoteCli.HostLteUpdateSupport*:UpdateCli.*")
 endif()
 gtest_discover_tests(hwio_cli_tests
     DISCOVERY_TIMEOUT 60

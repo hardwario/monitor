@@ -50,8 +50,10 @@ namespace fs = std::filesystem;
 using hwio::ErrorCode;
 using hwio::device::Channel;
 using hwio::device::ConnectionState;
+using hwio::device::ConsoleSession;
 using hwio::device::DeviceSession;
 using hwio::device::Direction;
+using hwio::device::LineSource;
 using hwio::device::SessionOptions;
 using hwio::device::SessionRegistry;
 using hwio::device::detail::OpenHooks;
@@ -1009,6 +1011,42 @@ TEST_F(Session, ConsoleFileGetsHeaderLinesAndConnectionChanges) {
     EXPECT_NE(text.find(" < version"), std::string::npos) << text;
     EXPECT_NE(text.find(" > v3.1.0"), std::string::npos) << text;
     EXPECT_NE(text.find(" @ stopped"), std::string::npos) << text;
+}
+
+// Plan 0044 (ADR-0333): remote audit markers go into the log and the console file in order; a
+// remote command's echo carries LineSource::Remote.
+TEST_F(Session, RemoteEventsAndRemoteCommands) {
+    const fs::path file = root() / "console.log";
+    SessionOptions opts = options();
+    opts.consoleFile = file;
+    target().set([](ScriptedTarget& t) { t.responses["version"] = "v3.1.0\n"; });
+    {
+        Recorder* events = nullptr;
+        auto session = openConnected(opts, events);
+        ASSERT_TRUE(session);
+        ASSERT_TRUE(session->recordRemoteEvent("Remote: participant allowed"));
+        ASSERT_TRUE(session->sendRemoteLine("version"));
+        ASSERT_TRUE(session->sendLine("version"));
+        ASSERT_TRUE(waitFor([&] { return events->lines.size() >= 5; }));
+        EXPECT_EQ(events->lines[0].dir, Direction::Marker);
+        EXPECT_EQ(events->lines[0].source, LineSource::Remote);
+        EXPECT_EQ(events->lines[0].text, "Remote: participant allowed");
+        EXPECT_EQ(events->lines[1].dir, Direction::In);
+        EXPECT_EQ(events->lines[1].source, LineSource::Remote);
+        EXPECT_EQ(events->lines[3].dir, Direction::In);
+        EXPECT_EQ(events->lines[3].source, LineSource::Local);
+        EXPECT_EQ(session->log().last(10).front().source, LineSource::Remote);
+        // Bounded text.
+        ASSERT_TRUE(session->recordRemoteEvent(std::string(5000, 'x')));
+        ASSERT_TRUE(waitFor([&] { return events->lines.size() >= 6; }));
+        EXPECT_EQ(events->lines[5].text.size(), ConsoleSession::maxRemoteEventBytes);
+    }
+    std::ifstream input(file);
+    std::stringstream content;
+    content << input.rdbuf();
+    const std::string text = content.str();
+    EXPECT_NE(text.find(" @ Remote: participant allowed"), std::string::npos) << text;
+    EXPECT_LT(text.find(" @ Remote: participant allowed"), text.find(" < version")) << text;
 }
 
 TEST_F(Session, DefaultConsoleFileInTheConsoleDirectory) {

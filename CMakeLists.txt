@@ -104,7 +104,8 @@ include(HWioSanitizers)
 include(HWioCxxFeatureChecks)
 include(HWioBackendRules)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Network Bluetooth LinguistTools)
+# WebSockets: libs/remote only (plan 0044, ADR-0321).
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Network Bluetooth WebSockets LinguistTools)
 qt_standard_project_setup(REQUIRES 6.8
     I18N_SOURCE_LANGUAGE en
     I18N_TRANSLATED_LANGUAGES cs)
@@ -127,6 +128,7 @@ add_subdirectory(libs/hw/nrfutil)
 add_subdirectory(libs/hw/ble)
 add_subdirectory(libs/device)
 add_subdirectory(libs/diag)
+add_subdirectory(libs/remote)
 add_subdirectory(libs/mcp)
 add_subdirectory(libs/mcp_tools)
 add_subdirectory(app/cli)

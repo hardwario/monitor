@@ -14,6 +14,7 @@ hwio_add_backend_library(hwio_device
     include/hwio/device/command_tree.h
     include/hwio/device/command_tree_cache.h
     include/hwio/device/command_tree_learner.h
+    include/hwio/device/command_tree_source.h
     include/hwio/device/completer.h
     include/hwio/device/console_file_sink.h
     include/hwio/device/console_line.h

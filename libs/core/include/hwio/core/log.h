@@ -41,6 +41,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcDiag)  // "hwio.diag" (libs/diag: checks, report; p
 Q_DECLARE_LOGGING_CATEGORY(lcBle)   // "hwio.ble" (libs/hw/ble, BLE sessions; plan 0011)
 Q_DECLARE_LOGGING_CATEGORY(lcMcp)   // "hwio.mcp" (libs/mcp, libs/mcp_tools, `hwio mcp`; plan 0013)
 Q_DECLARE_LOGGING_CATEGORY(lcUpdate) // "hwio.update" (libs/update, the update check; plan 0016)
+Q_DECLARE_LOGGING_CATEGORY(lcRemote) // "hwio.remote" (libs/remote, `hwio remote`; plan 0044)
 
 enum class AppKind : std::uint8_t {
     Gui,
