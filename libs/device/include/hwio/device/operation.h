@@ -139,6 +139,10 @@ struct OperationResult {
 struct FlashOptions {
     bool halt = false;      // leave the CPU halted after programming
     bool allowUicr = false; // ADR-0036: program the image's UICR records (the PIB is kept)
+    // ADR-0383: started by the guided LTE update (LteUpdateProcedure; the application MCU is
+    // erased): a failure keeps its own error, the reset reason of the target is only logged (no
+    // target.reset_during_update).
+    bool guided = false;
 };
 
 // Largest readMemory() (64 KiB).

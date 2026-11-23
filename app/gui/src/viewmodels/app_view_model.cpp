@@ -113,6 +113,21 @@ void logFailure(const char* what, const Status& status) {
     }
 }
 
+// Plan 0052 (ADR-0387): the content views.
+const QString reportView = QStringLiteral("report");
+const QString probeFirmwareView = QStringLiteral("probeFirmware");
+const QString modeChoiceView = QStringLiteral("modeChoice");
+
+bool knownView(const QString& viewId) {
+    static const QStringList ids{reportView,
+                                 probeFirmwareView,
+                                 QStringLiteral("join"),
+                                 QStringLiteral("share"),
+                                 modeChoiceView,
+                                 AppViewModel::shortcutsView()};
+    return ids.contains(viewId);
+}
+
 } // namespace
 
 AppViewModel::AppViewModel(AppOptions options, QObject* parent)
@@ -131,11 +146,11 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
                                                m_options.scanInterval)),
       m_ble(m_options.bluetooth ? std::make_unique<BleService>(m_options.bleApiFactory) : nullptr),
       m_diagWorker(std::make_unique<DiagWorker>()),
-      m_wizard(new WizardViewModel( // NOLINT(cppcoreguidelines-owning-memory)
+      m_globalWizard(new WizardViewModel( // NOLINT(cppcoreguidelines-owning-memory)
           m_wizardRegistry, this,
           [this](const QString& text) { copyToClipboard(text); })), // ADR-0202
       m_launcher(new WizardLauncher( // NOLINT(cppcoreguidelines-owning-memory)
-          m_wizardRegistry, *m_wizard,
+          m_wizardRegistry, *m_globalWizard,
           [this](int index) { return index < 0 ? currentTabViewModel() : m_tabs->at(index); },
           this)),
       m_report(new ReportViewModel( // NOLINT(cppcoreguidelines-owning-memory)
@@ -221,6 +236,7 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
         for (int i = 0; i < m_tabs->count(); ++i) {
             m_tabs->at(i)->picker()->updateFromScanner();
         }
+        syncOverlay(); // plan 0052: its content view
         checkQuit();
     });
     // ADR-0261: a failed update cancels a pending quit (the error stays on screen).
@@ -228,7 +244,16 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
             [this] { m_quitPending = false; });
 
     connect(m_scanner.get(), &ProbeScanner::scanned, this, &AppViewModel::onScan);
-    connect(m_wizard, &WizardViewModel::handOff, this, &AppViewModel::onHandOff);
+    connect(m_globalWizard, &WizardViewModel::handOff, this, &AppViewModel::onHandOff);
+    // Plan 0052 (ADR-0387): the content views of the report, the J-Link firmware update and the
+    // mode choice follow their view models; a global wizard closes a content view.
+    connect(m_report, &ReportViewModel::changed, this, &AppViewModel::syncOverlay);
+    connect(m_uiMode, &UiModeController::chosenChanged, this, &AppViewModel::syncOverlay);
+    connect(m_globalWizard, &WizardViewModel::openChanged, this, [this] {
+        if (m_globalWizard->isOpen() && !overlayBusy()) {
+            closeView();
+        }
+    });
     connect(m_settings, &SettingsStore::valueChanged, this, [this](const QString& key) {
         if (key == QStringLiteral("jlink/libraryPath")) {
             updateLocatorOptions();
@@ -244,6 +269,8 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
 
     // Plan 0053 (ADR-0388): every start opens one Choose device tab; tabs are not restored.
     (void)addTab(makeTab());
+    // Plan 0052 (ADR-0359, ADR-0387): the mode choice before the first tab is used.
+    syncOverlay();
 }
 
 AppViewModel::~AppViewModel() {
@@ -255,11 +282,12 @@ AppViewModel::~AppViewModel() {
     }
     m_update = nullptr;
     m_updateService = nullptr;
-    // The open wizard first (it may use a tab's session): its operation is cancelled.
-    if (m_wizard != nullptr) {
-        m_wizard->setParent(nullptr);
-        const std::unique_ptr<WizardViewModel> owned(m_wizard);
-        m_wizard = nullptr;
+    // The global wizard first: its operation is cancelled (a tab's wizard closes in the tab's
+    // shutdown()).
+    if (m_globalWizard != nullptr) {
+        m_globalWizard->setParent(nullptr);
+        const std::unique_ptr<WizardViewModel> owned(m_globalWizard);
+        m_globalWizard = nullptr;
     }
     // Tabs first: their sessions use the registry, their pickers the scanner.
     while (m_tabs->count() > 0) {
@@ -514,7 +542,7 @@ void AppViewModel::refreshCrashNotice() {
 
 void AppViewModel::reportCrash() {
     dismissCrashNotice();
-    m_report->show();
+    (void)openView(reportView);
 }
 
 void AppViewModel::dismissCrashNotice() {
@@ -570,6 +598,11 @@ void AppViewModel::setCurrentTab(int index) {
     if (index < 0 || index >= m_tabs->rowTotal()) {
         return;
     }
+    // Plan 0052 (ADR-0387): the J-Link firmware update keeps its tab while it writes (the probe is
+    // busy; the dialog could not be left either). Not when a tab was removed (m_currentTab = -1).
+    if (index != m_currentTab && m_currentTab >= 0 && tabSwitchBlocked()) {
+        return;
+    }
     if (index < m_tabs->count()) {
         m_lastDeviceTab = index;
     }
@@ -580,6 +613,12 @@ void AppViewModel::setCurrentTab(int index) {
         if (page != globalPage()) {
             globalPageChanged(); // signal: the Settings tab became current or was left
         }
+        // Plan 0052: a content view of another tab closes unless it runs an operation (then it
+        // stays with its tab and is shown again on return).
+        if (!m_overlayId.isEmpty() && !overlayCurrent() && !overlayBusy()) {
+            closeView();
+        }
+        overlayViewChanged(); // signal: shown or hidden with its tab
     }
 }
 
@@ -604,11 +643,138 @@ void AppViewModel::setWindowWidth(int width) {
 }
 
 void AppViewModel::setShortcutOverlayVisible(bool visible) {
-    if (visible == m_shortcutOverlay) {
+    if (visible) {
+        (void)openView(shortcutsView());
+    } else if (m_overlayId == shortcutsView()) {
+        closeView();
+    }
+}
+
+// ---- content views (plan 0052, ADR-0387)
+// ---------------------------------------------------------
+
+QString AppViewModel::overlayView() const { return overlayCurrent() ? m_overlayId : QString(); }
+
+bool AppViewModel::overlayCurrent() const {
+    if (m_overlayId.isEmpty()) {
+        return false;
+    }
+    if (m_overlayOnSettings) {
+        return !globalPage().isEmpty();
+    }
+    return !m_overlayTab.isNull() && globalPage().isEmpty() &&
+           currentTabViewModel() == m_overlayTab.data();
+}
+
+bool AppViewModel::tabSwitchBlocked() {
+    if (m_overlayId != probeFirmwareView || !overlayBusy()) {
+        return false;
+    }
+    showToast(tr("Wait until the J-Link firmware update has finished."));
+    return true;
+}
+
+bool AppViewModel::probeFirmwareShown() const {
+    return m_overlayId == probeFirmwareView && m_probeFirmware != nullptr &&
+           m_probeFirmware->state() != ProbeFirmwareViewModel::Idle;
+}
+
+bool AppViewModel::overlayBusy() const {
+    if (m_overlayId == reportView) {
+        return m_report->isOpen() && (m_report->state() == QStringLiteral("collecting") ||
+                                      m_report->state() == QStringLiteral("saving"));
+    }
+    if (m_overlayId == probeFirmwareView) {
+        return m_probeFirmware != nullptr &&
+               m_probeFirmware->state() == ProbeFirmwareViewModel::Updating;
+    }
+    return false;
+}
+
+void AppViewModel::setOverlay(const QString& viewId) {
+    const bool shortcuts = shortcutOverlayVisible();
+    m_overlayId = viewId;
+    m_overlayOnSettings = !viewId.isEmpty() && !globalPage().isEmpty();
+    m_overlayTab = viewId.isEmpty() || m_overlayOnSettings ? nullptr : currentTabViewModel();
+    overlayViewChanged(); // signal
+    if (shortcuts != shortcutOverlayVisible()) {
+        shortcutOverlayVisibleChanged(); // signal
+    }
+}
+
+bool AppViewModel::openView(const QString& viewId) {
+    if (!knownView(viewId)) {
+        return false;
+    }
+    if (!m_overlayId.isEmpty() && m_overlayId != viewId && overlayBusy()) {
+        // The running view is shown instead (its tab becomes current).
+        qCInfo(lcGui).noquote() << "View" << viewId << "refused:" << m_overlayId << "is busy";
+        if (!overlayCurrent()) {
+            if (m_overlayOnSettings) {
+                openSettings();
+            } else if (const int index = m_tabs->indexOf(m_overlayTab.data()); index >= 0) {
+                setCurrentTab(index);
+            }
+        }
+        return false;
+    }
+    if (m_overlayId == viewId) {
+        if (!overlayCurrent() && !overlayBusy()) {
+            setOverlay(viewId); // moves to the current tab
+        }
+        return true;
+    }
+    closeView();
+    setOverlay(viewId);
+    if (viewId == reportView && !m_report->isOpen()) {
+        m_report->show(); // starts collecting
+    }
+    return true;
+}
+
+void AppViewModel::closeView() {
+    const QString viewId = m_overlayId;
+    if (viewId.isEmpty() ||
+        (viewId == probeFirmwareView && overlayBusy())) { // the update must not be interrupted
         return;
     }
-    m_shortcutOverlay = visible;
-    shortcutOverlayVisibleChanged(); // signal
+    setOverlay(QString());
+    // The view's own close (each is a no-op when it has closed itself already).
+    if (viewId == reportView && m_report->isOpen()) {
+        m_report->close();
+    } else if (viewId == probeFirmwareView && m_probeFirmware != nullptr &&
+               m_probeFirmware->state() != ProbeFirmwareViewModel::Idle) {
+        m_probeFirmware->cancel();
+    } else if (viewId == modeChoiceView && !m_uiMode->chosen()) {
+        m_uiMode->chooseMode(static_cast<int>(m_uiMode->mode())); // Esc keeps the preselection
+    }
+}
+
+void AppViewModel::syncOverlay() {
+    // The report and the J-Link firmware update open and close themselves; the mode choice is
+    // shown while the mode is not chosen.
+    if (m_report->isOpen() && m_overlayId != reportView) {
+        if (!openView(reportView)) {
+            m_report->close(); // refused: another view runs an operation
+        }
+    } else if (!m_report->isOpen() && m_overlayId == reportView) {
+        setOverlay(QString());
+    }
+    if (m_probeFirmware != nullptr) {
+        const bool active = m_probeFirmware->state() != ProbeFirmwareViewModel::Idle;
+        if (active && m_overlayId != probeFirmwareView) {
+            if (!openView(probeFirmwareView)) {
+                m_probeFirmware->cancel();
+            }
+        } else if (!active && m_overlayId == probeFirmwareView) {
+            setOverlay(QString());
+        }
+    }
+    if (!m_uiMode->chosen() && m_overlayId != modeChoiceView && m_tabs->count() > 0) {
+        (void)openView(modeChoiceView);
+    } else if (m_uiMode->chosen() && m_overlayId == modeChoiceView) {
+        setOverlay(QString());
+    }
 }
 
 QStringList AppViewModel::toasts() const {
@@ -649,6 +815,7 @@ std::unique_ptr<DeviceTabViewModel> AppViewModel::makeTab() {
     context.openWizard = [this](const QString& wizardId, DeviceTabViewModel* tab) {
         (void)m_launcher->openForTab(wizardId, tab);
     };
+    context.wizards = &m_wizardRegistry;
     context.probeFirmware = m_probeFirmware;
     if (!m_firmwareCache) {
         m_firmwareCache =
@@ -682,6 +849,24 @@ DeviceTabViewModel* AppViewModel::addTab(std::unique_ptr<DeviceTabViewModel> tab
         }
     });
     connect(raw, &DeviceTabViewModel::busyChanged, this, [this] { checkQuit(); });
+    // Plan 0052 (ADR-0386): the tab's wizard. Opened or asked for again: its tab is shown with the
+    // wizard view.
+    WizardViewModel* wizard = raw->wizard();
+    connect(wizard, &WizardViewModel::handOff, this, &AppViewModel::onHandOff);
+    const auto showWizard = [this, raw] {
+        if (!raw->wizard()->isOpen()) {
+            return;
+        }
+        if (const int index = m_tabs->indexOf(raw); index >= 0) {
+            setCurrentTab(index);
+        }
+        if (overlayCurrent() && !overlayBusy()) {
+            closeView(); // the wizard is not hidden under a content view
+        }
+        raw->setCurrentPage(DeviceTabViewModel::wizardPageId());
+    };
+    connect(wizard, &WizardViewModel::openChanged, this, showWizard);
+    connect(wizard, &WizardViewModel::raiseRequested, this, showWizard);
     return raw;
 }
 
@@ -724,7 +909,7 @@ bool AppViewModel::joinRemoteSession(const QString& text, bool allowForeignRelay
 }
 
 void AppViewModel::newTab() {
-    if (!m_tabs->canAdd()) {
+    if (!m_tabs->canAdd() || tabSwitchBlocked()) { // plan 0052: no tab is added meanwhile
         return;
     }
     if (addTab(makeTab()) != nullptr) {
@@ -770,9 +955,17 @@ void AppViewModel::removeTab(int index) {
         return;
     }
     tab->disconnect(this);
-    // The wizard working on this tab closes first, while the tab and its session still exist
+    tab->wizard()->disconnect(this);
+    // Plan 0052: the content view of this tab closes with it; one running an operation moves to
+    // the tab shown next.
+    const bool reownView = !m_overlayId.isEmpty() && !m_overlayOnSettings &&
+                           m_overlayTab.data() == tab.get() && overlayBusy();
+    if (!m_overlayId.isEmpty() && !m_overlayOnSettings && m_overlayTab.data() == tab.get() &&
+        !reownView) {
+        closeView();
+    }
+    // shutdown() closes the tab's wizard first, while the tab and its session still exist
     // (review V2): the wizard holds the tab as QPointer, but its operation runs on the session.
-    m_wizard->tabClosing(tab.get());
     tab->shutdown();
     // Deleted later, after QML has destroyed its delegates (they were scheduled for deletion by
     // the row removal, before this). The call may also come from the tab's own signal or from a
@@ -797,6 +990,11 @@ void AppViewModel::removeTab(int index) {
     current = settingsCurrent ? m_tabs->settingsRow() : std::clamp(current, 0, m_tabs->count() - 1);
     m_currentTab = -1; // force the notification: another tab is at the index now
     setCurrentTab(current);
+    if (reownView) {
+        m_overlayOnSettings = !globalPage().isEmpty();
+        m_overlayTab = m_overlayOnSettings ? nullptr : currentTabViewModel();
+        overlayViewChanged(); // signal
+    }
     for (int i = 0; i < m_tabs->count(); ++i) {
         m_tabs->at(i)->picker()->updateFromScanner();
     }
@@ -818,11 +1016,25 @@ void AppViewModel::previousTab() {
 }
 
 void AppViewModel::showPage(const QString& pageId) {
+    // Plan 0052: a page of the rail replaces a content view of this tab (not while it runs an
+    // operation).
+    if (overlayCurrent()) {
+        if (overlayBusy()) {
+            return;
+        }
+        closeView();
+    }
     if (!globalPage().isEmpty()) {
         // A per-tab page from the Settings tab: back to the last device tab.
         setCurrentTab(std::clamp(m_lastDeviceTab, 0, m_tabs->count() - 1));
     }
-    if (DeviceTabViewModel* tab = currentTabViewModel(); tab != nullptr && !tab->choosing()) {
+    DeviceTabViewModel* const current = currentTabViewModel();
+    if (current != nullptr && pageId == DeviceTabViewModel::wizardPageId()) {
+        // Plan 0052 (ADR-0386): the rail's "Wizard" entry, also while choosing a device.
+        current->setCurrentPage(pageId);
+        return;
+    }
+    if (DeviceTabViewModel* tab = current; tab != nullptr && !tab->choosing()) {
         // Plan 0012: a page the tab cannot use says why.
         if (const QString reason = tab->pageDisabledReason(pageId); !reason.isEmpty()) {
             showToast(reason);
@@ -844,6 +1056,9 @@ void AppViewModel::openGlobalPage(const QString& pageId) {
 void AppViewModel::closeGlobalPage() { closeSettings(); }
 
 void AppViewModel::openSettings(const QString& sectionId, const QString& rowId) {
+    if (m_currentTab != m_tabs->settingsRow() && tabSwitchBlocked()) { // plan 0052
+        return;
+    }
     m_tabs->openSettings();
     setCurrentTab(m_tabs->settingsRow());
     // Plan 0045 (ADR-0361): a section or row hidden by the mode is shown for this visit.
@@ -877,12 +1092,18 @@ QObject* AppViewModel::globalPageViewModel(const QString& pageId) const {
 }
 
 void AppViewModel::toggleConnection() const {
+    if (probeFirmwareShown()) { // plan 0052: its probe is reserved for the update
+        return;
+    }
     if (DeviceTabViewModel* tab = currentTabViewModel(); tab != nullptr && !tab->choosing()) {
         tab->connection()->toggleConnection();
     }
 }
 
 void AppViewModel::reconnect() const {
+    if (probeFirmwareShown()) { // plan 0052
+        return;
+    }
     if (DeviceTabViewModel* tab = currentTabViewModel(); tab != nullptr && !tab->choosing()) {
         tab->reconnect();
     }

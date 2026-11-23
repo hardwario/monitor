@@ -218,40 +218,47 @@ TestCase {
         tryVerify(() => find("settingsPage") !== null);
     }
 
-    // ADR-0359: the first-start dialog - Advanced preselected, Continue stores the choice, not
+    // ADR-0359: the first-start choice - Advanced preselected, Continue stores the choice, not
     // shown again; ADR-0362: with the rc.3 expert switch on, Expert is preselected and Esc keeps it.
+    // Plan 0052 (ADR-0387): a view of the page area (here over the Settings page).
     function test_modeChoiceDialog() {
-        const dialog = findChild(window, "modeChoiceDialog");
-        verify(dialog !== null);
-        verify(!dialog.visible);
+        verify(find("modeChoiceDialog") === null);
         verify(testSupport.resetUiMode());
-        tryVerify(() => dialog.opened);
+        tryVerify(() => find("modeChoiceDialog") !== null);
+        const dialog = find("modeChoiceDialog");
+        compare(AppViewModel.overlayView, "modeChoice");
+        verify(find("settingsPage") === null, "the page beneath is hidden");
         verify(!AppViewModel.uiMode.chosen);
         compare(dialog.selected, UiMode.Advanced);
-        compare(findChild(dialog.contentItem, "modeCard_" + UiMode.Advanced).Accessible.checked, true);
-        mouseClick(findChild(dialog.contentItem, "modeCard_" + UiMode.Basic));
+        tryVerify(() => findChild(dialog, "modeChoiceContinue").activeFocus);
+        compare(findChild(dialog, "modeCard_" + UiMode.Advanced).Accessible.checked, true);
+        waitForRendering(window.contentItem);
+        mouseClick(findChild(dialog, "modeCard_" + UiMode.Basic));
         compare(dialog.selected, UiMode.Basic);
-        mouseClick(findChild(dialog.footer, "modeChoiceContinue"));
-        tryVerify(() => !dialog.visible);
+        mouseClick(findChild(dialog, "modeChoiceContinue"));
+        tryVerify(() => find("modeChoiceDialog") === null);
+        verify(find("settingsPage") !== null);
         verify(AppViewModel.uiMode.chosen);
         compare(AppViewModel.uiMode.mode, UiMode.Basic);
         compare(testSupport.setting("ui/mode"), "basic");
         wait(100);
-        verify(!dialog.visible); // not shown again
+        verify(find("modeChoiceDialog") === null); // not shown again
 
         verify(testSupport.setSetting("advanced/expertActions", true));
         verify(testSupport.resetUiMode());
-        tryVerify(() => dialog.opened);
-        compare(dialog.selected, UiMode.Expert);
-        mouseClick(findChild(dialog.contentItem, "modeCard_" + UiMode.Basic));
+        tryVerify(() => find("modeChoiceDialog") !== null);
+        const again = find("modeChoiceDialog");
+        compare(again.selected, UiMode.Expert);
+        waitForRendering(window.contentItem);
+        mouseClick(findChild(again, "modeCard_" + UiMode.Basic));
         keyClick(Qt.Key_Escape); // closing keeps the preselection
-        tryVerify(() => !dialog.visible);
+        tryVerify(() => find("modeChoiceDialog") === null);
         compare(AppViewModel.uiMode.mode, UiMode.Expert);
         compare(testSupport.setting("ui/mode"), "expert");
         compare(testSupport.setting("advanced/expertActions"), "false"); // removed (ADR-0360)
     }
 
-    // The dialog fits at 960 x 600 in the longest languages.
+    // The view fits at 960 x 600 in the longest languages.
     function test_modeChoiceDialogLayout_data() {
         return [{ tag: "de" }, { tag: "pl" }, { tag: "cs" }, { tag: "sk" }];
     }
@@ -260,16 +267,22 @@ TestCase {
         AppViewModel.setLanguage(data.tag);
         window.width = 960;
         window.height = 600;
-        const dialog = findChild(window, "modeChoiceDialog");
         verify(testSupport.resetUiMode());
-        tryVerify(() => dialog.opened);
+        tryVerify(() => find("modeChoiceDialog") !== null);
+        const dialog = find("modeChoiceDialog");
         waitForRendering(window.contentItem);
-        verify(dialog.y >= 0 && dialog.y + dialog.height <= window.height + 0.5, `dialog height ${dialog.height}`);
-        const button = findChild(dialog.footer, "modeChoiceContinue");
+        const d = dialog.mapToItem(window.contentItem, 0, 0);
+        verify(d.y >= 0 && d.y + dialog.height <= window.height + 0.5, `view height ${dialog.height}`);
+        const button = findChild(dialog, "modeChoiceContinue");
         const r = button.mapToItem(window.contentItem, 0, 0);
         verify(r.y + button.height <= window.height + 0.5 && r.x + button.width <= window.width + 0.5);
+        for (let mode = UiMode.Basic; mode <= UiMode.Expert; ++mode) {
+            const card = findChild(dialog, "modeCard_" + mode);
+            const c = card.mapToItem(window.contentItem, 0, 0);
+            verify(c.y + card.height <= r.y + 0.5, `card ${mode} is visible above the footer`);
+        }
         mouseClick(button);
-        tryVerify(() => !dialog.visible);
+        tryVerify(() => find("modeChoiceDialog") === null);
         verify(AppViewModel.uiMode.chosen);
     }
 

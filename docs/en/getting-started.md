@@ -90,8 +90,8 @@ Changes apply immediately.
 
 The **Mode** decides how much Settings shows. At the first start (and once after updating from 2.0.0-rc.3 or older)
 the app asks **How do you want to use HARDWARIO Monitor?**: choose a mode and click **Continue**. **Advanced** is
-preselected; if you had **Show expert maintenance actions** on in an older version, **Expert** is. Closing the dialog
-keeps the preselected mode. Change it at any time in **Settings › General › Mode**.
+preselected; if you had **Show expert maintenance actions** on in an older version, **Expert** is. Closing the
+question keeps the preselected mode. Change it at any time in **Settings › General › Mode**.
 
 | Shown | Basic | Advanced | Expert |
 |---|---|---|---|
@@ -117,6 +117,17 @@ for that visit with the note "Shown because it was needed."; the mode does not c
 - **Create diagnostic report…**: a zip file for HARDWARIO support ([Privacy](privacy.md#diagnostic-report)).
 - **Documentation ↗**: these pages on GitHub, for the installed version of the app and in the app language (English
   where a page is not translated).
+
+<a id="guides-and-views"></a>
+### Guides and other views
+
+Guides (for example **Update LTE firmware…**), the diagnostic report, the keyboard shortcuts, the J-Link firmware
+update, **Join support session…** and **Share with support…** open in the page area of the tab, next to the rail;
+the tabs and the rail stay. **×** or <kbd>Esc</kbd> closes them and the page shown before comes back. Switching to
+another tab closes them too, except while they work (the report collecting, the J-Link firmware being written).
+
+While a guide runs you can open the other pages of the tab, for example the console: **Wizard** at the top of the rail
+(and a small badge on the device tab) brings the guide back where it was. Every device tab can run its own guide.
 
 When something fails, the app shows what happened, the probable cause (**Probably:**) and what to do
 (**What to do:**). **Details** shows the error code; [Troubleshooting](troubleshooting.md) lists every code.

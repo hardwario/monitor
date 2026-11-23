@@ -15,7 +15,7 @@ Další jazyky: [English](../en/remote-support.md) · [Deutsch](../de/remote-sup
 ## Sdílení konzole
 
 1. Připojte zařízení (J-Link nebo Bluetooth) a otevřete stránku **Konzole**.
-2. Klikněte na **Sdílet s podporou…**. Dialog vysvětlí, co podpora může dělat. Klikněte na **Zahájit sdílení**.
+2. Klikněte na **Sdílet s podporou…**. Stránka vysvětlí, co podpora může dělat. Klikněte na **Zahájit sdílení**.
 3. Banner ukáže **Sdíleno s podporou — kód 482 913**. Přečtěte kód podpoře HARDWARIO. **Kopírovat odkaz** zkopíruje
    odkaz s kódem.
 4. Když se někdo připojí, HARDWARIO Monitor se zeptá: *K relaci 482 913 se někdo připojil. Povolit mu posílat příkazy

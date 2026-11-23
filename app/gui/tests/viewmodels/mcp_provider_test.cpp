@@ -436,11 +436,25 @@ TEST_F(McpProvider, AiOperationBlocksTheFirmwareUpdate) {
 // Plan 0036 (ADR-0257): a probe reserved for a J-Link firmware update refuses the AI's connect
 // with the registry's probe.open_failed, for a new AI tab (closed again) and for a user's tab.
 TEST_F(McpProvider, ReservedProbeRefusesConnect) {
+    // The second probe's firmware is outdated, so the request stops at the question and keeps the
+    // probe reserved (with current firmware it ended after the read and released the probe, in a
+    // race with the connects below: seen on Windows CI).
+    useScenario(R"({"libraryVersion": 81000, "probes": [
+        {"serialNumber": 801000001, "product": "Test Probe",
+         "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted A\n"}]}},
+        {"serialNumber": 801000002, "product": "Test Probe 2",
+         "firmware": "J-Link V11 compiled Sep 21 2023 10:38:43",
+         "libraryFirmware": "J-Link V11 compiled Oct  1 2024 09:00:00",
+         "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted B\n"}]}}]})");
     (void)app();
     hwio::gui::ProbeFirmwareViewModel& firmware = *app().probeFirmware();
     firmware.requestForSerial(QStringLiteral("801000002"));
     ASSERT_NE(firmware.state(), hwio::gui::ProbeFirmwareViewModel::Idle);
     ASSERT_TRUE(app().sessionRegistry().reserved(801000002));
+    // Plan 0052: the question's view stays (and the probe reserved) while the AI tab opens and
+    // closes again.
+    ASSERT_TRUE(
+        waitFor([&] { return firmware.state() == hwio::gui::ProbeFirmwareViewModel::Confirm; }));
 
     auto refused = open("jlink:801000002");
     ASSERT_FALSE(refused.has_value());

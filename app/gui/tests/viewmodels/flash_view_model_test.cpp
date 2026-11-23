@@ -10,6 +10,7 @@
 #include "http_fixture.h"
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
+#include "hwio/device/application_backup.h"
 #include "hwio/device/device_session.h"
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/firmware/program_progress.h"
@@ -139,7 +140,7 @@ protected:
     }
     hwio::gui::LteUpdateWizard* openLteWizard() {
         tab().openWizard(QStringLiteral("lte-update"));
-        return qobject_cast<hwio::gui::LteUpdateWizard*>(app().wizard()->wizard());
+        return qobject_cast<hwio::gui::LteUpdateWizard*>(tab().wizard()->wizard());
     }
     static bool loadInto(hwio::gui::FirmwareSourceViewModel& target, const fs::path& path) {
         target.loadFile(QUrl::fromLocalFile(QString::fromStdString(path.string())));
@@ -403,6 +404,110 @@ TEST_F(FlashTest, CatalogDownloadAndErrors) {
     EXPECT_EQ(source().error().primaryAction(), hwio::gui::error_action::ChooseFile);
 }
 
+// Plan 0051 (ADR-0381): the application copies of this device in the application picker.
+TEST_F(FlashTest, ApplicationCopiesAreOffered) {
+    start(probeScenario());
+    const fs::path backups = root() / "backups";
+    source().setBackupDirectory(backups);
+    EXPECT_TRUE(source().backups().isEmpty());
+    const auto start = std::chrono::sys_days{std::chrono::year{2026} / 11 / 4};
+    const std::vector<std::byte> data(16, std::byte{0x42});
+    ASSERT_TRUE(hwio::device::ApplicationBackup::save(backups, "2159018", start, 0x2000, data));
+    ASSERT_TRUE(hwio::device::ApplicationBackup::save(backups, "2159018",
+                                                      start + std::chrono::hours(1), 0x2000, data));
+    ASSERT_TRUE(hwio::device::ApplicationBackup::save(backups, "1111111", start, 0x2000, data));
+    source().refreshBackups();
+    EXPECT_EQ(source().backups().size(), 3); // the serial is unknown: all, with the serial
+    EXPECT_TRUE(source()
+                    .backups()
+                    .at(0)
+                    .toMap()
+                    .value(QStringLiteral("text"))
+                    .toString()
+                    .startsWith(QStringLiteral("Application copy of 2159018 from ")));
+    source().setDeviceSerial(QStringLiteral("2159018"));
+    ASSERT_EQ(source().backups().size(), 2);
+    const QVariantMap newest = source().backups().at(0).toMap();
+    EXPECT_TRUE(newest.value(QStringLiteral("text"))
+                    .toString()
+                    .startsWith(QStringLiteral("Application copy from ")));
+    EXPECT_TRUE(newest.value(QStringLiteral("path"))
+                    .toString()
+                    .endsWith(QStringLiteral("2159018-20261104-010000.hex")));
+    EXPECT_FALSE(source().backupsFolder().isEmpty());
+    source().loadBackup(0);
+    ASSERT_TRUE(
+        waitFor([this] { return source().sourceState() != FirmwareSourceViewModel::Loading; }));
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Ready);
+    // Not for LTE firmware.
+    flash().setKind(Kind::LteFirmware);
+    EXPECT_TRUE(source().backups().isEmpty());
+}
+
+// Plan 0051 (ADR-0385): a catalog entry shows the name and version of its page; older entries
+// without a name get it from a background lookup; a failed lookup keeps "Catalog ID <id>".
+TEST_F(FlashTest, RecentCatalogEntriesShowTheirNames) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (HWIO_CATALOG_URL)";
+#endif
+    hwio::firmware::test::HttpFixture http;
+    ASSERT_TRUE(http.listening());
+    qputenv("HWIO_CATALOG_URL", http.baseUrl().toUtf8());
+    const QString id = randomId();
+    const QByteArray hex = QByteArray::fromStdString(hwio::firmware::test::toHex(image()));
+    http.set(QStringLiteral("/chester/%1").arg(id),
+             hwio::firmware::test::HttpFixture::Response::ok(
+                 QByteArrayLiteral("<h2>hio-chester-meteo:v4.0.1</h2><div>the HEX file:</div>")));
+    http.set(QStringLiteral("/chester/%1/hex").arg(id),
+             hwio::firmware::test::HttpFixture::Response::ok(hex));
+    start(probeScenario());
+    RecentSourcesModel* recent = source().recent();
+    source().loadCatalogId(id);
+    ASSERT_TRUE(
+        waitFor([this] { return source().sourceState() != FirmwareSourceViewModel::Downloading; }));
+    ASSERT_EQ(source().sourceState(), FirmwareSourceViewModel::Ready);
+    ASSERT_EQ(recent->sourceAt(0), RecentSourcesModel::catalogPrefix + id);
+    EXPECT_EQ(recent->data(recent->index(0), RecentSourcesModel::NameRole).toString(),
+              QStringLiteral("hio-chester-meteo v4.0.1"));
+    EXPECT_EQ(recent->data(recent->index(0), RecentSourcesModel::TypeRole).toString(),
+              QStringLiteral("Catalog ID"));
+    EXPECT_EQ(recent->data(recent->index(0), RecentSourcesModel::DetailRole).toString(),
+              QStringLiteral("Catalog ID %1").arg(id));
+
+    // Entries stored before (no name): one is found, one is not.
+    const QString old = randomId();
+    const QString missing = randomId();
+    http.set(QStringLiteral("/chester/%1").arg(old),
+             hwio::firmware::test::HttpFixture::Response::ok(
+                 QByteArrayLiteral("<h2>hio-chester-push-fm:v1.2.0</h2>")));
+    const QString stored =
+        QStringLiteral(R"([{"kind":"app","source":"catalog:%1","time":"2026-11-01T10:00:00Z"},)"
+                       R"({"kind":"app","source":"catalog:%2","time":"2026-11-01T09:00:00Z",)"
+                       R"("future":"ignored"}])")
+            .arg(old, missing);
+    ASSERT_TRUE(app().settingsStore()->setValue(QStringLiteral("flash/recent"), stored));
+    ASSERT_EQ(recent->count(), 2);
+    EXPECT_EQ(recent->data(recent->index(0), RecentSourcesModel::NameRole).toString(),
+              QStringLiteral("Catalog ID %1").arg(old));
+    source().resolveRecentNames();
+    ASSERT_TRUE(waitFor([&] {
+        return recent->data(recent->index(0), RecentSourcesModel::NameRole).toString() ==
+               QStringLiteral("hio-chester-push-fm v1.2.0");
+    }));
+    ASSERT_TRUE(
+        waitFor([&] { return http.requests(QStringLiteral("/chester/%1").arg(missing)) > 0; }));
+    (void)waitFor([] { return false; }, std::chrono::milliseconds(200));
+    EXPECT_EQ(recent->data(recent->index(1), RecentSourcesModel::NameRole).toString(),
+              QStringLiteral("Catalog ID %1").arg(missing));
+    // Each ID once per run.
+    source().resolveRecentNames();
+    (void)waitFor([] { return false; }, std::chrono::milliseconds(200));
+    EXPECT_EQ(http.requests(QStringLiteral("/chester/%1").arg(missing)), 1);
+    // The name is stored (an unknown field of an old entry does not hurt).
+    EXPECT_EQ(recent->entries().at(0).name, QStringLiteral("hio-chester-push-fm"));
+    EXPECT_EQ(recent->entries().at(0).version, QStringLiteral("v1.2.0"));
+}
+
 TEST_F(FlashTest, RecentListIsBoundedPerKindAndRemovable) {
     start(probeScenario());
     RecentSourcesModel* recent = source().recent();
@@ -515,10 +620,10 @@ TEST_F(FlashTest, TheLteKindOpensTheLteUpdateWizard) {
     QSignalSpy requested(&flash(), &FlashViewModel::lteUpdateRequested);
     flash().requestLteUpdate();
     EXPECT_EQ(requested.count(), 1);
-    ASSERT_TRUE(app().wizard()->isOpen());
-    EXPECT_EQ(app().wizard()->wizardId(), QStringLiteral("lte-update"));
-    app().wizard()->cancel(false);
-    EXPECT_FALSE(app().wizard()->isOpen());
+    ASSERT_TRUE(tab().wizard()->isOpen());
+    EXPECT_EQ(tab().wizard()->wizardId(), QStringLiteral("lte-update"));
+    tab().wizard()->cancel(false);
+    EXPECT_FALSE(tab().wizard()->isOpen());
 }
 
 TEST_F(FlashTest, MissingNrfUtilIsAPrerequisite) {
@@ -1102,7 +1207,7 @@ TEST_F(FlashTest, ExpertActionsFollowTheMode) {
 TEST_F(FlashTest, TheProtectedHandOffShowsRecoverOnce) {
     start(probeScenario());
     EXPECT_FALSE(flash().maintenanceExpanded());
-    emit app().wizard() -> handOff(QStringLiteral("open-flash-page:recover:app"), &tab());
+    emit tab().wizard() -> handOff(QStringLiteral("open-flash-page:recover:app"), &tab());
     EXPECT_EQ(tab().currentPage(), FlashViewModel::pageId);
     EXPECT_TRUE(flash().maintenanceExpanded());
     EXPECT_TRUE(flash().recoverAvailable());
@@ -1122,7 +1227,7 @@ TEST_F(FlashTest, TheProtectedHandOffShowsRecoverOnce) {
 TEST_F(FlashTest, TheProtectedHandOffWorksInBasicMode) {
     start(probeScenario());
     ASSERT_TRUE(app().uiMode()->choose(hwio::gui::UiMode::Basic));
-    emit app().wizard() -> handOff(QStringLiteral("open-flash-page:recover:app"), &tab());
+    emit tab().wizard() -> handOff(QStringLiteral("open-flash-page:recover:app"), &tab());
     EXPECT_TRUE(flash().recoverAvailable());
     EXPECT_FALSE(flash().eraseAllAvailable());
     EXPECT_EQ(app().uiMode()->mode(), hwio::gui::UiMode::Basic);
@@ -1164,9 +1269,11 @@ TEST_F(FlashTest, LteUpdateWizardRunsABundleThroughEveryStep) {
     }));
     EXPECT_EQ(wizard->illustration(), QStringLiteral("chester-lte-cable"));
     EXPECT_EQ(wizard->current().illustration, QStringLiteral("chester-lte-cable"));
-    EXPECT_TRUE(wizard->busyCancelText().startsWith(QStringLiteral(
-        "The application MCU is erased. The device will not run until you flash an application.")));
-    EXPECT_EQ(wizard->cancelAcceptText(), QStringLiteral("Cancel anyway"));
+    // Plan 0051 (ADR-0381): with a copy, Cancel offers to write it back.
+    EXPECT_EQ(wizard->busyCancelText(),
+              QStringLiteral("The application MCU is erased. Write the application back first?"));
+    EXPECT_EQ(wizard->cancelAlternativeText(), QStringLiteral("Write back"));
+    EXPECT_EQ(wizard->cancelAcceptText(), QStringLiteral("Leave it erased"));
     EXPECT_EQ(wizard->cancelRejectText(), QStringLiteral("Back"));
     moveCable("lte");
     bool sawSecondStep = false;
@@ -1193,9 +1300,9 @@ TEST_F(FlashTest, LteUpdateWizardRunsABundleThroughEveryStep) {
     EXPECT_EQ(wizard->current().kind, hwio::gui::StepKind::Done);
     EXPECT_FALSE(tab().isBusy());
     ASSERT_TRUE(waitFor([this] { return tab().state() == DeviceTabViewModel::Connected; }));
-    app().wizard()->action(QStringLiteral("open-console"));
+    tab().wizard()->action(QStringLiteral("open-console"));
     EXPECT_EQ(tab().currentPage(), QStringLiteral("console"));
-    EXPECT_FALSE(app().wizard()->isOpen()); // the guide closes with the hand-off
+    EXPECT_FALSE(tab().wizard()->isOpen()); // the guide closes with the hand-off
 }
 
 TEST_F(FlashTest, LteUpdateWizardModemFailureCanBeRetriedOrCancelled) {
@@ -1216,15 +1323,77 @@ TEST_F(FlashTest, LteUpdateWizardModemFailureCanBeRetriedOrCancelled) {
     moveCable("lte");
     ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Failed));
     EXPECT_EQ(wizard->error().code(), QStringLiteral("firmware.modem_update_failed"));
+    // Plan 0051 (ADR-0383): the guided advice, never "use the guided update".
+    EXPECT_EQ(wizard->error().suggestion(),
+              QStringLiteral("Check the power supply of the CHESTER and the J-Link cable on the "
+                             "LTE connector, then click Try again."));
     EXPECT_EQ(wizard->current().primaryText, QStringLiteral("Try again"));
     EXPECT_TRUE(wizard->canPrimary());
     EXPECT_TRUE(tab().isBusy()); // still in the procedure
     // Cancel asks (the application is erased); [Cancel anyway] closes the wizard.
-    app().wizard()->cancel(false);
-    EXPECT_TRUE(app().wizard()->isOpen());
-    app().wizard()->cancel(true);
-    EXPECT_FALSE(app().wizard()->isOpen());
+    tab().wizard()->cancel(false);
+    EXPECT_TRUE(tab().wizard()->isOpen());
+    tab().wizard()->cancel(true);
+    EXPECT_FALSE(tab().wizard()->isOpen());
     EXPECT_FALSE(tab().isBusy());
+}
+
+// Plan 0051 (ADR-0381): Cancel after the erase -> [Write back]: the wizard stays open, the copy
+// is written on the APP connector, and the wizard ends with "LTE firmware not updated. The
+// application was written back."
+TEST_F(FlashTest, LteUpdateWizardCancelAfterTheEraseWritesTheApplicationBack) {
+    startBoard();
+    hwio::gui::LteUpdateWizard* wizard = openLteWizard();
+    ASSERT_NE(wizard, nullptr);
+    wizard->lteSource()->setLteSource(FirmwareSourceViewModel::OwnFile);
+    ASSERT_TRUE(loadInto(*wizard->lteSource(), hexFile("lte.hex")));
+    ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
+    wizard->primary();
+    ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Confirm));
+    wizard->primary(); // [Continue]
+    ASSERT_TRUE(waitFor([&] {
+        return wizard->procedure()->step() == hwio::device::LteUpdateProcedure::Step::ConnectLte;
+    }));
+    tab().wizard()->cancel(false);
+    EXPECT_TRUE(tab().wizard()->isOpen()); // asks
+    EXPECT_EQ(tab().wizard()->cancelAlternativeText(), QStringLiteral("Write back"));
+    tab().wizard()->cancelAlternative();
+    EXPECT_TRUE(tab().wizard()->isOpen());
+    EXPECT_FALSE(tab().wizard()->closing());
+    ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Summary)); // the cable is on APP
+    EXPECT_EQ(wizard->current().kind, hwio::gui::StepKind::Done);
+    EXPECT_EQ(wizard->current().heading, QStringLiteral("LTE firmware update cancelled"));
+    EXPECT_EQ(wizard->current().body,
+              QStringLiteral("LTE firmware not updated. The application was written back."));
+    EXPECT_FALSE(tab().isBusy());
+    EXPECT_TRUE(wizard->busyCancelText().isEmpty());
+    tab().wizard()->cancel(false); // [Close]
+    EXPECT_FALSE(tab().wizard()->isOpen());
+    ASSERT_TRUE(waitFor([this] { return tab().state() == DeviceTabViewModel::Connected; }));
+}
+
+// ADR-0381: [Leave it erased] closes the wizard; a toast says where the copy is.
+TEST_F(FlashTest, LteUpdateWizardCancelAfterTheEraseCanLeaveItErased) {
+    startBoard();
+    hwio::gui::LteUpdateWizard* wizard = openLteWizard();
+    ASSERT_NE(wizard, nullptr);
+    wizard->lteSource()->setLteSource(FirmwareSourceViewModel::OwnFile);
+    ASSERT_TRUE(loadInto(*wizard->lteSource(), hexFile("lte.hex")));
+    ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
+    wizard->primary();
+    ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Confirm));
+    wizard->primary();
+    ASSERT_TRUE(waitFor([&] {
+        return wizard->procedure()->step() == hwio::device::LteUpdateProcedure::Step::ConnectLte;
+    }));
+    const QString copy = QString::fromStdU16String(wizard->procedure()->backupFile().u16string());
+    tab().wizard()->cancel(true); // [Leave it erased]
+    EXPECT_FALSE(tab().wizard()->isOpen());
+    EXPECT_FALSE(tab().isBusy());
+    const QStringList toasts = app().toasts();
+    ASSERT_FALSE(toasts.isEmpty());
+    EXPECT_TRUE(toasts.back().contains(QDir::toNativeSeparators(copy)))
+        << toasts.back().toStdString();
 }
 
 // Plan 0046 (ADR-0366): [Cancel] at "Ready to update the LTE MCU" closes the wizard without a
@@ -1240,10 +1409,67 @@ TEST_F(FlashTest, LteUpdateWizardCancelBeforeContinueChangesNothing) {
     ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Confirm));
     EXPECT_EQ(wizard->current().id, QStringLiteral("app-connector"));
     EXPECT_TRUE(wizard->busyCancelText().isEmpty());
-    app().wizard()->cancel(false); // no question: closes at once
-    EXPECT_FALSE(app().wizard()->isOpen());
+    tab().wizard()->cancel(false); // no question: closes at once
+    EXPECT_FALSE(tab().wizard()->isOpen());
     ASSERT_TRUE(waitFor([this] { return !tab().isBusy(); })); // the closed wizard is deleted later
     ASSERT_TRUE(waitFor([this] { return tab().state() == DeviceTabViewModel::Connected; }));
+}
+
+// Plan 0052 (ADR-0386): one wizard per tab - two tabs run the LTE update guide at the same time,
+// each on its own probe and session, independently.
+TEST_F(FlashTest, TwoTabsRunTheLteUpdateGuideAtOnce) {
+    moveCable("app");
+    const std::string connector = (root() / "connector").generic_string();
+    const auto probe = [&connector](int serial) {
+        return std::string(R"({"serialNumber": )") + std::to_string(serial) +
+               R"(, "product": "Test Probe", "firmware": "J-Link V11 compiled Sep 21 2023 10:38:43",
+            "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted\n"}]},
+            "connectors": {"file": ")" +
+               connector +
+               R"(", "chips": {"app": {"memory": [{"address": 4096, "hex": "a5a5a5a5"}]},
+            "lte": {"family": "nrf91"}}}})";
+    };
+    start(R"({"libraryVersion": 81000, "probes": [)" + probe(801000001) + ", " + probe(801000002) +
+          "]}");
+    DeviceTabViewModel& first = tab();
+    app().newTab();
+    DeviceTabViewModel& second = tab();
+    ASSERT_NE(&first, &second);
+    ASSERT_TRUE(second.configure(QStringLiteral("chester"), QStringLiteral("app"), 801000002,
+                                 QStringLiteral("Test Probe")));
+
+    first.openWizard(QStringLiteral("lte-update"));
+    second.openWizard(QStringLiteral("lte-update"));
+    auto* one = qobject_cast<hwio::gui::LteUpdateWizard*>(first.wizard()->wizard());
+    auto* two = qobject_cast<hwio::gui::LteUpdateWizard*>(second.wizard()->wizard());
+    ASSERT_NE(one, nullptr);
+    ASSERT_NE(two, nullptr);
+    ASSERT_NE(one, two);
+    EXPECT_EQ(first.wizard()->tab(), &first);
+    EXPECT_EQ(second.wizard()->tab(), &second);
+    ASSERT_NE(one->lteSource(), two->lteSource());
+
+    for (hwio::gui::LteUpdateWizard* wizard : {one, two}) {
+        wizard->lteSource()->setLteSource(FirmwareSourceViewModel::OwnFile);
+        ASSERT_TRUE(loadInto(*wizard->lteSource(), hexFile("lte.hex")));
+        ASSERT_TRUE(waitFor([&] { return wizard->canPrimary(); }));
+        wizard->primary();
+    }
+    ASSERT_TRUE(reachStage(*one, hwio::gui::LteUpdateWizard::Confirm));
+    ASSERT_TRUE(reachStage(*two, hwio::gui::LteUpdateWizard::Confirm));
+    EXPECT_TRUE(first.isBusy()); // each guide pauses its own tab
+    EXPECT_TRUE(second.isBusy());
+
+    // Cancelling one guide leaves the other where it is.
+    second.wizard()->cancel(false); // no question before Continue
+    EXPECT_FALSE(second.wizard()->isOpen());
+    EXPECT_TRUE(first.wizard()->isOpen());
+    EXPECT_EQ(one->stage(), hwio::gui::LteUpdateWizard::Confirm);
+    ASSERT_TRUE(waitFor([&] { return !second.isBusy(); }));
+    EXPECT_TRUE(first.isBusy());
+    first.wizard()->cancel(false);
+    EXPECT_FALSE(first.wizard()->isOpen());
+    ASSERT_TRUE(waitFor([&] { return !first.isBusy(); }));
 }
 
 // ADR-0368: in a remote LTE update support answers Continue; the customer's wizard shows the
@@ -1285,8 +1511,8 @@ TEST_F(FlashTest, RemoteLteUpdateQuestionsGoToSupport) {
                                     answer = std::move(a);
                                 })
                         .has_value());
-        ASSERT_TRUE(waitFor([&] { return app().wizard()->isOpen(); }));
-        auto* wizard = qobject_cast<hwio::gui::LteUpdateWizard*>(app().wizard()->wizard());
+        ASSERT_TRUE(waitFor([&] { return tab().wizard()->isOpen(); }));
+        auto* wizard = qobject_cast<hwio::gui::LteUpdateWizard*>(tab().wizard()->wizard());
         ASSERT_NE(wizard, nullptr);
         const QPointer<hwio::gui::LteUpdateWizard> guard(wizard);
         ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Confirm));
@@ -1314,10 +1540,10 @@ TEST_F(FlashTest, RemoteLteUpdateQuestionsGoToSupport) {
             // The cancelled guide may already have closed (and deleted) the wizard.
             EXPECT_FALSE(!guard.isNull() && guard->procedure() != nullptr &&
                          guard->procedure()->applicationErased());
-            if (app().wizard()->isOpen()) {
-                app().wizard()->cancel(true);
+            if (tab().wizard()->isOpen()) {
+                tab().wizard()->cancel(true);
             }
-            ASSERT_TRUE(waitFor([this] { return !app().wizard()->isOpen() && !tab().isBusy(); }));
+            ASSERT_TRUE(waitFor([this] { return !tab().wizard()->isOpen() && !tab().isBusy(); }));
             continue;
         }
         ASSERT_TRUE(waitFor([&] {
@@ -1339,7 +1565,7 @@ TEST_F(FlashTest, RemoteLteUpdateQuestionsGoToSupport) {
         EXPECT_TRUE(written.has_value()) << (written ? std::string() : written.error().detail);
         EXPECT_EQ(questions.size(), 1U);
         ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Summary));
-        app().wizard()->cancel(true);
+        tab().wizard()->cancel(true);
     }
     qunsetenv("HWIO_DESIGNATED_URL");
     qunsetenv("HWIO_DESIGNATED_SHA256");
@@ -1381,8 +1607,8 @@ TEST_F(FlashTest, AChangedNrfUtilPathReachesTheLteUpdate) {
         },
         std::chrono::seconds(60)))
         << wizard->error().detail().toStdString();
-    app().wizard()->cancel(true);
-    EXPECT_FALSE(app().wizard()->isOpen());
+    tab().wizard()->cancel(true);
+    EXPECT_FALSE(tab().wizard()->isOpen());
 }
 
 // ADR-0233 (D8): the J-Link on the LTE connector - [Update LTE firmware…] of the banner.
@@ -1392,9 +1618,9 @@ TEST_F(FlashTest, TheOtherConnectorBannerOpensTheLteUpdate) {
     tab().connectDevice();
     ASSERT_TRUE(waitFor([this] { return tab().connection()->otherConnector(); }));
     tab().connection()->updateLteFirmware();
-    ASSERT_TRUE(app().wizard()->isOpen());
-    EXPECT_EQ(app().wizard()->wizardId(), QStringLiteral("lte-update"));
-    app().wizard()->cancel(false);
+    ASSERT_TRUE(tab().wizard()->isOpen());
+    EXPECT_EQ(tab().wizard()->wizardId(), QStringLiteral("lte-update"));
+    tab().wizard()->cancel(false);
 }
 
 } // namespace

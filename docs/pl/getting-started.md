@@ -94,7 +94,7 @@ Zmiany obowiązują natychmiast. W polskim interfejsie tryby nazywają się **Po
 **Mode** (tryb) decyduje, ile pokazują ustawienia. Przy pierwszym uruchomieniu (i jeden raz po aktualizacji z wersji
 2.0.0-rc.3 lub starszej) aplikacja pyta **How do you want to use HARDWARIO Monitor?**: wybierz tryb i kliknij
 **Continue**. Wstępnie wybrany jest **Advanced**; jeśli w starszej wersji było włączone **Show expert maintenance
-actions**, jest to **Expert**. Zamknięcie okna zachowuje wstępnie wybrany tryb. Zmienisz go w dowolnej chwili w
+actions**, jest to **Expert**. Zamknięcie pytania zachowuje wstępnie wybrany tryb. Zmienisz go w dowolnej chwili w
 **Settings › General › Mode**.
 
 | Wyświetlane | Basic | Advanced | Expert |
@@ -122,6 +122,18 @@ Settings**), jest ono wyświetlane podczas tej wizyty z uwagą „Shown because 
   ([Prywatność](privacy.md#raport-diagnostyczny)).
 - **Documentation ↗**: te strony w serwisie GitHub, dla zainstalowanej wersji aplikacji i w języku aplikacji
   (po angielsku, jeśli strona nie jest przetłumaczona).
+
+<a id="kreatory-i-inne-widoki"></a>
+### Kreatory i inne widoki
+
+Kreatory (na przykład **Update LTE firmware…**), raport diagnostyczny, skróty klawiaturowe, aktualizacja firmware
+J-Linka, **Join support session…** i **Share with support…** otwierają się w obszarze strony karty, obok paska
+bocznego; karty i pasek boczny pozostają. **×** lub <kbd>Esc</kbd> je zamyka i wraca poprzednia strona. Przełączenie
+na inną kartę również je zamyka, z wyjątkiem czasu, gdy pracują (zbieranie raportu, zapis firmware J-Linka).
+
+Podczas działania kreatora możesz otwierać inne strony karty, na przykład konsolę: **Wizard** (kreator) na górze paska
+bocznego (oraz mała plakietka na karcie urządzenia) przywraca kreator tam, gdzie był. Każda karta urządzenia może mieć
+własny kreator.
 
 Gdy coś się nie powiedzie, aplikacja pokazuje, co się stało, prawdopodobną przyczynę (**Probably:**) i co należy
 zrobić (**What to do:**). **Details** pokazuje kod błędu; [Rozwiązywanie problemów](troubleshooting.md) zawiera

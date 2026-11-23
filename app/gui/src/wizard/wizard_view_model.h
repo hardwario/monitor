@@ -1,15 +1,17 @@
 #pragma once
 
-// WizardViewModel - the one open wizard (plan/features/0007, ADR-0066, ADR-0067), exposed as
-// AppViewModel.wizard to the WizardDialog. Generic: it holds the Wizard object and turns its
-// current step, buttons and checks into properties; the step machine itself is the Wizard.
+// WizardViewModel - one wizard host (plan/features/0007, ADR-0067; plan 0052, ADR-0386): every
+// device tab owns one (DeviceTabViewModel.wizard), the application one more for global wizards
+// (AppViewModel.globalWizard); each is shown by a WizardView. Generic: it holds the Wizard object
+// and turns its current step, buttons and checks into properties; the step machine itself is the
+// Wizard.
 //
 // Cancel: while the wizard runs an operation (busyCancelText non-empty) cancel() asks first
-// (cancelConfirmationNeeded); cancel(true) cancels the operation and the dialog closes when the
+// (cancelConfirmationNeeded); cancel(true) cancels the operation and the view closes when the
 // wizard is no longer busy. A wizard bound to a tab is closed (its operation cancelled) when the
-// tab closes: AppViewModel calls tabClosing() before the tab shuts down its session (review V2);
-// the tab's `destroyed` signal is only a fallback. Owned by AppViewModel (Qt parent). GUI thread
-// only.
+// tab closes: DeviceTabViewModel::shutdown() calls tabClosing() before it releases the session
+// (review V2); the tab's `destroyed` signal is only a fallback. Owned by its tab or by
+// AppViewModel (Qt parent). GUI thread only.
 
 #include "wizard/check_list_model.h"
 #include "wizard/wizard.h"
@@ -52,6 +54,7 @@ class WizardViewModel : public QObject {
     Q_PROPERTY(bool canCancel READ canCancel NOTIFY changed)
     Q_PROPERTY(QString cancelAcceptText READ cancelAcceptText NOTIFY changed)
     Q_PROPERTY(QString cancelRejectText READ cancelRejectText NOTIFY changed)
+    Q_PROPERTY(QString cancelAlternativeText READ cancelAlternativeText NOTIFY changed) // 0051
     Q_PROPERTY(hwio::gui::CheckListModel* checks READ checks NOTIFY changed)
     Q_PROPERTY(QObject* embedded READ embedded NOTIFY changed)
     Q_PROPERTY(QUrl embeddedSource READ embeddedSource NOTIFY changed)
@@ -69,11 +72,11 @@ public:
     WizardViewModel& operator=(WizardViewModel&&) = delete;
 
     // Shows `wizard` (this object becomes its Qt parent) and calls Wizard::start. False (the
-    // wizard is deleted) when a wizard is open already (ADR-0066: one at a time).
+    // wizard is deleted) when this instance has a wizard open already (ADR-0386: one per tab).
     bool start(Wizard* wizard, const ErrorInfo& context, DeviceTabViewModel* tab);
     // `tab` is about to close (AppViewModel::removeTab, before DeviceTabViewModel::shutdown()):
     // when the open wizard works on it, its operation is cancelled (Wizard::cancelOperation) and
-    // the dialog closes while the tab and its session still exist. Other tabs: nothing happens.
+    // the view closes while the tab and its session still exist. Other tabs: nothing happens.
     void tabClosing(const DeviceTabViewModel* tab);
 
     [[nodiscard]] bool isOpen() const { return !m_wizard.isNull(); }
@@ -90,6 +93,7 @@ public:
     [[nodiscard]] bool canCancel() const;
     [[nodiscard]] QString cancelAcceptText() const;
     [[nodiscard]] QString cancelRejectText() const;
+    [[nodiscard]] QString cancelAlternativeText() const;
     [[nodiscard]] CheckListModel* checks() const;
     [[nodiscard]] QObject* embedded() const;
     [[nodiscard]] QUrl embeddedSource() const;
@@ -103,6 +107,8 @@ public:
     Q_INVOKABLE void action(const QString& actionId);
     // Esc / ×. While busy and !force: cancelConfirmationNeeded(busyCancelText).
     Q_INVOKABLE void cancel(bool force = false);
+    // Plan 0051 (ADR-0381): the third button of the Cancel confirmation; the wizard stays open.
+    Q_INVOKABLE void cancelAlternative();
     Q_INVOKABLE void copyText(const QString& text); // CommandBlock [Copy]
 
     // ADR-0076: the image of an illustration slot: <slot>-dark.svg in the dark theme when it
@@ -117,7 +123,7 @@ signals:
     void openChanged();
     void changed();
     void cancelConfirmationNeeded(const QString& text);
-    // The open wizard should come to the front (another wizard was asked for).
+    // The open wizard should be shown (another wizard was asked for in this instance).
     void raiseRequested();
     void handOff(const QString& action, hwio::gui::DeviceTabViewModel* tab);
 

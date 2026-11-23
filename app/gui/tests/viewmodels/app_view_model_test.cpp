@@ -9,6 +9,8 @@
 #include "viewmodels/device_tab_list_model.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/page_list_model.h"
+#include "viewmodels/ui_mode_controller.h"
+#include "wizard/report_view_model.h"
 
 #include <QAbstractItemModel>
 #include <QByteArray>
@@ -424,6 +426,83 @@ TEST(TextAntialiasing, GrayUnlessTheEnvironmentHasAValue) {
     } else {
         qunsetenv("QSG_DISTANCEFIELD_ANTIALIASING");
     }
+}
+
+// Plan 0052 (ADR-0359, ADR-0387): the mode choice is a content view until the mode is chosen;
+// closing it (Esc, a tab switch) stores the preselection.
+TEST_F(AppViewModelTest, ModeChoiceIsAViewUntilTheModeIsChosen) {
+    const auto app = makeApp();
+    ASSERT_FALSE(app->uiMode()->chosen());
+    EXPECT_EQ(app->overlayView(), QStringLiteral("modeChoice"));
+    app->closeView();
+    EXPECT_EQ(app->overlayView(), QString());
+    EXPECT_TRUE(app->uiMode()->chosen());
+    EXPECT_EQ(readRaw(QStringLiteral("ui/mode")), QStringLiteral("advanced"));
+}
+
+// Plan 0052 (ADR-0387): one content view at a time, on the current tab; a tab switch and the
+// rail close an idle one.
+TEST_F(AppViewModelTest, ContentViewsAreOneAtATimeAndCloseOnATabSwitch) {
+    const auto app = makeApp();
+    app->closeView(); // the mode choice
+    QSignalSpy shortcuts(app.get(), &AppViewModel::shortcutOverlayVisibleChanged);
+    EXPECT_FALSE(app->openView(QStringLiteral("nonsense")));
+    EXPECT_TRUE(app->openView(QStringLiteral("shortcuts")));
+    EXPECT_TRUE(app->shortcutOverlayVisible());
+    EXPECT_EQ(shortcuts.count(), 1);
+    EXPECT_TRUE(app->openView(QStringLiteral("join"))); // replaces the idle one
+    EXPECT_EQ(app->overlayView(), QStringLiteral("join"));
+    EXPECT_FALSE(app->shortcutOverlayVisible());
+    app->newTab();
+    EXPECT_EQ(app->overlayView(), QString());
+    app->setCurrentTab(0);
+    EXPECT_EQ(app->overlayView(), QString()); // closed, not only hidden
+
+    // Over the Settings tab, closed when it is left.
+    app->openSettings();
+    EXPECT_TRUE(app->openView(QStringLiteral("shortcuts")));
+    EXPECT_EQ(app->overlayView(), QStringLiteral("shortcuts"));
+    app->setCurrentTab(0);
+    EXPECT_EQ(app->overlayView(), QString());
+
+    // The rail shows a page instead.
+    app->setShortcutOverlayVisible(true);
+    app->showPage(QStringLiteral("console"));
+    EXPECT_EQ(app->overlayView(), QString());
+}
+
+// Plan 0052 (ADR-0387): the report stays with its tab while it collects; another view is refused
+// and the report is shown; closing it stops collecting.
+TEST_F(AppViewModelTest, ReportWhileCollectingStaysWithItsTab) {
+    const auto app = makeApp();
+    app->closeView(); // the mode choice
+    ASSERT_TRUE(app->openView(QStringLiteral("report")));
+    hwio::gui::ReportViewModel& report = *app->report();
+    ASSERT_TRUE(report.isOpen());
+    ASSERT_EQ(report.state(), QStringLiteral("collecting")); // the worker answers queued
+    app->newTab();
+    EXPECT_EQ(app->currentTab(), 1);
+    EXPECT_EQ(app->overlayView(), QString()); // not shown on the other tab
+    EXPECT_TRUE(report.isOpen());
+    EXPECT_FALSE(app->openView(QStringLiteral("shortcuts")));
+    EXPECT_EQ(app->currentTab(), 0); // the running view is shown
+    EXPECT_EQ(app->overlayView(), QStringLiteral("report"));
+    app->showPage(QStringLiteral("console")); // refused while it collects
+    EXPECT_EQ(app->overlayView(), QStringLiteral("report"));
+
+    // Its tab closes: it moves to the tab shown next.
+    app->setCurrentTab(1);
+    app->closeTab(0);
+    EXPECT_EQ(app->overlayView(), QStringLiteral("report"));
+    app->closeView();
+    EXPECT_FALSE(report.isOpen());
+    EXPECT_EQ(app->overlayView(), QString());
+
+    // Report → show() from elsewhere (Help menu, crash notice) opens the view too.
+    report.show();
+    EXPECT_EQ(app->overlayView(), QStringLiteral("report"));
+    report.close();
+    EXPECT_EQ(app->overlayView(), QString());
 }
 
 } // namespace
