@@ -190,7 +190,9 @@ TEST_F(Stm32Tools, NordicTargetsAreRefused) {
 // flash / erase tools; the cable is on the module's connector and the application MCU is held.
 TEST_F(Stm32Tools, ChesterLrwTargetIsAccepted) {
     provider().settings().profile = hwio::device::ProfileRegistry::find("chester");
-    const QString connector = QString::fromStdString((provider().root() / "connector").string());
+    // generic_string: the path goes into JSON, where a Windows backslash would be an escape.
+    const QString connector =
+        QString::fromStdString((provider().root() / "connector").generic_string());
     QFile cable(connector);
     ASSERT_TRUE(cable.open(QIODevice::WriteOnly));
     cable.write("lrw");
