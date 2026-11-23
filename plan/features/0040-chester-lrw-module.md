@@ -2,7 +2,7 @@
 
 - **Status:** In progress (approved 2026-11-06 with all recommended options; D6 stays open; D7/D8 decided
   2026-11-09 after Phase 0, ADR-0352)
-- **Milestone:** 2.0.0-rc.4 (user decision 2026-11-06)
+- **Milestone:** 2.0.0-rc.5 (user decision 2026-11-19; was 2.0.0-rc.4, user decision 2026-11-06)
 - **Author:** Matej Strnad (with Claude), 2026-11-06
 - **Related ADRs:** ADR-0037, ADR-0038, ADR-0057, ADR-0077, ADR-0165, ADR-0174, ADR-0274 … ADR-0277; accepted
   here: ADR-0278, ADR-0281, ADR-0352
@@ -205,6 +205,36 @@ version before downloading.
         behind any connector, so the wizard's APP-connector check can pass before the cable is back
         (the tests accept it).
   - [ ] Screenshots, translations, docs (5 languages).
+
+- [x] B4 Prepared firmware without a "Downloading…" flash (user report 2026-11-19, approved by Matej Strnad the same
+      day). Implemented 2026-11-19, verified 2026-11-23: debug 1944/1945 (the one failure was
+      `McpControllerTest.TokenFileErrorAndRegenerate`, a port collision with a running Monitor), qmllint,
+      `check_translations`, tidy 0 findings, ASan 1944/1944, TSan 1871/1871 with the three new download tests left
+      out of the TSan run like the other QNetworkAccessManager tests (approved by the user 2026-11-23). The entries
+      belong to the device profile: they are cleared (running downloads cancelled) when the tab's profile changes;
+      another device with the same profile keeps them. Finding: the file is cached on disk and fetched from the network once, but (1)
+      `FirmwareSourceViewModel::setKind` discards the prepared firmware of the other card (`resetDesignated()`), so
+      every switch between the LTE and LoRaWAN cards loads it again and cancels a running download of the other
+      card, and (2) a cache hit is shown as "Downloading…" until its asynchronous result arrives.
+  - The view model keeps the designated state **per target** (`lte`, `lrw`): state, running operation, progress,
+    loaded source and error move from single members into one bounded map keyed by the target id (at most the
+    targets of the profile that have `designatedFirmware`; today 2). Switching the card neither resets nor cancels
+    the other card's entry; the properties (`designatedState`, `designatedStatus`, `designatedProgress`,
+    `designatedError`, …) read the entry of the current kind. `cancelDesignated()` / `retryDesignated()` act on the
+    current kind's entry. The entries belong to the device profile (the designated firmware is a property of the profile's target, not of
+    the connected device): a change of the profile clears all entries and cancels their downloads; another device
+    of the same profile keeps them (corrected 2026-11-19: the earlier wording "or of the tab's device" described a
+    reset the code never had).
+  - `firmware::DesignatedOperation` gains `[[nodiscard]] bool fromCache() const noexcept` (true when
+    `FirmwareCatalog::downloadDesignated` found a verified cache file and only the asynchronous hand-over is
+    pending). For such an operation the view model enters a new state `DesignatedLoading` instead of
+    `DesignatedDownloading`: `designatedStatus()` is empty, no progress bar; the Flash button's reason stays
+    "… is not downloaded yet" for that moment. The cache format, the SHA-256 re-check of every cache hit and the
+    CLI are unchanged.
+  - Tests: view-model GTests — switch LTE → LoRaWAN → LTE with both cached: no second catalog request for LTE and
+    its state stays Ready; a running LTE download survives a switch to LoRaWAN and back; a cache hit never reports
+    `DesignatedDownloading`; `DesignatedOperation::fromCache()` in the catalog tests. No user-visible string
+    changes (no translation work).
 
 ### Phase C — HIL
 

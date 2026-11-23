@@ -164,6 +164,15 @@ protected:
         return *qobject_cast<FlashViewModel*>(tab().pageViewModel(FlashViewModel::pageId));
     }
     [[nodiscard]] FirmwareSourceViewModel& source() { return *flash().source(); }
+    // Plan 0040 (B4): the designated download of the current kind is neither running nor being
+    // handed over from the cache.
+    [[nodiscard]] bool designatedSettled() {
+        return waitFor([this] {
+            const int state = source().designatedState();
+            return state != FirmwareSourceViewModel::DesignatedDownloading &&
+                   state != FirmwareSourceViewModel::DesignatedLoading;
+        });
+    }
 
     [[nodiscard]] fs::path writeFile(const std::string& name, const QByteArray& bytes) const {
         const fs::path path = root() / name;
@@ -855,9 +864,7 @@ TEST_F(FlashTest, DesignatedLteFirmware) {
     source().prepareDesignated();
     EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedDownloading);
     EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Downloading);
-    ASSERT_TRUE(waitFor([this] {
-        return source().designatedState() != FirmwareSourceViewModel::DesignatedDownloading;
-    }));
+    ASSERT_TRUE(designatedSettled());
     ASSERT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
         << source().designatedError().detail().toStdString();
     EXPECT_EQ(source().designatedStatus(), QStringLiteral("Ready"));
@@ -890,9 +897,7 @@ TEST_F(FlashTest, DesignatedLteFirmware) {
     EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedFailed);
     qputenv("HWIO_DESIGNATED_SHA256", sha.toUtf8());
     source().retryDesignated();
-    ASSERT_TRUE(waitFor([this] {
-        return source().designatedState() != FirmwareSourceViewModel::DesignatedDownloading;
-    }));
+    ASSERT_TRUE(designatedSettled());
     EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady);
     EXPECT_FALSE(source().designatedError().valid());
 
@@ -1591,6 +1596,28 @@ protected:
     [[nodiscard]] fs::path moduleHex(const std::string& name = "module.hex") const {
         return hexFile(name, image(0x08000000, 1024, 0x3C));
     }
+    // Plan 0040 (B4): unique designated files (the firmware cache of the test data directory never
+    // has them yet) and the test-only overrides that make `file` of `http` the designated firmware
+    // of the next download (read when the download starts).
+    [[nodiscard]] static QByteArray uniqueModuleHex() {
+        return QByteArray::fromStdString(hwio::firmware::test::toHex(
+            image(0x08000000, 1024, static_cast<std::uint8_t>(QUuid::createUuid().data1))));
+    }
+    [[nodiscard]] static QByteArray uniqueLteBundle(std::size_t applicationBytes = 4096) {
+        const QByteArray modem = hwio::firmware::test::zipBytes(
+            {{.name = "firmware.update.image.segments.0.hex", .data = ":00000001FF\n"},
+             {.name = "x" + randomId().toStdString() + ".txt", .data = "x"}});
+        return hwio::firmware::test::zipBytes(
+            {{.name = "modem.zip", .data = modem.toStdString()},
+             {.name = "application.hex",
+              .data = hwio::firmware::test::toHex(image(0x1000, applicationBytes))}});
+    }
+    static void designate(const hwio::firmware::test::HttpFixture& http, const QString& file,
+                          const QByteArray& bytes) {
+        qputenv("HWIO_DESIGNATED_URL", (http.baseUrl() + QStringLiteral("/") + file).toUtf8());
+        qputenv("HWIO_DESIGNATED_SHA256",
+                QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
+    }
 };
 
 TEST_F(LrwFlashTest, TheLoRaWanCardOffersTheDesignatedFirmwareAndTheCablingNote) {
@@ -1690,9 +1717,7 @@ TEST_F(LrwFlashTest, FlashingTheDesignatedFirmwareRunsTheGuidedWizard) {
     startLrwBoard();
     flash().setKind(Kind::LrwFirmware);
     source().prepareDesignated();
-    ASSERT_TRUE(waitFor([this] {
-        return source().designatedState() != FirmwareSourceViewModel::DesignatedDownloading;
-    }));
+    ASSERT_TRUE(designatedSettled());
     ASSERT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
         << source().designatedError().detail().toStdString();
     EXPECT_EQ(source().sourceSummary(),
@@ -1733,6 +1758,129 @@ TEST_F(LrwFlashTest, FlashingTheDesignatedFirmwareRunsTheGuidedWizard) {
     EXPECT_FALSE(tab().isBusy());
     app().wizard()->action(QStringLiteral("open-console"));
     EXPECT_FALSE(app().wizard()->isOpen());
+}
+
+// Plan 0040 (B4): each card keeps its prepared firmware - switching LTE -> LoRaWAN -> LTE neither
+// loads it again nor asks the server again.
+TEST_F(LrwFlashTest, SwitchingTheCardKeepsThePreparedFirmware) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (HWIO_DESIGNATED_URL)";
+#endif
+    hwio::firmware::test::HttpFixture http;
+    ASSERT_TRUE(http.listening());
+    const QByteArray bundle = uniqueLteBundle();
+    const QByteArray hex = uniqueModuleHex();
+    http.set(QStringLiteral("/chester/lte.zip"),
+             hwio::firmware::test::HttpFixture::Response::ok(bundle));
+    http.set(QStringLiteral("/chester/lrw.hex"),
+             hwio::firmware::test::HttpFixture::Response::ok(hex));
+    qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
+    startLrwBoard();
+    flash().setKind(Kind::LteFirmware);
+    designate(http, QStringLiteral("lte.zip"), bundle);
+    source().prepareDesignated();
+    ASSERT_TRUE(designatedSettled());
+    ASSERT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
+        << source().designatedError().detail().toStdString();
+    flash().setKind(Kind::LrwFirmware);
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedIdle); // its own
+    designate(http, QStringLiteral("lrw.hex"), hex);
+    source().prepareDesignated();
+    ASSERT_TRUE(designatedSettled());
+    ASSERT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
+        << source().designatedError().detail().toStdString();
+
+    // Back to LTE: still prepared at once; showing the row again (prepareDesignated) changes
+    // nothing.
+    flash().setKind(Kind::LteFirmware);
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady);
+    EXPECT_EQ(source().designatedStatus(), QStringLiteral("Ready"));
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Ready);
+    EXPECT_EQ(source().sourceName(), QStringLiteral("HARDWARIO LTE firmware 1.7.0"));
+    source().prepareDesignated();
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady);
+    flash().setKind(Kind::LrwFirmware);
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady);
+    EXPECT_EQ(source().sourceName(), QStringLiteral("lora-modem for CHESTER 1.4.1"));
+    EXPECT_EQ(http.requests(QStringLiteral("/chester/lte.zip")), 1);
+    EXPECT_EQ(http.requests(QStringLiteral("/chester/lrw.hex")), 1);
+}
+
+// Plan 0040 (B4): a running download of the LTE card goes on while the LoRaWAN card is shown.
+TEST_F(LrwFlashTest, ARunningDownloadSurvivesACardSwitch) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (HWIO_DESIGNATED_URL)";
+#endif
+    hwio::firmware::test::HttpFixture http;
+    ASSERT_TRUE(http.listening());
+    const QByteArray bundle = uniqueLteBundle(16); // small: trickled
+    // A slow server: one byte every 2 ms.
+    http.set(QStringLiteral("/chester/lte.zip"),
+             hwio::firmware::test::HttpFixture::Response::trickling(bundle, 2));
+    qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
+    startLrwBoard();
+    flash().setKind(Kind::LteFirmware);
+    designate(http, QStringLiteral("lte.zip"), bundle);
+    source().prepareDesignated();
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedDownloading);
+    ASSERT_TRUE(
+        waitFor([&http] { return http.requests(QStringLiteral("/chester/lte.zip")) == 1; }));
+    flash().setKind(Kind::LrwFirmware);
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedIdle);
+    EXPECT_TRUE(source().designatedStatus().isEmpty());
+    flash().setKind(Kind::LteFirmware);
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedDownloading);
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Downloading);
+    ASSERT_TRUE(designatedSettled());
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
+        << source().designatedError().detail().toStdString();
+    EXPECT_EQ(http.requests(QStringLiteral("/chester/lte.zip")), 1);
+}
+
+// Plan 0040 (B4): a verified cache file is handed over without a "Downloading…" status.
+TEST_F(LrwFlashTest, ACacheHitIsNotShownAsADownload) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (HWIO_DESIGNATED_URL)";
+#endif
+    hwio::firmware::test::HttpFixture http;
+    ASSERT_TRUE(http.listening());
+    const QByteArray hex = uniqueModuleHex();
+    http.set(QStringLiteral("/chester/lrw.hex"),
+             hwio::firmware::test::HttpFixture::Response::ok(hex));
+    designate(http, QStringLiteral("lrw.hex"), hex);
+    startLrwBoard();
+    flash().setKind(Kind::LrwFirmware);
+    source().prepareDesignated();
+    ASSERT_TRUE(designatedSettled());
+    ASSERT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
+        << source().designatedError().detail().toStdString();
+
+    // Another tab: its own source, the file is in the cache now.
+    app().newTab();
+    ASSERT_TRUE(tab().configure(QStringLiteral("chester"), QStringLiteral("app"), 801000001,
+                                QStringLiteral("Test Probe")));
+    flash().setKind(Kind::LrwFirmware);
+    FirmwareSourceViewModel& second = source();
+    std::vector<int> states;
+    const QObject receiver; // destroyed before `states`: ends the connection
+    QObject::connect(&second, &FirmwareSourceViewModel::designatedChanged, &receiver,
+                     [&states, &second] { states.push_back(second.designatedState()); });
+    second.prepareDesignated();
+    EXPECT_EQ(second.designatedState(), FirmwareSourceViewModel::DesignatedLoading);
+    EXPECT_TRUE(second.designatedStatus().isEmpty());
+    EXPECT_LT(second.designatedProgress(), 0);
+    EXPECT_EQ(second.sourceState(), FirmwareSourceViewModel::None);
+    EXPECT_EQ(flash().cannotFlashReason(),
+              QStringLiteral("The LoRaWAN module firmware is not downloaded yet"));
+    ASSERT_TRUE(designatedSettled());
+    EXPECT_EQ(second.designatedState(), FirmwareSourceViewModel::DesignatedReady)
+        << second.designatedError().detail().toStdString();
+    EXPECT_EQ(second.sourceState(), FirmwareSourceViewModel::Ready);
+    EXPECT_EQ(http.requests(QStringLiteral("/chester/lrw.hex")), 1);
+    ASSERT_FALSE(states.empty());
+    for (const int state : states) {
+        EXPECT_NE(state, FirmwareSourceViewModel::DesignatedDownloading);
+    }
 }
 
 TEST_F(LrwFlashTest, AProtectedModuleAsksForTheUnlockInTheWizard) {

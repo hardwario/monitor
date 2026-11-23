@@ -511,6 +511,7 @@ FirmwareCatalog::downloadDesignated(const DesignatedFirmware& firmware, Download
         if (auto verified =
                 m_cache->lookupDesignated(operation->m_sha256, firmware.cacheTag, firmware.kind)) {
             // Classified from the verified bytes and reported asynchronously, like a download.
+            operation->m_fromCache = true;
             QTimer::singleShot(std::chrono::milliseconds(0), operation.get(),
                                [op = operation.get(), bytes = std::move(*verified)] {
                                    op->finishVerified(bytes, true, {});

@@ -122,9 +122,10 @@ add_dependencies(hwio_gui_tests hwio_fake_jlink hwio_fake_jlink_incomplete hwio_
 # Under ThreadSanitizer the tests that download through QNetworkAccessManager (the catalog, the
 # update check of plan 0016, the designated LoRaWAN firmware of plan 0040) are left out, as in
 # libs/firmware/tests (Qt's HTTP thread is uninstrumented; plan/features/0003, review R11).
+# The three download tests of plan 0040 B4 were added to the list with the user's approval (2026-11-23).
 set(_hwio_gui_test_filter "")
 if("thread" IN_LIST HWIO_SANITIZERS)
-    set(_hwio_gui_test_filter TEST_FILTER "-FlashTest.CatalogDownloadAndErrors:FlashTest.DesignatedLteFirmware:LrwFlashTest.FlashingTheDesignatedFirmwareRunsTheGuidedWizard:FlashTest.RemoteLteUpdateQuestionsGoToSupport:FlashTest.CatalogInfoOfAnId:FlashTest.ACatalogDownloadWaitsForTheLookup:UpdateTest.AutomaticCheckShowsTheBannerAndStoresTheResult:UpdateTest.NoAutomaticCheckBeforeTheIntervalOrInDevelopmentBuilds:UpdateTest.DownloadOpensTheReleasePage:UpdateTest.SkippedVersionIsNotAnnouncedAgainButManualChecksIgnoreIt:UpdateTest.LaterHidesTheBanner:UpdateTest.UpToDate:UpdateTest.FailuresAreShownOnlyForManualChecks")
+    set(_hwio_gui_test_filter TEST_FILTER "-FlashTest.CatalogDownloadAndErrors:FlashTest.DesignatedLteFirmware:LrwFlashTest.FlashingTheDesignatedFirmwareRunsTheGuidedWizard:LrwFlashTest.SwitchingTheCardKeepsThePreparedFirmware:LrwFlashTest.ARunningDownloadSurvivesACardSwitch:LrwFlashTest.ACacheHitIsNotShownAsADownload:FlashTest.RemoteLteUpdateQuestionsGoToSupport:FlashTest.CatalogInfoOfAnId:FlashTest.ACatalogDownloadWaitsForTheLookup:UpdateTest.AutomaticCheckShowsTheBannerAndStoresTheResult:UpdateTest.NoAutomaticCheckBeforeTheIntervalOrInDevelopmentBuilds:UpdateTest.DownloadOpensTheReleasePage:UpdateTest.SkippedVersionIsNotAnnouncedAgainButManualChecksIgnoreIt:UpdateTest.LaterHidesTheBanner:UpdateTest.UpToDate:UpdateTest.FailuresAreShownOnlyForManualChecks")
 endif()
 gtest_discover_tests(hwio_gui_tests
     DISCOVERY_TIMEOUT 60

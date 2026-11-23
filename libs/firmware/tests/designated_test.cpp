@@ -158,8 +158,12 @@ TEST_F(Designated, CacheHitIsReverifiedWithoutARequest) {
     const QByteArray zip = bundleZip();
     serve(QStringLiteral("/chester/lte.zip"), HttpFixture::Response::ok(zip));
     const DesignatedFirmware designated = firmware(zip);
-    ASSERT_TRUE(waitForDownload(*catalog->downloadDesignated(designated)));
+    auto first = catalog->downloadDesignated(designated);
+    EXPECT_FALSE(first->fromCache()); // plan 0040 (B4): a network download
+    ASSERT_TRUE(waitForDownload(*first));
     auto again = catalog->downloadDesignated(designated);
+    EXPECT_TRUE(again->fromCache()); // known before the asynchronous hand-over
+    EXPECT_FALSE(again->isFinished());
     const auto hit = waitForDownload(*again);
     ASSERT_TRUE(hit) << hit.error().detail;
     EXPECT_TRUE(hit->fromCache);
@@ -173,6 +177,7 @@ TEST_F(Designated, CacheHitIsReverifiedWithoutARequest) {
         file.write("damaged");
     }
     auto third = catalog->downloadDesignated(designated);
+    EXPECT_FALSE(third->fromCache());
     const auto downloaded = waitForDownload(*third);
     ASSERT_TRUE(downloaded) << downloaded.error().detail;
     EXPECT_FALSE(downloaded->fromCache);
@@ -181,6 +186,7 @@ TEST_F(Designated, CacheHitIsReverifiedWithoutARequest) {
 
     // noCache downloads again.
     auto forced = catalog->downloadDesignated(designated, DownloadOptions{.noCache = true});
+    EXPECT_FALSE(forced->fromCache());
     ASSERT_TRUE(waitForDownload(*forced));
     EXPECT_EQ(requests(QStringLiteral("/chester/lte.zip")), 3);
 }

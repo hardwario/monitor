@@ -200,6 +200,9 @@ public:
     [[nodiscard]] const std::optional<Result<DesignatedDownload>>& result() const noexcept {
         return m_result;
     }
+    // Plan 0040 (B4): FirmwareCatalog::downloadDesignated() found a verified cache file; only the
+    // asynchronous hand-over is pending (no network request, no progress).
+    [[nodiscard]] bool fromCache() const noexcept { return m_fromCache; }
     void cancel();
 
 signals:
@@ -228,6 +231,7 @@ private:
     DownloadProgressFn m_progressFn;
     std::stop_token m_stop;
     std::unique_ptr<detail::HttpFetch> m_fetch;
+    bool m_fromCache = false; // set by FirmwareCatalog::downloadDesignated()
     std::optional<Result<DesignatedDownload>> m_result;
 };
 

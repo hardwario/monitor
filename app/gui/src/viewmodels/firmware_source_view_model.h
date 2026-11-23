@@ -29,11 +29,17 @@
 // Plan 0040 (B1, ADR-0278, ADR-0352): the LoRaWAN module kind (LrwFirmware, target `lrw`) has the
 // same two sources as the LTE kind: the designated firmware of its target (lora-modem for CHESTER,
 // an Intel HEX: DesignatedDownload::image) or an own .hex / .bin (start address as on the STM32
-// card). The designated part (lteSource, designated*) follows the target of the current kind; a
-// kind with another target forgets the other kind's designated download. Kind hints by address
-// range (ADR-0040 extended): an Intel HEX starting in the STM32 flash (0x08000000) on the
-// application or LTE card, or a .bin there, is LoRaWAN module firmware; an nRF image (below
+// card). The designated part (lteSource, designated*) follows the target of the current kind. Kind
+// hints by address range (ADR-0040 extended): an Intel HEX starting in the STM32 flash (0x08000000)
+// on the application or LTE card, or a .bin there, is LoRaWAN module firmware; an nRF image (below
 // 0x08000000) on the LoRaWAN card is suggested for the application card.
+//
+// Plan 0040 (B4): the designated state (state, running operation, progress, prepared source,
+// error) is kept per target (`lte`, `lrw`) in one map: switching the card neither forgets nor
+// cancels the other card's prepared firmware or running download; the designated* properties,
+// cancelDesignated() and retryDesignated() act on the entry of the current kind. Another device
+// profile of the owner's tab clears every entry. A verified cache file
+// (DesignatedOperation::fromCache()) is DesignatedLoading - no "Downloading…" status, no progress.
 //
 // Ownership: child of its owner (FlashViewModel, the flash wizard). The catalog operation it holds
 // never outlives FirmwareServices (see firmware_services.h). GUI thread only.
@@ -52,6 +58,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <map>
 #include <memory>
 #include <optional>
 
@@ -146,6 +153,8 @@ public:
         DesignatedDownloading,
         DesignatedReady,
         DesignatedFailed,
+        // Plan 0040 (B4): a verified cache file is being handed over (no status text, no progress)
+        DesignatedLoading,
     };
     Q_ENUM(DesignatedState)
 
@@ -213,7 +222,7 @@ public:
     void setLteSource(int source);
     [[nodiscard]] bool designatedAvailable() const;
     [[nodiscard]] QString designatedTitle() const;
-    [[nodiscard]] int designatedState() const noexcept { return m_designatedState; }
+    [[nodiscard]] int designatedState() const;
     [[nodiscard]] QString designatedStatus() const;
     [[nodiscard]] qreal designatedProgress() const;
     [[nodiscard]] ErrorInfo designatedError() const;
@@ -264,7 +273,7 @@ private:
     void onDownloadFinished();
     void startCatalogDownload();
     void startDesignated();
-    void onDesignatedFinished();
+    void onDesignatedFinished(const QString& key);
     void startLookup(const QString& id);
     void onLookupFinished();
     void cancelLookup();
@@ -287,8 +296,23 @@ private:
     [[nodiscard]] bool lrwAvailable() const;
     // The kind the image (Intel HEX) belongs to by its address range, when it is not m_kind.
     [[nodiscard]] std::optional<Kind> hexMismatch() const;
-    // Forgets the designated download of another target (a kind change).
-    void resetDesignated();
+    // Plan 0040 (B4): the designated firmware of one target (the map below).
+    struct DesignatedEntry {
+        DesignatedState state = DesignatedIdle;
+        std::unique_ptr<firmware::DesignatedOperation> download; // running (Downloading, Loading)
+        std::uint64_t done = 0;
+        std::uint64_t total = 0;
+        std::optional<LoadedSource> loaded; // when DesignatedReady
+        std::optional<Error> error;
+    };
+    // The key of the current kind's entry: its target id (lte, lrw); "" for other kinds.
+    [[nodiscard]] QString designatedKey() const;
+    // The current kind's entry (nullptr while none, or the entries belong to another profile).
+    [[nodiscard]] const DesignatedEntry* currentDesignated() const;
+    [[nodiscard]] DesignatedState currentDesignatedState() const;
+    // Clears (and cancels) every entry when the owner's tab has another device profile now;
+    // true when an entry was cleared.
+    [[nodiscard]] bool forgetDesignatedOfAnotherProfile();
     [[nodiscard]] QString catalogInfoText() const;
     // "hio-chester-push-fm v4.0.1" when the page of `id` was read, else "Catalog ID <id>".
     [[nodiscard]] QString catalogName(const QString& id) const;
@@ -315,13 +339,12 @@ private:
     QString m_binAddress = QStringLiteral("0x08000000");
     // 0021: the designated LTE firmware.
     LteSource m_lteSource = Designated;
-    DesignatedState m_designatedState = DesignatedIdle;
-    std::unique_ptr<firmware::DesignatedOperation> m_designatedDownload;
-    std::uint64_t m_designatedDone = 0;
-    std::uint64_t m_designatedTotal = 0;
-    std::optional<LoadedSource> m_designated; // when DesignatedReady
-    std::optional<Error> m_designatedError;
-    QString m_designatedFor; // the target id of the designated state ("" = none yet)
+    // Plan 0040 (B4): the designated firmware per target id. Bounded: keys are only the targets of
+    // the kinds with designated firmware (targetIdFor(LteFirmware), targetIdFor(LrwFirmware)) that
+    // have designatedFirmware in the profile - at most 2 entries.
+    std::map<QString, DesignatedEntry> m_designated;
+    // The profile the entries belong to (non-owning; the static ProfileRegistry entry).
+    const device::DeviceProfile* m_designatedProfile = nullptr;
     // 0021: the catalog page of the ID in the field.
     std::unique_ptr<firmware::LookupOperation> m_lookup;
     QString m_lookupId;

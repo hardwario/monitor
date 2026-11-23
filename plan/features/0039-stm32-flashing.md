@@ -2,7 +2,7 @@
 
 - **Status:** In progress (approved by the user 2026-11-06 with all recommended options; Phase 0 done on the
   CHESTER-S1 controller 2026-11-06, except P0.2 on the ABZ module)
-- **Milestone:** 2.0.0-rc.4 (user decision 2026-11-06)
+- **Milestone:** 2.0.0-rc.5 (user decision 2026-11-19; was 2.0.0-rc.4, user decision 2026-11-06)
 - **Author:** Matej Strnad (with Claude), 2026-11-06
 - **Related ADRs:** ADR-0015, ADR-0031, ADR-0032, ADR-0035–ADR-0040, ADR-0050, ADR-0057, ADR-0099, ADR-0160,
   ADR-0165, ADR-0174; accepted here: ADR-0274 … ADR-0277, ADR-0279, ADR-0280, ADR-0353 (Phase 0)
