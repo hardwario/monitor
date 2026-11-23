@@ -98,8 +98,30 @@ when the J-Link is on the LTE connector) therefore guides you through the whole 
 8. **Done**: the application runs again and the console reconnects.
 
 While the guide runs, the tab's console is paused (**Paused for the LTE firmware update**). Cancel works except while
-the MCU is being written. After step 3 it asks first: the application MCU is erased and the device does not run until
-you flash an application. The copy stays in the backups folder ([Privacy and stored data](privacy.md)).
+the MCU is being written. After step 3 it asks first: **The application MCU is erased. Write the application back
+first?**
+
+- **Write back**: the guide asks for the J-Link on the APP connector, writes the copy back and ends with **LTE
+  firmware not updated. The application was written back.**
+- **Leave it erased**: the guide closes; the device does not run until you flash an application. A message says where
+  the copy is.
+- **Back**: the guide goes on.
+
+Without a copy (an empty application) Cancel says that the application MCU is erased. The copies stay in the backups
+folder ([Privacy and stored data](privacy.md)); the newest 10 are kept.
+
+<a id="application-copies"></a>
+### Application copies
+
+When the backups folder has copies of the connected CHESTER, the **Application firmware** card (the Flash page and
+step 7 of the guide) shows **Application copy from** with the date and time of the newest copy; the arrow lists all
+copies of the device (up to 10). Choosing one loads it like a file. **Open backups folder** opens the folder, and the
+file dialog starts there. While the device's serial number is not known (for example when the application is erased),
+the card lists all copies with their serial numbers. In the terminal: `hwio chester app backups` and
+`hwio chester app flash --backup latest` ([CLI](cli.md)).
+
+When a step of the guide fails, the error panel shows **Troubleshooting** (the documentation of the error) instead of
+the buttons of the Flash page; **Try again** and **Cancel** at the bottom of the guide go on.
 
 ## Maintenance
 

@@ -101,6 +101,9 @@ QString LteUpdateWizard::title() const { return tr("Update the LTE firmware"); }
 void LteUpdateWizard::start(const ErrorInfo& context, DeviceTabViewModel* tab) {
     (void)context; // opened from the banner, the Flash page or "Help me fix this": the same start
     m_tab = tab;
+    if (tab != nullptr && !tab->deviceInfoFields().deviceSerial().empty()) {
+        m_appSource->setDeviceSerial(toQString(tab->deviceInfoFields().deviceSerial()));
+    }
     if (needsNrfUtil()) {
         m_services.dependencies()->ensureChecked();
     }
@@ -204,11 +207,13 @@ int LteUpdateWizard::stepIndex() const {
     case Step::UpdateLte:
         return 4;
     case Step::ConnectAppAgain:
+    case Step::OfferRestore:
         return 5;
     case Step::ChooseApplication:
     case Step::Restore:
-    case Step::Cancelled:
         return 6;
+    case Step::Cancelled:
+        return m_procedure->writtenBack() ? 7 : 6;
     case Step::Done:
         return 7;
     case Step::Failed:
@@ -245,14 +250,16 @@ int LteUpdateWizard::stage() const {
     case Step::Erase:
     case Step::UpdateLte:
     case Step::Restore:
+    case Step::OfferRestore: // passed through at once (cancelAlternative / cancelOperation)
         return Working;
     case Step::BackupFailed:
         return BackupFailed;
     case Step::ChooseApplication:
         return Application;
     case Step::Failed:
-    case Step::Cancelled:
         return Failed;
+    case Step::Cancelled:
+        return m_procedure->writtenBack() ? Summary : Failed; // ADR-0381
     case Step::Done:
         return Summary;
     }
@@ -270,6 +277,13 @@ WizardStep LteUpdateWizard::current() const {
         step.actions =
             QVariantList{QVariantMap{{QStringLiteral("id"), QStringLiteral("open-console")},
                                      {QStringLiteral("text"), tr("Open console")}}};
+        return step;
+    }
+    if (m_procedure && m_procedure->writtenBack()) {
+        // Plan 0051 (ADR-0381): cancelled after the erase, the copy was written back.
+        step.kind = StepKind::Done;
+        step.heading = tr("LTE firmware update cancelled");
+        step.body = m_procedure->promptText().toHtmlEscaped();
         return step;
     }
     step.kind = StepKind::Embedded;
@@ -451,6 +465,7 @@ void LteUpdateWizard::startProcedure() {
         *session, device::LteUpdateProcedure::Options{.pollInterval = std::chrono::seconds(1),
                                                       .backupDirectory = {},
                                                       .autoRestore = !m_remote.isNull(),
+                                                      .restoreOnCancel = !m_remote.isNull(),
                                                       .now = {}});
     connect(m_procedure.get(), &device::LteUpdateProcedure::changed, this,
             &LteUpdateWizard::onProcedureChanged);
@@ -473,6 +488,13 @@ void LteUpdateWizard::startProcedure() {
 }
 
 void LteUpdateWizard::onProcedureChanged() {
+    // Plan 0051 (ADR-0381): the application picker of step 7 lists this device's copies.
+    if (m_procedure && !m_procedure->serial().empty()) {
+        m_appSource->setDeviceSerial(toQString(m_procedure->serial()));
+    }
+    if (m_procedure && m_procedure->step() == Step::ChooseApplication) {
+        m_appSource->refreshBackups();
+    }
     if (m_procedure && m_procedure->step() == Step::ChooseApplication && !hasBackup()) {
         m_useBackup = false;
         // ADR-0368: nothing to write back; support is told now (the LTE MCU is updated, the
@@ -492,6 +514,17 @@ void LteUpdateWizard::onProcedureFinished() {
     if (step == Step::Done || step == Step::Cancelled ||
         (step == Step::Failed && !m_procedure->canRetry())) {
         releaseTab();
+    }
+    if (step == Step::Cancelled && m_procedure->writtenBack() && m_remote.isNull()) {
+        emit changed(); // ADR-0381: the wizard says that the application was written back
+        return;
+    }
+    if (step == Step::Cancelled && m_procedure->applicationErased() && m_procedure->hasBackup() &&
+        !m_tab.isNull()) {
+        // ADR-0381 (Leave it erased): where the copy is.
+        m_tab->showToast(tr("The copy of the application stays in %1.")
+                             .arg(QDir::toNativeSeparators(QString::fromStdU16String(
+                                 m_procedure->backupFile().u16string()))));
     }
     if (step == Step::Cancelled) {
         // ADR-0368: support answered No, or did not answer; the customer is told why it closed.
@@ -520,9 +553,23 @@ bool LteUpdateWizard::canCancel() const {
            m_procedure->canCancel();
 }
 
+bool LteUpdateWizard::offersWriteBack() const {
+    return m_procedure && m_remote.isNull() && m_procedure->canCancel() &&
+           m_procedure->applicationErased() && m_procedure->hasBackup() &&
+           !m_procedure->restoringAfterCancel();
+}
+
 QString LteUpdateWizard::busyCancelText() const {
     if (!m_procedure || !m_procedure->canCancel() || !m_procedure->applicationErased()) {
         return {};
+    }
+    if (offersWriteBack()) {
+        return device::LteUpdateProcedure::offerRestoreText();
+    }
+    if (!m_remote.isNull() && m_procedure->hasBackup() && !m_procedure->restoringAfterCancel()) {
+        // ADR-0368: a remote update always writes the copy back.
+        return tr("The application MCU is erased. Cancelling writes the application back first: "
+                  "connect the J-Link to the APP connector when asked.");
     }
     QString text = tr("The application MCU is erased. The device will not run until you flash an "
                       "application.");
@@ -534,13 +581,32 @@ QString LteUpdateWizard::busyCancelText() const {
     return text;
 }
 
-QString LteUpdateWizard::cancelAcceptText() const { return tr("Cancel anyway"); }
+QString LteUpdateWizard::cancelAcceptText() const {
+    return offersWriteBack() ? tr("Leave it erased") : tr("Cancel anyway");
+}
+
+QString LteUpdateWizard::cancelAlternativeText() const {
+    return offersWriteBack() ? tr("Write back") : QString();
+}
+
+void LteUpdateWizard::cancelAlternative() {
+    if (!offersWriteBack()) {
+        return;
+    }
+    // ADR-0381: the wizard stays open: APP connector, the copy is written, then the summary.
+    if (m_procedure->cancel() && m_procedure->step() == Step::OfferRestore) {
+        m_procedure->restoreAfterCancel();
+    }
+}
 
 QString LteUpdateWizard::cancelRejectText() const { return tr("Back"); }
 
 void LteUpdateWizard::cancelOperation() {
     if (m_procedure && m_procedure->canCancel()) {
         (void)m_procedure->cancel(); // finished(false) follows
+        if (m_procedure && m_procedure->step() == Step::OfferRestore) {
+            m_procedure->leaveErased(); // Leave it erased, a closed tab (ADR-0381)
+        }
         return;
     }
     if (!m_procedure || m_procedure->step() == Step::Failed || m_procedure->step() == Step::Done) {
