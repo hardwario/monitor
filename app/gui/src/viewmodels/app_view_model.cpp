@@ -50,7 +50,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonParseError>
 #include <QJsonValue>
 #include <QKeySequence>
 #include <QList>
@@ -94,8 +93,6 @@ namespace {
 
 const QString themeKey = QStringLiteral("ui/theme");
 const QString geometryKey = QStringLiteral("ui/windowGeometry");
-const QString restoreTabsKey = QStringLiteral("ui/restoreTabs");
-const QString tabsKey = QStringLiteral("ui/tabs");
 const QString lastTransportKey = QStringLiteral("ui/lastTransport");
 
 constexpr int minWindowWidth = 960;
@@ -245,7 +242,8 @@ AppViewModel::AppViewModel(AppOptions options, QObject* parent)
         m_jlinkLibraryPath = toQString(toUtf8(location->path));
     }
 
-    restoreTabs();
+    // Plan 0053 (ADR-0388): every start opens one Choose device tab; tabs are not restored.
+    (void)addTab(makeTab());
 }
 
 AppViewModel::~AppViewModel() {
@@ -329,8 +327,6 @@ void AppViewModel::registerShellKeys(SettingsStore& store) {
                    .type = QMetaType::QString,
                    .defaultValue = QString(),
                    .validator = validators::maxLength(1024)},
-        SettingKey{
-            .path = restoreTabsKey, .type = QMetaType::Bool, .defaultValue = true, .validator = {}},
         // Plan 0045 (ADR-0359): the user mode; "" = not chosen yet (the first-start dialog).
         SettingKey{.path = UiModeController::modeKey,
                    .type = QMetaType::QString,
@@ -344,10 +340,6 @@ void AppViewModel::registerShellKeys(SettingsStore& store) {
                    .type = QMetaType::Bool,
                    .defaultValue = false,
                    .validator = {}},
-        SettingKey{.path = tabsKey,
-                   .type = QMetaType::QString,
-                   .defaultValue = QString(),
-                   .validator = validators::maxLength(4096)},
         // Plan 0044 (ADR-0330): the remote support relay; "" = https://terminal.hardwario.com.
         SettingKey{.path = toQString(remote::relayUrlSetting.path),
                    .type = QMetaType::QString,
@@ -588,7 +580,6 @@ void AppViewModel::setCurrentTab(int index) {
         if (page != globalPage()) {
             globalPageChanged(); // signal: the Settings tab became current or was left
         }
-        saveTabs();
     }
 }
 
@@ -679,7 +670,6 @@ DeviceTabViewModel* AppViewModel::addTab(std::unique_ptr<DeviceTabViewModel> tab
         m_currentTab = m_tabs->settingsRow();
     }
     connect(raw, &DeviceTabViewModel::configurationChanged, this, [this] {
-        saveTabs();
         // Other pickers show "In use (tab N)" for this probe now.
         for (int i = 0; i < m_tabs->count(); ++i) {
             m_tabs->at(i)->picker()->updateFromScanner();
@@ -807,7 +797,6 @@ void AppViewModel::removeTab(int index) {
     current = settingsCurrent ? m_tabs->settingsRow() : std::clamp(current, 0, m_tabs->count() - 1);
     m_currentTab = -1; // force the notification: another tab is at the index now
     setCurrentTab(current);
-    saveTabs();
     for (int i = 0; i < m_tabs->count(); ++i) {
         m_tabs->at(i)->picker()->updateFromScanner();
     }
@@ -931,162 +920,7 @@ QString AppViewModel::bleOtherProgram(const QString& deviceId) const {
         .arg(use.otherProcess->pid);
 }
 
-// ---- restore and save (ADR-0061) --------------------------------------------------------------
-
-namespace {
-
-// One entry of ui/tabs.
-struct Entry {
-    QString profile;
-    QString target;
-    std::uint32_t serial = 0;
-    // Plan 0012 (ADR-0083): Bluetooth entries {transport: "ble", profile, id, name}.
-    QString bleId;
-    QString bleName;
-};
-
-// nullopt: an invalid entry or a device already in `known` (the whole list is then ignored).
-std::optional<Entry> parseSavedTab(const QJsonObject& object, const std::vector<Entry>& known) {
-    // An entry without a transport is a J-Link tab (written before plan 0012).
-    const QString transport =
-        object.value(QStringLiteral("transport")).toString(DeviceTabViewModel::jlinkTransport());
-    if (transport == DeviceTabViewModel::bleTransport()) {
-        Entry entry{.profile = object.value(QStringLiteral("profile")).toString(),
-                    .target = {},
-                    .serial = 0,
-                    .bleId = object.value(QStringLiteral("id")).toString(),
-                    .bleName = object.value(QStringLiteral("name")).toString()};
-        const bool duplicate = std::ranges::any_of(known, [&entry](const Entry& other) {
-            return !other.bleId.isEmpty() &&
-                   ble::sameDeviceId(toStdString(other.bleId), toStdString(entry.bleId));
-        });
-        if (entry.bleId.isEmpty() || duplicate) {
-            return std::nullopt;
-        }
-        return entry;
-    }
-    if (transport != DeviceTabViewModel::jlinkTransport()) {
-        return std::nullopt;
-    }
-    const double serial = object.value(QStringLiteral("sn")).toDouble(0);
-    const bool duplicate = std::ranges::any_of(known, [serial](const Entry& other) {
-        return other.bleId.isEmpty() && other.serial == static_cast<std::uint32_t>(serial);
-    });
-    if (serial < 1 || serial > 4294967295.0 || duplicate) {
-        return std::nullopt;
-    }
-    return Entry{.profile = object.value(QStringLiteral("profile")).toString(),
-                 .target = object.value(QStringLiteral("target")).toString(),
-                 .serial = static_cast<std::uint32_t>(serial),
-                 .bleId = {},
-                 .bleName = {}};
-}
-
-// The entries of a ui/tabs value; false when the list is invalid (it is then ignored).
-bool parseSavedTabs(const QString& stored, std::vector<Entry>& entries, int& current) {
-    QJsonParseError parseError{};
-    const QJsonDocument document = QJsonDocument::fromJson(stored.toUtf8(), &parseError);
-    const QJsonArray tabs = document.object().value(QStringLiteral("tabs")).toArray();
-    if (parseError.error != QJsonParseError::NoError || !document.isObject() ||
-        !std::cmp_less_equal(tabs.size(), DeviceTabListModel::maxTabs)) {
-        return false;
-    }
-    current = document.object().value(QStringLiteral("current")).toInt(0);
-    for (const auto value : tabs) {
-        std::optional<Entry> entry = parseSavedTab(value.toObject(), entries);
-        if (!entry) {
-            return false;
-        }
-        entries.push_back(std::move(*entry));
-    }
-    return true;
-}
-
-} // namespace
-
-void AppViewModel::restoreTabs() {
-    m_restoring = true;
-    std::vector<Entry> entries;
-    int current = 0;
-    const QString stored = m_settings->value(tabsKey).toString();
-    bool valid = true;
-    if (m_settings->value(restoreTabsKey).toBool() && !stored.isEmpty()) {
-        valid = parseSavedTabs(stored, entries, current);
-    }
-
-    if (valid) {
-        for (const Entry& entry : entries) {
-            if (!entry.bleId.isEmpty() && !m_ble) {
-                continue; // Bluetooth off (AppOptions): the tab is left out
-            }
-            std::unique_ptr<DeviceTabViewModel> tab = makeTab();
-            const bool configured =
-                entry.bleId.isEmpty()
-                    ? tab->configure(entry.profile, entry.target, entry.serial)
-                    : tab->configureBle(entry.profile, entry.bleId, entry.bleName);
-            if (!configured) {
-                valid = false;
-                break;
-            }
-            (void)addTab(std::move(tab));
-        }
-    }
-    if (!valid) {
-        qCWarning(lcGui) << "The saved tab list is invalid and was ignored:" << stored;
-        while (m_tabs->count() > 0) {
-            m_tabs->take(0)->shutdown();
-        }
-        current = 0;
-    }
-    if (m_tabs->count() == 0) {
-        (void)addTab(makeTab()); // first start: one Choose device tab
-    }
-    m_currentTab = std::clamp(current, 0, m_tabs->count() - 1);
-    m_lastDeviceTab = m_currentTab;
-    m_restoring = false;
-}
-
-void AppViewModel::saveTabs() {
-    if (m_restoring || m_settings->readOnly()) {
-        return;
-    }
-    QJsonArray tabs;
-    int current = 0;
-    for (int i = 0; i < m_tabs->count(); ++i) {
-        const DeviceTabViewModel* tab = m_tabs->at(i);
-        const std::optional<std::uint32_t> serial = tab->probeSerial();
-        const bool ble = tab->isBle() && !tab->bleDeviceId().isEmpty();
-        // Plan 0014 (ADR-0244): tabs an AI assistant opened are not restored.
-        if (tab->choosing() || (!serial && !ble) || !tab->openedBy().isEmpty()) {
-            continue;
-        }
-        if (i == m_currentTab || (m_currentTab == m_tabs->settingsRow() && i == m_lastDeviceTab)) {
-            current = static_cast<int>(tabs.size());
-        }
-        if (ble) {
-            tabs.append(
-                QJsonObject{{QStringLiteral("transport"), DeviceTabViewModel::bleTransport()},
-                            {QStringLiteral("profile"), tab->profileId()},
-                            {QStringLiteral("id"), tab->bleDeviceId()},
-                            {QStringLiteral("name"), tab->bleDeviceName()}});
-            continue;
-        }
-        tabs.append(QJsonObject{{QStringLiteral("transport"), DeviceTabViewModel::jlinkTransport()},
-                                {QStringLiteral("profile"), tab->profileId()},
-                                {QStringLiteral("target"), tab->consoleTargetId()},
-                                {QStringLiteral("sn"), static_cast<double>(*serial)}});
-    }
-    const QJsonObject root{{QStringLiteral("current"), current}, {QStringLiteral("tabs"), tabs}};
-    const QString text = QString::fromUtf8(QJsonDocument(root).toJson(QJsonDocument::Compact));
-    if (text != m_settings->value(tabsKey).toString()) {
-        logFailure("ui/tabs", m_settings->setValue(tabsKey, text));
-    }
-}
-
-void AppViewModel::saveState() {
-    saveTabs();
-    saveGeometry();
-}
+void AppViewModel::saveState() { saveGeometry(); }
 
 void AppViewModel::attachWindow(QWindow* window) {
     m_window = window;

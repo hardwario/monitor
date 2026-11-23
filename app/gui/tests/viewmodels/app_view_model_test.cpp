@@ -1,9 +1,10 @@
-// AppViewModel: tab lifecycle and the 8-tab limit, restore without connect, toasts, theme, global
-// pages, responsive rail (plan 0004, B1, B2; ADR-0043, ADR-0061).
+// AppViewModel: tab lifecycle and the 8-tab limit, a fresh start without restored tabs, toasts,
+// theme, global pages, responsive rail (plan 0004, B1, B2; ADR-0043, ADR-0061, ADR-0388).
 
 #include "fonts.h"
 #include "gui_test_support.h"
 #include "hwio/core/docs_urls.h"
+#include "settings_store.h"
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/device_tab_list_model.h"
 #include "viewmodels/device_tab_view_model.h"
@@ -27,7 +28,6 @@
 
 #include <gtest/gtest.h>
 
-#include <array>
 #include <chrono>
 #include <memory>
 
@@ -108,7 +108,8 @@ TEST_F(AppViewModelTest, TabNavigation) {
     EXPECT_EQ(app->currentTab(), 2);
 }
 
-TEST_F(AppViewModelTest, TabsAreSavedAndRestoredWithoutConnecting) {
+// Plan 0053 (ADR-0388): tabs are not saved; the next start opens one Choose device tab.
+TEST_F(AppViewModelTest, TabsAreNotSavedAndTheNextStartIsFresh) {
     {
         const auto app = makeApp();
         ASSERT_TRUE(app->currentTabViewModel()->configure(QStringLiteral("chester"),
@@ -116,66 +117,42 @@ TEST_F(AppViewModelTest, TabsAreSavedAndRestoredWithoutConnecting) {
         app->newTab();
         ASSERT_TRUE(app->currentTabViewModel()->configure(QStringLiteral("chester"),
                                                           QStringLiteral("lte"), 801000002));
-        app->newTab(); // a Choose device tab is not saved
+        // ADR-0233 (plan 0033): a J-Link tab always uses the console target.
+        EXPECT_EQ(app->currentTabViewModel()->consoleTargetId(), QStringLiteral("app"));
         app->setCurrentTab(1);
         app->saveState();
     }
-    // Plan 0012: every entry names its transport. ADR-0233: a tab configured with "lte" works
-    // with the console target (app).
-    EXPECT_EQ(readRaw(QStringLiteral("ui/tabs")),
-              QStringLiteral(R"({"current":1,"tabs":[{"profile":"chester","sn":801000001,)"
-                             R"("target":"app","transport":"jlink"},{"profile":"chester",)"
-                             R"("sn":801000002,"target":"app","transport":"jlink"}]})"));
-    const auto app = makeApp();
-    ASSERT_EQ(app->tabs()->count(), 2);
-    EXPECT_EQ(app->currentTab(), 1);
-    for (int i = 0; i < 2; ++i) {
-        const DeviceTabViewModel* tab = app->tabs()->at(i);
-        EXPECT_EQ(tab->state(), DeviceTabViewModel::Disconnected);
-        EXPECT_EQ(tab->session(), nullptr); // never connects at start
-    }
-    EXPECT_EQ(app->tabs()->at(0)->title(), QStringLiteral("CHESTER app · 801000001"));
-    EXPECT_EQ(app->tabs()->at(1)->consoleTargetId(), QStringLiteral("app"));
-    spin(std::chrono::milliseconds(300));
-    EXPECT_EQ(app->sessionRegistry().sessionCount(), 0U);
-}
-
-// ADR-0233 (plan 0033): a tab saved by rc.2 with target "lte" is restored on the console target.
-TEST_F(AppViewModelTest, ATabSavedOnTheLteTargetIsRestoredOnTheApplicationMcu) {
-    writeRaw(QStringLiteral("ui/tabs"),
-             QStringLiteral(R"({"current":0,"tabs":[{"profile":"chester","sn":801000002,)"
-                            R"("target":"lte","transport":"jlink"}]})"));
+    EXPECT_TRUE(readRaw(QStringLiteral("ui/tabs")).isEmpty());
     const auto app = makeApp();
     ASSERT_EQ(app->tabs()->count(), 1);
-    EXPECT_EQ(app->tabs()->at(0)->consoleTargetId(), QStringLiteral("app"));
-    EXPECT_EQ(app->tabs()->at(0)->title(), QStringLiteral("CHESTER app · 801000002"));
-}
-
-TEST_F(AppViewModelTest, RestoreCanBeTurnedOff) {
-    writeRaw(
-        QStringLiteral("ui/tabs"),
-        QStringLiteral(R"({"current":0,"tabs":[{"profile":"chester","target":"app","sn":5}]})"));
-    writeRaw(QStringLiteral("ui/restoreTabs"), false);
-    const auto app = makeApp();
-    ASSERT_EQ(app->tabs()->count(), 1);
+    EXPECT_EQ(app->currentTab(), 0);
     EXPECT_EQ(app->currentTabViewModel()->state(), DeviceTabViewModel::ChoosingDevice);
 }
 
-TEST_F(AppViewModelTest, InvalidTabListsAreIgnored) {
-    const std::array invalid{
-        R"(not json)",
-        R"({"current":0,"tabs":[{"profile":"nope","target":"app","sn":5}]})",
-        R"({"current":0,"tabs":[{"profile":"chester","target":"xyz","sn":5}]})",
-        R"({"current":0,"tabs":[{"profile":"chester","target":"app","sn":0}]})",
-        R"({"current":0,"tabs":[{"profile":"chester","target":"app","sn":5},{"profile":"chester","target":"app","sn":5}]})",
-        R"({"current":0,"tabs":[1,2,3,4,5,6,7,8,9]})",
-    };
-    for (const char* text : invalid) {
-        writeRaw(QStringLiteral("ui/tabs"), QString::fromUtf8(text));
+// Plan 0053 (ADR-0388): the keys of older versions stay in the file, unread, without a warning
+// (the settings stay writable).
+TEST_F(AppViewModelTest, OldSavedTabsAreNotRestored) {
+    const QString oldTabs =
+        QStringLiteral(R"({"current":1,"tabs":[{"profile":"chester","sn":801000001,)"
+                       R"("target":"app","transport":"jlink"},{"profile":"chester",)"
+                       R"("sn":801000002,"target":"app","transport":"jlink"}]})");
+    writeRaw(QStringLiteral("ui/tabs"), oldTabs);
+    writeRaw(QStringLiteral("ui/restoreTabs"), true);
+    {
         const auto app = makeApp();
-        ASSERT_EQ(app->tabs()->count(), 1) << text;
-        EXPECT_EQ(app->currentTabViewModel()->state(), DeviceTabViewModel::ChoosingDevice) << text;
+        ASSERT_EQ(app->tabs()->count(), 1);
+        EXPECT_EQ(app->currentTab(), 0);
+        DeviceTabViewModel* tab = app->currentTabViewModel();
+        ASSERT_NE(tab, nullptr);
+        EXPECT_EQ(tab->state(), DeviceTabViewModel::ChoosingDevice);
+        EXPECT_EQ(tab->session(), nullptr);
+        EXPECT_FALSE(app->settingsStore()->readOnly());
+        app->setTheme(QStringLiteral("dark"));
+        EXPECT_EQ(app->theme(), QStringLiteral("dark"));
+        app->saveState();
     }
+    EXPECT_EQ(readRaw(QStringLiteral("ui/tabs")), oldTabs);
+    EXPECT_EQ(readRaw(QStringLiteral("ui/restoreTabs")), QStringLiteral("true"));
 }
 
 TEST_F(AppViewModelTest, ToastsAreBounded) {
@@ -229,7 +206,7 @@ TEST_F(AppViewModelTest, PagesAndGlobalPages) {
 }
 
 // 0021 (ADR-0172): Settings opens as a tab after the device tabs, only while open; not counted in
-// the limit, not stored in ui/tabs, cycled with Ctrl+Tab, closed like a tab.
+// the limit, cycled with Ctrl+Tab, closed like a tab.
 TEST_F(AppViewModelTest, SettingsTab) {
     {
         const auto app = makeApp();
@@ -311,11 +288,6 @@ TEST_F(AppViewModelTest, SettingsTab) {
         EXPECT_EQ(tabs.count(), 7);
         EXPECT_EQ(app->currentTab(), tabs.settingsRow());
         EXPECT_EQ(app->globalPage(), QStringLiteral("settings"));
-
-        // Not stored in ui/tabs (the current device tab is stored instead).
-        app->saveState();
-        EXPECT_TRUE(
-            readRaw(QStringLiteral("ui/tabs")).startsWith(QStringLiteral(R"({"current":0,)")));
 
         // Ctrl+W / × closes it: back to the last device tab.
         app->closeTab(tabs.settingsRow());

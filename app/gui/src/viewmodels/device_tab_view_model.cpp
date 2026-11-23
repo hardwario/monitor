@@ -278,8 +278,8 @@ bool DeviceTabViewModel::configure(const QString& profileId, const QString& requ
         qCWarning(lcGui) << "Tab: unknown configuration" << profileId << requestedTarget << serial;
         return false;
     }
-    // ADR-0233 (plan 0033): a J-Link tab always uses the profile's console target; a tab saved
-    // with another target (ui/tabs of rc.2) opens on it.
+    // ADR-0233 (plan 0033): a J-Link tab always uses the profile's console target; a request for
+    // another target opens on it.
     const QString targetId = toQString(device::consoleTargetId(*profile));
     if (targetId != requestedTarget) {
         qCInfo(lcGui) << "Tab: target" << requestedTarget << "->" << targetId << "(ADR-0233)";
@@ -380,7 +380,7 @@ bool DeviceTabViewModel::configureRemote(const QString& code, const QUrl& relay)
     m_picker->setActive(false);
     m_blePicker->setActive(false);
     titleChanged();         // signal
-    configurationChanged(); // signal (a remote tab is never saved in ui/tabs)
+    configurationChanged(); // signal
     updateState();
     return true;
 }
@@ -888,7 +888,7 @@ void DeviceTabViewModel::handOverToUser() {
     m_openedBy.clear();
     m_openedByKey.clear();
     aiStateChanged();       // signal
-    configurationChanged(); // signal: ui/tabs is saved with this tab now
+    configurationChanged(); // signal
 }
 
 void DeviceTabViewModel::setAiCommandActive(bool active) {

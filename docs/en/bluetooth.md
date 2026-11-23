@@ -30,8 +30,8 @@ The tab works like a J-Link tab: the console with suggestions, history, find, ba
   dialog**, and if needed **Pair** (Linux, Windows). See [Pairing](#pairing).
 - If the device cannot be found, **Choose another device** goes back to the list.
 
-Bluetooth tabs come back after a restart disconnected; press **Connect**. The app starts Bluetooth only when you first
-open the Bluetooth view, so on macOS it asks for Bluetooth access only then.
+The app starts Bluetooth only when you first open the Bluetooth view, so on macOS it asks for Bluetooth access only
+then.
 
 ## Find the device (command line)
 

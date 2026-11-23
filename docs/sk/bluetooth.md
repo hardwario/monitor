@@ -33,8 +33,8 @@ Karta funguje ako karta J-Linku: konzola s návrhmi, históriou, vyhľadávaním
   (spárovať; Linux, Windows). Pozrite si [Párovanie](#párovanie).
 - Ak sa zariadenie nedá nájsť, **Choose another device** (vybrať iné zariadenie) vás vráti do zoznamu.
 
-Karty Bluetooth sa po reštarte vrátia odpojené; stlačte **Connect**. Aplikácia spustí Bluetooth až vtedy, keď prvýkrát
-otvoríte zobrazenie Bluetooth, takže v macOS sa na prístup k Bluetooth spýta až vtedy.
+Aplikácia spustí Bluetooth až vtedy, keď prvýkrát otvoríte zobrazenie Bluetooth, takže v macOS sa na prístup k
+Bluetooth spýta až vtedy.
 
 ## Vyhľadanie zariadenia (príkazový riadok)
 

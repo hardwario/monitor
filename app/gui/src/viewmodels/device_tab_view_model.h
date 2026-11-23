@@ -299,7 +299,7 @@ public:
     [[nodiscard]] const std::string& openedByKey() const noexcept { return m_openedByKey; }
     void setOpenedBy(const QString& client, std::string clientKey = {});
     // ADR-0260: the user changed the device or an option of an AI tab: openedBy is cleared (no
-    // badge, saved in ui/tabs, the AI can no longer close it). No-op for a user's tab.
+    // badge, the AI can no longer close it). No-op for a user's tab.
     void handOverToUser();
     [[nodiscard]] bool aiCommandActive() const noexcept { return m_aiCommandActive; }
     void setAiCommandActive(bool active);
@@ -320,7 +320,7 @@ signals:
     // session() changed (new, replaced, released, shutdown): pages reconnect their handlers and
     // drop their pointers to the old session, which is deleted after this signal.
     void sessionChanged();
-    void configurationChanged(); // profile, target or probe changed (ui/tabs is saved)
+    void configurationChanged(); // profile, target or probe changed
     void closeReady();           // the busy page finished after cancelBusy(true)
     void tabActivationRequested(int tabIndex);
     // 0021: deviceInfo changed; deviceInfoQueried when `info show` of the current attach answered

@@ -2,7 +2,7 @@
 // the BlePickerViewModel (profile filter, Show all, name filter, selection by id, stale and removed
 // rows, in-use badges, adapter errors), the Bluetooth tab (connect, console over ConsoleSession,
 // markers, log pane, Reset, Flash disabled), pairing from the ErrorPanel (ADR-0227), the per-device
-// options and the tab restore with `transport` (ADR-0083).
+// options and new tabs in the last transport (ADR-0083).
 
 #include "gui_test_support.h"
 #include "hwio/device/console_line.h"
@@ -18,12 +18,8 @@
 #include "workers/ble_service.h"
 
 #include <QByteArray>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QModelIndex>
 #include <QObject>
-#include <QSettings>
 #include <QSignalSpy>
 #include <QString>
 #include <QStringList>
@@ -86,17 +82,6 @@ protected:
         return *m_app;
     }
     DeviceTabViewModel& tab() { return *app().currentTabViewModel(); }
-
-    void writeRaw(const QString& key, const QVariant& value) const {
-        QSettings raw(QString::fromStdU16String(settingsFile().u16string()), QSettings::IniFormat);
-        raw.setValue(QStringLiteral("meta/schemaVersion"), 1);
-        raw.setValue(key, value);
-    }
-    [[nodiscard]] QString readRaw(const QString& key) const {
-        const QSettings raw(QString::fromStdU16String(settingsFile().u16string()),
-                            QSettings::IniFormat);
-        return raw.value(key).toString();
-    }
 
     static QString nameAt(const BlePickerViewModel& picker, int row) {
         return picker.data(picker.index(row), BlePickerViewModel::NameRole).toString();
@@ -477,41 +462,6 @@ TEST_F(BleGuiTest, OptionsAreRememberedPerDevice) {
     EXPECT_TRUE(tab().connection()->autoReconnect());
     EXPECT_FALSE(tab().connection()->logToFile());
     EXPECT_EQ(tab().title(), QStringLiteral("CHESTER · F1:22:33:44:55:66")); // no name: the id
-}
-
-TEST_F(BleGuiTest, TabsAreRestoredWithTheirTransport) {
-    const QJsonArray tabs{
-        QJsonObject{{QStringLiteral("profile"), QStringLiteral("chester")},
-                    {QStringLiteral("target"), QStringLiteral("app")},
-                    {QStringLiteral("sn"), 801000001}}, // written before plan 0012
-        QJsonObject{{QStringLiteral("transport"), QStringLiteral("ble")},
-                    {QStringLiteral("profile"), QStringLiteral("chester")},
-                    {QStringLiteral("id"), QStringLiteral("F1:22:33:44:55:66")},
-                    {QStringLiteral("name"), QStringLiteral("CHESTER-ABC123")}}};
-    const QJsonObject root{{QStringLiteral("current"), 1}, {QStringLiteral("tabs"), tabs}};
-    writeRaw(QStringLiteral("ui/tabs"),
-             QString::fromUtf8(QJsonDocument(root).toJson(QJsonDocument::Compact)));
-    AppViewModel& restored = app();
-    ASSERT_EQ(restored.tabs()->count(), 2);
-    EXPECT_FALSE(restored.tabs()->at(0)->isBle());
-    DeviceTabViewModel* bleTab = restored.tabs()->at(1);
-    EXPECT_TRUE(bleTab->isBle());
-    EXPECT_EQ(bleTab->state(), DeviceTabViewModel::Disconnected); // ADR-0083: not connected
-    EXPECT_EQ(bleTab->title(), QStringLiteral("CHESTER · CHESTER-ABC123"));
-    EXPECT_EQ(restored.currentTab(), 1);
-
-    restored.saveState();
-    const QJsonArray saved = QJsonDocument::fromJson(readRaw(QStringLiteral("ui/tabs")).toUtf8())
-                                 .object()
-                                 .value(QStringLiteral("tabs"))
-                                 .toArray();
-    ASSERT_EQ(saved.size(), 2);
-    EXPECT_EQ(saved.at(0).toObject().value(QStringLiteral("transport")).toString(),
-              QStringLiteral("jlink"));
-    EXPECT_EQ(saved.at(1).toObject().value(QStringLiteral("transport")).toString(),
-              QStringLiteral("ble"));
-    EXPECT_EQ(saved.at(1).toObject().value(QStringLiteral("id")).toString(),
-              QStringLiteral("F1:22:33:44:55:66"));
 }
 
 TEST_F(BleGuiTest, NewTabsOpenInTheLastTransport) {
