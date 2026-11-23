@@ -78,6 +78,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <filesystem>
 #include <iostream>
 #include <memory>
@@ -878,6 +879,9 @@ class Setup : public QObject {
 
 public slots:
     void applicationAvailable() {
+        // Qt Test writes to stdout, which is fully buffered on a pipe (ctest): after an abnormal
+        // end the whole test log was lost (seen on the Windows CI runners). Unbuffered instead.
+        (void)std::setvbuf(stdout, nullptr, _IONBF, 0);
         QStandardPaths::setTestModeEnabled(true);
         hwio::initApplicationIdentity();
         QQuickStyle::setStyle(QStringLiteral("Material"));
