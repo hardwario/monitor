@@ -44,6 +44,7 @@
 #include <QDir>
 #include <QFile>
 #include <QIODevice>
+#include <QMetaObject>
 #include <QObject>
 #include <QPointer>
 #include <QSignalSpy>
@@ -1287,19 +1288,26 @@ TEST_F(FlashTest, LteUpdateWizardRunsABundleThroughEveryStep) {
     EXPECT_EQ(wizard->cancelAlternativeText(), QStringLiteral("Write back"));
     EXPECT_EQ(wizard->cancelAcceptText(), QStringLiteral("Leave it erased"));
     EXPECT_EQ(wizard->cancelRejectText(), QStringLiteral("Back"));
-    moveCable("lte");
+    // Watched through the change signal: a fast run passes "Step 2 of 2" between two polls.
     bool sawSecondStep = false;
+    const QMetaObject::Connection watch = QObject::connect(
+        wizard, &hwio::gui::LteUpdateWizard::progressChanged, wizard, [&sawSecondStep, wizard] {
+            if (wizard->stage() == hwio::gui::LteUpdateWizard::Working) {
+                sawSecondStep =
+                    sawSecondStep || wizard->stepText() == QStringLiteral("Step 2 of 2");
+            }
+        });
+    moveCable("lte");
     ASSERT_TRUE(waitFor(
         [&] {
             if (wizard->stage() == hwio::gui::LteUpdateWizard::Working) {
                 EXPECT_FALSE(wizard->canCancel()); // not during a flash
-                sawSecondStep =
-                    sawSecondStep || wizard->stepText() == QStringLiteral("Step 2 of 2");
             }
             return wizard->procedure()->step() ==
                    hwio::device::LteUpdateProcedure::Step::ConnectAppAgain;
         },
         std::chrono::seconds(60)));
+    QObject::disconnect(watch);
     EXPECT_TRUE(sawSecondStep);
     moveCable("app");
     ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Application));

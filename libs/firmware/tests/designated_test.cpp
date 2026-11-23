@@ -379,6 +379,9 @@ private:
 // The local fixture stands in for the asset host: "localhost" is the allowed host of this test
 // (the request itself goes to 127.0.0.1, so the redirect is cross-host).
 TEST_F(Designated, RedirectToTheAllowedHostIsFollowed) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (HWIO_DESIGNATED_REDIRECT_HOST)";
+#endif
     const ScopedEnv host("HWIO_DESIGNATED_REDIRECT_HOST", "localhost");
     auto catalog = this->catalog(nullptr);
     const QByteArray zip = bundleZip();
