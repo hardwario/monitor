@@ -450,6 +450,7 @@ private:
             *m_session, device::LteUpdateProcedure::Options{.pollInterval = std::chrono::seconds(1),
                                                             .backupDirectory = {},
                                                             .autoRestore = true,
+                                                            .restoreOnCancel = true, // ADR-0368
                                                             .now = {}});
         m_terminal = std::make_unique<GuidedTerminal>(
             *m_context, *m_ui, *m_procedure,

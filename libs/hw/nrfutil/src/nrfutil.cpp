@@ -424,6 +424,12 @@ Status NrfUtilModemUpdater::waitForProcess(QProcess& process, const std::functio
     return {};
 }
 
+ErrorCode modemFailureCode(std::string_view output) noexcept {
+    return output.find("LOW_VOLTAGE") != std::string_view::npos
+               ? ErrorCode::TargetLowVoltage
+               : ErrorCode::FirmwareModemUpdateFailed;
+}
+
 Status NrfUtilModemUpdater::updateModem(const fs::path& modemZip, std::uint32_t probeSn,
                                         const firmware::ProgressFn& progress,
                                         std::stop_token stop) {
@@ -480,7 +486,8 @@ Status NrfUtilModemUpdater::updateModem(const fs::path& modemZip, std::uint32_t 
             detail += "; stderr: " + stderrTail;
         }
         qCWarning(log::lcFlash).noquote() << "Modem update failed:" << toQString(detail);
-        return std::unexpected(makeError(ErrorCode::FirmwareModemUpdateFailed, std::move(detail)));
+        const ErrorCode code = modemFailureCode(detail);
+        return std::unexpected(makeError(code, std::move(detail)));
     }
     report(100);
     qCInfo(log::lcFlash) << "Modem firmware updated";

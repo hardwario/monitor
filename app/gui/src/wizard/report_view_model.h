@@ -1,6 +1,6 @@
 #pragma once
 
-// ReportViewModel - the "Create diagnostic report" dialog (plan/features/0007 § Diagnostic report
+// ReportViewModel - the "Create diagnostic report" view (plan/features/0007 § Diagnostic report
 // dialog, ADR-0075): collects the doctor checks and the report data on the DiagWorker (≤ 15 s),
 // shows summary.txt, saves the zip where the user chooses (native file dialog in QML) and copies
 // the summary. Nothing is sent anywhere. Exposed as AppViewModel.report. GUI thread only.
@@ -54,7 +54,8 @@ public:
     [[nodiscard]] static QUrl defaultFolder();
     [[nodiscard]] QString savedPath() const { return m_savedPath; }
 
-    // Opens the dialog and starts collecting (Help → Create diagnostic report…).
+    // Opens the view (AppViewModel, plan 0052) and starts collecting (Help → Create diagnostic
+    // report…).
     Q_INVOKABLE void show();
     // Cancel / Close: stops collecting or saving and closes.
     Q_INVOKABLE void close();

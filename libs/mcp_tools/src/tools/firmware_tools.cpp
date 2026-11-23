@@ -222,7 +222,8 @@ private:
             return;
         }
         const std::string target(m_target->id);
-        const hwio::device::FlashOptions options{.halt = false, .allowUicr = m_allowUicr};
+        const hwio::device::FlashOptions options{
+            .halt = false, .allowUicr = m_allowUicr, .guided = false};
         run([this, target,
              options](DeviceSession& session) { return session.flash(target, m_image, options); },
             [this](const OperationResult& result) {
@@ -289,7 +290,8 @@ private:
             return;
         }
         const std::string id = m_target;
-        const hwio::device::FlashOptions options{.halt = false, .allowUicr = false};
+        const hwio::device::FlashOptions options{
+            .halt = false, .allowUicr = false, .guided = false};
         QString kind;
         if (auto* bundle = std::get_if<hwio::firmware::LteBundle>(&input)) {
             kind = QStringLiteral("bundle");

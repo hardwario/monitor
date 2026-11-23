@@ -99,7 +99,12 @@ Error code: [`target.other_connector`](#target.other_connector).
 
 A plain LTE update (`hwio chester lte flash`, or a bundle, modem or application file for the LTE MCU) leaves the application on the application MCU running. When the LTE MCU does not answer for a while, the CHESTER application firmware resets it through its reset pin, and the update stops. The app then reads the LTE MCU's reset reason and reports **The LTE MCU was reset during the update.** Use the guided update instead: **Update LTE firmware…** on the **Flash** page, or `hwio chester lte flash --guided`. It keeps a copy of the application, erases it, updates the LTE MCU and writes the application back. See [LTE firmware update](flashing.md#lte-firmware-update).
 
-Error code: [`target.reset_during_update`](#target.reset_during_update).
+In the guided update the application is erased first, so it cannot reset the LTE MCU: a failed step there keeps its
+own error (the reset reason is only written to the log). When nRF Util reports **LOW_VOLTAGE** (for example "Failed to
+configure Coresight: LOW_VOLTAGE"), the error is [`target.low_voltage`](#target.low_voltage): check the power supply
+or batteries of the CHESTER and the J-Link cable on the LTE connector, then click **Try again**.
+
+Error codes: [`target.reset_during_update`](#target.reset_during_update), [`target.low_voltage`](#target.low_voltage).
 
 <a id="remote-support-session-problems"></a>
 ### Remote support session problems
@@ -316,7 +321,7 @@ On Linux, missing USB permissions are a common cause; see [USB access to the J-L
 - **Probably:** The J-Link firmware differs from the firmware bundled with the J-Link Software.
 - **What to do:** Run `hwio jlink update-firmware`.
 
-This is a warning; the J-Link keeps working. `hwio doctor` reports it too. In HARDWARIO Monitor the banner above the console offers **Disconnect and update…**: the tab disconnects, a dialog shows the current and the new firmware and, after **Update**, the J-Link is updated (about 10–30 s; do not unplug it) and the tab connects again. **Not now** hides the banner for this J-Link until the app is closed. When the probe firmware is newer than the library, the message is "The J-Link firmware is newer than the J-Link library." In that case, update the J-Link Software instead.
+This is a warning; the J-Link keeps working. `hwio doctor` reports it too. In HARDWARIO Monitor the banner above the console offers **Disconnect and update…**: the tab disconnects, a page shows the current and the new firmware and, after **Update**, the J-Link is updated (about 10–30 s; do not unplug it) and the tab connects again. **Not now** hides the banner for this J-Link until the app is closed. When the probe firmware is newer than the library, the message is "The J-Link firmware is newer than the J-Link library." In that case, update the J-Link Software instead.
 
 <a id="probe.firmware_update_failed"></a>
 #### `probe.firmware_update_failed`
@@ -492,7 +497,17 @@ session does not reconnect by itself. See [The J-Link is on the LTE connector](#
 - **Probably:** The application firmware on the application MCU reset the LTE MCU through its reset pin while the LTE MCU was being updated.
 - **What to do:** Use the guided update, which stops the application first: Flash › Update LTE firmware… in the desktop app, or `hwio chester lte flash --guided`.
 
-After a failed step of an LTE update the reset-pin bit of the LTE MCU's reset reason register was set. The details keep the original error (for example `target.program_failed` or `firmware.modem_update_failed`) and the register value. See [The LTE update fails: the LTE MCU was reset](#the-lte-update-fails-the-lte-mcu-was-reset).
+After a failed step of an LTE update the reset-pin bit of the LTE MCU's reset reason register was set. The details keep the original error (for example `target.program_failed` or `firmware.modem_update_failed`) and the register value. See [The LTE update fails: the LTE MCU was reset](#the-lte-update-fails-the-lte-mcu-was-reset). Only a plain LTE update reports it; in the guided update the original error stays.
+
+<a id="target.low_voltage"></a>
+#### `target.low_voltage`
+
+**The LTE MCU reports too low supply voltage.**
+
+- **Probably:** The CHESTER is not powered enough (battery, power supply) or the J-Link cable does not connect the supply reference.
+- **What to do:** Check the power supply or batteries of the CHESTER and the J-Link cable on the connector, then try again.
+
+nRF Util reported LOW_VOLTAGE while it programmed the modem firmware ("Failed to configure Coresight: LOW_VOLTAGE"); its output is in **Details**. In the guided update the advice is "Check the power supply of the CHESTER and the J-Link cable on the LTE connector, then click Try again."
 
 <a id="target.protected"></a>
 #### `target.protected`
@@ -733,7 +748,7 @@ Appears when you flash by a 32-digit firmware ID. The message can name the ID, a
 - **Probably:** The modem firmware zip is wrong, the connection was lost, or nRF Util reported an error (see Details).
 - **What to do:** Check the cable and power, then flash the modem firmware again.
 
-The LTE modem firmware is written by nRF Util; its output is in **Details**. See [Nordic nRF Util](install.md#nordic-nrf-util-lte-modem-firmware-only).
+The LTE modem firmware is written by nRF Util; its output is in **Details**. See [Nordic nRF Util](install.md#nordic-nrf-util-lte-modem-firmware-only). In the guided update the advice is "Check the power supply of the CHESTER and the J-Link cable on the LTE connector, then click Try again."
 
 <a id="firmware.checksum_mismatch"></a>
 #### `firmware.checksum_mismatch`

@@ -4,6 +4,9 @@
 // Below 1100 px window width it shows icons only, with the labels as tooltips.
 // Plan 0012: a page the tab cannot use (Flash in a Bluetooth tab) is dimmed, its tooltip says why
 // and a click shows the reason as a toast.
+// Plan 0052 (ADR-0386): while the tab has a wizard open, the "Wizard" entry is the first item (its
+// tooltip and accessible description are the wizard's title, busy while the wizard runs an
+// operation); it shows the wizard view again. Usable also while the tab chooses a device.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -38,6 +41,8 @@ Rectangle {
         property bool busy: false
         property string shortcutId: ""
         property string unavailableReason: ""
+        // Plan 0052: replaces the shortcut tooltip and the accessible description ("" = none).
+        property string detail: ""
 
         objectName: "railItem"
         Layout.alignment: Qt.AlignHCenter
@@ -47,10 +52,11 @@ Rectangle {
         Accessible.role: Accessible.Button
         Accessible.name: item.text
         Accessible.checked: item.selected
-        Accessible.description: item.busy ? qsTr("Busy") : item.unavailableReason
+        Accessible.description: item.busy ? qsTr("Busy") : (item.detail !== "" ? item.detail : item.unavailableReason)
         HToolTip {
             visible: item.hovered
             text: item.unavailableReason !== "" ? item.text + " — " + item.unavailableReason
+                                                : item.detail !== "" ? item.text + " — " + item.detail
                                                 : AppViewModel.shortcuts.tooltip(item.text, item.shortcutId)
             delay: 400
         }
@@ -108,6 +114,20 @@ Rectangle {
         anchors.topMargin: Theme.spacingS
         anchors.bottomMargin: Theme.spacingS
         spacing: Theme.spacingXs
+
+        // Plan 0052 (ADR-0386): the tab's open wizard.
+        RailItem {
+            id: wizardItem
+
+            objectName: "railWizard"
+            visible: rail.tab !== null && rail.tab.wizard.open
+            text: qsTr("Wizard")
+            iconName: "info"
+            detail: rail.tab !== null ? rail.tab.wizard.title : ""
+            selected: wizardItem.visible && AppViewModel.globalPage === "" && rail.tab.currentPage === "wizard"
+            busy: wizardItem.visible && rail.tab.busyPage !== "" && rail.tab.busyPage === rail.tab.wizard.wizardId
+            onClicked: AppViewModel.showPage("wizard")
+        }
 
         Repeater {
             model: AppViewModel.pages

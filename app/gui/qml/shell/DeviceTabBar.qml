@@ -1,7 +1,8 @@
 // Device tab strip (ADR-0043): state dot + "CHESTER app · 683012345" + close ×, "+" at the end
 // (Ctrl+T; disabled at 8 tabs with a tooltip). Middle-click closes a tab. Amended by 0021
 // (ADR-0172): while open, the Settings tab (gear icon, "Settings", no state dot) follows the
-// device tabs.
+// device tabs. Plan 0052 (ADR-0386): a tab with an open wizard shows a small wizard badge (tooltip
+// and accessible name: "Wizard: <title>").
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -43,6 +44,10 @@ Rectangle {
                 required property string tabKind
                 readonly property bool settingsTab: tabButton.tabKind === "settings"
                 readonly property bool selected: tabButton.index === AppViewModel.currentTab
+                // Plan 0052: "Wizard: <title>" while the tab has a wizard open, else "".
+                readonly property string wizardText: !tabButton.settingsTab && tabButton.stableTab !== null
+                                                     && tabButton.stableTab.wizard.open
+                                                     ? qsTr("Wizard: %1").arg(tabButton.stableTab.wizard.title) : ""
                 // The model clears `tab` when the row is removed; keep the last one until the
                 // delegate is destroyed.
                 property DeviceTabViewModel stableTab: null
@@ -66,6 +71,7 @@ Rectangle {
                 Accessible.role: Accessible.PageTab
                 Accessible.name: tabButton.settingsTab ? tabButton.title
                                  : tabButton.title + ", " + (tabButton.stableTab ? tabButton.stableTab.connection.stateText : "")
+                                   + (tabButton.wizardText !== "" ? ", " + tabButton.wizardText : "")
                 Accessible.selected: tabButton.selected
                 onClicked: AppViewModel.currentTab = tabButton.index
 
@@ -114,6 +120,24 @@ Rectangle {
                         symbol: "bluetooth"
                         size: 16
                         color: tabButton.selected ? Theme.text : Theme.textMuted
+                    }
+
+                    // Plan 0052 (ADR-0386): the tab's wizard is open.
+                    Icon {
+                        objectName: "tabWizardBadge"
+                        visible: tabButton.wizardText !== ""
+                        symbol: "info"
+                        size: 16
+                        color: Theme.accent
+
+                        HoverHandler {
+                            id: wizardHover
+                        }
+
+                        HToolTip {
+                            visible: wizardHover.hovered
+                            text: tabButton.wizardText
+                        }
                     }
 
                     Icon {

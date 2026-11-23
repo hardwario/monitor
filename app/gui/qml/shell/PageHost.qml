@@ -1,7 +1,9 @@
 // The page area of a tab (page-extension contract, ADR-0059): the connection ErrorPanel and the
 // warning banner on top, then the Choose device page or the current page. Each page root is
 // loaded once on first use and gets the properties `tab` (DeviceTabViewModel) and `vm` (its view
-// model).
+// model). Plan 0052 (ADR-0386): while the tab's page is "wizard" the tab's WizardView replaces
+// the whole page area (loaded while the wizard is open, so it keeps its scroll position while
+// another page is shown).
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -14,10 +16,37 @@ Item {
 
     required property DeviceTabViewModel tab
     readonly property bool choosing: host.tab.state === DeviceTabViewModel.ChoosingDevice
+    readonly property bool wizardShown: host.tab !== null && host.tab.wizard.open && host.tab.currentPage === "wizard"
+    // Plan 0052: this tab's page area is the one shown now (for the content views and the global
+    // wizard).
+    readonly property bool current: host.tab !== null && host.tab === AppViewModel.currentTabViewModel
+                                    && AppViewModel.globalPage === ""
+
+    // Plan 0052: the focus goes back to the page when a view closes.
+    function focusPage() {
+        if (!host.current)
+            return;
+        if (host.choosing) {
+            choosePage.forceActiveFocus();
+            return;
+        }
+        for (let i = 0; i < pageRepeater.count; ++i) {
+            const loader = pageRepeater.itemAt(i) as Loader;
+            const page = loader ? loader.item as Item : null;
+            if (loader && loader.visible && page) {
+                page.forceActiveFocus();
+                return;
+            }
+        }
+    }
+
+    onWizardShownChanged: if (!host.wizardShown) Qt.callLater(host.focusPage)
 
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
+        // Plan 0052: hidden (no focus beneath) while a view replaces the page area.
+        visible: !host.wizardShown && !viewHost.shown
 
         // Plan 0033 (ADR-0233, D8): the J-Link is on the LTE connector - a warning instead of the
         // console's error, with the LTE update and a retry (no automatic reconnect).
@@ -171,6 +200,8 @@ Item {
             Layout.fillHeight: true
 
             ChooseDevicePage {
+                id: choosePage
+
                 anchors.fill: parent
                 visible: host.choosing
                 tab: host.tab
@@ -180,6 +211,8 @@ Item {
             }
 
             Repeater {
+                id: pageRepeater
+
                 model: AppViewModel.pages
 
                 delegate: Loader {
@@ -214,5 +247,28 @@ Item {
                 }
             }
         }
+    }
+
+    // Plan 0052 (ADR-0386): the tab's wizard.
+    Loader {
+        id: wizardLoader
+
+        objectName: "tabWizard"
+        anchors.fill: parent
+        active: host.tab !== null && host.tab.wizard.open
+        visible: host.wizardShown && !viewHost.shown
+
+        sourceComponent: WizardView {
+            wizard: host.tab.wizard
+        }
+    }
+
+    // Plan 0052 (ADR-0387): a content view or the global wizard over this page area.
+    ContentViewHost {
+        id: viewHost
+
+        anchors.fill: parent
+        current: host.current
+        onClosed: Qt.callLater(host.focusPage)
     }
 }

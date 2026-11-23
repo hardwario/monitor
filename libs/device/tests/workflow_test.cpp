@@ -176,8 +176,8 @@ TEST_F(Workflow, FlashSequence) {
 TEST_F(Workflow, FlashHaltLeavesTheCpuHalted) {
     EXPECT_CALL(programmer(), reset(ResetMode::Halt)).Times(2);
     auto ctx = context();
-    ASSERT_TRUE(hwio::device::detail::runFlash(ctx, image({{0x0, 16}}),
-                                               FlashOptions{.halt = true, .allowUicr = false}));
+    ASSERT_TRUE(hwio::device::detail::runFlash(
+        ctx, image({{0x0, 16}}), FlashOptions{.halt = true, .allowUicr = false, .guided = false}));
     EXPECT_TRUE(ctx.cpuHalted);
 }
 
@@ -246,8 +246,9 @@ TEST_F(Workflow, UicrRecordsNeedAllowUicrAndThePibIsNeverWritten) {
     const auto uicr = hwio::device::detail::runFlash(ctx, image({{0x0, 16}, {0x10001200, 4}}), {});
     ASSERT_FALSE(uicr);
     EXPECT_EQ(uicr.error().code, ErrorCode::FirmwareUicrInImage);
-    const auto pib = hwio::device::detail::runFlash(ctx, image({{0x100010F0, 0x20}}),
-                                                    FlashOptions{.halt = false, .allowUicr = true});
+    const auto pib = hwio::device::detail::runFlash(
+        ctx, image({{0x100010F0, 0x20}}),
+        FlashOptions{.halt = false, .allowUicr = true, .guided = false});
     ASSERT_FALSE(pib);
     EXPECT_EQ(pib.error().code, ErrorCode::FirmwareOutOfRange);
     EXPECT_EQ(pib.error().message,
@@ -268,8 +269,9 @@ TEST_F(Workflow, AllowUicrMergesAndKeepsThePib) {
             return hwio::Result<hwio::jlink::DownloadReport>{};
         });
     auto ctx = context();
-    ASSERT_TRUE(hwio::device::detail::runFlash(ctx, image({{0x0, 16}, {0x10001200, 4}}, 0x11),
-                                               FlashOptions{.halt = false, .allowUicr = true}));
+    ASSERT_TRUE(hwio::device::detail::runFlash(
+        ctx, image({{0x0, 16}, {0x10001200, 4}}, 0x11),
+        FlashOptions{.halt = false, .allowUicr = true, .guided = false}));
     ASSERT_TRUE(written.has_value());
     const FirmwareImage writtenImage = written.value_or(FirmwareImage{});
     ASSERT_EQ(writtenImage.segments().size(), 2U);
@@ -292,8 +294,9 @@ TEST_F(Workflow, AllowUicrOnTheLteMcuLeavesThePibOut) {
             return hwio::Result<hwio::jlink::DownloadReport>{};
         });
     auto ctx = context("lte");
-    ASSERT_TRUE(hwio::device::detail::runFlash(ctx, image({{0x00FF8000, 4}}),
-                                               FlashOptions{.halt = false, .allowUicr = true}));
+    ASSERT_TRUE(hwio::device::detail::runFlash(
+        ctx, image({{0x00FF8000, 4}}),
+        FlashOptions{.halt = false, .allowUicr = true, .guided = false}));
     ASSERT_TRUE(written.has_value());
     EXPECT_FALSE(written.value_or(FirmwareImage{}).intersects(hwio::device::pibRange(*ctx.target)));
 }

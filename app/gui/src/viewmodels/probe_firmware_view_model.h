@@ -7,7 +7,7 @@
 // (requestFromTab: the tab disconnects first, ADR-0246, and connects again after a successful
 // update, ADR-0256) and, once they exist, the setup wizard's `probe-firmware` row (0008) and the
 // troubleshooting topic `probe-firmware` (0009) (requestForSerial: refused while a tab uses the
-// probe; nothing connects afterwards). ProbeFirmwareDialog.qml shows the states:
+// probe; nothing connects afterwards). ProbeFirmwareView.qml shows the states:
 //   Idle -> Reading (inspectProbe on the worker, "Reading the J-Link…") -> Confirm (product, SN,
 //   current and new firmware strings; [Cancel] [Update]) -> Updating (no Cancel) -> Idle with a
 //   toast, or Failed (ErrorPanel, [Close]).
@@ -102,7 +102,7 @@ public:
     [[nodiscard]] ErrorInfo error() const { return m_error; }
     [[nodiscard]] bool quitPending() const noexcept { return m_quitPending; }
     [[nodiscard]] bool statusUnknown() const noexcept { return m_statusUnknown; }
-    // A request is open or a job runs (also a job whose dialog was cancelled while reading).
+    // A request is open or a job runs (also a job whose view was cancelled while reading).
     [[nodiscard]] bool busy() const noexcept { return m_state != Idle || m_worker->busy(); }
     // The update itself runs (quit waits for it).
     [[nodiscard]] bool updating() const noexcept { return m_state == Updating; }

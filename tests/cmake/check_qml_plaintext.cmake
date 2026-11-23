@@ -5,7 +5,7 @@
 #   cmake -DHWIO_QML_DIR=<dir> [-DHWIO_QML_ALLOWLIST=<file>] -P check_qml_plaintext.cmake
 #
 # The allow-list holds one path per line, relative to HWIO_QML_DIR ('#' starts a comment); those
-# files are not checked (only WizardDialog.qml, the single StyledText consumer, ADR-0184).
+# files are not checked (only WizardView.qml, the single StyledText consumer, ADR-0184).
 #
 # Tooltips (ADR-0184 amendment, review R7): an attached `ToolTip.text:` and a `ToolTip { }` element
 # are errors everywhere except in HToolTip.qml (allow-listed), whose contentItem is PlainText.
