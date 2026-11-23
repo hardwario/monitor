@@ -140,7 +140,7 @@ connected. `target` is `app` or `lte` (default: the console's target).
 
 | Tool | Does |
 |---|---|
-| `flash` | Flashes a `.hex` file (`path`, absolute) or a catalog firmware (`catalog_id`), verifies it and attaches the console again *(flash)* |
+| `flash` | Flashes a `.hex` file (`path`, absolute) or a catalog firmware (`catalog_id`; the download is checked against the SHA-256 on its catalog page when the page can be read), verifies it and attaches the console again *(flash)* |
 | `flash_lte` | Flashes an LTE bundle, a modem firmware zip or a `.hex` to the LTE MCU; needs nRF Util; 3 to 10 minutes *(flash)* |
 | `erase` | Erases the firmware (`scope: "code"`) or everything (`"all"`) *(erase)* |
 | `recover` | Removes read-back protection by erasing everything *(erase, uicr)* |

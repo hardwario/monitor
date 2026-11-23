@@ -2,7 +2,7 @@
 // window without a transient parent (shown while the main window is minimised), centred on the
 // screen under the mouse cursor, raised with requestActivate() and a taskbar / dock alert of the
 // main window. One prompt at a time (the queue is GuiConsentBroker's); the main window does not
-// switch tabs (Show device does). Esc = Deny, no default button; the title and the action are
+// switch tabs (Show device, in the device row, does; plan 0054). Esc = Deny, no default button; the title and the action are
 // announced to screen readers. Presentation only: McpController.consent (ConsentViewModel).
 pragma ComponentBehavior: Bound
 
@@ -102,7 +102,9 @@ Window {
             Accessible.name: heading.text
         }
 
-        // The detail rows: label and value, warnings without a label.
+        // The detail rows (plan 0054, ADR-0389): label, value with an optional small note under
+        // it (the full catalog ID), the "Show device" link in the device row; warnings without a
+        // label. Every text is plain text (a firmware name comes from a web page).
         Repeater {
             model: prompt.vm ? prompt.vm.details : []
 
@@ -125,38 +127,60 @@ Window {
                     wrapMode: Text.Wrap
                 }
 
-                Label {
-                    textFormat: Text.PlainText
+                // Takes the width the label and the link leave (a long path or ID wraps here).
+                ColumnLayout {
                     Layout.fillWidth: true
-                    text: detail.modelData.value
-                    color: detail.modelData.warning ? Theme.warning : Theme.text
-                    font: detail.modelData.warning ? Theme.fontUiStrong : Theme.fontUi
-                    wrapMode: Text.WrapAnywhere
+                    Layout.preferredWidth: 1
+                    Layout.alignment: Qt.AlignTop
+                    spacing: 0
+
+                    Label {
+                        textFormat: Text.PlainText
+                        objectName: "consentDetailValue"
+                        Layout.fillWidth: true
+                        text: detail.modelData.value
+                        color: detail.modelData.warning ? Theme.warning : Theme.text
+                        font: detail.modelData.warning ? Theme.fontUiStrong : Theme.fontUi
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    }
+
+                    // Never shortened: the full catalog ID is what the user can compare.
+                    Label {
+                        textFormat: Text.PlainText
+                        objectName: "consentDetailNote"
+                        Layout.fillWidth: true
+                        visible: detail.modelData.note !== ""
+                        text: detail.modelData.note
+                        font: Theme.fontUiSmall
+                        color: Theme.textMuted
+                        wrapMode: Text.WrapAnywhere
+                    }
                 }
-            }
-        }
 
-        Label {
-            id: showDevice
+                Label {
+                    id: showDeviceLink
 
-            textFormat: Text.PlainText
-            objectName: "consentShowDevice"
-            Layout.topMargin: Theme.spacingS
-            visible: prompt.vm !== null && prompt.vm.canShowDevice
-            text: qsTr("Show device ↗")
-            color: Theme.accent
-            font.underline: showDeviceHover.hovered
-            Accessible.role: Accessible.Link
-            Accessible.name: qsTr("Show device")
+                    textFormat: Text.PlainText
+                    objectName: "consentShowDevice"
+                    Layout.alignment: Qt.AlignTop
+                    Layout.minimumWidth: showDeviceLink.implicitWidth
+                    visible: detail.modelData.action === true
+                    text: qsTr("Show device ↗")
+                    color: Theme.accent
+                    font.underline: showDeviceHover.hovered
+                    Accessible.role: Accessible.Link
+                    Accessible.name: qsTr("Show device")
 
-            HoverHandler {
-                id: showDeviceHover
+                    HoverHandler {
+                        id: showDeviceHover
 
-                cursorShape: Qt.PointingHandCursor
-            }
+                        cursorShape: Qt.PointingHandCursor
+                    }
 
-            TapHandler {
-                onTapped: prompt.vm.showDevice()
+                    TapHandler {
+                        onTapped: prompt.vm.showDevice()
+                    }
+                }
             }
         }
 
@@ -169,6 +193,7 @@ Window {
                 id: denyButton
 
                 objectName: "consentDeny"
+                Layout.minimumWidth: denyButton.implicitWidth
                 text: qsTr("Deny")
                 onClicked: prompt.vm.deny(prompt.vm.promptId)
             }
@@ -178,18 +203,41 @@ Window {
             }
 
             HButton {
+                id: allowOnceButton
+
                 objectName: "consentAllowOnce"
+                Layout.minimumWidth: allowOnceButton.implicitWidth
                 text: qsTr("Allow once")
                 enabled: prompt.vm !== null && prompt.vm.armed
                 onClicked: prompt.vm.allowOnce(prompt.vm.promptId)
             }
 
+            // ADR-0389: "Always allow … for <client>"; its natural width when it fits, otherwise it
+            // wraps (the window is 480 px wide, the client name may be long).
             HButton {
+                id: rememberButton
+
                 objectName: "consentAllowForClient"
-                Layout.maximumWidth: 240
+                Layout.fillWidth: true
+                Layout.maximumWidth: rememberButton.implicitWidth
+                implicitHeight: Math.max(Theme.controlHeight, rememberText.implicitHeight + 2 * Theme.spacingXs)
                 text: prompt.vm ? prompt.vm.rememberLabel : ""
+                toolTipText: qsTr("Until you remove it in Settings › AI assistants (MCP).")
                 enabled: prompt.vm !== null && prompt.vm.armed
                 onClicked: prompt.vm.allowForClient(prompt.vm.promptId)
+
+                contentItem: Label {
+                    id: rememberText
+
+                    objectName: "consentAllowForClientText"
+                    textFormat: Text.PlainText
+                    text: rememberButton.text
+                    font: rememberButton.font
+                    color: rememberButton.contentColor
+                    wrapMode: Text.Wrap
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
             }
         }
 

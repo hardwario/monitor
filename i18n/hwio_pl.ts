@@ -459,27 +459,32 @@
         <translation>HARDWARIO Monitor — zezwolić asystentowi AI?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="146"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="168"/>
         <source>Show device ↗</source>
         <translation>Pokaż urządzenie ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="150"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="172"/>
         <source>Show device</source>
         <translation>Pokaż urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="172"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="197"/>
         <source>Deny</source>
         <translation>Odmów</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="182"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="210"/>
         <source>Allow once</source>
         <translation>Zezwól raz</translation>
     </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="225"/>
+        <source>Until you remove it in Settings › AI assistants (MCP).</source>
+        <translation>Dopóki nie usuniesz tego w Ustawienia › Asystenci AI (MCP).</translation>
+    </message>
     <message numerus="yes">
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="211"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="259"/>
         <source>%n more request(s) waiting.</source>
         <translation>
             <numerusform>Czeka jeszcze %n żądanie.</numerusform>
@@ -1541,178 +1546,200 @@
 <context>
     <name>McpSection</name>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="37"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="47"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="38"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="48"/>
         <source>Allow AI assistants to use HARDWARIO Monitor</source>
         <translation>Zezwól asystentom AI na korzystanie z HARDWARIO Monitor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="38"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="39"/>
         <source>AI tools such as Claude Code can read the console, send commands and, with your permission, flash devices.</source>
         <translation>Narzędzia AI, takie jak Claude Code, mogą czytać konsolę, wysyłać polecenia i za twoją zgodą wgrywać firmware do urządzeń.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="71"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="72"/>
         <source>Retry</source>
         <translation>Spróbuj ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="81"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="82"/>
         <source>Regenerate token</source>
         <translation>Wygeneruj nowy token</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="88"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="89"/>
         <source>Address</source>
         <translation>Adres</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="89"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="90"/>
         <source>After a port change, AI clients have to be configured again.</source>
         <translation>Po zmianie portu skonfiguruj klientów AI ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="111"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="112"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="124"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="161"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="205"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="386"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="125"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="162"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="206"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="440"/>
         <source>Copy</source>
         <translation>Kopiuj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="125"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="126"/>
         <source>Copied.</source>
         <translation>Skopiowano.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="132"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="149"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="133"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="150"/>
         <source>Token</source>
         <translation>Token</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="133"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="134"/>
         <source>AI clients send it with every request. Keep it private.</source>
         <translation>Klienci AI wysyłają go z każdym żądaniem. Nikomu go nie udostępniaj.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="145"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="146"/>
         <source>Created when the server starts</source>
         <translation>Zostanie utworzony przy uruchomieniu serwera</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="149"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="150"/>
         <source>Token, hidden</source>
         <translation>Token, ukryty</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="154"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="155"/>
         <source>Hide</source>
         <translation>Ukryj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="154"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="155"/>
         <source>Show</source>
         <translation>Pokaż</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="168"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="169"/>
         <source>Regenerate…</source>
         <translation>Wygeneruj nowy…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="176"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="177"/>
         <source>Connect a client</source>
         <translation>Połącz klienta</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="206"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="207"/>
         <source>Copy %1</source>
         <translation>Kopiuj %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="246"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="247"/>
         <source>Permissions</source>
         <translation>Uprawnienia</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="247"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="248"/>
         <source>What an AI assistant may do without asking you first.</source>
         <translation>Co asystent AI może zrobić bez pytania cię o zgodę.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="260"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="261"/>
         <source>Ask</source>
         <translation>Pytaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="268"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="269"/>
         <source>Always allow</source>
         <translation>Zawsze zezwalaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="316"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="287"/>
+        <source>All</source>
+        <translation>Wszystkie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="299"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="370"/>
         <source>%1: ask</source>
         <translation>%1: pytaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="327"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="309"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="381"/>
         <source>%1: always allow</source>
         <translation>%1: zawsze zezwalaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="339"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="393"/>
         <source>No answers are remembered for a client.</source>
         <translation>Dla żadnego klienta nie zapamiętano odpowiedzi.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="368"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="422"/>
         <source>Revoke</source>
         <translation>Odwołaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="369"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="423"/>
         <source>Revoke the permissions of %1</source>
         <translation>Odwołaj uprawnienia klienta %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="378"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="421"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="432"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="475"/>
         <source>Activity</source>
         <translation>Aktywność</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="379"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="433"/>
         <source>The last %1 calls, kept until the application quits.</source>
         <translation>Ostatnie %1 wywołań, przechowywane do zamknięcia aplikacji.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="393"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="447"/>
         <source>Clear</source>
         <translation>Wyczyść</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="404"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="458"/>
         <source>No calls yet.</source>
         <translation>Brak wywołań.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="522"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="577"/>
+        <source>Always allow everything?</source>
+        <translation>Zawsze zezwalać na wszystko?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="578"/>
+        <source>An AI assistant will be able to flash, erase and write the memory of your devices without asking you.</source>
+        <translation>Asystent AI będzie mógł wgrywać firmware do twoich urządzeń, wymazywać je i zapisywać ich pamięć bez pytania cię o zgodę.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="579"/>
+        <source>Always allow everything</source>
+        <translation>Zawsze zezwalaj na wszystko</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="587"/>
         <source>Regenerate the token?</source>
         <translation>Wygenerować nowy token?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="523"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="588"/>
         <source>Connected AI clients stop working until you update their configuration.</source>
         <translation>Połączeni klienci AI przestaną działać, dopóki nie zaktualizujesz ich konfiguracji.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="524"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="589"/>
         <source>Regenerate</source>
         <translation>Wygeneruj</translation>
     </message>
@@ -5600,153 +5627,178 @@
 <context>
     <name>hwio::gui::ConsentViewModel</name>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="49"/>
-        <source>Allow these for %1</source>
-        <translation>Zezwól na to dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="52"/>
-        <source>Allow flashing for %1</source>
-        <translation>Zezwól na wgrywanie dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="55"/>
-        <source>Allow erasing for %1</source>
-        <translation>Zezwól na wymazywanie dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="58"/>
-        <source>Allow memory writes for %1</source>
-        <translation>Zezwól na zapis pamięci dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="61"/>
-        <source>Allow UICR writes for %1</source>
-        <translation>Zezwól na zapis UICR dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="63"/>
-        <source>Allow connecting devices for %1</source>
-        <translation>Zezwól na łączenie urządzeń dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="116"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="179"/>
         <source>An AI assistant</source>
         <translation>Asystent AI</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="127"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="190"/>
         <source>%1 wants to flash firmware</source>
         <translation>%1 chce wgrać firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="130"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="193"/>
         <source>%1 wants to update the LTE modem firmware</source>
         <translation>%1 chce zaktualizować firmware modemu LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="133"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="196"/>
         <source>%1 wants to write to the flash memory</source>
         <translation>%1 chce zapisać pamięć flash</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="136"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="199"/>
         <source>%1 wants to erase the device</source>
         <translation>%1 chce wymazać urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="139"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="202"/>
         <source>%1 wants to recover the device (erases everything)</source>
         <translation>%1 chce odzyskać urządzenie (wymazuje wszystko)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="142"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="205"/>
         <source>%1 wants to write to the memory</source>
         <translation>%1 chce zapisać pamięć</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="145"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="208"/>
         <source>%1 wants to connect a device</source>
         <translation>%1 chce połączyć urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="147"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="210"/>
         <source>%1 wants to run %2</source>
         <translation>%1 chce uruchomić %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="160"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="267"/>
+        <source>MCU</source>
+        <translation>MCU</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="277"/>
         <source>Client</source>
         <translation>Klient</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="167"/>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="171"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="254"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="259"/>
         <source>Device</source>
         <translation>Urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="168"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="97"/>
+        <source>Application MCU</source>
+        <translation>MCU aplikacji</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="100"/>
+        <source>LTE MCU</source>
+        <translation>MCU LTE</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="112"/>
+        <source>Always allow these for %1</source>
+        <translation>Zawsze zezwalaj na to dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="115"/>
+        <source>Always allow flashing for %1</source>
+        <translation>Zawsze zezwalaj na wgrywanie dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="118"/>
+        <source>Always allow erasing for %1</source>
+        <translation>Zawsze zezwalaj na wymazywanie dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="121"/>
+        <source>Always allow memory writes for %1</source>
+        <translation>Zawsze zezwalaj na zapis pamięci dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="124"/>
+        <source>Always allow UICR writes for %1</source>
+        <translation>Zawsze zezwalaj na zapis UICR dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="126"/>
+        <source>Always allow connecting devices for %1</source>
+        <translation>Zawsze zezwalaj na łączenie urządzeń dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="241"/>
+        <source>Firmware</source>
+        <translation>Firmware</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="243"/>
+        <source>Catalog ID %1</source>
+        <translation>ID w katalogu %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="255"/>
         <source>Open a new tab for %1</source>
         <translation>Otwórz nową kartę dla %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="169"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="256"/>
         <source>Connect the tab %1</source>
         <translation>Połącz kartę %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="177"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="232"/>
         <source>File</source>
         <translation>Plik</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="181"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="246"/>
         <source>Size</source>
         <translation>Rozmiar</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="185"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="238"/>
         <source>Catalog ID</source>
         <translation>ID w katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="189"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="263"/>
         <source>Profile</source>
         <translation>Profil</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="193"/>
-        <source>Target</source>
-        <translation>Cel</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="196"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="270"/>
         <source>Scope</source>
         <translation>Zakres</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="199"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="273"/>
         <source>Address range</source>
         <translation>Zakres adresów</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="206"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="278"/>
+        <source>%1, version %2</source>
+        <translation>%1, wersja %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="285"/>
         <source>The PIB (serial number, keys) is lost.</source>
         <translation>PIB (numer seryjny, klucze) zostanie utracony.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="210"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="289"/>
         <source>Contains UICR data: factory data of the device may be overwritten.</source>
         <translation>Zawiera dane UICR: dane fabryczne urządzenia mogą zostać nadpisane.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="216"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="295"/>
         <source>Writing memory can make the device run arbitrary code.</source>
         <translation>Zapis pamięci może sprawić, że urządzenie wykona dowolny kod.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="245"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="324"/>
         <source>Denied automatically in %1 if not answered.</source>
         <translation>Bez odpowiedzi odmowa nastąpi automatycznie za %1.</translation>
     </message>
@@ -6712,98 +6764,98 @@
 <context>
     <name>hwio::gui::McpController</name>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="69"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="70"/>
         <source>Flash firmware (flash, LTE, raw flash)</source>
         <translation>Wgrywanie firmware (flash, LTE, surowy zapis flash)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="71"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="72"/>
         <source>Erase and recover</source>
         <translation>Wymazywanie i odzyskiwanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="73"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="74"/>
         <source>Write memory</source>
         <translation>Zapis pamięci</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="75"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="76"/>
         <source>Write UICR / factory data</source>
         <translation>Zapis UICR / danych fabrycznych</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="77"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="78"/>
         <source>Connect devices (opens a tab)</source>
         <translation>Łączenie urządzeń (otwiera kartę)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="153"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="170"/>
         <source>The AI assistant cancelled the request</source>
         <translation>Asystent AI anulował żądanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="260"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="86"/>
         <source>Writing memory can make the device run arbitrary code.</source>
         <translation>Zapis pamięci może sprawić, że urządzenie wykona dowolny kod.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="277"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="305"/>
         <source>An AI assistant</source>
         <translation>Asystent AI</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="285"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="313"/>
         <source>Allowed until disconnect: %1 — %2</source>
         <translation>Dozwolone do rozłączenia: %1 — %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="317"/>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="379"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="345"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="407"/>
         <source>Copied.</source>
         <translation>Skopiowano.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="354"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="382"/>
         <source>Claude Code (HTTP)</source>
         <translation>Claude Code (HTTP)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="357"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="385"/>
         <source>Claude Code (.mcp.json, token from HWIO_MCP_TOKEN)</source>
         <translation>Claude Code (.mcp.json, token z HWIO_MCP_TOKEN)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="360"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="388"/>
         <source>Claude Desktop (runs the hwio command separately)</source>
         <translation>Claude Desktop (uruchamia polecenie hwio osobno)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="361"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="389"/>
         <source>Runs separately from this window and cannot use a probe that is open here.</source>
         <translation>Działa niezależnie od tego okna i nie może użyć programatora otwartego tutaj.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="378"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="406"/>
         <source>Copied. Run it in a terminal.</source>
         <translation>Skopiowano. Uruchom to w terminalu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="387"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="415"/>
         <source>Off</source>
         <translation>Wyłączony</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="389"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="417"/>
         <source>Starting…</source>
         <translation>Uruchamianie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="391"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="419"/>
         <source>Listening</source>
         <translation>Nasłuchuje</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="392"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="420"/>
         <source>Listening · %n client(s)</source>
         <translation>
             <numerusform>Nasłuchuje · %n klient</numerusform>
@@ -6812,22 +6864,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="394"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="422"/>
         <source>Stopping…</source>
         <translation>Zatrzymywanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="397"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="425"/>
         <source>Port %1 is in use by another program — choose another port</source>
         <translation>Port %1 jest używany przez inny program — wybierz inny port</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="408"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="436"/>
         <source>AI assistants: listening on port %1</source>
         <translation>Asystenci AI: nasłuchuje na porcie %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="409"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="437"/>
         <source>AI assistants: listening on port %1, %n client(s)</source>
         <translation>
             <numerusform>Asystenci AI: nasłuchuje na porcie %1, %n klient</numerusform>
@@ -6836,12 +6888,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="417"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="445"/>
         <source>AI assistants: %1</source>
         <translation>Asystenci AI: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="626"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="654"/>
         <source>%1 (tab %2)</source>
         <translation>%1 (karta %2)</translation>
     </message>

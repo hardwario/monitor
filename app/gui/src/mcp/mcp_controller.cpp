@@ -16,6 +16,7 @@
 #include "hwio/mcp/tools/tools_context.h"
 #include "mcp/activity_model.h"
 #include "mcp/client_snippets.h"
+#include "mcp/consent_rules_model.h"
 #include "mcp/consent_view_model.h"
 #include "mcp/gui_consent_broker.h"
 #include "mcp/gui_device_provider.h"
@@ -79,6 +80,13 @@ QString categoryTitle(ConsentCategory category) {
     return {};
 }
 
+// ADR-0164: the warning under a category ("" when none).
+QString categoryHint(ConsentCategory category) {
+    return category == ConsentCategory::MemoryWrite
+               ? McpController::tr("Writing memory can make the device run arbitrary code.")
+               : QString();
+}
+
 std::optional<ConsentCategory> categoryOf(const QString& id) {
     return hwio::mcp::consentCategoryFromId(toStdString(id));
 }
@@ -137,6 +145,15 @@ McpController::McpController(AppViewModel& app, Options options)
             }
         },
         this);
+    // Qt parent ownership: the Permissions rows are a child (QML reads them as a property).
+    m_rules = new ConsentRulesModel( // NOLINT(cppcoreguidelines-owning-memory)
+        *m_consent,
+        [](ConsentCategory category) {
+            return ConsentRulesModel::Texts{.title = categoryTitle(category),
+                                            .hint = categoryHint(category)};
+        },
+        this);
+    connect(&app, &AppViewModel::languageChanged, m_rules, &ConsentRulesModel::retranslate);
 
     m_activeTimer.setInterval(activeTick);
     connect(&m_activeTimer, &QTimer::timeout, this, &McpController::updateActiveClients);
@@ -247,21 +264,32 @@ void McpController::setConsentRule(const QString& category, bool allow) {
     }
 }
 
-QVariantList McpController::rules() const {
-    QVariantList rows;
+void McpController::setAllConsentRules(bool allow) {
     for (const ConsentCategory category : GuiConsentBroker::categories) {
-        const std::string_view id = hwio::mcp::consentCategoryId(category);
-        rows.append(QVariantMap{{QStringLiteral("id"),
-                                 QString::fromLatin1(id.data(), static_cast<qsizetype>(id.size()))},
-                                {QStringLiteral("title"), categoryTitle(category)},
-                                // ADR-0164.
-                                {QStringLiteral("hint"),
-                                 category == ConsentCategory::MemoryWrite
-                                     ? tr("Writing memory can make the device run arbitrary code.")
-                                     : QString()},
-                                {QStringLiteral("allow"), m_consent->alwaysAllowed(category)}});
+        if (m_consent->alwaysAllowed(category) == allow) {
+            continue;
+        }
+        // A failure is logged and the other categories are still set (Ask for all stays as safe
+        // as it can be).
+        if (const Status stored = m_consent->setAlwaysAllowed(category, allow); !stored) {
+            qCWarning(lcGui) << "MCP: consent rule"
+                             << toQString(hwio::mcp::consentCategoryId(category))
+                             << "not stored:" << toQString(stored.error().detail);
+        }
     }
-    return rows;
+}
+
+int McpController::allRules() const {
+    const auto allowed = [this](ConsentCategory category) {
+        return m_consent->alwaysAllowed(category);
+    };
+    if (std::ranges::all_of(GuiConsentBroker::categories, allowed)) {
+        return AllRulesAllow;
+    }
+    if (std::ranges::none_of(GuiConsentBroker::categories, allowed)) {
+        return AllRulesAsk;
+    }
+    return AllRulesMixed;
 }
 
 QVariantList McpController::grants() const {
