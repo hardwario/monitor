@@ -17,6 +17,9 @@ ColumnLayout {
     property LteUpdateWizard vm: null
     readonly property int stage: step.vm ? step.vm.stage : LteUpdateWizard.Firmware
 
+    // ADR-0384: the wizard dialog scrolls `item` into view.
+    signal scrollIntoViewRequested(Item item)
+
     objectName: "lteUpdateStep"
     spacing: Theme.spacingM
 
@@ -166,10 +169,22 @@ ColumnLayout {
             visible: step.vm !== null && step.vm.hasBackup
             text: qsTr("Firmware from the catalog or a file")
             checked: step.vm !== null && !step.vm.useBackup
-            onToggled: step.vm.useBackup = false
+            onToggled: {
+                step.vm.useBackup = false;
+                revealPicker.restart(); // ADR-0384: once the picker is laid out
+            }
+        }
+
+        Timer {
+            id: revealPicker
+
+            interval: 50
+            onTriggered: step.scrollIntoViewRequested(appSourceCard)
         }
 
         SourceCard {
+            id: appSourceCard
+
             objectName: "appSourceCard"
             Layout.fillWidth: true
             number: 0 // plan 0034 (B4): no Flash page step number inside the wizard
@@ -177,6 +192,8 @@ ColumnLayout {
             source: step.vm ? step.vm.appSource : null
             onBrowseRequested: {
                 fileDialog.target = step.vm.appSource;
+                if (step.vm.appSource.backupsFolder.toString() !== "") // ADR-0381
+                    fileDialog.currentFolder = step.vm.appSource.backupsFolder;
                 fileDialog.open();
             }
         }

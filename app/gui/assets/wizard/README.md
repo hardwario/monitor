@@ -7,15 +7,19 @@ the caption is a separate translatable text. The files are stored with **Git LFS
 `app/gui/assets/wizard/*.svg`, `*.png`) and compiled into the QML module `HardwarioMonitor`
 (`qrc:/qt/qml/HardwarioMonitor/assets/wizard/`). Replacing a file needs no code change.
 
-The current files are **placeholders**: a dashed outline frame and the Material Symbol of the topic (paths from the
-icons in `../icons`, Apache License 2.0, see `../icons/README.md`), the slot id only in the SVG `<title>`. The real art
-is a content task for HARDWARIO (ADR-0076, open question 22 for the CHESTER connectors).
+`jlink-usb`, `chester-power` and `placeholder` are **placeholders**: a dashed outline frame and the Material Symbol of
+the topic (paths from the icons in `../icons`, Apache License 2.0, see `../icons/README.md`), the slot id only in the
+SVG `<title>`. `chester-app-cable` and `chester-lte-cable` (light and `-dark`) are **schematic line drawings** (plan
+0051, ADR-0380): the CHESTER board outline with both 10-pin programming connectors (APP left, LTE right), the J-Link
+flat cable on the connector of the step in the accent colour, the other connector muted. **The connector positions
+are schematic and must be checked against a real CHESTER board.** Real photos or art remain a content task for
+HARDWARIO (ADR-0076, open question 22); they replace the files without code changes.
 
 | Slot | Shows | Caption source text | Placeholder symbol |
 |---|---|---|---|
 | `jlink-usb` | J-Link connected to a computer by USB | "Connect the J-Link to your computer with a USB cable." | `probe` |
-| `chester-app-cable` | flat cable to the application MCU's programming connector | from the profile guide (`TargetProfile::connectionGuide`, ADR-0077) | `device` |
-| `chester-lte-cable` | flat cable to the LTE MCU's programming connector | from the profile guide | `device` |
+| `chester-app-cable` | flat cable to the application MCU's programming connector | from the profile guide (`TargetProfile::connectionGuide`, ADR-0077) | schematic (ADR-0380) |
+| `chester-lte-cable` | flat cable to the LTE MCU's programming connector | from the profile guide | schematic (ADR-0380) |
 | `chester-power` | CHESTER with batteries / USB-C power | from the profile power hint (`DeviceProfile::powerHintSourceText`) | `flash` |
 | `placeholder` | neutral frame (fallback for an unknown slot) | — | `placeholder` |
 

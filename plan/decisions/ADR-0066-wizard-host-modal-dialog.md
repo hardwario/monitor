@@ -1,6 +1,6 @@
 # ADR-0066 — Wizards are shown in a modal dialog
 
-- **Status:** Accepted
+- **Status:** Superseded by ADR-0386
 - **Date:** 2026-10-09
 - **Decided by:** Matej Strnad (M4 planning session)
 

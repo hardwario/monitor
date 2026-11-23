@@ -110,8 +110,8 @@ TestCase {
         keyClick(Qt.Key_Escape);
         tryVerify(() => !popover.visible);
 
-        // M4 (plan 0007): the wizard dialog with the test wizard, its check list and the
-        // diagnostic report dialog.
+        // M4 (plan 0007): the wizard view (plan 0052) with the test wizard, its check list and the
+        // diagnostic report.
         verify(AppViewModel.launcher.start("connect-device", 0));
         save("10-wizard-info");
         testSupport.openWizard().goTo(2);
@@ -120,8 +120,8 @@ TestCase {
         save("12-wizard-commands");
         testSupport.openWizard().goTo(5);
         save("13-wizard-done");
-        AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open);
+        AppViewModel.currentTabViewModel.wizard.cancel(true);
+        tryVerify(() => !AppViewModel.currentTabViewModel.wizard.open);
         AppViewModel.report.show();
         tryCompare(AppViewModel.report, "state", "ready", 30000);
         save("14-report");
@@ -133,8 +133,8 @@ TestCase {
         verify(AppViewModel.launcher.start("connect-device", 0));
         testSupport.openWizard().goTo(2);
         save("15-wizard-checks-960x600");
-        AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open);
+        AppViewModel.currentTabViewModel.wizard.cancel(true);
+        tryVerify(() => !AppViewModel.currentTabViewModel.wizard.open);
         testSupport.resetTabs();
     }
 

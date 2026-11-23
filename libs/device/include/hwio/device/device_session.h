@@ -225,8 +225,10 @@ public:
                    FlashOptions options);
     [[nodiscard]] Result<OperationId> erase(std::string_view targetId, EraseScope scope);
     [[nodiscard]] Result<OperationId> recover(std::string_view targetId);
+    // `options`: only `guided` applies (ADR-0383).
     [[nodiscard]] Result<OperationId> updateModem(std::string_view targetId,
-                                                  std::filesystem::path modemZip);
+                                                  std::filesystem::path modemZip,
+                                                  FlashOptions options = {});
     // Replaces M1's reset(bool halt) (ADR-0062).
     [[nodiscard]] Result<OperationId> reset(std::string_view targetId, ResetMode mode);
     // 1..maxReadMemoryBytes bytes; M6: `size` a multiple of the width, `address` aligned to it,

@@ -35,6 +35,9 @@ Item {
     objectName: "flashPage"
 
     function browse() {
+        // Plan 0051 (ADR-0381): application firmware starts in the backups folder when copies exist.
+        if (page.model && page.model.source.backupsFolder.toString() !== "")
+            fileDialog.currentFolder = page.model.source.backupsFolder;
         fileDialog.open();
     }
 

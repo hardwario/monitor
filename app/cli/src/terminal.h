@@ -24,8 +24,9 @@ namespace hwio::cli {
 // Colors on stdout: a TTY and NO_COLOR not set.
 [[nodiscard]] bool stdoutColors();
 
-// Asks on stderr and reads one line from stdin; true for "y" / "yes" (any case).
-[[nodiscard]] bool askYesNo(const std::string& question);
+// Asks on stderr and reads one line from stdin; true for "y" / "yes" (any case). `defaultYes`
+// (plan 0051, "[Y/n]"): also true for an empty answer or the end of the input.
+[[nodiscard]] bool askYesNo(const std::string& question, bool defaultYes = false);
 
 // What StdinLineReader does with a line longer than StdinReaderOptions::maxLineBytes (ADR-0154).
 enum class OverlongLinePolicy : std::uint8_t {
