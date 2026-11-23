@@ -631,14 +631,16 @@ static_assert(std::ranges::all_of(topics, [](const Topic& topic) {
 std::span<const Topic> troubleshootingTopics() { return topics; }
 
 const Topic* topicFor(ErrorCode code) {
-    const auto* const it = std::ranges::find_if(topics, [code](const Topic& topic) {
+    // NOLINTNEXTLINE(readability-qualified-auto)
+    const auto it = std::ranges::find_if(topics, [code](const Topic& topic) {
         return std::ranges::find(topic.codes, code) != topic.codes.end();
     });
     return it != topics.end() ? &*it : nullptr;
 }
 
 const Topic* topicById(std::string_view id) {
-    const auto* const it =
+    // NOLINTNEXTLINE(readability-qualified-auto)
+    const auto it =
         std::ranges::find_if(topics, [id](const Topic& topic) { return topic.id == id; });
     return it != topics.end() ? &*it : nullptr;
 }

@@ -665,7 +665,8 @@ void FlashWizard::onDiagnoseStep(device::OperationId id, const device::DiagnoseS
     if (!m_diagnose || id != m_diagnose->id || m_diagnose->identifyReported) {
         return;
     }
-    const auto* const it = std::ranges::find(cableCheckIds, std::string_view(step.id));
+    // NOLINTNEXTLINE(readability-qualified-auto)
+    const auto it = std::ranges::find(cableCheckIds, std::string_view(step.id));
     if (it == cableCheckIds.end()) {
         return;
     }

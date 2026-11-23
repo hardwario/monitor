@@ -1415,7 +1415,9 @@ private:
         std::size_t lastStep = diagnoseStepIds.size() - 1;
 
         [[nodiscard]] bool runs(std::string_view stepId) const {
-            const auto* const it = std::ranges::find(diagnoseStepIds, stepId);
+            // An iterator, not a pointer, in the MSVC STL.
+            // NOLINTNEXTLINE(readability-qualified-auto)
+            const auto it = std::ranges::find(diagnoseStepIds, stepId);
             return std::cmp_less_equal(std::distance(diagnoseStepIds.begin(), it), lastStep);
         }
     };
@@ -1951,7 +1953,8 @@ private:
                         .deadline = clock().now() + budget,
                         .budget = budget};
         if (!command.diagnoseLastStep.empty()) {
-            const auto* const last = std::ranges::find(diagnoseStepIds, command.diagnoseLastStep);
+            // NOLINTNEXTLINE(readability-qualified-auto)
+            const auto last = std::ranges::find(diagnoseStepIds, command.diagnoseLastStep);
             run.lastStep = static_cast<std::size_t>(std::distance(diagnoseStepIds.begin(), last));
         }
         reporter.step(1, static_cast<int>(run.lastStep) + 1);
