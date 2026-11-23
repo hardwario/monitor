@@ -97,9 +97,31 @@ konektoru LTE) vás proto provede celým postupem:
 7. **Aplikace**: zapíše se zpět kopie (výchozí), nebo zvolte firmware z katalogu či ze souboru.
 8. **Hotovo**: aplikace znovu běží a konzole se znovu připojí.
 
-Během průvodce je konzole karty pozastavená (**Pozastaveno kvůli aktualizaci firmwaru LTE**). Zrušit lze kdykoli kromě
-zápisu do MCU. Po kroku 3 se průvodce nejprve zeptá: aplikační MCU je smazaný a zařízení neběží, dokud nenahrajete
-aplikaci. Kopie zůstane ve složce `backups` ([Soukromí a uložená data](privacy.md)).
+Průvodce nahradí plochu stránky karty; mezitím se můžete podívat do konzole a vrátit se tlačítkem **Průvodce** nahoře
+v liště ([Průvodci a další zobrazení](getting-started.md#průvodci-a-další-zobrazení)). Během průvodce je konzole karty
+pozastavená (**Pozastaveno kvůli aktualizaci firmwaru LTE**). Zrušit lze kdykoli kromě
+zápisu do MCU. Po kroku 3 se průvodce nejprve zeptá: **Aplikační MCU je smazaný. Zapsat nejdřív aplikaci zpět?**
+
+- **Zapsat zpět**: průvodce požádá o J-Link na konektoru APP, zapíše kopii zpět a skončí zprávou **Firmware LTE nebyl
+  aktualizován. Aplikace byla zapsána zpět.**
+- **Nechat smazané**: průvodce se zavře; zařízení neběží, dokud nenahrajete aplikaci. Zpráva řekne, kde kopie je.
+- **Zpět**: průvodce pokračuje.
+
+Bez kopie (prázdná aplikace) Zrušit oznámí, že aplikační MCU je smazaný. Kopie zůstávají ve složce `backups`
+([Soukromí a uložená data](privacy.md)); uchovává se 10 nejnovějších.
+
+<a id="application-copies"></a>
+### Kopie aplikace
+
+Když složka `backups` obsahuje kopie připojeného zařízení CHESTER, karta **Aplikační firmware** (stránka **Nahrát FW**
+a krok 7 průvodce) ukáže **Kopie aplikace z** s datem a časem nejnovější kopie; šipka vypíše všechny kopie zařízení
+(až 10). Zvolená kopie se načte jako soubor. **Otevřít složku záloh** složku otevře a dialog pro výběr souboru v ní
+začíná. Dokud sériové číslo zařízení není známé (například když je aplikace smazaná), karta vypíše všechny kopie
+s jejich sériovými čísly. V terminálu: `hwio chester app backups` a `hwio chester app flash --backup latest`
+([Příkazová řádka](../en/cli.md)).
+
+Když krok průvodce selže, panel chyby místo tlačítek stránky Nahrát FW ukáže **Řešení potíží** (dokumentaci chyby);
+**Zkusit znovu** a **Zrušit** ve spodní části průvodce pokračují.
 
 ## Údržba
 

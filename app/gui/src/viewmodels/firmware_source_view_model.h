@@ -44,6 +44,7 @@
 // Ownership: child of its owner (FlashViewModel, the flash wizard). The catalog operation it holds
 // never outlives FirmwareServices (see firmware_services.h). GUI thread only.
 
+#include "hwio/device/application_backup.h"
 #include "viewmodels/error_info.h"
 #include "viewmodels/recent_sources_model.h"
 #include "workers/firmware_loader.h"
@@ -52,11 +53,13 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+#include <QVariantList>
 #include <QVariantMap>
 #include <QtQmlIntegration>
 #include <QtTypes>
 
 #include <cstdint>
+#include <filesystem>
 #include <functional>
 #include <map>
 #include <memory>
@@ -108,6 +111,12 @@ class FirmwareSourceViewModel : public QObject {
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY kindChanged)
     Q_PROPERTY(QString dropText READ dropText NOTIFY kindChanged)
     Q_PROPERTY(hwio::gui::RecentSourcesModel* recent READ recent CONSTANT)
+    // Plan 0051 (ADR-0381): the application copies of the guided LTE update (application kind
+    // only): [{text: "Application copy from <local date and time>", path}], newest first (at
+    // most ApplicationBackup::keepFiles), of the device's serial (all copies, with the serial in
+    // the text, while it is unknown); the backups folder, for the file dialog when copies exist.
+    Q_PROPERTY(QVariantList backups READ backups NOTIFY backupsChanged)
+    Q_PROPERTY(QUrl backupsFolder READ backupsFolder NOTIFY backupsChanged)
     // 0021 (ADR-0165): the LTE source and the designated LTE firmware.
     Q_PROPERTY(int lteSource READ lteSource WRITE setLteSource NOTIFY lteSourceChanged)
     Q_PROPERTY(bool designatedAvailable READ designatedAvailable NOTIFY kindChanged)
@@ -237,6 +246,23 @@ public:
     Q_INVOKABLE bool checkCatalogId(const QString& text);
     Q_INVOKABLE void loadRecent(int row);
     Q_INVOKABLE void removeRecent(int row);
+    // Plan 0051 (ADR-0385): called when the Recent list is shown: looks up the catalog names of
+    // its entries without one in the background - one request at a time, at most
+    // maxNameLookups per run of this object, each ID once; a found name is stored.
+    Q_INVOKABLE void resolveRecentNames();
+    // ADR-0381: reads the backups folder again (the picker is shown, a copy was saved).
+    Q_INVOKABLE void refreshBackups();
+    // Loads the copy `index` of `backups` like a file.
+    Q_INVOKABLE void loadBackup(int index);
+    // Opens the backups folder in the file manager (created when missing).
+    Q_INVOKABLE void openBackupsFolder();
+    [[nodiscard]] QVariantList backups() const;
+    [[nodiscard]] QUrl backupsFolder() const;
+    // The device's serial number ("" = unknown); set by the owner (Flash page, LTE wizard).
+    void setDeviceSerial(const QString& serial);
+    // Test seam: the folder of the copies (default ApplicationBackup::defaultDirectory()).
+    void setBackupDirectory(const std::filesystem::path& directory);
+    static constexpr int maxNameLookups = 10;
     Q_INVOKABLE void clear();
     Q_INVOKABLE void cancelDownload();
     // [Switch] of the kind hint: emits kindSuggestionAccepted(suggestedKind).
@@ -266,6 +292,7 @@ signals:
     void lteSourceChanged();
     void designatedChanged();
     void binAddressChanged();
+    void backupsChanged();
 
 private:
     void loadPath(const QString& path);
@@ -277,6 +304,8 @@ private:
     void startLookup(const QString& id);
     void onLookupFinished();
     void cancelLookup();
+    void lookUpNextRecentName();
+    void onRecentNameFinished();
     void setLoaded(LoadedSource loaded, QString recentSource);
     void setError(Error error);
     void setState(SourceState state);
@@ -347,6 +376,14 @@ private:
     const device::DeviceProfile* m_designatedProfile = nullptr;
     // 0021: the catalog page of the ID in the field.
     std::unique_ptr<firmware::LookupOperation> m_lookup;
+    // ADR-0385: the background name lookup of the Recent list (bounded: maxNameLookups).
+    std::unique_ptr<firmware::LookupOperation> m_nameLookup;
+    QString m_nameLookupId;
+    QStringList m_namesTried; // the IDs looked up in this run (<= maxNameLookups)
+    // ADR-0381: the copies of m_deviceSerial (all while it is empty), <= keepFiles.
+    QString m_deviceSerial;
+    std::filesystem::path m_backupDirectory;
+    std::vector<device::ApplicationBackup::Entry> m_backups;
     QString m_lookupId;
     QString m_lookupState = QStringLiteral("none");
     std::unique_ptr<firmware::CatalogInfo> m_info; // of m_lookupId when found

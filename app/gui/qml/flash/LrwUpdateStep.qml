@@ -1,6 +1,6 @@
 // The Embedded step "lrw-update" of the LoRaWAN module wizard (plan/features/0040-chester-lrw-module
 // .md B1, B2; ADR-0352), bound to LrwUpdateWizard (`vm`). Shows by `vm.stage`: a connector prompt
-// (the dialog shows the picture), the running operation (prompt + PhaseStepper), the unlock
+// (the wizard view shows the picture), the running operation (prompt + PhaseStepper), the unlock
 // confirmation of a read-out protected module or the failure. Presentation only.
 pragma ComponentBehavior: Bound
 
@@ -68,7 +68,7 @@ ColumnLayout {
         }
     }
 
-    // While an operation runs (Cancel is the dialog's, disabled meanwhile).
+    // While an operation runs (Cancel is the wizard view's, disabled meanwhile).
     PhaseStepper {
         objectName: "lrwProgress"
         Layout.fillWidth: true
@@ -79,7 +79,7 @@ ColumnLayout {
         cancelVisible: false
     }
 
-    // What went wrong ([Try again] is the dialog's primary button when the procedure can retry).
+    // What went wrong ([Try again] is the wizard view's primary button when the procedure can retry).
     ErrorPanel {
         objectName: "lrwError"
         Layout.fillWidth: true

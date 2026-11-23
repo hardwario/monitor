@@ -183,6 +183,29 @@ TEST_F(NrfUtil, UpdateFailure) {
         << status.error().detail;
 }
 
+// Plan 0051 (ADR-0383): the nRF Util output of issue #9 is target.low_voltage.
+TEST_F(NrfUtil, LowVoltageIsClassified) {
+    mode("lowvoltage");
+    NrfUtilModemUpdater updater(fake);
+    const auto status = updater.updateModem("/tmp/mfw.zip", 1, {}, {});
+    ASSERT_FALSE(status);
+    EXPECT_EQ(status.error().code, ErrorCode::TargetLowVoltage);
+    EXPECT_NE(status.error().detail.find("Failed to configure Coresight: LOW_VOLTAGE"),
+              std::string::npos)
+        << status.error().detail;
+}
+
+TEST_F(NrfUtil, ModemFailureCode) {
+    EXPECT_EQ(hwio::nrfutil::modemFailureCode(
+                  "nRF Util exit 1: Failed, Device error: Failed to configure Coresight: "
+                  "LOW_VOLTAGE; stderr: Error: One or more program tasks failed:\n * 822005110: "
+                  "Device error: Failed to configure Coresight: LOW_VOLTAGE (Generic)"),
+              ErrorCode::TargetLowVoltage);
+    EXPECT_EQ(hwio::nrfutil::modemFailureCode("nRF Util exit 1: Modem DFU failed (simulated)"),
+              ErrorCode::FirmwareModemUpdateFailed);
+    EXPECT_EQ(hwio::nrfutil::modemFailureCode(""), ErrorCode::FirmwareModemUpdateFailed);
+}
+
 TEST_F(NrfUtil, HangTimesOutAndIsKilled) {
     mode("hang");
     NrfUtilModemUpdater updater(fake,

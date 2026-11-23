@@ -128,7 +128,8 @@ ApplicationWindow {
                     // 0021 review F8: alive while the Settings tab is open (scroll position and
                     // half-typed fields survive switching tabs), shown while it is current.
                     active: AppViewModel.tabs.settingsOpen
-                    visible: AppViewModel.globalPage !== ""
+                    // Plan 0052: hidden (no focus beneath) while a view covers it.
+                    visible: AppViewModel.globalPage !== "" && !settingsViewHost.shown
                     source: AppViewModel.pages.qml("settings")
 
                     Binding {
@@ -138,12 +139,26 @@ ApplicationWindow {
                         when: globalPageLoader.status === Loader.Ready
                     }
                 }
+
+                // Plan 0052 (ADR-0387): a content view or the global wizard over the Settings tab
+                // (a device tab's own host is in its PageHost).
+                ContentViewHost {
+                    id: settingsViewHost
+
+                    anchors.fill: parent
+                    current: AppViewModel.globalPage !== ""
+                    onClosed: {
+                        const page = globalPageLoader.item as Item;
+                        if (page)
+                            page.forceActiveFocus(); // plan 0052: back to the page
+                    }
+                }
             }
         }
     }
 
-    // Plan 0028 (D21, ADR-0202): in the overlay layer above the modal dialogs (wizard, report), so
-    // a copy inside a dialog shows its toast; never focusable and never takes input.
+    // Plan 0028 (D21, ADR-0202): in the overlay layer above the modal dialogs, so a copy shows its
+    // toast also while a confirmation is open; never focusable and never takes input.
     Toast {
         id: toastColumn
 
@@ -156,31 +171,9 @@ ApplicationWindow {
         enabled: false
     }
 
-    ShortcutOverlay {}
-
-    // M4 (plan/features/0007): the one wizard dialog and the diagnostic report dialog.
-    WizardDialog {}
-
-    ReportDialog {}
-
-    // Plan 0036: the J-Link firmware update.
-    ProbeFirmwareDialog {}
-
-    // Plan 0045 (ADR-0359, ADR-0362): the user mode is chosen once, before the first tab is used.
-    ModeChoiceDialog {
-        id: modeChoice
-
-        Component.onCompleted: if (!AppViewModel.uiMode.chosen) modeChoice.open()
-
-        Connections {
-            target: AppViewModel.uiMode
-
-            function onChosenChanged() {
-                if (!AppViewModel.uiMode.chosen)
-                    modeChoice.open();
-            }
-        }
-    }
+    // Plan 0052 (ADR-0386, ADR-0387): the wizards and the content views (report, J-Link firmware
+    // update, join / share a support session, mode choice, keyboard shortcuts) are views of the page
+    // area (PageHost, ContentViewHost), not dialogs.
 
     // Plan 0014 (ADR-0108): the MCP consent prompt, a window of its own.
     ConsentWindow {

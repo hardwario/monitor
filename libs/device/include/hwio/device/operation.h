@@ -145,6 +145,10 @@ struct FlashOptions {
     bool allowUicr = false;
     // STM32 (plan 0039): erase the whole chip (flash and data EEPROM) before programming.
     bool eraseAll = false;
+    // ADR-0383: started by the guided LTE update (LteUpdateProcedure; the application MCU is
+    // erased): a failure keeps its own error, the reset reason of the target is only logged (no
+    // target.reset_during_update).
+    bool guided = false;
 };
 
 // Largest readMemory() (64 KiB).

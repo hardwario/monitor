@@ -15,7 +15,7 @@ Inne języki: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-sup
 ## Udostępnianie konsoli
 
 1. Podłącz urządzenie (J-Link lub Bluetooth) i otwórz stronę **Konsola**.
-2. Kliknij **Udostępnij wsparciu…**. Okno wyjaśnia, co wsparcie może robić. Kliknij **Rozpocznij udostępnianie**.
+2. Kliknij **Udostępnij wsparciu…**. Strona wyjaśnia, co wsparcie może robić. Kliknij **Rozpocznij udostępnianie**.
 3. Baner pokazuje **Udostępniono wsparciu — kod 482 913**. Podaj kod wsparciu HARDWARIO. **Kopiuj link** kopiuje
    link z kodem.
 4. Gdy ktoś dołączy, HARDWARIO Monitor zapyta: *Ktoś dołączył do sesji 482 913. Zezwolić mu na wysyłanie poleceń do

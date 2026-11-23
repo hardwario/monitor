@@ -137,7 +137,7 @@ void LrwUpdateWizard::onProcedureFinished() {
         releaseTab();
     }
     if (step == Step::Cancelled) {
-        emit finished(false); // the dialog closes (also after Cancel and close)
+        emit finished(false); // the wizard closes (also after Cancel and close)
         return;
     }
     emit changed();
@@ -256,7 +256,7 @@ WizardStep LrwUpdateWizard::doneStep(WizardStep step) const {
     step.kind = StepKind::Done;
     switch (requestAction()) {
     case Action::Flash:
-        // Plain text (WizardDialog): the firmware's name may be a file name.
+        // Plain text (WizardView): the firmware's name may be a file name.
         step.heading = tr("LoRaWAN module flashed with %1.")
                            .arg(QString::fromStdString(m_procedure->request().name));
         break;

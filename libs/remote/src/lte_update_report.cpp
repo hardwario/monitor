@@ -71,9 +71,8 @@ void LteUpdateReporter::onChanged() {
         return;
     }
     const Step step = m_procedure->step();
-    if (step == Step::ConnectAppAgain || step == Step::ChooseApplication || step == Step::Restore ||
-        step == Step::Done) {
-        m_lteUpdated = true; // reached only after a successful LTE update
+    if (m_procedure->lteUpdated()) {
+        m_lteUpdated = true; // not the write-back after a cancel (ADR-0381)
     }
     if (step == Step::Idle || step == Step::Done || step == Step::Failed ||
         step == Step::Cancelled) {
@@ -191,6 +190,15 @@ Status LteUpdateReporter::result() const {
             makeError(ErrorCode::InternalUnexpected, "the guided LTE update failed")));
     default:
         break;
+    }
+    if (m_procedure->writtenBack()) {
+        // ADR-0381: cancelled, the copy was written back.
+        return std::unexpected(makeError(ErrorCode::Cancelled,
+                                         m_procedure->lteUpdated()
+                                             ? "the guided LTE update was cancelled after the LTE "
+                                               "update; the application was written back"
+                                             : "the guided LTE update was cancelled; the "
+                                               "application was written back"));
     }
     if (m_lteUpdated) {
         return std::unexpected(makeError(ErrorCode::RemoteApplicationNotRestored,

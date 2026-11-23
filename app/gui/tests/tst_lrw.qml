@@ -39,10 +39,10 @@ TestCase {
         return items.length > 0 ? items[0] : null;
     }
 
-    // An item of the open wizard dialog (a popup: not below the window's content item).
+    // An item of the tab's wizard view (plan 0052: the wizard is a view of the tab's page area).
     function part(name) {
-        const dialog = findChild(window, "wizardDialog");
-        const items = dialog ? findAll(dialog.contentItem, name).filter(effectivelyVisible) : [];
+        const view = find("wizardView");
+        const items = view ? findAll(view, name).filter(effectivelyVisible) : [];
         return items.length > 0 ? items[0] : null;
     }
 
@@ -71,11 +71,10 @@ TestCase {
     }
 
     function cleanup() {
-        if (AppViewModel.wizard.open)
-            AppViewModel.wizard.cancel(true);
-        tryVerify(() => !AppViewModel.wizard.open, 10000);
-        const dialog = findChild(window, "wizardDialog");
-        tryVerify(() => !dialog || !dialog.visible);
+        if (AppViewModel.currentTabViewModel.wizard.open)
+            AppViewModel.currentTabViewModel.wizard.cancel(true);
+        tryVerify(() => !AppViewModel.currentTabViewModel.wizard.open, 10000);
+        tryVerify(() => find("wizardView") === null);
         verify(testSupport.moveCable("app"));
     }
 
@@ -136,11 +135,11 @@ TestCase {
         flash.source.loadFile(testSupport.writeModuleHex("module.hex", 1024));
         tryVerify(() => find("flashButton").enabled, 5000);
         mouseClick(find("flashButton"));
-        const dialog = findChild(window, "wizardDialog");
-        tryVerify(() => dialog.opened);
+        tryVerify(() => find("wizardView") !== null); // plan 0052: the wizard view of the tab
+        const dialog = find("wizardView");
         const wizard = testSupport.openWizard();
         verify(wizard !== null);
-        compare(AppViewModel.wizard.wizardId, "lrw-update");
+        compare(AppViewModel.currentTabViewModel.wizard.wizardId, "lrw-update");
         compare(flash.opState, FlashViewModel.Idle);
         tryVerify(() => wizard.illustration === "chester-lrw-cable", 20000);
         compare(wizard.stage, LrwUpdateWizard.Connector);
@@ -152,8 +151,8 @@ TestCase {
         tryVerify(() => wizard.stage === LrwUpdateWizard.UnlockConfirmation, 20000);
         verify(part("lrwUnlockText").text.endsWith("the module's original Murata firmware is removed."));
         verify(!part("lrwPrompt"));
-        verify(AppViewModel.wizard.canPrimary);
-        AppViewModel.wizard.primary();
+        verify(AppViewModel.currentTabViewModel.wizard.canPrimary);
+        AppViewModel.currentTabViewModel.wizard.primary();
         // The APP connector (the fake's CTRL-AP may answer behind the LoRaWAN connector too, so the
         // wizard can be past this step already).
         tryVerify(() => wizard.illustration === "chester-app-cable" || wizard.stage === LrwUpdateWizard.Summary, 60000);
@@ -161,8 +160,8 @@ TestCase {
         verify(testSupport.moveCable("app"));
         tryVerify(() => wizard.stage === LrwUpdateWizard.Summary, 20000);
         compare(findChild(dialog, "wizardHeading").text, "LoRaWAN module flashed with module.hex.");
-        AppViewModel.wizard.action("open-console");
-        tryVerify(() => !AppViewModel.wizard.open);
+        AppViewModel.currentTabViewModel.wizard.action("open-console");
+        tryVerify(() => !AppViewModel.currentTabViewModel.wizard.open);
     }
 
     // Expert maintenance: the module is the third MCU; its actions open the wizard.
@@ -189,9 +188,9 @@ TestCase {
         mouseClick(find("eraseAllButton"));
         tryVerify(() => confirm.opened);
         mouseClick(findChild(confirm, "dialogAccept"));
-        const dialog = findChild(window, "wizardDialog");
-        tryVerify(() => dialog.opened);
-        compare(AppViewModel.wizard.wizardId, "lrw-update");
-        compare(AppViewModel.wizard.title, "Erase the LoRaWAN module");
+        tryVerify(() => find("wizardView") !== null); // plan 0052: the wizard view of the tab
+        const dialog = find("wizardView");
+        compare(AppViewModel.currentTabViewModel.wizard.wizardId, "lrw-update");
+        compare(AppViewModel.currentTabViewModel.wizard.title, "Erase the LoRaWAN module");
     }
 }

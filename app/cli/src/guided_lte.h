@@ -76,7 +76,8 @@ public:
     void show() {
         const Step step = m_procedure.step();
         const std::string prompt = toStdString(m_procedure.promptText());
-        if (step == Step::Failed || step == Step::Cancelled || prompt == m_lastPrompt) {
+        if (step == Step::Failed || step == Step::Cancelled || step == Step::OfferRestore ||
+            prompt == m_lastPrompt) {
             return;
         }
         m_ui.finish();
@@ -116,6 +117,9 @@ private:
             }
             // Asked on the next turn of the event loop; nothing runs on the device meanwhile.
             QMetaObject::invokeMethod(&m_loop, [this] { askAboutTheCopy(); }, Qt::QueuedConnection);
+        } else if (step == Step::OfferRestore) {
+            // Plan 0051 (ADR-0381): cancelled after the erase with a copy.
+            QMetaObject::invokeMethod(&m_loop, [this] { askToWriteBack(); }, Qt::QueuedConnection);
         } else if (step == Step::ChooseApplication && !m_procedure.hasBackup()) {
             // No copy (an empty or unreadable application): the LTE MCU is updated; the
             // application is the user's to flash.
@@ -171,6 +175,30 @@ private:
         }
     }
 
+    // ADR-0381: "[Y/n]"; no answer (the end of the input) writes the copy back.
+    void askToWriteBack() {
+        if (m_procedure.step() != Step::OfferRestore) {
+            return;
+        }
+        const std::string question = "Write the application back first? [Y/n] ";
+        if (m_ask) {
+            m_ask(question, [this](bool yes) { answerToWriteBack(yes); });
+            return;
+        }
+        answerToWriteBack(askYesNo(question, true));
+    }
+
+    void answerToWriteBack(bool yes) {
+        if (m_procedure.step() != Step::OfferRestore) {
+            return;
+        }
+        if (yes) {
+            m_procedure.restoreAfterCancel();
+        } else {
+            m_procedure.leaveErased();
+        }
+    }
+
     void onProgress() {
         const Step step = m_procedure.step();
         if (step == Step::Backup) {
@@ -181,10 +209,14 @@ private:
     }
 
     void onStopCheck() {
-        if (!m_context.stop.stop_requested()) {
+        // Ctrl+C keeps the stop request set: the procedure is cancelled once (a second cancel()
+        // would end the write-back offered after it, ADR-0381).
+        if (!m_context.stop.stop_requested() || m_cancelled) {
             return;
         }
-        if (!m_procedure.cancel() && !m_cancelRefusedShown) {
+        if (m_procedure.cancel()) {
+            m_cancelled = true;
+        } else if (!m_cancelRefusedShown) {
             m_cancelRefusedShown = true;
             m_ui.info("The MCU is being written and cannot be interrupted; cancelling afterwards.");
         }
@@ -200,6 +232,7 @@ private:
     bool m_noCopyEnd = false;
     bool m_supportDecides = false;
     bool m_cancelRefusedShown = false;
+    bool m_cancelled = false; // Ctrl+C was applied
 };
 
 // Plan 0044 (ADR-0363): the designated LTE firmware as the guided update's source; `download`

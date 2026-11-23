@@ -875,8 +875,10 @@ private:
 
     // After a failed step of an armed update: target.reset_during_update when the reset-pin bit
     // of `target` is set (another MCU of the device reset it during the step); `failed` otherwise.
-    [[nodiscard]] Status explainFailure(const TargetProfile& target, bool armed, Status failed,
-                                        const std::stop_token& stop) {
+    // `guided` (ADR-0383): the guided LTE update erased the application first, so it cannot be the
+    // cause; the reset reason is only logged and `failed` is kept.
+    [[nodiscard]] Status explainFailure(const TargetProfile& target, bool armed, bool guided,
+                                        Status failed, const std::stop_token& stop) {
         if (failed || !armed || !target.resetReason || stop.stop_requested()) {
             return failed;
         }
@@ -931,6 +933,10 @@ private:
         }
         flashLog(std::format("Reset reason after the failure: 0x{:08X}", value));
         if ((value & target.resetReason->pinMask) == 0) {
+            return failed;
+        }
+        if (guided) {
+            flashLog("Reset pin set during the guided update; the original error is kept");
             return failed;
         }
         return std::unexpected(makeError(ErrorCode::TargetResetDuringUpdate,
@@ -1137,7 +1143,7 @@ private:
         if (Status prepared = prepareOperation(run, true); !prepared) {
             return prepared;
         }
-        return explainFailure(run.target, armed,
+        return explainFailure(run.target, armed, run.command.flash.guided,
                               keepChip(runFlash(run.context, image, run.command.flash), result),
                               run.stop);
     }
@@ -1199,7 +1205,7 @@ private:
             }
             const bool armed = armResetReason(run.target, run.stop); // H5 (ADR-0273)
             return explainFailure(
-                run.target, armed,
+                run.target, armed, command.flash.guided,
                 runModem(command.modemZip, command.nrfUtil, run.reporter, run.stop), run.stop);
         }
         case OperationKind::LteBundle: {
@@ -1210,7 +1216,7 @@ private:
             // it could not be cleared before step 1, runFlashStep() tries again before step 2).
             const bool armed = armResetReason(run.target, run.stop);
             if (Status modem = explainFailure(
-                    run.target, armed,
+                    run.target, armed, command.flash.guided,
                     runModem(command.bundle->modemZip, command.nrfUtil, run.reporter, run.stop),
                     run.stop);
                 !modem) {

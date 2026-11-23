@@ -97,7 +97,12 @@ Kód chyby: [`target.other_connector`](#target.other_connector).
 
 Obyčejná aktualizace LTE (`hwio chester lte flash`, nebo balíček, firmware modemu či aplikace pro MCU LTE) nechá aplikaci na aplikačním MCU běžet. Když MCU LTE chvíli neodpovídá, aplikační firmware CHESTER ho resetuje přes jeho resetovací pin a aktualizace se přeruší. Aplikace pak přečte důvod resetu MCU LTE a nahlásí **MCU LTE byl během aktualizace resetován.** Použijte místo toho průvodce: **Aktualizovat firmware LTE…** na stránce **Nahrát FW**, nebo `hwio chester lte flash --guided`. Průvodce uloží kopii aplikace, smaže ji, aktualizuje MCU LTE a aplikaci zapíše zpět. Viz [aktualizace firmwaru LTE](flashing.md#aktualizace-firmwaru-lte).
 
-Kód chyby: [`target.reset_during_update`](#target.reset_during_update).
+V průvodci aktualizací se aplikace nejdřív smaže, takže MCU LTE resetovat nemůže: neúspěšný krok tam ponechá svou
+vlastní chybu (důvod resetu se jen zapíše do logu). Když nRF Util ohlásí **LOW_VOLTAGE** (například „Failed to
+configure Coresight: LOW_VOLTAGE“), chyba je [`target.low_voltage`](#target.low_voltage): zkontrolujte napájení nebo
+baterie zařízení CHESTER a kabel J-Linku na konektoru LTE a potom klikněte na **Zkusit znovu**.
+
+Kódy chyb: [`target.reset_during_update`](#target.reset_during_update), [`target.low_voltage`](#target.low_voltage).
 
 <a id="remote-support-session-problems"></a>
 ### Problémy s relací vzdálené podpory
@@ -311,7 +316,7 @@ V Linuxu jsou častou příčinou chybějící oprávnění k USB; viz [Přístu
 - **Pravděpodobně:** Firmware J-Linku se liší od firmwaru dodávaného s J-Link Software.
 - **Co dělat:** Spusťte `hwio jlink update-firmware`.
 
-Jde o varování; J-Link dál funguje. Hlásí to také `hwio doctor`. V HARDWARIO Monitoru nabízí pruh nad konzolí **Odpojit a aktualizovat…**: karta se odpojí, dialog ukáže současný a nový firmware a po **Aktualizovat** se J-Link aktualizuje (asi 10–30 s; neodpojujte ho) a karta se znovu připojí. **Teď ne** skryje pruh pro tento J-Link do zavření aplikace. Když je firmware sondy novější než knihovna, zpráva zní „Firmware J-Linku je novější než knihovna J-Link.“ V takovém případě místo toho aktualizujte J-Link Software.
+Jde o varování; J-Link dál funguje. Hlásí to také `hwio doctor`. V HARDWARIO Monitoru nabízí pruh nad konzolí **Odpojit a aktualizovat…**: karta se odpojí, stránka ukáže současný a nový firmware a po **Aktualizovat** se J-Link aktualizuje (asi 10–30 s; neodpojujte ho) a karta se znovu připojí. **Teď ne** skryje pruh pro tento J-Link do zavření aplikace. Když je firmware sondy novější než knihovna, zpráva zní „Firmware J-Linku je novější než knihovna J-Link.“ V takovém případě místo toho aktualizujte J-Link Software.
 
 <a id="probe.firmware_update_failed"></a>
 #### `probe.firmware_update_failed`
@@ -484,7 +489,17 @@ U CHESTER zní zpráva „J-Link je připojen k MCU LTE.“, příčina „Konzo
 - **Pravděpodobně:** Aplikační firmware na aplikačním MCU resetoval MCU LTE přes jeho resetovací pin, zatímco se MCU LTE aktualizoval.
 - **Co dělat:** Použijte průvodce aktualizací, který nejdřív zastaví aplikaci: Nahrát FW › Aktualizovat firmware LTE… v desktopové aplikaci, nebo `hwio chester lte flash --guided`.
 
-Po neúspěšném kroku aktualizace LTE byl v registru důvodu resetu MCU LTE nastaven bit resetovacího pinu. Podrobnosti obsahují původní chybu (například `target.program_failed` nebo `firmware.modem_update_failed`) a hodnotu registru. Viz [Aktualizace LTE selže: MCU LTE byl resetován](#the-lte-update-fails-the-lte-mcu-was-reset).
+Po neúspěšném kroku aktualizace LTE byl v registru důvodu resetu MCU LTE nastaven bit resetovacího pinu. Podrobnosti obsahují původní chybu (například `target.program_failed` nebo `firmware.modem_update_failed`) a hodnotu registru. Viz [Aktualizace LTE selže: MCU LTE byl resetován](#the-lte-update-fails-the-lte-mcu-was-reset). Hlásí ji jen obyčejná aktualizace LTE; v průvodci aktualizací zůstane původní chyba.
+
+<a id="target.low_voltage"></a>
+#### `target.low_voltage`
+
+**MCU LTE hlásí příliš nízké napájecí napětí.**
+
+- **Pravděpodobně:** Zařízení CHESTER nemá dostatečné napájení (baterie, zdroj) nebo kabel J-Linku nepropojuje referenci napájení.
+- **Co dělat:** Zkontrolujte napájení nebo baterie zařízení CHESTER a kabel J-Linku na konektoru a potom to zkuste znovu.
+
+nRF Util při nahrávání firmwaru modemu ohlásil LOW_VOLTAGE („Failed to configure Coresight: LOW_VOLTAGE“); jeho výstup je v **Podrobnosti**. V průvodci aktualizací zní doporučení „Zkontrolujte napájení zařízení CHESTER a kabel J-Linku na konektoru LTE a potom klikněte na Zkusit znovu.“
 
 <a id="target.protected"></a>
 #### `target.protected`
@@ -757,7 +772,7 @@ Zobrazí se, když flashujete podle 32místného ID firmwaru. Zpráva může uv�
 - **Pravděpodobně:** Zip s firmwarem modemu je chybný, spojení bylo přerušeno nebo nRF Util ohlásil chybu (viz Podrobnosti).
 - **Co dělat:** Zkontrolujte kabel a napájení a nahrajte firmware modemu znovu.
 
-Firmware modemu LTE zapisuje nRF Util; jeho výstup je v **Podrobnosti**. Viz [Nordic nRF Util](install.md#nordic-nrf-util-jen-firmware-modemu-lte).
+Firmware modemu LTE zapisuje nRF Util; jeho výstup je v **Podrobnosti**. Viz [Nordic nRF Util](install.md#nordic-nrf-util-jen-firmware-modemu-lte). V průvodci aktualizací zní doporučení „Zkontrolujte napájení zařízení CHESTER a kabel J-Linku na konektoru LTE a potom klikněte na Zkusit znovu.“
 
 <a id="firmware.checksum_mismatch"></a>
 #### `firmware.checksum_mismatch`

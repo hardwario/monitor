@@ -59,6 +59,8 @@ QtObject {
     readonly property int spacingXxl: 32
     readonly property int controlHeight: 32
     readonly property int toolButtonSize: 28
+    // ADR-0378: every console bottom bar (command input, shell and log search bars).
+    readonly property int toolbarHeight: controlHeight + 2 * spacingXs
     readonly property int iconSize: 20
     readonly property int railItemSize: 56
     readonly property int railWidth: 72

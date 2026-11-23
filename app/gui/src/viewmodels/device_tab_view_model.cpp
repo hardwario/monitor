@@ -28,6 +28,8 @@
 #include "viewmodels/probe_picker_view_model.h"
 #include "viewmodels/remote_join_view_model.h"
 #include "viewmodels/remote_share_view_model.h"
+#include "wizard/wizard_registry.h"
+#include "wizard/wizard_view_model.h"
 #include "workers/ble_service.h"
 
 #include <QDesktopServices>
@@ -63,6 +65,12 @@ bool probeReserved(const device::SessionRegistry* registry, std::uint32_t serial
 }
 
 const QString lastTransportKey = QStringLiteral("ui/lastTransport");
+
+// Plan 0052: the registry of a tab built without one (tests): no wizard is registered.
+const WizardRegistry& emptyWizardRegistry() {
+    static const WizardRegistry registry;
+    return registry;
+}
 
 } // namespace
 
@@ -116,6 +124,7 @@ DeviceTabViewModel::DeviceTabViewModel(TabContext context, QObject* parent)
     // Plan 0044: sharing this console / the joiner state (children, Qt parent ownership).
     m_remoteShare = new RemoteShareViewModel(this); // NOLINT(cppcoreguidelines-owning-memory)
     m_remoteJoin = new RemoteJoinViewModel(this);   // NOLINT(cppcoreguidelines-owning-memory)
+    createWizard();
 
     if (m_context.pages != nullptr) {
         for (const PageDescriptor& page : m_context.pages->pages()) {
@@ -160,6 +169,15 @@ void DeviceTabViewModel::createBlePicker() {
                     connectDevice();
                 }
             });
+}
+
+// Plan 0052 (ADR-0386): the tab's wizard (a child, Qt parent ownership).
+void DeviceTabViewModel::createWizard() {
+    m_wizard = new WizardViewModel( // NOLINT(cppcoreguidelines-owning-memory)
+        m_context.wizards != nullptr ? *m_context.wizards : emptyWizardRegistry(), this,
+        [this](const QString& text) { copyToClipboard(text); }); // ADR-0202
+    connect(m_wizard, &WizardViewModel::openChanged, this,
+            &DeviceTabViewModel::onWizardOpenChanged);
 }
 
 DeviceTabViewModel::~DeviceTabViewModel() { shutdown(); }
@@ -225,12 +243,37 @@ QString DeviceTabViewModel::pageDisabledReason(const QString& pageId) const {
 }
 
 void DeviceTabViewModel::setCurrentPage(const QString& pageId) {
-    if (pageId == m_currentPage || !m_pageIds.contains(pageId) ||
-        !pageDisabledReason(pageId).isEmpty()) {
+    if (pageId == m_currentPage) {
+        return;
+    }
+    if (pageId == wizardPageId()) {
+        // Plan 0052: the wizard view, while the wizard is open (also while choosing a device).
+        if (!m_wizard->isOpen()) {
+            return;
+        }
+        m_pageBeforeWizard = m_currentPage;
+    } else if (!m_pageIds.contains(pageId) || !pageDisabledReason(pageId).isEmpty()) {
         return;
     }
     m_currentPage = pageId;
     currentPageChanged(); // signal
+}
+
+void DeviceTabViewModel::onWizardOpenChanged() {
+    if (m_wizard->isOpen()) {
+        setCurrentPage(wizardPageId()); // the wizard view replaces the page area
+        return;
+    }
+    // Closed: the page shown before it, unless a hand-off chose another page meanwhile.
+    if (m_currentPage == wizardPageId()) {
+        QString page = m_pageBeforeWizard;
+        if (!m_pageIds.contains(page) || !pageDisabledReason(page).isEmpty()) {
+            page = m_pageIds.isEmpty() ? QString() : m_pageIds.front();
+        }
+        m_currentPage = page;
+        currentPageChanged(); // signal
+    }
+    m_pageBeforeWizard.clear();
 }
 
 QString DeviceTabViewModel::busyPage() const { return m_busy ? m_busy->pageId : QString(); }
@@ -943,6 +986,11 @@ void DeviceTabViewModel::copyToClipboard(const QString& text, const QString& toa
 }
 
 void DeviceTabViewModel::shutdown() {
+    // Plan 0052 (review V2): the tab's wizard closes first (its operation is cancelled) while the
+    // session still exists.
+    if (m_wizard != nullptr) {
+        m_wizard->tabClosing(this);
+    }
     if (m_picker != nullptr) {
         m_picker->setActive(false);
     }

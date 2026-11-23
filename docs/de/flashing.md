@@ -115,10 +115,38 @@ deshalb durch den ganzen Ablauf:
    oder eine Datei.
 8. **Done** (Fertig): Die Anwendung läuft wieder, und die Konsole verbindet sich neu.
 
-Während der Assistent läuft, ist die Konsole des Tabs angehalten (**Paused for the LTE firmware update**). Abbrechen
-ist jederzeit möglich, außer während die MCU beschrieben wird. Nach Schritt 3 fragt der Assistent zuerst nach: Die
-Anwendungs-MCU ist gelöscht, und das Gerät läuft erst wieder, wenn Sie eine Anwendung flashen. Die Kopie bleibt im
-Ordner `backups` ([Datenschutz und gespeicherte Daten](privacy.md)).
+Der Assistent ersetzt den Seitenbereich des Tabs; Sie können währenddessen die Konsole ansehen und mit **Wizard**
+(Assistent) oben in der Leiste zurückkehren ([Assistenten und weitere
+Ansichten](getting-started.md#assistenten-und-weitere-ansichten)). Während der Assistent läuft, ist die Konsole des
+Tabs angehalten (**Paused for the LTE firmware update**). Abbrechen
+ist jederzeit möglich, außer während die MCU beschrieben wird. Nach Schritt 3 fragt der Assistent zuerst nach: **The
+application MCU is erased. Write the application back first?** (Die Anwendungs-MCU ist gelöscht. Zuerst die Anwendung
+zurückschreiben?)
+
+- **Write back** (Zurückschreiben): Der Assistent bittet um den J-Link am APP-Anschluss, schreibt die Kopie zurück und
+  endet mit **LTE firmware not updated. The application was written back.** (LTE-Firmware nicht aktualisiert. Die
+  Anwendung wurde zurückgeschrieben.)
+- **Leave it erased** (Gelöscht lassen): Der Assistent wird geschlossen; das Gerät läuft erst wieder, wenn Sie eine
+  Anwendung flashen. Eine Meldung sagt, wo die Kopie liegt.
+- **Back** (Zurück): Der Assistent geht weiter.
+
+Ohne Kopie (eine leere Anwendung) meldet Abbrechen, dass die Anwendungs-MCU gelöscht ist. Die Kopien bleiben im Ordner
+`backups` ([Datenschutz und gespeicherte Daten](privacy.md)); die neuesten 10 werden aufbewahrt.
+
+<a id="application-copies"></a>
+### Anwendungskopien
+
+Liegen im Ordner `backups` Kopien des verbundenen CHESTER, zeigt die Karte **Application firmware**
+(Anwendungs-Firmware; auf der Seite **Flash** und in Schritt 7 des Assistenten) **Application copy from**
+(Anwendungskopie vom) mit Datum und Uhrzeit der neuesten Kopie; der Pfeil listet alle Kopien des Geräts auf (bis zu
+10). Eine ausgewählte Kopie wird wie eine Datei geladen. **Open backups folder** (Backup-Ordner öffnen) öffnet den
+Ordner, und der Dateidialog startet dort. Solange die Seriennummer des Geräts nicht bekannt ist (zum Beispiel wenn die
+Anwendung gelöscht ist), listet die Karte alle Kopien mit ihren Seriennummern auf. Im Terminal: `hwio chester app
+backups` und `hwio chester app flash --backup latest` ([Kommandozeile](../en/cli.md)).
+
+Schlägt ein Schritt des Assistenten fehl, zeigt das Fehlerfeld statt der Schaltflächen der Seite Flash
+**Troubleshooting** (Fehlerbehebung, die Dokumentation des Fehlers); **Try again** (Erneut versuchen) und **Cancel**
+(Abbrechen) unten im Assistenten gehen weiter.
 
 ## Wartung
 

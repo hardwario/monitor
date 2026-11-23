@@ -113,6 +113,8 @@ std::string_view LteUpdateProcedure::stepId(Step step) noexcept {
         return "choose-application";
     case Step::Restore:
         return "restore";
+    case Step::OfferRestore:
+        return "offer-restore";
     case Step::Done:
         return "done";
     case Step::Failed:
@@ -182,6 +184,7 @@ bool LteUpdateProcedure::canCancel() const noexcept {
     case Step::ConnectLte:
     case Step::ConnectAppAgain:
     case Step::ChooseApplication:
+    case Step::OfferRestore:
         return true;
     case Step::Failed:
         return canRetry(); // a retryable failure is still in the procedure
@@ -215,10 +218,48 @@ bool LteUpdateProcedure::cancel() {
     }
     m_operation.reset();
     m_error.reset();
+    // ADR-0381: after the erase the copy can be written back first (not again on the way back,
+    // and not from OfferRestore itself: a cancel there leaves the application erased).
+    if (m_erased && m_backupImage != nullptr && !m_restoreAfterCancel &&
+        m_step != Step::OfferRestore && !m_session.isNull()) {
+        if (m_options.restoreOnCancel) {
+            startRestoreAfterCancel(); // ADR-0368: the remote update always writes the copy back
+        } else {
+            setStep(Step::OfferRestore);
+        }
+        return true;
+    }
+    endCancelled();
+    return true;
+}
+
+void LteUpdateProcedure::endCancelled() {
     setStep(Step::Cancelled);
     endHold();
     finished(); // signal
-    return true;
+}
+
+void LteUpdateProcedure::restoreAfterCancel() {
+    if (m_backupImage == nullptr || m_restoreAfterCancel || m_step != Step::OfferRestore) {
+        return;
+    }
+    startRestoreAfterCancel();
+}
+
+void LteUpdateProcedure::startRestoreAfterCancel() {
+    qCInfo(log::lcFlash) << "LTE update: writing the application back after the cancel";
+    m_restoreAfterCancel = true;
+    m_restoreImage = m_backupImage; // the copy (another image may have been chosen before)
+    m_restoreOptions = FlashOptions{.halt = false, .allowUicr = false, .guided = true};
+    startConnectorStep(Step::ConnectAppAgain);
+}
+
+void LteUpdateProcedure::leaveErased() {
+    if (m_step != Step::OfferRestore) {
+        return;
+    }
+    qCInfo(log::lcFlash) << "LTE update: cancelled, the application MCU stays erased";
+    endCancelled();
 }
 
 void LteUpdateProcedure::retry() {
@@ -278,6 +319,7 @@ Status LteUpdateProcedure::restoreApplication(std::shared_ptr<const firmware::Fi
     } else {
         m_restoreOptions = FlashOptions{};
     }
+    m_restoreOptions.guided = true; // ADR-0383
     startRestore();
     return {};
 }
@@ -297,7 +339,7 @@ void LteUpdateProcedure::fail(Error error) {
     qCWarning(log::lcFlash).noquote() << "LTE update failed in" << toQString(stepId(m_step)) << ":"
                                       << toQString(idOf(error.code)) << toQString(error.detail);
     m_failedStep = m_step;
-    m_error = std::move(error);
+    m_error = withGuidedLteSuggestion(std::move(error)); // ADR-0383
     setStep(Step::Failed);
     if (!canRetry()) {
         endHold();
@@ -390,6 +432,10 @@ void LteUpdateProcedure::afterConnector() {
         startLteUpdate();
         break;
     case Step::ConnectAppAgain:
+        if (m_restoreAfterCancel) {
+            startRestore(); // ADR-0381: the copy, without asking again
+            break;
+        }
         setStep(Step::ChooseApplication);
         if (m_options.autoRestore && m_restoreImage != nullptr) {
             if (Status restored = restoreApplication(); !restored) {
@@ -522,7 +568,8 @@ void LteUpdateProcedure::finishBackup() {
         return;
     }
     m_backupFile = std::move(*saved);
-    m_restoreImage = std::make_shared<const firmware::FirmwareImage>(std::move(*image));
+    m_backupImage = std::make_shared<const firmware::FirmwareImage>(std::move(*image));
+    m_restoreImage = m_backupImage;
     startErase();
 }
 
@@ -537,7 +584,8 @@ void LteUpdateProcedure::startErase() {
 void LteUpdateProcedure::startLteUpdate() {
     setStep(Step::UpdateLte);
     const std::string_view target = lteTargetId();
-    const FlashOptions options{.halt = false, .allowUicr = m_source.options.allowUicr};
+    const FlashOptions options{
+        .halt = false, .allowUicr = m_source.options.allowUicr, .guided = true}; // ADR-0383
     switch (m_source.kind) {
     case Source::Kind::Image:
         (void)startOperation(m_session->flash(target, m_source.image, options));
@@ -546,7 +594,7 @@ void LteUpdateProcedure::startLteUpdate() {
         (void)startOperation(m_session->flashLteBundle(target, m_source.bundle, options));
         break;
     case Source::Kind::Modem:
-        (void)startOperation(m_session->updateModem(target, m_source.modemZip));
+        (void)startOperation(m_session->updateModem(target, m_source.modemZip, options));
         break;
     }
 }
@@ -605,6 +653,7 @@ void LteUpdateProcedure::onFinished(OperationId id, const OperationResult& resul
             fail(result.status.error());
             return;
         }
+        m_lteUpdated = true;
         startConnectorStep(Step::ConnectAppAgain);
         return;
     case Step::Restore:
@@ -613,6 +662,11 @@ void LteUpdateProcedure::onFinished(OperationId id, const OperationResult& resul
             return;
         }
         m_erased = false;
+        if (m_restoreAfterCancel) {
+            qCInfo(log::lcFlash) << "LTE update: cancelled, the application was written back";
+            endCancelled();
+            return;
+        }
         setStep(Step::Done);
         endHold();
         finished(); // signal
@@ -621,6 +675,7 @@ void LteUpdateProcedure::onFinished(OperationId id, const OperationResult& resul
     case Step::Confirm:
     case Step::BackupFailed:
     case Step::ChooseApplication:
+    case Step::OfferRestore:
     case Step::Done:
     case Step::Failed:
     case Step::Cancelled:
@@ -629,6 +684,10 @@ void LteUpdateProcedure::onFinished(OperationId id, const OperationResult& resul
 }
 
 // ---- texts ------------------------------------------------------------------------------------
+
+QString LteUpdateProcedure::offerRestoreText() {
+    return tr("The application MCU is erased. Write the application back first?");
+}
 
 QString LteUpdateProcedure::connectorLabel() const {
     switch (m_step) {
@@ -680,7 +739,14 @@ QString LteUpdateProcedure::promptText() const {
         return tr("The LTE firmware was updated and the application is running again.");
     case Step::Failed:
         return m_error ? toQString(m_error->message) : QString();
+    case Step::OfferRestore:
+        return offerRestoreText();
     case Step::Cancelled:
+        if (m_restoreAfterCancel && !m_erased) {
+            return m_lteUpdated
+                       ? tr("The LTE firmware was updated. The application was written back.")
+                       : tr("LTE firmware not updated. The application was written back.");
+        }
         return m_erased ? tr("The application MCU is erased. The device will not run until you "
                              "flash an application.")
                         : tr("The LTE firmware update was cancelled.");

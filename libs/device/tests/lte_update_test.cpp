@@ -22,6 +22,7 @@
 #include <QFile>
 #include <QFileDevice>
 #include <QIODevice>
+#include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
@@ -32,6 +33,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -124,11 +126,12 @@ protected:
         return *m_session;
     }
 
-    LteUpdateProcedure& procedure(bool autoRestore = false) {
+    LteUpdateProcedure& procedure(bool autoRestore = false, bool restoreOnCancel = false) {
         m_procedure = std::make_unique<LteUpdateProcedure>(
             *m_session, LteUpdateProcedure::Options{.pollInterval = 20ms,
                                                     .backupDirectory = backups(),
                                                     .autoRestore = autoRestore,
+                                                    .restoreOnCancel = restoreOnCancel,
                                                     .now = {}});
         return *m_procedure;
     }
@@ -320,6 +323,34 @@ TEST(ApplicationBackupTest, SavesIntelHexOwnerOnlyAndKeepsTheNewestTen) {
               ErrorCode::UsageInvalidArgument);
 }
 
+// Plan 0051 (ADR-0381): the copies of a directory, newest first, per serial.
+TEST(ApplicationBackupTest, ListsTheCopiesNewestFirst) {
+    const QTemporaryDir dir;
+    const fs::path directory = fs::path(dir.path().toStdString()) / "backups";
+    EXPECT_TRUE(ApplicationBackup::list(directory).empty()); // no directory yet
+    const auto start = std::chrono::sys_days{std::chrono::year{2026} / 11 / 4};
+    const std::vector<std::byte> data = bytes({1, 2, 3});
+    ASSERT_TRUE(ApplicationBackup::save(directory, "2159018", start, 0x1000, data));
+    ASSERT_TRUE(
+        ApplicationBackup::save(directory, "2159018", start + std::chrono::hours(2), 0x1000, data));
+    ASSERT_TRUE(
+        ApplicationBackup::save(directory, "1234567", start + std::chrono::hours(1), 0x1000, data));
+    QFile other(dir.path() + QStringLiteral("/backups/notes.hex"));
+    ASSERT_TRUE(other.open(QIODevice::WriteOnly)); // not a copy's name: skipped
+    other.close();
+    const auto all = ApplicationBackup::list(directory);
+    ASSERT_EQ(all.size(), 3U);
+    EXPECT_EQ(all.at(0).serial, "2159018");
+    EXPECT_EQ(all.at(0).time, start + std::chrono::hours(2));
+    EXPECT_EQ(all.at(1).serial, "1234567");
+    EXPECT_GT(all.at(0).size, 0U);
+    EXPECT_EQ(all.at(0).path.filename().string(), "2159018-20261104-020000.hex");
+    const auto mine = ApplicationBackup::list(directory, std::string("2159018"));
+    ASSERT_EQ(mine.size(), 2U);
+    EXPECT_EQ(mine.at(1).time, start);
+    EXPECT_TRUE(ApplicationBackup::list(directory, std::string("999")).empty());
+}
+
 // ---- LteUpdateProcedure (E2) --------------------------------------------------------------------
 
 TEST_F(LteUpdate, HappyPathBacksUpErasesUpdatesAndWritesTheApplicationBack) {
@@ -449,10 +480,113 @@ TEST_F(LteUpdate, CancelAfterTheEraseSaysSoAndKeepsTheCopy) {
     ASSERT_TRUE(confirmOnApp());
     ASSERT_TRUE(reach(Step::ConnectLte));
     EXPECT_TRUE(update.cancel());
+    // Plan 0051 (ADR-0381): with a copy it asks first; Leave it erased ends as before.
+    EXPECT_EQ(update.step(), Step::OfferRestore);
+    EXPECT_EQ(LteUpdateProcedure::stepId(Step::OfferRestore), "offer-restore");
+    EXPECT_EQ(update.promptText(),
+              QStringLiteral("The application MCU is erased. Write the application back first?"));
+    EXPECT_TRUE(session.held());
+    update.leaveErased();
+    EXPECT_EQ(update.step(), Step::Cancelled);
+    EXPECT_FALSE(update.writtenBack());
+    EXPECT_FALSE(session.held());
     EXPECT_EQ(update.promptText(), QStringLiteral("The application MCU is erased. The device will "
                                                   "not run until you flash an application."));
     EXPECT_TRUE(fs::exists(update.backupFile()));
     EXPECT_EQ(read("app", 0x1000, 4), std::vector<std::byte>(4, std::byte{0xFF}));
+}
+
+// Plan 0051 (ADR-0381): Write back after a cancel: the APP connector, the copy, then Cancelled
+// with the application written back (ChooseApplication is skipped).
+TEST_F(LteUpdate, CancelAfterTheEraseCanWriteTheApplicationBack) {
+    useBoard("app");
+    DeviceSession& session = open();
+    ASSERT_TRUE(hwio::device::waitUntilConnected(session, 10s));
+    LteUpdateProcedure& update = procedure();
+    ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(confirmOnApp());
+    ASSERT_TRUE(reach(Step::ConnectLte));
+    moveCable("lte"); // the user moved it already; the cancel comes before the update
+    EXPECT_TRUE(update.cancel());
+    ASSERT_EQ(update.step(), Step::OfferRestore);
+    update.restoreAfterCancel();
+    EXPECT_TRUE(update.restoringAfterCancel());
+    EXPECT_EQ(update.step(), Step::ConnectAppAgain);
+    ASSERT_TRUE(waitFor([&] { return update.wrongConnector(); }));
+    moveCable("app");
+    ASSERT_TRUE(reach(Step::Cancelled));
+    EXPECT_TRUE(update.writtenBack());
+    EXPECT_FALSE(update.lteUpdated());
+    EXPECT_FALSE(update.applicationErased());
+    EXPECT_FALSE(session.held());
+    EXPECT_EQ(update.promptText(),
+              QStringLiteral("LTE firmware not updated. The application was written back."));
+    EXPECT_EQ(read("app", 0x1000, 4), bytes({0xa5, 0xa5, 0xa5, 0xa5}));
+}
+
+// ADR-0381: a second cancel on the way back ends with the application erased.
+TEST_F(LteUpdate, ASecondCancelOnTheWayBackLeavesItErased) {
+    useBoard("app");
+    DeviceSession& session = open();
+    ASSERT_TRUE(hwio::device::waitUntilConnected(session, 10s));
+    LteUpdateProcedure& update = procedure();
+    ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(confirmOnApp());
+    ASSERT_TRUE(reach(Step::ConnectLte));
+    moveCable("lte");
+    EXPECT_TRUE(update.cancel());
+    update.restoreAfterCancel();
+    ASSERT_TRUE(waitFor([&] { return update.wrongConnector(); }));
+    EXPECT_TRUE(update.cancel());
+    EXPECT_EQ(update.step(), Step::Cancelled);
+    EXPECT_FALSE(update.writtenBack());
+    EXPECT_TRUE(update.applicationErased());
+    EXPECT_FALSE(session.held());
+}
+
+// ADR-0368 / ADR-0381: a remote update (restoreOnCancel) writes the copy back without asking,
+// also after the LTE MCU was updated.
+TEST_F(LteUpdate, RemoteCancelWritesBackWithoutAsking) {
+    useBoard("app");
+    DeviceSession& session = open();
+    ASSERT_TRUE(hwio::device::waitUntilConnected(session, 10s));
+    LteUpdateProcedure& update = procedure(false, true);
+    ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(confirmOnApp());
+    ASSERT_TRUE(reach(Step::ConnectLte));
+    moveCable("lte");
+    ASSERT_TRUE(reach(Step::ConnectAppAgain));
+    EXPECT_TRUE(update.lteUpdated());
+    std::vector<Step> steps;
+    QObject::connect(&update, &LteUpdateProcedure::changed,
+                     [&] { steps.push_back(update.step()); });
+    EXPECT_TRUE(update.cancel());
+    EXPECT_TRUE(std::ranges::find(steps, Step::OfferRestore) == steps.end()); // not asked
+    EXPECT_TRUE(update.restoringAfterCancel());
+    moveCable("app");
+    ASSERT_TRUE(reach(Step::Cancelled));
+    EXPECT_TRUE(update.writtenBack());
+    EXPECT_EQ(update.promptText(),
+              QStringLiteral("The LTE firmware was updated. The application was written back."));
+    EXPECT_EQ(read("app", 0x1000, 4), bytes({0xa5, 0xa5, 0xa5, 0xa5}));
+}
+
+// ADR-0381: without a copy (an empty application) a cancel after the erase ends at once.
+TEST_F(LteUpdate, CancelAfterTheEraseWithoutACopyEndsAtOnce) {
+    useBoard("app");
+    DeviceSession& session = open();
+    ASSERT_TRUE(hwio::device::waitUntilConnected(session, 10s));
+    auto erase = session.erase("app", hwio::device::EraseScope::Code);
+    ASSERT_TRUE(erase);
+    ASSERT_TRUE(hwio::device::waitForOperation(session, *erase).status);
+    LteUpdateProcedure& update = procedure();
+    ASSERT_TRUE(update.start(lteImage()));
+    ASSERT_TRUE(confirmOnApp());
+    ASSERT_TRUE(reach(Step::ConnectLte));
+    EXPECT_FALSE(update.hasBackup());
+    EXPECT_TRUE(update.cancel());
+    EXPECT_EQ(update.step(), Step::Cancelled);
+    EXPECT_FALSE(session.held());
 }
 
 TEST_F(LteUpdate, AProtectedApplicationGoesOnWithoutACopy) {
@@ -519,6 +653,8 @@ TEST_F(LteUpdate, AFailedLteFlashCanBeRetried) {
     EXPECT_EQ(update.step(), Step::ConnectLte);
     ASSERT_TRUE(reach(Step::Failed)); // the fake keeps failing
     EXPECT_TRUE(update.cancel());
+    EXPECT_EQ(update.step(), Step::OfferRestore); // plan 0051 (ADR-0381): a copy exists
+    update.leaveErased();
     EXPECT_FALSE(session.held());
 }
 
