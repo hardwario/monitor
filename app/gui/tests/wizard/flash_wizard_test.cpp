@@ -630,6 +630,9 @@ TEST_F(FlashWizardTest, TheWizardsFlashRefusesWhileTheFlashPageHoldsTheTab) {
 
 // Plan 0056 (U-2, ADR-0393): the flash wizard refuses a remote-support tab with a toast.
 TEST_F(FlashWizardTest, RefusesARemoteTab) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (an http loopback relay URL)";
+#endif
     start(probeScenario(), false);
     ASSERT_TRUE(app().settingsStore()->setValue(QStringLiteral("remote/relayUrl"),
                                                 QStringLiteral("http://127.0.0.1:9")));

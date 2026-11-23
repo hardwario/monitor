@@ -518,6 +518,9 @@ TEST_F(ConnectWizardTest, TheWizardFollowsConnectAndDisconnect) {
 // Plan 0056 (U-2, D-7, ADR-0393): on a remote-support tab (also after the session ended) the
 // connect and troubleshooting wizards refuse with a toast; the tab stays remote.
 TEST_F(ConnectWizardTest, LocalDeviceWizardsRefuseARemoteTab) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (an http loopback relay URL)";
+#endif
     start(scenario(), false);
     ASSERT_TRUE(app().settingsStore()->setValue(QStringLiteral("remote/relayUrl"),
                                                 QStringLiteral("http://127.0.0.1:9")));
