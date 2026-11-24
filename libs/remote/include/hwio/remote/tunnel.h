@@ -119,8 +119,11 @@ inline constexpr std::size_t maxOpKinds = 16; // entries of a hello's opKinds
 // the two CHESTER ids as constants.
 class OpTarget {
 public:
+    // The names of the former enumerators (kept for the call sites).
+    // NOLINTBEGIN(readability-identifier-naming)
     static const OpTarget App; // "app"
     static const OpTarget Lte; // "lte"
+    // NOLINTEND(readability-identifier-naming)
 
     // nullopt unless validName(id).
     [[nodiscard]] static constexpr std::optional<OpTarget> fromId(std::string_view id) noexcept {
@@ -148,7 +151,10 @@ private:
     std::array<char, maxNameBytes> m_chars{};
     std::size_t m_size = 0;
 };
+// The two former OpTarget enumerators (their names kept for the call sites).
+// NOLINTNEXTLINE(readability-identifier-naming)
 inline constexpr OpTarget OpTarget::App{"app"};
+// NOLINTNEXTLINE(readability-identifier-naming)
 inline constexpr OpTarget OpTarget::Lte{"lte"};
 // ADR-0368: the questions of a remote LTE update that support answers.
 enum class OpQuestionKind : std::uint8_t {
@@ -174,6 +180,8 @@ struct DeviceInfo {
 // ---- host → joiners ----
 // ADR-0418: a firmware the host has prepared for a target (no file, URL or digest crosses the
 // relay; the host flashes its own pinned image).
+// NOLINTBEGIN(readability-redundant-member-init): the {} initializers keep fields optional in
+// designated initializers (-Wmissing-designated-field-initializers).
 struct PreparedFirmware {
     std::string id{};      // name: "release", "debug"
     std::string name{};    // "STICKER" (text)
@@ -203,6 +211,7 @@ struct HostHello {
     // nullopt = not sent (an older host: app / lte as in ADR-0322).
     std::optional<std::vector<HostTarget>> targets = std::nullopt;
 };
+// NOLINTEND(readability-redundant-member-init)
 // The hello's target `id`, nullptr when it lists none (or no targets at all).
 [[nodiscard]] const HostTarget* findTarget(const HostHello& hello, std::string_view id) noexcept;
 // The host runs `kind` (ops and opKinds).
@@ -253,11 +262,13 @@ using HostMessage = std::variant<HostHello, OpAccepted, OpDenied, OpProgress, Op
                                  HostCommands, OpQuestion, LineRefused>;
 
 // ---- joiner → host ----
+// NOLINTBEGIN(readability-redundant-member-init): as above.
 struct JoinerHello {
     std::string app = std::string(appId);
     std::string version;
     std::vector<std::string> caps{}; // plan 0059: names, at most maxCaps (sent when not empty)
 };
+// NOLINTEND(readability-redundant-member-init)
 struct OpRequest {
     std::string id;
     OpKind kind = OpKind::Reset;

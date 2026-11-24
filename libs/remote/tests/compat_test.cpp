@@ -6,9 +6,9 @@
 #include "fake_relay.h"
 #include "hwio/core/error.h"
 #include "hwio/device/console_line.h"
+#include "hwio/device/console_log.h"
 #include "hwio/device/profile.h"
 #include "hwio/remote/baseline_errors.h"
-#include "hwio/remote/host_operations.h"
 #include "hwio/remote/remote_console_session.h"
 #include "hwio/remote/remote_host.h"
 #include "hwio/remote/remote_operation_client.h"
@@ -32,12 +32,12 @@
 #include <array>
 #include <chrono>
 #include <cstddef>
-#include <cstdint>
 #include <expected>
 #include <optional>
 #include <set>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -55,6 +55,9 @@ using testing::runUntil;
 using testing::ScriptedConsent;
 
 const QString nsp = QStringLiteral("/482913");
+// A target id that only newer peers know (a Nordic chip).
+constexpr tunnel::OpTarget nrf52 =
+    tunnel::OpTarget::fromId("nrf52").value_or(tunnel::OpTarget::App);
 
 QJsonObject json(const char* text) { return QJsonDocument::fromJson(text).object(); }
 
@@ -245,9 +248,11 @@ TEST(Rc4Compat, NewHostHellosDecodeInAnRc4Joiner) {
     EXPECT_FALSE(hello.console);
     EXPECT_EQ(hello.caps, other.caps);
     ASSERT_TRUE(hello.targets.has_value());
-    EXPECT_EQ(hello.targets->size(), tunnel::maxTargets);
-    EXPECT_EQ(hello.targets->back().prepared.size(), tunnel::maxPrepared);
-    EXPECT_EQ(hello.targets->back().prepared.back().id, "p3");
+    const std::vector<tunnel::HostTarget> targets =
+        hello.targets.value_or(std::vector<tunnel::HostTarget>{});
+    ASSERT_EQ(targets.size(), tunnel::maxTargets);
+    EXPECT_EQ(targets.back().prepared.size(), tunnel::maxPrepared);
+    EXPECT_EQ(targets.back().prepared.back().id, "p3");
     EXPECT_NE(tunnel::findTarget(hello, "t7"), nullptr);
     EXPECT_EQ(tunnel::findTarget(hello, "t8"), nullptr);
 }
@@ -284,11 +289,10 @@ TEST(Rc4Compat, NewJoinerMessagesTheRc4HostDecodes) {
                                                .firmwareId = "0123456789abcdef0123456789abcdef"}));
     // Other targets and prepared firmware do not decode there (no answer at all, F8): the joiner
     // never sends them to a host without `targets` (JoinerGateToAnOlderHost).
-    EXPECT_FALSE(rc4::decodeJoiner(tunnel::encodeJoiner(tunnel::OpRequest{
-                                       .id = "op-2",
-                                       .kind = tunnel::OpKind::Reset,
-                                       .target = *tunnel::OpTarget::fromId("nrf52")}))
-                     .has_value());
+    EXPECT_FALSE(
+        rc4::decodeJoiner(tunnel::encodeJoiner(tunnel::OpRequest{
+                              .id = "op-2", .kind = tunnel::OpKind::Reset, .target = nrf52}))
+            .has_value());
     EXPECT_FALSE(
         rc4::decodeJoiner(tunnel::encodeJoiner(tunnel::OpRequest{.id = "op-3",
                                                                  .kind = tunnel::OpKind::Flash,
@@ -487,10 +491,9 @@ TEST(Rc4CompatSession, UnknownTargetIsDeniedNotIgnored) {
     RawParticipant joiner(relay.url(), nsp);
     ASSERT_TRUE(joiner.waitConnected());
     ASSERT_TRUE(runUntil([&] { return !tunnelAts(joiner).empty(); }));
-    joiner.emitEvent(QStringLiteral("write"), tunnel::encodeJoiner(tunnel::OpRequest{
-                                                  .id = "op-1",
-                                                  .kind = tunnel::OpKind::Reset,
-                                                  .target = *tunnel::OpTarget::fromId("nrf52")}));
+    joiner.emitEvent(QStringLiteral("write"),
+                     tunnel::encodeJoiner(tunnel::OpRequest{
+                         .id = "op-1", .kind = tunnel::OpKind::Reset, .target = nrf52}));
     std::optional<tunnel::OpDenied> denied;
     ASSERT_TRUE(runUntil([&] {
         for (const QJsonObject& at : tunnelAts(joiner)) {
@@ -501,7 +504,7 @@ TEST(Rc4CompatSession, UnknownTargetIsDeniedNotIgnored) {
         }
         return denied.has_value();
     }));
-    EXPECT_EQ(denied->code, "remote.target_unsupported");
+    EXPECT_EQ(denied.value_or(tunnel::OpDenied{}).code, "remote.target_unsupported");
     EXPECT_TRUE(operations.started.empty());
     EXPECT_TRUE(consent.operationQuestions.empty());
 }
@@ -535,9 +538,8 @@ TEST(Rc4CompatSession, NewJoinerWithAnRc4Host) {
 
     RemoteOperationClient client(joiner);
     // Not sent to an rc.4 host: it could not decode them (F8: no answer, 90 s timeout).
-    EXPECT_EQ(
-        client.request(tunnel::OpKind::Reset, *tunnel::OpTarget::fromId("nrf52")).error().code,
-        ErrorCode::RemoteTargetUnsupported);
+    EXPECT_EQ(client.request(tunnel::OpKind::Reset, nrf52).error().code,
+              ErrorCode::RemoteTargetUnsupported);
     EXPECT_EQ(client
                   .request(tunnel::OpKind::Flash, tunnel::OpTarget::App, std::nullopt,
                            std::string("debug"))
@@ -561,7 +563,7 @@ TEST(Rc4CompatSession, NewJoinerWithAnRc4Host) {
     oldHost.emitEvent(QStringLiteral("at"),
                       rc4::encodeHost(rc4::OpDenied{.id = *id, .code = "remote.operation_denied"}));
     ASSERT_TRUE(runUntil([&] { return finished.has_value(); }));
-    EXPECT_EQ(finished->code, ErrorCode::RemoteOperationDenied);
+    EXPECT_EQ(finished.value_or(Error{}).code, ErrorCode::RemoteOperationDenied);
     EXPECT_TRUE(warnings.empty());
 }
 
@@ -586,8 +588,9 @@ TEST(Rc4CompatSession, OtherProfileHostRefusesLinesAndRedacts) {
         return joiner.hostHello().has_value() && joiner.joinState() == JoinState::Allowed;
     }));
     ASSERT_TRUE(runUntil([&] { return !host.peerApp().empty(); }));
-    EXPECT_FALSE(joiner.hostHello()->ops);
-    EXPECT_EQ(joiner.hostHello()->profile, "testdev");
+    const tunnel::HostHello hello = joiner.hostHello().value_or(tunnel::HostHello{});
+    EXPECT_FALSE(hello.ops);
+    EXPECT_EQ(hello.profile, "testdev");
     EXPECT_EQ(&joiner.profile(), &device::genericConsoleProfile());
     EXPECT_TRUE(console.hasEvent(
         "Participant app: HARDWARIO Monitor 2.1.0-support (capabilities: targets, detail-codes, "
@@ -595,8 +598,8 @@ TEST(Rc4CompatSession, OtherProfileHostRefusesLinesAndRedacts) {
     for (const QJsonObject& at : tunnelAts(web)) {
         auto decoded = rc4::decodeHost(at);
         ASSERT_TRUE(decoded.has_value()) << decoded.error().detail;
-        if (const auto* hello = std::get_if<rc4::HostHello>(&*decoded)) {
-            EXPECT_FALSE(hello->ops); // an rc.4 joiner offers the console only
+        if (const auto* oldHello = std::get_if<rc4::HostHello>(&*decoded)) {
+            EXPECT_FALSE(oldHello->ops); // an rc.4 joiner offers the console only
         }
     }
     // No operations behind ops: false.

@@ -126,6 +126,7 @@ struct TargetProfile {
     // carry a secret without a "key:" (STICKER debug `config secret-key <hex>`). The console file,
     // the shell query log and a remote session's relay show "<prefix> <redacted>", whoever typed
     // the command (matchSensitiveOutputPrefix).
+    // NOLINTNEXTLINE(readability-redundant-member-init): keeps designated initializers optional
     std::span<const std::string_view> sensitiveOutputPrefixes = {};
     // A remote support session (RemoteHost) does not pass a remote command line to the device when
     // (refusedFromRemote): refuseRemoteSensitive and the line is a sensitiveCommandPrefixes command
@@ -133,7 +134,9 @@ struct TargetProfile {
     // or it is a remoteRefusedCommands command (with or without arguments). Reading a secret
     // (no argument) passes; its output is redacted. Empty for CHESTER (its behaviour unchanged).
     bool refuseRemoteSensitive = false;
+    // NOLINTNEXTLINE(readability-redundant-member-init): keeps designated initializers optional
     std::span<const std::string_view> remoteRefusedSetters = {};
+    // NOLINTNEXTLINE(readability-redundant-member-init): keeps designated initializers optional
     std::span<const std::string_view> remoteRefusedCommands = {};
 };
 
