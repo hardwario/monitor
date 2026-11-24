@@ -88,8 +88,14 @@ konzole nezobrazujú; konzolový súbor zaznamená, koľko ich bolo.
    skopírovať. Pokračovať bez kópie?*. Nie alebo žiadna odpoveď do 60 sekúnd aktualizáciu zruší skôr, než sa čokoľvek
    zmení. Kópia sa zapíše späť automaticky. Po vašom Nie karta ukáže *Aktualizáciu firmvéru LTE ste zrušili (14:02). Nič sa nezmenilo.* Zákazník so starším HARDWARIO Monitorom odpovedá na tieto otázky sám.
 
+Reláciu opustíte tlačidlom **Opustiť reláciu** na lište zariadenia (alebo klávesmi Ctrl+Shift+D). Karta zostane
+otvorená aj s konzolou, takže ju môžete stále uložiť; v konzole je riadok *— opustili ste reláciu —*. **Pripojiť sa
+znova** sa pripojí k rovnakému kódu a zákazník vás musí znova povoliť. Kým beží operácia, o ktorú ste požiadali,
+tlačidlo čaká, kým skončí.
+
 Keď zákazník ukončí zdieľanie, HARDWARIO Monitor to nie vždy rozpozná: server to neoznamuje. Po 30 minútach bez
-akejkoľvek aktivity to lišta oznámi a ponúkne **Opustiť**. Karta zostane otvorená, takže konzolu môžete stále uložiť.
+akejkoľvek aktivity to lišta oznámi a ponúkne **Zatvoriť kartu**. Kým ju nezatvoríte, karta zostane otvorená, takže
+konzolu môžete stále uložiť.
 
 <a id="command-line"></a>
 ## Príkazový riadok

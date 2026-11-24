@@ -936,58 +936,68 @@
 <context>
     <name>DeviceBar</name>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="39"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="42"/>
         <source>Choose device</source>
         <translation>Wybierz urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="55"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="58"/>
         <source>Bluetooth device %1</source>
         <translation>Urządzenie Bluetooth %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="56"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="59"/>
         <source>Probe %1</source>
         <translation>Programator %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="68"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="71"/>
         <source>Probe</source>
         <translation>Programator</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="144"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="147"/>
         <source>Choose another probe</source>
         <translation>Wybierz inny programator</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="144"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="147"/>
         <source>Choose another device</source>
         <translation>Wybierz inne urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="163"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="175"/>
         <source>Connect</source>
         <translation>Połącz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="153"/>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="164"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="156"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="176"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="164"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="177"/>
+        <source>Leave session</source>
+        <translation>Opuść sesję</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="178"/>
         <source>Disconnect</source>
         <translation>Rozłącz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="154"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="157"/>
         <source>Cancel the AI operation</source>
         <translation>Anuluj operację AI</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="175"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="178"/>
+        <source>Join again</source>
+        <translation>Dołącz ponownie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="201"/>
         <source>Advanced</source>
         <translation>Zaawansowane</translation>
     </message>
@@ -2078,59 +2088,59 @@
 <context>
     <name>RemoteBanner</name>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="57"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="58"/>
         <source>Connecting to the support server %1…</source>
         <translation>Łączenie z serwerem wsparcia %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="59"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="60"/>
         <source>Shared with support — code %1. The connection to the support server was lost, reconnecting…</source>
         <translation>Udostępniono wsparciu — kod %1. Połączenie z serwerem wsparcia zostało przerwane, ponowne łączenie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="61"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="62"/>
         <source>Shared with support — code %1. %2</source>
         <translation>Udostępniono wsparciu — kod %1. %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="63"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="64"/>
         <source>Shared with support — code %1. Support can send commands.</source>
         <translation>Udostępniono wsparciu — kod %1. Wsparcie może wysyłać polecenia.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="64"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="65"/>
         <source>Shared with support — code %1</source>
         <translation>Udostępniono wsparciu — kod %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="75"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="76"/>
         <source>Session code %1</source>
         <translation>Kod sesji %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="82"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="83"/>
         <source>Copy link</source>
         <translation>Kopiuj link</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="89"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="90"/>
         <source>End sharing</source>
         <translation>Zakończ udostępnianie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="101"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="102"/>
         <source>Sharing ends in 2 minutes because there was no activity.</source>
         <translation>Udostępnianie zakończy się za 2 minuty z powodu braku aktywności.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="102"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="103"/>
         <source>Keep sharing</source>
         <translation>Kontynuuj udostępnianie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="114"/>
-        <source>Leave</source>
-        <translation>Opuść</translation>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="115"/>
+        <source>Close tab</source>
+        <translation>Zamknij kartę</translation>
     </message>
 </context>
 <context>
@@ -5418,17 +5428,17 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="613"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="682"/>
         <source>Wait until the J-Link firmware update has finished.</source>
         <translation>Poczekaj na zakończenie aktualizacji firmware J-Linka.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="893"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="904"/>
         <source>Close a tab first: at most %1 device tabs can be open.</source>
         <translation>Najpierw zamknij kartę: otwartych może być najwyżej %1 kart urządzeń.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1458"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1478"/>
         <source>Copied to clipboard.</source>
         <translation>Skopiowano do schowka.</translation>
     </message>
@@ -5506,172 +5516,177 @@
 <context>
     <name>hwio::gui::ConnectionViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="293"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="309"/>
         <source>Disconnected — %1</source>
         <translation>Rozłączono — %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="310"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="293"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="309"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="311"/>
         <source>Disconnected</source>
         <translation>Rozłączono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="296"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="297"/>
         <source>Connecting…</source>
         <translation>Łączenie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="298"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="299"/>
         <source>J-Link open, device not connected</source>
         <translation>J-Link otwarty, urządzenie niepołączone</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="301"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="290"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="302"/>
         <source>Connected</source>
         <translation>Połączono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="120"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="121"/>
         <source>%1 · %2 dBm</source>
         <translation>%1 · %2 dBm</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="162"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="163"/>
         <source>Click Pair and enter the passkey in the system dialog.</source>
         <translation>Kliknij Sparuj i wpisz klucz dostępu w oknie systemowym.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="163"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="164"/>
         <source>Click Connect and enter the passkey when macOS asks for it.</source>
         <translation>Kliknij Połącz i wpisz klucz dostępu, gdy macOS o niego poprosi.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="166"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="167"/>
         <source>Already paired but it does not work? Remove the device in the system Bluetooth settings and pair it again.</source>
         <translation>Urządzenie jest sparowane, ale nie działa? Usuń je w systemowych ustawieniach Bluetooth i sparuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="197"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="198"/>
         <source>Pair</source>
         <translation>Sparuj</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="203"/>
         <source>Choose another device</source>
         <translation>Wybierz inne urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="203"/>
         <source>Choose another probe</source>
         <translation>Wybierz inny programator</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="205"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="206"/>
         <source>Open Bluetooth settings</source>
         <translation>Otwórz ustawienia Bluetooth</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="209"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="210"/>
         <source>Open Privacy settings</source>
         <translation>Otwórz ustawienia prywatności</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="281"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="282"/>
         <source>Pairing — confirm the passkey in the system dialog…</source>
         <translation>Parowanie — potwierdź klucz dostępu w oknie systemowym…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="285"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="286"/>
         <source>Waiting for pairing — enter the passkey in the system dialog</source>
         <translation>Oczekiwanie na sparowanie — wpisz klucz dostępu w oknie systemowym</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="290"/>
         <source>Connected · MTU %1</source>
         <translation>Połączono · MTU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="302"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="303"/>
         <source>Connected · %1 V</source>
         <translation>Połączono · %1 V</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="305"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="306"/>
         <source>Reconnecting… (%1)</source>
         <translation>Ponowne łączenie… (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="306"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="307"/>
         <source>Reconnecting…</source>
         <translation>Ponowne łączenie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="531"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="346"/>
+        <source>Wait until the running operation ends.</source>
+        <translation>Poczekaj, aż trwająca operacja się zakończy.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="563"/>
         <source>The J-Link firmware is outdated (%1, available: %2).</source>
         <translation>Firmware J-Linka jest nieaktualne (%1, dostępne: %2).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="807"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="839"/>
         <source>The console log file could not be written; logging to file is off for this session.</source>
         <translation>Nie można zapisać pliku dziennika konsoli; zapis do pliku jest wyłączony w tej sesji.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="825"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="857"/>
         <source>target not powered</source>
         <translation>urządzenie nie jest zasilane</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="827"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="859"/>
         <source>J-Link not found</source>
         <translation>nie znaleziono J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="829"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="861"/>
         <source>J-Link used by another program</source>
         <translation>J-Link używany przez inny program</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="831"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="863"/>
         <source>J-Link could not be opened</source>
         <translation>nie można otworzyć J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="833"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="865"/>
         <source>target does not respond</source>
         <translation>urządzenie nie odpowiada</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="836"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="868"/>
         <source>no RTT console found</source>
         <translation>nie znaleziono konsoli RTT</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="840"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="844"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="872"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="876"/>
         <source>connection lost</source>
         <translation>utracono połączenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="842"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="874"/>
         <source>out of range</source>
         <translation>poza zasięgiem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="847"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="879"/>
         <source>not paired</source>
         <translation>niesparowane</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="849"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="881"/>
         <source>Bluetooth is off</source>
         <translation>Bluetooth jest wyłączony</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="853"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="885"/>
         <source>J-Link Software missing</source>
         <translation>brak J-Link Software</translation>
     </message>
@@ -5963,54 +5978,59 @@
 <context>
     <name>hwio::gui::DeviceTabViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="200"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="210"/>
         <source>New device</source>
         <translation>Nowe urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="232"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="242"/>
         <source>Flashing needs a J-Link. Open a J-Link tab to flash this device.</source>
         <translation>Wgrywanie firmware wymaga J-Linka. Aby wgrać firmware do tego urządzenia, otwórz kartę z J-Linkiem.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="678"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="751"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="689"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="768"/>
         <source>— disconnected: %1 —</source>
         <translation>— rozłączono: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="692"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="752"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="707"/>
+        <source>— you left the session —</source>
+        <translation>— opuściłeś sesję —</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="709"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="769"/>
         <source>— disconnected —</source>
         <translation>— rozłączono —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="741"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="758"/>
         <source>— connected (remote) —</source>
         <translation>— połączono (zdalnie) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="743"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="760"/>
         <source>— connected —</source>
         <translation>— połączono —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="739"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="756"/>
         <source>— connected (Bluetooth) —</source>
         <translation>— połączono (Bluetooth) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="192"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="202"/>
         <source>Session %1</source>
         <translation>Sesja %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="873"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="890"/>
         <source>— paused: %1 —</source>
         <translation>— wstrzymano: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="886"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="903"/>
         <source>— resumed —</source>
         <translation>— wznowiono —</translation>
     </message>
@@ -7041,57 +7061,62 @@
 <context>
     <name>hwio::gui::RemoteJoinViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="110"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="111"/>
         <source>The customer allowed it. Running on the customer&apos;s side…</source>
         <translation>Klient zezwolił. Wykonywanie po stronie klienta…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="118"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="119"/>
         <source>Running on the customer&apos;s side: %1</source>
         <translation>Wykonywanie po stronie klienta: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="152"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="164"/>
         <source>Connecting to the support server…</source>
         <translation>Łączenie z serwerem wsparcia…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="155"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="167"/>
         <source>Waiting for the customer to allow you… The live output may already appear.</source>
         <translation>Czekanie, aż klient zezwoli… Wyjście na żywo może się już pojawiać.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="158"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="170"/>
         <source>No activity from the customer for 30 min. The session may have ended.</source>
         <translation>Brak aktywności klienta od 30 min. Sesja mogła się zakończyć.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="161"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="173"/>
+        <source>You left the session. The console stays here so that you can save it.</source>
+        <translation>Opuściłeś sesję. Konsola pozostaje tutaj, abyś mógł ją zapisać.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="176"/>
         <source>The session ended. The console stays here so that you can save it.</source>
         <translation>Sesja została zakończona. Konsola pozostaje tutaj, abyś mógł ją zapisać.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="175"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="190"/>
         <source>Operations are available once the customer has allowed you.</source>
         <translation>Operacje są dostępne, gdy klient Ci zezwoli.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="178"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="193"/>
         <source>The customer uses the web Terminal, which supports only the console. Ask them to use HARDWARIO Monitor for flashing.</source>
         <translation>Klient używa Terminala webowego, który obsługuje tylko konsolę. Do wgrywania poproś go o użycie HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="181"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="196"/>
         <source>The customer&apos;s console (Bluetooth) has no flashing.</source>
         <translation>Konsola klienta (Bluetooth) nie obsługuje wgrywania.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="236"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="251"/>
         <source>The firmware ID must be 32 hexadecimal digits from the HARDWARIO catalog.</source>
         <translation>Identyfikator firmware musi mieć 32 cyfry szesnastkowe z katalogu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="247"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="262"/>
         <source>Waiting for the customer&apos;s confirmation…</source>
         <translation>Czekanie na potwierdzenie klienta…</translation>
     </message>
@@ -7687,47 +7712,47 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>Popraw adres serwera wsparcia lub wyczyść go, aby używać domyślnego serwera.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="77"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="115"/>
         <source>— Connection restored; waiting for the customer to allow you again —</source>
         <translation>— Połączenie przywrócone; oczekiwanie, aż klient ponownie Cię dopuści —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="126"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="164"/>
         <source>A command line must not be longer than %1 bytes.</source>
         <translation>Wiersz polecenia nie może być dłuższy niż %1 bajtów.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="189"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="227"/>
         <source>Session %1</source>
         <translation>Sesja %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="196"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="234"/>
         <source>%1 — remote</source>
         <translation>%1 — zdalnie</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="200"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="238"/>
         <source>%1 — web Terminal</source>
         <translation>%1 — web Terminal</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="278"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="316"/>
         <source>— Connected to HARDWARIO Monitor %1 of the customer —</source>
         <translation>— Połączono z HARDWARIO Monitor %1 klienta —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="329"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="367"/>
         <source>The customer&apos;s device is disconnected.</source>
         <translation>Urządzenie klienta jest odłączone.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="373"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="419"/>
         <source>— Session history from the customer —</source>
         <translation>— Historia sesji od klienta —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="376"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="422"/>
         <source>— Older history of the session was left out —</source>
         <translation>— Starsza historia sesji została pominięta —</translation>
     </message>
@@ -7814,104 +7839,104 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>Uczestnik dopuszczony (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="426"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="435"/>
         <source>A remote command was dropped (too long or with control characters).</source>
         <translation>Zdalne polecenie zostało odrzucone (za długie lub ze znakami sterującymi).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="438"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="447"/>
         <source>Remote commands dropped: more than %1 per second.</source>
         <translation>Zdalne polecenia odrzucone: więcej niż %1 na sekundę.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="448"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="457"/>
         <source>command %1</source>
         <translation>polecenie %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="466"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="475"/>
         <source>An operation request was refused: the participant is not allowed.</source>
         <translation>Żądanie operacji odrzucono: uczestnik nie jest dopuszczony.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="485"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="494"/>
         <source>Participant app: %1.</source>
         <translation>Aplikacja uczestnika: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="578"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="587"/>
         <source>Support asks: %1.</source>
         <translation>Prośba wsparcia: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="581"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="590"/>
         <source>%1: refused (this console has no operations).</source>
         <translation>%1: odmowa (ta konsola nie ma operacji).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="589"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="598"/>
         <source>%1: refused (not available on this console).</source>
         <translation>%1: odmowa (niedostępne w tej konsoli).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="596"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="605"/>
         <source>%1: refused (another request or operation is in progress).</source>
         <translation>%1: odmowa (trwa inne żądanie lub operacja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="604"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="628"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="613"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="637"/>
         <source>%1: refused (%2).</source>
         <translation>%1: odmowa (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="656"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="665"/>
         <source>%1: denied by you.</source>
         <translation>%1: odrzucono (Twoja decyzja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="675"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="684"/>
         <source>%1: allowed by you.</source>
         <translation>%1: zezwolono (Twoja decyzja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="739"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="748"/>
         <source>%1: waiting for support&apos;s answer: %2</source>
         <translation>%1: oczekiwanie na odpowiedź wsparcia: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="773"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="782"/>
         <source>Support answered: continue.</source>
         <translation>Wsparcie odpowiedziało: kontynuuj.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="791"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="794"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="800"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="803"/>
         <source>%1: done.</source>
         <translation>%1: gotowe.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="797"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="806"/>
         <source>%1: failed: %2</source>
         <translation>%1: niepowodzenie: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="851"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="872"/>
         <source>— Remote: %1 —</source>
         <translation>— Zdalnie: %1 —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="884"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="905"/>
         <source>You ended sharing.</source>
         <translation>Zakończono udostępnianie.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="902"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="923"/>
         <source>Support did not answer before the session ended.</source>
         <translation>Wsparcie nie odpowiedziało przed zakończeniem sesji.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="929"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="950"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Odczytano pomoc %n polecenia dla podpowiedzi wsparcia.</numerusform>
@@ -7920,12 +7945,12 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="936"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="957"/>
         <source>Sharing ended.</source>
         <translation>Udostępnianie zakończone.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="937"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="958"/>
         <source>Sharing ended: %1</source>
         <translation>Udostępnianie zakończone: %1</translation>
     </message>

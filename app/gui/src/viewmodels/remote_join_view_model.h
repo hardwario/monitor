@@ -36,7 +36,8 @@ class RemoteJoinViewModel : public QObject {
     QML_UNCREATABLE("Owned by DeviceTabViewModel")
 
     Q_PROPERTY(bool active READ active NOTIFY changed) // a remote tab
-    // "connecting" | "waiting" | "joined" | "ended" | "idle"
+    // "connecting" | "waiting" | "joined" | "ended" | "idle" ("ended" also after support left the
+    // session with the device bar's Leave session, ADR-0429; then bannerText says so)
     Q_PROPERTY(QString state READ state NOTIFY changed)
     Q_PROPERTY(QString bannerText READ bannerText NOTIFY changed)
     // The host is HARDWARIO Monitor with operations (the Flash page offers them).
@@ -86,6 +87,12 @@ public:
     // A valid catalog firmware ID (32 hex digits) for the Flash page's field.
     Q_INVOKABLE [[nodiscard]] static bool isFirmwareId(const QString& text);
 
+    // ADR-0429: support left the session (DeviceTabViewModel::disconnectDevice of a remote tab):
+    // state() "ended" with its own banner text until the next session (Join again) or until the
+    // tab is configured for another session (setLeft(false)).
+    void setLeft(bool left);
+    [[nodiscard]] bool left() const noexcept { return m_left; }
+
     // The Join dialog: {valid, code ("482 913"), foreignRelay ("" or the link's server), error}.
     [[nodiscard]] static QVariantMap checkJoinInput(const QString& text, const QUrl& configured);
 
@@ -101,6 +108,7 @@ private:
     DeviceTabViewModel* m_tab; // the parent
     std::unique_ptr<remote::RemoteOperationClient> m_client;
     bool m_idle = false;
+    bool m_left = false; // ADR-0429: support left; cleared when a session is attached again
     QString m_status;
     bool m_failed = false;
     double m_progress = -1.0;

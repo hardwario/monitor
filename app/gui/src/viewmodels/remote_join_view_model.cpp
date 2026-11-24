@@ -86,6 +86,7 @@ void RemoteJoinViewModel::attach() {
     m_failed = false;
     m_progress = -1.0;
     if (remote::RemoteConsoleSession* session = m_tab->remoteSession()) {
+        m_left = false; // Join again (ADR-0429)
         connect(session, &remote::RemoteConsoleSession::joinStateChanged, this,
                 &RemoteJoinViewModel::changed);
         connect(session, &remote::RemoteConsoleSession::hostHelloReceived, this,
@@ -128,8 +129,19 @@ void RemoteJoinViewModel::attach() {
 
 bool RemoteJoinViewModel::active() const { return m_tab->isRemote(); }
 
+void RemoteJoinViewModel::setLeft(bool left) {
+    if (m_left == left) {
+        return;
+    }
+    m_left = left;
+    changed(); // signal
+}
+
 QString RemoteJoinViewModel::state() const {
     const remote::RemoteConsoleSession* session = m_tab->remoteSession();
+    if (m_tab->isRemote() && session == nullptr && m_left) {
+        return QStringLiteral("ended"); // ADR-0429: support left the session
+    }
     if (!m_tab->isRemote() || session == nullptr) {
         return QStringLiteral("connecting");
     }
@@ -156,6 +168,9 @@ QString RemoteJoinViewModel::bannerText() const {
     }
     if (current == QStringLiteral("idle")) {
         return tr("No activity from the customer for 30 min. The session may have ended.");
+    }
+    if (current == QStringLiteral("ended") && m_left) {
+        return tr("You left the session. The console stays here so that you can save it.");
     }
     if (current == QStringLiteral("ended")) {
         return tr("The session ended. The console stays here so that you can save it.");

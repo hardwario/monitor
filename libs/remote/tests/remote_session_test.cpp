@@ -22,11 +22,14 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLoggingCategory>
+#include <QMessageLogContext>
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
 #include <QtContainerFwd>
+#include <QtLogging>
 #include <QtTypes>
 
 #include <gtest/gtest.h>
@@ -37,8 +40,10 @@
 #include <expected>
 #include <format>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -293,6 +298,142 @@ TEST(RemoteSession, JoinerWithAWebTerminalHost) {
     ASSERT_TRUE(runUntil(
         [&] { return joiner.connection().state == device::ConnectionState::Disconnected; }));
     EXPECT_EQ(texts(joiner.log(), device::Direction::Out).back(), "123456789");
+}
+
+// ADR-0430: the line diagnostics (category hwio.remote, debug) of the host and the joiner: counts
+// and lengths per batch and one line per sync; the console text is never in them.
+class RemoteLogCapture {
+public:
+    RemoteLogCapture() {
+        QLoggingCategory::setFilterRules(QStringLiteral("hwio.remote.debug=true"));
+        {
+            const std::scoped_lock lock(mutex());
+            lines().clear();
+        }
+        m_previous = qInstallMessageHandler(
+            [](QtMsgType, const QMessageLogContext& context, const QString& text) {
+                if (context.category != nullptr &&
+                    std::string_view(context.category) == "hwio.remote") {
+                    const std::scoped_lock lock(mutex());
+                    lines().push_back(text);
+                }
+            });
+    }
+    ~RemoteLogCapture() {
+        qInstallMessageHandler(m_previous);
+        QLoggingCategory::setFilterRules(QString());
+    }
+    RemoteLogCapture(const RemoteLogCapture&) = delete;
+    RemoteLogCapture& operator=(const RemoteLogCapture&) = delete;
+    RemoteLogCapture(RemoteLogCapture&&) = delete;
+    RemoteLogCapture& operator=(RemoteLogCapture&&) = delete;
+
+    [[nodiscard]] static QStringList starting(const QString& prefix) {
+        const std::scoped_lock lock(mutex());
+        QStringList out;
+        for (const QString& line : lines()) {
+            if (line.startsWith(prefix)) {
+                out.append(line);
+            }
+        }
+        return out;
+    }
+
+private:
+    static std::mutex& mutex() {
+        static std::mutex instance;
+        return instance;
+    }
+    static QStringList& lines() {
+        static QStringList instance;
+        return instance;
+    }
+    QtMessageHandler m_previous = nullptr;
+};
+
+TEST(RemoteSession, LineDiagnosticsWithoutConsoleText) {
+    const RemoteLogCapture capture;
+    const QStringList secrets{QStringLiteral("Vendor name: HARDWARIO"), QStringLiteral("zq7wqx"),
+                              QStringLiteral("app config interval-sample"),
+                              QStringLiteral("system show")};
+    const auto checkClean = [&](const QStringList& diagnostics) {
+        for (const QString& line : diagnostics) {
+            for (const QString& secret : secrets) {
+                EXPECT_FALSE(line.contains(secret)) << line.toStdString();
+            }
+        }
+    };
+
+    // A Monitor host and joiner.
+    {
+        FakeRelay relay;
+        FakeConsole console;
+        ScriptedConsent consent;
+        RemoteHost host(console, consent, nullptr, hostFor(relay));
+        host.start();
+        ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
+        console.shell("Vendor name: HARDWARIO");
+        RemoteConsoleSession joiner(joinFor(relay));
+        ASSERT_TRUE(runUntil(
+            [&] { return joiner.joinState() == JoinState::Allowed && joiner.hostHello(); }));
+        ASSERT_TRUE(joiner.sendLine("system show").has_value());
+        ASSERT_TRUE(runUntil([&] { return console.sent.size() == 1; }));
+        console.shell("app config interval-sample zq7wqx");
+        ASSERT_TRUE(runUntil([&] {
+            const auto out = texts(joiner.log(), device::Direction::Out);
+            return !out.empty() && out.back() == "app config interval-sample zq7wqx";
+        }));
+    }
+    const QStringList forwarded =
+        RemoteLogCapture::starting(QStringLiteral("Host lines forwarded:"));
+    ASSERT_FALSE(forwarded.isEmpty());
+    EXPECT_TRUE(forwarded.contains(QStringLiteral(
+        "Host lines forwarded: 1 of 1 (markers skipped), 33 bytes, 33 bytes after redaction, 0 "
+        "empty")))
+        << forwarded.join(QLatin1Char('\n')).toStdString();
+    const QStringList hostSyncs = RemoteLogCapture::starting(QStringLiteral("Host sync sent:"));
+    ASSERT_EQ(hostSyncs.size(), 1);
+    EXPECT_TRUE(hostSyncs.front().startsWith(QStringLiteral("Host sync sent: 1 entries, 1 output")))
+        << hostSyncs.front().toStdString();
+    const QStringList reads = RemoteLogCapture::starting(QStringLiteral("Joiner read received:"));
+    EXPECT_TRUE(reads.contains(QStringLiteral(
+        "Joiner read received: 1 line, 33 bytes, 0 line feeds, 33 bytes after sanitising")))
+        << reads.join(QLatin1Char('\n')).toStdString();
+    EXPECT_FALSE(RemoteLogCapture::starting(QStringLiteral("Joiner write received:")).isEmpty());
+
+    // A host that sends a piece of the stream (several lines in one string): the diagnostics show
+    // the line feeds and what is left after sanitising.
+    {
+        FakeRelay relay;
+        RawParticipant webHost(relay.url(), QStringLiteral("/12345"));
+        ASSERT_TRUE(webHost.waitConnected());
+        RemoteConsoleSession joiner(joinFor(relay, 12345));
+        ASSERT_TRUE(
+            runUntil([&] { return webHost.named(QStringLiteral("newClient")).size() == 2; }));
+        QJsonObject response;
+        response.insert(QStringLiteral("outputs"),
+                        QJsonArray{QStringLiteral("\r\nVendor name: HARDWARIO\r\nbt_nus:~$ ")});
+        QJsonObject entry;
+        entry.insert(QStringLiteral("command"), QStringLiteral("system show"));
+        entry.insert(QStringLiteral("response"), response);
+        QJsonObject sync;
+        sync.insert(QStringLiteral("commands"), QJsonArray{entry});
+        webHost.emitEvent(QStringLiteral("sync"), sync);
+        ASSERT_TRUE(runUntil([&] { return joiner.joinState() == JoinState::Allowed; }));
+    }
+    const QStringList joinerSyncs =
+        RemoteLogCapture::starting(QStringLiteral("Joiner sync received:"));
+    ASSERT_FALSE(joinerSyncs.isEmpty());
+    EXPECT_TRUE(joinerSyncs.back().startsWith(
+        QStringLiteral("Joiner sync received: 1 entries, 1 output strings, 47 bytes, 2 line feeds; "
+                       "kept 1 entries, truncated: no;")))
+        << joinerSyncs.back().toStdString();
+
+    checkClean(forwarded);
+    checkClean(hostSyncs);
+    checkClean(reads);
+    checkClean(RemoteLogCapture::starting(QStringLiteral("Joiner write received:")));
+    checkClean(joinerSyncs);
 }
 
 TEST(RemoteSession, JoinerIdleNoticeAndRelayFailureEndsTheSession) {

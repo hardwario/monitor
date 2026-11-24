@@ -351,6 +351,15 @@ void RemoteHost::sendSync() {
     QJsonObject sync;
     sync.insert(QStringLiteral("state"), m_deviceState);
     sync.insert(QStringLiteral("commands"), m_transcript.toJson());
+    // ADR-0430: one line per sync, counts and lengths only.
+    std::size_t outputs = 0;
+    for (const TranscriptEntry& entry : m_transcript.entries()) {
+        outputs += static_cast<std::size_t>(entry.outputs.size());
+    }
+    qCDebug(log::lcRemote).noquote() << QString::fromStdString(
+        std::format("Host sync sent: {} entries, {} output lines, {} bytes, truncated: {}",
+                    m_transcript.entries().size(), outputs, m_transcript.bytes(),
+                    m_transcript.truncated() ? "yes" : "no"));
     if (m_relay) {
         m_relay->emitEvent(QStringLiteral("sync"), sync, false);
     }
@@ -802,23 +811,35 @@ void RemoteHost::finishOperation(const Status& status) {
 }
 
 void RemoteHost::onLines(const QList<device::ConsoleLine>& lines) {
-    bool any = false;
+    // ADR-0430: counts and lengths per batch for the diagnostics, never the text.
+    std::size_t forwarded = 0;
+    std::size_t bytesBefore = 0;
+    std::size_t bytesAfter = 0;
+    std::size_t empty = 0;
     for (const device::ConsoleLine& line : lines) {
         if (line.dir == device::Direction::Marker) {
             continue;
         }
-        any = true;
+        ++forwarded;
+        bytesBefore += line.text.size();
+        const QString text = line.dir == device::Direction::In ? redactedCommand(line.text)
+                                                               : redactedOutput(line.text);
+        const std::size_t sent = static_cast<std::size_t>(text.toUtf8().size());
+        bytesAfter += sent;
+        empty += sent == 0 ? 1 : 0;
         if (line.dir == device::Direction::In) {
-            const QString text = redactedCommand(line.text);
             m_transcript.addCommand(text, line.time);
             sendAt(QStringLiteral("write"), text, false);
         } else {
-            const QString text = redactedOutput(line.text);
             m_transcript.addOutput(text, line.time);
             sendAt(QStringLiteral("read"), text, true);
         }
     }
-    if (any) {
+    if (forwarded > 0) {
+        qCDebug(log::lcRemote).noquote() << QString::fromStdString(std::format(
+            "Host lines forwarded: {} of {} (markers skipped), {} bytes, {} bytes after "
+            "redaction, {} empty",
+            forwarded, lines.size(), bytesBefore, bytesAfter, empty));
         activity();
     }
 }

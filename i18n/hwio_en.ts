@@ -121,7 +121,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../libs/remote/src/remote_host.cpp" line="929"/>
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="950"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Help of %n command read for support&apos;s autocomplete.</numerusform>

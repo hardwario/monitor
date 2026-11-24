@@ -936,58 +936,68 @@
 <context>
     <name>DeviceBar</name>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="39"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="42"/>
         <source>Choose device</source>
         <translation>Vyberte zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="55"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="58"/>
         <source>Bluetooth device %1</source>
         <translation>Zariadenie Bluetooth %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="56"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="59"/>
         <source>Probe %1</source>
         <translation>Programátor %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="68"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="71"/>
         <source>Probe</source>
         <translation>Programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="144"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="147"/>
         <source>Choose another probe</source>
         <translation>Vybrať iný programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="144"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="147"/>
         <source>Choose another device</source>
         <translation>Vybrať iné zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="163"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="175"/>
         <source>Connect</source>
         <translation>Pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="153"/>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="164"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="156"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="176"/>
         <source>Cancel</source>
         <translation>Zrušiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="164"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="177"/>
+        <source>Leave session</source>
+        <translation>Opustiť reláciu</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="178"/>
         <source>Disconnect</source>
         <translation>Odpojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="154"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="157"/>
         <source>Cancel the AI operation</source>
         <translation>Zrušiť operáciu AI</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="175"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="178"/>
+        <source>Join again</source>
+        <translation>Pripojiť sa znova</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="201"/>
         <source>Advanced</source>
         <translation>Pokročilé</translation>
     </message>
@@ -2078,59 +2088,59 @@
 <context>
     <name>RemoteBanner</name>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="57"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="58"/>
         <source>Connecting to the support server %1…</source>
         <translation>Pripája sa k serveru podpory %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="59"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="60"/>
         <source>Shared with support — code %1. The connection to the support server was lost, reconnecting…</source>
         <translation>Zdieľané s podporou — kód %1. Spojenie so serverom podpory sa prerušilo, pripája sa znova…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="61"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="62"/>
         <source>Shared with support — code %1. %2</source>
         <translation>Zdieľané s podporou — kód %1. %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="63"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="64"/>
         <source>Shared with support — code %1. Support can send commands.</source>
         <translation>Zdieľané s podporou — kód %1. Podpora môže posielať príkazy.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="64"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="65"/>
         <source>Shared with support — code %1</source>
         <translation>Zdieľané s podporou — kód %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="75"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="76"/>
         <source>Session code %1</source>
         <translation>Kód relácie %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="82"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="83"/>
         <source>Copy link</source>
         <translation>Kopírovať odkaz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="89"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="90"/>
         <source>End sharing</source>
         <translation>Ukončiť zdieľanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="101"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="102"/>
         <source>Sharing ends in 2 minutes because there was no activity.</source>
         <translation>Zdieľanie sa ukončí o 2 minúty, pretože nebola žiadna aktivita.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="102"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="103"/>
         <source>Keep sharing</source>
         <translation>Ponechať zdieľanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="114"/>
-        <source>Leave</source>
-        <translation>Opustiť</translation>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="115"/>
+        <source>Close tab</source>
+        <translation>Zatvoriť kartu</translation>
     </message>
 </context>
 <context>
@@ -5418,17 +5428,17 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="613"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="682"/>
         <source>Wait until the J-Link firmware update has finished.</source>
         <translation>Počkajte na dokončenie aktualizácie firmvéru J-Linku.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="893"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="904"/>
         <source>Close a tab first: at most %1 device tabs can be open.</source>
         <translation>Najprv zatvorte kartu: otvorených môže byť najviac %1 kariet zariadení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1458"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1478"/>
         <source>Copied to clipboard.</source>
         <translation>Skopírované do schránky.</translation>
     </message>
@@ -5506,172 +5516,177 @@
 <context>
     <name>hwio::gui::ConnectionViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="293"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="309"/>
         <source>Disconnected — %1</source>
         <translation>Odpojené — %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="310"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="293"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="309"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="311"/>
         <source>Disconnected</source>
         <translation>Odpojené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="296"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="297"/>
         <source>Connecting…</source>
         <translation>Pripájanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="298"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="299"/>
         <source>J-Link open, device not connected</source>
         <translation>J-Link otvorený, zariadenie nepripojené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="301"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="290"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="302"/>
         <source>Connected</source>
         <translation>Pripojené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="120"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="121"/>
         <source>%1 · %2 dBm</source>
         <translation>%1 · %2 dBm</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="162"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="163"/>
         <source>Click Pair and enter the passkey in the system dialog.</source>
         <translation>Kliknite na Spárovať a zadajte prístupový kľúč v dialógovom okne systému.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="163"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="164"/>
         <source>Click Connect and enter the passkey when macOS asks for it.</source>
         <translation>Kliknite na Pripojiť a zadajte prístupový kľúč, keď si ho macOS vyžiada.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="166"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="167"/>
         <source>Already paired but it does not work? Remove the device in the system Bluetooth settings and pair it again.</source>
         <translation>Zariadenie je spárované, ale nefunguje? Odoberte ho v systémových nastaveniach Bluetooth a spárujte ho znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="197"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="198"/>
         <source>Pair</source>
         <translation>Spárovať</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="203"/>
         <source>Choose another device</source>
         <translation>Vybrať iné zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="203"/>
         <source>Choose another probe</source>
         <translation>Vybrať iný programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="205"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="206"/>
         <source>Open Bluetooth settings</source>
         <translation>Otvoriť nastavenia Bluetooth</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="209"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="210"/>
         <source>Open Privacy settings</source>
         <translation>Otvoriť nastavenia súkromia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="281"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="282"/>
         <source>Pairing — confirm the passkey in the system dialog…</source>
         <translation>Párovanie — potvrďte prístupový kľúč v dialógovom okne systému…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="285"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="286"/>
         <source>Waiting for pairing — enter the passkey in the system dialog</source>
         <translation>Čaká sa na spárovanie — zadajte prístupový kľúč v dialógovom okne systému</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="290"/>
         <source>Connected · MTU %1</source>
         <translation>Pripojené · MTU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="302"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="303"/>
         <source>Connected · %1 V</source>
         <translation>Pripojené · %1 V</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="305"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="306"/>
         <source>Reconnecting… (%1)</source>
         <translation>Opätovné pripájanie… (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="306"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="307"/>
         <source>Reconnecting…</source>
         <translation>Opätovné pripájanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="531"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="346"/>
+        <source>Wait until the running operation ends.</source>
+        <translation>Počkajte, kým prebiehajúca operácia skončí.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="563"/>
         <source>The J-Link firmware is outdated (%1, available: %2).</source>
         <translation>Firmvér J-Linku je zastaraný (%1, k dispozícii: %2).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="807"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="839"/>
         <source>The console log file could not be written; logging to file is off for this session.</source>
         <translation>Súbor s výpisom konzoly sa nedá zapísať; ukladanie do súboru je pre túto reláciu vypnuté.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="825"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="857"/>
         <source>target not powered</source>
         <translation>zariadenie nie je napájané</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="827"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="859"/>
         <source>J-Link not found</source>
         <translation>J-Link sa nenašiel</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="829"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="861"/>
         <source>J-Link used by another program</source>
         <translation>J-Link používa iný program</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="831"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="863"/>
         <source>J-Link could not be opened</source>
         <translation>J-Link sa nedá otvoriť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="833"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="865"/>
         <source>target does not respond</source>
         <translation>zariadenie neodpovedá</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="836"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="868"/>
         <source>no RTT console found</source>
         <translation>konzola RTT sa nenašla</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="840"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="844"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="872"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="876"/>
         <source>connection lost</source>
         <translation>spojenie sa stratilo</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="842"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="874"/>
         <source>out of range</source>
         <translation>mimo dosahu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="847"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="879"/>
         <source>not paired</source>
         <translation>nespárované</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="849"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="881"/>
         <source>Bluetooth is off</source>
         <translation>Bluetooth je vypnuté</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="853"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="885"/>
         <source>J-Link Software missing</source>
         <translation>chýba softvér J-Link</translation>
     </message>
@@ -5963,54 +5978,59 @@
 <context>
     <name>hwio::gui::DeviceTabViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="200"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="210"/>
         <source>New device</source>
         <translation>Nové zariadenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="232"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="242"/>
         <source>Flashing needs a J-Link. Open a J-Link tab to flash this device.</source>
         <translation>Nahrávanie firmvéru vyžaduje J-Link. Na nahratie do tohto zariadenia otvorte kartu s J-Linkom.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="678"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="751"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="689"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="768"/>
         <source>— disconnected: %1 —</source>
         <translation>— odpojené: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="692"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="752"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="707"/>
+        <source>— you left the session —</source>
+        <translation>— opustili ste reláciu —</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="709"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="769"/>
         <source>— disconnected —</source>
         <translation>— odpojené —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="741"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="758"/>
         <source>— connected (remote) —</source>
         <translation>— pripojené (na diaľku) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="743"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="760"/>
         <source>— connected —</source>
         <translation>— pripojené —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="739"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="756"/>
         <source>— connected (Bluetooth) —</source>
         <translation>— pripojené (Bluetooth) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="192"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="202"/>
         <source>Session %1</source>
         <translation>Relácia %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="873"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="890"/>
         <source>— paused: %1 —</source>
         <translation>— pozastavené: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="886"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="903"/>
         <source>— resumed —</source>
         <translation>— obnovené —</translation>
     </message>
@@ -7041,57 +7061,62 @@
 <context>
     <name>hwio::gui::RemoteJoinViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="110"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="111"/>
         <source>The customer allowed it. Running on the customer&apos;s side…</source>
         <translation>Zákazník to povolil. Prebieha na strane zákazníka…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="118"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="119"/>
         <source>Running on the customer&apos;s side: %1</source>
         <translation>Prebieha na strane zákazníka: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="152"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="164"/>
         <source>Connecting to the support server…</source>
         <translation>Pripája sa k serveru podpory…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="155"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="167"/>
         <source>Waiting for the customer to allow you… The live output may already appear.</source>
         <translation>Čaká sa, kým vás zákazník povolí… Živý výstup sa už môže zobrazovať.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="158"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="170"/>
         <source>No activity from the customer for 30 min. The session may have ended.</source>
         <translation>Žiadna aktivita od zákazníka 30 min. Relácia sa možno skončila.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="161"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="173"/>
+        <source>You left the session. The console stays here so that you can save it.</source>
+        <translation>Opustili ste reláciu. Konzola tu zostáva, aby ste ju mohli uložiť.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="176"/>
         <source>The session ended. The console stays here so that you can save it.</source>
         <translation>Relácia sa skončila. Konzola tu zostáva, aby ste ju mohli uložiť.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="175"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="190"/>
         <source>Operations are available once the customer has allowed you.</source>
         <translation>Operácie sú dostupné, keď vás zákazník povolí.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="178"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="193"/>
         <source>The customer uses the web Terminal, which supports only the console. Ask them to use HARDWARIO Monitor for flashing.</source>
         <translation>Zákazník používa webový Terminál, ktorý podporuje iba konzolu. Požiadajte ho, aby na nahrávanie použil HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="181"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="196"/>
         <source>The customer&apos;s console (Bluetooth) has no flashing.</source>
         <translation>Konzola zákazníka (Bluetooth) nepodporuje nahrávanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="236"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="251"/>
         <source>The firmware ID must be 32 hexadecimal digits from the HARDWARIO catalog.</source>
         <translation>ID firmvéru musí mať 32 hexadecimálnych číslic z katalógu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="247"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="262"/>
         <source>Waiting for the customer&apos;s confirmation…</source>
         <translation>Čaká sa na potvrdenie zákazníka…</translation>
     </message>
@@ -7687,47 +7712,47 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         <translation>Opravte adresu servera podpory alebo ju vymažte, aby sa použil predvolený server.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="77"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="115"/>
         <source>— Connection restored; waiting for the customer to allow you again —</source>
         <translation>— Spojenie obnovené; čaká sa, kým vás zákazník znova povolí —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="126"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="164"/>
         <source>A command line must not be longer than %1 bytes.</source>
         <translation>Riadok príkazu nesmie byť dlhší ako %1 bajtov.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="189"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="227"/>
         <source>Session %1</source>
         <translation>Relácia %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="196"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="234"/>
         <source>%1 — remote</source>
         <translation>%1 — na diaľku</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="200"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="238"/>
         <source>%1 — web Terminal</source>
         <translation>%1 — web Terminal</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="278"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="316"/>
         <source>— Connected to HARDWARIO Monitor %1 of the customer —</source>
         <translation>— Pripojené k HARDWARIO Monitor %1 zákazníka —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="329"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="367"/>
         <source>The customer&apos;s device is disconnected.</source>
         <translation>Zariadenie zákazníka je odpojené.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="373"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="419"/>
         <source>— Session history from the customer —</source>
         <translation>— História relácie od zákazníka —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="376"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="422"/>
         <source>— Older history of the session was left out —</source>
         <translation>— Staršia história relácie bola vynechaná —</translation>
     </message>
@@ -7814,104 +7839,104 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         <translation>Účastník povolený (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="426"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="435"/>
         <source>A remote command was dropped (too long or with control characters).</source>
         <translation>Vzdialený príkaz bol zahodený (príliš dlhý alebo s riadiacimi znakmi).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="438"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="447"/>
         <source>Remote commands dropped: more than %1 per second.</source>
         <translation>Vzdialené príkazy zahodené: viac ako %1 za sekundu.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="448"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="457"/>
         <source>command %1</source>
         <translation>príkaz %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="466"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="475"/>
         <source>An operation request was refused: the participant is not allowed.</source>
         <translation>Žiadosť o operáciu bola odmietnutá: účastník nie je povolený.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="485"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="494"/>
         <source>Participant app: %1.</source>
         <translation>Aplikácia účastníka: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="578"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="587"/>
         <source>Support asks: %1.</source>
         <translation>Podpora žiada: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="581"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="590"/>
         <source>%1: refused (this console has no operations).</source>
         <translation>%1: odmietnuté (táto konzola nemá operácie).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="589"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="598"/>
         <source>%1: refused (not available on this console).</source>
         <translation>%1: odmietnuté (na tejto konzole nie je k dispozícii).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="596"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="605"/>
         <source>%1: refused (another request or operation is in progress).</source>
         <translation>%1: odmietnuté (prebieha iná žiadosť alebo operácia).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="604"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="628"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="613"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="637"/>
         <source>%1: refused (%2).</source>
         <translation>%1: odmietnuté (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="656"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="665"/>
         <source>%1: denied by you.</source>
         <translation>%1: zamietli ste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="675"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="684"/>
         <source>%1: allowed by you.</source>
         <translation>%1: povolili ste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="739"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="748"/>
         <source>%1: waiting for support&apos;s answer: %2</source>
         <translation>%1: čaká sa na odpoveď podpory: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="773"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="782"/>
         <source>Support answered: continue.</source>
         <translation>Podpora odpovedala: pokračovať.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="791"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="794"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="800"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="803"/>
         <source>%1: done.</source>
         <translation>%1: hotovo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="797"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="806"/>
         <source>%1: failed: %2</source>
         <translation>%1: zlyhalo: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="851"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="872"/>
         <source>— Remote: %1 —</source>
         <translation>— Vzdialené: %1 —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="884"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="905"/>
         <source>You ended sharing.</source>
         <translation>Zdieľanie ste ukončili.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="902"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="923"/>
         <source>Support did not answer before the session ended.</source>
         <translation>Podpora neodpovedala pred ukončením relácie.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="929"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="950"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Nápoveda %n príkazu prečítaná pre dopĺňanie podpory.</numerusform>
@@ -7920,12 +7945,12 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="936"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="957"/>
         <source>Sharing ended.</source>
         <translation>Zdieľanie skončilo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="937"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="958"/>
         <source>Sharing ended: %1</source>
         <translation>Zdieľanie skončilo: %1</translation>
     </message>

@@ -22,6 +22,10 @@
 // (ble/<sanitised id>/..., the 32 most recently changed devices, ble/recent). The ErrorPanel of
 // ble.not_paired / ble.pairing_failed offers [Pair] (Linux, Windows) or [Connect] (macOS).
 //
+// Plan 0061 (ADR-0429): in a remote support tab the button is "Leave session" while the session
+// runs (connecting, waiting, joined, idle) and "Join again" after it ended or support left; it is
+// disabled while a remote operation that support started is running (also for Ctrl+Shift+D).
+//
 // The connection itself is run by the owning DeviceTabViewModel; this object forwards the actions
 // and presents its state.
 //
@@ -88,9 +92,13 @@ class ConnectionViewModel : public QObject {
     // "idle", "connecting", "connected", "reconnecting", "error", "busy"
     Q_PROPERTY(QString stateKind READ stateKind NOTIFY stateChanged)
     Q_PROPERTY(QString stateText READ stateText NOTIFY stateChanged)
-    // "connect", "cancel", "disconnect" (the device bar's primary button)
+    // "connect", "cancel", "disconnect" (the device bar's primary button); a remote support tab
+    // (ADR-0429): "leave" (Leave session) or "join" (Join again), from the join state.
     Q_PROPERTY(QString action READ action NOTIFY stateChanged)
     Q_PROPERTY(bool actionEnabled READ actionEnabled NOTIFY stateChanged)
+    // ADR-0429: why the button is disabled ("" = not blocked): a remote operation that support
+    // started is running. The device bar shows it as the button's tooltip.
+    Q_PROPERTY(QString actionBlockedReason READ actionBlockedReason NOTIFY stateChanged)
     Q_PROPERTY(double targetVolts READ targetVolts NOTIFY stateChanged)   // NaN = unknown
     Q_PROPERTY(hwio::gui::ErrorInfo error READ error NOTIFY errorChanged) // invalid when none
     Q_PROPERTY(hwio::gui::ErrorInfo warning READ warning NOTIFY warningChanged)
@@ -159,6 +167,7 @@ public:
     [[nodiscard]] QString stateText() const;
     [[nodiscard]] QString action() const;
     [[nodiscard]] bool actionEnabled() const;
+    [[nodiscard]] QString actionBlockedReason() const;
     [[nodiscard]] double targetVolts() const;
     [[nodiscard]] ErrorInfo error() const { return m_errorInfo; }
     [[nodiscard]] ErrorInfo warning() const { return m_warning; }

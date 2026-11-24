@@ -86,8 +86,14 @@ your console; the console file records how many there were.
    changes. The copy is written back automatically. After your No the card says *LTE firmware update cancelled by you (14:02). Nothing was changed.* A customer with an older HARDWARIO Monitor answers these questions
    themselves.
 
+To leave the session, click **Leave session** in the device bar (or press Ctrl+Shift+D). The tab stays open with the
+console, so you can still save it; the console shows *— you left the session —*. **Join again** joins the same code
+again, and the customer is asked to allow you again. While an operation you asked for runs, the button waits until it
+ends.
+
 When the customer ends sharing, HARDWARIO Monitor cannot always tell: the server does not announce it. After 30 minutes
-without any activity the banner says so and offers **Leave**. The tab stays open, so you can still save the console.
+without any activity the banner says so and offers **Close tab**. Until you close it, the tab stays open, so you can
+still save the console.
 
 <a id="command-line"></a>
 ## Command line

@@ -18,6 +18,7 @@
 #include "hwio/remote/tunnel.h"
 
 #include <QCoreApplication>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QLatin1Char>
@@ -32,8 +33,10 @@
 #include <QtLogging>
 
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <expected>
+#include <format>
 #include <map>
 #include <memory>
 #include <optional>
@@ -49,6 +52,41 @@ namespace {
 
 // Callers pass QT_TRANSLATE_NOOP / QT_TRANSLATE_N_NOOP literals so lupdate extracts them.
 QString trRemote(const char* text) { return QCoreApplication::translate("hwio::remote", text); }
+
+std::size_t utf8Size(const QString& text) { return static_cast<std::size_t>(text.toUtf8().size()); }
+
+// ADR-0430: what a received sync carried before sanitising (counts and lengths, never the text).
+struct RawSyncStats {
+    std::size_t entries = 0;
+    std::size_t outputs = 0;
+    std::size_t bytes = 0; // UTF-8 bytes of the commands and outputs as received
+    std::size_t lineFeeds = 0;
+};
+
+RawSyncStats rawSyncStats(const QJsonValue& commands) {
+    RawSyncStats stats;
+    const auto count = [&stats](const QString& text) {
+        stats.bytes += utf8Size(text);
+        stats.lineFeeds += static_cast<std::size_t>(text.count(QLatin1Char('\n')));
+    };
+    const QJsonArray array = commands.toArray();
+    for (const auto& value : array) {
+        const QJsonObject entry = value.toObject();
+        ++stats.entries;
+        count(entry.value(QStringLiteral("command")).toString());
+        const QJsonArray outputs = entry.value(QStringLiteral("response"))
+                                       .toObject()
+                                       .value(QStringLiteral("outputs"))
+                                       .toArray();
+        for (const auto& output : outputs) {
+            if (output.isString()) {
+                ++stats.outputs;
+                count(output.toString());
+            }
+        }
+    }
+    return stats;
+}
 
 } // namespace
 
@@ -336,14 +374,21 @@ void RemoteConsoleSession::onAt(const QJsonValue& payload) {
     if (!data.isString()) {
         return; // the web Terminal ignores other events too
     }
-    if (event == QStringLiteral("write")) {
-        appendLines({makeLine(device::Direction::In, data.toString())});
-    } else if (event == QStringLiteral("read")) {
-        if (m_connection.state != device::ConnectionState::Connected) {
-            setConnection(device::ConnectionState::Connected); // output proves the link works
-        }
-        appendLines({makeLine(device::Direction::Out, data.toString())});
+    const bool write = event == QStringLiteral("write");
+    if (!write && event != QStringLiteral("read")) {
+        return;
     }
+    if (!write && m_connection.state != device::ConnectionState::Connected) {
+        setConnection(device::ConnectionState::Connected); // output proves the link works
+    }
+    const QString text = data.toString();
+    device::ConsoleLine line =
+        makeLine(write ? device::Direction::In : device::Direction::Out, text);
+    // ADR-0430: counts and lengths of the event before and after sanitising, never the text.
+    qCDebug(log::lcRemote).noquote() << QString::fromStdString(std::format(
+        "Joiner {} received: 1 line, {} bytes, {} line feeds, {} bytes after sanitising",
+        write ? "write" : "read", utf8Size(text), text.count(QLatin1Char('\n')), line.text.size()));
+    appendLines({std::move(line)});
 }
 
 void RemoteConsoleSession::onSync(const QJsonValue& payload) {
@@ -358,6 +403,7 @@ void RemoteConsoleSession::onSync(const QJsonValue& payload) {
         emit warning(transcript.error());
         return;
     }
+    const RawSyncStats raw = rawSyncStats(sync.value(QStringLiteral("commands")));
     m_syncSeen = true;
     m_log->clear(device::ChannelMask::All);
     QList<device::ConsoleLine> lines;
@@ -385,9 +431,23 @@ void RemoteConsoleSession::onSync(const QJsonValue& payload) {
     }
     // The views reload the replaced log (transcriptReplaced); consumers that only follow
     // linesReceived (the CLI) get the history as new lines.
+    std::size_t shownLines = 0;
+    std::size_t shownBytes = 0;
+    std::size_t emptyLines = 0;
     for (device::ConsoleLine& line : lines) {
+        if (line.dir != device::Direction::Marker) {
+            ++shownLines;
+            shownBytes += line.text.size();
+            emptyLines += line.text.empty() ? 1 : 0;
+        }
         line.seq = m_log->append(line);
     }
+    // ADR-0430: one line per sync, counts and lengths only.
+    qCDebug(log::lcRemote).noquote() << QString::fromStdString(std::format(
+        "Joiner sync received: {} entries, {} output strings, {} bytes, {} line feeds; "
+        "kept {} entries, truncated: {}; {} lines, {} bytes after sanitising, {} empty",
+        raw.entries, raw.outputs, raw.bytes, raw.lineFeeds, transcript->entries().size(),
+        transcript->truncated() ? "yes" : "no", shownLines, shownBytes, emptyLines));
     emit linesReceived(lines);
     const QString state = sync.value(QStringLiteral("state")).toString();
     if (state == QStringLiteral("connected")) {

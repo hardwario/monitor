@@ -89,9 +89,14 @@ Twojej konsoli; plik konsoli zapisuje, ile ich było.
    Kontynuować bez kopii?*. Nie lub brak odpowiedzi w ciągu 60 sekund anuluje aktualizację, zanim cokolwiek się zmieni.
    Kopia jest zapisywana z powrotem automatycznie. Po Twoim Nie karta pokaże *Aktualizacja firmware LTE anulowana przez Ciebie (14:02). Nic nie zostało zmienione.* Klient ze starszym HARDWARIO Monitor odpowiada na te pytania sam.
 
+Aby opuścić sesję, kliknij **Opuść sesję** na pasku urządzenia (lub naciśnij Ctrl+Shift+D). Karta pozostaje otwarta
+razem z konsolą, więc nadal możesz ją zapisać; konsola pokazuje *— opuściłeś sesję —*. **Dołącz ponownie** dołącza do
+tego samego kodu, a klient musi Cię ponownie dopuścić. Dopóki trwa operacja, o którą poprosiłeś, przycisk czeka na jej
+zakończenie.
+
 HARDWARIO Monitor nie zawsze rozpozna, że klient zakończył udostępnianie: serwer tego nie ogłasza. Po 30 minutach bez
-żadnej aktywności baner o tym informuje i oferuje **Opuść**. Karta pozostaje otwarta, więc nadal możesz zapisać
-konsolę.
+żadnej aktywności baner o tym informuje i oferuje **Zamknij kartę**. Dopóki jej nie zamkniesz, karta pozostaje otwarta,
+więc nadal możesz zapisać konsolę.
 
 <a id="command-line"></a>
 ## Wiersz poleceń

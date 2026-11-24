@@ -93,9 +93,14 @@ Hilfeabfragen erscheinen nicht in Ihrer Konsole; die Konsolendatei hält fest, w
    bricht das Update ab, bevor etwas geändert wird. Die Kopie wird automatisch zurückgeschrieben. Nach Ihrem Nein zeigt die Karte *LTE-Firmware-Update von Ihnen abgebrochen (14:02). Es wurde nichts geändert.* Ein Kunde mit einem
    älteren HARDWARIO Monitor beantwortet diese Fragen selbst.
 
+Um die Sitzung zu verlassen, klicken Sie in der Geräteleiste auf **Sitzung verlassen** (oder drücken Sie
+Ctrl+Shift+D). Der Tab bleibt mit der Konsole offen, sodass Sie sie noch speichern können; die Konsole zeigt *— Sie haben
+die Sitzung verlassen —*. **Erneut beitreten** tritt mit demselben Code wieder bei, und der Kunde muss Sie erneut
+zulassen. Solange ein Vorgang läuft, den Sie angefordert haben, wartet die Schaltfläche, bis er beendet ist.
+
 Wenn der Kunde die Freigabe beendet, kann HARDWARIO Monitor das nicht immer erkennen: Der Server kündigt es nicht an.
-Nach 30 Minuten ohne jede Aktivität weist das Banner darauf hin und bietet **Verlassen** an. Der Tab bleibt offen,
-sodass Sie die Konsole noch speichern können.
+Nach 30 Minuten ohne jede Aktivität weist das Banner darauf hin und bietet **Tab schließen** an. Bis Sie ihn schließen,
+bleibt der Tab offen, sodass Sie die Konsole noch speichern können.
 
 <a id="command-line"></a>
 ## Kommandozeile

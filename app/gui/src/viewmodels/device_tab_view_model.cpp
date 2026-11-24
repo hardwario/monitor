@@ -124,6 +124,12 @@ DeviceTabViewModel::DeviceTabViewModel(TabContext context, QObject* parent)
     // Plan 0044: sharing this console / the joiner state (children, Qt parent ownership).
     m_remoteShare = new RemoteShareViewModel(this); // NOLINT(cppcoreguidelines-owning-memory)
     m_remoteJoin = new RemoteJoinViewModel(this);   // NOLINT(cppcoreguidelines-owning-memory)
+    // ADR-0429: the device bar's Leave session / Join again follows the join state and a running
+    // remote operation.
+    connect(m_remoteJoin, &RemoteJoinViewModel::changed, m_connection,
+            &ConnectionViewModel::stateChanged);
+    connect(m_remoteJoin, &RemoteJoinViewModel::operationChanged, m_connection,
+            &ConnectionViewModel::stateChanged);
     createWizard();
 
     if (m_context.pages != nullptr) {
@@ -405,6 +411,7 @@ bool DeviceTabViewModel::configureRemote(const QString& code, const QUrl& relay)
         return false;
     }
     releaseSession();
+    m_remoteJoin->setLeft(false); // ADR-0429: another session
     m_profile = profile;
     m_targetId = toQString(device::consoleTargetId(*profile));
     m_serial.reset();
@@ -690,9 +697,15 @@ void DeviceTabViewModel::disconnectDevice() {
         return;
     }
     const bool hadSession = consoleSession() != nullptr;
+    const bool leaving = hadSession && isRemote();
+    if (leaving) {
+        m_remoteJoin->setLeft(true); // ADR-0429: before releaseSession() re-attaches the view model
+    }
     releaseSession();
     m_connection->setOpenError(std::nullopt);
-    if (hadSession) {
+    if (leaving) {
+        addMarker(tr("— you left the session —"));
+    } else if (hadSession) {
         addMarker(tr("— disconnected —"));
     }
     updateState();
