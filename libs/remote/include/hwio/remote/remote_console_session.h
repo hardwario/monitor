@@ -106,7 +106,8 @@ public:
     }
     // {Remote, "<code>", title()}.
     [[nodiscard]] device::SessionIdentity identity() const override;
-    // Operations when the host's hello said ops: true.
+    // Operations when the host's hello offers them (ops: true, or plan 0059: a listed target with
+    // kinds; tunnel::offersOperations).
     [[nodiscard]] device::Capabilities capabilities() const override;
     // Plan 0059 (ADR-0415): profileFor(hostHello()).
     [[nodiscard]] const device::DeviceProfile& profile() const override;

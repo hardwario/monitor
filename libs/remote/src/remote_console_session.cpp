@@ -220,7 +220,7 @@ device::SessionIdentity RemoteConsoleSession::identity() const {
 
 device::Capabilities RemoteConsoleSession::capabilities() const {
     device::Capabilities capabilities;
-    if (m_hostHello && m_hostHello->ops) {
+    if (m_hostHello && tunnel::offersOperations(*m_hostHello)) { // plan 0059
         capabilities |= device::Capability::Operations;
     }
     return capabilities;
