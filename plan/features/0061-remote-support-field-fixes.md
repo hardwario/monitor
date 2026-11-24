@@ -545,3 +545,52 @@ several hundred bytes becoming lines of 0 bytes, and it is the cheapest way to s
 5. The exposed application key of the evidence file (A1.8, fact 6): inform the customer or not.
 6. The pairs of A1.5 need one capture or one session with the ADR-0430 diagnostics.
 7. The installed version of the mobile app in the reported session (A1.2).
+
+## Amendment 2 — the customer's side learns that support left (2026-11-24)
+
+**Decision D14 (Matej Strnad, 2026-11-24: "Add a leave message"; ADR-0439).** Step A4 was blocked because the host
+cannot learn that a participant left: the relay sends nothing on a disconnect and the tunnel has no leave message
+(see the note at A4). The non-goal "no change of the session protocol" is lifted for this one message.
+
+### Design
+
+- **Message.** A new tunnel message from the joiner to the host, type `leave`, no payload besides the common
+  fields. Protocol version stays 1.
+- **Capability-gated.** An rc.4 / rc.5-without-this host rejects unknown message types with a warning, so the
+  joiner sends `leave` only when the host's hello lists the capability `leave` (the `caps` list of plan 0059,
+  ADR-0414). A Monitor host of this build lists it. Hosts without a hello (web Terminal, mobile app) and older
+  Monitor hosts never get the message: behaviour as today.
+- **When it is sent.** On "Leave session" (ADR-0429), on closing a joined remote tab, and on quitting Monitor
+  with a joined tab: best effort, before the socket is closed, without waiting for an answer. A lost connection
+  sends nothing: the existing idle rules stay the only signal there.
+- **Host on `leave`.**
+  1. The participant's permission is withdrawn: commands and operation requests are dropped again until the
+     customer allows a participant anew (the state after "Join again" before the consent).
+  2. Audit line in the customer's console and log: "— Remote: Support left the session. —" (translated, with the
+     English `textEn` for MCP as ADR-0374).
+  3. The banner returns to "Shared with support — code NNN NNN" (no "Support can send commands.").
+  4. A remote operation that this participant started and that is still running is **not** cancelled: the joiner's
+     button is disabled during it (D3), and a `leave` that arrives anyway (tab closed, quit) leaves the operation
+     to finish on the customer's side as a lost connection would.
+- **Forged `leave`.** The relay does not authenticate senders, so anybody who knows the code can send `leave`.
+  Its only effect is to withdraw permission and to end with the customer being asked again, never to grant
+  anything; the host's existing rate limit for remote lines applies to it too.
+- **Several participants.** The relay gives the host no participant identity (plan 0044), and the host's
+  permission is one flag for "a participant". `leave` therefore withdraws that one permission; another
+  participant still connected has to be allowed again. Documented as a limit, not solved here.
+- **Base.** The capability list exists only with plan 0059 (branch `strnad/plan-0059-remote-new-devices`), so
+  this amendment is implemented on a branch that contains plans 0059 and 0061 together (the plan 0062 branch
+  `strnad/impl-0062-mcp-remote` is the first such branch).
+
+### Steps
+
+- [ ] III-1 `tunnel`: message `leave` (encode, decode, bounds), capability `leave` in the host hello; compat
+      tests: an rc.4-shaped host never receives it, an rc.4-shaped joiner ignores the new capability.
+- [ ] III-2 Joiner: send on Leave session, tab close and quit, only with the capability; unit tests.
+- [ ] III-3 Host: withdraw permission, audit line, banner, rate limit; a running operation is not cancelled;
+      tests incl. a forged `leave` and a command after `leave` being dropped.
+- [ ] III-4 Qt Quick test of the customer's banner; translations (cs, de, pl, sk); docs `remote-support.md` in
+      five languages; release notes; interop checklist row. This completes A4.
+
+Verification as for the rest of the plan (debug, ASan, TSan, tidy, qmllint, translations, format, includes), plus
+the manual check with two Monitors: Leave session → the customer's banner and audit line; Join again → consent.
