@@ -49,7 +49,9 @@ using namespace std::chrono_literals;
 
 // The allowance applies to the normal (debug / release) builds: 20 ms, 100 ms on macOS, whose CI
 // runners showed 29-62 ms of timer and scheduler jitter in Debug (plan 0023: 50 ms; raised to
-// 100 ms by the user on 2026-11-03 after 62 ms on a macOS runner).
+// 100 ms by the user on 2026-11-03 after 62 ms on a macOS runner). Windows: 100 ms too (user
+// decision 2026-11-24): its CI runners showed 20-37 ms over the baseline, also on main without any
+// change to this code.
 // ASan/UBSan slow everything down by about 2-3x (bound 100 ms); under TSan (5-15x, and
 // DeviceSession's own event batches dominate) the latency is only recorded, not checked.
 #ifdef __has_feature
@@ -59,7 +61,7 @@ constexpr auto allowedLatency = 1000ms;
 #elif __has_feature(address_sanitizer)
 constexpr bool checkLatency = true;
 constexpr auto allowedLatency = 100ms;
-#elifdef __APPLE__
+#elif defined(__APPLE__) || defined(_WIN32)
 constexpr bool checkLatency = true;
 constexpr auto allowedLatency = 100ms;
 #else
