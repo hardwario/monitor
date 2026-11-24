@@ -7,6 +7,7 @@
 #include "hwio/core/error.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
+#include "hwio/device/console_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/remote/baseline_errors.h"
 #include "hwio/remote/remote_console_session.h"
