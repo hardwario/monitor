@@ -165,10 +165,15 @@ TestCase {
         // The failed row is expanded: its cause and what to do.
         tryVerify(() => part("checkCause") !== null);
         verify(part("wizardBody").text.indexOf("APP connector") >= 0);
-        const actions = parts("wizardAction");
-        verify(actions.length >= 1);
-        compare(actions[0].text, "Show me how");
-        mouseClick(actions[0]);
+        // The action buttons are a Repeater in a row: clicked only once they are laid out side by
+        // side (a click before that hit the second button on the Windows release runner).
+        tryVerify(() => {
+            const actions = parts("wizardAction");
+            return actions.length >= 1 && actions[0].text === "Show me how" && actions[0].width > 0
+                && (actions.length < 2 || actions[1].x >= actions[0].x + actions[0].width
+                    || actions[1].y !== actions[0].y);
+        });
+        mouseClick(parts("wizardAction")[0]);
         tryVerify(() => wizard.step === ConnectWizard.Cable);
     }
 
