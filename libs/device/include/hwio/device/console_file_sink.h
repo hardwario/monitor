@@ -11,8 +11,10 @@
 // target) is written as "< <prefix> <redacted>", and so is a shell's echo of it in the output
 // (after the profile's shell prompt or a Zephyr "<name>:~$ " prompt); plan 0028 (U2): a shell
 // output line "<key>: <value>" whose key is one of the profile's sensitiveOutputKeys (CHESTER
-// `info show`: claim token, BLE passkey) is written as "<key>: <redacted>"; the files are
-// owner-only (0600 on Unix, created so).
+// `info show`: claim token, BLE passkey) is written as "<key>: <redacted>"; plan 0059 (ADR-0416):
+// a shell output line starting with one of the target's sensitiveOutputPrefixes is written as
+// "<prefix> <redacted>" (all three rules: ConsoleRedaction); the files are owner-only (0600 on
+// Unix, created so).
 //
 // Default mode: one file per session (in ConsoleFileConfig::consoleFileDir when set, ADR-0156),
 // <directory>/<profile>-<target>-YYYYMMDD-HHMMSS-<sn>.log
@@ -52,17 +54,16 @@
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
 #include "hwio/device/console_line.h"
+#include "hwio/device/console_redaction.h"
 #include "hwio/device/firmware_identity.h"
 #include "hwio/device/session_key.h"
 
-#include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
 #include <optional>
-#include <span>
 #include <string>
 #include <string_view>
 
@@ -170,16 +171,8 @@ private:
     std::string m_keySuffix;  // the probe SN or the sanitised BLE id
     std::optional<FirmwareIdentity> m_identity;
     bool m_renameFailureLogged = false;
-    // The length of a shell prompt at the start of an echoed line (0 = none).
-    [[nodiscard]] std::size_t echoPromptLength(std::string_view text) const noexcept;
-
-    // ADR-0186: input lines matching these are written redacted (the target's profile list).
-    std::span<const std::string_view> m_sensitivePrefixes;
-    // Plan 0028 (U2): output lines "<key>: <secret>" are written as "<key>: <redacted>".
-    std::span<const std::string_view> m_sensitiveOutput;
-    std::span<const std::string_view> m_sensitiveOutputPrefixes; // plan 0059 (profile data)
-    // Review R4: the profile's shell prompts (RTT target, BLE); "" = none.
-    std::array<std::string_view, 2> m_prompts{};
+    // ADR-0186, plan 0028 (U2): the secrets of the config's profile and target.
+    ConsoleRedaction m_redaction;
 };
 
 // The session key of a generated console file name (old and plan 0028 names, with .partN and the

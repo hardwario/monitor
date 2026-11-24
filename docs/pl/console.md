@@ -93,6 +93,9 @@ Kliknij wiersz, aby go zaznaczyć, <kbd>Shift</kbd>+kliknięcie lub przeciągni�
 **Save view…** (<kbd>Ctrl</kbd>+<kbd>S</kbd>) zapisuje panel z fokusem tak, jak jest wyświetlany, ze znacznikami
 czasu, jeśli są włączone. Nazwa jest wstępnie wypełniona, na przykład
 `chester-app-clime-v3.2.0-20261103-101500-log.txt`, a folderem jest ostatnio używany (za pierwszym razem Dokumenty).
+Sekrety są zapisywane jako `<redacted>`, tak jak w [plikach konsoli](#pliki-konsoli) (na przykład
+`claim token: <redacted>`); na ekranie i przy **kopiowaniu** pozostają widoczne. W systemach Linux i macOS zapisany
+plik może odczytać tylko Twój użytkownik.
 
 <a id="batch-files"></a>
 ## Pliki wsadowe

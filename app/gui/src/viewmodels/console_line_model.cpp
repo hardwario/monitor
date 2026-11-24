@@ -4,6 +4,7 @@
 #include "hwio/core/result.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
+#include "hwio/device/console_redaction.h"
 #include "viewmodels/find_filter_engine.h"
 
 #include <QAbstractListModel>
@@ -739,10 +740,18 @@ ConsoleLineModel::CopyText ConsoleLineModel::selectedText(bool withTime) const {
     return result;
 }
 
-Status ConsoleLineModel::writeRows(QIODevice& device, bool withTime) const {
+Status ConsoleLineModel::writeRows(QIODevice& device, bool withTime,
+                                   const device::ConsoleRedaction& redaction) const {
     bool ok = true;
     forEachRow(*m_log, m_channel, m_rows, 0, m_rows.size(), [&](const device::ConsoleLine& line) {
-        QByteArray bytes = formatLine(line, withTime).toUtf8();
+        QByteArray bytes;
+        if (auto text = redaction.redacted(line)) {
+            device::ConsoleLine shown = line;
+            shown.text = std::move(*text);
+            bytes = formatLine(shown, withTime).toUtf8();
+        } else {
+            bytes = formatLine(line, withTime).toUtf8();
+        }
         bytes.append('\n');
         ok = device.write(bytes) == bytes.size();
         return ok;

@@ -10,7 +10,9 @@ hwio_add_backend_library(hwio_core
     include/hwio/core/firmware_identity.h
     include/hwio/core/i18n.h
     include/hwio/core/json.h
+    include/hwio/core/localized_text.h
     include/hwio/core/log.h
+    include/hwio/core/owner_only.h
     include/hwio/core/result.h
     include/hwio/core/ring_buffer.h
     include/hwio/core/settings.h
@@ -22,7 +24,9 @@ hwio_add_backend_library(hwio_core
     src/error.cpp
     src/i18n.cpp
     src/json.cpp
+    src/localized_text.cpp
     src/log.cpp
+    src/owner_only.cpp
     src/settings.cpp
     src/settings_internal.h
     src/text_sanitizer.cpp

@@ -47,8 +47,9 @@ mit:
 - den neuesten Absturzberichten, falls vorhanden.
 
 Bevor er geschrieben wird, werden Ihr Benutzername, Ihr Home-Ordner und der Computername ersetzt (`<user>`, `~`,
-`<host>`), und Werte, die wie Passwörter, Tokens oder Schlüssel aussehen, werden durch `<redacted>` ersetzt.
-Seriennummern der Probes bleiben enthalten. Die Logs können Ausgaben Ihres Geräts enthalten, sehen Sie den Bericht
+`<host>`), und Werte, die wie Passwörter, Tokens oder Schlüssel aussehen, werden durch `<redacted>` ersetzt. Die
+Adresse des Bluetooth-Adapters Ihres Computers wird durch `<adapter address>` ersetzt (die App und `hwio doctor`
+zeigen sie weiterhin an). Seriennummern der Probes und die Adressen Ihrer Geräte bleiben enthalten. Die Logs können Ausgaben Ihres Geräts enthalten, sehen Sie den Bericht
 daher durch, bevor Sie ihn senden. Konsolendateien und der Befehlsverlauf sind nicht Teil des Berichts.
 
 Der Bericht wird auf Ihrem Computer gespeichert (standardmäßig `hwio-diagnostics-YYYYMMDD-HHMMSS.zip` in Dokumente

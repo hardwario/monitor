@@ -1,6 +1,7 @@
 // Redaction of the diagnostic report (ADR-0075).
 
 #include "hwio/device/profile.h"
+#include "hwio/diag/environment.h"
 #include "hwio/diag/report.h"
 
 #include <QDir>
@@ -247,6 +248,21 @@ std::string redactSecrets(std::string_view text) {
     return redactNamedSecrets(std::move(result));
 }
 
+// The 12 hex digits of a Bluetooth address in any separator form ("00:11:22:33:44:55",
+// "00-11-...", "001122334455"); "" when it is not one.
+std::string adapterAddressDigits(std::string_view address) {
+    std::string digits;
+    for (const char c : address) {
+        if (std::isxdigit(static_cast<unsigned char>(c)) != 0) {
+            digits += c;
+        } else if (c != ':' && c != '-') {
+            return {};
+        }
+    }
+    constexpr std::size_t addressDigits = 12;
+    return digits.size() == addressDigits ? digits : std::string();
+}
+
 } // namespace
 
 RedactionContext currentRedaction() {
@@ -267,8 +283,28 @@ RedactionContext currentRedaction() {
     return context;
 }
 
+RedactionContext currentRedaction(const EnvironmentFacts& facts) {
+    RedactionContext context = currentRedaction();
+    context.bluetoothAddresses = facts.bluetoothAdapterAddresses;
+    return context;
+}
+
 std::string redact(std::string_view text, const RedactionContext& context) {
     std::string result = redactSecrets(text);
+    // ADR-0427: this computer's Bluetooth adapter (colon-separated and bare form).
+    for (const std::string& address : context.bluetoothAddresses) {
+        const std::string bare = adapterAddressDigits(address);
+        if (bare.empty()) {
+            continue;
+        }
+        std::string colons;
+        for (std::size_t i = 0; i < bare.size(); i += 2) {
+            colons += i == 0 ? "" : ":";
+            colons += bare.substr(i, 2);
+        }
+        result = replaceAll(result, colons, "<adapter address>", Boundary::Word, true);
+        result = replaceAll(result, bare, "<adapter address>", Boundary::Word, true);
+    }
     std::string home = context.home;
     while (home.size() > 1 && (home.back() == '/' || home.back() == '\\')) {
         home.pop_back();

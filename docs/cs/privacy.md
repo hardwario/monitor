@@ -46,7 +46,9 @@ diagnostickou zprávu…**, nebo `hwio diag report` (`-o FILE`). Je to soubor zi
 - poslední zprávy o pádu, pokud nějaké jsou.
 
 Před zapsáním se vaše uživatelské jméno, domovská složka a název počítače nahradí (`<user>`, `~`, `<host>`) a hodnoty,
-které vypadají jako hesla, tokeny nebo klíče, se nahradí `<redacted>`. Sériová čísla sond ve zprávě zůstávají. Logy
+které vypadají jako hesla, tokeny nebo klíče, se nahradí `<redacted>`. Adresa Bluetooth adaptéru vašeho počítače se
+nahradí `<adapter address>` (aplikace a `hwio doctor` ji dál zobrazují). Sériová čísla sond a adresy vašich zařízení
+ve zprávě zůstávají. Logy
 mohou obsahovat výstup vašeho zařízení, proto si zprávu před odesláním prohlédněte. Soubory konzole a historie
 příkazů nejsou součástí zprávy.
 

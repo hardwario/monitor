@@ -83,6 +83,9 @@ public:
     [[nodiscard]] Result<CommandResult> run(const Context& context) const;
 
 private:
+    // After --help: ShowHelp, or the usage error for arguments no command took (ADR-0423).
+    [[nodiscard]] Result<ParseOutcome> helpOrExtras() const;
+
     std::unique_ptr<CLI::App> m_app;
     GlobalOptions m_options;
     std::string m_logLevelName;

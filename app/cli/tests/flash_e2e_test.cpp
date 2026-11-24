@@ -200,6 +200,44 @@ TEST_F(FlashCli, FlashHumanOutput) {
     EXPECT_NE(result.err.find("Target: nRF52840 (app)"), std::string::npos);
 }
 
+// Plan 0050 (ADR-0376): what the J-Link loader reported (the fake: computed V9.84 lines, or given
+// ones); nothing reported -> no fields.
+TEST_F(FlashCli, FlashReportsWhatTheLoaderChanged) {
+    useScenario(QStringLiteral(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+        "chip": {"downloadReport": true}}]})"));
+    const RunResult changed =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("flash"), path(QStringLiteral("app.hex"))});
+    ASSERT_EQ(changed.exitCode, 0) << changed.out << changed.err;
+    const QJsonObject result = data(envelopes(changed.out).back());
+    EXPECT_FALSE(result.value(QStringLiteral("unchanged")).toBool(true));
+    EXPECT_EQ(result.value(QStringLiteral("affected_bytes")).toInt(), 4096);
+
+    useScenario(QStringLiteral(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+        "chip": {"downloadMessages": [
+            "J-Link: Flash download: Bank 0 @ 0x00000000: Skipped. Contents already match"]}}]})"));
+    const RunResult same =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("flash"), path(QStringLiteral("app.hex"))});
+    ASSERT_EQ(same.exitCode, 0) << same.out << same.err;
+    const QJsonObject unchanged = data(envelopes(same.out).back());
+    EXPECT_TRUE(unchanged.value(QStringLiteral("unchanged")).toBool());
+    EXPECT_EQ(unchanged.value(QStringLiteral("affected_bytes")).toInt(-1), 0);
+    const RunResult human = hwio({QStringLiteral("chester"), QStringLiteral("app"),
+                                  QStringLiteral("flash"), path(QStringLiteral("app.hex"))});
+    ASSERT_EQ(human.exitCode, 0) << human.err;
+    EXPECT_EQ(human.out,
+              "Flash contents already matched; nothing was programmed.\nSuccessfully completed\n");
+
+    SetUp(); // the fixture's scenario: no loader messages
+    const RunResult silent =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("flash"), path(QStringLiteral("app.hex"))});
+    ASSERT_EQ(silent.exitCode, 0) << silent.out << silent.err;
+    EXPECT_FALSE(data(envelopes(silent.out).back()).contains(QStringLiteral("unchanged")));
+    EXPECT_FALSE(data(envelopes(silent.out).back()).contains(QStringLiteral("affected_bytes")));
+}
+
 TEST_F(FlashCli, SubcommandSerialNumberWinsOverTheGroup) {
     // Probe 2 has an nRF91: flashing the app there is a wrong family (exit 6).
     const RunResult group = hwio({QStringLiteral("chester"), QStringLiteral("app"),
@@ -219,8 +257,8 @@ TEST_F(FlashCli, InputErrors) {
     const RunResult missing =
         hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
               QStringLiteral("flash"), path(QStringLiteral("missing.hex"))});
-    EXPECT_EQ(missing.exitCode, 2);
-    EXPECT_EQ(errorCode(missing), QStringLiteral("usage.invalid_argument"));
+    EXPECT_EQ(missing.exitCode, 3); // ADR-0423
+    EXPECT_EQ(errorCode(missing), QStringLiteral("io.file_not_found"));
 
     writeFile(QStringLiteral("bad.hex"), ":0100000001FF\n");
     const RunResult bad =
@@ -657,6 +695,13 @@ TEST_F(FlashCli, GuidedLteFlashCancelAfterTheEraseWritesBackAndListsTheCopy) {
                                  QStringLiteral("flash"), QStringLiteral("--backup"),
                                  QStringLiteral("latest"), path(QStringLiteral("lte.hex"))});
     EXPECT_NE(both.exitCode, 0);
+    // ADR-0423: a given copy that does not exist is io.file_not_found (exit 3).
+    const RunResult missing =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("flash"), QStringLiteral("--backup"),
+              path(QStringLiteral("missing-copy.hex"))});
+    EXPECT_EQ(missing.exitCode, 3) << missing.out << missing.err;
+    EXPECT_EQ(errorCode(missing), QStringLiteral("io.file_not_found"));
 }
 #endif
 

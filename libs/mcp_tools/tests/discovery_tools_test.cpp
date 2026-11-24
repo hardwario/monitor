@@ -12,6 +12,7 @@
 
 #include <QFile>
 #include <QIODevice>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QString>
@@ -22,6 +23,7 @@
 
 #include <chrono>
 #include <expected>
+#include <format>
 #include <functional>
 #include <optional>
 #include <string_view>
@@ -96,6 +98,64 @@ TEST(DiscoveryTools, ListDevicesGolden) {
                                           .toUtf8())
                   .object(),
               call.structured());
+}
+
+// ADR-0373: by default like `hwio ble scan` (open devices, J-Link probes, BLE devices with a
+// profile); all_ble=true lists every BLE device; the hwio://devices resource uses the default.
+TEST(DiscoveryTools, ListDevicesHidesUnprofiledBle) {
+    std::vector<DeviceEntry> entries{sampleEntries().front()};
+    entries.push_back(DeviceEntry{.id = "ble:F1:22:33:44:55:66",
+                                  .kind = "ble",
+                                  .displayName = "CHESTER-ABC",
+                                  .profileId = "chester",
+                                  .state = DeviceEntry::State::Available,
+                                  .owner = std::nullopt,
+                                  .connection = std::nullopt,
+                                  .openedByMcp = false});
+    constexpr int unprofiled = 50;
+    for (int i = 0; i < unprofiled; ++i) {
+        entries.push_back(DeviceEntry{.id = std::format("ble:00:00:00:00:00:{:02X}", i),
+                                      .kind = "ble",
+                                      .displayName = std::format("MP1_{}", i),
+                                      .profileId = {},
+                                      .state = DeviceEntry::State::Available,
+                                      .owner = std::nullopt,
+                                      .connection = std::nullopt,
+                                      .openedByMcp = false});
+    }
+    NiceMock<MockDeviceProvider> provider;
+    ON_CALL(provider, list()).WillByDefault(Return(entries));
+    Harness harness(provider);
+
+    auto call = harness.call(QStringLiteral("list_devices"));
+    ASSERT_FALSE(call.isError()) << call.errorCode();
+    const QJsonArray listed = call.structured().value(QStringLiteral("devices")).toArray();
+    ASSERT_EQ(listed.size(), 2);
+    EXPECT_EQ(listed.at(0).toObject().value(QStringLiteral("id")).toString(),
+              QStringLiteral("jlink:801000001"));
+    EXPECT_EQ(listed.at(1).toObject().value(QStringLiteral("id")).toString(),
+              QStringLiteral("ble:F1:22:33:44:55:66"));
+    EXPECT_EQ(call.structured().value(QStringLiteral("ble_hidden")).toInteger(), unprofiled);
+
+    auto all = harness.call(QStringLiteral("list_devices"), args({{"all_ble", true}}));
+    ASSERT_FALSE(all.isError()) << all.errorCode();
+    EXPECT_EQ(all.structured().value(QStringLiteral("devices")).toArray().size(), 2 + unprofiled);
+    EXPECT_EQ(all.structured().value(QStringLiteral("ble_hidden")).toInteger(), 0);
+
+    const QJsonObject read = harness
+                                 .rpc(QStringLiteral("resources/read"),
+                                      {{QStringLiteral("uri"), QStringLiteral("hwio://devices")}})
+                                 .value(QStringLiteral("result"))
+                                 .toObject();
+    const QJsonObject resource = QJsonDocument::fromJson(read.value(QStringLiteral("contents"))
+                                                             .toArray()
+                                                             .at(0)
+                                                             .toObject()
+                                                             .value(QStringLiteral("text"))
+                                                             .toString()
+                                                             .toUtf8())
+                                     .object();
+    EXPECT_EQ(resource, call.structured());
 }
 
 // ADR-0162: refresh=true waits for the provider's asynchronous refresh, then lists the cache.

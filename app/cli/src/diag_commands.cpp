@@ -4,6 +4,7 @@
 #include "hwio/core/crash_handler.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
@@ -167,8 +168,10 @@ Result<CommandResult> report(const Context& context, const GlobalOptions& global
                              const ReportOptions& options) {
     if (options.output == "-") {
         Error error = makeError(ErrorCode::UsageInvalidArgument, "-o -");
-        error.message = "The report is a zip file and cannot be written to the terminal.";
-        error.suggestion = "Give a file name with -o, or leave -o out.";
+        setUntranslatedText(error, ErrorText::Message,
+                            "The report is a zip file and cannot be written to the terminal.");
+        setUntranslatedText(error, ErrorText::Suggestion,
+                            "Give a file name with -o, or leave -o out.");
         return std::unexpected(std::move(error));
     }
     const fs::path target = options.output.empty()
@@ -191,7 +194,7 @@ Result<CommandResult> report(const Context& context, const GlobalOptions& global
     input.crashFiles = diag::recentCrashFiles(crash::defaultDirectory());
     input.settingsFile = Settings::defaultFilePath();
     input.createdUtc = QDateTime::currentDateTimeUtc().toString(Qt::ISODate).toStdString();
-    input.redaction = diag::currentRedaction();
+    input.redaction = diag::currentRedaction(*environmentContext.facts); // ADR-0427
     auto bytes = diag::ReportBuilder::writeZip(input, target, context.stop);
     if (!bytes) {
         return std::unexpected(std::move(bytes).error());

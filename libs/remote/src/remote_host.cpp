@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/device/command_tree.h"
@@ -35,6 +36,7 @@
 #include <QtCore/qtmetamacros.h>
 #include <QtCore/qttranslation.h>
 #include <QtLogging>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <algorithm>
@@ -159,29 +161,25 @@ RemoteHost::RemoteHost(device::ConsoleSession& session, ConsentProvider& consent
         audit(trRemote(
             QT_TRANSLATE_NOOP("hwio::remote", "Sharing ended after 30 minutes without activity.")));
         Error error = makeError(ErrorCode::Timeout, "remote session idle");
-        error.message =
-            trRemote(QT_TRANSLATE_NOOP("hwio::remote",
-                                       "Sharing ended after 30 minutes without activity."))
-                .toStdString();
-        error.cause.clear();
-        error.suggestion =
-            trRemote(QT_TRANSLATE_NOOP("hwio::remote",
-                                       "Start sharing again if support still needs the console."))
-                .toStdString();
+        setText(
+            error, ErrorText::Message, "hwio::remote",
+            QT_TRANSLATE_NOOP("hwio::remote", "Sharing ended after 30 minutes without activity."));
+        clearText(error, ErrorText::Cause);
+        setText(error, ErrorText::Suggestion, "hwio::remote",
+                QT_TRANSLATE_NOOP("hwio::remote",
+                                  "Start sharing again if support still needs the console."));
         finish(std::move(error));
     });
     connect(&m_lifetimeTimer, &QTimer::timeout, this, [this] {
         audit(trRemote(
             QT_TRANSLATE_NOOP("hwio::remote", "Sharing ended after the maximum of 8 hours.")));
         Error error = makeError(ErrorCode::Timeout, "remote session lifetime");
-        error.message = trRemote(QT_TRANSLATE_NOOP("hwio::remote",
-                                                   "Sharing ended after the maximum of 8 hours."))
-                            .toStdString();
-        error.cause.clear();
-        error.suggestion =
-            trRemote(QT_TRANSLATE_NOOP("hwio::remote",
-                                       "Start sharing again if support still needs the console."))
-                .toStdString();
+        setText(error, ErrorText::Message, "hwio::remote",
+                QT_TRANSLATE_NOOP("hwio::remote", "Sharing ended after the maximum of 8 hours."));
+        clearText(error, ErrorText::Cause);
+        setText(error, ErrorText::Suggestion, "hwio::remote",
+                QT_TRANSLATE_NOOP("hwio::remote",
+                                  "Start sharing again if support still needs the console."));
         finish(std::move(error));
     });
     connect(&m_helloTimer, &QTimer::timeout, this, [this] {

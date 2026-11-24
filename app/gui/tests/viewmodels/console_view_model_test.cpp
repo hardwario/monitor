@@ -786,6 +786,107 @@ TEST_F(ConsoleViewModelTest, SaveViewNameFolderAndRefusal) {
         << console().saveViewFileName(1).toStdString();
 }
 
+// Plan 0060 A4 (ADR-0426): a shell that prints the secrets of CHESTER `info show` (claim token,
+// BLE passkey) and echoes what it is sent (a command with a secret argument comes back).
+constexpr const char* secretsScenario = R"({
+  "libraryVersion": 81000,
+  "probes": [
+    {"serialNumber": 801000001, "product": "Test Probe",
+     "rtt": {"echo": true,
+             "output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted A\n"}],
+             "responses": {
+               "secrets": "claim token: 0123456789abcdef\nble passkey: 975310\n"}}}
+  ]})";
+
+// The bytes of a saved file.
+QByteArray readSaved(const std::filesystem::path& path) {
+    QFile file(hwio::toQString(hwio::toUtf8(path)));
+    if (!file.open(QIODevice::ReadOnly)) {
+        return {};
+    }
+    return file.readAll();
+}
+
+// Plan 0060 A4 (ADR-0426): the file is owner-only, also when it replaces an existing file with a
+// wider mode (QSaveFile would otherwise keep the old file's mode).
+TEST_F(ConsoleViewModelTest, SaveViewIsOwnerOnly) {
+#ifdef _WIN32
+    // Windows has no mode bits; the file gets the ACL of the folder the user chose (Documents by
+    // default, which is per-user). See hwio/core/owner_only.h.
+    GTEST_SKIP() << "POSIX file mode";
+#else
+    namespace fs = std::filesystem;
+    ASSERT_TRUE(connectAndWait(tab()));
+    ASSERT_TRUE(waitFor([&] { return console().log()->rowCount() >= 1; }));
+    const fs::path fresh = root() / "fresh.txt";
+    console().saveView(1, url(fresh));
+    ASSERT_FALSE(console().error().valid()) << console().error().message().toStdString();
+    EXPECT_EQ(fs::status(fresh).permissions(), fs::perms::owner_read | fs::perms::owner_write);
+
+    const fs::path existing = root() / "existing.txt";
+    std::ofstream(existing) << "old\n";
+    fs::permissions(existing, fs::perms::owner_read | fs::perms::owner_write |
+                                  fs::perms::group_read | fs::perms::group_write |
+                                  fs::perms::others_read);
+    console().saveView(1, url(existing));
+    ASSERT_FALSE(console().error().valid()) << console().error().message().toStdString();
+    EXPECT_EQ(fs::status(existing).permissions(), fs::perms::owner_read | fs::perms::owner_write);
+    EXPECT_TRUE(readSaved(existing).contains("<inf> app: started"));
+#endif
+}
+
+// Plan 0060 A4 (ADR-0426): the secrets of `info show` are written as in the console file; the
+// screen and Copy keep them.
+TEST_F(ConsoleViewModelTest, SaveViewRedactsInfoShowSecrets) {
+    useScenario(secretsScenario);
+    ASSERT_TRUE(connectAndWait(tab()));
+    ASSERT_TRUE(console().send(QStringLiteral("secrets")));
+    ConsoleLineModel& shell = *console().shell();
+    const auto copied = [&shell] {
+        shell.selectAll();
+        return shell.selectedText(false).text;
+    };
+    ASSERT_TRUE(waitFor([&] { return copied().contains(QStringLiteral("ble passkey: 975310")); }))
+        << copied().toStdString();
+    EXPECT_TRUE(copied().contains(QStringLiteral("claim token: 0123456789abcdef"))); // Copy
+
+    const auto saved = root() / "secrets.txt";
+    console().saveView(0, url(saved));
+    ASSERT_FALSE(console().error().valid()) << console().error().message().toStdString();
+    const QByteArray bytes = readSaved(saved);
+    EXPECT_TRUE(bytes.contains("claim token: <redacted>")) << bytes.toStdString();
+    EXPECT_TRUE(bytes.contains("ble passkey: <redacted>")) << bytes.toStdString();
+    EXPECT_FALSE(bytes.contains("0123456789abcdef")) << bytes.toStdString();
+    EXPECT_FALSE(bytes.contains("975310")) << bytes.toStdString();
+    EXPECT_TRUE(bytes.contains("booted A")); // the rest is written as shown
+    // The screen is unchanged after saving.
+    EXPECT_TRUE(copied().contains(QStringLiteral("claim token: 0123456789abcdef")));
+}
+
+// Plan 0060 A4 (ADR-0426, ADR-0186): a command with a secret argument is written as
+// "<prefix> <redacted>", the sent line and the shell's echo of it.
+TEST_F(ConsoleViewModelTest, SaveViewRedactsSensitiveCommandEcho) {
+    useScenario(secretsScenario);
+    ASSERT_TRUE(connectAndWait(tab()));
+    ASSERT_TRUE(console().send(QStringLiteral("lte config password hunter2-secret")));
+    ConsoleLineModel& shell = *console().shell();
+    const auto copied = [&shell] {
+        shell.selectAll();
+        return shell.selectedText(false).text;
+    };
+    // The sent line and the echo.
+    ASSERT_TRUE(waitFor([&] {
+        return copied().count(QStringLiteral("lte config password hunter2-secret")) >= 2;
+    })) << copied().toStdString();
+
+    const auto saved = root() / "echo.txt";
+    console().saveView(0, url(saved));
+    ASSERT_FALSE(console().error().valid()) << console().error().message().toStdString();
+    const QByteArray bytes = readSaved(saved);
+    EXPECT_FALSE(bytes.contains("hunter2-secret")) << bytes.toStdString();
+    EXPECT_GE(bytes.count("lte config password <redacted>"), 2) << bytes.toStdString();
+}
+
 // Review round 1 (R6): Save view follows the identity the session adopted, also the boot banner
 // fallback when `info show` names no firmware.
 TEST_F(ConsoleViewModelTest, SaveViewFollowsTheBannerIdentity) {

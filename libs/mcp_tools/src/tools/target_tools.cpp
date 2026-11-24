@@ -4,6 +4,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
@@ -280,9 +281,11 @@ public:
             hwio::Error error =
                 makeError(ErrorCode::IoWriteFailed, path.toStdString() + ": the folder " +
                                                         hwio::toUtf8(parent) + " does not exist");
-            error.cause = "The folder of the file does not exist; it is not created.";
-            error.suggestion = "Create the dump folder again, or restart the server with another "
-                               "--dump-dir.";
+            setUntranslatedText(error, ErrorText::Cause,
+                                "The folder of the file does not exist; it is not created.");
+            setUntranslatedText(error, ErrorText::Suggestion,
+                                "Create the dump folder again, or restart the server with another "
+                                "--dump-dir.");
             completeError(std::move(error));
             return;
         }
@@ -626,9 +629,11 @@ hwio::Status addReadMemory(hwio::mcp::Registry& registry, ToolsContext& context)
                 if (args.contains(QStringLiteral("to_file")) && !isPlainDumpName(name)) {
                     hwio::Error error =
                         makeError(ErrorCode::McpToFileNotAllowed, name.toStdString());
-                    error.message = "The file name must be a plain name. Memory dumps are written "
-                                    "only to " +
-                                    hwio::toUtf8(directory) + ".";
+                    setUntranslatedText(
+                        error, ErrorText::Message,
+                        "The file name must be a plain name. Memory dumps are written "
+                        "only to " +
+                            hwio::toUtf8(directory) + ".");
                     return failed(std::move(error));
                 }
                 auto device = resolveJLinkDevice(context.provider(), args);
@@ -959,10 +964,11 @@ hwio::Status addWriteFlash(hwio::mcp::Registry& registry, ToolsContext& context)
                               Schema::boolean(QStringLiteral("Allow writing into the UICR."))
                                   .defaultValue(false))
                     .json(),
-            .outputSchema = addressedSchema({{"bytes", typed("integer")},
-                                             {"duration", typed("number")},
-                                             {"log_cursor_end", typed("integer")},
-                                             {"terminal_cursor_end", typed("integer")}}),
+            .outputSchema =
+                withDownload(addressedSchema({{"bytes", typed("integer")},
+                                              {"duration", typed("number")},
+                                              {"log_cursor_end", typed("integer")},
+                                              {"terminal_cursor_end", typed("integer")}})),
             .annotations = destructive,
             .consent = hwio::mcp::ConsentCategory::Flash,
             .marker = true,
@@ -1026,6 +1032,7 @@ hwio::Status addWriteFlash(hwio::mcp::Registry& registry, ToolsContext& context)
                             json.insert(QStringLiteral("address"), formatAddress(address));
                             json.insert(QStringLiteral("bytes"), static_cast<qint64>(size));
                             json.insert(QStringLiteral("duration"), seconds(r.duration));
+                            insertDownload(json, r.download); // ADR-0376
                             return json;
                         }};
                 }),

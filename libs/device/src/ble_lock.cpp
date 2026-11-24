@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/probe_lock.h"
 #include "hwio/hw/ble/types.h"
@@ -11,6 +12,7 @@
 #include <QDir>
 #include <QLockFile>
 #include <QString>
+#include <QtTranslation>
 
 #include <expected>
 #include <filesystem>
@@ -37,17 +39,15 @@ Error inUseError(const ble::BleDeviceId& id, const ProbeLockOwner& owner, const 
     Error error =
         makeError(ErrorCode::BleInUseByOtherProcess,
                   std::format("lock held by {} (PID {}): {}", owner.app, owner.pid, toUtf8(path)));
-    error.message = QCoreApplication::translate(
-                        "hwio::device", "The device %1 is used by another program (%2, PID %3).")
-                        .arg(toQString(id), toQString(owner.app))
-                        .arg(owner.pid)
-                        .toStdString();
+    setText(
+        error, ErrorText::Message, "hwio::device",
+        QT_TRANSLATE_NOOP("hwio::device", "The device %1 is used by another program (%2, PID %3)."),
+        {toQString(id), toQString(owner.app), owner.pid});
     if (owner.pid == 0) {
-        error.suggestion =
-            QCoreApplication::translate("hwio::device",
-                                        "If no other HARDWARIO program is running, delete %1.")
-                .arg(QDir::toNativeSeparators(toQString(toUtf8(path))))
-                .toStdString();
+        setText(error, ErrorText::Suggestion, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device",
+                                  "If no other HARDWARIO program is running, delete %1."),
+                {QDir::toNativeSeparators(toQString(toUtf8(path)))});
     }
     return error;
 }
@@ -77,11 +77,10 @@ Result<BleLock> BleLock::acquire(const ble::BleDeviceId& id, const fs::path& dir
                 // Q3 (plan 0011, 2026-10-19): the same code as another process, exit 5.
                 Error error = makeError(ErrorCode::BleInUseByOtherProcess,
                                         "the device lock is held by this process");
-                error.message =
-                    QCoreApplication::translate(
-                        "hwio::device", "The device %1 is already used by this application.")
-                        .arg(toQString(id))
-                        .toStdString();
+                setText(error, ErrorText::Message, "hwio::device",
+                        QT_TRANSLATE_NOOP("hwio::device",
+                                          "The device %1 is already used by this application."),
+                        {toQString(id)});
                 return error;
             }};
     auto lock = detail::acquireLockFile(directory, lockPath(id, directory), lockKey(id), errors);

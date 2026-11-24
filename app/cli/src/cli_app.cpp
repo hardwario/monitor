@@ -6,6 +6,7 @@
 #include "diag_commands.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/version.h"
@@ -47,9 +48,9 @@ const std::map<std::string, log::Level>& logLevels() {
 
 Error usageError(std::string message) {
     Error error = makeError(ErrorCode::UsageInvalidArgument);
-    error.message = std::move(message);
-    error.cause.clear(); // CLI11's message already says what is wrong
-    error.suggestion = "Run `hwio --help`.";
+    setUntranslatedText(error, ErrorText::Message, std::move(message));
+    clearText(error, ErrorText::Cause); // CLI11's message already says what is wrong
+    setUntranslatedText(error, ErrorText::Suggestion, "Run `hwio --help`.");
     return error;
 }
 
@@ -104,9 +105,9 @@ Result<ParseOutcome> CliApp::parse(const std::vector<std::string>& args) {
     try {
         m_app->parse(reversed);
     } catch (const CLI::CallForHelp&) {
-        return ParseOutcome::ShowHelp;
+        return helpOrExtras();
     } catch (const CLI::CallForAllHelp&) {
-        return ParseOutcome::ShowHelp;
+        return helpOrExtras();
     } catch (const CLI::ParseError& error) {
         return std::unexpected(usageError(error.what()));
     }
@@ -115,6 +116,17 @@ Result<ParseOutcome> CliApp::parse(const std::vector<std::string>& args) {
         return ParseOutcome::ShowHelp;
     }
     return ParseOutcome::Run;
+}
+
+// ADR-0423: CLI11 handles --help before it rejects arguments nobody took, so `hwio rtt --help`
+// would print the help and exit 0 as if `rtt` existed. Arguments left over are the same usage
+// error (exit 2, CLI11's text) as without --help.
+Result<ParseOutcome> CliApp::helpOrExtras() const {
+    const std::vector<std::string> extras = m_app->remaining(true);
+    if (extras.empty()) {
+        return ParseOutcome::ShowHelp;
+    }
+    return std::unexpected(usageError(CLI::ExtrasError(extras).what()));
 }
 
 std::string CliApp::helpText() const { return m_app->help(); }

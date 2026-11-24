@@ -47,8 +47,9 @@ report…** w aplikacji lub `hwio diag report` (`-o FILE`). Jest to plik zip zaw
 - najnowsze raporty o awariach, jeśli istnieją.
 
 Przed zapisaniem nazwa użytkownika, folder domowy i nazwa komputera są zastępowane (`<user>`, `~`, `<host>`), a
-wartości wyglądające na hasła, tokeny lub klucze są zastępowane przez `<redacted>`. Numery seryjne sond pozostają w
-raporcie. Logi mogą zawierać dane wyjściowe Twojego urządzenia, więc przejrzyj raport przed wysłaniem. Pliki konsoli
+wartości wyglądające na hasła, tokeny lub klucze są zastępowane przez `<redacted>`. Adres adaptera Bluetooth Twojego
+komputera jest zastępowany przez `<adapter address>` (aplikacja i `hwio doctor` nadal go pokazują). Numery seryjne
+sond i adresy Twoich urządzeń pozostają w raporcie. Logi mogą zawierać dane wyjściowe Twojego urządzenia, więc przejrzyj raport przed wysłaniem. Pliki konsoli
 i historia poleceń nie są częścią raportu.
 
 Raport jest zapisywany na Twoim komputerze (domyślnie `hwio-diagnostics-YYYYMMDD-HHMMSS.zip` w folderze Dokumenty

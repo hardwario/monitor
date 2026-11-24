@@ -88,7 +88,9 @@ vyberie všetko. <kbd>Ctrl</kbd>+<kbd>C</kbd> alebo ponuka po kliknutí pravým 
 
 **Save view…** (<kbd>Ctrl</kbd>+<kbd>S</kbd>) uloží panel s fokusom tak, ako je zobrazený, s časovými značkami, ak sú
 zapnuté. Názov je predvyplnený, napríklad `chester-app-clime-v3.2.0-20261103-101500-log.txt`, a priečinok je ten,
-ktorý ste použili naposledy (pri prvom použití Dokumenty).
+ktorý ste použili naposledy (pri prvom použití Dokumenty). Tajné údaje sa zapíšu ako `<redacted>`, rovnako ako
+v [súboroch konzoly](#súbory-konzoly) (napríklad `claim token: <redacted>`); na obrazovke a pri **kopírovaní** zostanú
+viditeľné. V Linuxe a macOS môže uložený súbor čítať len váš používateľ.
 
 <a id="batch-files"></a>
 ## Dávkové súbory

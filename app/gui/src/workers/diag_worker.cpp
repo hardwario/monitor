@@ -179,7 +179,7 @@ void DiagWorker::process(Request& request, const std::stop_token& stop) {
                 input->settingsFile = Settings::defaultFilePath();
                 input->createdUtc =
                     QDateTime::currentDateTimeUtc().toString(Qt::ISODate).toStdString();
-                input->redaction = diag::currentRedaction();
+                input->redaction = diag::currentRedaction(*collect.context.facts); // ADR-0427
                 const QString summary =
                     QString::fromStdString(diag::ReportBuilder::summaryText(*input));
                 post(Collected{.generation = generation, .input = input, .summary = summary});

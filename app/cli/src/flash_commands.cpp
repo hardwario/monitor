@@ -7,6 +7,7 @@
 #include "guided_lte.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
 #include "hwio/device/application_backup.h"
@@ -85,7 +86,15 @@ fs::path toPath(const std::string& text) { return {toQString(text).toStdU16Strin
 
 Error usage(const QString& message, std::string detail) {
     Error error = makeError(ErrorCode::UsageInvalidArgument, std::move(detail));
-    error.message = message.toStdString();
+    setUntranslatedText(error, ErrorText::Message, message.toStdString());
+    return error;
+}
+
+// ADR-0423: a given input path that does not exist is io.file_not_found (exit 3), not a usage
+// error; the message stays English (CLI, ADR-0027).
+Error fileNotFound(const QString& message, std::string detail) {
+    Error error = makeError(ErrorCode::IoFileNotFound, std::move(detail));
+    setUntranslatedText(error, ErrorText::Message, message.toStdString());
     return error;
 }
 
@@ -101,6 +110,26 @@ QJsonObject resultJson(std::string_view targetId, const OperationResult& result)
                                             : QJsonValue(QJsonValue::Null));
     data.insert(QStringLiteral("durationMs"), static_cast<double>(result.duration.count()));
     return data;
+}
+
+// Plan 0050 (ADR-0376): `unchanged` / `affected_bytes` of a Flash operation when J-Link reported
+// them; returns the human text ("Successfully completed", with a line before it when nothing was
+// programmed).
+std::string addDownload(QJsonObject& data, const OperationResult& result) {
+    if (result.kind != device::OperationKind::Flash || !result.download) {
+        return std::string(completed);
+    }
+    if (result.download->unchanged) {
+        data.insert(QStringLiteral("unchanged"), *result.download->unchanged);
+    }
+    if (result.download->affectedBytes) {
+        data.insert(QStringLiteral("affected_bytes"),
+                    static_cast<double>(*result.download->affectedBytes));
+    }
+    if (result.download->unchanged.value_or(false)) {
+        return "Flash contents already matched; nothing was programmed.\n" + std::string(completed);
+    }
+    return std::string(completed);
 }
 
 QJsonObject imageJson(const firmware::FirmwareImage& image, std::string_view source,
@@ -289,9 +318,13 @@ Result<AppFlashOptions> resolveBackup(const Context& context, const GlobalOption
             copy = directory / copy; // a file name of the backups folder
         }
         if (!fs::is_regular_file(copy, ec)) {
-            return std::unexpected(usage(QStringLiteral("The application copy %1 does not exist.")
-                                             .arg(toQString(toUtf8(copy))),
-                                         "app flash --backup"));
+            const QString message = QStringLiteral("The application copy %1 does not exist.")
+                                        .arg(toQString(toUtf8(copy)));
+            // ADR-0423: a missing file is io (exit 3); a path that is there but not a file stays
+            // a usage error.
+            return std::unexpected(fs::exists(copy, ec)
+                                       ? usage(message, "app flash --backup")
+                                       : fileNotFound(message, "app flash --backup"));
         }
         // The serial of the file name ("<serial>-yyyyMMdd-HHmmss.hex").
         for (const auto& entry : device::ApplicationBackup::list(copy.parent_path())) {
@@ -306,7 +339,8 @@ Result<AppFlashOptions> resolveBackup(const Context& context, const GlobalOption
             QStringLiteral("The application copy %1 is not of this device (serial number %2).")
                 .arg(toQString(toUtf8(copy)), toQString(*serial)),
             std::format(R"(copy serial "{}", device "{}")", copySerial, deviceSerial));
-        error.suggestion = "Choose a copy of this device, or use --force to flash it anyway.";
+        setUntranslatedText(error, ErrorText::Suggestion,
+                            "Choose a copy of this device, or use --force to flash it anyway.");
         return std::unexpected(std::move(error));
     }
     options.input = toUtf8(copy);
@@ -339,7 +373,8 @@ Result<CommandResult> appFlash(const Context& context, const GlobalOptions& glob
     QJsonObject data = resultJson("app", outcome->result);
     data.insert(QStringLiteral("image"), loaded->json);
     data.insert(QStringLiteral("halted"), options.halt);
-    return CommandResult{.data = data, .humanText = std::string(completed), .streamed = false};
+    std::string human = addDownload(data, outcome->result);
+    return CommandResult{.data = data, .humanText = std::move(human), .streamed = false};
 }
 
 // ---- erase / reset / recover ---------------------------------------------------------------
@@ -702,8 +737,8 @@ Result<LteJob> prepareLte(const Context& context, const GlobalOptions& globals, 
         }
         std::error_code ec;
         if (!fs::exists(path, ec)) {
-            return std::unexpected(
-                usage(QStringLiteral("The file %1 does not exist.").arg(toQString(file)), file));
+            return std::unexpected(fileNotFound(
+                QStringLiteral("The file %1 does not exist.").arg(toQString(file)), file));
         }
         auto classified = firmware::classifyLteInput(path);
         if (!classified) {
@@ -811,7 +846,8 @@ Result<CommandResult> lteFlash(const Context& context, const GlobalOptions& glob
     QJsonObject data = resultJson("lte", outcome->result);
     data.insert(QStringLiteral("image"), job->image);
     data.insert(QStringLiteral("halted"), false);
-    return CommandResult{.data = data, .humanText = std::string(completed), .streamed = false};
+    std::string human = addDownload(data, outcome->result); // an application hex only
+    return CommandResult{.data = data, .humanText = std::move(human), .streamed = false};
 }
 
 // Plan 0033 (D7, ADR-0234): `chester lte flash --guided` - the guided procedure of the GUI wizard
@@ -844,24 +880,28 @@ Result<CommandResult> guidedResult(const device::LteUpdateProcedure& procedure, 
         // Plan 0034 (B1, ADR-0238): not completed - the application was not written back, so the
         // command fails (exit code 130) and says what to do.
         Error error = makeError(ErrorCode::Cancelled, "guided LTE update: no application copy");
-        error.message = "The LTE firmware was updated. The application MCU is empty.";
-        error.suggestion = "Flash an application with `hwio chester app flash`.";
+        setUntranslatedText(error, ErrorText::Message,
+                            "The LTE firmware was updated. The application MCU is empty.");
+        setUntranslatedText(error, ErrorText::Suggestion,
+                            "Flash an application with `hwio chester app flash`.");
         return std::unexpected(std::move(error));
     }
     if (procedure.writtenBack()) {
         // Plan 0051 (ADR-0381): cancelled after the erase, the copy was written back.
         Error error = makeError(ErrorCode::Cancelled, "guided LTE update: written back");
-        error.message = toStdString(procedure.promptText());
+        setUntranslatedText(error, ErrorText::Message, toStdString(procedure.promptText()));
         return std::unexpected(std::move(error));
     }
     if (procedure.step() == Step::Cancelled) {
         Error error = makeError(ErrorCode::Cancelled, "guided LTE update");
         if (procedure.applicationErased()) {
-            error.message = toStdString(procedure.promptText());
+            setUntranslatedText(error, ErrorText::Message, toStdString(procedure.promptText()));
         }
         if (procedure.applicationErased() && !backup.empty()) {
-            error.suggestion = std::format(
-                "Flash an application, e.g. the copy: hwio chester app flash \"{}\"", backup);
+            setUntranslatedText(
+                error, ErrorText::Suggestion,
+                std::format("Flash an application, e.g. the copy: hwio chester app flash \"{}\"",
+                            backup));
         }
         return std::unexpected(std::move(error));
     }
@@ -870,8 +910,9 @@ Result<CommandResult> guidedResult(const device::LteUpdateProcedure& procedure, 
     // ADR-0383 in a terminal: there is no Try again button; the command is run again.
     if (error.code == ErrorCode::FirmwareModemUpdateFailed ||
         error.code == ErrorCode::TargetLowVoltage) {
-        error.suggestion = "Check the power supply of the CHESTER and the J-Link cable on the LTE "
-                           "connector, then run the command again.";
+        setUntranslatedText(error, ErrorText::Suggestion,
+                            "Check the power supply of the CHESTER and the J-Link cable on the "
+                            "LTE connector, then run the command again.");
     }
     if (procedure.applicationErased() && !backup.empty()) {
         error.detail += std::format("; the copy of the application: {}", backup);
@@ -945,7 +986,7 @@ Result<FlashInput> resolveFlashInput(const std::string& argument, const fs::path
         if (firmware::FirmwareId::looksLikeId(argument)) {
             return FlashCatalogId{.id = argument};
         }
-        return std::unexpected(usage(
+        return std::unexpected(fileNotFound(
             QStringLiteral("The path %1 does not exist (and it is not a 32-digit firmware ID).")
                 .arg(toQString(argument)),
             argument));

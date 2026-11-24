@@ -64,6 +64,13 @@
 //         "writeFault": false,                      JLINKARM_EndDownload fails
 //         "eraseChipFails": false,                  JLINK_EraseChip fails
 //         "eraseAllPolls": 2,                       CTRL-AP ERASEALLSTATUS reads "busy" N times
+//         "downloadReport": false,                  plan 0050: EndDownload logs the J-Link V9.84
+//                                                   per-bank lines "Flash download: Bank <n> @
+//                                                   0x<addr>: Skipped. Contents already match" /
+//                                                   "...: 1 range affected (<bytes> bytes)" (4 KiB
+//                                                   sectors whose bytes change; bank 0 flash,
+//                                                   bank 1 UICR) and a "Total:" line
+//         "downloadMessages": ["..."],              plan 0050: EndDownload logs these lines instead
 //         "downloadDelayMs": 0, "readDelayMs": 0    JLINKARM_EndDownload / every ReadMemEx blocks
 //                                                   (CTRL-AP IDR in bank 0xF: nRF52 0x02880000,
 //                                                   nRF91 0x12880000; other APs do not answer)
@@ -126,13 +133,16 @@
 #include <QtTypes>
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <format>
 #include <map>
 #include <mutex>
 #include <optional>
+#include <set>
 #include <span>
 #include <string>
 #include <string_view>
@@ -227,6 +237,8 @@ struct ChipScenario {
     bool eraseChipFails = false;
     int eraseAllPolls = 2;
     std::int64_t downloadDelayMs = 0;
+    bool downloadReport = false;               // plan 0050
+    std::vector<std::string> downloadMessages; // plan 0050
     bool absentApsReadZero = false;
     std::int64_t readDelayMs = 0;
     std::vector<std::uint8_t> flash = std::vector<std::uint8_t>(0x100000, 0xFF);
@@ -419,6 +431,10 @@ ChipScenario readChip(const QJsonObject& object) {
     chip.eraseChipFails = object.value(QStringLiteral("eraseChipFails")).toBool();
     chip.eraseAllPolls = object.value(QStringLiteral("eraseAllPolls")).toInt(2);
     chip.downloadDelayMs = object.value(QStringLiteral("downloadDelayMs")).toInteger();
+    chip.downloadReport = object.value(QStringLiteral("downloadReport")).toBool();
+    for (const QJsonValue line : object.value(QStringLiteral("downloadMessages")).toArray()) {
+        chip.downloadMessages.push_back(line.toString().toStdString());
+    }
     chip.absentApsReadZero = object.value(QStringLiteral("absentApsReadZero")).toBool();
     chip.readDelayMs = object.value(QStringLiteral("readDelayMs")).toInteger();
     std::size_t ramBytes = 0;
@@ -681,6 +697,44 @@ struct State {
     // Programs the buffered download bytes that lie in flash or UICR and clears the buffer. The
     // loader keeps the unwritten bytes of every touched sector (read-modify-write). Returns the
     // number of bytes programmed.
+    // Plan 0050: the J-Link V9.84 per-bank lines of EndDownload for the buffered data (before it
+    // is programmed): bank 0 = flash, bank 1 = UICR; a bank counts the 4 KiB sectors (the UICR
+    // page) in which a byte changes.
+    void reportDownload(ChipScenario& chip) const {
+        constexpr std::uint64_t sector = 4096;
+        std::array<std::set<std::uint64_t>, 2> touched;
+        std::array<std::set<std::uint64_t>, 2> changed;
+        for (const auto& [address, bytes] : downloadData) {
+            for (std::size_t i = 0; i < bytes.size(); ++i) {
+                const std::uint64_t at = std::uint64_t{address} + i;
+                const std::uint8_t* byte = chip.at(at);
+                if (byte == nullptr) {
+                    continue;
+                }
+                const std::size_t bank = at < chip.flash.size() ? 0 : 1;
+                touched.at(bank).insert(at / sector);
+                if (*byte != bytes[i]) {
+                    changed.at(bank).insert(at / sector);
+                }
+            }
+        }
+        const std::array<std::uint64_t, 2> bases{0, chip.uicrBase()};
+        for (std::size_t bank = 0; bank < bases.size(); ++bank) {
+            if (touched.at(bank).empty()) {
+                continue;
+            }
+            const std::string result =
+                changed.at(bank).empty()
+                    ? std::string("Skipped. Contents already match")
+                    : std::format("1 range affected ({} bytes)", changed.at(bank).size() * sector);
+            report(logHandler, std::format("J-Link: Flash download: Bank {} @ 0x{:08X}: {}", bank,
+                                           bases.at(bank), result));
+        }
+        report(logHandler, "J-Link: Flash download: Total: 0.100s (Prepare: 0.010s, Compare: "
+                           "0.010s, Erase: 0.050s, Program: 0.020s, Verify: 0.010s, Restore: "
+                           "0.000s)");
+    }
+
     std::size_t programBuffered(ChipScenario& chip) {
         std::size_t total = 0;
         for (const auto& [address, bytes] : downloadData) {
@@ -1270,6 +1324,13 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_EndDownload() {
         s.flashProgress("Erase", "", 100);
         s.flashProgress("Program", "", 50);
         s.flashProgress("Program", "", 100);
+    }
+    if (!chip.downloadMessages.empty()) {
+        for (const std::string& line : chip.downloadMessages) {
+            State::report(s.logHandler, line);
+        }
+    } else if (chip.downloadReport) {
+        s.reportDownload(chip);
     }
     const std::size_t total = s.programBuffered(chip);
     return static_cast<int>(std::min<std::size_t>(total, 0x7FFFFFFF));

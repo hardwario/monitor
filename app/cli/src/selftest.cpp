@@ -3,6 +3,7 @@
 #include "cli_app.h"
 #include "cli_log.h"
 #include "hwio/core/error.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 
 #include <QJsonValue>
@@ -27,8 +28,9 @@ Result<CommandResult> selftestError(const std::string& id) {
     if (!code) {
         Error error = makeError(ErrorCode::UsageInvalidArgument,
                                 std::format("_selftest error: unknown error id '{}'", id));
-        error.message = std::format("Unknown error id '{}'.", id);
-        error.suggestion = "Use an id from the error table, e.g. io.file_not_found.";
+        setUntranslatedText(error, ErrorText::Message, std::format("Unknown error id '{}'.", id));
+        setUntranslatedText(error, ErrorText::Suggestion,
+                            "Use an id from the error table, e.g. io.file_not_found.");
         return std::unexpected(std::move(error));
     }
     return std::unexpected(makeError(*code));

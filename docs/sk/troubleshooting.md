@@ -861,7 +861,7 @@ Z kontroly aktualizácií, keď je odpoveď z GitHubu väčšia, ako je povolen�
 - **Probably:** The path is wrong or the file was moved or deleted.
 - **What to do:** Check the file path (see Details).
 
-Cesta je v **Details**. Pri MCP serveri (`hwio mcp`) môže správa znieť "The `<what>` `<dir>` does not exist." pre možnosť s priečinkom, napríklad `--dump-dir`.
+Cesta je v **Details**. Pri MCP serveri (`hwio mcp`) môže správa znieť "The `<what>` `<dir>` does not exist." pre možnosť s priečinkom, napríklad `--dump-dir`. Pri `hwio chester app flash` a `hwio chester lte flash` uvádza súbor firmvéru, ktorý neexistuje, napríklad "The file `<path>` does not exist."
 
 <a id="io.read_failed"></a>
 #### `io.read_failed`

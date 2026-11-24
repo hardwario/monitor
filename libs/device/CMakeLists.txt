@@ -19,6 +19,7 @@ hwio_add_backend_library(hwio_device
     include/hwio/device/console_file_sink.h
     include/hwio/device/console_line.h
     include/hwio/device/console_log.h
+    include/hwio/device/console_redaction.h
     include/hwio/device/console_session.h
     include/hwio/device/device_info.h
     include/hwio/device/device_session.h
@@ -49,6 +50,7 @@ hwio_add_backend_library(hwio_device
     src/console_file_sink.cpp
     src/console_line.cpp
     src/console_log.cpp
+    src/console_redaction.cpp
     src/console_session.cpp
     src/device_info.cpp
     src/device_session.cpp
@@ -69,7 +71,6 @@ hwio_add_backend_library(hwio_device
     src/profiles/chester.cpp
     src/profiles/generic.cpp
     src/profiles/profiles.h
-    src/owner_only.h
     src/session_internal.h
     src/session_registry.cpp
     src/session_worker.cpp

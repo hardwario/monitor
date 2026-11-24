@@ -39,7 +39,7 @@ class AllowAll final : public IConsentBroker {
 public:
     std::function<void()> request(ConsentRequest /*request*/,
                                   std::function<void(ConsentDecision)> done) override {
-        done({});
+        done(ConsentGrant::Flag);
         return {};
     }
     void clientGone(std::string_view /*clientKey*/) override {}

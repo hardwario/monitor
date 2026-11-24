@@ -88,7 +88,9 @@ schránky.“); najednou se zkopíruje nejvýše 100 000 řádků.
 
 **Uložit výpis…** (<kbd>Ctrl</kbd>+<kbd>S</kbd>) uloží panel, který má fokus, tak, jak je zobrazený, včetně časových
 značek, pokud jsou zapnuté. Název je předvyplněný, například `chester-app-clime-v3.2.0-20261103-101500-log.txt`, a
-složka je ta, kterou jste použili naposledy (poprvé Dokumenty).
+složka je ta, kterou jste použili naposledy (poprvé Dokumenty). Tajné údaje se zapíšou jako `<redacted>`, stejně jako
+v [souborech konzole](#soubory-konzole) (například `claim token: <redacted>`); na obrazovce a při **kopírování** zůstanou
+vidět. Na Linuxu a macOS může uložený soubor číst jen váš uživatel.
 
 <a id="batch-files"></a>
 ## Dávkové soubory

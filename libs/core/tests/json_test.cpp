@@ -19,6 +19,9 @@ hwio::Error sampleError() {
                        .message = "File not found.",
                        .cause = "",
                        .suggestion = "Check the path.",
+                       .messageEn = "File not found.",
+                       .causeEn = "",
+                       .suggestionEn = "Check the path.",
                        .detail = "/tmp/x.hex",
                        .wizard = std::nullopt};
 }

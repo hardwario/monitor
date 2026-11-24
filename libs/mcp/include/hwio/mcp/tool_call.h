@@ -39,6 +39,7 @@
 #include <QObject>
 #include <QString>
 
+#include <array>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -89,6 +90,9 @@ public:
     }
     [[nodiscard]] const std::string& deviceId() const noexcept { return m_deviceId; }
     [[nodiscard]] ConsentCategories grantedConsent() const noexcept { return m_granted; }
+    // Plan 0050 (ADR-0377): {"<category id>": "<consentGrantId>"} of every category granted
+    // during the call (static and run-time ones), in the enum order; empty when none.
+    [[nodiscard]] QJsonObject consentJson() const;
 
 signals:
     void progress(double done, std::optional<double> total, const QString& message);
@@ -111,6 +115,9 @@ private:
     std::optional<hwio::Result<ToolResult>> m_result;
     std::string m_deviceId;
     ConsentCategories m_granted;
+    // How each granted category was allowed (plan 0050), by its bit index in ConsentCategory;
+    // the latest grant of a category wins.
+    std::array<std::optional<ConsentGrant>, 8> m_grants;
     std::function<void()> m_consentCancel;
     std::uint64_t m_consentToken = 0;
     bool m_consentPending = false;

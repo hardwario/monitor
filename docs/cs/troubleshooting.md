@@ -861,7 +861,7 @@ Pochází z kontroly aktualizací, když je odpověď z GitHubu větší, než j
 - **Pravděpodobně:** Cesta je chybná nebo byl soubor přesunut či smazán.
 - **Co dělat:** Zkontrolujte cestu k souboru (viz Podrobnosti).
 
-Cesta je v **Podrobnosti**. U serveru MCP (`hwio mcp`) může zpráva znít "The `<what>` `<dir>` does not exist." u volby se složkou, například `--dump-dir`.
+Cesta je v **Podrobnosti**. U serveru MCP (`hwio mcp`) může zpráva znít "The `<what>` `<dir>` does not exist." u volby se složkou, například `--dump-dir`. U `hwio chester app flash` a `hwio chester lte flash` jmenuje soubor firmwaru, který neexistuje, například "The file `<path>` does not exist."
 
 <a id="io.read_failed"></a>
 #### `io.read_failed`

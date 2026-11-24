@@ -870,7 +870,7 @@ From the update check, when the answer from GitHub is larger than allowed. It us
 - **Probably:** The path is wrong or the file was moved or deleted.
 - **What to do:** Check the file path (see Details).
 
-The path is in **Details**. For the MCP server (`hwio mcp`), the message can be "The `<what>` `<dir>` does not exist." for a folder option such as `--dump-dir`.
+The path is in **Details**. For the MCP server (`hwio mcp`), the message can be "The `<what>` `<dir>` does not exist." for a folder option such as `--dump-dir`. For `hwio chester app flash` and `hwio chester lte flash` it names the firmware file that does not exist, as in "The file `<path>` does not exist."
 
 <a id="io.read_failed"></a>
 #### `io.read_failed`

@@ -1,5 +1,7 @@
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
+#include "hwio/device/console_line.h"
+#include "hwio/device/console_redaction.h"
 #include "hwio/device/profile.h"
 #include "hwio/firmware/designated_firmware.h"
 #include "hwio/firmware/firmware_image.h"
@@ -13,6 +15,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <string>
 #include <string_view>
 
 namespace {
@@ -108,6 +111,42 @@ TEST(Profiles, GenericConsoleProfileIsNotRegistered) {
     EXPECT_TRUE(app->sensitiveOutputKeys.empty());
     EXPECT_TRUE(generic.firmwareCatalogUrl.empty());
     EXPECT_FALSE(generic.ble.has_value());
+}
+
+// Plan 0059 (ADR-0416) in ConsoleRedaction (console files, "Save view…"): an output line that
+// starts with a sensitive output prefix is written as "<prefix> <redacted>", after its prompt.
+TEST(Profiles, ConsoleRedactionSensitiveOutputPrefixes) {
+    using hwio::device::Channel;
+    using hwio::device::ConsoleLine;
+    using hwio::device::Direction;
+    constexpr std::array<std::string_view, 1> prefixes{"config secret-key"};
+    std::array<hwio::device::TargetProfile, 1> targets{
+        *hwio::device::findTarget(hwio::device::genericConsoleProfile(), "app")};
+    targets.front().sensitiveOutputPrefixes = prefixes;
+    hwio::device::DeviceProfile profile = hwio::device::genericConsoleProfile();
+    profile.targets = targets;
+    const hwio::device::ConsoleRedaction redaction(profile, "app");
+    const auto shellLine = [](Direction dir, std::string_view text) {
+        ConsoleLine line;
+        line.channel = Channel::Shell;
+        line.dir = dir;
+        line.text = std::string(text);
+        return line;
+    };
+    const auto redacted = [&](Direction dir, std::string_view text) {
+        return redaction.redacted(shellLine(dir, text)).value_or("-");
+    };
+    EXPECT_EQ(redacted(Direction::Out, "config secret-key 00112233"),
+              "config secret-key <redacted>");
+    EXPECT_EQ(redacted(Direction::Out, "uart:~$ config secret-key 00112233"),
+              "uart:~$ config secret-key <redacted>");
+    EXPECT_EQ(redacted(Direction::Out, "\x1b[1;32mconfig secret-key 00"),
+              "config secret-key <redacted>");
+    EXPECT_EQ(redacted(Direction::Out, "config serial-number 42"), "-");
+    EXPECT_EQ(redacted(Direction::In, "config secret-key 00"), "-"); // an output rule
+    // The same profile through the registry: not registered, nothing is redacted.
+    EXPECT_FALSE(hwio::device::ConsoleRedaction("generic", "app")
+                     .redacted(shellLine(Direction::Out, "config secret-key 00")));
 }
 
 TEST(Profiles, ChesterAppTarget) {
