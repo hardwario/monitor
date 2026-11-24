@@ -675,6 +675,13 @@ std::optional<OpQuestionKind> questionFromId(std::string_view id) noexcept {
 
 std::optional<OpTarget> targetFromId(std::string_view id) noexcept { return OpTarget::fromId(id); }
 
+bool offersOperations(const HostHello& hello) noexcept {
+    return hello.ops ||
+           (hello.targets && std::ranges::any_of(*hello.targets, [](const HostTarget& target) {
+                return !target.kinds.empty();
+            }));
+}
+
 bool supports(const HostHello& hello, OpKind kind) noexcept {
     return hello.ops && std::ranges::find(hello.opKinds, kind) != hello.opKinds.end();
 }

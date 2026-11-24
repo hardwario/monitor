@@ -216,6 +216,9 @@ struct HostHello {
 [[nodiscard]] const HostTarget* findTarget(const HostHello& hello, std::string_view id) noexcept;
 // The host runs `kind` (ops and opKinds).
 [[nodiscard]] bool supports(const HostHello& hello, OpKind kind) noexcept;
+// Plan 0059 (ADR-0414): the host accepts operation requests: legacy `ops`, or a listed target
+// with at least one kind (a host of another profile says ops: false for older joiners).
+[[nodiscard]] bool offersOperations(const HostHello& hello) noexcept;
 struct OpAccepted {
     std::string id;
 };

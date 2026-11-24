@@ -169,7 +169,8 @@ QString RemoteJoinViewModel::bannerText() const {
 bool RemoteJoinViewModel::operationsAvailable() const {
     const remote::RemoteConsoleSession* session = m_tab->remoteSession();
     return session != nullptr && session->joinState() == remote::JoinState::Allowed &&
-           session->hostHello() && session->hostHello()->ops;
+           session->hostHello() &&
+           remote::tunnel::offersOperations(*session->hostHello()); // plan 0059
 }
 
 QString RemoteJoinViewModel::operationsUnavailableText() const {

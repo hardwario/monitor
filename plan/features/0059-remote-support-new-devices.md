@@ -491,7 +491,7 @@ with synthetic profiles in unit tests.
 - [x] A1 Tunnel: `caps`, `profile`, `console`, `targets`, `prepared`, string targets, `detail.code`, baseline error
       set (frozen list from tag `v2.0.0-rc.4` + test), `line-refused` (cap-gated). Decoder bounds. Unit tests,
       including **golden messages from `v2.0.0-rc.4`** both ways.
-- [x] A2 Joiner: `generic` console profile, profile from the hello, target names translated by profile, Flash card
+- [x] A2 (one point pending confirmation: the no-hello profile, see "Implementation notes") Joiner: `generic` console profile, profile from the hello, target names translated by profile, Flash card
       from `targets`. Old-host fallback is the 0044 card unchanged.
 - [x] A3 Host: profile-driven hello (name + part), legacy `ops: false` off CHESTER, `detail.code` on every
       denial / result / end. The new output rule kind `sensitiveOutputPrefixes` and the `refuseRemoteSensitive` /
@@ -587,7 +587,11 @@ profile (`device::genericConsoleProfile()`, not in `ProfileRegistry`). **Deviati
 (the compatibility matrix: "as today"), and `generic` would drop the CHESTER sensitive-command rules on the joiner. The
 GUI tab takes the session's profile on every host hello (`configurationChanged`). The Flash card's target buttons
 come from `RemoteJoinViewModel::targets` (an older host: Application core / LTE modem core as in 0044); per-target
-kinds and the firmware chooser are B5.
+kinds and the firmware chooser are B5. The joiner offers operations when the hello says `ops: true` or lists a
+target with kinds (`tunnel::offersOperations`), so a host of another profile (`ops: false` for older joiners) gets
+the card. The alternative for the no-hello case is `generic` (the Design text): the joiner then drops the CHESTER
+sensitive-command and `info show` output rules for web Terminal hosts and before a Monitor host's hello; the switch is
+one branch in `RemoteConsoleSession::profileFor()`.
 
 **A3:** the host sends `profile` and `caps: [detail-codes, refused-lines]`. It does not send `targets` (and not the
 `targets` / `prepared` caps) before the operations matrix of B1. The device `name` stays the profile display name: the

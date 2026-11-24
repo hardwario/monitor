@@ -7,6 +7,7 @@
 #include "hwio/core/error.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
+#include "hwio/device/console_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/remote/baseline_errors.h"
 #include "hwio/remote/remote_console_session.h"
@@ -674,6 +675,54 @@ TEST(Rc4CompatSession, NoLineRefusedWithoutTheCap) {
         auto decoded = rc4::decodeHost(at);
         EXPECT_TRUE(decoded.has_value()) << decoded.error().detail;
     }
+}
+
+// Plan 0059: a host that lists its targets (another profile: legacy ops: false) offers operations
+// to a joiner of this build; the joiner sends only what the hello lists.
+TEST(Rc4CompatSession, JoinerUsesTheTargetsOfANewHost) {
+    FakeRelay relay;
+    RawParticipant newHost(relay.url(), nsp);
+    ASSERT_TRUE(newHost.waitConnected());
+    RemoteConsoleSession joiner(joinFor(relay));
+    ASSERT_TRUE(runUntil([&] { return joiner.joinState() == JoinState::Waiting; }));
+    newHost.emitEvent(
+        QStringLiteral("at"),
+        tunnel::encodeHost(tunnel::HostHello{
+            .app = "hwio-monitor",
+            .version = "2.1.0",
+            .device = {.name = "Nordic chip", .serial = "", .transport = "jlink", .firmware = ""},
+            .ops = false,
+            .opKinds = {},
+            .opQuestions = false,
+            .caps = {"detail-codes"},
+            .profile = "nrf",
+            .targets = std::vector<tunnel::HostTarget>{
+                tunnel::HostTarget{.id = "nrf52",
+                                   .kinds = {tunnel::OpKind::Erase, tunnel::OpKind::Reset},
+                                   .catalog = false,
+                                   .prepared = {}}}}));
+    ASSERT_TRUE(runUntil([&] { return joiner.hostHello().has_value(); }));
+    EXPECT_TRUE(joiner.capabilities().testFlag(device::Capability::Operations));
+    EXPECT_EQ(&joiner.profile(), &device::genericConsoleProfile()); // "nrf" is not on main
+    RemoteOperationClient client(joiner);
+    EXPECT_EQ(client.request(tunnel::OpKind::Reset, tunnel::OpTarget::App).error().code,
+              ErrorCode::RemoteTargetUnsupported);
+    EXPECT_EQ(client.request(tunnel::OpKind::Recover, nrf52).error().code,
+              ErrorCode::RemoteTargetUnsupported);
+    EXPECT_EQ(
+        client
+            .request(tunnel::OpKind::Flash, nrf52, std::string("0123456789abcdef0123456789abcdef"))
+            .error()
+            .code,
+        ErrorCode::RemoteTargetUnsupported);
+    ASSERT_TRUE(client.request(tunnel::OpKind::Reset, nrf52).has_value());
+    ASSERT_TRUE(runUntil([&] {
+        return std::ranges::any_of(newHost.named(QStringLiteral("write")), [](const auto& write) {
+            const auto decoded = tunnel::decodeJoiner(write.payload);
+            return decoded && std::holds_alternative<tunnel::OpRequest>(*decoded) &&
+                   std::get<tunnel::OpRequest>(*decoded).target.id() == "nrf52";
+        });
+    }));
 }
 
 } // namespace
