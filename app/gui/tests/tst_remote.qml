@@ -153,7 +153,7 @@ TestCase {
 
         testSupport.remoteHostSync("hello from the web host");
         tryVerify(() => tab().remoteJoin.state === "joined", 10000);
-        compare(tab().title, "Session 12345 — web Terminal");
+        compare(tab().title, "Session 12345 — web Terminal or mobile app");
         tryVerify(() => testSupport.consoleLastSeq(AppViewModel.currentTab) > 0, 5000);
 
         AppViewModel.showPage("flash");

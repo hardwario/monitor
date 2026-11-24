@@ -63,11 +63,13 @@ your console; the console file records how many there were.
 2. Type the code the customer reads to you (spaces are allowed) or paste the link. A link to another server than the
    configured one needs an extra confirmation.
 3. A new tab opens, titled **Session 482 913** and then *CHESTER-M 2159018247 — remote* (or *Session 482 913 — web
-   Terminal* when the customer uses the web Terminal). Until the customer allows you, the banner says *Waiting for the
+   Terminal or mobile app* when the customer uses the web Terminal or the HARDWARIO mobile app). Until the customer allows you, the banner says *Waiting for the
    customer to allow you…*. The live output may already appear.
 4. Once allowed, you get the customer's console history and can work in the console as usual: history, search,
    filter and save view.
    With a HARDWARIO Monitor customer, suggestions and Tab completion use the customer's list of device commands.
+   The web Terminal and the mobile app do not hide secrets; your HARDWARIO Monitor hides them before they reach the
+   console (for example `claim token: <redacted>`, `lrw config appkey <redacted>`), also in a saved view.
    Hexdump lines of the device log are hidden by default, as in a local tab (chip **H**).
 5. With a HARDWARIO Monitor customer, the **Flash** page offers **Ask to flash** (a catalog firmware ID), **Ask to
    erase**, **Ask to recover** and **Ask to reset** for the application or the LTE core. Each request waits for the

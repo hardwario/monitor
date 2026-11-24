@@ -11,9 +11,17 @@
 //   at {state}            → connection(): connected → Connected, connection → Connecting,
 //                           disconnected → Disconnected
 //   at {write} / {read}   → In / Out lines (a read line with a Zephyr level tag goes to the Log
-//                           channel); the log holds the lines of every participant
+//                           channel); the log holds the lines of every participant. A read is one
+//                           line (Monitor, web Terminal) or a piece of the byte stream (the
+//                           HARDWARIO mobile app: lines assembled across events, the prompt and
+//                           the empty line after a command left out; ADR-0431, HostOutputReader)
+//   at {end}              → (the mobile app stopped sharing, no hello) the session ends (ADR-0431)
+//   secrets               → a host without a hello hides nothing: the console file's redaction
+//                           (device::ConsoleRedaction) applies before a line enters the log
+//                           (ADR-0432)
 //   sync                  → the log is replaced by the snapshot (bounded: TranscriptLimits, oldest
-//                           first), transcriptReplaced(); a Monitor host sends it when it allows
+//                           first; outputs in stream form are split into lines, ADR-0431),
+//                           transcriptReplaced(); a Monitor host sends it when it allows
 //                           this participant (joinState() Allowed)
 //   at {hwio: hello}      → hostHello(), title, the joiner's own hello is sent (ADR-0336: tunnel
 //                           objects only after the host's hello)
@@ -31,6 +39,7 @@
 #include "hwio/core/result.h"
 #include "hwio/device/command_tree.h"
 #include "hwio/device/console_log.h"
+#include "hwio/device/console_redaction.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
@@ -57,6 +66,8 @@
 #include <vector>
 
 namespace hwio::remote {
+
+class HostOutputReader; // src/host_output_reader.h
 
 struct JoinOptions {
     QUrl relay;
@@ -119,7 +130,8 @@ public:
     [[nodiscard]] const std::optional<tunnel::HostHello>& hostHello() const noexcept {
         return m_hostHello;
     }
-    // "CHESTER-M 1234567890 — remote", "Session 482 913 — web Terminal" (no hello after a sync),
+    // "CHESTER-M 1234567890 — remote", "Session 482 913 — web Terminal or mobile app" (no hello
+    // after a sync),
     // "Session 482 913" before.
     [[nodiscard]] QString title() const;
     // Sends a tunnel message (only after the host's hello). Errors:
@@ -154,14 +166,20 @@ private:
     void onTunnelAt(const QJsonValue& payload); // a hwio tunnel object (ADR-0336)
     void onSync(const QJsonValue& payload);
     void appendLines(QList<device::ConsoleLine> lines);
+    // The lines of a sync's history (ADR-0431: read by m_reader).
+    void appendHistory(const Transcript& transcript, QList<device::ConsoleLine>& lines);
     void setConnection(device::ConnectionState state, std::optional<Error> error = std::nullopt);
     void setState(JoinState state);
     void hostActivity();
     void end(const std::optional<Error>& error);
     [[nodiscard]] static device::ConsoleLine makeLine(device::Direction dir, const QString& text);
+    void hideSecrets(device::ConsoleLine& line) const; // ADR-0432
 
     JoinOptions m_options;
     std::shared_ptr<device::ConsoleLog> m_log;
+    std::unique_ptr<HostOutputReader> m_reader; // ADR-0431
+    // ADR-0432: the console file's rules of the remote device (CHESTER, app console).
+    device::ConsoleRedaction m_redaction{"chester", "app"};
     std::unique_ptr<RelayClient> m_relay;
     device::ConnectionEvent m_connection;
     JoinState m_state = JoinState::Connecting;

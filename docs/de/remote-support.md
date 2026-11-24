@@ -68,10 +68,13 @@ Hilfeabfragen erscheinen nicht in Ihrer Konsole; die Konsolendatei hält fest, w
 2. Geben Sie den Code ein, den Ihnen der Kunde vorliest (Leerzeichen sind erlaubt), oder fügen Sie den Link ein. Ein
    Link zu einem anderen als dem eingestellten Server erfordert eine zusätzliche Bestätigung.
 3. Ein neuer Tab öffnet sich mit dem Titel **Sitzung 482 913** und danach *CHESTER-M 2159018247 — remote* (oder *Sitzung
-   482 913 — web Terminal*, wenn der Kunde das web Terminal verwendet). Bis der Kunde es Ihnen erlaubt, zeigt das Banner
+   482 913 — web Terminal oder mobile App*, wenn der Kunde das web Terminal oder die HARDWARIO-App verwendet). Bis der Kunde es Ihnen erlaubt, zeigt das Banner
    *Warten, bis der Kunde es Ihnen erlaubt…*. Die Live-Ausgabe kann bereits erscheinen.
 4. Sobald es Ihnen erlaubt ist, erhalten Sie den Konsolenverlauf des Kunden und können wie gewohnt in der Konsole
    arbeiten: Verlauf, Suche, Filter und Ansicht speichern.
+   Das web Terminal und die mobile App verbergen keine Geheimnisse; Ihr HARDWARIO Monitor verbirgt sie, bevor sie in
+   die Konsole gelangen (zum Beispiel `claim token: <redacted>`, `lrw config appkey <redacted>`), auch in
+   einer gespeicherten Ansicht.
    Bei einem Kunden mit HARDWARIO Monitor verwenden Vorschläge und die Tab-Vervollständigung die Befehlsliste seines
    Geräts.
    Hexdump-Zeilen des Geräteprotokolls sind standardmäßig ausgeblendet, wie in einem lokalen Tab (Chip **H**).

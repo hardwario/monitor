@@ -12,6 +12,7 @@ set_target_properties(hwio_remote_fake_relay PROPERTIES AUTOMOC ON)
 
 add_executable(hwio_remote_tests
     fake_console.h
+    host_output_reader_test.cpp
     main.cpp
     protocol_test.cpp
     relay_client_test.cpp

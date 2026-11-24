@@ -529,11 +529,16 @@ several hundred bytes becoming lines of 0 bytes, and it is the cheapest way to s
 
 ### A1.10 Steps (after approval; replaces "Phase II")
 
-- [ ] II-1 `HostOutputReader` (line mode, stream mode, prompt rule) with unit tests; `Transcript::fromJson` (D8).
-- [ ] II-2 `RemoteConsoleSession::onAt` / `onSync` use it; the tests of A1.6 pass; CLI end-to-end test.
-- [ ] II-3 Secrets as decided in D9 and D10, with tests in both directions.
-- [ ] II-4 `at` `end` and the tab title as decided in D11 and D12; translations.
-- [ ] II-5 Interop checklist rows for the mobile app; manual retest with the phone; report to the app's team.
+- [x] II-1 `HostOutputReader` (line mode, stream mode, prompt rule) with unit tests; `Transcript::fromJson` (D8).
+- [x] II-2 `RemoteConsoleSession::onAt` / `onSync` use it; the tests of A1.6 pass; CLI end-to-end test.
+- [x] II-3 Secrets as decided in D9 and D10, with tests in both directions. `device::ConsoleRedaction` is taken
+      unchanged from plan 0060 A4 (branch `strnad/impl-0060-test-feedback`, commit `e86a600`: the two files and the
+      `ConsoleFileSink` change, nothing else), so both branches merge without a second shape. The host checks every
+      output line as shell output (as `redactedOutput()` did for every `read` line). The output prefixes of plan 0059
+      (ADR-0416, STICKER) are not on this branch: they join the same lists when 0059 is merged.
+- [x] II-4 `at` `end` and the tab title as decided in D11 and D12; translations.
+- [ ] II-5 Interop checklist rows for the mobile app (done: rows 2.5 and 2.6 of the 0044 D1 checklist); manual
+      retest with the phone (open); report to the app's team (open).
 
 ### A1.11 Open points added
 

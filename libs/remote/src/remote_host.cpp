@@ -6,6 +6,7 @@
 #include "hwio/core/result.h"
 #include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
+#include "hwio/device/console_redaction.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
@@ -454,7 +455,8 @@ void RemoteHost::onRemoteLine(const QString& text) {
     if (m_session.isNull()) {
         return;
     }
-    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "command %1")).arg(redactedCommand(line)));
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "command %1"))
+              .arg(redacted(device::Direction::In, line)));
     if (Status sent = m_session->sendRemoteLine(line); !sent) {
         emit warning(sent.error());
     }
@@ -822,8 +824,7 @@ void RemoteHost::onLines(const QList<device::ConsoleLine>& lines) {
         }
         ++forwarded;
         bytesBefore += line.text.size();
-        const QString text = line.dir == device::Direction::In ? redactedCommand(line.text)
-                                                               : redactedOutput(line.text);
+        const QString text = redacted(line.dir, line.text);
         const std::size_t sent = static_cast<std::size_t>(text.toUtf8().size());
         bytesAfter += sent;
         empty += sent == 0 ? 1 : 0;
@@ -876,26 +877,23 @@ void RemoteHost::audit(const QString& text) {
     }
 }
 
-QString RemoteHost::redactedCommand(const std::string& line) const {
-    if (!m_session.isNull()) {
-        const auto prefixes =
-            device::sensitivePrefixesOf(m_session->profile().id, m_session->consoleTargetId());
-        if (const auto prefix = device::matchSensitiveCommand(line, prefixes)) {
-            return toQString(std::string(*prefix) + " <redacted>");
-        }
+// ADR-0432 (D10): the console file's redaction (device::ConsoleRedaction, one implementation for
+// the console file, Save view, the relay traffic and the joiner): a command with secret arguments
+// as "<prefix> <redacted>" (also in the output, as `config show` prints it), "<key>: <redacted>".
+QString RemoteHost::redacted(device::Direction dir, const std::string& text) const {
+    if (m_session.isNull()) {
+        return toQString(text);
     }
-    return toQString(line);
-}
-
-QString RemoteHost::redactedOutput(const std::string& line) const {
-    if (!m_session.isNull()) {
-        const auto keys =
-            device::sensitiveOutputKeysOf(m_session->profile().id, m_session->consoleTargetId());
-        if (const auto key = device::matchSensitiveOutput(line, keys)) {
-            return toQString(*key + ": <redacted>");
-        }
+    device::ConsoleLine line;
+    line.dir = dir;
+    // Every output line is checked as shell output (ADR-0356 checked every read line).
+    line.channel = device::Channel::Shell;
+    line.text = text;
+    const device::ConsoleRedaction redaction(m_session->profile().id, m_session->consoleTargetId());
+    if (auto hidden = redaction.redacted(line)) {
+        return toQString(*hidden);
     }
-    return toQString(line);
+    return toQString(text);
 }
 
 void RemoteHost::end() {

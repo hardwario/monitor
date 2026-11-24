@@ -1,5 +1,6 @@
 #include "hwio/remote/remote_console_session.h"
 
+#include "host_output_reader.h"
 #include "hwio/core/error.h"
 #include "hwio/core/firmware_identity.h"
 #include "hwio/core/json.h"
@@ -9,7 +10,6 @@
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
 #include "hwio/device/console_session.h"
-#include "hwio/device/line_assembler.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
 #include "hwio/remote/protocol.h"
@@ -92,7 +92,8 @@ RawSyncStats rawSyncStats(const QJsonValue& commands) {
 
 RemoteConsoleSession::RemoteConsoleSession(JoinOptions options)
     : m_options(std::move(options)),
-      m_log(m_options.consoleLog ? m_options.consoleLog : std::make_shared<device::ConsoleLog>()) {
+      m_log(m_options.consoleLog ? m_options.consoleLog : std::make_shared<device::ConsoleLog>()),
+      m_reader(std::make_unique<HostOutputReader>()) {
     m_connection.transport = device::Transport::Remote;
     m_idleTimer.setSingleShot(true);
     connect(&m_idleTimer, &QTimer::timeout, this, [this] {
@@ -235,7 +236,9 @@ QString RemoteConsoleSession::title() const {
             .arg(device.isEmpty() ? session : device);
     }
     if (m_syncSeen) {
-        return trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1 — web Terminal")).arg(session);
+        // D12 (plan 0061): a host without a hello is the web Terminal or the mobile app.
+        return trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1 — web Terminal or mobile app"))
+            .arg(session);
     }
     return session;
 }
@@ -282,16 +285,7 @@ device::ConsoleLine RemoteConsoleSession::makeLine(device::Direction dir, const 
     line.text = sanitizeDeviceText(toStdString(text));
     // The device lines of the host (LineSource::Remote marks only this session's own markers).
     if (dir == device::Direction::Out) {
-        line.level = device::parseZephyrLevel(line.text);
-        const std::string_view shown = line.text;
-        if (line.level == device::LogLevel::None &&
-            device::isHexdumpLine(shown.starts_with('#') ? shown.substr(1) : shown)) {
-            // ADR-0171 (as BleConsoleHandler and the '#' rule of LineAssembler): the continuation
-            // lines of a log hexdump are log lines too, hidden by default like in a local tab.
-            line.level = device::LogLevel::Hexdump;
-        }
-        line.channel =
-            line.level != device::LogLevel::None ? device::Channel::Log : device::Channel::Shell;
+        classifyHostOutput(line);
     }
     return line;
 }
@@ -305,6 +299,7 @@ void RemoteConsoleSession::onTunnelAt(const QJsonValue& payload) {
     if (const auto* hello = std::get_if<tunnel::HostHello>(&*message)) {
         const bool first = !m_hostHello;
         m_hostHello = *hello;
+        m_reader->hostHello(); // ADR-0431: a Monitor host sends lines
         // ADR-0336: our tunnel objects only after the host's hello.
         m_relay->emitEvent(QStringLiteral("write"),
                            tunnel::encodeJoiner(tunnel::JoinerHello{
@@ -371,6 +366,12 @@ void RemoteConsoleSession::onAt(const QJsonValue& payload) {
         }
         return;
     }
+    if (event == QStringLiteral("end") && !m_hostHello) {
+        // ADR-0431 (D11): the HARDWARIO mobile app's `at` {event: "end", data: null} when it stops
+        // sharing; like the tunnel `end` of a Monitor host (ADR-0354).
+        end(makeError(ErrorCode::RemoteHostEnded, "the host ended the session: at end"));
+        return;
+    }
     if (!data.isString()) {
         return; // the web Terminal ignores other events too
     }
@@ -382,13 +383,71 @@ void RemoteConsoleSession::onAt(const QJsonValue& payload) {
         setConnection(device::ConnectionState::Connected); // output proves the link works
     }
     const QString text = data.toString();
-    device::ConsoleLine line =
-        makeLine(write ? device::Direction::In : device::Direction::Out, text);
+    QList<device::ConsoleLine> lines;
+    if (write) {
+        lines.append(makeLine(device::Direction::In, text));
+        m_reader->commandShown();
+    } else {
+        // ADR-0431: one line (a Monitor or web Terminal host) or a piece of the stream (the mobile
+        // app): the reader assembles the lines.
+        for (device::ConsoleLine& line : m_reader->read(text, std::chrono::system_clock::now())) {
+            lines.append(std::move(line));
+        }
+    }
+    std::size_t bytesAfter = 0;
+    for (device::ConsoleLine& line : lines) {
+        hideSecrets(line);
+        bytesAfter += line.text.size();
+    }
     // ADR-0430: counts and lengths of the event before and after sanitising, never the text.
     qCDebug(log::lcRemote).noquote() << QString::fromStdString(std::format(
-        "Joiner {} received: 1 line, {} bytes, {} line feeds, {} bytes after sanitising",
-        write ? "write" : "read", utf8Size(text), text.count(QLatin1Char('\n')), line.text.size()));
-    appendLines({std::move(line)});
+        "Joiner {} received: {} bytes, {} line feeds; {} lines, {} bytes after sanitising{}",
+        write ? "write" : "read", utf8Size(text), text.count(QLatin1Char('\n')), lines.size(),
+        bytesAfter, m_reader->streamMode() ? " (stream)" : ""));
+    if (!lines.isEmpty()) {
+        appendLines(std::move(lines));
+    }
+}
+
+void RemoteConsoleSession::hideSecrets(device::ConsoleLine& line) const {
+    // ADR-0432 (D9): a host without a hello (web Terminal, mobile app) hides nothing; the console
+    // file's rules apply before a line enters the log (screen, Copy, Save view, the CLI). A Monitor
+    // host has hidden them already (ADR-0356, ADR-0432 D10).
+    if (m_hostHello) {
+        return;
+    }
+    if (auto redacted = m_redaction.redacted(line)) {
+        line.text = std::move(*redacted);
+    }
+}
+
+void RemoteConsoleSession::appendHistory(const Transcript& transcript,
+                                         QList<device::ConsoleLine>& lines) {
+    // ADR-0431: the log is replaced; a history in stream form (the mobile app) is read like the
+    // live output: no prompt lines, no empty line right after a command or a prompt.
+    m_reader->restart();
+    if (transcript.streamForm()) {
+        m_reader->streamSeen();
+    }
+    for (const TranscriptEntry& entry : transcript.entries()) {
+        if (entry.command != QString::fromLatin1(deviceOutputCommand) || entry.index != 0) {
+            lines.append(makeLine(device::Direction::In, entry.command));
+            m_reader->commandShown();
+        }
+        for (const QString& output : entry.outputs) {
+            device::ConsoleLine line = makeLine(device::Direction::Out, output);
+            if (m_reader->keepHistoryLine(line)) {
+                lines.append(std::move(line));
+            }
+        }
+    }
+    if (!transcript.unfinishedTail().isEmpty()) {
+        // The newest entry's unfinished line (usually the prompt) continues in the live output.
+        for (device::ConsoleLine& line :
+             m_reader->read(transcript.unfinishedTail(), std::chrono::system_clock::now())) {
+            lines.append(std::move(line));
+        }
+    }
 }
 
 void RemoteConsoleSession::onSync(const QJsonValue& payload) {
@@ -421,13 +480,9 @@ void RemoteConsoleSession::onSync(const QJsonValue& payload) {
         lines.append(marker(trRemote(
             QT_TRANSLATE_NOOP("hwio::remote", "— Older history of the session was left out —"))));
     }
-    for (const TranscriptEntry& entry : transcript->entries()) {
-        if (entry.command != QString::fromLatin1(deviceOutputCommand) || entry.index != 0) {
-            lines.append(makeLine(device::Direction::In, entry.command));
-        }
-        for (const QString& output : entry.outputs) {
-            lines.append(makeLine(device::Direction::Out, output));
-        }
+    appendHistory(*transcript, lines);
+    for (device::ConsoleLine& line : lines) {
+        hideSecrets(line);
     }
     // The views reload the replaced log (transcriptReplaced); consumers that only follow
     // linesReceived (the CLI) get the history as new lines.

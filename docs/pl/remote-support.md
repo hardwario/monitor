@@ -66,12 +66,14 @@ Twojej konsoli; plik konsoli zapisuje, ile ich było.
 2. Wpisz kod sesji, który podaje Ci klient (spacje są dozwolone), albo wklej link. Link do innego serwera niż
    skonfigurowany wymaga dodatkowego potwierdzenia.
 3. Otwiera się nowa karta zatytułowana **Sesja 482 913**, a potem *CHESTER-M 2159018247 — zdalnie* (lub *Sesja 482 913 —
-   web Terminal*, gdy klient korzysta z web Terminal). Dopóki klient Ci nie zezwoli, baner pokazuje *Czekanie, aż klient
+   web Terminal lub aplikacja mobilna*, gdy klient korzysta z web Terminal lub aplikacji mobilnej HARDWARIO). Dopóki klient Ci nie zezwoli, baner pokazuje *Czekanie, aż klient
    zezwoli…*. Wyjście na żywo może się już pojawiać.
 4. Po uzyskaniu zgody otrzymujesz historię konsoli klienta i możesz pracować w konsoli jak zwykle: historia,
    wyszukiwanie, filtrowanie i zapisywanie widoku.
    Gdy klient używa HARDWARIO Monitor, podpowiedzi i uzupełnianie klawiszem Tab korzystają z listy poleceń jego
    urządzenia.
+   Web Terminal i aplikacja mobilna nie ukrywają sekretów; Twój HARDWARIO Monitor ukrywa je, zanim trafią do konsoli
+   (na przykład `claim token: <redacted>`, `lrw config appkey <redacted>`), także w zapisanym widoku.
    Wiersze hexdumpu z dziennika urządzenia są domyślnie ukryte, tak jak w lokalnej karcie (przełącznik **H**).
 5. Gdy klient używa HARDWARIO Monitor, strona **Wgraj** oferuje **Poproś o wgranie** (identyfikator firmware z
    katalogu), **Poproś o skasowanie**, **Poproś o recover** i **Poproś o reset** dla rdzenia aplikacji lub LTE. Każda

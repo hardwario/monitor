@@ -64,12 +64,14 @@ nezobrazují; konzolový soubor zaznamená, kolik jich bylo.
 2. Napište kód, který vám zákazník přečte (mezery jsou povolené), nebo vložte odkaz. Odkaz na jiný server, než je
    nastavený, vyžaduje další potvrzení.
 3. Otevře se nová karta s názvem **Relace 482 913** a potom *CHESTER-M 2159018247 — vzdáleně* (nebo *Relace 482 913 —
-   web Terminal*, když zákazník používá web Terminal). Dokud vám to zákazník nepovolí, banner ukazuje *Čeká se, až vám
+   web Terminal nebo mobilní aplikace*, když zákazník používá web Terminal nebo mobilní aplikaci HARDWARIO). Dokud vám to zákazník nepovolí, banner ukazuje *Čeká se, až vám
    to zákazník povolí…*. Živý výstup se může zobrazovat už teď.
 4. Po povolení dostanete historii konzole zákazníka a můžete v konzoli pracovat jako obvykle: historie, hledání, filtr
    a uložení výpisu.
    Se zákazníkem, který používá HARDWARIO Monitor, používají návrhy a doplňování klávesou Tab seznam příkazů jeho
    zařízení.
+   Web Terminal a mobilní aplikace tajné údaje neskrývají; váš HARDWARIO Monitor je skryje dřív, než se dostanou do
+   konzole (například `claim token: <redacted>`, `lrw config appkey <redacted>`), i v uloženém výpisu.
    Řádky hexdumpu z logu zařízení jsou ve výchozím stavu skryté, stejně jako v místní kartě (štítek **H**).
 5. Se zákazníkem, který používá HARDWARIO Monitor, nabízí stránka **Nahrát FW** volby **Požádat o nahrání** (ID
    firmwaru z katalogu), **Požádat o smazání**, **Požádat o obnovení** a **Požádat o reset** pro aplikační nebo LTE

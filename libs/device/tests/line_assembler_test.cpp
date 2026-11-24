@@ -205,6 +205,21 @@ TEST(LineAssembler, IsPrompt) {
     EXPECT_FALSE(isPrompt("", "uart:~$ "));
 }
 
+// Plan 0061 (ADR-0431): any Zephyr prompt, for a host whose prompt is unknown.
+TEST(LineAssembler, IsZephyrPrompt) {
+    using hwio::device::isZephyrPrompt;
+    EXPECT_TRUE(isZephyrPrompt("bt_nus:~$ "));
+    EXPECT_TRUE(isZephyrPrompt("uart:~$"));
+    EXPECT_TRUE(isZephyrPrompt("\x1b[1;32mbt_nus:~$ \x1b[m"));
+    EXPECT_TRUE(isZephyrPrompt("junk\rbt_nus:~$ "));               // a redrawn line
+    EXPECT_TRUE(isZephyrPrompt("bt_nus:~$ bt_nus:~$ bt_nus:~$ ")); // repeated redraws
+    EXPECT_FALSE(isZephyrPrompt("bt_nus:~$ info show"));
+    EXPECT_FALSE(isZephyrPrompt("Vendor name: HARDWARIO"));
+    EXPECT_FALSE(isZephyrPrompt("my shell:~$ "));
+    EXPECT_FALSE(isZephyrPrompt(":~$ "));
+    EXPECT_FALSE(isZephyrPrompt(""));
+}
+
 } // namespace
 
 // ---- plan 0021 (ADR-0171): hexdump continuation lines ---------------------------------------
