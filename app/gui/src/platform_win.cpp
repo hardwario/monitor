@@ -11,6 +11,7 @@
 #include <QLoggingCategory>
 #include <QtLogging>
 
+#include <cstdio>
 #include <shobjidl_core.h>
 
 namespace hwio::gui {
@@ -20,6 +21,22 @@ void applyPlatformIdentity() {
     if (FAILED(result)) {
         qCWarning(lcGui) << "SetCurrentProcessExplicitAppUserModelID failed:"
                          << static_cast<long>(result);
+    }
+}
+
+void attachParentConsole() {
+    // Redirected stdout (a pipe or a file, for example `hwio-monitor --version > v.txt`) is
+    // inherited and used as it is.
+    const HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (out != nullptr && out != INVALID_HANDLE_VALUE) {
+        return;
+    }
+    if (AttachConsole(ATTACH_PARENT_PROCESS) == 0) {
+        return; // no parent console (started from Explorer): nothing is shown
+    }
+    FILE* stream = nullptr;
+    if (freopen_s(&stream, "CONOUT$", "w", stdout) != 0) {
+        qCWarning(lcGui) << "stdout could not be attached to the parent console";
     }
 }
 

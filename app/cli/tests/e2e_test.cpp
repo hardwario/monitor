@@ -122,6 +122,80 @@ TEST_F(CliProcess, UnknownOptionIsUsageError) {
               QStringLiteral("usage.invalid_argument"));
 }
 
+// Plan 0060 A2 (ADR-0423): a flash input that does not exist is io.file_not_found (exit 3); the
+// check comes before any probe or nRF Util is looked for.
+TEST_F(CliProcess, FlashMissingFileExits3) {
+    const QString missing = home() + QStringLiteral("/missing.hex");
+    const RunResult human =
+        run({QStringLiteral("chester"), QStringLiteral("app"), QStringLiteral("flash"), missing});
+    ASSERT_TRUE(human.normalExit);
+    EXPECT_EQ(human.exitCode, 3) << human.err;
+    EXPECT_NE(human.err.find("does not exist (and it is not a 32-digit firmware ID)."),
+              std::string::npos)
+        << human.err;
+
+    const RunResult json = run({QStringLiteral("--json"), QStringLiteral("chester"),
+                                QStringLiteral("app"), QStringLiteral("flash"), missing});
+    EXPECT_EQ(json.exitCode, 3) << json.err;
+    const QJsonObject error = parseEnvelope(json.out).value(QStringLiteral("error")).toObject();
+    EXPECT_EQ(error.value(QStringLiteral("code")).toString(), QStringLiteral("io.file_not_found"));
+    EXPECT_EQ(error.value(QStringLiteral("category")).toString(), QStringLiteral("io"));
+}
+
+TEST_F(CliProcess, LteFlashMissingFileExits3) {
+    const QString missing = home() + QStringLiteral("/missing.zip");
+    const RunResult human =
+        run({QStringLiteral("chester"), QStringLiteral("lte"), QStringLiteral("flash"), missing});
+    ASSERT_TRUE(human.normalExit);
+    EXPECT_EQ(human.exitCode, 3) << human.err;
+    EXPECT_NE(human.err.find("does not exist."), std::string::npos) << human.err;
+
+    const RunResult json = run({QStringLiteral("--json"), QStringLiteral("chester"),
+                                QStringLiteral("lte"), QStringLiteral("flash"), missing});
+    EXPECT_EQ(json.exitCode, 3) << json.err;
+    const QJsonObject error = parseEnvelope(json.out).value(QStringLiteral("error")).toObject();
+    EXPECT_EQ(error.value(QStringLiteral("code")).toString(), QStringLiteral("io.file_not_found"));
+}
+
+// Plan 0060 A2 (ADR-0423): --help does not make an unknown command look like an existing one.
+TEST_F(CliProcess, UnknownCommandWithHelpExits2) {
+    const RunResult human = run({QStringLiteral("rtt"), QStringLiteral("--help")});
+    ASSERT_TRUE(human.normalExit);
+    EXPECT_EQ(human.exitCode, 2);
+    EXPECT_EQ(human.out, "");
+    EXPECT_NE(human.err.find("The following argument was not expected: rtt"), std::string::npos)
+        << human.err;
+
+    const RunResult json =
+        run({QStringLiteral("--json"), QStringLiteral("rtt"), QStringLiteral("--help")});
+    EXPECT_EQ(json.exitCode, 2);
+    const QJsonObject error = parseEnvelope(json.out).value(QStringLiteral("error")).toObject();
+    EXPECT_EQ(error.value(QStringLiteral("code")).toString(),
+              QStringLiteral("usage.invalid_argument"));
+}
+
+TEST_F(CliProcess, NestedUnknownCommandWithHelpExits2) {
+    const RunResult result =
+        run({QStringLiteral("chester"), QStringLiteral("bogus"), QStringLiteral("--help")});
+    ASSERT_TRUE(result.normalExit);
+    EXPECT_EQ(result.exitCode, 2);
+    EXPECT_NE(result.err.find("The following argument was not expected: bogus"), std::string::npos)
+        << result.err;
+}
+
+TEST_F(CliProcess, KnownCommandHelpExits0) {
+    for (const QStringList& args :
+         {QStringList{QStringLiteral("chester"), QStringLiteral("--help")},
+          QStringList{QStringLiteral("chester"), QStringLiteral("app"), QStringLiteral("flash"),
+                      QStringLiteral("--help")},
+          QStringList{QStringLiteral("jlink"), QStringLiteral("list"), QStringLiteral("-h")}}) {
+        const RunResult result = run(args);
+        ASSERT_TRUE(result.normalExit);
+        EXPECT_EQ(result.exitCode, 0) << args.join(QLatin1Char(' ')).toStdString() << result.err;
+        EXPECT_FALSE(result.out.empty());
+    }
+}
+
 // Plan 0025 (ADR-0186): `hwio console history clear` deletes only the history files.
 #ifdef __linux__
 TEST_F(CliProcess, ConsoleHistoryClear) {

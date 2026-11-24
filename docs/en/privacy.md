@@ -46,7 +46,9 @@ app, or `hwio diag report` (`-o FILE`). It is a zip file with:
 - the latest crash reports, if there are any.
 
 Before it is written, your user name, home folder and computer name are replaced (`<user>`, `~`, `<host>`), and values
-that look like passwords, tokens or keys are replaced by `<redacted>`. Probe serial numbers stay in it. The logs may
+that look like passwords, tokens or keys are replaced by `<redacted>`. The address of your computer's Bluetooth
+adapter is replaced by `<adapter address>` (the app and `hwio doctor` still show it). Probe serial numbers and the
+addresses of your devices stay in it. The logs may
 contain output of your device, so look through the report before you send it. Console files and the command history
 are not part of the report.
 

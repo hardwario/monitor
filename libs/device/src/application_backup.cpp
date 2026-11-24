@@ -3,11 +3,11 @@
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/log.h"
+#include "hwio/core/owner_only.h"
 #include "hwio/core/result.h"
 #include "hwio/device/profile.h"
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/firmware/intel_hex.h"
-#include "owner_only.h"
 
 #include <QByteArray>
 #include <QDateTime>
@@ -147,7 +147,7 @@ Result<fs::path> ApplicationBackup::save(const fs::path& directory, std::string_
     if (!file.open(QIODevice::WriteOnly)) {
         return std::unexpected(writeFailed(path, file.errorString()));
     }
-    detail::restrictToOwner(file);
+    restrictToOwner(file);
     const std::string text = firmware::toIntelHex(*image);
     const QByteArray bytes = QByteArray::fromStdString(text);
     if (file.write(bytes) != bytes.size() || !file.commit()) {

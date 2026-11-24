@@ -127,7 +127,7 @@ TEST(FlashInput, ArgumentRules) {
     EXPECT_TRUE(std::holds_alternative<hwio::cli::FlashCatalogId>(*id));
     const auto missing = hwio::cli::resolveFlashInput((root / "nope.hex").string(), root);
     ASSERT_FALSE(missing);
-    EXPECT_EQ(missing.error().code, ErrorCode::UsageInvalidArgument);
+    EXPECT_EQ(missing.error().code, ErrorCode::IoFileNotFound); // ADR-0423
 }
 
 TEST(FlashInput, BuildOutputSearch) {

@@ -47,7 +47,9 @@ v aplikácii alebo `hwio diag report` (`-o FILE`). Je to súbor zip, ktorý obsa
 - najnovšie správy o páde, ak nejaké sú.
 
 Pred zapísaním sa vaše používateľské meno, domovský priečinok a názov počítača nahradia (`<user>`, `~`, `<host>`) a
-hodnoty, ktoré vyzerajú ako heslá, tokeny alebo kľúče, sa nahradia `<redacted>`. Sériové čísla sond v nej zostanú. Logy
+hodnoty, ktoré vyzerajú ako heslá, tokeny alebo kľúče, sa nahradia `<redacted>`. Adresa Bluetooth adaptéra vášho
+počítača sa nahradí `<adapter address>` (aplikácia a `hwio doctor` ju naďalej zobrazujú). Sériové čísla sond a adresy
+vašich zariadení v nej zostanú. Logy
 môžu obsahovať výstup vášho zariadenia, preto si správu pred odoslaním prezrite. Súbory konzoly a história príkazov
 nie sú súčasťou správy.
 

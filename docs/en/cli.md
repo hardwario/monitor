@@ -310,8 +310,8 @@ hwio --json chester app console < cmds.txt | jq -c 'select(.data.type=="line" an
 |---|---|
 | 0 | Success |
 | 1 | Internal error (a bug: please report it with the diagnostic report) |
-| 2 | Invalid arguments or options; a confirmation is needed (`--yes`); `ble pair` on macOS |
-| 3 | A file could not be read or written; settings |
+| 2 | Invalid arguments or options, an unknown command (also with `--help`); a confirmation is needed (`--yes`); `ble pair` on macOS |
+| 3 | A file was not found (for example the firmware file of `chester app flash` or `chester lte flash`), could not be read or written; settings |
 | 4 | J-Link Software or nRF Util missing or too old; Bluetooth adapter missing, off or not allowed |
 | 5 | J-Link probe not found, busy or with a firmware problem; Bluetooth device used by another program |
 | 6 | The device does not respond, has no power or no console, is protected; Bluetooth connection problems |

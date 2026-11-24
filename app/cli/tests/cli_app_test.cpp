@@ -91,6 +91,31 @@ TEST(CliApp, UnknownOptionIsUsageError) {
     EXPECT_NE(parsed.error().message.find("--bogus"), std::string::npos);
 }
 
+// Plan 0060 A2 (ADR-0423): --help with arguments no command took is the usage error that the
+// same arguments give without --help; --help on a known command still shows the help.
+TEST(CliApp, UnknownCommandWithHelpIsUsageError) {
+    for (const auto& args : std::vector<std::vector<std::string>>{
+             {"rtt", "--help"}, {"--help", "rtt"}, {"chester", "bogus", "--help"}}) {
+        CliApp cli;
+        const auto parsed = cli.parse(args);
+        ASSERT_FALSE(parsed.has_value()) << args.front();
+        EXPECT_EQ(parsed.error().code, hwio::ErrorCode::UsageInvalidArgument);
+        EXPECT_NE(parsed.error().message.find("The following argument was not expected:"),
+                  std::string::npos)
+            << parsed.error().message;
+    }
+}
+
+TEST(CliApp, KnownCommandHelpShowsHelp) {
+    for (const auto& args : std::vector<std::vector<std::string>>{
+             {"chester", "--help"}, {"chester", "app", "flash", "--help"}, {"--help"}}) {
+        CliApp cli;
+        const auto parsed = cli.parse(args);
+        ASSERT_TRUE(parsed.has_value()) << parsed.error().message;
+        EXPECT_EQ(*parsed, ParseOutcome::ShowHelp);
+    }
+}
+
 // ADR-0090 / review R49: --jlink-speed is `auto` (the default) or a fixed speed of 5-50 000 kHz,
 // on the `chester app` group and on its subcommands; anything else is a usage error at parse time.
 TEST(CliApp, JLinkSpeedAcceptsAutoOrKiloHertz) {

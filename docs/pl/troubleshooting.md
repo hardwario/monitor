@@ -862,7 +862,7 @@ Pochodzi ze sprawdzania aktualizacji, gdy odpowiedź z GitHub jest większa niż
 - **Probably:** The path is wrong or the file was moved or deleted.
 - **What to do:** Check the file path (see Details).
 
-Ścieżka znajduje się w **Details**. W przypadku serwera MCP (`hwio mcp`) komunikat może brzmieć „The `<what>` `<dir>` does not exist.” dla opcji folderu, takiej jak `--dump-dir`.
+Ścieżka znajduje się w **Details**. W przypadku serwera MCP (`hwio mcp`) komunikat może brzmieć „The `<what>` `<dir>` does not exist.” dla opcji folderu, takiej jak `--dump-dir`. W przypadku `hwio chester app flash` i `hwio chester lte flash` podaje plik firmware, który nie istnieje, na przykład „The file `<path>` does not exist.”
 
 <a id="io.read_failed"></a>
 #### `io.read_failed`
