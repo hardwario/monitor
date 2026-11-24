@@ -294,6 +294,23 @@ Phase C — documents:
       rc.4 Monitor host, web Terminal host, mobile app host).
 - [ ] C2 ADR-0332 marked superseded; notes in plans 0044 and 0059 (D16); `plan/0004-mcp.md` tool table.
 
+## Implementation notes (A4, A5; confirmed by the user 2026-11-24, "Accept both")
+
+- **Where support's permission is kept (changes a consequence of ADR-0436).** The session grant is kept by the
+  remote device object (`IRemoteDevice::aiAllowed` / `allowAi` / `aiRevoked`), not by the consent broker: resources,
+  the resource list and resource updates are answered synchronously and cannot ask the broker. The broker only
+  shows the prompt; the tools accept only a prompted answer for `RemoteDevice` and for remote operations.
+- **Local tool schemas changed** so that the same tools serve a remote device: `flash_lte` no longer requires
+  `path` in its schema (a local call without it is the tool error `usage.invalid_argument`, not -32602);
+  `send_command` has no schema default for `timeout` (5 s local, 10 s remote, applied in code); `flash` has
+  `prepared_id` (refused on a local device); `connect` accepts a `remote:` id to answer `mcp.tool_not_allowed`.
+- A tool the matrix refuses on a remote device answers at once, without prompting support. `wait_for_state` with
+  a polling command counts toward the 30 commands per minute.
+- The hidden view replaces the session code written as `482913` and `482 913`; other spellings are not
+  recognised.
+- New error ids: `remote.command_not_delivered` (category timeout, baseline `timeout`),
+  `remote.waiting_for_customer` (category cancelled, baseline `remote.join_not_allowed`); neither is sent.
+
 ## Tests and verification
 
 - Unit (GoogleTest): `lineRefused`; the forced silence rule;

@@ -39,4 +39,6 @@ Option 1.
 - Nothing of a customer's session reaches an AI client before a person on support's machine agreed for that
   session.
 - A long session costs one prompt for reading and commands, and one per operation.
-- The consent broker gets a grant scope "client + tab" next to "client".
+- The grant is kept by the remote tab's device object, which the tools, resources and resource updates can all
+  reach synchronously; the consent broker only shows the prompt (wording changed 2026-11-24 with the user's
+  agreement, plan 0062 implementation notes; the first wording put the grant into the broker).
