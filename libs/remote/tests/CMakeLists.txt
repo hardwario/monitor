@@ -11,14 +11,18 @@ target_link_libraries(hwio_remote_fake_relay PUBLIC hwio::remote Qt6::WebSockets
 set_target_properties(hwio_remote_fake_relay PROPERTIES AUTOMOC ON)
 
 add_executable(hwio_remote_tests
+    compat_test.cpp
     fake_console.h
     main.cpp
     protocol_test.cpp
+    rc4_tunnel.cpp
+    rc4_tunnel.h
     relay_client_test.cpp
     remote_host_test.cpp
     remote_session_test.cpp
     remote_test_support.h
     session_code_test.cpp
+    test_profile.h
     transcript_test.cpp
     tunnel_test.cpp)
 hwio_apply_target_defaults(hwio_remote_tests)

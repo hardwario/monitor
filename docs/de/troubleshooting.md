@@ -109,7 +109,7 @@ Fehlercodes: [`target.reset_during_update`](#target.reset_during_update), [`targ
 
 HARDWARIO Monitor erreicht den Support-Server `terminal.hardwario.com` über `wss` (HTTPS, Port 443). Eine Firewall oder ein Proxy, der WebSockets blockiert, verhindert das Freigeben und das Beitreten. Verwendet jemand anderes denselben Sitzungscode (sehr selten), endet die Freigabe aus Sicherheitsgründen: Starten Sie sie erneut, um einen neuen Code zu erhalten. Wer nach dem Beitritt nicht innerhalb von 2 Minuten zugelassen (oder abgelehnt) wird, muss den Kunden bitten, die Konsole erneut freizugeben. Siehe [Fernsupport](remote-support.md).
 
-Fehlercodes: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored).
+Fehlercodes: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored), [`remote.target_unsupported`](#remote.target_unsupported), [`remote.command_refused`](#remote.command_refused).
 
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Die LTE-Modem-Firmware braucht nRF Util
@@ -984,6 +984,24 @@ Die Meldung sagt meist genau, welcher Wert falsch ist, zum Beispiel eine ungült
 - **What to do:** Ask the customer to share the console from HARDWARIO Monitor.
 
 Auch wenn der Kunde eine Bluetooth-Konsole freigibt, die kein Flashen bietet.
+
+<a id="remote.target_unsupported"></a>
+#### `remote.target_unsupported`
+
+**The customer's device has no such target, or this operation is not available on it remotely.**
+
+- **Probably:** The device or its firmware does not support it in a support session.
+- **What to do:** Choose another operation or ask the customer to do it locally.
+
+Der Support mit einem älteren HARDWARIO Monitor sieht stattdessen `remote.operation_denied`.
+
+<a id="remote.command_refused"></a>
+#### `remote.command_refused`
+
+**The customer's Monitor refused this command.**
+
+- **Probably:** It would read or change the device's keys or identity, which is not possible in a support session.
+- **What to do:** Ask the customer to run it locally if it is really needed.
 
 <a id="usage.confirmation_required"></a>
 #### `usage.confirmation_required`

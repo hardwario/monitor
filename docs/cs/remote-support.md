@@ -90,6 +90,9 @@ nezobrazují; konzolový soubor zaznamená, kolik jich bylo.
 Když zákazník ukončí sdílení, HARDWARIO Monitor to nemusí vždy poznat: server to neoznamuje. Po 30 minutách bez
 jakékoli aktivity to banner oznámí a nabídne **Opustit**. Karta zůstane otevřená, takže konzoli můžete ještě uložit.
 
+Podpora a zákazník mohou používat různé verze HARDWARIO Monitor. Novější verze funguje se starší i s webovým
+Terminalem: co druhá strana nepodporuje, se nenabízí, a chyby dorazí do starší verze jako chyba, kterou zná.
+
 <a id="command-line"></a>
 ## Příkazová řádka
 

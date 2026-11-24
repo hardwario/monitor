@@ -177,6 +177,7 @@ private:
     std::span<const std::string_view> m_sensitivePrefixes;
     // Plan 0028 (U2): output lines "<key>: <secret>" are written as "<key>: <redacted>".
     std::span<const std::string_view> m_sensitiveOutput;
+    std::span<const std::string_view> m_sensitiveOutputPrefixes; // plan 0059 (profile data)
     // Review R4: the profile's shell prompts (RTT target, BLE); "" = none.
     std::array<std::string_view, 2> m_prompts{};
 };

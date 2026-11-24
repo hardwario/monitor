@@ -93,6 +93,10 @@ HARDWARIO Monitor nie zawsze rozpozna, że klient zakończył udostępnianie: se
 żadnej aktywności baner o tym informuje i oferuje **Opuść**. Karta pozostaje otwarta, więc nadal możesz zapisać
 konsolę.
 
+Wsparcie i klient mogą używać różnych wersji HARDWARIO Monitor. Nowsza wersja działa ze starszą i z Terminalem
+webowym: to, czego druga strona nie obsługuje, nie jest oferowane, a błędy docierają do starszej wersji jako błąd,
+który zna.
+
 <a id="command-line"></a>
 ## Wiersz poleceń
 

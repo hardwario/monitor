@@ -31,9 +31,11 @@
 #include <QtCore/qttranslation.h>
 #include <QtLogging>
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <expected>
+#include <format>
 #include <map>
 #include <memory>
 #include <optional>
@@ -51,6 +53,55 @@ namespace {
 QString trRemote(const char* text) { return QCoreApplication::translate("hwio::remote", text); }
 
 } // namespace
+
+Status RemoteConsoleSession::hostOffers(const tunnel::HostHello& hello,
+                                        const tunnel::OpRequest& request) {
+    if (!hello.targets) {
+        // An older host (2.0.0-rc.4 / rc.5, ADR-0414): its ops / opKinds, the CHESTER targets
+        // app / lte, catalog firmware IDs only. Anything else would not decode there and get no
+        // answer at all.
+        if (!hello.ops) {
+            return std::unexpected(
+                makeError(ErrorCode::RemoteOperationUnsupportedPeer, "the host has no operations"));
+        }
+        if (!request.target.isChesterTarget() || request.prepared) {
+            return std::unexpected(makeError(ErrorCode::RemoteTargetUnsupported,
+                                             "the host offers the app and lte targets only"));
+        }
+        return {};
+    }
+    // A host that lists its targets: the target, its kind and its prepared firmware must be
+    // listed (the host validates again).
+    const tunnel::HostTarget* target = request.kind == tunnel::OpKind::LteUpdate
+                                           ? nullptr
+                                           : tunnel::findTarget(hello, request.target.id());
+    if (request.kind == tunnel::OpKind::LteUpdate) {
+        if (!tunnel::supports(hello, request.kind)) {
+            return std::unexpected(makeError(ErrorCode::RemoteOperationUnsupportedPeer,
+                                             "the host has no remote LTE update"));
+        }
+        return {};
+    }
+    if (target == nullptr ||
+        std::ranges::find(target->kinds, request.kind) == target->kinds.end()) {
+        return std::unexpected(
+            makeError(ErrorCode::RemoteTargetUnsupported,
+                      std::format("the host offers no {} on {}", tunnel::kindId(request.kind),
+                                  request.target.id())));
+    }
+    if (request.prepared &&
+        (!tunnel::hasCap(hello.caps, tunnel::cap::prepared) ||
+         std::ranges::find(target->prepared, *request.prepared, &tunnel::PreparedFirmware::id) ==
+             target->prepared.end())) {
+        return std::unexpected(makeError(ErrorCode::RemoteTargetUnsupported,
+                                         "the host has no such prepared firmware"));
+    }
+    if (request.firmwareId && !target->catalog) {
+        return std::unexpected(makeError(ErrorCode::RemoteFirmwareNotInCatalog,
+                                         "the target takes no catalog firmware"));
+    }
+    return {};
+}
 
 RemoteConsoleSession::RemoteConsoleSession(JoinOptions options)
     : m_options(std::move(options)),
@@ -175,9 +226,21 @@ device::Capabilities RemoteConsoleSession::capabilities() const {
     return capabilities;
 }
 
+const device::DeviceProfile&
+RemoteConsoleSession::profileFor(const std::optional<tunnel::HostHello>& hello) {
+    // Plan 0059 (ADR-0415, D-6): the profile the host's hello names when this build knows it,
+    // else the neutral console profile. A host without `profile` in its hello (2.0.0-rc.4 /
+    // rc.5) and a host without a hello (the web Terminal: Bluetooth CHESTER) share CHESTERs only:
+    // their console keeps the CHESTER rules (see plan 0059 § Implementation notes, A2).
+    if (!hello || hello->profile.empty()) {
+        return *device::ProfileRegistry::find("chester");
+    }
+    const device::DeviceProfile* named = device::ProfileRegistry::find(hello->profile);
+    return named != nullptr ? *named : device::genericConsoleProfile();
+}
+
 const device::DeviceProfile& RemoteConsoleSession::profile() const {
-    // The remote device is a CHESTER (the only profile; its console rules apply to the view).
-    return *device::ProfileRegistry::find("chester");
+    return profileFor(m_hostHello);
 }
 
 Status RemoteConsoleSession::setFirmwareIdentity(std::optional<FirmwareIdentity> /*identity*/,
@@ -210,9 +273,10 @@ Status RemoteConsoleSession::sendTunnel(const tunnel::JoinerMessage& message) {
         return std::unexpected(
             makeError(ErrorCode::RemoteOperationUnsupportedPeer, "no host hello"));
     }
-    if (std::holds_alternative<tunnel::OpRequest>(message) && !m_hostHello->ops) {
-        return std::unexpected(
-            makeError(ErrorCode::RemoteOperationUnsupportedPeer, "the host has no operations"));
+    if (const auto* request = std::get_if<tunnel::OpRequest>(&message)) {
+        if (Status offered = hostOffers(*m_hostHello, *request); !offered) {
+            return offered;
+        }
     }
     m_relay->emitEvent(QStringLiteral("write"), tunnel::encodeJoiner(message), false);
     return {};
@@ -268,10 +332,15 @@ void RemoteConsoleSession::onTunnelAt(const QJsonValue& payload) {
         const bool first = !m_hostHello;
         m_hostHello = *hello;
         // ADR-0336: our tunnel objects only after the host's hello.
-        m_relay->emitEvent(QStringLiteral("write"),
-                           tunnel::encodeJoiner(tunnel::JoinerHello{
-                               .app = std::string(tunnel::appId), .version = m_options.appVersion}),
-                           false);
+        // Plan 0059 (ADR-0414): this joiner understands targets, detail codes and line-refused.
+        m_relay->emitEvent(
+            QStringLiteral("write"),
+            tunnel::encodeJoiner(tunnel::JoinerHello{
+                .app = std::string(tunnel::appId),
+                .version = m_options.appVersion,
+                .caps = {std::string(tunnel::cap::targets), std::string(tunnel::cap::detailCodes),
+                         std::string(tunnel::cap::refusedLines)}}),
+            false);
         if (first) {
             if (Status recorded = recordRemoteEvent(
                     trRemote(
@@ -294,6 +363,19 @@ void RemoteConsoleSession::onTunnelAt(const QJsonValue& payload) {
         // ADR-0364: validated by the codec (bounds, names, sanitised help).
         m_commandTree = commands->tree;
         emit commandTreeChanged();
+        return;
+    }
+    if (std::holds_alternative<tunnel::LineRefused>(*message)) {
+        // Plan 0059 (ADR-0416): the customer's Monitor did not pass a line of support's.
+        if (Status recorded = recordRemoteEvent(
+                trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                           "— The customer's Monitor refused this command: it "
+                                           "changes the device's keys or identity —"))
+                    .toStdString());
+            !recorded) {
+            qCWarning(log::lcRemote).noquote()
+                << "Remote event not recorded:" << toQString(recorded.error().detail);
+        }
         return;
     }
     if (std::holds_alternative<tunnel::HostEnd>(*message)) {

@@ -4,6 +4,7 @@
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/result.h"
+#include "hwio/device/profile.h"
 #include "hwio/firmware/firmware_cache.h"
 #include "hwio/remote/consent.h"
 #include "hwio/remote/remote_console_session.h"
@@ -18,12 +19,14 @@
 #include <QStringLiteral>
 #include <QTime>
 #include <QUrl>
+#include <QVariantList>
 #include <QVariantMap>
 #include <QtContainerFwd>
 
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 
 namespace hwio::gui {
 
@@ -188,6 +191,38 @@ bool RemoteJoinViewModel::lteUpdateAvailable() const {
     }
     const std::optional<tunnel::HostHello>& hello = session->hostHello();
     return hello.has_value() && tunnel::supports(*hello, tunnel::OpKind::LteUpdate);
+}
+
+QVariantList RemoteJoinViewModel::targets() const {
+    const remote::RemoteConsoleSession* session = m_tab->remoteSession();
+    const std::optional<tunnel::HostHello> hello =
+        session != nullptr ? session->hostHello() : std::nullopt;
+    const device::DeviceProfile& profile = remote::RemoteConsoleSession::profileFor(hello);
+    const auto name = [&profile](std::string_view id) {
+        if (profile.id == "chester" && id == "app") {
+            return tr("Application core");
+        }
+        if (profile.id == "chester" && id == "lte") {
+            return tr("LTE modem core");
+        }
+        const device::TargetProfile* target = device::findTarget(profile, id);
+        return target != nullptr ? device::targetDisplayName(*target) : toQString(id);
+    };
+    const auto entry = [&name](std::string_view id, bool catalog) {
+        return QVariantMap{{QStringLiteral("id"), toQString(id)},
+                           {QStringLiteral("name"), name(id)},
+                           {QStringLiteral("catalog"), catalog}};
+    };
+    QVariantList out;
+    if (!hello || !hello->targets) {
+        out.append(entry("app", true));
+        out.append(entry("lte", false));
+        return out;
+    }
+    for (const tunnel::HostTarget& target : *hello->targets) {
+        out.append(entry(target.id, target.catalog));
+    }
+    return out;
 }
 
 bool RemoteJoinViewModel::operationPending() const { return m_client && m_client->busy(); }

@@ -308,6 +308,12 @@ ConsoleFileSink::ConsoleFileSink(Passkey /*key*/, ConsoleFileConfig config, fs::
     : m_config(std::move(config)), m_base(std::move(baseFile)), m_current(m_base),
       m_sensitivePrefixes(sensitivePrefixesOf(m_config.profileId, m_config.targetId)),
       m_sensitiveOutput(sensitiveOutputKeysOf(m_config.profileId, m_config.targetId)) {
+    // Plan 0059 (ADR-0416): secrets printed without a "key:" (STICKER `config secret-key <hex>`).
+    if (const DeviceProfile* profile = ProfileRegistry::find(m_config.profileId)) {
+        if (const TargetProfile* target = findTarget(*profile, m_config.targetId)) {
+            m_sensitiveOutputPrefixes = target->sensitiveOutputPrefixes;
+        }
+    }
     // Review R4: the shell prompts of the profile (RTT target, BLE), stripped from echoed lines.
     if (const DeviceProfile* profile = ProfileRegistry::find(m_config.profileId)) {
         if (const TargetProfile* target = findTarget(*profile, m_config.targetId)) {
@@ -433,6 +439,13 @@ Status ConsoleFileSink::write(const ConsoleLine& line) {
             if (const auto key = matchSensitiveOutput(command, m_sensitiveOutput)) {
                 return append(consoleFilePrefix(line),
                               line.text.substr(0, promptLength) + *key + ": <redacted>", line.time);
+            }
+            if (const auto prefix =
+                    matchSensitiveOutputPrefix(command, m_sensitiveOutputPrefixes)) {
+                return append(consoleFilePrefix(line),
+                              line.text.substr(0, promptLength) + std::string(*prefix) +
+                                  " <redacted>",
+                              line.time);
             }
         }
     }

@@ -6,6 +6,7 @@
 #include "hwio/core/text_sanitizer.h"
 #include "hwio/device/command_tree.h"
 #include "hwio/firmware/firmware_cache.h"
+#include "hwio/remote/baseline_errors.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -27,6 +28,7 @@
 #include <string_view>
 #include <utility>
 #include <variant>
+#include <vector>
 
 namespace hwio::remote::tunnel {
 
@@ -67,16 +69,211 @@ Result<std::string> id(const QJsonObject& object) {
     return toStdString(value.toString());
 }
 
+// The `code` of op-denied, the error of op-result and end: a known hwio::Error id. ADR-0414: an
+// optional `detail: {code}` refines it; its id is used when this build knows it (a newer host may
+// send ids this build does not know: then `code`).
 Result<std::string> errorCode(const QJsonObject& object) {
     const QJsonValue value = object.value(QStringLiteral("code"));
     if (!value.isString()) {
         return bad("error code is not a string");
     }
     std::string code = toStdString(value.toString());
-    if (code.size() > 64 || !errorCodeFromId(code)) {
+    if (code.size() > maxErrorIdBytes || !errorCodeFromId(code)) {
         return bad("unknown error code");
     }
+    const QJsonValue detail = object.value(QStringLiteral("detail"));
+    if (detail.isUndefined()) {
+        return code;
+    }
+    const QJsonValue detailCode = detail.toObject().value(QStringLiteral("code"));
+    if (!detail.isObject() || !detailCode.isString() ||
+        std::cmp_greater(detailCode.toString().size(), maxErrorIdBytes)) {
+        return bad("invalid error detail");
+    }
+    std::string refined = toStdString(detailCode.toString());
+    if (errorCodeFromId(refined)) {
+        return refined;
+    }
     return code;
+}
+
+// ADR-0414: inserts `code` as an id of Monitor 2.0.0-rc.4 into `object`, plus `detail: {code}`
+// when the real id differs.
+void insertErrorCode(QJsonObject& object, const std::string& code) {
+    const auto known = errorCodeFromId(code);
+    const std::string_view baseline = known ? baselineErrorId(*known) : std::string_view(code);
+    object.insert(QStringLiteral("code"), q(baseline));
+    if (baseline != code) {
+        QJsonObject detail;
+        detail.insert(QStringLiteral("code"), q(code));
+        object.insert(QStringLiteral("detail"), detail);
+    }
+}
+
+// ADR-0414: an optional name (absent = "").
+Result<std::string> optionalName(const QJsonObject& data, const QString& key) {
+    const QJsonValue value = data.value(key);
+    if (value.isUndefined()) {
+        return std::string();
+    }
+    if (!value.isString() || !validName(toStdString(value.toString()))) {
+        return bad("invalid " + toStdString(key));
+    }
+    return toStdString(value.toString());
+}
+
+// ADR-0414: an optional list of caps (absent = none): names, at most maxCaps, kept in order
+// without duplicates.
+Result<std::vector<std::string>> capsOf(const QJsonObject& data) {
+    const QJsonValue value = data.value(QStringLiteral("caps"));
+    std::vector<std::string> caps;
+    if (value.isUndefined()) {
+        return caps;
+    }
+    if (!value.isArray() || std::cmp_greater(value.toArray().size(), maxCaps)) {
+        return bad("invalid caps");
+    }
+    for (const auto& entry : value.toArray()) {
+        const std::string name = toStdString(entry.toString());
+        if (!entry.isString() || !validName(name)) {
+            return bad("invalid caps");
+        }
+        if (std::ranges::find(caps, name) == caps.end()) {
+            caps.push_back(name);
+        }
+    }
+    return caps;
+}
+
+QJsonArray capsJson(const std::vector<std::string>& caps) {
+    QJsonArray out;
+    for (const std::string& name : caps) {
+        out.append(q(name));
+    }
+    return out;
+}
+
+// A list of kinds (opKinds, a target's kinds): at most maxOpKinds strings; unknown kinds (a later
+// version) are skipped, duplicates dropped.
+Result<std::vector<OpKind>> kindsOf(const QJsonValue& value) {
+    if (!value.isArray() || std::cmp_greater(value.toArray().size(), maxOpKinds)) {
+        return bad("invalid kinds");
+    }
+    std::vector<OpKind> kinds;
+    for (const auto& kindValue : value.toArray()) {
+        if (!kindValue.isString() || kindValue.toString().size() > 32) {
+            return bad("invalid kinds");
+        }
+        const auto kind = kindFromId(toStdString(kindValue.toString()));
+        if (kind && std::ranges::find(kinds, *kind) == kinds.end()) {
+            kinds.push_back(*kind);
+        }
+    }
+    return kinds;
+}
+
+Result<PreparedFirmware> preparedOf(const QJsonValue& value) {
+    if (!value.isObject()) {
+        return bad("invalid prepared firmware");
+    }
+    const QJsonObject object = value.toObject();
+    const QJsonValue idValue = object.value(QStringLiteral("id"));
+    auto name = text(object, "name");
+    auto ver = text(object, "version");
+    if (!idValue.isString() || !validName(toStdString(idValue.toString())) || !name || !ver) {
+        return bad("invalid prepared firmware");
+    }
+    return PreparedFirmware{.id = toStdString(idValue.toString()), .name = *name, .version = *ver};
+}
+
+Result<HostTarget> hostTargetOf(const QJsonValue& value) {
+    if (!value.isObject()) {
+        return bad("invalid target");
+    }
+    const QJsonObject object = value.toObject();
+    const QJsonValue idValue = object.value(QStringLiteral("id"));
+    if (!idValue.isString() || !validName(toStdString(idValue.toString()))) {
+        return bad("invalid target id");
+    }
+    HostTarget target{
+        .id = toStdString(idValue.toString()), .kinds = {}, .catalog = false, .prepared = {}};
+    const QJsonValue kinds = object.value(QStringLiteral("kinds"));
+    if (!kinds.isUndefined()) {
+        auto decoded = kindsOf(kinds);
+        if (!decoded) {
+            return std::unexpected(std::move(decoded).error());
+        }
+        target.kinds = std::move(*decoded);
+    }
+    const QJsonValue catalog = object.value(QStringLiteral("catalog"));
+    if (!catalog.isUndefined() && !catalog.isBool()) {
+        return bad("invalid target catalog");
+    }
+    target.catalog = catalog.toBool(false);
+    const QJsonValue prepared = object.value(QStringLiteral("prepared"));
+    if (!prepared.isUndefined()) {
+        if (!prepared.isArray() || std::cmp_greater(prepared.toArray().size(), maxPrepared)) {
+            return bad("invalid prepared firmware");
+        }
+        for (const auto& entry : prepared.toArray()) {
+            auto firmware = preparedOf(entry);
+            if (!firmware) {
+                return std::unexpected(std::move(firmware).error());
+            }
+            if (std::ranges::find(target.prepared, firmware->id, &PreparedFirmware::id) !=
+                target.prepared.end()) {
+                return bad("duplicate prepared firmware");
+            }
+            target.prepared.push_back(std::move(*firmware));
+        }
+    }
+    return target;
+}
+
+// ADR-0414: the optional `targets` of a host hello (absent = nullopt).
+Result<std::optional<std::vector<HostTarget>>> targetsOf(const QJsonObject& data) {
+    const QJsonValue value = data.value(QStringLiteral("targets"));
+    if (value.isUndefined()) {
+        return std::optional<std::vector<HostTarget>>();
+    }
+    if (!value.isArray() || std::cmp_greater(value.toArray().size(), maxTargets)) {
+        return bad("invalid targets");
+    }
+    std::vector<HostTarget> targets;
+    for (const auto& entry : value.toArray()) {
+        auto target = hostTargetOf(entry);
+        if (!target) {
+            return std::unexpected(std::move(target).error());
+        }
+        if (std::ranges::find(targets, target->id, &HostTarget::id) != targets.end()) {
+            return bad("duplicate target");
+        }
+        targets.push_back(std::move(*target));
+    }
+    return std::optional(std::move(targets));
+}
+
+QJsonObject hostTargetJson(const HostTarget& target) {
+    QJsonObject object;
+    object.insert(QStringLiteral("id"), q(target.id));
+    QJsonArray kinds;
+    for (const OpKind kind : target.kinds) {
+        kinds.append(q(kindId(kind)));
+    }
+    object.insert(QStringLiteral("kinds"), kinds);
+    object.insert(QStringLiteral("catalog"), target.catalog);
+    if (!target.prepared.empty()) {
+        QJsonArray prepared;
+        for (const PreparedFirmware& firmware : target.prepared) {
+            QJsonObject entry;
+            entry.insert(QStringLiteral("id"), q(firmware.id));
+            entry.insert(QStringLiteral("name"), q(firmware.name));
+            entry.insert(QStringLiteral("version"), q(firmware.version));
+            prepared.append(entry);
+        }
+        object.insert(QStringLiteral("prepared"), prepared);
+    }
+    return object;
 }
 
 // A non-negative integer up to 2^53.
@@ -150,18 +347,13 @@ Result<HostMessage> decodeHostHello(const QJsonObject& data) {
         if (ops.toBool()) {
             hello.opKinds = {OpKind::Flash, OpKind::Erase, OpKind::Recover, OpKind::Reset};
         }
-    } else if (!kinds.isArray() || std::cmp_greater(kinds.toArray().size(), maxOpKinds)) {
-        return bad("invalid opKinds");
     } else {
-        for (const auto& kindValue : kinds.toArray()) {
-            if (!kindValue.isString() || kindValue.toString().size() > 32) {
-                return bad("invalid opKinds");
-            }
-            const auto kind = kindFromId(toStdString(kindValue.toString()));
-            if (kind && ops.toBool() &&
-                std::ranges::find(hello.opKinds, *kind) == hello.opKinds.end()) {
-                hello.opKinds.push_back(*kind); // unknown kinds (a later version) are skipped
-            }
+        auto decoded = kindsOf(kinds); // unknown kinds (a later version) are skipped
+        if (!decoded) {
+            return bad("invalid opKinds");
+        }
+        if (ops.toBool()) {
+            hello.opKinds = std::move(*decoded);
         }
     }
     hello.app = *app;
@@ -174,6 +366,18 @@ Result<HostMessage> decodeHostHello(const QJsonObject& data) {
         return std::unexpected(questions.error());
     }
     hello.opQuestions = hello.ops && *questions;
+    // Plan 0059 (ADR-0414): optional, absent from older hosts.
+    auto caps = capsOf(data);
+    auto profile = optionalName(data, QStringLiteral("profile"));
+    const QJsonValue console = data.value(QStringLiteral("console"));
+    auto targets = targetsOf(data);
+    if (!caps || !profile || (!console.isUndefined() && !console.isBool()) || !targets) {
+        return bad("invalid hello extension");
+    }
+    hello.caps = std::move(*caps);
+    hello.profile = std::move(*profile);
+    hello.console = console.toBool(true);
+    hello.targets = std::move(*targets);
     return hello;
 }
 
@@ -288,7 +492,7 @@ Result<JoinerMessage> decodeOpRequest(const QJsonObject& data) {
         return bad("invalid kind");
     }
     const QJsonValue targetValue = data.value(QStringLiteral("target"));
-    std::optional<OpTarget> target;
+    std::optional<OpTarget> target; // ADR-0414: any profile target id
     if (*kind == OpKind::LteUpdate) {
         // ADR-0363: the guided LTE update has no target (it is always the LTE MCU).
         if (!targetValue.isUndefined()) {
@@ -305,7 +509,8 @@ Result<JoinerMessage> decodeOpRequest(const QJsonObject& data) {
                       .kind = *kind,
                       .target = *target,
                       .firmwareId = std::nullopt,
-                      .questions = false};
+                      .questions = false,
+                      .prepared = std::nullopt};
     // ADR-0368: optional; only `true` is sent.
     const QJsonValue questions = data.value(QStringLiteral("questions"));
     if (!questions.isUndefined() && !questions.isBool()) {
@@ -313,6 +518,16 @@ Result<JoinerMessage> decodeOpRequest(const QJsonObject& data) {
     }
     request.questions = questions.toBool(false);
     const QJsonValue firmware = data.value(QStringLiteral("firmwareId"));
+    // ADR-0418: a prepared firmware instead of a catalog ID (flash only).
+    const QJsonValue prepared = data.value(QStringLiteral("prepared"));
+    if (!prepared.isUndefined()) {
+        if (*kind != OpKind::Flash || !firmware.isUndefined() || !prepared.isString() ||
+            !validName(toStdString(prepared.toString()))) {
+            return bad("invalid prepared firmware");
+        }
+        request.prepared = toStdString(prepared.toString());
+        return request;
+    }
     if (*kind == OpKind::Flash) {
         if (!firmware.isString()) {
             return bad("flash without a firmware ID");
@@ -420,8 +635,18 @@ std::string_view kindId(OpKind kind) noexcept {
     return "reset";
 }
 
-std::string_view targetId(OpTarget target) noexcept {
-    return target == OpTarget::Lte ? "lte" : "app";
+std::string_view targetId(const OpTarget& target) noexcept { return target.id(); }
+
+bool hasCap(const std::vector<std::string>& caps, std::string_view name) noexcept {
+    return std::ranges::find(caps, name) != caps.end();
+}
+
+const HostTarget* findTarget(const HostHello& hello, std::string_view id) noexcept {
+    if (!hello.targets) {
+        return nullptr;
+    }
+    const auto it = std::ranges::find(*hello.targets, id, &HostTarget::id);
+    return it == hello.targets->end() ? nullptr : &*it;
 }
 
 std::optional<OpKind> kindFromId(std::string_view id) noexcept {
@@ -448,15 +673,7 @@ std::optional<OpQuestionKind> questionFromId(std::string_view id) noexcept {
     return std::nullopt;
 }
 
-std::optional<OpTarget> targetFromId(std::string_view id) noexcept {
-    if (id == "app") {
-        return OpTarget::App;
-    }
-    if (id == "lte") {
-        return OpTarget::Lte;
-    }
-    return std::nullopt;
-}
+std::optional<OpTarget> targetFromId(std::string_view id) noexcept { return OpTarget::fromId(id); }
 
 bool supports(const HostHello& hello, OpKind kind) noexcept {
     return hello.ops && std::ranges::find(hello.opKinds, kind) != hello.opKinds.end();
@@ -496,6 +713,24 @@ QJsonObject encodeHost(const HostMessage& message) {
                 if (hello.opQuestions) { // ADR-0368
                     d.insert(QStringLiteral("opQuestions"), true);
                 }
+                // Plan 0059 (ADR-0414): only what is set, so that a CHESTER host's hello stays
+                // as an older host's apart from caps and profile.
+                if (!hello.caps.empty()) {
+                    d.insert(QStringLiteral("caps"), capsJson(hello.caps));
+                }
+                if (!hello.profile.empty()) {
+                    d.insert(QStringLiteral("profile"), q(hello.profile));
+                }
+                if (!hello.console) {
+                    d.insert(QStringLiteral("console"), false);
+                }
+                if (hello.targets) {
+                    QJsonArray targets;
+                    for (const HostTarget& target : *hello.targets) {
+                        targets.append(hostTargetJson(target));
+                    }
+                    d.insert(QStringLiteral("targets"), targets);
+                }
                 return d;
             },
             [](const OpAccepted& accepted) {
@@ -506,7 +741,7 @@ QJsonObject encodeHost(const HostMessage& message) {
             [](const OpDenied& denied) {
                 QJsonObject d = envelope("op-denied");
                 d.insert(QStringLiteral("id"), q(denied.id));
-                d.insert(QStringLiteral("code"), q(denied.code));
+                insertErrorCode(d, denied.code); // ADR-0414
                 return d;
             },
             [](const OpProgress& progress) {
@@ -525,7 +760,7 @@ QJsonObject encodeHost(const HostMessage& message) {
                 d.insert(QStringLiteral("ok"), result.ok);
                 if (result.code) {
                     QJsonObject error;
-                    error.insert(QStringLiteral("code"), q(*result.code));
+                    insertErrorCode(error, *result.code); // ADR-0414: detail inside `error`
                     d.insert(QStringLiteral("error"), error);
                 }
                 return d;
@@ -539,7 +774,12 @@ QJsonObject encodeHost(const HostMessage& message) {
             },
             [](const HostEnd& end) {
                 QJsonObject d = envelope("end");
-                d.insert(QStringLiteral("code"), q(end.code));
+                insertErrorCode(d, end.code); // ADR-0414
+                return d;
+            },
+            [](const LineRefused& refused) {
+                QJsonObject d = envelope("line-refused");
+                insertErrorCode(d, refused.code);
                 return d;
             },
             [](const HostCommands& commands) {
@@ -563,6 +803,9 @@ QJsonObject encodeJoiner(const JoinerMessage& message) {
                            QJsonObject d = envelope("hello");
                            d.insert(QStringLiteral("app"), q(hello.app));
                            d.insert(QStringLiteral("version"), q(hello.version));
+                           if (!hello.caps.empty()) { // plan 0059
+                               d.insert(QStringLiteral("caps"), capsJson(hello.caps));
+                           }
                            return d;
                        },
                        [](const OpRequest& request) {
@@ -577,6 +820,9 @@ QJsonObject encodeJoiner(const JoinerMessage& message) {
                            }
                            if (request.questions) { // ADR-0368
                                d.insert(QStringLiteral("questions"), true);
+                           }
+                           if (request.prepared) { // ADR-0418
+                               d.insert(QStringLiteral("prepared"), q(*request.prepared));
                            }
                            return d;
                        },
@@ -644,6 +890,13 @@ Result<HostMessage> decodeHost(const QJsonValue& payload) {
     if (type == QStringLiteral("commands")) {
         return decodeCommands(*data);
     }
+    if (type == QStringLiteral("line-refused")) { // plan 0059 (ADR-0416)
+        auto code = errorCode(*data);
+        if (!code) {
+            return std::unexpected(std::move(code).error());
+        }
+        return LineRefused{.code = *code};
+    }
     auto messageId = id(*data);
     if (!messageId) {
         return std::unexpected(std::move(messageId).error());
@@ -678,10 +931,11 @@ Result<JoinerMessage> decodeJoiner(const QJsonValue& payload) {
     if (type == QStringLiteral("hello")) {
         auto app = text(*data, "app");
         auto ver = text(*data, "version");
-        if (!app || !ver || *app != appId) {
+        auto caps = capsOf(*data); // plan 0059
+        if (!app || !ver || *app != appId || !caps) {
             return bad("invalid hello");
         }
-        return JoinerHello{.app = *app, .version = *ver};
+        return JoinerHello{.app = *app, .version = *ver, .caps = std::move(*caps)};
     }
     if (type == QStringLiteral("learn")) {
         return decodeLearn(*data);

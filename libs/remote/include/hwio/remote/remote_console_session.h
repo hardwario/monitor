@@ -18,6 +18,8 @@
 //   at {hwio: hello}      → hostHello(), title, the joiner's own hello is sent (ADR-0336: tunnel
 //                           objects only after the host's hello)
 //   at {hwio: op-*}       → hostMessage() (RemoteOperationClient)
+//   at {hwio: line-refused} → a marker line (plan 0059, ADR-0416: the host refused a line of
+//                           this joiner's; the joiner hello lists the refused-lines cap)
 //   at {hwio: commands}   → commandTree(), commandTreeChanged() (ADR-0364: the host's learned
 //                           command tree, validated by TunnelCodec); requestLearn(path) asks the
 //                           host for a command's subcommands (tunnel `learn`, once per path, again
@@ -106,7 +108,13 @@ public:
     [[nodiscard]] device::SessionIdentity identity() const override;
     // Operations when the host's hello said ops: true.
     [[nodiscard]] device::Capabilities capabilities() const override;
+    // Plan 0059 (ADR-0415): profileFor(hostHello()).
     [[nodiscard]] const device::DeviceProfile& profile() const override;
+    // The console rules for a host hello: the named profile when this build has it, else
+    // device::genericConsoleProfile(); CHESTER for a hello without a profile (an older host) and
+    // without a hello (web Terminal host, or before the hello).
+    [[nodiscard]] static const device::DeviceProfile&
+    profileFor(const std::optional<tunnel::HostHello>& hello);
     [[nodiscard]] std::string_view consoleTargetId() const override { return "app"; }
     [[nodiscard]] std::filesystem::path consoleFile() const override { return {}; }
     [[nodiscard]] Status setFirmwareIdentity(std::optional<FirmwareIdentity> identity,
@@ -122,8 +130,16 @@ public:
     // "CHESTER-M 1234567890 — remote", "Session 482 913 — web Terminal" (no hello after a sync),
     // "Session 482 913" before.
     [[nodiscard]] QString title() const;
+    // Plan 0059 (ADR-0414): the one place that keeps a joiner from sending a host what it cannot
+    // decode: a host hello without `targets` (an older host) gets only app / lte requests with
+    // catalog IDs (and ops: true); a host that lists its targets only listed targets, kinds and
+    // prepared firmware. Errors: remote.operation_unsupported_peer, remote.target_unsupported,
+    // remote.firmware_not_in_catalog (a catalog ID for a target without a catalog).
+    [[nodiscard]] static Status hostOffers(const tunnel::HostHello& hello,
+                                           const tunnel::OpRequest& request);
     // Sends a tunnel message (only after the host's hello). Errors:
-    // remote.operation_unsupported_peer (no hello / ops: false), remote.host_ended.
+    // remote.operation_unsupported_peer (no hello), remote.host_ended; for an op-request those of
+    // hostOffers().
     [[nodiscard]] Status sendTunnel(const tunnel::JoinerMessage& message);
     // ADR-0364: the host's command tree (nullptr: none, e.g. a web Terminal host).
     [[nodiscard]] std::shared_ptr<const device::CommandTree> commandTree() const {

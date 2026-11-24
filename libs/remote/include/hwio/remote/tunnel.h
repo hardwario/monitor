@@ -37,6 +37,27 @@
 //
 // Text fields shown to the user are sanitised (control characters removed, length bounded). Pure
 // functions, any thread.
+//
+// Plan 0059 (ADR-0414): `v` stays 1; additions are optional fields that older peers ignore.
+//   host hello    `caps` [names], `profile` (device profile id), `console` (false: operations
+//                 only, ADR-0419), `targets` [{id, kinds, catalog, prepared: [{id, name,
+//                 version}]}]; absent = an older host (CHESTER, `app` / `lte`, catalog on app)
+//   joiner hello  `caps`
+//   op-request    `target` is any profile target id ([a-z0-9-], at most maxNameBytes); flash
+//                 names either `firmwareId` (catalog) or `prepared` (the id of a prepared
+//                 firmware of the host's hello, ADR-0418). A joiner sends a target other than
+//                 app / lte, or `prepared`, only to a host whose hello lists it
+//                 (RemoteConsoleSession::sendTunnel); the host validates every request itself.
+//   op-denied, op-result (in `error`), end: `code` is always an id of Monitor 2.0.0-rc.4
+//                 (baselineErrorId); when the real id differs it follows as
+//                 `detail: {code: <id>}`. Decoded: the detail's id when this build knows it, else
+//                 `code`.
+//   line-refused  {code} host → joiners: the host refused a remote command line (ADR-0416); sent
+//                 only when the session's last joiner hello listed the `refused-lines` cap (an
+//                 older joiner shows an unknown type as a warning).
+// Names (caps, profile, target and prepared ids) are [a-z0-9-], 1..maxNameBytes bytes; lists are
+// bounded (maxCaps, maxTargets, maxPrepared, maxOpKinds). Unknown caps and kinds are kept / skipped
+// as data, never an error.
 
 #include "hwio/core/result.h"
 #include "hwio/device/command_tree.h"
@@ -44,6 +65,9 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
+#include <algorithm>
+#include <array>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -63,9 +87,69 @@ inline constexpr std::size_t maxCommandsBytes = 256ULL * 1024;
 inline constexpr std::size_t maxCommandNodes = 4000;
 inline constexpr std::size_t maxCommandDepth = 8;
 
+// Plan 0059 (ADR-0414): caps, profile, target and prepared firmware ids.
+inline constexpr std::size_t maxNameBytes = 32;
+inline constexpr std::size_t maxCaps = 16;    // entries of a hello's caps
+inline constexpr std::size_t maxTargets = 8;  // entries of a host hello's targets
+inline constexpr std::size_t maxPrepared = 4; // prepared firmware per target
+inline constexpr std::size_t maxErrorIdBytes = 64;
+
+// The capabilities of this build (ADR-0414). Host: detail codes on its errors, line-refused.
+// Joiner: understands targets, detail codes and line-refused.
+namespace cap {
+inline constexpr std::string_view targets = "targets";   // host hello lists `targets`
+inline constexpr std::string_view prepared = "prepared"; // host accepts `prepared` flash
+inline constexpr std::string_view detailCodes = "detail-codes";
+inline constexpr std::string_view refusedLines = "refused-lines";
+} // namespace cap
+
+// A name of the protocol: [a-z0-9-], 1..maxNameBytes bytes.
+[[nodiscard]] constexpr bool validName(std::string_view name) noexcept {
+    return !name.empty() && name.size() <= maxNameBytes &&
+           std::ranges::all_of(name, [](const char c) {
+               return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-';
+           });
+}
+[[nodiscard]] bool hasCap(const std::vector<std::string>& caps, std::string_view name) noexcept;
+
 enum class OpKind : std::uint8_t { Flash, Erase, Recover, Reset, LteUpdate };
 inline constexpr std::size_t maxOpKinds = 16; // entries of a hello's opKinds
-enum class OpTarget : std::uint8_t { App, Lte };
+
+// The target of an operation request: a profile target id (ADR-0414, D-16), a bounded value with
+// the two CHESTER ids as constants.
+class OpTarget {
+public:
+    static const OpTarget App; // "app"
+    static const OpTarget Lte; // "lte"
+
+    // nullopt unless validName(id).
+    [[nodiscard]] static constexpr std::optional<OpTarget> fromId(std::string_view id) noexcept {
+        if (!validName(id)) {
+            return std::nullopt;
+        }
+        return OpTarget(id);
+    }
+    [[nodiscard]] constexpr std::string_view id() const noexcept {
+        return {m_chars.data(), m_size};
+    }
+    // One of the two targets of a 2.0.0-rc.4 peer.
+    [[nodiscard]] constexpr bool isChesterTarget() const noexcept {
+        return id() == "app" || id() == "lte";
+    }
+    [[nodiscard]] constexpr bool operator==(const OpTarget& other) const noexcept {
+        return id() == other.id();
+    }
+
+private:
+    constexpr explicit OpTarget(std::string_view id) noexcept : m_size(id.size()) {
+        std::ranges::copy(id, m_chars.begin());
+    }
+
+    std::array<char, maxNameBytes> m_chars{};
+    std::size_t m_size = 0;
+};
+inline constexpr OpTarget OpTarget::App{"app"};
+inline constexpr OpTarget OpTarget::Lte{"lte"};
 // ADR-0368: the questions of a remote LTE update that support answers.
 enum class OpQuestionKind : std::uint8_t {
     Continue,            // ADR-0366: the application will be erased; go on?
@@ -73,8 +157,9 @@ enum class OpQuestionKind : std::uint8_t {
 };
 
 [[nodiscard]] std::string_view kindId(OpKind kind) noexcept; // "flash", "erase", ..., "lteUpdate"
-[[nodiscard]] std::string_view targetId(OpTarget target) noexcept; // "app", "lte"
+[[nodiscard]] std::string_view targetId(const OpTarget& target) noexcept; // "app", "lte", ...
 [[nodiscard]] std::optional<OpKind> kindFromId(std::string_view id) noexcept;
+// Any valid target id (OpTarget::fromId).
 [[nodiscard]] std::optional<OpTarget> targetFromId(std::string_view id) noexcept;
 [[nodiscard]] std::string_view questionId(OpQuestionKind kind) noexcept; // "continue", ...
 [[nodiscard]] std::optional<OpQuestionKind> questionFromId(std::string_view id) noexcept;
@@ -87,6 +172,20 @@ struct DeviceInfo {
 };
 
 // ---- host → joiners ----
+// ADR-0418: a firmware the host has prepared for a target (no file, URL or digest crosses the
+// relay; the host flashes its own pinned image).
+struct PreparedFirmware {
+    std::string id{};      // name: "release", "debug"
+    std::string name{};    // "STICKER" (text)
+    std::string version{}; // "2.0.0" (text)
+};
+// ADR-0414: what the host offers on one target.
+struct HostTarget {
+    std::string id{};                         // the profile target id (a name)
+    std::vector<OpKind> kinds{};              // decoded: unknown kinds skipped, no duplicates
+    bool catalog = false;                     // a catalog firmware ID is accepted for flash
+    std::vector<PreparedFirmware> prepared{}; // at most maxPrepared
+};
 struct HostHello {
     std::string app = std::string(appId);
     std::string version; // Monitor version
@@ -97,12 +196,22 @@ struct HostHello {
     std::vector<OpKind> opKinds;
     // ADR-0368: the host sends op-question to a joiner whose request says `questions`.
     bool opQuestions = false;
+    // ---- plan 0059 (ADR-0414); all optional on the wire ----
+    std::vector<std::string> caps{}; // names, at most maxCaps (sent when not empty)
+    std::string profile{};           // device profile id; "" = not sent (an older host: CHESTER)
+    bool console = true;             // false: an operations-only session (sent only when false)
+    // nullopt = not sent (an older host: app / lte as in ADR-0322).
+    std::optional<std::vector<HostTarget>> targets = std::nullopt;
 };
+// The hello's target `id`, nullptr when it lists none (or no targets at all).
+[[nodiscard]] const HostTarget* findTarget(const HostHello& hello, std::string_view id) noexcept;
 // The host runs `kind` (ops and opKinds).
 [[nodiscard]] bool supports(const HostHello& hello, OpKind kind) noexcept;
 struct OpAccepted {
     std::string id;
 };
+// ADR-0414: `code` is the real hwio::Error id; the codec sends the rc.4 id plus `detail` when they
+// differ, and decodes the detail's id when it knows it.
 struct OpDenied {
     std::string id;
     std::string code; // a hwio::Error id: "internal.busy", "remote.operation_denied", ...
@@ -135,20 +244,29 @@ struct OpQuestion {
 struct HostCommands {
     std::shared_ptr<const device::CommandTree> tree;
 };
+// Plan 0059 (ADR-0416): the host refused a remote command line (only to joiners with the
+// refused-lines cap).
+struct LineRefused {
+    std::string code = "remote.command_refused"; // a hwio::Error id
+};
 using HostMessage = std::variant<HostHello, OpAccepted, OpDenied, OpProgress, OpResult, HostEnd,
-                                 HostCommands, OpQuestion>;
+                                 HostCommands, OpQuestion, LineRefused>;
 
 // ---- joiner → host ----
 struct JoinerHello {
     std::string app = std::string(appId);
     std::string version;
+    std::vector<std::string> caps{}; // plan 0059: names, at most maxCaps (sent when not empty)
 };
 struct OpRequest {
     std::string id;
     OpKind kind = OpKind::Reset;
-    OpTarget target = OpTarget::App;       // not sent for lteUpdate (decoded as Lte)
-    std::optional<std::string> firmwareId; // flash only: a catalog firmware ID (32 hex digits)
+    OpTarget target = OpTarget::App;                      // not sent for lteUpdate (decoded as Lte)
+    std::optional<std::string> firmwareId = std::nullopt; // flash: a catalog firmware ID, or
     bool questions = false; // ADR-0368: the joiner answers op-question (sent only when true)
+    // flash (ADR-0418): the id of a prepared firmware of the host's hello. A flash names exactly
+    // one of firmwareId and prepared.
+    std::optional<std::string> prepared = std::nullopt;
 };
 // ADR-0364: learn the subcommands of the command at `path` (1..maxCommandDepth names).
 struct Learn {

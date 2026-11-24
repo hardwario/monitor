@@ -585,8 +585,16 @@ Status DeviceTabViewModel::openRemoteSession() {
                             .consoleLog = m_consoleLog});
     connect(m_remoteSession.get(), &remote::RemoteConsoleSession::transcriptReplaced, this,
             &DeviceTabViewModel::consoleReplaced);
-    connect(m_remoteSession.get(), &remote::RemoteConsoleSession::hostHelloReceived, this,
-            &DeviceTabViewModel::titleChanged);
+    connect(m_remoteSession.get(), &remote::RemoteConsoleSession::hostHelloReceived, this, [this] {
+        // Plan 0059 (ADR-0415): the console rules of the host's profile (CHESTER for an older
+        // host; the neutral console profile for one this build does not know).
+        if (m_remoteSession && &m_remoteSession->profile() != m_profile) {
+            m_profile = &m_remoteSession->profile();
+            m_targetId = toQString(device::consoleTargetId(*m_profile));
+            configurationChanged(); // signal
+        }
+        titleChanged(); // signal
+    });
     connect(m_remoteSession.get(), &remote::RemoteConsoleSession::joinStateChanged, this,
             &DeviceTabViewModel::titleChanged);
     adoptSession(*m_remoteSession);

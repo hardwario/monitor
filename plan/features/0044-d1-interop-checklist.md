@@ -73,3 +73,21 @@ release notes or the HIL results.
 
 - [ ] Linux, macOS, Windows: packages contain Qt WebSockets (`Qt6WebSockets` library next to the app), sharing and
       joining work on each.
+
+## 6. Plan 0059 protocol base (A1–A4: caps, profile, string targets, detail codes)
+
+Nothing visible may change for CHESTER. The automated part runs in `libs/remote/tests/compat_test.cpp` against the
+frozen rc.4 codec (`rc4_tunnel.*`); these rows check the real packages and the real relay.
+
+- [ ] Monitor with 0059 (host, J-Link CHESTER) ↔ Monitor 2.0.0-rc.4 / rc.5 (joiner): tab title, console, history and
+      the Flash card as before; **no** connection warning in the joiner's tab; Ask to reset / flash work; the host's
+      audit says "Participant app: HARDWARIO Monitor 2.0.0-rc.… ." (no capabilities).
+- [ ] Monitor 2.0.0-rc.4 / rc.5 (host) ↔ Monitor with 0059 (joiner): tab title, console and the Flash card (Application
+      core / LTE modem core) as before; operations work; no connection warning.
+- [ ] Monitor with 0059 ↔ Monitor with 0059: the host's audit names the joiner's capabilities
+      ("… (capabilities: targets, detail-codes, refused-lines)."); operations as before.
+- [ ] An LTE update that fails with low supply voltage (`target.low_voltage`, a weak supply on purpose) on a 0059 host:
+      an rc.4 / rc.5 joiner shows `target.no_power` (before 0059 it showed a connection warning and waited for the
+      result); a 0059 joiner shows `target.low_voltage`.
+- [ ] Web Terminal joiner on a 0059 host and web Terminal host with a 0059 joiner: as rows 2.2 and 2.3 (no garbage
+      from the new hello fields).

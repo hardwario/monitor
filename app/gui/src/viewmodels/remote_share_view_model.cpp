@@ -49,7 +49,10 @@ RemoteShareViewModel::~RemoteShareViewModel() { stopSharing(false); }
 
 bool RemoteShareViewModel::available() const {
     const device::ConsoleSession* session = m_tab->consoleSession();
-    return session != nullptr && !m_tab->isRemote() &&
+    // Plan 0059 A0 (ADR-0415, D-7): CHESTER tabs only until the remote session supports the
+    // profile (plan 0059 phase A2 for that device): another device would be shared as a CHESTER
+    // with operations that fail.
+    return session != nullptr && !m_tab->isRemote() && session->profile().id == "chester" &&
            session->connection().state == device::ConnectionState::Connected;
 }
 

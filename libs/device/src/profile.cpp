@@ -60,6 +60,8 @@ const DeviceProfile* ProfileRegistry::findByAdvertisement(
     return nullptr;
 }
 
+const DeviceProfile& genericConsoleProfile() noexcept { return profiles::generic; }
+
 const TargetProfile* findTarget(const DeviceProfile& profile, std::string_view id) noexcept {
     const auto it = std::ranges::find(profile.targets, id, &TargetProfile::id);
     return it == profile.targets.end() ? nullptr : &*it;
@@ -159,6 +161,41 @@ std::optional<std::string> matchSensitiveOutput(std::string_view line,
         }
     }
     return std::nullopt;
+}
+
+std::optional<std::string_view>
+matchSensitiveOutputPrefix(std::string_view line, std::span<const std::string_view> prefixes) {
+    if (prefixes.empty()) {
+        return std::nullopt;
+    }
+    const std::string clean = stripAnsiCsi(line);
+    return matchSensitiveCommand(clean, prefixes);
+}
+
+namespace {
+
+// The number of words of `text` (spaces and tabs separate words).
+std::size_t wordCount(std::string_view text) noexcept {
+    std::size_t position = 0;
+    std::size_t count = 0;
+    while (!nextWord(text, position).empty()) {
+        ++count;
+    }
+    return count;
+}
+
+// `line` starts with one of `prefixes` and has more words than it (an argument).
+bool setsValue(std::string_view line, std::span<const std::string_view> prefixes) noexcept {
+    const auto prefix = matchSensitiveCommand(line, prefixes);
+    return prefix && wordCount(line) > wordCount(*prefix);
+}
+
+} // namespace
+
+bool refusedFromRemote(const TargetProfile& target, std::string_view line) noexcept {
+    return (target.refuseRemoteSensitive && setsValue(line, target.sensitiveCommandPrefixes)) ||
+           setsValue(line, target.remoteRefusedSetters) ||
+           matchSensitiveCommand(line, target.remoteRefusedCommands).has_value();
 }
 
 const ChipPart* findPart(const TargetProfile& target, std::uint32_t part) noexcept {

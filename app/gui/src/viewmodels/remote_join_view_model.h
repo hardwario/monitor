@@ -17,6 +17,7 @@
 #include <QObject>
 #include <QString>
 #include <QUrl>
+#include <QVariantList>
 #include <QVariantMap>
 #include <QtQmlIntegration>
 
@@ -42,6 +43,11 @@ class RemoteJoinViewModel : public QObject {
     // The host is HARDWARIO Monitor with operations (the Flash page offers them).
     Q_PROPERTY(bool operationsAvailable READ operationsAvailable NOTIFY changed)
     Q_PROPERTY(QString operationsUnavailableText READ operationsUnavailableText NOTIFY changed)
+    // Plan 0059 (ADR-0414, D-5): the targets support can choose, [{id, name, catalog}]: those of
+    // the host's hello, named in support's language from the profile (CHESTER: "Application core",
+    // "LTE modem core"; another known profile: its target's display name; else the id); an older
+    // host (no `targets`): app (catalog) and lte, as in plan 0044.
+    Q_PROPERTY(QVariantList targets READ targets NOTIFY changed)
     // ADR-0363: the host offers the guided LTE update (its hello's opKinds).
     Q_PROPERTY(bool lteUpdateAvailable READ lteUpdateAvailable NOTIFY changed)
     Q_PROPERTY(bool operationPending READ operationPending NOTIFY operationChanged)
@@ -69,6 +75,7 @@ public:
     [[nodiscard]] bool operationsAvailable() const;
     [[nodiscard]] QString operationsUnavailableText() const;
     [[nodiscard]] bool lteUpdateAvailable() const;
+    [[nodiscard]] QVariantList targets() const;
     [[nodiscard]] bool operationPending() const;
     [[nodiscard]] QString operationStatus() const { return m_status; }
     [[nodiscard]] bool operationFailed() const { return m_failed; }

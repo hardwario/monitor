@@ -59,6 +59,16 @@
 // idleTimeout - idleWarningBefore (idleWarning()), keepSharing() restarts the idle time; idle or
 // maxLifetime end the session. ConsoleSession closed → the session ends.
 //
+// Plan 0059 (ADR-0414, ADR-0416): the hello names the session's profile and the host's caps
+// (detail-codes, refused-lines); its legacy ops / opKinds are those of today on a CHESTER and
+// ops: false on any other profile (an operation request is then refused as on a console without
+// operations). The joiner's hello caps: the last hello's decide line-refused, their union is
+// audited (at most tunnel::maxCaps names). The redaction rules are those of the session's profile
+// and console target (sensitiveCommandPrefixes, sensitiveOutputKeys, sensitiveOutputPrefixes). A
+// remote line that device::refusedFromRemote() matches is not sent to the device: an audit line,
+// an English `read` line for every participant and, to a joiner with the refused-lines cap, a
+// tunnel line-refused (remote.command_refused).
+//
 // Audit (ADR-0333): ConsoleSession::recordRemoteEvent() for the start and end, every join, allow,
 // the peer's app, remote commands (redacted), dropped commands, and every operation request with
 // its outcome. The texts are translated (the host's language), context "hwio::remote".
@@ -92,9 +102,11 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace hwio::device {
 class ConsoleSession;
+struct TargetProfile;
 } // namespace hwio::device
 
 namespace hwio::remote {
@@ -228,6 +240,12 @@ private:
     void finish(std::optional<Error> error, bool notify = true);
     [[nodiscard]] QString redactedCommand(const std::string& line) const;
     [[nodiscard]] QString redactedOutput(const std::string& line) const;
+    // The console target of the shared session (its redaction and refusal rules), nullptr when the
+    // session is gone or its profile has no such target.
+    [[nodiscard]] const device::TargetProfile* consoleTarget() const;
+    // The hello's legacy ops (plan 0059: HostOperations and a CHESTER profile).
+    [[nodiscard]] bool operationsOffered() const;
+    void refuseLine(const std::string& line);
 
     QPointer<device::ConsoleSession> m_session;
     ConsentProvider* m_consent;   // non-owning
@@ -248,6 +266,9 @@ private:
     std::uint64_t m_joinToken = 0; // answers of withdrawn questions are ignored
     std::uint64_t m_droppedWhilePending = 0;
     std::string m_peerApp;
+    // Plan 0059: the caps of the last joiner hello, and of every hello (<= tunnel::maxCaps).
+    std::vector<std::string> m_peerCaps;
+    std::vector<std::string> m_capsSeen;
     std::optional<PendingOperation> m_operation;
     // ADR-0368: the open question to support (of m_operation).
     struct SupportQuestion {

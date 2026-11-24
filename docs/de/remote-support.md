@@ -97,6 +97,10 @@ Wenn der Kunde die Freigabe beendet, kann HARDWARIO Monitor das nicht immer erke
 Nach 30 Minuten ohne jede Aktivität weist das Banner darauf hin und bietet **Verlassen** an. Der Tab bleibt offen,
 sodass Sie die Konsole noch speichern können.
 
+Support und Kunde können verschiedene Versionen von HARDWARIO Monitor verwenden. Eine neuere Version funktioniert mit
+einer älteren und mit dem Web-Terminal: Was die andere Seite nicht unterstützt, wird nicht angeboten, und Fehler
+erreichen eine ältere Version als ein Fehler, den sie kennt.
+
 <a id="command-line"></a>
 ## Kommandozeile
 

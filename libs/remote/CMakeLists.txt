@@ -7,6 +7,7 @@
 # (ADR-0022).
 
 hwio_add_backend_library(hwio_remote
+    include/hwio/remote/baseline_errors.h
     include/hwio/remote/consent.h
     include/hwio/remote/host_operations.h
     include/hwio/remote/lte_update_report.h
@@ -18,6 +19,7 @@ hwio_add_backend_library(hwio_remote
     include/hwio/remote/session_code.h
     include/hwio/remote/transcript.h
     include/hwio/remote/tunnel.h
+    src/baseline_errors.cpp
     src/consent.cpp
     src/host_operations.cpp
     src/lte_update_report.cpp

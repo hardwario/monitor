@@ -91,6 +91,9 @@ konzole nezobrazujú; konzolový súbor zaznamená, koľko ich bolo.
 Keď zákazník ukončí zdieľanie, HARDWARIO Monitor to nie vždy rozpozná: server to neoznamuje. Po 30 minútach bez
 akejkoľvek aktivity to lišta oznámi a ponúkne **Opustiť**. Karta zostane otvorená, takže konzolu môžete stále uložiť.
 
+Podpora a zákazník môžu používať rôzne verzie HARDWARIO Monitor. Novšia verzia funguje so staršou aj s webovým
+Terminalom: čo druhá strana nepodporuje, sa neponúka, a chyby prídu do staršej verzie ako chyba, ktorú pozná.
+
 <a id="command-line"></a>
 ## Príkazový riadok
 

@@ -94,7 +94,10 @@ TEST(Tunnel, RejectsInvalidJoinerMessages) {
             R"({"hwio":{"v":1,"type":"bye"}})",
             R"({"hwio":{"v":1,"type":"hello","app":"other","version":"1"}})",
             R"({"hwio":{"v":1,"type":"op-request","id":"a","kind":"format","target":"app"}})",
-            R"({"hwio":{"v":1,"type":"op-request","id":"a","kind":"reset","target":"uicr"}})",
+            // Plan 0059 (ADR-0414): any target id decodes ("uicr" too; the host denies it), but
+            // only [a-z0-9-] up to 32 bytes.
+            R"({"hwio":{"v":1,"type":"op-request","id":"a","kind":"reset","target":"UICR"}})",
+            R"({"hwio":{"v":1,"type":"op-request","id":"a","kind":"reset","target":"012345678901234567890123456789012"}})",
             R"({"hwio":{"v":1,"type":"op-request","id":"a b","kind":"reset","target":"app"}})",
             R"({"hwio":{"v":1,"type":"op-request","id":"","kind":"reset","target":"app"}})",
             R"({"hwio":{"v":1,"type":"op-request","id":"0123456789012345678901234567890123","kind":"reset","target":"app"}})",

@@ -5,7 +5,10 @@
 // the customer's confirmation; progress and the result are reported by the customer's Monitor
 // (ADR-0369: the result names the operation and the time). ADR-0368: support answers the LTE
 // update's questions here.
-// With a web Terminal host only the explanation is shown. Presentation only: RemoteJoinViewModel.
+// With a web Terminal host only the explanation is shown. Plan 0059 (ADR-0414, D-5): one target
+// button per target of the host's hello (RemoteJoinViewModel.targets, named in support's language;
+// an older host: Application core / LTE modem core as in 0044); the firmware ID field only for a
+// target that takes catalog firmware. Presentation only: RemoteJoinViewModel.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -19,7 +22,17 @@ ColumnLayout {
     property RemoteJoinViewModel join: null
     readonly property bool available: card.join !== null && card.join.operationsAvailable
     readonly property bool idle: card.join !== null && !card.join.operationPending
-    readonly property string target: lteButton.checked ? "lte" : "app"
+    readonly property var targets: card.join ? card.join.targets : []
+    // The chosen target id; the first one until support picks another.
+    property string chosenTarget: ""
+    readonly property var targetEntry: {
+        for (let i = 0; i < card.targets.length; ++i) {
+            if (card.targets[i].id === card.chosenTarget)
+                return card.targets[i];
+        }
+        return card.targets.length > 0 ? card.targets[0] : null;
+    }
+    readonly property string target: card.targetEntry ? card.targetEntry.id : "app"
 
     objectName: "remoteFlashCard"
     spacing: Theme.spacingM
@@ -60,25 +73,25 @@ ColumnLayout {
             color: Theme.text
         }
 
-        RadioButton {
-            id: appButton
+        Repeater {
+            model: card.targets
 
-            objectName: "remoteTargetApp"
-            text: qsTr("Application core")
-            checked: true
-        }
+            delegate: RadioButton {
+                required property var modelData
 
-        RadioButton {
-            id: lteButton
-
-            objectName: "remoteTargetLte"
-            text: qsTr("LTE modem core")
+                objectName: modelData.id === "app" ? "remoteTargetApp"
+                            : modelData.id === "lte" ? "remoteTargetLte"
+                            : "remoteTarget-" + modelData.id
+                text: modelData.name
+                checked: modelData.id === card.target
+                onClicked: card.chosenTarget = modelData.id
+            }
         }
     }
 
     RowLayout {
         Layout.fillWidth: true
-        visible: card.available && appButton.checked
+        visible: card.available && card.targetEntry !== null && card.targetEntry.catalog
         spacing: Theme.spacingS
 
         TextField {
@@ -95,8 +108,8 @@ ColumnLayout {
             objectName: "remoteFlashButton"
             kind: "primary"
             text: qsTr("Ask to flash")
-            enabled: card.idle && appButton.checked && card.join.isFirmwareId(firmwareField.text)
-            onClicked: card.join.requestOperation("flash", "app", firmwareField.text)
+            enabled: card.idle && card.join.isFirmwareId(firmwareField.text)
+            onClicked: card.join.requestOperation("flash", card.target, firmwareField.text)
         }
     }
 
@@ -104,7 +117,7 @@ ColumnLayout {
     // version with the guided update (they move the J-Link cable).
     ColumnLayout {
         Layout.fillWidth: true
-        visible: card.available && lteButton.checked
+        visible: card.available && card.target === "lte"
         spacing: Theme.spacingS
 
         Label {

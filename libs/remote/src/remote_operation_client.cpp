@@ -60,7 +60,8 @@ RemoteOperationClient::RemoteOperationClient(RemoteConsoleSession& session,
 }
 
 Result<std::string> RemoteOperationClient::request(tunnel::OpKind kind, tunnel::OpTarget target,
-                                                   std::optional<std::string> firmwareId) {
+                                                   std::optional<std::string> firmwareId,
+                                                   std::optional<std::string> prepared) {
     if (m_pending) {
         return std::unexpected(makeError(ErrorCode::InternalBusy, "a remote operation is pending"));
     }
@@ -73,7 +74,9 @@ Result<std::string> RemoteOperationClient::request(tunnel::OpKind kind, tunnel::
         return std::unexpected(makeError(ErrorCode::RemoteOperationUnsupportedPeer,
                                          "the host has no remote LTE update"));
     }
-    if ((kind == tunnel::OpKind::Flash) != firmwareId.has_value()) {
+    // ADR-0418: a flash names a catalog firmware ID or a prepared firmware, never both.
+    if ((kind == tunnel::OpKind::Flash) != (firmwareId.has_value() != prepared.has_value()) ||
+        (firmwareId && prepared)) {
         return std::unexpected(makeError(ErrorCode::UsageInvalidArgument,
                                          "a firmware ID goes with flash, and only with flash"));
     }
@@ -87,7 +90,8 @@ Result<std::string> RemoteOperationClient::request(tunnel::OpKind kind, tunnel::
                                     .kind = kind,
                                     .target = target,
                                     .firmwareId = std::move(firmwareId),
-                                    .questions = questions};
+                                    .questions = questions,
+                                    .prepared = std::move(prepared)};
     if (Status sent = m_session->sendTunnel(request); !sent) {
         return std::unexpected(std::move(sent).error());
     }
@@ -107,7 +111,8 @@ void RemoteOperationClient::onMessage(const tunnel::HostMessage& message) {
             using T = std::decay_t<decltype(m)>;
             if constexpr (std::is_same_v<T, tunnel::HostHello> ||
                           std::is_same_v<T, tunnel::HostEnd> ||
-                          std::is_same_v<T, tunnel::HostCommands>) {
+                          std::is_same_v<T, tunnel::HostCommands> ||
+                          std::is_same_v<T, tunnel::LineRefused>) {
                 return; // the session handles these; HostEnd ends it (joinStateChanged)
             } else {
                 if (m.id != *m_pending) {

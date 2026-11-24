@@ -89,6 +89,10 @@ your console; the console file records how many there were.
 When the customer ends sharing, HARDWARIO Monitor cannot always tell: the server does not announce it. After 30 minutes
 without any activity the banner says so and offers **Leave**. The tab stays open, so you can still save the console.
 
+Support and the customer may use different versions of HARDWARIO Monitor. A newer version works with an older one and
+with the web Terminal: what the other side does not support is not offered, and errors reach an older version as an
+error it knows.
+
 <a id="command-line"></a>
 ## Command line
 
