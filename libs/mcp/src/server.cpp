@@ -165,6 +165,7 @@ struct McpServer::Impl {
 
     struct Listen {
         QJsonValue id;
+        std::string clientKey; // plan 0062: RequestContext::clientKey of the listen request
         std::shared_ptr<IReplyChannel> channel;
         std::uint64_t connectionId = 0;
         bool resourcesListChanged = false;
@@ -192,6 +193,9 @@ struct McpServer::Impl {
     struct UpdateState {
         QElapsedTimer last;
         bool sent = false;
+        // Plan 0062 (ADR-0436): the recipients (client keys) of the next notification; empty =
+        // every subscriber. The latest call wins.
+        std::function<bool(std::string_view)> recipient;
         std::unique_ptr<QTimer> timer; // trailing notification; active = pending
     };
 
@@ -641,6 +645,7 @@ struct McpServer::Impl {
         const QJsonObject filter = filterValue.toObject();
         Listen entry;
         entry.id = in.message.id;
+        entry.clientKey = context.clientKey;
         entry.channel = in.reply;
         entry.connectionId = in.transport.connectionId;
         entry.resourcesListChanged =
@@ -678,7 +683,6 @@ struct McpServer::Impl {
         params.insert(QStringLiteral("notifications"), acknowledged);
         in.reply->notify(
             listenNotification(in.message.id, protocol::method::subscriptionsAcknowledged, params));
-        (void)context;
     }
 
     [[nodiscard]] static QJsonObject listenNotification(const QJsonValue& subscriptionId,
@@ -1143,8 +1147,10 @@ struct McpServer::Impl {
                                                                     entry.context, std::nullopt)),
                                   ReplyMeta{.status = ReplyStatus::Ok, .sessionId = std::nullopt});
         }
-        recordActivity(entry.context, entry.context.tool, entry.arguments, entry.call->deviceId(),
-                       resultCode(result), entry.started,
+        // Plan 0062 (ADR-0437): a handler may record other (redacted) arguments.
+        recordActivity(entry.context, entry.context.tool,
+                       entry.call->activityArguments().value_or(entry.arguments),
+                       entry.call->deviceId(), resultCode(result), entry.started,
                        std::chrono::milliseconds{entry.elapsed.elapsed()}, entry.spec->marker);
 
         graveyard.push_back(std::move(entry.call));
@@ -1462,11 +1468,13 @@ struct McpServer::Impl {
         }
     }
 
-    void notifyResourceUpdated(const QString& uri) {
+    void notifyResourceUpdated(const QString& uri,
+                               std::function<bool(std::string_view)> recipient) {
         if (stopped || !hasSubscribers(uri)) {
             return;
         }
         UpdateState& state = updates[uri];
+        state.recipient = std::move(recipient);
         const qint64 interval = limits.resourceUpdateInterval.count();
         if (!state.sent || state.last.elapsed() >= interval) {
             deliverUpdate(uri);
@@ -1496,9 +1504,14 @@ struct McpServer::Impl {
         }
         QJsonObject params;
         params.insert(QStringLiteral("uri"), uri);
+        const std::function<bool(std::string_view)> recipient = it->second.recipient;
+        const auto allowed = [&recipient](std::string_view clientKey) {
+            return !recipient || recipient(clientKey);
+        };
         std::vector<Delivery> deliveries;
         for (const auto& [id, session] : sessions) {
-            if (session.stream && session.subscriptions.contains(uri)) {
+            // A legacy session's client key is its id (RequestContext::clientKey).
+            if (session.stream && session.subscriptions.contains(uri) && allowed(session.id)) {
                 deliveries.push_back(Delivery{
                     .channel = session.stream,
                     .message =
@@ -1506,7 +1519,7 @@ struct McpServer::Impl {
             }
         }
         for (const auto& [key, entry] : listens) {
-            if (entry.uris.contains(uri)) {
+            if (entry.uris.contains(uri) && allowed(entry.clientKey)) {
                 deliveries.push_back(Delivery{
                     .channel = entry.channel,
                     .message =
@@ -1650,7 +1663,10 @@ ReplyStatus McpServer::endSession(const TransportInfo& transport) {
 
 void McpServer::stop() { m_impl->stop(); }
 
-void McpServer::notifyResourceUpdated(const QString& uri) { m_impl->notifyResourceUpdated(uri); }
+void McpServer::notifyResourceUpdated(const QString& uri,
+                                      std::function<bool(std::string_view)> recipient) {
+    m_impl->notifyResourceUpdated(uri, std::move(recipient));
+}
 
 void McpServer::notifyResourceListChanged() { m_impl->notifyResourceListChanged(); }
 

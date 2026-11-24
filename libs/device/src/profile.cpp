@@ -186,17 +186,18 @@ std::size_t wordCount(std::string_view text) noexcept {
     return count;
 }
 
-// `line` starts with one of `prefixes` and has more words than it (an argument).
-bool setsValue(std::string_view line, std::span<const std::string_view> prefixes) noexcept {
+} // namespace
+
+bool setsSensitiveValue(std::string_view line,
+                        std::span<const std::string_view> prefixes) noexcept {
     const auto prefix = matchSensitiveCommand(line, prefixes);
     return prefix && wordCount(line) > wordCount(*prefix);
 }
 
-} // namespace
-
 bool refusedFromRemote(const TargetProfile& target, std::string_view line) noexcept {
-    return (target.refuseRemoteSensitive && setsValue(line, target.sensitiveCommandPrefixes)) ||
-           setsValue(line, target.remoteRefusedSetters) ||
+    return (target.refuseRemoteSensitive &&
+            setsSensitiveValue(line, target.sensitiveCommandPrefixes)) ||
+           setsSensitiveValue(line, target.remoteRefusedSetters) ||
            matchSensitiveCommand(line, target.remoteRefusedCommands).has_value();
 }
 

@@ -58,6 +58,10 @@ std::optional<std::string> ConsoleRedaction::redacted(const ConsoleLine& line) c
     return std::nullopt;
 }
 
+bool ConsoleRedaction::setsSecret(std::string_view command) const noexcept {
+    return setsSensitiveValue(command, m_sensitivePrefixes);
+}
+
 std::size_t ConsoleRedaction::echoPromptLength(std::string_view text) const noexcept {
     for (const std::string_view prompt : m_prompts) {
         if (!prompt.empty() && text.starts_with(prompt)) {

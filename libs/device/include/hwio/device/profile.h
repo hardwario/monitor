@@ -231,6 +231,11 @@ matchSensitiveOutput(std::string_view line, std::span<const std::string_view> ke
 [[nodiscard]] std::optional<std::string_view>
 matchSensitiveOutputPrefix(std::string_view line, std::span<const std::string_view> prefixes);
 
+// Plan 0062 (ADR-0437): `line` starts with one of `prefixes` (as matchSensitiveCommand) and has
+// more words than that prefix: it sets the secret value.
+[[nodiscard]] bool setsSensitiveValue(std::string_view line,
+                                      std::span<const std::string_view> prefixes) noexcept;
+
 // Plan 0059 (ADR-0416): a remote command `line` that a remote support session does not pass to
 // the device on `target` (TargetProfile::refuseRemoteSensitive, remoteRefusedSetters,
 // remoteRefusedCommands; words matched as matchSensitiveCommand).

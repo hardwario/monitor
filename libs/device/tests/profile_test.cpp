@@ -149,6 +149,17 @@ TEST(Profiles, ConsoleRedactionSensitiveOutputPrefixes) {
                      .redacted(shellLine(Direction::Out, "config secret-key 00")));
 }
 
+// Plan 0062 (ADR-0437): a sensitive command with an argument sets a secret; without one it reads.
+TEST(Profiles, ConsoleRedactionSetsSecret) {
+    const hwio::device::ConsoleRedaction redaction("chester", "app");
+    EXPECT_TRUE(redaction.setsSecret("lrw config appkey 0011"));
+    EXPECT_TRUE(redaction.setsSecret("lte config password\tx"));
+    EXPECT_FALSE(redaction.setsSecret("lrw config appkey"));
+    EXPECT_FALSE(redaction.setsSecret("lrw config show"));
+    EXPECT_FALSE(
+        hwio::device::ConsoleRedaction("unknown", "app").setsSecret("lrw config appkey 1"));
+}
+
 TEST(Profiles, ChesterAppTarget) {
     const auto* app = hwio::device::findTarget(*ProfileRegistry::find("chester"), "app");
     ASSERT_NE(app, nullptr);

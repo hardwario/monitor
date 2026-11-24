@@ -130,6 +130,9 @@ TEST(Rc4Baseline, IsTheFrozenRc4SetAndCoversEveryErrorCode) {
     EXPECT_EQ(baselineErrorId(ErrorCode::TargetLowVoltage), "target.no_power");
     EXPECT_EQ(baselineErrorId(ErrorCode::RemoteTargetUnsupported), "remote.operation_denied");
     EXPECT_EQ(baselineErrorId(ErrorCode::RemoteCommandRefused), "remote.operation_denied");
+    // Plan 0062: support's side only (never sent); the rows keep the table complete.
+    EXPECT_EQ(baselineErrorId(ErrorCode::RemoteCommandNotDelivered), "timeout");
+    EXPECT_EQ(baselineErrorId(ErrorCode::RemoteWaitingForCustomer), "remote.join_not_allowed");
 }
 
 // ---- golden messages: new host → rc.4 joiner ----

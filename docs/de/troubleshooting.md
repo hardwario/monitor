@@ -109,7 +109,7 @@ Fehlercodes: [`target.reset_during_update`](#target.reset_during_update), [`targ
 
 HARDWARIO Monitor erreicht den Support-Server `terminal.hardwario.com` über `wss` (HTTPS, Port 443). Eine Firewall oder ein Proxy, der WebSockets blockiert, verhindert das Freigeben und das Beitreten. Verwendet jemand anderes denselben Sitzungscode (sehr selten), endet die Freigabe aus Sicherheitsgründen: Starten Sie sie erneut, um einen neuen Code zu erhalten. Wer nach dem Beitritt nicht innerhalb von 2 Minuten zugelassen (oder abgelehnt) wird, muss den Kunden bitten, die Konsole erneut freizugeben. Siehe [Fernsupport](remote-support.md).
 
-Fehlercodes: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored), [`remote.target_unsupported`](#remote.target_unsupported), [`remote.command_refused`](#remote.command_refused).
+Fehlercodes: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored), [`remote.target_unsupported`](#remote.target_unsupported), [`remote.command_refused`](#remote.command_refused), [`remote.command_not_delivered`](#remote.command_not_delivered), [`remote.waiting_for_customer`](#remote.waiting_for_customer).
 
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Die LTE-Modem-Firmware braucht nRF Util
@@ -1002,6 +1002,26 @@ Der Support mit einem älteren HARDWARIO Monitor sieht stattdessen `remote.opera
 
 - **Probably:** It would read or change the device's keys or identity, which is not possible in a support session.
 - **What to do:** Ask the customer to run it locally if it is really needed.
+
+<a id="remote.command_not_delivered"></a>
+#### `remote.command_not_delivered`
+
+**The customer's app did not pass the command to the device.**
+
+- **Probably:** You are not allowed in the session yet, too many commands were sent per second, or the session is busy.
+- **What to do:** Wait a moment and try again.
+
+Diesen Fehler erhält nur ein KI-Client, der über Ihren HARDWARIO Monitor mit einem Gerät des Kunden arbeitet.
+
+<a id="remote.waiting_for_customer"></a>
+#### `remote.waiting_for_customer`
+
+**The customer has not allowed you in the session yet.**
+
+- **Probably:** The customer's HARDWARIO Monitor asks the customer before support can send commands.
+- **What to do:** Ask the customer to allow you, then try again.
+
+Diesen Fehler erhält nur ein KI-Client, der über Ihren HARDWARIO Monitor mit einem Gerät des Kunden arbeitet.
 
 <a id="usage.confirmation_required"></a>
 #### `usage.confirmation_required`

@@ -2845,1852 +2845,1888 @@
 <context>
     <name>hwio::core</name>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="200"/>
+        <location filename="../libs/core/src/error.cpp" line="202"/>
         <source>An unexpected internal error occurred.</source>
         <comment>internal.unexpected message</comment>
         <translation>Wystąpił nieoczekiwany błąd wewnętrzny.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="202"/>
+        <location filename="../libs/core/src/error.cpp" line="204"/>
         <source>This is a bug in HARDWARIO Monitor.</source>
         <comment>internal.unexpected cause</comment>
         <translation>To błąd w aplikacji HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="205"/>
+        <location filename="../libs/core/src/error.cpp" line="207"/>
         <source>Please report it with the log file (see Details).</source>
         <comment>internal.unexpected suggestion</comment>
         <translation>Zgłoś go, dołączając plik dziennika (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="210"/>
+        <location filename="../libs/core/src/error.cpp" line="212"/>
         <source>An internal buffer is full.</source>
         <comment>internal.queue_full message</comment>
         <translation>Wewnętrzny bufor jest pełny.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="212"/>
+        <location filename="../libs/core/src/error.cpp" line="214"/>
         <source>This is a bug in HARDWARIO Monitor or the computer is overloaded.</source>
         <comment>internal.queue_full cause</comment>
         <translation>To błąd w aplikacji HARDWARIO Monitor lub komputer jest przeciążony.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="216"/>
+        <location filename="../libs/core/src/error.cpp" line="218"/>
         <source>Please report it with the log file (see Details).</source>
         <comment>internal.queue_full suggestion</comment>
         <translation>Zgłoś go, dołączając plik dziennika (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="221"/>
+        <location filename="../libs/core/src/error.cpp" line="223"/>
         <source>An argument or option is invalid.</source>
         <comment>usage.invalid_argument message</comment>
         <translation>Argument lub opcja jest nieprawidłowa.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="224"/>
+        <location filename="../libs/core/src/error.cpp" line="226"/>
         <source>The request contains a value that is not supported.</source>
         <comment>usage.invalid_argument cause</comment>
         <translation>Żądanie zawiera nieobsługiwaną wartość.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="226"/>
+        <location filename="../libs/core/src/error.cpp" line="228"/>
         <source>Check the arguments and try again.</source>
         <comment>usage.invalid_argument suggestion</comment>
         <translation>Sprawdź argumenty i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="231"/>
+        <location filename="../libs/core/src/error.cpp" line="233"/>
         <source>The file was not found.</source>
         <comment>io.file_not_found message</comment>
         <translation>Nie znaleziono pliku.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="234"/>
+        <location filename="../libs/core/src/error.cpp" line="236"/>
         <source>The path is wrong or the file was moved or deleted.</source>
         <comment>io.file_not_found cause</comment>
         <translation>Ścieżka jest błędna albo plik został przeniesiony lub usunięty.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="236"/>
+        <location filename="../libs/core/src/error.cpp" line="238"/>
         <source>Check the file path (see Details).</source>
         <comment>io.file_not_found suggestion</comment>
         <translation>Sprawdź ścieżkę do pliku (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="241"/>
+        <location filename="../libs/core/src/error.cpp" line="243"/>
         <source>The file could not be read.</source>
         <comment>io.read_failed message</comment>
         <translation>Nie można odczytać pliku.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="243"/>
+        <location filename="../libs/core/src/error.cpp" line="245"/>
         <source>You do not have permission to read it or the disk reported an error.</source>
         <comment>io.read_failed cause</comment>
         <translation>Brak uprawnień do odczytu lub dysk zgłosił błąd.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="246"/>
+        <location filename="../libs/core/src/error.cpp" line="248"/>
         <source>Check the file path and its permissions (see Details).</source>
         <comment>io.read_failed suggestion</comment>
         <translation>Sprawdź ścieżkę do pliku i jego uprawnienia (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="252"/>
+        <location filename="../libs/core/src/error.cpp" line="254"/>
         <source>The file could not be written.</source>
         <comment>io.write_failed message</comment>
         <translation>Nie można zapisać pliku.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="254"/>
+        <location filename="../libs/core/src/error.cpp" line="256"/>
         <source>The disk is full or read-only, or you do not have permission to write.</source>
         <comment>io.write_failed cause</comment>
         <translation>Dysk jest pełny lub tylko do odczytu albo brak uprawnień do zapisu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="257"/>
+        <location filename="../libs/core/src/error.cpp" line="259"/>
         <source>Check the path, the free disk space and the permissions (see Details).</source>
         <comment>io.write_failed suggestion</comment>
         <translation>Sprawdź ścieżkę, wolne miejsce na dysku i uprawnienia (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="263"/>
+        <location filename="../libs/core/src/error.cpp" line="265"/>
         <source>Settings were written by a newer version and are opened read-only.</source>
         <comment>settings.newer_schema message</comment>
         <translation>Ustawienia zostały zapisane przez nowszą wersję i są otwarte tylko do odczytu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="266"/>
+        <location filename="../libs/core/src/error.cpp" line="268"/>
         <source>An older version of HARDWARIO Monitor is running now.</source>
         <comment>settings.newer_schema cause</comment>
         <translation>Uruchomiona jest starsza wersja aplikacji HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="270"/>
+        <location filename="../libs/core/src/error.cpp" line="272"/>
         <source>Changes will not be saved; update HARDWARIO Monitor.</source>
         <comment>settings.newer_schema suggestion</comment>
         <translation>Zmiany nie zostaną zapisane; zaktualizuj HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="275"/>
+        <location filename="../libs/core/src/error.cpp" line="277"/>
         <source>The operation timed out.</source>
         <comment>timeout message</comment>
         <translation>Upłynął limit czasu operacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="276"/>
+        <location filename="../libs/core/src/error.cpp" line="278"/>
         <source>The other side did not respond in time.</source>
         <comment>timeout cause</comment>
         <translation>Druga strona nie odpowiedziała na czas.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="278"/>
+        <location filename="../libs/core/src/error.cpp" line="280"/>
         <source>Try it again.</source>
         <comment>timeout suggestion</comment>
         <translation>Spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="282"/>
+        <location filename="../libs/core/src/error.cpp" line="284"/>
         <source>Cancelled by user.</source>
         <comment>cancelled message</comment>
         <translation>Anulowano przez użytkownika.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="283"/>
+        <location filename="../libs/core/src/error.cpp" line="285"/>
         <source>The operation was stopped before it finished.</source>
         <comment>cancelled cause</comment>
         <translation>Operacja została zatrzymana przed zakończeniem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="285"/>
+        <location filename="../libs/core/src/error.cpp" line="287"/>
         <source>Run the operation again if needed.</source>
         <comment>cancelled suggestion</comment>
         <translation>W razie potrzeby uruchom operację ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="290"/>
+        <location filename="../libs/core/src/error.cpp" line="292"/>
         <source>SEGGER J-Link Software was not found.</source>
         <comment>dependency.jlink_not_found message</comment>
         <translation>Nie znaleziono oprogramowania SEGGER J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="292"/>
+        <location filename="../libs/core/src/error.cpp" line="294"/>
         <source>It is not installed, or it is installed in a non-standard location.</source>
         <comment>dependency.jlink_not_found cause</comment>
         <translation>Nie jest zainstalowane albo jest zainstalowane w niestandardowej lokalizacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="295"/>
+        <location filename="../libs/core/src/error.cpp" line="297"/>
         <source>Install J-Link Software 8.00 or newer, or set its path with --jlink-library.</source>
         <comment>dependency.jlink_not_found suggestion</comment>
         <translation>Zainstaluj J-Link Software 8.00 lub nowsze albo podaj jego ścieżkę opcją --jlink-library.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="303"/>
+        <location filename="../libs/core/src/error.cpp" line="305"/>
         <source>The J-Link library could not be loaded.</source>
         <comment>dependency.jlink_load_failed message</comment>
         <translation>Nie udało się wczytać biblioteki J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="305"/>
+        <location filename="../libs/core/src/error.cpp" line="307"/>
         <source>The installation is damaged, is for another processor architecture, or lacks a required function.</source>
         <comment>dependency.jlink_load_failed cause</comment>
         <translation>Instalacja jest uszkodzona, przeznaczona dla innej architektury procesora albo brakuje w niej wymaganej funkcji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="309"/>
+        <location filename="../libs/core/src/error.cpp" line="311"/>
         <source>Reinstall J-Link Software.</source>
         <comment>dependency.jlink_load_failed suggestion</comment>
         <translation>Zainstaluj ponownie J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="315"/>
+        <location filename="../libs/core/src/error.cpp" line="317"/>
         <source>The J-Link Software is too old.</source>
         <comment>dependency.jlink_too_old message</comment>
         <translation>J-Link Software jest zbyt stare.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="317"/>
+        <location filename="../libs/core/src/error.cpp" line="319"/>
         <source>HARDWARIO Monitor needs J-Link Software 8.00 or newer.</source>
         <comment>dependency.jlink_too_old cause</comment>
         <translation>HARDWARIO Monitor wymaga J-Link Software 8.00 lub nowszego.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="320"/>
+        <location filename="../libs/core/src/error.cpp" line="322"/>
         <source>Install the current J-Link Software.</source>
         <comment>dependency.jlink_too_old suggestion</comment>
         <translation>Zainstaluj aktualne J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="327"/>
+        <location filename="../libs/core/src/error.cpp" line="329"/>
         <source>No J-Link probe found.</source>
         <comment>probe.not_found message</comment>
         <translation>Nie znaleziono programatora J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="328"/>
+        <location filename="../libs/core/src/error.cpp" line="330"/>
         <source>The USB cable is disconnected or the J-Link is not powered.</source>
         <comment>probe.not_found cause</comment>
         <translation>Kabel USB jest odłączony lub J-Link nie jest zasilany.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="331"/>
+        <location filename="../libs/core/src/error.cpp" line="333"/>
         <source>Check the USB cable between the J-Link and the computer.</source>
         <comment>probe.not_found suggestion</comment>
         <translation>Sprawdź kabel USB między J-Linkiem a komputerem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="338"/>
+        <location filename="../libs/core/src/error.cpp" line="340"/>
         <source>The J-Link is used by another program.</source>
         <comment>probe.in_use_by_other_process message</comment>
         <translation>J-Link jest używany przez inny program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="340"/>
+        <location filename="../libs/core/src/error.cpp" line="342"/>
         <source>Another HARDWARIO Monitor window or hwio command is using it.</source>
         <comment>probe.in_use_by_other_process cause</comment>
         <translation>Używa go inne okno aplikacji HARDWARIO Monitor lub polecenie hwio.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="344"/>
+        <location filename="../libs/core/src/error.cpp" line="346"/>
         <source>Close the other program, or choose another J-Link.</source>
         <comment>probe.in_use_by_other_process suggestion</comment>
         <translation>Zamknij drugi program albo wybierz inny J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="350"/>
+        <location filename="../libs/core/src/error.cpp" line="352"/>
         <source>The J-Link probe could not be opened.</source>
         <comment>probe.open_failed message</comment>
         <translation>Nie udało się otworzyć programatora J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="352"/>
+        <location filename="../libs/core/src/error.cpp" line="354"/>
         <source>It is used by another program or session, or the USB permissions are missing (Linux udev rules).</source>
         <comment>probe.open_failed cause</comment>
         <translation>Używa go inny program lub sesja albo brakuje uprawnień do USB (reguły udev w Linuksie).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="357"/>
+        <location filename="../libs/core/src/error.cpp" line="359"/>
         <source>Close other programs using the J-Link and try again.</source>
         <comment>probe.open_failed suggestion</comment>
         <translation>Zamknij inne programy używające J-Linka i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="363"/>
+        <location filename="../libs/core/src/error.cpp" line="365"/>
         <source>The J-Link firmware is outdated.</source>
         <comment>probe.firmware_outdated message</comment>
         <translation>Firmware J-Linka jest nieaktualny.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="365"/>
+        <location filename="../libs/core/src/error.cpp" line="367"/>
         <source>The J-Link firmware differs from the firmware bundled with the J-Link Software.</source>
         <comment>probe.firmware_outdated cause</comment>
         <translation>Firmware J-Linka różni się od firmware dostarczanego z J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="369"/>
+        <location filename="../libs/core/src/error.cpp" line="371"/>
         <source>Run `hwio jlink update-firmware`.</source>
         <comment>probe.firmware_outdated suggestion</comment>
         <translation>Uruchom `hwio jlink update-firmware`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="376"/>
+        <location filename="../libs/core/src/error.cpp" line="378"/>
         <source>The device has no power.</source>
         <comment>target.no_power message</comment>
         <translation>Urządzenie nie ma zasilania.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="377"/>
+        <location filename="../libs/core/src/error.cpp" line="379"/>
         <source>The device is not powered or the flat cable is disconnected.</source>
         <comment>target.no_power cause</comment>
         <translation>Urządzenie nie jest zasilane lub taśma jest odłączona.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="380"/>
+        <location filename="../libs/core/src/error.cpp" line="382"/>
         <source>Power the device and check the flat cable.</source>
         <comment>target.no_power suggestion</comment>
         <translation>Włącz zasilanie urządzenia i sprawdź taśmę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="386"/>
+        <location filename="../libs/core/src/error.cpp" line="388"/>
         <source>Could not connect to the device.</source>
         <comment>target.connect_failed message</comment>
         <translation>Nie udało się połączyć z urządzeniem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="388"/>
+        <location filename="../libs/core/src/error.cpp" line="390"/>
         <source>The flat cable is disconnected or in the wrong connector, or the MCU is in a low-power or protected state.</source>
         <comment>target.connect_failed cause</comment>
         <translation>Taśma jest odłączona lub podłączona do niewłaściwego złącza albo MCU jest w trybie niskiego poboru energii lub w stanie chronionym.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="392"/>
+        <location filename="../libs/core/src/error.cpp" line="394"/>
         <source>Check the flat cable between the J-Link and the device.</source>
         <comment>target.connect_failed suggestion</comment>
         <translation>Sprawdź taśmę między J-Linkiem a urządzeniem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="399"/>
+        <location filename="../libs/core/src/error.cpp" line="401"/>
         <source>The device&apos;s console (RTT) was not found.</source>
         <comment>target.rtt_not_found message</comment>
         <translation>Nie znaleziono konsoli urządzenia (RTT).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="401"/>
+        <location filename="../libs/core/src/error.cpp" line="403"/>
         <source>The firmware has no RTT console, is still booting, or the CPU is halted.</source>
         <comment>target.rtt_not_found cause</comment>
         <translation>Firmware nie ma konsoli RTT, jeszcze się uruchamia albo procesor jest zatrzymany.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="405"/>
+        <location filename="../libs/core/src/error.cpp" line="407"/>
         <source>Reset the device or flash firmware with RTT console support.</source>
         <comment>target.rtt_not_found suggestion</comment>
         <translation>Zresetuj urządzenie lub wgraj firmware z obsługą konsoli RTT.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="412"/>
+        <location filename="../libs/core/src/error.cpp" line="414"/>
         <source>An RTT buffer was not found.</source>
         <comment>target.rtt_buffer_not_found message</comment>
         <translation>Nie znaleziono bufora RTT.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="414"/>
+        <location filename="../libs/core/src/error.cpp" line="416"/>
         <source>The firmware is older or different.</source>
         <comment>target.rtt_buffer_not_found cause</comment>
         <translation>Firmware jest starszy lub inny.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="416"/>
+        <location filename="../libs/core/src/error.cpp" line="418"/>
         <source>Use firmware with the CHESTER shell.</source>
         <comment>target.rtt_buffer_not_found suggestion</comment>
         <translation>Użyj firmware z powłoką (shell) CHESTER.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="422"/>
+        <location filename="../libs/core/src/error.cpp" line="424"/>
         <source>The device is not reading commands.</source>
         <comment>target.rtt_write_timeout message</comment>
         <translation>Urządzenie nie odczytuje poleceń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="424"/>
+        <location filename="../libs/core/src/error.cpp" line="426"/>
         <source>The firmware is hung or its shell is disabled.</source>
         <comment>target.rtt_write_timeout cause</comment>
         <translation>Firmware się zawiesił lub ma wyłączoną powłokę (shell).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="426"/>
+        <location filename="../libs/core/src/error.cpp" line="428"/>
         <source>Reset the device.</source>
         <comment>target.rtt_write_timeout suggestion</comment>
         <translation>Zresetuj urządzenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="432"/>
+        <location filename="../libs/core/src/error.cpp" line="434"/>
         <source>Reading from the device failed.</source>
         <comment>target.rtt_read_failed message</comment>
         <translation>Odczyt z urządzenia nie powiódł się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="435"/>
+        <location filename="../libs/core/src/error.cpp" line="437"/>
         <source>A cable was disconnected or the device was reset.</source>
         <comment>target.rtt_read_failed cause</comment>
         <translation>Odłączono kabel lub urządzenie zostało zresetowane.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="437"/>
+        <location filename="../libs/core/src/error.cpp" line="439"/>
         <source>Check the cables; the console reconnects automatically if enabled.</source>
         <comment>target.rtt_read_failed suggestion</comment>
         <translation>Sprawdź kable; jeśli ta opcja jest włączona, konsola połączy się ponownie automatycznie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="444"/>
+        <location filename="../libs/core/src/error.cpp" line="446"/>
         <source>Too many devices are open (max 8).</source>
         <comment>internal.session_limit message</comment>
         <translation>Otwartych jest zbyt wiele urządzeń (maks. 8).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="446"/>
+        <location filename="../libs/core/src/error.cpp" line="448"/>
         <source>HARDWARIO Monitor works with at most 8 devices at the same time.</source>
         <comment>internal.session_limit cause</comment>
         <translation>HARDWARIO Monitor obsługuje jednocześnie najwyżej 8 urządzeń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="449"/>
+        <location filename="../libs/core/src/error.cpp" line="451"/>
         <source>Close a device first.</source>
         <comment>internal.session_limit suggestion</comment>
         <translation>Najpierw zamknij jedno z urządzeń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="454"/>
+        <location filename="../libs/core/src/error.cpp" line="456"/>
         <source>This operation needs confirmation.</source>
         <comment>usage.confirmation_required message</comment>
         <translation>Ta operacja wymaga potwierdzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="456"/>
+        <location filename="../libs/core/src/error.cpp" line="458"/>
         <source>The command runs non-interactively, so it cannot ask.</source>
         <comment>usage.confirmation_required cause</comment>
         <translation>Polecenie działa w trybie nieinteraktywnym, więc nie może zapytać.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="459"/>
+        <location filename="../libs/core/src/error.cpp" line="461"/>
         <source>Re-run with --yes.</source>
         <comment>usage.confirmation_required suggestion</comment>
         <translation>Uruchom ponownie z opcją --yes.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="464"/>
+        <location filename="../libs/core/src/error.cpp" line="466"/>
         <source>Writing to the device failed.</source>
         <comment>target.rtt_write_failed message</comment>
         <translation>Zapis do urządzenia nie powiódł się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="467"/>
+        <location filename="../libs/core/src/error.cpp" line="469"/>
         <source>A cable was disconnected or the device was reset.</source>
         <comment>target.rtt_write_failed cause</comment>
         <translation>Odłączono kabel lub urządzenie zostało zresetowane.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="469"/>
+        <location filename="../libs/core/src/error.cpp" line="471"/>
         <source>Check the cables; the console reconnects automatically if enabled.</source>
         <comment>target.rtt_write_failed suggestion</comment>
         <translation>Sprawdź kable; jeśli ta opcja jest włączona, konsola połączy się ponownie automatycznie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="476"/>
+        <location filename="../libs/core/src/error.cpp" line="478"/>
         <source>The J-Link firmware could not be updated.</source>
         <comment>probe.firmware_update_failed message</comment>
         <translation>Nie udało się zaktualizować firmware J-Linka.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="478"/>
+        <location filename="../libs/core/src/error.cpp" line="480"/>
         <source>The update failed or the probe still reports a firmware different from the library&apos;s.</source>
         <comment>probe.firmware_update_failed cause</comment>
         <translation>Aktualizacja nie powiodła się lub programator nadal zgłasza firmware inny niż w bibliotece.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="482"/>
+        <location filename="../libs/core/src/error.cpp" line="484"/>
         <source>Disconnect and reconnect the J-Link, then run `hwio jlink update-firmware` again.</source>
         <comment>probe.firmware_update_failed suggestion</comment>
         <translation>Odłącz i ponownie podłącz J-Link, a następnie ponownie uruchom `hwio jlink update-firmware`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="490"/>
+        <location filename="../libs/core/src/error.cpp" line="492"/>
         <source>The device is not connected.</source>
         <comment>target.not_connected message</comment>
         <translation>Urządzenie nie jest połączone.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="493"/>
+        <location filename="../libs/core/src/error.cpp" line="495"/>
         <source>The console is disconnected or still reconnecting.</source>
         <comment>target.not_connected cause</comment>
         <translation>Konsola jest rozłączona lub dopiero ponownie się łączy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="495"/>
+        <location filename="../libs/core/src/error.cpp" line="497"/>
         <source>Reconnect the console (F4).</source>
         <comment>target.not_connected suggestion</comment>
         <translation>Połącz ponownie konsolę (F4).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="502"/>
+        <location filename="../libs/core/src/error.cpp" line="504"/>
         <source>The firmware file is not a valid HEX file.</source>
         <comment>firmware.hex_parse_error message</comment>
         <translation>Plik z firmware nie jest prawidłowym plikiem HEX.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="504"/>
+        <location filename="../libs/core/src/error.cpp" line="506"/>
         <source>The file is damaged or it is not a HEX file.</source>
         <comment>firmware.hex_parse_error cause</comment>
         <translation>Plik jest uszkodzony lub nie jest plikiem HEX.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="506"/>
+        <location filename="../libs/core/src/error.cpp" line="508"/>
         <source>Use the .hex file produced by the build or download it again.</source>
         <comment>firmware.hex_parse_error suggestion</comment>
         <translation>Użyj pliku .hex utworzonego podczas kompilacji lub pobierz go ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="513"/>
+        <location filename="../libs/core/src/error.cpp" line="515"/>
         <source>The file is not a supported firmware file.</source>
         <comment>firmware.invalid_image message</comment>
         <translation>Plik nie jest obsługiwanym plikiem z firmware.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="515"/>
+        <location filename="../libs/core/src/error.cpp" line="517"/>
         <source>It is not a CHESTER LTE bundle, a modem firmware zip or a HEX file, or the zip exceeds the safety limits.</source>
         <comment>firmware.invalid_image cause</comment>
         <translation>Nie jest to pakiet CHESTER LTE, archiwum zip z firmware modemu ani plik HEX albo archiwum zip przekracza limity bezpieczeństwa.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="520"/>
+        <location filename="../libs/core/src/error.cpp" line="522"/>
         <source>Use a CHESTER .hex file or LTE bundle (.zip).</source>
         <comment>firmware.invalid_image suggestion</comment>
         <translation>Użyj pliku .hex dla CHESTER lub pakietu LTE (.zip).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="526"/>
+        <location filename="../libs/core/src/error.cpp" line="528"/>
         <source>The firmware does not fit the MCU.</source>
         <comment>firmware.out_of_range message</comment>
         <translation>Firmware nie pasuje do MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="528"/>
+        <location filename="../libs/core/src/error.cpp" line="530"/>
         <source>The image was built for another MCU.</source>
         <comment>firmware.out_of_range cause</comment>
         <translation>Obraz został zbudowany dla innego MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="530"/>
+        <location filename="../libs/core/src/error.cpp" line="532"/>
         <source>Check that the firmware is for this MCU.</source>
         <comment>firmware.out_of_range suggestion</comment>
         <translation>Sprawdź, czy firmware jest przeznaczony dla tego MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="536"/>
+        <location filename="../libs/core/src/error.cpp" line="538"/>
         <source>The firmware also writes the UICR configuration area.</source>
         <comment>firmware.uicr_in_image message</comment>
         <translation>Firmware zapisuje również obszar konfiguracyjny UICR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="539"/>
+        <location filename="../libs/core/src/error.cpp" line="541"/>
         <source>The build includes UICR settings.</source>
         <comment>firmware.uicr_in_image cause</comment>
         <translation>Kompilacja zawiera ustawienia UICR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="541"/>
+        <location filename="../libs/core/src/error.cpp" line="543"/>
         <source>Re-run with --allow-uicr if this is intended; the Product Information Block is kept.</source>
         <comment>firmware.uicr_in_image suggestion</comment>
         <translation>Jeśli jest to zamierzone, uruchom polecenie ponownie z --allow-uicr; blok informacji o produkcie (PIB) zostanie zachowany.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="548"/>
+        <location filename="../libs/core/src/error.cpp" line="550"/>
         <source>Verification of the written firmware failed.</source>
         <comment>firmware.verify_failed message</comment>
         <translation>Weryfikacja zapisanego firmware nie powiodła się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="550"/>
+        <location filename="../libs/core/src/error.cpp" line="552"/>
         <source>The connection is unstable, or the flash is protected or faulty.</source>
         <comment>firmware.verify_failed cause</comment>
         <translation>Połączenie jest niestabilne albo pamięć flash jest chroniona lub uszkodzona.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="553"/>
+        <location filename="../libs/core/src/error.cpp" line="555"/>
         <source>Flash again; if it repeats, lower the J-Link speed or check the cables.</source>
         <comment>firmware.verify_failed suggestion</comment>
         <translation>Wgraj firmware ponownie; jeśli błąd się powtarza, zmniejsz prędkość J-Linka lub sprawdź kable.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="560"/>
+        <location filename="../libs/core/src/error.cpp" line="562"/>
         <source>The firmware was not found in the catalog.</source>
         <comment>firmware.not_found_in_catalog message</comment>
         <translation>Nie znaleziono firmware w katalogu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="562"/>
+        <location filename="../libs/core/src/error.cpp" line="564"/>
         <source>The firmware ID is wrong or it was deleted.</source>
         <comment>firmware.not_found_in_catalog cause</comment>
         <translation>ID firmware jest błędne lub firmware został usunięty.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="564"/>
+        <location filename="../libs/core/src/error.cpp" line="566"/>
         <source>Check the firmware ID.</source>
         <comment>firmware.not_found_in_catalog suggestion</comment>
         <translation>Sprawdź ID firmware.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="570"/>
+        <location filename="../libs/core/src/error.cpp" line="572"/>
         <source>The modem firmware update failed.</source>
         <comment>firmware.modem_update_failed message</comment>
         <translation>Aktualizacja firmware modemu nie powiodła się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="572"/>
+        <location filename="../libs/core/src/error.cpp" line="574"/>
         <source>The modem firmware zip is wrong, the connection was lost, or nRF Util reported an error (see Details).</source>
         <comment>firmware.modem_update_failed cause</comment>
         <translation>Archiwum zip z firmware modemu jest błędne, połączenie zostało przerwane lub nRF Util zgłosił błąd (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="576"/>
+        <location filename="../libs/core/src/error.cpp" line="578"/>
         <source>Check the cable and power, then flash the modem firmware again.</source>
         <comment>firmware.modem_update_failed suggestion</comment>
         <translation>Sprawdź kabel i zasilanie, a następnie ponownie wgraj firmware modemu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="583"/>
+        <location filename="../libs/core/src/error.cpp" line="585"/>
         <source>Downloading the firmware failed.</source>
         <comment>network.download_failed message</comment>
         <translation>Pobieranie firmware nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="585"/>
+        <location filename="../libs/core/src/error.cpp" line="587"/>
         <source>There is no internet connection, a proxy blocks it, or the server failed.</source>
         <comment>network.download_failed cause</comment>
         <translation>Brak połączenia z internetem, blokuje je serwer proxy lub wystąpił błąd serwera.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="590"/>
+        <location filename="../libs/core/src/error.cpp" line="592"/>
         <source>Check the internet connection and try again.</source>
         <comment>network.download_failed suggestion</comment>
         <translation>Sprawdź połączenie z internetem i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="595"/>
+        <location filename="../libs/core/src/error.cpp" line="597"/>
         <source>The J-Link is connected to another MCU.</source>
         <comment>target.wrong_family message</comment>
         <translation>J-Link jest podłączony do innego MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="597"/>
+        <location filename="../libs/core/src/error.cpp" line="599"/>
         <source>The J-Link is connected to the other connector of the device.</source>
         <comment>target.wrong_family cause</comment>
         <translation>J-Link jest podłączony do drugiego złącza urządzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="600"/>
+        <location filename="../libs/core/src/error.cpp" line="602"/>
         <source>Connect the J-Link to the connector of the MCU you want to program.</source>
         <comment>target.wrong_family suggestion</comment>
         <translation>Podłącz J-Link do złącza MCU, który chcesz zaprogramować.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="607"/>
+        <location filename="../libs/core/src/error.cpp" line="609"/>
         <source>The MCU is read-back protected.</source>
         <comment>target.protected message</comment>
         <translation>MCU jest chroniony przed odczytem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="609"/>
+        <location filename="../libs/core/src/error.cpp" line="611"/>
         <source>Access port protection (APPROTECT) is enabled.</source>
         <comment>target.protected cause</comment>
         <translation>Włączona jest ochrona portu dostępu (APPROTECT).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="611"/>
+        <location filename="../libs/core/src/error.cpp" line="613"/>
         <source>Recover the MCU (this erases it), then flash it again.</source>
         <comment>target.protected suggestion</comment>
         <translation>Odzyskaj MCU (recover – spowoduje to jego wymazanie), a następnie ponownie wgraj firmware.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="618"/>
+        <location filename="../libs/core/src/error.cpp" line="620"/>
         <source>Programming the MCU failed.</source>
         <comment>target.program_failed message</comment>
         <translation>Programowanie MCU nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="620"/>
+        <location filename="../libs/core/src/error.cpp" line="622"/>
         <source>The connection was lost, the power is low or the MCU is protected.</source>
         <comment>target.program_failed cause</comment>
         <translation>Połączenie zostało przerwane, zasilanie jest zbyt niskie lub MCU jest chroniony.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="624"/>
+        <location filename="../libs/core/src/error.cpp" line="626"/>
         <source>Check the cables and power, then try again.</source>
         <comment>target.program_failed suggestion</comment>
         <translation>Sprawdź kable i zasilanie, a następnie spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="630"/>
+        <location filename="../libs/core/src/error.cpp" line="632"/>
         <source>Erasing the MCU failed.</source>
         <comment>target.erase_failed message</comment>
         <translation>Wymazywanie MCU nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="632"/>
+        <location filename="../libs/core/src/error.cpp" line="634"/>
         <source>The connection was lost, the power is low or the MCU is protected.</source>
         <comment>target.erase_failed cause</comment>
         <translation>Połączenie zostało przerwane, zasilanie jest zbyt niskie lub MCU jest chroniony.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="636"/>
+        <location filename="../libs/core/src/error.cpp" line="638"/>
         <source>Check the cables and power, then try again.</source>
         <comment>target.erase_failed suggestion</comment>
         <translation>Sprawdź kable i zasilanie, a następnie spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="642"/>
+        <location filename="../libs/core/src/error.cpp" line="644"/>
         <source>Recovering the MCU failed.</source>
         <comment>target.recover_failed message</comment>
         <translation>Odzyskiwanie MCU (recover) nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="644"/>
+        <location filename="../libs/core/src/error.cpp" line="646"/>
         <source>The device has no power or its control access port does not answer.</source>
         <comment>target.recover_failed cause</comment>
         <translation>Urządzenie nie ma zasilania lub jego sterujący port dostępu nie odpowiada.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="648"/>
+        <location filename="../libs/core/src/error.cpp" line="650"/>
         <source>Power-cycle the device and try again.</source>
         <comment>target.recover_failed suggestion</comment>
         <translation>Odłącz i ponownie podłącz zasilanie urządzenia, a następnie spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="655"/>
+        <location filename="../libs/core/src/error.cpp" line="657"/>
         <source>The Product Information Block is missing or damaged.</source>
         <comment>pib.invalid message</comment>
         <translation>Brak bloku informacji o produkcie (PIB) lub jest on uszkodzony.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="657"/>
+        <location filename="../libs/core/src/error.cpp" line="659"/>
         <source>It was never written, or it was erased by a full erase or a recover.</source>
         <comment>pib.invalid cause</comment>
         <translation>Nigdy nie został zapisany albo został wymazany przez pełne wymazanie lub odzyskiwanie (recover).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="661"/>
+        <location filename="../libs/core/src/error.cpp" line="663"/>
         <source>Contact HARDWARIO support to restore it.</source>
         <comment>pib.invalid suggestion</comment>
         <translation>Aby go przywrócić, skontaktuj się z pomocą techniczną HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="666"/>
+        <location filename="../libs/core/src/error.cpp" line="668"/>
         <source>nRF Util was not found.</source>
         <comment>dependency.nrfutil_not_found message</comment>
         <translation>Nie znaleziono nRF Util.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="668"/>
+        <location filename="../libs/core/src/error.cpp" line="670"/>
         <source>It is not installed; it is needed only for the modem firmware.</source>
         <comment>dependency.nrfutil_not_found cause</comment>
         <translation>Nie jest zainstalowany; jest potrzebny tylko do firmware modemu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="671"/>
+        <location filename="../libs/core/src/error.cpp" line="673"/>
         <source>Install nRF Util and its device command, or set its path with --nrfutil.</source>
         <comment>dependency.nrfutil_not_found suggestion</comment>
         <translation>Zainstaluj nRF Util i jego polecenie device albo podaj jego ścieżkę opcją --nrfutil.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="679"/>
+        <location filename="../libs/core/src/error.cpp" line="681"/>
         <source>The nRF Util device command is not installed.</source>
         <comment>dependency.nrfutil_device_missing message</comment>
         <translation>Polecenie device programu nRF Util nie jest zainstalowane.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="682"/>
+        <location filename="../libs/core/src/error.cpp" line="684"/>
         <source>nRF Util is installed without its device command.</source>
         <comment>dependency.nrfutil_device_missing cause</comment>
         <translation>nRF Util jest zainstalowany bez polecenia device.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="684"/>
+        <location filename="../libs/core/src/error.cpp" line="686"/>
         <source>Run `nrfutil install device`.</source>
         <comment>dependency.nrfutil_device_missing suggestion</comment>
         <translation>Uruchom `nrfutil install device`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="690"/>
+        <location filename="../libs/core/src/error.cpp" line="692"/>
         <source>nRF Util is too old.</source>
         <comment>dependency.nrfutil_too_old message</comment>
         <translation>nRF Util jest zbyt stary.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="692"/>
+        <location filename="../libs/core/src/error.cpp" line="694"/>
         <source>HARDWARIO Monitor needs a newer nRF Util or device command.</source>
         <comment>dependency.nrfutil_too_old cause</comment>
         <translation>HARDWARIO Monitor wymaga nowszej wersji nRF Util lub polecenia device.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="695"/>
+        <location filename="../libs/core/src/error.cpp" line="697"/>
         <source>Run `nrfutil self-upgrade` and `nrfutil upgrade device`.</source>
         <comment>dependency.nrfutil_too_old suggestion</comment>
         <translation>Uruchom `nrfutil self-upgrade` i `nrfutil upgrade device`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="702"/>
+        <location filename="../libs/core/src/error.cpp" line="704"/>
         <source>Another operation is running on this device.</source>
         <comment>internal.busy message</comment>
         <translation>Na tym urządzeniu trwa inna operacja.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="704"/>
+        <location filename="../libs/core/src/error.cpp" line="706"/>
         <source>Only one operation can run at a time.</source>
         <comment>internal.busy cause</comment>
         <translation>Jednocześnie może trwać tylko jedna operacja.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="706"/>
+        <location filename="../libs/core/src/error.cpp" line="708"/>
         <source>Wait for it to finish or cancel it.</source>
         <comment>internal.busy suggestion</comment>
         <translation>Poczekaj na jej zakończenie lub ją anuluj.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="711"/>
+        <location filename="../libs/core/src/error.cpp" line="713"/>
         <source>Communication with the J-Link failed.</source>
         <comment>probe.io_failed message</comment>
         <translation>Komunikacja z J-Linkiem nie powiodła się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="713"/>
+        <location filename="../libs/core/src/error.cpp" line="715"/>
         <source>The J-Link did not answer: a USB glitch, or the USB cable was disconnected.</source>
         <comment>probe.io_failed cause</comment>
         <translation>J-Link nie odpowiedział: chwilowy zanik USB lub odłączono kabel USB.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="717"/>
+        <location filename="../libs/core/src/error.cpp" line="719"/>
         <source>Check the USB cable between the J-Link and the computer; the console reconnects automatically if enabled.</source>
         <comment>probe.io_failed suggestion</comment>
         <translation>Sprawdź kabel USB między J-Linkiem a komputerem; jeśli ta opcja jest włączona, konsola połączy się ponownie automatycznie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="727"/>
+        <location filename="../libs/core/src/error.cpp" line="729"/>
         <source>This computer does not allow access to the J-Link (USB permissions).</source>
         <comment>usb.access_denied message</comment>
         <translation>Ten komputer nie zezwala na dostęp do J-Linka (uprawnienia USB).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="730"/>
+        <location filename="../libs/core/src/error.cpp" line="732"/>
         <source>The udev rule for SEGGER devices is missing.</source>
         <comment>usb.access_denied cause</comment>
         <translation>Brakuje reguły udev dla urządzeń SEGGER.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="732"/>
+        <location filename="../libs/core/src/error.cpp" line="734"/>
         <source>Install the udev rule shown in the setup wizard, then reconnect the J-Link. The rule gives access only to the user logged in at this computer; users connected only over SSH need their own udev rule.</source>
         <comment>usb.access_denied suggestion</comment>
         <translation>Zainstaluj regułę udev pokazaną w kreatorze konfiguracji, a następnie ponownie podłącz J-Link. Reguła daje dostęp tylko użytkownikowi zalogowanemu bezpośrednio przy tym komputerze; użytkownicy połączeni tylko przez SSH potrzebują własnej reguły udev.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="742"/>
+        <location filename="../libs/core/src/error.cpp" line="744"/>
         <source>Another program is running and may be using the J-Link.</source>
         <comment>probe.held_by_program message</comment>
         <translation>Działa inny program, który może używać J-Linka.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="745"/>
+        <location filename="../libs/core/src/error.cpp" line="747"/>
         <source>Another debugging or programming tool keeps the probe open.</source>
         <comment>probe.held_by_program cause</comment>
         <translation>Inne narzędzie do debugowania lub programowania utrzymuje programator otwarty.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="748"/>
+        <location filename="../libs/core/src/error.cpp" line="750"/>
         <source>Close the other program and try again.</source>
         <comment>probe.held_by_program suggestion</comment>
         <translation>Zamknij drugi program i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="754"/>
+        <location filename="../libs/core/src/error.cpp" line="756"/>
         <source>The diagnostic report could not be saved.</source>
         <comment>diag.report_write_failed message</comment>
         <translation>Nie udało się zapisać raportu diagnostycznego.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="756"/>
+        <location filename="../libs/core/src/error.cpp" line="758"/>
         <source>The folder is not writable or the disk is full.</source>
         <comment>diag.report_write_failed cause</comment>
         <translation>Folder nie jest zapisywalny lub dysk jest pełny.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="758"/>
+        <location filename="../libs/core/src/error.cpp" line="760"/>
         <source>Choose another folder.</source>
         <comment>diag.report_write_failed suggestion</comment>
         <translation>Wybierz inny folder.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="763"/>
+        <location filename="../libs/core/src/error.cpp" line="765"/>
         <source>A check did not finish in time.</source>
         <comment>diag.check_timeout message</comment>
         <translation>Sprawdzanie nie zakończyło się na czas.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="765"/>
+        <location filename="../libs/core/src/error.cpp" line="767"/>
         <source>The system is slow or a tool does not answer.</source>
         <comment>diag.check_timeout cause</comment>
         <translation>System działa wolno lub któreś narzędzie nie odpowiada.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="767"/>
+        <location filename="../libs/core/src/error.cpp" line="769"/>
         <source>Run the checks again.</source>
         <comment>diag.check_timeout suggestion</comment>
         <translation>Uruchom sprawdzanie ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="773"/>
+        <location filename="../libs/core/src/error.cpp" line="775"/>
         <source>No Bluetooth adapter was found.</source>
         <comment>ble.adapter_not_found message</comment>
         <translation>Nie znaleziono adaptera Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="775"/>
+        <location filename="../libs/core/src/error.cpp" line="777"/>
         <source>The computer has no Bluetooth or it is disabled in the system.</source>
         <comment>ble.adapter_not_found cause</comment>
         <translation>Komputer nie ma Bluetooth lub jest on wyłączony w systemie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="779"/>
+        <location filename="../libs/core/src/error.cpp" line="781"/>
         <source>Enable Bluetooth or connect a USB Bluetooth adapter.</source>
         <comment>ble.adapter_not_found suggestion</comment>
         <translation>Włącz Bluetooth lub podłącz adapter Bluetooth USB.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="786"/>
+        <location filename="../libs/core/src/error.cpp" line="788"/>
         <source>Bluetooth is turned off.</source>
         <comment>ble.adapter_off message</comment>
         <translation>Bluetooth jest wyłączony.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="787"/>
+        <location filename="../libs/core/src/error.cpp" line="789"/>
         <source>Bluetooth is turned off in the system settings or with a hardware switch.</source>
         <comment>ble.adapter_off cause</comment>
         <translation>Bluetooth jest wyłączony w ustawieniach systemu lub przełącznikiem sprzętowym.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="791"/>
+        <location filename="../libs/core/src/error.cpp" line="793"/>
         <source>Turn Bluetooth on in the system settings.</source>
         <comment>ble.adapter_off suggestion</comment>
         <translation>Włącz Bluetooth w ustawieniach systemu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="798"/>
+        <location filename="../libs/core/src/error.cpp" line="800"/>
         <source>HARDWARIO Monitor is not allowed to use Bluetooth.</source>
         <comment>ble.permission_denied message</comment>
         <translation>HARDWARIO Monitor nie ma uprawnień do korzystania z Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="801"/>
+        <location filename="../libs/core/src/error.cpp" line="803"/>
         <source>Bluetooth access was denied in the privacy settings.</source>
         <comment>ble.permission_denied cause</comment>
         <translation>Dostęp do Bluetooth został odrzucony w ustawieniach prywatności.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="803"/>
+        <location filename="../libs/core/src/error.cpp" line="805"/>
         <source>Allow Bluetooth for HARDWARIO Monitor (or your terminal) in System Settings → Privacy &amp; Security → Bluetooth.</source>
         <comment>ble.permission_denied suggestion</comment>
         <translation>Zezwól na Bluetooth dla HARDWARIO Monitor (lub swojego terminala) w Ustawienia systemowe → Prywatność i ochrona → Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="811"/>
+        <location filename="../libs/core/src/error.cpp" line="813"/>
         <source>The Bluetooth service of the system is not available.</source>
         <comment>ble.stack_unavailable message</comment>
         <translation>Systemowa usługa Bluetooth jest niedostępna.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="814"/>
+        <location filename="../libs/core/src/error.cpp" line="816"/>
         <source>The Bluetooth service of the system (BlueZ on Linux) is not running.</source>
         <comment>ble.stack_unavailable cause</comment>
         <translation>Systemowa usługa Bluetooth (w Linuksie BlueZ) nie działa.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="817"/>
+        <location filename="../libs/core/src/error.cpp" line="819"/>
         <source>Start the Bluetooth service: `sudo systemctl start bluetooth`.</source>
         <comment>ble.stack_unavailable suggestion</comment>
         <translation>Uruchom usługę Bluetooth: `sudo systemctl start bluetooth`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="824"/>
+        <location filename="../libs/core/src/error.cpp" line="826"/>
         <source>The Bluetooth device was not found.</source>
         <comment>ble.device_not_found message</comment>
         <translation>Nie znaleziono urządzenia Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="826"/>
+        <location filename="../libs/core/src/error.cpp" line="828"/>
         <source>The device is out of range, turned off or its Bluetooth is disabled.</source>
         <comment>ble.device_not_found cause</comment>
         <translation>Urządzenie jest poza zasięgiem, wyłączone lub ma wyłączony Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="829"/>
+        <location filename="../libs/core/src/error.cpp" line="831"/>
         <source>Bring the device closer and make sure its Bluetooth is on.</source>
         <comment>ble.device_not_found suggestion</comment>
         <translation>Przybliż urządzenie i upewnij się, że ma włączony Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="837"/>
+        <location filename="../libs/core/src/error.cpp" line="839"/>
         <source>Could not connect to the device over Bluetooth.</source>
         <comment>ble.connect_failed message</comment>
         <translation>Nie udało się połączyć z urządzeniem przez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="839"/>
+        <location filename="../libs/core/src/error.cpp" line="841"/>
         <source>The signal is weak or the device is busy with another connection.</source>
         <comment>ble.connect_failed cause</comment>
         <translation>Sygnał jest słaby lub urządzenie jest zajęte innym połączeniem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="842"/>
+        <location filename="../libs/core/src/error.cpp" line="844"/>
         <source>Move closer, disconnect other phones or computers from the device and try again.</source>
         <comment>ble.connect_failed suggestion</comment>
         <translation>Podejdź bliżej, rozłącz od urządzenia inne telefony lub komputery i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="851"/>
+        <location filename="../libs/core/src/error.cpp" line="853"/>
         <source>The device does not offer the console service (NUS).</source>
         <comment>ble.service_not_found message</comment>
         <translation>Urządzenie nie oferuje usługi konsoli (NUS).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="853"/>
+        <location filename="../libs/core/src/error.cpp" line="855"/>
         <source>The firmware has no Bluetooth shell.</source>
         <comment>ble.service_not_found cause</comment>
         <translation>Firmware nie ma powłoki (shell) przez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="856"/>
+        <location filename="../libs/core/src/error.cpp" line="858"/>
         <source>Use firmware with the Bluetooth console enabled.</source>
         <comment>ble.service_not_found suggestion</comment>
         <translation>Użyj firmware z włączoną konsolą przez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="862"/>
+        <location filename="../libs/core/src/error.cpp" line="864"/>
         <source>The device is not paired with this computer.</source>
         <comment>ble.not_paired message</comment>
         <translation>Urządzenie nie jest sparowane z tym komputerem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="864"/>
+        <location filename="../libs/core/src/error.cpp" line="866"/>
         <source>Pairing was cancelled, failed or was removed on one side.</source>
         <comment>ble.not_paired cause</comment>
         <translation>Parowanie zostało anulowane, nie powiodło się lub zostało usunięte po jednej ze stron.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="867"/>
+        <location filename="../libs/core/src/error.cpp" line="869"/>
         <source>Pair the device: enter its passkey when the system asks.</source>
         <comment>ble.not_paired suggestion</comment>
         <translation>Sparuj urządzenie: wpisz jego klucz dostępu, gdy system o to poprosi.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="874"/>
+        <location filename="../libs/core/src/error.cpp" line="876"/>
         <source>Pairing with the device failed.</source>
         <comment>ble.pairing_failed message</comment>
         <translation>Parowanie z urządzeniem nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="876"/>
+        <location filename="../libs/core/src/error.cpp" line="878"/>
         <source>A wrong passkey, a timeout or a stale bond on one side.</source>
         <comment>ble.pairing_failed cause</comment>
         <translation>Błędny klucz dostępu, przekroczenie limitu czasu lub nieaktualne powiązanie po jednej ze stron.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="879"/>
+        <location filename="../libs/core/src/error.cpp" line="881"/>
         <source>Remove the device in the system Bluetooth settings and pair again.</source>
         <comment>ble.pairing_failed suggestion</comment>
         <translation>Usuń urządzenie w systemowych ustawieniach Bluetooth i sparuj je ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="886"/>
+        <location filename="../libs/core/src/error.cpp" line="888"/>
         <source>This system pairs Bluetooth devices only when connecting.</source>
         <comment>ble.pairing_not_supported message</comment>
         <translation>Ten system paruje urządzenia Bluetooth tylko podczas łączenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="890"/>
+        <location filename="../libs/core/src/error.cpp" line="892"/>
         <source>macOS pairs a device automatically when it connects.</source>
         <comment>ble.pairing_not_supported cause</comment>
         <translation>macOS paruje urządzenie automatycznie, gdy się z nim łączy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="893"/>
+        <location filename="../libs/core/src/error.cpp" line="895"/>
         <source>Connect to the device; macOS asks for the passkey.</source>
         <comment>ble.pairing_not_supported suggestion</comment>
         <translation>Połącz się z urządzeniem; macOS poprosi o klucz dostępu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="898"/>
+        <location filename="../libs/core/src/error.cpp" line="900"/>
         <source>Sending to the device over Bluetooth failed.</source>
         <comment>ble.write_failed message</comment>
         <translation>Wysyłanie do urządzenia przez Bluetooth nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="900"/>
+        <location filename="../libs/core/src/error.cpp" line="902"/>
         <source>The link was lost during the write.</source>
         <comment>ble.write_failed cause</comment>
         <translation>Połączenie zostało utracone podczas zapisu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="902"/>
+        <location filename="../libs/core/src/error.cpp" line="904"/>
         <source>Reconnect.</source>
         <comment>ble.write_failed suggestion</comment>
         <translation>Połącz ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="907"/>
+        <location filename="../libs/core/src/error.cpp" line="909"/>
         <source>The device is not reading commands.</source>
         <comment>ble.write_timeout message</comment>
         <translation>Urządzenie nie odczytuje poleceń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="909"/>
+        <location filename="../libs/core/src/error.cpp" line="911"/>
         <source>The firmware is busy or the link is stalled.</source>
         <comment>ble.write_timeout cause</comment>
         <translation>Firmware jest zajęty lub połączenie się zablokowało.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="912"/>
+        <location filename="../libs/core/src/error.cpp" line="914"/>
         <source>Reconnect; if it repeats, restart the device.</source>
         <comment>ble.write_timeout suggestion</comment>
         <translation>Połącz ponownie; jeśli problem się powtarza, uruchom urządzenie ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="919"/>
+        <location filename="../libs/core/src/error.cpp" line="921"/>
         <source>The Bluetooth connection to the device was lost.</source>
         <comment>ble.disconnected message</comment>
         <translation>Połączenie Bluetooth z urządzeniem zostało utracone.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="921"/>
+        <location filename="../libs/core/src/error.cpp" line="923"/>
         <source>The device is out of range, was restarted or turned off.</source>
         <comment>ble.disconnected cause</comment>
         <translation>Urządzenie jest poza zasięgiem, zostało uruchomione ponownie lub wyłączone.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="924"/>
+        <location filename="../libs/core/src/error.cpp" line="926"/>
         <source>Bring the device closer; the console reconnects automatically if enabled.</source>
         <comment>ble.disconnected suggestion</comment>
         <translation>Przybliż urządzenie; jeśli ta opcja jest włączona, konsola połączy się ponownie automatycznie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="932"/>
+        <location filename="../libs/core/src/error.cpp" line="934"/>
         <source>The device is used by another program.</source>
         <comment>ble.in_use_by_other_process message</comment>
         <translation>Urządzenie jest używane przez inny program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="934"/>
+        <location filename="../libs/core/src/error.cpp" line="936"/>
         <source>Another HARDWARIO Monitor window or `hwio` command is connected to it.</source>
         <comment>ble.in_use_by_other_process cause</comment>
         <translation>Jest z nim połączone inne okno HARDWARIO Monitor lub polecenie `hwio`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="937"/>
+        <location filename="../libs/core/src/error.cpp" line="939"/>
         <source>Close the other program.</source>
         <comment>ble.in_use_by_other_process suggestion</comment>
         <translation>Zamknij drugi program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="942"/>
+        <location filename="../libs/core/src/error.cpp" line="944"/>
         <source>No program is ready to ask for the Bluetooth passkey.</source>
         <comment>ble.no_pairing_agent message</comment>
         <translation>Żaden program nie jest gotowy, by poprosić o klucz dostępu Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="945"/>
+        <location filename="../libs/core/src/error.cpp" line="947"/>
         <source>No pairing agent is running (on GNOME the agent may only be active in Settings → Bluetooth).</source>
         <comment>ble.no_pairing_agent cause</comment>
         <translation>Nie działa żaden agent parowania (w środowisku GNOME agent może być aktywny tylko w Ustawienia → Bluetooth).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="950"/>
+        <location filename="../libs/core/src/error.cpp" line="952"/>
         <source>Pair the device from the system Bluetooth settings, or with bluetoothctl: `agent KeyboardOnly`, `default-agent`, `pair &lt;id&gt;`.</source>
         <comment>ble.no_pairing_agent suggestion</comment>
         <translation>Sparuj urządzenie w systemowych ustawieniach Bluetooth lub za pomocą bluetoothctl: `agent KeyboardOnly`, `default-agent`, `pair &lt;id&gt;`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="959"/>
+        <location filename="../libs/core/src/error.cpp" line="961"/>
         <source>The MCP port is already in use.</source>
         <comment>mcp.port_in_use message</comment>
         <translation>Port MCP jest już używany.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="961"/>
+        <location filename="../libs/core/src/error.cpp" line="963"/>
         <source>Another HARDWARIO Monitor, `hwio mcp --http` or another MCP server (for example rttt) is listening on it.</source>
         <comment>mcp.port_in_use cause</comment>
         <translation>Nasłuchuje na nim inny HARDWARIO Monitor, `hwio mcp --http` lub inny serwer MCP (na przykład rttt).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="965"/>
+        <location filename="../libs/core/src/error.cpp" line="967"/>
         <source>Stop the other server or choose another port with --port.</source>
         <comment>mcp.port_in_use suggestion</comment>
         <translation>Zatrzymaj drugi serwer lub wybierz inny port opcją --port.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="971"/>
+        <location filename="../libs/core/src/error.cpp" line="973"/>
         <source>The MCP server could not start.</source>
         <comment>mcp.listen_failed message</comment>
         <translation>Nie udało się uruchomić serwera MCP.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="973"/>
+        <location filename="../libs/core/src/error.cpp" line="975"/>
         <source>The operating system refused to open the listening socket on 127.0.0.1.</source>
         <comment>mcp.listen_failed cause</comment>
         <translation>System operacyjny odmówił otwarcia gniazda nasłuchującego na 127.0.0.1.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="976"/>
+        <location filename="../libs/core/src/error.cpp" line="978"/>
         <source>Choose another port with --port.</source>
         <comment>mcp.listen_failed suggestion</comment>
         <translation>Wybierz inny port opcją --port.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="981"/>
+        <location filename="../libs/core/src/error.cpp" line="983"/>
         <source>The MCP token file cannot be read or created.</source>
         <comment>mcp.token_file message</comment>
         <translation>Nie można odczytać ani utworzyć pliku z tokenem MCP.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="983"/>
+        <location filename="../libs/core/src/error.cpp" line="985"/>
         <source>The file or its folder has the wrong permissions, or the file does not contain a valid token.</source>
         <comment>mcp.token_file cause</comment>
         <translation>Plik lub jego folder ma nieprawidłowe uprawnienia albo plik nie zawiera prawidłowego tokenu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="987"/>
+        <location filename="../libs/core/src/error.cpp" line="989"/>
         <source>Check the file permissions, or delete the file to create a new token.</source>
         <comment>mcp.token_file suggestion</comment>
         <translation>Sprawdź uprawnienia pliku albo usuń plik, aby utworzyć nowy token.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="993"/>
+        <location filename="../libs/core/src/error.cpp" line="995"/>
         <source>This MCP tool is not allowed by the server.</source>
         <comment>mcp.tool_not_allowed message</comment>
         <translation>Serwer nie zezwala na to narzędzie MCP.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="995"/>
+        <location filename="../libs/core/src/error.cpp" line="997"/>
         <source>Destructive tools must be allowed when the server starts.</source>
         <comment>mcp.tool_not_allowed cause</comment>
         <translation>Na narzędzia destrukcyjne trzeba zezwolić przy uruchamianiu serwera.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="998"/>
+        <location filename="../libs/core/src/error.cpp" line="1000"/>
         <source>Start the server with --allow and the tool&apos;s category, or with --allow all.</source>
         <comment>mcp.tool_not_allowed suggestion</comment>
         <translation>Uruchom serwer z --allow i kategorią narzędzia albo z --allow all.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1005"/>
+        <location filename="../libs/core/src/error.cpp" line="1007"/>
         <source>The user did not allow this action.</source>
         <comment>mcp.consent_denied message</comment>
         <translation>Użytkownik nie zezwolił na tę czynność.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1007"/>
+        <location filename="../libs/core/src/error.cpp" line="1009"/>
         <source>The user declined the permission request in HARDWARIO Monitor.</source>
         <comment>mcp.consent_denied cause</comment>
         <translation>Użytkownik odrzucił prośbę o zgodę w HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1011"/>
+        <location filename="../libs/core/src/error.cpp" line="1013"/>
         <source>Ask the user to allow it in HARDWARIO Monitor.</source>
         <comment>mcp.consent_denied suggestion</comment>
         <translation>Poproś użytkownika, aby zezwolił na nią w HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1016"/>
+        <location filename="../libs/core/src/error.cpp" line="1018"/>
         <source>Nobody answered the permission request.</source>
         <comment>mcp.consent_timeout message</comment>
         <translation>Nikt nie odpowiedział na prośbę o zgodę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1018"/>
+        <location filename="../libs/core/src/error.cpp" line="1020"/>
         <source>The permission request in HARDWARIO Monitor was not answered within 2 minutes.</source>
         <comment>mcp.consent_timeout cause</comment>
         <translation>Nikt nie odpowiedział na prośbę o zgodę w HARDWARIO Monitor w ciągu 2 minut.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1022"/>
+        <location filename="../libs/core/src/error.cpp" line="1024"/>
         <source>Ask the user to watch HARDWARIO Monitor and try again.</source>
         <comment>mcp.consent_timeout suggestion</comment>
         <translation>Poproś użytkownika, aby obserwował HARDWARIO Monitor, i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1028"/>
+        <location filename="../libs/core/src/error.cpp" line="1030"/>
         <source>Several devices are connected and the tool does not know which one to use.</source>
         <comment>mcp.device_ambiguous message</comment>
         <translation>Połączonych jest kilka urządzeń i narzędzie nie wie, którego użyć.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1032"/>
+        <location filename="../libs/core/src/error.cpp" line="1034"/>
         <source>The device argument was left out while more than one device is open.</source>
         <comment>mcp.device_ambiguous cause</comment>
         <translation>Pominięto argument device, a otwartych jest więcej urządzeń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1035"/>
+        <location filename="../libs/core/src/error.cpp" line="1037"/>
         <source>Pass the device argument; list_devices shows the ids.</source>
         <comment>mcp.device_ambiguous suggestion</comment>
         <translation>Podaj argument device; identyfikatory pokazuje list_devices.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1041"/>
+        <location filename="../libs/core/src/error.cpp" line="1043"/>
         <source>The device is not connected.</source>
         <comment>mcp.device_not_open message</comment>
         <translation>Urządzenie nie jest połączone.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1043"/>
+        <location filename="../libs/core/src/error.cpp" line="1045"/>
         <source>It was never connected, it was disconnected, or its tab was closed.</source>
         <comment>mcp.device_not_open cause</comment>
         <translation>Nigdy nie zostało połączone, zostało rozłączone lub jego karta została zamknięta.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1046"/>
+        <location filename="../libs/core/src/error.cpp" line="1048"/>
         <source>Call connect first.</source>
         <comment>mcp.device_not_open suggestion</comment>
         <translation>Najpierw wywołaj connect.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1051"/>
+        <location filename="../libs/core/src/error.cpp" line="1053"/>
         <source>This tool needs a J-Link connection.</source>
         <comment>mcp.capability_missing message</comment>
         <translation>To narzędzie wymaga połączenia przez J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1053"/>
+        <location filename="../libs/core/src/error.cpp" line="1055"/>
         <source>The device is connected over Bluetooth, which provides only the console.</source>
         <comment>mcp.capability_missing cause</comment>
         <translation>Urządzenie jest połączone przez Bluetooth, który udostępnia tylko konsolę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1057"/>
+        <location filename="../libs/core/src/error.cpp" line="1059"/>
         <source>Connect the device with a J-Link probe.</source>
         <comment>mcp.capability_missing suggestion</comment>
         <translation>Połącz urządzenie za pomocą programatora J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1062"/>
+        <location filename="../libs/core/src/error.cpp" line="1064"/>
         <source>Too many MCP requests are running.</source>
         <comment>mcp.too_many_requests message</comment>
         <translation>Trwa zbyt wiele żądań MCP.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1064"/>
+        <location filename="../libs/core/src/error.cpp" line="1066"/>
         <source>The server runs at most 32 tool calls at the same time.</source>
         <comment>mcp.too_many_requests cause</comment>
         <translation>Serwer wykonuje jednocześnie najwyżej 32 wywołania narzędzi.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1068"/>
+        <location filename="../libs/core/src/error.cpp" line="1070"/>
         <source>Wait for running calls to finish and try again.</source>
         <comment>mcp.too_many_requests suggestion</comment>
         <translation>Poczekaj na zakończenie trwających wywołań i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1074"/>
+        <location filename="../libs/core/src/error.cpp" line="1076"/>
         <source>The CPU is running.</source>
         <comment>target.not_halted message</comment>
         <translation>Procesor pracuje.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1076"/>
+        <location filename="../libs/core/src/error.cpp" line="1078"/>
         <source>Registers can be read only while the core is halted.</source>
         <comment>target.not_halted cause</comment>
         <translation>Rejestry można odczytać tylko przy zatrzymanym rdzeniu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1078"/>
+        <location filename="../libs/core/src/error.cpp" line="1080"/>
         <source>Halt the core first.</source>
         <comment>target.not_halted suggestion</comment>
         <translation>Najpierw zatrzymaj rdzeń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1084"/>
+        <location filename="../libs/core/src/error.cpp" line="1086"/>
         <source>The address range is not allowed for this operation.</source>
         <comment>target.address_out_of_range message</comment>
         <translation>Ten zakres adresów jest niedozwolony dla tej operacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1086"/>
+        <location filename="../libs/core/src/error.cpp" line="1088"/>
         <source>Memory writes are allowed only in the RAM and peripheral ranges of the target.</source>
         <comment>target.address_out_of_range cause</comment>
         <translation>Zapis do pamięci jest dozwolony tylko w zakresach RAM i peryferiów docelowego MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1090"/>
+        <location filename="../libs/core/src/error.cpp" line="1092"/>
         <source>Use an address inside the RAM or peripheral ranges of the target.</source>
         <comment>target.address_out_of_range suggestion</comment>
         <translation>Użyj adresu z zakresów RAM lub peryferiów docelowego MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1096"/>
+        <location filename="../libs/core/src/error.cpp" line="1098"/>
         <source>Reading or writing target memory failed.</source>
         <comment>target.memory_access_failed message</comment>
         <translation>Odczyt lub zapis pamięci docelowego MCU nie powiódł się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1098"/>
+        <location filename="../libs/core/src/error.cpp" line="1100"/>
         <source>The address is not mapped, or the core is in a fault state.</source>
         <comment>target.memory_access_failed cause</comment>
         <translation>Adres nie jest zmapowany lub rdzeń jest w stanie błędu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1102"/>
+        <location filename="../libs/core/src/error.cpp" line="1104"/>
         <source>Check the address and try again after a reset.</source>
         <comment>target.memory_access_failed suggestion</comment>
         <translation>Sprawdź adres i spróbuj ponownie po resecie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1107"/>
+        <location filename="../libs/core/src/error.cpp" line="1109"/>
         <source>The output file already exists.</source>
         <comment>io.file_exists message</comment>
         <translation>Plik wyjściowy już istnieje.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1109"/>
+        <location filename="../libs/core/src/error.cpp" line="1111"/>
         <source>Existing files are never overwritten by this command.</source>
         <comment>io.file_exists cause</comment>
         <translation>To polecenie nigdy nie nadpisuje istniejących plików.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1113"/>
+        <location filename="../libs/core/src/error.cpp" line="1115"/>
         <source>Choose a new file name or delete the file first.</source>
         <comment>io.file_exists suggestion</comment>
         <translation>Wybierz nową nazwę pliku lub najpierw usuń plik.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1118"/>
+        <location filename="../libs/core/src/error.cpp" line="1120"/>
         <source>The installed J-Link software does not provide a function this operation needs.</source>
         <comment>dependency.jlink_function_missing message</comment>
         <translation>Zainstalowane oprogramowanie J-Link nie udostępnia funkcji wymaganej przez tę operację.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1122"/>
+        <location filename="../libs/core/src/error.cpp" line="1124"/>
         <source>The J-Link library is older than, or different from, the versions HARDWARIO Monitor was tested with.</source>
         <comment>dependency.jlink_function_missing cause</comment>
         <translation>Biblioteka J-Link jest starsza od wersji, z którymi testowano HARDWARIO Monitor, lub się od nich różni.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1126"/>
+        <location filename="../libs/core/src/error.cpp" line="1128"/>
         <source>Install the latest J-Link Software and Documentation Pack.</source>
         <comment>dependency.jlink_function_missing suggestion</comment>
         <translation>Zainstaluj najnowszy J-Link Software and Documentation Pack.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1132"/>
+        <location filename="../libs/core/src/error.cpp" line="1134"/>
         <source>The downloaded firmware is damaged (checksum mismatch).</source>
         <comment>firmware.checksum_mismatch message</comment>
         <translation>Pobrany firmware jest uszkodzony (niezgodna suma kontrolna).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1136"/>
+        <location filename="../libs/core/src/error.cpp" line="1138"/>
         <source>The file was changed or damaged during the download.</source>
         <comment>firmware.checksum_mismatch cause</comment>
         <translation>Plik został zmieniony lub uszkodzony podczas pobierania.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1139"/>
+        <location filename="../libs/core/src/error.cpp" line="1141"/>
         <source>Try again; if it repeats, report it to HARDWARIO.</source>
         <comment>firmware.checksum_mismatch suggestion</comment>
         <translation>Spróbuj ponownie; jeśli problem się powtarza, zgłoś go firmie HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1146"/>
+        <location filename="../libs/core/src/error.cpp" line="1148"/>
         <source>Could not reach GitHub to check for updates.</source>
         <comment>update.network message</comment>
         <translation>Nie udało się połączyć z GitHubem, aby sprawdzić dostępność aktualizacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1148"/>
+        <location filename="../libs/core/src/error.cpp" line="1150"/>
         <source>There is no internet connection, or a firewall or proxy blocks GitHub.</source>
         <comment>update.network cause</comment>
         <translation>Brak połączenia z internetem albo zapora sieciowa lub serwer proxy blokuje GitHub.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1151"/>
+        <location filename="../libs/core/src/error.cpp" line="1153"/>
         <source>Check your connection or try again later.</source>
         <comment>update.network suggestion</comment>
         <translation>Sprawdź połączenie lub spróbuj ponownie później.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1157"/>
+        <location filename="../libs/core/src/error.cpp" line="1159"/>
         <source>GitHub temporarily refused the update check.</source>
         <comment>update.rate_limited message</comment>
         <translation>GitHub tymczasowo odrzucił sprawdzanie aktualizacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1159"/>
+        <location filename="../libs/core/src/error.cpp" line="1161"/>
         <source>GitHub limits how often a network address may ask; other computers on the same network may have used up the limit.</source>
         <comment>update.rate_limited cause</comment>
         <translation>GitHub ogranicza, jak często można wysyłać zapytania z jednego adresu sieciowego; limit mogły wyczerpać inne komputery w tej samej sieci.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1164"/>
+        <location filename="../libs/core/src/error.cpp" line="1166"/>
         <source>Try again in an hour.</source>
         <comment>update.rate_limited suggestion</comment>
         <translation>Spróbuj ponownie za godzinę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1170"/>
-        <location filename="../libs/core/src/error.cpp" line="1187"/>
+        <location filename="../libs/core/src/error.cpp" line="1172"/>
+        <location filename="../libs/core/src/error.cpp" line="1189"/>
         <source>The update information from GitHub could not be read.</source>
         <comment>update.bad_response message</comment>
         <translation>Nie udało się odczytać informacji o aktualizacjach z GitHuba.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1173"/>
-        <location filename="../libs/core/src/error.cpp" line="1190"/>
+        <location filename="../libs/core/src/error.cpp" line="1175"/>
+        <location filename="../libs/core/src/error.cpp" line="1192"/>
         <source>GitHub sent an unexpected answer, or a proxy changed it.</source>
         <comment>update.bad_response cause</comment>
         <translation>GitHub wysłał nieoczekiwaną odpowiedź lub zmienił ją serwer proxy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1177"/>
-        <location filename="../libs/core/src/error.cpp" line="1194"/>
+        <location filename="../libs/core/src/error.cpp" line="1179"/>
+        <location filename="../libs/core/src/error.cpp" line="1196"/>
         <source>Try again later; if it persists, check the releases page: https://github.com/hardwario/monitor/releases</source>
         <comment>update.bad_response suggestion</comment>
         <translation>Spróbuj ponownie później; jeśli problem nie ustąpi, zajrzyj na stronę wydań: https://github.com/hardwario/monitor/releases</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1204"/>
+        <location filename="../libs/core/src/error.cpp" line="1206"/>
         <source>The file name must be a plain name.</source>
         <comment>mcp.to_file_not_allowed message</comment>
         <translation>Nazwa pliku musi być samą nazwą (bez ścieżki).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1206"/>
+        <location filename="../libs/core/src/error.cpp" line="1208"/>
         <source>Memory dumps are written only into the server&apos;s dump folder.</source>
         <comment>mcp.to_file_not_allowed cause</comment>
         <translation>Zrzuty pamięci są zapisywane tylko w folderze zrzutów serwera.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1209"/>
+        <location filename="../libs/core/src/error.cpp" line="1211"/>
         <source>Use a plain file name such as flash.bin, or start the server with --dump-dir DIR.</source>
         <comment>mcp.to_file_not_allowed suggestion</comment>
         <translation>Użyj samej nazwy pliku, na przykład flash.bin, lub uruchom serwer z opcją --dump-dir DIR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1217"/>
+        <location filename="../libs/core/src/error.cpp" line="1219"/>
         <source>The output file is a symbolic link.</source>
         <comment>cli.file_is_symlink message</comment>
         <translation>Plik wyjściowy jest dowiązaniem symbolicznym.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1219"/>
+        <location filename="../libs/core/src/error.cpp" line="1221"/>
         <source>Symbolic links are never followed or replaced, even with --force.</source>
         <comment>cli.file_is_symlink cause</comment>
         <translation>Dowiązania symboliczne nigdy nie są śledzone ani zastępowane, nawet z opcją --force.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1223"/>
+        <location filename="../libs/core/src/error.cpp" line="1225"/>
         <source>Choose another file name or remove the link first.</source>
         <comment>cli.file_is_symlink suggestion</comment>
         <translation>Wybierz inną nazwę pliku lub najpierw usuń dowiązanie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1230"/>
+        <location filename="../libs/core/src/error.cpp" line="1232"/>
         <source>Every user account on this computer can use the J-Link (USB permissions).</source>
         <comment>usb.world_accessible message</comment>
         <translation>Każde konto użytkownika na tym komputerze może używać J-Linka (uprawnienia USB).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1234"/>
+        <location filename="../libs/core/src/error.cpp" line="1236"/>
         <source>A udev rule, usually /etc/udev/rules.d/99-jlink.rules from the SEGGER J-Link Software, makes the probe accessible to all accounts.</source>
         <comment>usb.world_accessible cause</comment>
         <translation>Reguła udev, zwykle /etc/udev/rules.d/99-jlink.rules z SEGGER J-Link Software, udostępnia programator wszystkim kontom.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1239"/>
+        <location filename="../libs/core/src/error.cpp" line="1241"/>
         <source>Remove that rule (or its MODE=&quot;0666&quot;), install the rule shown in the setup wizard, then reconnect the J-Link. A J-Link Software update may install the rule again.</source>
         <comment>usb.world_accessible suggestion</comment>
         <translation>Usuń tę regułę (lub jej MODE=&quot;0666&quot;), zainstaluj regułę pokazaną w kreatorze konfiguracji, a następnie ponownie podłącz J-Link. Aktualizacja J-Link Software może ponownie zainstalować tę regułę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1250"/>
+        <location filename="../libs/core/src/error.cpp" line="1252"/>
         <source>The J-Link is connected to another MCU of the device.</source>
         <comment>target.other_connector message</comment>
         <translation>J-Link jest podłączony do innego MCU urządzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1253"/>
+        <location filename="../libs/core/src/error.cpp" line="1255"/>
         <source>The console runs on another MCU; the J-Link cable is on the other connector.</source>
         <comment>target.other_connector cause</comment>
         <translation>Konsola działa na innym MCU; kabel J-Linka jest podłączony do drugiego złącza.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1257"/>
+        <location filename="../libs/core/src/error.cpp" line="1259"/>
         <source>Move the J-Link cable to the connector of the console&apos;s MCU, or update the LTE firmware.</source>
         <comment>target.other_connector suggestion</comment>
         <translation>Przełóż kabel J-Linka do złącza MCU konsoli albo zaktualizuj firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1269"/>
+        <location filename="../libs/core/src/error.cpp" line="1271"/>
         <source>The LTE MCU was reset during the update.</source>
         <comment>target.reset_during_update message</comment>
         <translation>MCU LTE został zresetowany podczas aktualizacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1271"/>
+        <location filename="../libs/core/src/error.cpp" line="1273"/>
         <source>The application firmware on the application MCU reset the LTE MCU through its reset pin while the LTE MCU was being updated.</source>
         <comment>target.reset_during_update cause</comment>
         <translation>Firmware aplikacji na MCU aplikacji zresetował MCU LTE przez jego pin resetu podczas aktualizacji MCU LTE.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1276"/>
+        <location filename="../libs/core/src/error.cpp" line="1278"/>
         <source>Use the guided update, which stops the application first: Flash › Update LTE firmware… in the desktop app, or `hwio chester lte flash --guided`.</source>
         <comment>target.reset_during_update suggestion</comment>
         <translation>Użyj aktualizacji z przewodnikiem, która najpierw zatrzymuje aplikację: Wgraj FW › Aktualizuj firmware LTE… w aplikacji desktopowej albo `hwio chester lte flash --guided`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1285"/>
+        <location filename="../libs/core/src/error.cpp" line="1287"/>
         <source>Cannot reach the support server.</source>
         <comment>remote.relay_unreachable message</comment>
         <translation>Nie można połączyć się z serwerem wsparcia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1287"/>
+        <location filename="../libs/core/src/error.cpp" line="1289"/>
         <source>The network, a proxy or a firewall blocks the connection to the support server (wss://terminal.hardwario.com).</source>
         <comment>remote.relay_unreachable cause</comment>
         <translation>Sieć, serwer proxy lub zapora blokuje połączenie z serwerem wsparcia (wss://terminal.hardwario.com).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1291"/>
+        <location filename="../libs/core/src/error.cpp" line="1293"/>
         <source>Check the internet connection or try another network.</source>
         <comment>remote.relay_unreachable suggestion</comment>
         <translation>Sprawdź połączenie z internetem lub spróbuj innej sieci.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1297"/>
+        <location filename="../libs/core/src/error.cpp" line="1299"/>
         <source>The session code is not valid.</source>
         <comment>remote.code_invalid message</comment>
         <translation>Kod sesji jest nieprawidłowy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1299"/>
+        <location filename="../libs/core/src/error.cpp" line="1301"/>
         <source>The session code must be a number: 6 digits from HARDWARIO Monitor, up to 6 digits from the web Terminal.</source>
         <comment>remote.code_invalid cause</comment>
         <translation>Kod sesji musi być liczbą: 6 cyfr z HARDWARIO Monitor, do 6 cyfr z Terminala webowego.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1303"/>
+        <location filename="../libs/core/src/error.cpp" line="1305"/>
         <source>Check the code and type it again.</source>
         <comment>remote.code_invalid suggestion</comment>
         <translation>Sprawdź kod i wpisz go ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1308"/>
+        <location filename="../libs/core/src/error.cpp" line="1310"/>
         <source>Another device is using this session code.</source>
         <comment>remote.code_collision message</comment>
         <translation>Inne urządzenie używa tego kodu sesji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1310"/>
+        <location filename="../libs/core/src/error.cpp" line="1312"/>
         <source>Someone else shares a console under the same session code. The session was ended for safety.</source>
         <comment>remote.code_collision cause</comment>
         <translation>Ktoś inny udostępnia konsolę pod tym samym kodem sesji. Ze względów bezpieczeństwa sesja została zakończona.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1314"/>
+        <location filename="../libs/core/src/error.cpp" line="1316"/>
         <source>Start sharing again to get a new code.</source>
         <comment>remote.code_collision suggestion</comment>
         <translation>Rozpocznij udostępnianie ponownie, aby otrzymać nowy kod.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1319"/>
+        <location filename="../libs/core/src/error.cpp" line="1321"/>
         <source>The customer did not allow you to join.</source>
         <comment>remote.join_not_allowed message</comment>
         <translation>Klient nie zezwolił Ci na dołączenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1321"/>
+        <location filename="../libs/core/src/error.cpp" line="1323"/>
         <source>The customer ended the session instead of allowing you, or did not answer within 2 minutes.</source>
         <comment>remote.join_not_allowed cause</comment>
         <translation>Klient zakończył sesję zamiast Ci zezwolić lub nie odpowiedział w ciągu 2 minut.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1325"/>
+        <location filename="../libs/core/src/error.cpp" line="1327"/>
         <source>Ask the customer to share the console again and to allow you when you join.</source>
         <comment>remote.join_not_allowed suggestion</comment>
         <translation>Poproś klienta, aby ponownie udostępnił konsolę i zezwolił Ci, gdy dołączysz.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1332"/>
+        <location filename="../libs/core/src/error.cpp" line="1334"/>
         <source>The remote session ended.</source>
         <comment>remote.host_ended message</comment>
         <translation>Sesja zdalna została zakończona.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1334"/>
+        <location filename="../libs/core/src/error.cpp" line="1336"/>
         <source>The customer ended sharing, or their device or HARDWARIO Monitor disconnected.</source>
         <comment>remote.host_ended cause</comment>
         <translation>Klient zakończył udostępnianie albo jego urządzenie lub HARDWARIO Monitor zostało odłączone.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1338"/>
+        <location filename="../libs/core/src/error.cpp" line="1340"/>
         <source>Ask the customer to share the console again if you need more time.</source>
         <comment>remote.host_ended suggestion</comment>
         <translation>Jeśli potrzebujesz więcej czasu, poproś klienta o ponowne udostępnienie konsoli.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1344"/>
+        <location filename="../libs/core/src/error.cpp" line="1346"/>
         <source>The customer denied the request.</source>
         <comment>remote.operation_denied message</comment>
         <translation>Klient odrzucił prośbę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1346"/>
+        <location filename="../libs/core/src/error.cpp" line="1348"/>
         <source>The customer denied the operation, or did not answer within 60 seconds.</source>
         <comment>remote.operation_denied cause</comment>
         <translation>Klient odrzucił operację lub nie odpowiedział w ciągu 60 sekund.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1349"/>
+        <location filename="../libs/core/src/error.cpp" line="1351"/>
         <source>Ask the customer to allow the operation and try again.</source>
         <comment>remote.operation_denied suggestion</comment>
         <translation>Poproś klienta o zezwolenie na operację i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1355"/>
+        <location filename="../libs/core/src/error.cpp" line="1357"/>
         <source>The customer&apos;s application supports only the console.</source>
         <comment>remote.operation_unsupported_peer message</comment>
         <translation>Aplikacja klienta obsługuje tylko konsolę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1358"/>
+        <location filename="../libs/core/src/error.cpp" line="1360"/>
         <source>The customer uses the web Terminal, which cannot flash, erase, recover or reset the device remotely.</source>
         <comment>remote.operation_unsupported_peer cause</comment>
         <translation>Klient używa Terminala webowego, który nie potrafi zdalnie wgrać firmware, skasować, odblokować (recover) ani zresetować urządzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1362"/>
+        <location filename="../libs/core/src/error.cpp" line="1364"/>
         <source>Ask the customer to share the console from HARDWARIO Monitor.</source>
         <comment>remote.operation_unsupported_peer suggestion</comment>
         <translation>Poproś klienta o udostępnienie konsoli z HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1369"/>
+        <location filename="../libs/core/src/error.cpp" line="1371"/>
         <source>This firmware is not in the HARDWARIO catalog.</source>
         <comment>remote.firmware_not_in_catalog message</comment>
         <translation>Tego firmware nie ma w katalogu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1371"/>
+        <location filename="../libs/core/src/error.cpp" line="1373"/>
         <source>Remote flashing accepts only firmware from the HARDWARIO firmware catalog, identified by its ID.</source>
         <comment>remote.firmware_not_in_catalog cause</comment>
         <translation>Zdalne wgrywanie akceptuje tylko firmware z katalogu firmware HARDWARIO, wskazane jego identyfikatorem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1375"/>
+        <location filename="../libs/core/src/error.cpp" line="1377"/>
         <source>Check the firmware ID, or ask the customer to flash a file locally.</source>
         <comment>remote.firmware_not_in_catalog suggestion</comment>
         <translation>Sprawdź identyfikator firmware lub poproś klienta o lokalne wgranie pliku.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1381"/>
+        <location filename="../libs/core/src/error.cpp" line="1383"/>
         <source>Unexpected data in the remote session.</source>
         <comment>remote.protocol_error message</comment>
         <translation>Nieoczekiwane dane w sesji zdalnej.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1383"/>
+        <location filename="../libs/core/src/error.cpp" line="1385"/>
         <source>The support server or the other participant sent data that HARDWARIO Monitor does not understand. It was ignored, or the session was ended for safety.</source>
         <comment>remote.protocol_error cause</comment>
         <translation>Serwer wsparcia lub drugi uczestnik wysłał dane, których HARDWARIO Monitor nie rozumie. Zostały zignorowane albo sesja została zakończona ze względów bezpieczeństwa.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1388"/>
+        <location filename="../libs/core/src/error.cpp" line="1390"/>
         <source>Report the issue with a diagnostic report.</source>
         <comment>remote.protocol_error suggestion</comment>
         <translation>Zgłoś problem wraz z raportem diagnostycznym.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1393"/>
+        <location filename="../libs/core/src/error.cpp" line="1395"/>
         <source>The LTE firmware was updated, but the application was not written back.</source>
         <comment>remote.application_not_restored message</comment>
         <translation>Firmware LTE został zaktualizowany, ale aplikacja nie została zapisana z powrotem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1396"/>
+        <location filename="../libs/core/src/error.cpp" line="1398"/>
         <source>The guided LTE update ended before the application was written back, or no copy of the application could be saved. The application MCU is empty.</source>
         <comment>remote.application_not_restored cause</comment>
         <translation>Prowadzona aktualizacja LTE zakończyła się przed zapisaniem aplikacji z powrotem lub nie udało się zapisać kopii aplikacji. MCU aplikacji jest pusty.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1401"/>
+        <location filename="../libs/core/src/error.cpp" line="1403"/>
         <source>Flash an application: ask the customer to flash it, or ask to flash catalog firmware.</source>
         <comment>remote.application_not_restored suggestion</comment>
         <translation>Wgraj aplikację: poproś klienta o jej wgranie lub poproś o wgranie firmware z katalogu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1410"/>
+        <location filename="../libs/core/src/error.cpp" line="1412"/>
         <source>The LTE MCU reports too low supply voltage.</source>
         <comment>target.low_voltage message</comment>
         <translation>MCU LTE zgłasza zbyt niskie napięcie zasilania.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1412"/>
+        <location filename="../libs/core/src/error.cpp" line="1414"/>
         <source>The CHESTER is not powered enough (battery, power supply) or the J-Link cable does not connect the supply reference.</source>
         <comment>target.low_voltage cause</comment>
         <translation>CHESTER nie jest wystarczająco zasilany (bateria, zasilacz) lub kabel J-Link nie łączy napięcia odniesienia zasilania.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1416"/>
+        <location filename="../libs/core/src/error.cpp" line="1418"/>
         <source>Check the power supply or batteries of the CHESTER and the J-Link cable on the connector, then try again.</source>
         <comment>target.low_voltage suggestion</comment>
         <translation>Sprawdź zasilanie lub baterie CHESTER oraz kabel J-Link na złączu, a następnie spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1496"/>
+        <location filename="../libs/core/src/error.cpp" line="1456"/>
+        <source>The customer&apos;s app did not pass the command to the device.</source>
+        <comment>remote.command_not_delivered message</comment>
+        <translation>Aplikacja klienta nie przekazała polecenia do urządzenia.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1459"/>
+        <source>You are not allowed in the session yet, too many commands were sent per second, or the session is busy.</source>
+        <comment>remote.command_not_delivered cause</comment>
+        <translation>Nie masz jeszcze zezwolenia w sesji, wysłano zbyt wiele poleceń na sekundę albo sesja jest zajęta.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1464"/>
+        <source>Wait a moment and try again.</source>
+        <comment>remote.command_not_delivered suggestion</comment>
+        <translation>Poczekaj chwilę i spróbuj ponownie.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1470"/>
+        <source>The customer has not allowed you in the session yet.</source>
+        <comment>remote.waiting_for_customer message</comment>
+        <translation>Klient jeszcze nie zezwolił Ci na udział w sesji.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1473"/>
+        <source>The customer&apos;s HARDWARIO Monitor asks the customer before support can send commands.</source>
+        <comment>remote.waiting_for_customer cause</comment>
+        <translation>HARDWARIO Monitor klienta pyta klienta, zanim wsparcie może wysyłać polecenia.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1477"/>
+        <source>Ask the customer to allow you, then try again.</source>
+        <comment>remote.waiting_for_customer suggestion</comment>
+        <translation>Poproś klienta, aby Ci zezwolił, a następnie spróbuj ponownie.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1527"/>
         <source>Check the power supply of the CHESTER and the J-Link cable on the LTE connector, then click Try again.</source>
         <comment>suggestion of an LTE update failure in the guided update (ADR-0383)</comment>
         <translation>Sprawdź zasilanie CHESTER oraz kabel J-Link na złączu LTE, a następnie kliknij Spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1508"/>
+        <location filename="../libs/core/src/error.cpp" line="1539"/>
         <source>The output was closed.</source>
         <comment>cancelled message when the stdout was closed</comment>
         <translation>Wyjście zostało zamknięte.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1426"/>
+        <location filename="../libs/core/src/error.cpp" line="1428"/>
         <source>The customer&apos;s device has no such target, or this operation is not available on it remotely.</source>
         <comment>remote.target_unsupported message</comment>
         <translation>Urządzenie klienta nie ma takiego celu lub ta operacja nie jest na nim dostępna zdalnie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1430"/>
+        <location filename="../libs/core/src/error.cpp" line="1432"/>
         <source>The device or its firmware does not support it in a support session.</source>
         <comment>remote.target_unsupported cause</comment>
         <translation>Urządzenie lub jego firmware nie obsługuje jej w sesji zdalnego wsparcia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1433"/>
+        <location filename="../libs/core/src/error.cpp" line="1435"/>
         <source>Choose another operation or ask the customer to do it locally.</source>
         <comment>remote.target_unsupported suggestion</comment>
         <translation>Wybierz inną operację lub poproś klienta, aby wykonał ją lokalnie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1440"/>
+        <location filename="../libs/core/src/error.cpp" line="1442"/>
         <source>The customer&apos;s Monitor refused this command.</source>
         <comment>remote.command_refused message</comment>
         <translation>Monitor klienta odrzucił to polecenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1442"/>
+        <location filename="../libs/core/src/error.cpp" line="1444"/>
         <source>It would read or change the device&apos;s keys or identity, which is not possible in a support session.</source>
         <comment>remote.command_refused cause</comment>
         <translation>Odczytałoby lub zmieniłoby klucze albo tożsamość urządzenia, co w sesji zdalnego wsparcia nie jest możliwe.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1446"/>
+        <location filename="../libs/core/src/error.cpp" line="1448"/>
         <source>Ask the customer to run it locally if it is really needed.</source>
         <comment>remote.command_refused suggestion</comment>
         <translation>Jeśli jest naprawdę potrzebne, poproś klienta, aby uruchomił je lokalnie.</translation>
@@ -4978,37 +5014,37 @@
         <translation>J-Link %1 jest już używany przez tę aplikację.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="285"/>
+        <location filename="../libs/device/src/profile.cpp" line="286"/>
         <source>The range runs past the end of the address space.</source>
         <translation>Zakres wykracza poza koniec przestrzeni adresowej.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="287"/>
+        <location filename="../libs/device/src/profile.cpp" line="288"/>
         <source>Use a shorter range or a lower address.</source>
         <translation>Użyj krótszego zakresu lub niższego adresu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="303"/>
+        <location filename="../libs/device/src/profile.cpp" line="304"/>
         <source>The range overlaps system or debug registers of the CPU, through which a write could make the device run arbitrary code.</source>
         <translation>Zakres obejmuje rejestry systemowe lub debugowania procesora, przez które zapis mógłby spowodować uruchomienie dowolnego kodu na urządzeniu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="307"/>
+        <location filename="../libs/device/src/profile.cpp" line="308"/>
         <source>The range overlaps the flash controller registers, whose tasks erase flash, UICR and the product information.</source>
         <translation>Zakres obejmuje rejestry kontrolera flash, którego zadania wymazują flash, UICR i informacje o produkcie.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="339"/>
+        <location filename="../libs/device/src/profile.cpp" line="340"/>
         <source>The firmware writes into the Product Information Block (address %1).</source>
         <translation>Firmware zapisuje do bloku informacji o produkcie (PIB) (adres %1).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="355"/>
+        <location filename="../libs/device/src/profile.cpp" line="356"/>
         <source>The firmware does not fit the %1 MCU (address %2).</source>
         <translation>Firmware nie pasuje do MCU %1 (adres %2).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="358"/>
+        <location filename="../libs/device/src/profile.cpp" line="359"/>
         <source>Check that the firmware is for the %1 MCU.</source>
         <translation>Sprawdź, czy firmware jest przeznaczony dla MCU %1.</translation>
     </message>
@@ -6926,73 +6962,73 @@
         <translation>Łączenie urządzeń (otwiera kartę)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="170"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="172"/>
         <source>The AI assistant cancelled the request</source>
         <translation>Asystent AI anulował żądanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="86"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="88"/>
         <source>Writing memory can make the device run arbitrary code.</source>
         <translation>Zapis pamięci może sprawić, że urządzenie wykona dowolny kod.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="305"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="307"/>
         <source>An AI assistant</source>
         <translation>Asystent AI</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="313"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="315"/>
         <source>Allowed until disconnect: %1 — %2</source>
         <translation>Dozwolone do rozłączenia: %1 — %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="345"/>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="407"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="347"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="409"/>
         <source>Copied.</source>
         <translation>Skopiowano.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="382"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="384"/>
         <source>Claude Code (HTTP)</source>
         <translation>Claude Code (HTTP)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="385"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="387"/>
         <source>Claude Code (.mcp.json, token from HWIO_MCP_TOKEN)</source>
         <translation>Claude Code (.mcp.json, token z HWIO_MCP_TOKEN)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="388"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="390"/>
         <source>Claude Desktop (runs the hwio command separately)</source>
         <translation>Claude Desktop (uruchamia polecenie hwio osobno)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="389"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="391"/>
         <source>Runs separately from this window and cannot use a probe that is open here.</source>
         <translation>Działa niezależnie od tego okna i nie może użyć programatora otwartego tutaj.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="406"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="408"/>
         <source>Copied. Run it in a terminal.</source>
         <translation>Skopiowano. Uruchom to w terminalu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="415"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="417"/>
         <source>Off</source>
         <translation>Wyłączony</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="417"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="419"/>
         <source>Starting…</source>
         <translation>Uruchamianie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="419"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="421"/>
         <source>Listening</source>
         <translation>Nasłuchuje</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="420"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="422"/>
         <source>Listening · %n client(s)</source>
         <translation>
             <numerusform>Nasłuchuje · %n klient</numerusform>
@@ -7001,22 +7037,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="422"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="424"/>
         <source>Stopping…</source>
         <translation>Zatrzymywanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="425"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="427"/>
         <source>Port %1 is in use by another program — choose another port</source>
         <translation>Port %1 jest używany przez inny program — wybierz inny port</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="436"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="438"/>
         <source>AI assistants: listening on port %1</source>
         <translation>Asystenci AI: nasłuchuje na porcie %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="437"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="439"/>
         <source>AI assistants: listening on port %1, %n client(s)</source>
         <translation>
             <numerusform>Asystenci AI: nasłuchuje na porcie %1, %n klient</numerusform>
@@ -7025,12 +7061,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="445"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="447"/>
         <source>AI assistants: %1</source>
         <translation>Asystenci AI: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="654"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="656"/>
         <source>%1 (tab %2)</source>
         <translation>%1 (karta %2)</translation>
     </message>
@@ -7435,52 +7471,52 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
 <context>
     <name>hwio::mcp</name>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="533"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="661"/>
         <source>— AI (%1): %2 —</source>
         <translation>— AI (%1): %2 —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="537"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="665"/>
         <source>— AI: %1 done in %2 s —</source>
         <translation>— AI: %1 ukończono w %2 s —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="542"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="670"/>
         <source>— AI: %1 failed: %2 —</source>
         <translation>— AI: %1 nie powiodło się: %2 —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="547"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="675"/>
         <source>— AI: %1 cancelled —</source>
         <translation>— AI: %1 anulowano —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="552"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="680"/>
         <source>AI: Flashing…</source>
         <translation>AI: Wgrywanie…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="555"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="683"/>
         <source>AI: Erasing…</source>
         <translation>AI: Wymazywanie…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="558"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="686"/>
         <source>AI: Recovering…</source>
         <translation>AI: Odzyskiwanie…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="561"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="689"/>
         <source>AI: Writing memory…</source>
         <translation>AI: Zapis do pamięci…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="564"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="692"/>
         <source>AI: Resetting…</source>
         <translation>AI: Resetowanie…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="566"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="694"/>
         <source>AI: %1…</source>
         <translation>AI: %1…</translation>
     </message>

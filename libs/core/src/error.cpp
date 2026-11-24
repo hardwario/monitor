@@ -160,6 +160,8 @@ consteval bool isEnumerator(ErrorCode code) {
     case ErrorCode::TargetLowVoltage:
     case ErrorCode::RemoteTargetUnsupported:
     case ErrorCode::RemoteCommandRefused:
+    case ErrorCode::RemoteCommandNotDelivered:
+    case ErrorCode::RemoteWaitingForCustomer:
         return true;
     }
     return false;
@@ -1446,6 +1448,35 @@ constexpr std::array defaultTexts{
         .suggestion = QT_TRANSLATE_NOOP3(
             "hwio::core", "Ask the customer to run it locally if it is really needed.",
             "remote.command_refused suggestion"),
+    },
+    // Plan 0062 (ADR-0438): the customer's Monitor did not pass an AI client's command to the
+    // device (no echo within 5 s). Support's side only.
+    DefaultTexts{
+        .code = ErrorCode::RemoteCommandNotDelivered,
+        .message = QT_TRANSLATE_NOOP3("hwio::core",
+                                      "The customer's app did not pass the command to the device.",
+                                      "remote.command_not_delivered message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "You are not allowed in the session yet, too many commands were sent per second, or "
+            "the session is busy.",
+            "remote.command_not_delivered cause"),
+        .suggestion = QT_TRANSLATE_NOOP3("hwio::core", "Wait a moment and try again.",
+                                         "remote.command_not_delivered suggestion"),
+    },
+    // Plan 0062 (ADR-0438): a command before the customer allowed support in the session.
+    DefaultTexts{
+        .code = ErrorCode::RemoteWaitingForCustomer,
+        .message =
+            QT_TRANSLATE_NOOP3("hwio::core", "The customer has not allowed you in the session yet.",
+                               "remote.waiting_for_customer message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "The customer's HARDWARIO Monitor asks the customer before support can send commands.",
+            "remote.waiting_for_customer cause"),
+        .suggestion =
+            QT_TRANSLATE_NOOP3("hwio::core", "Ask the customer to allow you, then try again.",
+                               "remote.waiting_for_customer suggestion"),
     },
 };
 

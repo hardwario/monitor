@@ -129,6 +129,9 @@ constexpr std::array mappings{
     // Plan 0059: an older joiner shows a refusal of the customer's Monitor.
     Mapping{.code = ErrorCode::RemoteTargetUnsupported, .baseline = "remote.operation_denied"},
     Mapping{.code = ErrorCode::RemoteCommandRefused, .baseline = "remote.operation_denied"},
+    // Plan 0062 (ADR-0438): support's side only, never sent over the wire; rows for completeness.
+    Mapping{.code = ErrorCode::RemoteCommandNotDelivered, .baseline = "timeout"},
+    Mapping{.code = ErrorCode::RemoteWaitingForCustomer, .baseline = "remote.join_not_allowed"},
 };
 
 } // namespace

@@ -92,6 +92,12 @@ Status GuiConsentBroker::setAlwaysAllowed(hwio::mcp::ConsentCategory category, b
 }
 
 bool GuiConsentBroker::covered(const hwio::mcp::ConsentRequest& request) const {
+    // Plan 0062 (ADR-0436): a customer's device is asked every time; neither a rule nor a client
+    // grant covers it (the session grant of RemoteDevice is kept by the remote tab).
+    if (request.remoteDevice ||
+        request.categories.testFlag(hwio::mcp::ConsentCategory::RemoteDevice)) {
+        return false;
+    }
     hwio::mcp::ConsentCategories granted;
     for (const Grant& grant : m_grants) {
         if (grant.clientKey == request.clientKey) {
@@ -186,6 +192,12 @@ void GuiConsentBroker::answer(std::uint64_t promptId, Answer answer) {
         return;
     case Answer::AllowForClient: {
         const hwio::mcp::ConsentRequest& request = prompt->request;
+        // Plan 0062 (ADR-0436): a customer's device is never remembered for a client.
+        if (request.remoteDevice ||
+            request.categories.testFlag(hwio::mcp::ConsentCategory::RemoteDevice)) {
+            finishCurrent(hwio::mcp::ConsentGrant::Prompted);
+            return;
+        }
         const auto it = std::ranges::find(m_grants, request.clientKey, &Grant::clientKey);
         if (it == m_grants.end()) {
             m_grants.push_back(Grant{.clientKey = request.clientKey,

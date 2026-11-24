@@ -32,10 +32,16 @@ enum class ConsentCategory : std::uint8_t {
     MemoryWrite = 4, // write_memory
     Uicr = 8,        // any write touching UICR (requested at run time)
     Connect = 16,    // opening a new device (GUI only; the CLI always allows it)
+    // Plan 0062 (ADR-0436): an AI client works with a customer's device in a joined remote
+    // support tab (reading included). A grant of one client for one remote device until the tab
+    // leaves the session, the session ends, the client goes away or Stop AI; never remembered,
+    // never an "always allow" rule, not in the GUI's "All" row, never set by the CLI's --allow.
+    RemoteDevice = 32,
 };
 Q_DECLARE_FLAGS(ConsentCategories, ConsentCategory)
 
-// Stable ids: "flash", "erase", "memory-write", "uicr", "connect" (the CLI --allow names).
+// Stable ids: "flash", "erase", "memory-write", "uicr", "connect" (the CLI --allow names),
+// "remote-device" (plan 0062; not an --allow name).
 [[nodiscard]] std::string_view consentCategoryId(ConsentCategory category) noexcept;
 [[nodiscard]] std::optional<ConsentCategory> consentCategoryFromId(std::string_view id) noexcept;
 // The ids of the set categories in the enum order.
@@ -49,6 +55,10 @@ struct ConsentRequest {
     ConsentCategories categories;
     // For the prompt, e.g. {"file": "...", "size": 123, "target": "app", "range": "0x...-0x..."}
     QJsonObject details;
+    // Plan 0062 (ADR-0436): the device is a customer's device in a joined remote support tab. A
+    // broker never answers such a request from an "always allow" rule or a client grant (it asks
+    // every time); the tools accept only ConsentGrant::Prompted for it.
+    bool remoteDevice = false;
 };
 
 // How an allowed request was allowed (plan 0050, ADR-0377), reported to the client in the

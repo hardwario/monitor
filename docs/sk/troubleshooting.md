@@ -108,7 +108,7 @@ Kódy chýb: [`target.reset_during_update`](#target.reset_during_update), [`targ
 
 HARDWARIO Monitor sa k serveru podpory `terminal.hardwario.com` pripája cez `wss` (HTTPS, port 443). Firewall alebo proxy, ktoré blokujú WebSockety, znemožnia zdieľanie aj pripojenie k relácii. Ak rovnaký kód relácie používa niekto iný (veľmi zriedkavé), zdieľanie sa z bezpečnostných dôvodov ukončí: spustite ho znova a dostanete nový kód. Ten, kto sa pripája a nie je do 2 minút povolený (alebo je odmietnutý), musí zákazníka požiadať, aby zdieľanie spustil znova. Pozrite si [Vzdialená podpora](remote-support.md).
 
-Kódy chýb: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored), [`remote.target_unsupported`](#remote.target_unsupported), [`remote.command_refused`](#remote.command_refused).
+Kódy chýb: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored), [`remote.target_unsupported`](#remote.target_unsupported), [`remote.command_refused`](#remote.command_refused), [`remote.command_not_delivered`](#remote.command_not_delivered), [`remote.waiting_for_customer`](#remote.waiting_for_customer).
 
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Firmvér LTE modemu potrebuje nRF Util
@@ -1001,6 +1001,26 @@ Podpora so staršou verziou HARDWARIO Monitor namiesto toho vidí `remote.operat
 
 - **Probably:** It would read or change the device's keys or identity, which is not possible in a support session.
 - **What to do:** Ask the customer to run it locally if it is really needed.
+
+<a id="remote.command_not_delivered"></a>
+#### `remote.command_not_delivered`
+
+**The customer's app did not pass the command to the device.**
+
+- **Probably:** You are not allowed in the session yet, too many commands were sent per second, or the session is busy.
+- **What to do:** Wait a moment and try again.
+
+Túto chybu dostane len klient AI, ktorý pracuje so zariadením zákazníka cez váš HARDWARIO Monitor.
+
+<a id="remote.waiting_for_customer"></a>
+#### `remote.waiting_for_customer`
+
+**The customer has not allowed you in the session yet.**
+
+- **Probably:** The customer's HARDWARIO Monitor asks the customer before support can send commands.
+- **What to do:** Ask the customer to allow you, then try again.
+
+Túto chybu dostane len klient AI, ktorý pracuje so zariadením zákazníka cez váš HARDWARIO Monitor.
 
 <a id="usage.confirmation_required"></a>
 #### `usage.confirmation_required`

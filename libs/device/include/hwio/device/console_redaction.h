@@ -38,6 +38,9 @@ public:
     // The text of `line` with its secret replaced, nullopt when the line has none (write
     // line.text as it is).
     [[nodiscard]] std::optional<std::string> redacted(const ConsoleLine& line) const;
+    // Plan 0062 (ADR-0437): the command line sets a secret (one of the sensitive command prefixes
+    // with an argument); an AI client's such command is never sent to a customer's device.
+    [[nodiscard]] bool setsSecret(std::string_view command) const noexcept;
 
 private:
     // nullptr = an unknown profile (redacts nothing).

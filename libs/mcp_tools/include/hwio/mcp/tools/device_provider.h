@@ -16,9 +16,17 @@
 // the user opened or closed a GUI tab). ToolsContext turns it into resources/list_changed and
 // (re)connects to the sessions' linesReceived / connectionChanged for resources/updated.
 //
+// Plan 0062 (ADR-0433..0438): a joined remote support tab is a device of kind "remote" with the
+// id "remote:<n>" (a counter of this run, never the session code). Its DeviceRef holds the tab's
+// console session (the log the tools read) and an IRemoteDevice (below), through which the tools
+// send commands, request operations and see every line in the hidden view; DeviceRef::jlink is
+// null. A provider without remote support (the CLI) never lists one.
+//
 // Thread safety: owner thread only (ADR-0097).
 
 #include "hwio/core/result.h"
+#include "hwio/device/console_line.h"
+#include "hwio/device/console_redaction.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/probe_lock.h"
@@ -29,6 +37,7 @@
 #include <QPointer>
 #include <QString>
 
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <optional>
@@ -38,9 +47,145 @@
 
 namespace hwio::mcp::tools {
 
+// ---- remote support tabs (plan 0062)
+// -------------------------------------------------------------
+
+// Support's state in the customer's session (the joiner's RemoteConsoleSession::JoinState).
+enum class RemoteJoin : std::uint8_t { Connecting, Waiting, Allowed, Ended };
+// "connecting", "waiting", "allowed", "ended"
+[[nodiscard]] std::string_view remoteJoinId(RemoteJoin join) noexcept;
+
+// Who hosts the session: a HARDWARIO Monitor (it sent a hello), or a host without a hello (the web
+// Terminal or the mobile app).
+enum class RemoteHost : std::uint8_t { Monitor, Other };
+// "monitor", "other"
+[[nodiscard]] std::string_view remoteHostId(RemoteHost host) noexcept;
+
+// The operations an AI client may request on a customer's device (D8, ADR-0434).
+enum class RemoteOperationKind : std::uint8_t { Flash, Reset, LteUpdate };
+// "flash", "reset", "lteUpdate" (the tunnel's kind ids)
+[[nodiscard]] std::string_view remoteOperationKindId(RemoteOperationKind kind) noexcept;
+
+// NOLINTBEGIN(readability-redundant-member-init): the {} initializers keep fields optional in
+// designated initializers (-Wmissing-designated-field-initializers), as in remote/tunnel.h.
+// ADR-0418: a firmware the host prepared (texts from the host's hello, already bounded there).
+struct RemotePreparedFirmware {
+    std::string id;     // a name ("release")
+    std::string name{}; // "STICKER"
+    std::string version{};
+};
+
+// What the host offers on one target, reduced to RemoteOperationKind. The LTE update has no
+// target (`target` empty).
+struct RemoteTargetOffer {
+    std::string target;                     // "app"; "" for the LTE update
+    std::vector<RemoteOperationKind> kinds; // no duplicates
+    bool catalog = false;                   // flash with a catalog firmware ID
+    std::vector<RemotePreparedFirmware> prepared{};
+};
+
+// Bounds of RemoteInfo (the tunnel's: 8 targets plus the LTE update, 4 prepared per target).
+inline constexpr std::size_t maxRemoteOffers = 9;
+inline constexpr std::size_t maxRemotePrepared = 4;
+
+struct RemoteInfo {
+    RemoteHost host = RemoteHost::Other;
+    RemoteJoin join = RemoteJoin::Connecting;
+    bool commands = true; // the host shares a console (false: an operations-only session)
+    std::vector<RemoteTargetOffer> operations{}; // at most maxRemoteOffers
+};
+
+// A request of RemoteOperationKind (the joiner's op-request: catalog flash, prepared flash, reset,
+// LTE update with the host's recommended firmware).
+struct RemoteOperationRequest {
+    RemoteOperationKind kind = RemoteOperationKind::Reset;
+    std::string target{};                    // flash / reset; "" for the LTE update
+    std::optional<std::string> firmwareId{}; // flash: a catalog firmware ID
+    std::optional<std::string> prepared{};   // flash: a prepared firmware id of the offer
+};
+
+using RemoteOperationId = std::uint64_t;
+
+struct RemoteOperationProgress {
+    enum class Stage : std::uint8_t {
+        WaitingForCustomer, // sent; the customer has not accepted yet
+        Running,
+        WaitingForSupport, // ADR-0368: a question for the support person (D13)
+    };
+    Stage stage = Stage::Running;
+    std::string phase{}; // ProgramPhase id of the host ("download", "erasing", ...), "" = unknown
+    int step = 1;
+    int steps = 1;
+    std::uint64_t done = 0;
+    std::uint64_t total = 0; // 0 = indeterminate
+};
+
+// NOLINTEND(readability-redundant-member-init)
+
+struct RemoteOperationCallbacks {
+    std::function<void(const RemoteOperationProgress&)> progress; // any number, before done
+    // Exactly once (owner thread, possibly before requestOperation() returns) unless the
+    // operation was detached first: success, or the host's / the client's error
+    // (remote.operation_denied, the op-result's error id, timeout, remote.host_ended, ...).
+    std::function<void(hwio::Status)> done;
+};
+
+// A joined remote support tab as the MCP tools see it (ADR-0434..0438). Implemented by the GUI over
+// the tab's RemoteConsoleSession and its RemoteOperationClient (libs/mcp_tools does not depend on
+// libs/remote). Owner thread (the GUI thread) only; the object lives as long as the tab is in the
+// session (a QPointer in DeviceRef).
+//
+// The session code: the tools never get it. hiddenText() is the only place that knows it; it
+// replaces it (RemoteHiddenView, remote_hidden_view.h, implements the whole rule).
+class IRemoteDevice : public QObject {
+    Q_OBJECT
+
+public:
+    using QObject::QObject;
+
+    // Host kind, join state and the operations the host offers (as the tools may request them).
+    [[nodiscard]] virtual RemoteInfo info() const = 0;
+    // A plain remote line, exactly as a person's (RemoteConsoleSession::sendLine); `who` is for
+    // the GUI's activity. Errors: those of RemoteConsoleSession::sendLine.
+    [[nodiscard]] virtual hwio::Status sendLine(std::string line,
+                                                const hwio::mcp::RequestContext& who) = 0;
+    // One at a time per tab (internal.busy for another; also while a person's request runs).
+    // Errors before sending: the joiner's hostOffers() errors, internal.busy, remote.host_ended.
+    [[nodiscard]] virtual hwio::Result<RemoteOperationId>
+    requestOperation(const RemoteOperationRequest& request, const hwio::mcp::RequestContext& who,
+                     RemoteOperationCallbacks callbacks) = 0;
+    // D12: stop waiting. No further callback; the tab keeps following the operation to its result
+    // and stays busy until then. Unknown ids are ignored.
+    virtual void detachOperation(RemoteOperationId id) = 0;
+    // The redaction of the host's profile (CHESTER without a hello).
+    [[nodiscard]] virtual hwio::device::ConsoleRedaction redaction() const = 0;
+    // ADR-0437: the text of `line` (englishText) as an AI client may see it: redaction(), then the
+    // session code (plain and grouped) replaced with "<session>" (RemoteHiddenView::text()).
+    [[nodiscard]] virtual std::string hiddenText(const hwio::device::ConsoleLine& line) const = 0;
+    // ADR-0436: support allowed this client (RequestContext::clientKey) for this tab. The grant is
+    // kept here: it ends with the tab or the session, with Stop AI and when the client goes away
+    // (the GUI calls revoke and emits aiRevoked).
+    [[nodiscard]] virtual bool aiAllowed(std::string_view clientKey) const = 0;
+    // Records support's "Allow for this session" for `who` (the tools call it after the prompt).
+    virtual void allowAi(const hwio::mcp::RequestContext& who) = 0;
+
+signals:
+    // The host refused one of support's lines (tunnel line-refused; `code` an hwio::Error id).
+    void lineRefused(const QString& code);
+    // The grant of `clientKey` ended ("" = of every client): the client's running calls end with
+    // `cancelled`.
+    void aiRevoked(const QString& clientKey);
+    // info() changed (join state, host hello).
+    void infoChanged();
+};
+
+// ---- devices
+// -------------------------------------------------------------------------------------
+
 struct DeviceEntry {
-    std::string id;          // "jlink:<SN>" | "ble:<id>" (ADR-0098; SessionKey ProbeKey/BleKey)
-    std::string kind;        // "jlink" | "ble"
+    std::string id;          // "jlink:<SN>" | "ble:<id>" (ADR-0098; SessionKey ProbeKey/BleKey) |
+                             // "remote:<n>" (plan 0062)
+    std::string kind;        // "jlink" | "ble" | "remote"
     std::string displayName; // "J-Link 801000001", "CHESTER-ABC123"
     std::string profileId;   // "chester"; empty when unknown (a probe that is not open)
     enum class State : std::uint8_t {
@@ -56,10 +201,17 @@ struct DeviceEntry {
 
 struct DeviceRef {
     QPointer<hwio::device::ConsoleSession> console;
-    QPointer<hwio::device::DeviceSession> jlink; // null for BLE sessions
+    QPointer<hwio::device::DeviceSession> jlink; // null for BLE sessions and remote tabs
+    // Plan 0062: a joined remote tab (console = its RemoteConsoleSession). `isRemote` stays set
+    // when `remote` is gone, so that a remote device never passes for a local one.
+    // NOLINTNEXTLINE(readability-redundant-member-init): optional in designated initializers
+    QPointer<IRemoteDevice> remote{};
+    bool isRemote = false;
 
-    // The console session still exists.
-    [[nodiscard]] bool alive() const { return !console.isNull(); }
+    // The console session (and the remote device of a remote tab) still exists.
+    [[nodiscard]] bool alive() const {
+        return !console.isNull() && (!isRemote || !remote.isNull());
+    }
 };
 
 // What `connect` asks the provider to open (not sketched by the plan; fields follow the connect

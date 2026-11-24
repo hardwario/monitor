@@ -64,7 +64,8 @@ TEST(McpAllowList, ParsesItemsAndAll) {
 }
 
 TEST(McpAllowList, UnknownItemIsAUsageError) {
-    for (const char* list : {"flash,format", "connect", "FLASH", "memory_write"}) {
+    for (const char* list : {"flash,format", "connect", "FLASH", "memory_write", "remote-device",
+                             "all,remote-device"}) {
         const auto parsed = parseAllowList(list);
         ASSERT_FALSE(parsed) << list;
         EXPECT_EQ(parsed.error().code, hwio::ErrorCode::UsageInvalidArgument);
@@ -125,6 +126,22 @@ TEST(FlagConsentBroker, DecidesFromTheFlags) {
     FlagConsentBroker all(hwio::cli::allDestructiveCategories());
     EXPECT_TRUE(decide(all, ConsentCategories(ConsentCategory::Flash) | ConsentCategory::Erase |
                                 ConsentCategory::MemoryWrite | ConsentCategory::Uicr));
+    EXPECT_FALSE(hwio::cli::allDestructiveCategories().testFlag(ConsentCategory::RemoteDevice));
+
+    // Plan 0062 (ADR-0436): a customer's device is never allowed by a flag, not even when the
+    // broker was given the category.
+    FlagConsentBroker remote(ConsentCategories(ConsentCategory::RemoteDevice) |
+                             ConsentCategory::Flash);
+    const auto device = decide(remote, ConsentCategory::RemoteDevice, "read_log");
+    ASSERT_FALSE(device);
+    EXPECT_EQ(device.error().code, hwio::ErrorCode::McpToolNotAllowed);
+    std::optional<hwio::mcp::ConsentDecision> flash;
+    hwio::mcp::ConsentRequest request;
+    request.tool = "flash";
+    request.categories = ConsentCategory::Flash;
+    request.remoteDevice = true;
+    (void)remote.request(std::move(request), [&flash](auto answer) { flash = std::move(answer); });
+    EXPECT_FALSE(flash.value_or(hwio::mcp::ConsentGrant::Flag).has_value());
 }
 
 // Delivers `parts` one per read call, then the end of input.

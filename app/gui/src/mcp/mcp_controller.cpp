@@ -76,6 +76,8 @@ QString categoryTitle(ConsentCategory category) {
         return McpController::tr("Write UICR / factory data");
     case ConsentCategory::Connect:
         return McpController::tr("Connect devices (opens a tab)");
+    case ConsentCategory::RemoteDevice:
+        return {}; // plan 0062: never a rule (not in GuiConsentBroker::categories)
     }
     return {};
 }
