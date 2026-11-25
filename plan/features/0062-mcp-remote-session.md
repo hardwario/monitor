@@ -283,13 +283,13 @@ Phase A — tab, reading, commands:
 
 Phase B — operations:
 
-- [x] B2 (deviation in the end-to-end test's fixtures, awaiting the user; see the notes) `flash` (catalog, prepared), `flash_lte`, `reset` on a remote device; progress; stop waiting (D12);
+- [x] B2 (deviation in the end-to-end test's fixtures, accepted by the user 2026-11-25; see the notes) `flash` (catalog, prepared), `flash_lte`, `reset` on a remote device; progress; stop waiting (D12);
       questions (D13); tool tests and an end-to-end test host ↔ joiner with the fake J-Link and a test catalog.
 - [x] B3 GUI: busy text, Stop waiting, permission prompt rows; Qt Quick tests.
 
 Phase C — documents:
 
-- [x] C1 (deviation: `mcp.md` in English only, awaiting the user; see the notes) `docs/<lang>/mcp.md`, `remote-support.md`, `privacy.md` in en, cs, de, pl, sk; release notes
+- [x] C1 (deviation: `mcp.md` in English only, accepted by the user 2026-11-25; see the notes) `docs/<lang>/mcp.md`, `remote-support.md`, `privacy.md` in en, cs, de, pl, sk; release notes
       `packaging/release-notes/v2.0.0-rc.5.md`; interop checklist rows (AI client with: rc.5 Monitor host,
       rc.4 Monitor host, web Terminal host, mobile app host).
 - [x] C2 ADR-0332 marked superseded; notes in plans 0044 and 0059 (D16); `plan/0004-mcp.md` tool table.
@@ -311,7 +311,7 @@ Phase C — documents:
 - New error ids: `remote.command_not_delivered` (category timeout, baseline `timeout`),
   `remote.waiting_for_customer` (category cancelled, baseline `remote.join_not_allowed`); neither is sent.
 
-## Implementation notes (A1, A6, B2, B3, C1; 2026-11-25, not yet confirmed by the user)
+## Implementation notes (A1, A6, B2, B3, C1; confirmed by the user 2026-11-25, "Accept all")
 
 - **B2 end-to-end test.** `app/gui/tests/viewmodels/mcp_remote_test.cpp` runs the MCP server against a joined tab
   through `FakeRelay` and an in-process `RemoteHost` with the remote tests' fixtures (`FakeConsole`,
