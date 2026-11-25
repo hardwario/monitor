@@ -51,7 +51,8 @@ public:
     MOCK_METHOD(int, readU32s, (std::uint32_t, std::span<std::uint32_t>), (override));
     MOCK_METHOD((std::expected<std::vector<std::uint32_t>, int>), registerList, (), (override));
     MOCK_METHOD(std::string, registerName, (std::uint32_t), (override));
-    MOCK_METHOD(int, readRegisters, (std::span<const std::uint32_t>, std::span<std::uint32_t>),
+    MOCK_METHOD(int, readRegisters,
+                (std::span<const std::uint32_t>, std::span<std::uint32_t>, std::span<std::uint8_t>),
                 (override));
     MOCK_METHOD((std::expected<std::vector<MemoryZone>, int>), memoryZones, (std::size_t),
                 (override));

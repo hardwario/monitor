@@ -733,6 +733,112 @@ TEST_F(Workflow, RegistersAndZonesComeFromTheProgrammer) {
     EXPECT_TRUE(hwio::device::detail::runMemoryZones(ctx)->empty());
 }
 
+// Plan 0049 (ADR-0372): regs --halt on a running core: IsHalted -> Halt -> read -> Go.
+TEST_F(Workflow, ReadRegistersHaltsARunningCoreAndLetsItRunAgain) {
+    {
+        InSequence order;
+        EXPECT_CALL(programmer(), identify()).WillOnce(Return(chip(0x52840)));
+        EXPECT_CALL(programmer(), isHalted()).WillOnce(Return(false));
+        EXPECT_CALL(programmer(), halt()).WillOnce(Return(Status{}));
+        EXPECT_CALL(programmer(), readRegisters())
+            .WillOnce(Return(std::vector<hwio::jlink::RegisterValue>{{.name = "PC", .value = 7}}));
+        EXPECT_CALL(programmer(), go()).WillOnce(Return(Status{}));
+    }
+    auto ctx = context();
+    const auto registers = hwio::device::detail::runReadRegisters(ctx, true);
+    ASSERT_TRUE(registers) << registers.error().detail;
+    ASSERT_EQ(registers->size(), 1U);
+    EXPECT_EQ((*registers)[0].value, 7U);
+    EXPECT_FALSE(ctx.cpuHalted); // the worker decides about RTT (ADR-0157)
+    EXPECT_NE(std::ranges::find(log(), "Halting the CPU to read the registers"), log().end());
+    EXPECT_NE(std::ranges::find(log(), "Letting the CPU run again"), log().end());
+}
+
+// An already halted core stays halted: no Halt, no Go.
+TEST_F(Workflow, ReadRegistersLeavesAHaltedCoreHalted) {
+    EXPECT_CALL(programmer(), isHalted()).WillOnce(Return(true));
+    EXPECT_CALL(programmer(), halt()).Times(0);
+    EXPECT_CALL(programmer(), go()).Times(0);
+    EXPECT_CALL(programmer(), readRegisters())
+        .WillOnce(Return(std::vector<hwio::jlink::RegisterValue>{{.name = "R0", .value = 1}}));
+    auto ctx = context();
+    EXPECT_EQ(hwio::device::detail::runReadRegisters(ctx, true)->size(), 1U);
+}
+
+// Without the option nothing is halted or resumed (and IsHalted is left to the read).
+TEST_F(Workflow, ReadRegistersWithoutTheOptionNeverHalts) {
+    EXPECT_CALL(programmer(), isHalted()).Times(0);
+    EXPECT_CALL(programmer(), halt()).Times(0);
+    EXPECT_CALL(programmer(), go()).Times(0);
+    EXPECT_CALL(programmer(), readRegisters())
+        .WillOnce(Return(std::unexpected(hwio::makeError(ErrorCode::TargetNotHalted))));
+    auto ctx = context();
+    EXPECT_EQ(hwio::device::detail::runReadRegisters(ctx, false).error().code,
+              ErrorCode::TargetNotHalted);
+}
+
+// A failed read still lets the CPU run again; the read error is the result (also when go fails:
+// the first error wins).
+TEST_F(Workflow, ReadRegistersFailureStillLetsTheCpuRun) {
+    const auto readFailed = [] {
+        return hwio::Result<std::vector<hwio::jlink::RegisterValue>>(std::unexpected(
+            hwio::makeError(ErrorCode::TargetConnectFailed, "JLINKARM_ReadRegs returned -1")));
+    };
+    {
+        InSequence order;
+        EXPECT_CALL(programmer(), isHalted()).WillOnce(Return(false));
+        EXPECT_CALL(programmer(), halt()).WillOnce(Return(Status{}));
+        EXPECT_CALL(programmer(), readRegisters()).WillOnce(Return(readFailed()));
+        EXPECT_CALL(programmer(), go()).WillOnce(Return(Status{}));
+        EXPECT_CALL(programmer(), isHalted()).WillOnce(Return(false));
+        EXPECT_CALL(programmer(), halt()).WillOnce(Return(Status{}));
+        EXPECT_CALL(programmer(), readRegisters()).WillOnce(Return(readFailed()));
+        EXPECT_CALL(programmer(), go())
+            .WillOnce(Return(std::unexpected(
+                hwio::makeError(ErrorCode::TargetConnectFailed, "JLINKARM_Go failed"))));
+    }
+    auto ctx = context();
+    const auto first = hwio::device::detail::runReadRegisters(ctx, true);
+    ASSERT_FALSE(first);
+    EXPECT_EQ(first.error().detail, "JLINKARM_ReadRegs returned -1");
+    const auto second = hwio::device::detail::runReadRegisters(ctx, true);
+    ASSERT_FALSE(second);
+    EXPECT_EQ(second.error().detail, "JLINKARM_ReadRegs returned -1");
+}
+
+// A successful read whose go fails reports the go error (the CPU may remain halted).
+TEST_F(Workflow, ReadRegistersReportsAFailedGo) {
+    EXPECT_CALL(programmer(), isHalted()).WillOnce(Return(false));
+    EXPECT_CALL(programmer(), halt()).WillOnce(Return(Status{}));
+    EXPECT_CALL(programmer(), readRegisters())
+        .WillOnce(Return(std::vector<hwio::jlink::RegisterValue>{{.name = "R0", .value = 1}}));
+    EXPECT_CALL(programmer(), go())
+        .WillOnce(Return(std::unexpected(
+            hwio::makeError(ErrorCode::TargetConnectFailed, "JLINKARM_Go failed"))));
+    auto ctx = context();
+    const auto registers = hwio::device::detail::runReadRegisters(ctx, true);
+    ASSERT_FALSE(registers);
+    EXPECT_EQ(registers.error().detail, "JLINKARM_Go failed");
+    EXPECT_NE(std::ranges::find(log(), "Go failed: the CPU may remain halted"), log().end());
+}
+
+// A failed IsHalted or Halt reads nothing and resumes nothing.
+TEST_F(Workflow, ReadRegistersStopsWhenTheHaltFails) {
+    EXPECT_CALL(programmer(), isHalted())
+        .WillOnce(Return(std::unexpected(
+            hwio::makeError(ErrorCode::DependencyJLinkFunctionMissing, "JLINKARM_IsHalted"))))
+        .WillOnce(Return(false));
+    EXPECT_CALL(programmer(), halt())
+        .WillOnce(Return(
+            std::unexpected(hwio::makeError(ErrorCode::TargetConnectFailed, "JLINKARM_Halt"))));
+    EXPECT_CALL(programmer(), readRegisters()).Times(0);
+    EXPECT_CALL(programmer(), go()).Times(0);
+    auto ctx = context();
+    EXPECT_EQ(hwio::device::detail::runReadRegisters(ctx, true).error().code,
+              ErrorCode::DependencyJLinkFunctionMissing);
+    EXPECT_EQ(hwio::device::detail::runReadRegisters(ctx, true).error().detail, "JLINKARM_Halt");
+}
+
 TEST_F(Workflow, WriteFlashIsAFlashThatRunsAfterwards) {
     {
         InSequence order;

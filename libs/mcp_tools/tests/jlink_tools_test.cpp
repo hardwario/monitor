@@ -39,6 +39,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <format>
 #include <optional>
 #include <string>
 #include <system_error>
@@ -371,6 +372,68 @@ TEST_F(JLinkTools, HaltGoStatusRegistersZones) {
     auto badTarget = harness.call(QStringLiteral("halt"), args({{"target", "modem"}}));
     EXPECT_EQ(badTarget.errorCode(), "usage.invalid_argument");
     // halt and go wrote markers; the console stays connected (ADR-0157).
+    EXPECT_EQ(provider().record().markers.size(), 2U);
+}
+
+// Plan 0048 / ADR-0371: the fake library handles only 45 registers per ReadRegs call (like J-Link
+// V9.84); read_registers still returns all 60 with their values.
+TEST_F(JLinkTools, ReadRegistersBeyondTheLibraryPerCallLimit) {
+    constexpr int count = 60;
+    QJsonArray list;
+    for (int i = 0; i < count; ++i) {
+        list.append(QJsonObject{{QStringLiteral("name"), QStringLiteral("REG%1").arg(i)},
+                                {QStringLiteral("value"), 0x1000 + i}});
+    }
+    provider().scenario(
+        QJsonDocument(scenario({}, QJsonObject{{QStringLiteral("registers"), list},
+                                               {QStringLiteral("readRegsLimit"), 45}}))
+            .toJson());
+    Harness harness(provider(), limits());
+    connectDevice(harness);
+    ASSERT_TRUE(
+        harness.call(QStringLiteral("halt")).structured().value(QStringLiteral("halted")).toBool());
+    auto registers = harness.call(QStringLiteral("read_registers"));
+    ASSERT_FALSE(registers.isError()) << registers.errorCode();
+    const QJsonObject values = registers.structured().value(QStringLiteral("registers")).toObject();
+    EXPECT_EQ(values.size(), count);
+    for (int i = 0; i < count; ++i) {
+        EXPECT_EQ(values.value(QStringLiteral("REG%1").arg(i)).toString().toStdString(),
+                  std::format("0x{:08X}", 0x1000 + i));
+    }
+    EXPECT_FALSE(
+        harness.call(QStringLiteral("go")).structured().value(QStringLiteral("halted")).toBool());
+}
+
+// Plan 0049 (ADR-0372): read_registers {"halt": true} halts a running CPU for the read and lets it
+// run again; an already halted CPU stays halted; a non-boolean halt is rejected by the schema.
+TEST_F(JLinkTools, ReadRegistersWithHalt) {
+    Harness harness(provider(), limits());
+    connectDevice(harness);
+    const QJsonObject expected{{QStringLiteral("R0"), QStringLiteral("0x00000001")},
+                               {QStringLiteral("PC"), QStringLiteral("0x00001000")}};
+    auto running = harness.call(QStringLiteral("read_registers"), args({{"halt", true}}));
+    ASSERT_FALSE(running.isError()) << running.errorCode() << " " << running.errorDetail();
+    EXPECT_EQ(running.structured().value(QStringLiteral("registers")).toObject(), expected);
+    EXPECT_FALSE(harness.call(QStringLiteral("target_status"))
+                     .structured()
+                     .value(QStringLiteral("halted"))
+                     .toBool());
+
+    ASSERT_TRUE(
+        harness.call(QStringLiteral("halt")).structured().value(QStringLiteral("halted")).toBool());
+    auto halted = harness.call(QStringLiteral("read_registers"), args({{"halt", true}}));
+    ASSERT_FALSE(halted.isError()) << halted.errorCode();
+    EXPECT_EQ(halted.structured().value(QStringLiteral("registers")).toObject(), expected);
+    EXPECT_TRUE(harness.call(QStringLiteral("target_status"))
+                    .structured()
+                    .value(QStringLiteral("halted"))
+                    .toBool());
+    EXPECT_FALSE(
+        harness.call(QStringLiteral("go")).structured().value(QStringLiteral("halted")).toBool());
+
+    auto notBoolean = harness.call(QStringLiteral("read_registers"), args({{"halt", "yes"}}));
+    EXPECT_EQ(notBoolean.rpcError(), -32602);
+    // Only halt and go wrote markers (read_registers stays a read).
     EXPECT_EQ(provider().record().markers.size(), 2U);
 }
 

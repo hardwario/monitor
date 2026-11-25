@@ -221,8 +221,9 @@ using GetRegisterListFn = int (*)(std::uint32_t*, int);
 // null) [pylink register_name(), restype POINTER(c_char)].
 using GetRegisterNameFn = const char* (*)(std::uint32_t);
 // JLINKARM_ReadRegs(const U32* paRegIndex, U32* paData, U8* paStatus, U32 NumRegs): < 0 error
-// [pylink register_read_multiple(); its comment says the statuses "cannot be trusted", so they
-// are not evaluated].
+// [pylink register_read_multiple()]. ADR-0371: V9.84 handles only about 45 registers per call
+// (returns 0, junk values, status bytes untouched for the rest), so the adapter calls it in blocks
+// of maxRegistersPerRead and pre-fills the statuses with a marker; only status 0 confirms a value.
 using ReadRegsFn = int (*)(const std::uint32_t*, std::uint32_t*, std::uint8_t*, std::uint32_t);
 
 // JLINK_MEM_ZONE_INFO [pylink structs.JLinkMemoryZone]: char* sName; char* sDesc; U64 VirtAddr;

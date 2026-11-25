@@ -14,10 +14,12 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
+#include <format>
 #include <initializer_list>
 #include <map>
 #include <optional>
@@ -641,12 +643,14 @@ TEST_F(TargetOps, HaltGoAndStatus) {
 TEST_F(TargetOps, RegistersNeedAHaltedCore) {
     EXPECT_CALL(api(), isHalted()).WillOnce(Return(0)).WillOnce(Return(1));
     EXPECT_CALL(api(), registerList()).WillOnce(Return(std::vector<std::uint32_t>{0, 15}));
-    EXPECT_CALL(api(), readRegisters(_, _))
-        .WillOnce([](std::span<const std::uint32_t> indexes, std::span<std::uint32_t> values) {
+    EXPECT_CALL(api(), readRegisters(_, _, _))
+        .WillOnce([](std::span<const std::uint32_t> indexes, std::span<std::uint32_t> values,
+                     std::span<std::uint8_t> confirmed) {
             EXPECT_EQ(indexes.size(), 2U);
             values[0] = 7;
             values[1] = 0x1000;
-            return 0;
+            std::ranges::fill(confirmed, 1);
+            return 2;
         });
     EXPECT_CALL(api(), registerName(0U)).WillOnce(Return("R0"));
     EXPECT_CALL(api(), registerName(15U)).WillOnce(Return(""));
@@ -667,14 +671,53 @@ TEST_F(TargetOps, RegistersAreCappedAt128) {
     ON_CALL(api(), isHalted()).WillByDefault(Return(1));
     ON_CALL(api(), registerList()).WillByDefault(Return(many));
     ON_CALL(api(), registerName(_)).WillByDefault(Return("R"));
-    EXPECT_CALL(api(), readRegisters(_, _))
-        .WillOnce([](std::span<const std::uint32_t> indexes, std::span<std::uint32_t>) {
+    EXPECT_CALL(api(), readRegisters(_, _, _))
+        .WillOnce([](std::span<const std::uint32_t> indexes, std::span<std::uint32_t>,
+                     std::span<std::uint8_t> confirmed) {
             EXPECT_EQ(indexes.size(), 128U);
-            return 0;
+            std::ranges::fill(confirmed, 1);
+            return 128;
         });
     EXPECT_EQ(
         programmer().readRegisters().value_or(std::vector<hwio::jlink::RegisterValue>{}).size(),
         128U);
+}
+
+// ADR-0371: a register the library did not confirm is left out (and logged); the rest keep their
+// order and values.
+TEST_F(TargetOps, UnconfirmedRegistersAreLeftOut) {
+    ON_CALL(api(), isHalted()).WillByDefault(Return(1));
+    ON_CALL(api(), registerList()).WillByDefault(Return(std::vector<std::uint32_t>{0, 1, 2, 3}));
+    ON_CALL(api(), registerName(_)).WillByDefault([](std::uint32_t index) {
+        return std::format("R{}", index);
+    });
+    EXPECT_CALL(api(), readRegisters(_, _, _))
+        .WillOnce([](std::span<const std::uint32_t>, std::span<std::uint32_t> values,
+                     std::span<std::uint8_t> confirmed) {
+            const std::array<std::uint32_t, 4> read{10, 0x00AD9390U, 30, 0x0064006FU};
+            std::ranges::copy(read, values.begin());
+            const std::array<std::uint8_t, 4> ok{1, 0, 1, 0};
+            std::ranges::copy(ok, confirmed.begin());
+            return 2;
+        });
+    const auto registers = programmer().readRegisters();
+    ASSERT_TRUE(registers);
+    ASSERT_EQ(registers->size(), 2U);
+    EXPECT_EQ((*registers)[0].name, "R0");
+    EXPECT_EQ((*registers)[0].value, 10U);
+    EXPECT_EQ((*registers)[1].name, "R2");
+    EXPECT_EQ((*registers)[1].value, 30U);
+}
+
+TEST_F(TargetOps, NoConfirmedRegisterIsAnError) {
+    ON_CALL(api(), isHalted()).WillByDefault(Return(1));
+    ON_CALL(api(), registerList()).WillByDefault(Return(std::vector<std::uint32_t>{0, 1}));
+    ON_CALL(api(), registerName(_)).WillByDefault(Return("R"));
+    EXPECT_CALL(api(), readRegisters(_, _, _)).WillOnce(Return(0));
+    const auto registers = programmer().readRegisters();
+    ASSERT_FALSE(registers);
+    EXPECT_EQ(registers.error().code, ErrorCode::TargetConnectFailed);
+    EXPECT_EQ(registers.error().detail, "JLINKARM_ReadRegs confirmed no register");
 }
 
 TEST_F(TargetOps, MemoryZonesAreBounded) {

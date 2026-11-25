@@ -86,6 +86,11 @@
 //                                                   (WriteMem outside a download, WriteU16/U32)
 //                                                   reach; at most 16 MiB in total
 //         "registers": [{"name": "R0", "value": 5}],  M6: GetRegisterList / Name / ReadRegs
+//         "readRegsLimit": 0,                       plan 0048 / ADR-0371: > 0 makes ReadRegs
+//                                                   behave like J-Link V9.84: only the first N
+//                                                   entries of a call get their value and status
+//                                                   0, the rest get 0x00AD9390 and their status
+//                                                   byte is not touched (0 = unlimited)
 //         "zones": [{"name": "AHB-AP", "description": "AHB-AP (AP0)", "virtualAddress": 0}],
 //                                                   M6: JLINK_GetMemZones
 //         "coreId": 732959863,                      M6: JLINKARM_GetId (default 0x2BA01477)
@@ -245,6 +250,7 @@ struct ChipScenario {
     std::vector<std::uint8_t> uicr = std::vector<std::uint8_t>(0x1000, 0xFF);
     std::vector<RamRegion> ram;
     std::vector<RegisterSpec> registers;
+    std::size_t readRegsLimit = 0; // plan 0048: entries per ReadRegs call (0 = unlimited)
     std::vector<ZoneSpec> zones;
     std::uint32_t coreId = 0x2BA01477U;
     bool startHalted = false; // "halted": the CPU state after a boot (review Q10)
@@ -454,6 +460,8 @@ ChipScenario readChip(const QJsonObject& object) {
             .name = reg.value(QStringLiteral("name")).toString().toStdString(),
             .value = static_cast<std::uint32_t>(reg.value(QStringLiteral("value")).toInteger())});
     }
+    chip.readRegsLimit = static_cast<std::size_t>(
+        std::max<qint64>(0, object.value(QStringLiteral("readRegsLimit")).toInteger()));
     for (const QJsonValue item : object.value(QStringLiteral("zones")).toArray()) {
         const QJsonObject zone = item.toObject();
         chip.zones.push_back(ZoneSpec{
@@ -1602,9 +1610,15 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_ReadRegs(const std::uint32_t* indexes, std::
     }
     const auto in = std::span(indexes, count);
     const auto out = std::span(values, count);
+    const std::size_t limit = probe->chip.readRegsLimit;
     for (std::uint32_t i = 0; i < count; ++i) {
         if (in[i] >= probe->chip.registers.size()) {
             return -1;
+        }
+        if (limit != 0 && i >= limit) {
+            // J-Link V9.84 (plan 0048): junk value, status byte untouched, call still returns 0.
+            out[i] = 0x00AD9390U;
+            continue;
         }
         out[i] = probe->chip.registers.at(in[i]).value;
         if (statuses != nullptr) {

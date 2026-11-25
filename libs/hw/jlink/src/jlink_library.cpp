@@ -630,14 +630,36 @@ std::string JLinkLibrary::registerName(std::uint32_t index) {
 }
 
 int JLinkLibrary::readRegisters(std::span<const std::uint32_t> indexes,
-                                std::span<std::uint32_t> values) {
+                                std::span<std::uint32_t> values,
+                                std::span<std::uint8_t> confirmed) {
     if (m_impl->fn.readRegs == nullptr || indexes.size() != values.size() ||
-        indexes.size() > std::numeric_limits<std::uint32_t>::max()) {
+        indexes.size() != confirmed.size() ||
+        indexes.size() > static_cast<std::size_t>(std::numeric_limits<int>::max())) {
         return -1;
     }
-    std::vector<std::uint8_t> status(indexes.size(), 0); // not evaluated (pylink: unreliable)
-    return m_impl->fn.readRegs(indexes.data(), values.data(), status.data(),
-                               static_cast<std::uint32_t>(indexes.size()));
+    // ADR-0371: blocks of at most maxRegistersPerRead; a status the library did not write keeps
+    // the marker, so only status 0 confirms the value.
+    constexpr std::uint8_t notWritten = 0xFF;
+    std::vector<std::uint8_t> status(maxRegistersPerRead, notWritten);
+    int total = 0;
+    for (std::size_t offset = 0; offset < indexes.size(); offset += maxRegistersPerRead) {
+        const std::size_t size = std::min(maxRegistersPerRead, indexes.size() - offset);
+        const std::span<std::uint8_t> blockStatus = std::span(status).first(size);
+        std::ranges::fill(blockStatus, notWritten);
+        const int result = m_impl->fn.readRegs(
+            indexes.subspan(offset, size).data(), values.subspan(offset, size).data(),
+            blockStatus.data(), static_cast<std::uint32_t>(size));
+        if (result < 0) {
+            return result;
+        }
+        const std::span<std::uint8_t> blockConfirmed = confirmed.subspan(offset, size);
+        for (std::size_t i = 0; i < size; ++i) {
+            const bool ok = blockStatus[i] == 0;
+            blockConfirmed[i] = ok ? 1 : 0;
+            total += ok ? 1 : 0;
+        }
+    }
+    return total;
 }
 
 std::expected<std::vector<MemoryZone>, int> JLinkLibrary::memoryZones(std::size_t maxZones) {
