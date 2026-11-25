@@ -33,7 +33,9 @@
 #include <array>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <expected>
+#include <memory>
 #include <optional>
 #include <set>
 #include <string>
@@ -303,6 +305,24 @@ TEST(Rc4Compat, NewJoinerMessagesTheRc4HostDecodes) {
                                                                  .target = tunnel::OpTarget::App,
                                                                  .prepared = "debug"}))
             .has_value());
+}
+
+// Plan 0061 Amendment 2 (ADR-0439): why the joiner sends `leave` only to a host whose hello lists
+// the `leave` cap: rc.4 rejects the type (its host shows a warning). A host hello with the cap
+// decodes in rc.4 as before.
+TEST(Rc4Compat, LeaveIsUnknownToRc4AndTheCapIsHarmless) {
+    EXPECT_FALSE(rc4::decodeJoiner(tunnel::encodeJoiner(tunnel::Leave{})).has_value());
+    auto old = rc4::decodeHost(tunnel::encodeHost(tunnel::HostHello{
+        .app = "hwio-monitor",
+        .version = "2.1.0",
+        .device = {.name = "CHESTER", .serial = "1", .transport = "jlink", .firmware = ""},
+        .ops = true,
+        .opKinds = {tunnel::OpKind::Reset},
+        .opQuestions = false,
+        .caps = {"detail-codes", "refused-lines", "leave"},
+        .profile = "chester"}));
+    ASSERT_TRUE(old.has_value()) << old.error().detail;
+    EXPECT_TRUE(std::get<rc4::HostHello>(*old).ops);
 }
 
 // ---- golden messages: rc.4 peers → this build ----
@@ -723,6 +743,97 @@ TEST(Rc4CompatSession, JoinerUsesTheTargetsOfANewHost) {
                    std::get<tunnel::OpRequest>(*decoded).target.id() == "nrf52";
         });
     }));
+}
+
+// Plan 0061 Amendment 2 (ADR-0439): a joiner of this build that closes sends `leave` only to a
+// host whose hello lists the cap: never to a web Terminal / mobile app host (no hello), an rc.4
+// host or a host of this protocol without the cap (2.0.0-rc.5 before ADR-0439).
+TEST(Rc4CompatSession, JoinerSendsLeaveOnlyToAHostWithTheCap) {
+    enum class Host : std::uint8_t { WebTerminal, Rc4, WithoutCap, WithCap };
+    for (const Host kind : {Host::WebTerminal, Host::Rc4, Host::WithoutCap, Host::WithCap}) {
+        SCOPED_TRACE(static_cast<int>(kind));
+        FakeRelay relay;
+        RawParticipant host(relay.url(), nsp);
+        ASSERT_TRUE(host.waitConnected());
+        auto joiner = std::make_unique<RemoteConsoleSession>(joinFor(relay));
+        ASSERT_TRUE(runUntil([&] { return joiner->joinState() == JoinState::Waiting; }));
+        QJsonObject sync;
+        sync.insert(QStringLiteral("state"), QStringLiteral("connected"));
+        sync.insert(QStringLiteral("commands"), QJsonArray());
+        host.emitEvent(QStringLiteral("sync"), sync);
+        const tunnel::HostHello hello{
+            .app = "hwio-monitor",
+            .version = "2.0.0-rc.5",
+            .device = {.name = "CHESTER", .serial = "1", .transport = "jlink", .firmware = ""},
+            .ops = true,
+            .opKinds = {tunnel::OpKind::Reset},
+            .opQuestions = false,
+            .caps = kind == Host::WithCap
+                        ? std::vector<std::string>{"detail-codes", "refused-lines", "leave"}
+                        : std::vector<std::string>{"detail-codes", "refused-lines"},
+            .profile = "chester"};
+        if (kind == Host::Rc4) {
+            host.emitEvent(QStringLiteral("at"),
+                           rc4::encodeHost(rc4::HostHello{.app = "hwio-monitor",
+                                                          .version = "2.0.0-rc.4",
+                                                          .device = {.name = "CHESTER",
+                                                                     .serial = "1",
+                                                                     .transport = "jlink",
+                                                                     .firmware = ""},
+                                                          .ops = true,
+                                                          .opKinds = {rc4::OpKind::Reset},
+                                                          .opQuestions = false}));
+        } else if (kind != Host::WebTerminal) {
+            host.emitEvent(QStringLiteral("at"), tunnel::encodeHost(hello));
+        }
+        ASSERT_TRUE(runUntil([&] { return joiner->joinState() == JoinState::Allowed; }));
+        if (kind != Host::WebTerminal) {
+            ASSERT_TRUE(runUntil([&] { return joiner->hostHello().has_value(); }));
+            ASSERT_TRUE(runUntil([&] { return !host.named(QStringLiteral("write")).isEmpty(); }));
+        }
+        joiner->close();
+        joiner.reset();
+        ASSERT_TRUE(runUntil([&] { return relay.clientCount(nsp) == 1; }));
+        runFor(50ms);
+        const auto leaves =
+            std::ranges::count_if(host.named(QStringLiteral("write")), [](const auto& write) {
+                const auto decoded = tunnel::decodeJoiner(write.payload);
+                return decoded && std::holds_alternative<tunnel::Leave>(*decoded);
+            });
+        EXPECT_EQ(leaves, kind == Host::WithCap ? 1 : 0);
+        if (kind == Host::Rc4) {
+            for (const auto& write : host.named(QStringLiteral("write"))) {
+                EXPECT_TRUE(rc4::decodeJoiner(write.payload).has_value());
+            }
+        }
+    }
+}
+
+// An rc.4 joiner (and any joiner without `leave`) never sends it: when it disconnects, the host
+// behaves as before (the permission stays until the next join; no audit line).
+TEST(Rc4CompatSession, Rc4JoinerThatLeavesChangesNothingOnTheHost) {
+    FakeRelay relay;
+    FakeConsole console;
+    ScriptedConsent consent;
+    RemoteHost host(console, consent, nullptr, hostFor(relay));
+    host.start();
+    ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
+    auto old = std::make_unique<RawParticipant>(relay.url(), nsp);
+    ASSERT_TRUE(old->waitConnected());
+    ASSERT_TRUE(runUntil([&] { return !tunnelAts(*old).empty(); }));
+    for (const QJsonObject& at : tunnelAts(*old)) {
+        EXPECT_TRUE(rc4::decodeHost(at).has_value()); // the hello with the `leave` cap included
+    }
+    old->emitEvent(QStringLiteral("write"), rc4::encodeJoiner(rc4::JoinerHello{
+                                                .app = "hwio-monitor", .version = "2.0.0-rc.4"}));
+    ASSERT_TRUE(runUntil([&] { return !host.peerApp().empty(); }));
+    old->close();
+    ASSERT_TRUE(runUntil([&] { return relay.clientCount(nsp) == 1; }));
+    old.reset();
+    runFor(100ms);
+    EXPECT_TRUE(host.commandsAllowed());
+    EXPECT_FALSE(console.hasEvent("Support left the session."));
+    EXPECT_EQ(host.state(), HostState::Sharing);
 }
 
 } // namespace

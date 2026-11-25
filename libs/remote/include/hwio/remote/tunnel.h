@@ -55,6 +55,11 @@
 //   line-refused  {code} host → joiners: the host refused a remote command line (ADR-0416); sent
 //                 only when the session's last joiner hello listed the `refused-lines` cap (an
 //                 older joiner shows an unknown type as a warning).
+// Plan 0061 Amendment 2 (ADR-0439):
+//   leave         {} joiner → host: support leaves the session (Leave session, tab closed, quit;
+//                 best effort, before the socket closes). Sent only to a host whose hello lists
+//                 the `leave` cap (an older host rejects the unknown type with a warning). The
+//                 host withdraws the participant's permission; it never grants anything.
 // Names (caps, profile, target and prepared ids) are [a-z0-9-], 1..maxNameBytes bytes; lists are
 // bounded (maxCaps, maxTargets, maxPrepared, maxOpKinds). Unknown caps and kinds are kept / skipped
 // as data, never an error.
@@ -95,12 +100,13 @@ inline constexpr std::size_t maxPrepared = 4; // prepared firmware per target
 inline constexpr std::size_t maxErrorIdBytes = 64;
 
 // The capabilities of this build (ADR-0414). Host: detail codes on its errors, line-refused.
-// Joiner: understands targets, detail codes and line-refused.
+// Joiner: understands targets, detail codes and line-refused. ADR-0439: host accepts `leave`.
 namespace cap {
 inline constexpr std::string_view targets = "targets";   // host hello lists `targets`
 inline constexpr std::string_view prepared = "prepared"; // host accepts `prepared` flash
 inline constexpr std::string_view detailCodes = "detail-codes";
 inline constexpr std::string_view refusedLines = "refused-lines";
+inline constexpr std::string_view leave = "leave"; // host accepts the joiner's `leave`
 } // namespace cap
 
 // A name of the protocol: [a-z0-9-], 1..maxNameBytes bytes.
@@ -292,7 +298,9 @@ struct OpAnswer {
     std::string qid;
     bool yes = false;
 };
-using JoinerMessage = std::variant<JoinerHello, OpRequest, Learn, OpAnswer>;
+// ADR-0439: support leaves the session (no fields besides v and type).
+struct Leave {};
+using JoinerMessage = std::variant<JoinerHello, OpRequest, Learn, OpAnswer, Leave>;
 
 // The `at` payload {event: "hwio", data: …}.
 [[nodiscard]] QJsonObject encodeHost(const HostMessage& message);

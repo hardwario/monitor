@@ -6799,12 +6799,12 @@
 <context>
     <name>hwio::gui::GuiRemoteDevice</name>
     <message>
-        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="243"/>
+        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="245"/>
         <source>An AI assistant</source>
         <translation>AI asistent</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="290"/>
+        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="292"/>
         <source>Remote session (web Terminal or mobile app)</source>
         <translation>Vzdialená relácia (webový Terminal alebo mobilná aplikácia)</translation>
     </message>
@@ -7325,7 +7325,7 @@
         <translation>Čaká sa na potvrdenie zákazníka…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="470"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="472"/>
         <source>AI client active: %1</source>
         <translation>Aktívny AI klient: %1</translation>
     </message>
@@ -7936,43 +7936,43 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         <translation>— Spojenie obnovené; čaká sa, kým vás zákazník znova povolí —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="218"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="228"/>
         <source>A command line must not be longer than %1 bytes.</source>
         <translation>Riadok príkazu nesmie byť dlhší ako %1 bajtov.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="291"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="301"/>
         <source>Session %1</source>
         <translation>Relácia %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="298"/>
-        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="285"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="308"/>
+        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="287"/>
         <source>%1 — remote</source>
         <translation>%1 — na diaľku</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="303"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="313"/>
         <source>%1 — web Terminal or mobile app</source>
         <translation>%1 — web Terminal alebo mobilná aplikácia</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="380"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="396"/>
         <source>— Connected to HARDWARIO Monitor %1 of the customer —</source>
         <translation>— Pripojené k HARDWARIO Monitor %1 zákazníka —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="449"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="465"/>
         <source>The customer&apos;s device is disconnected.</source>
         <translation>Zariadenie zákazníka je odpojené.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="563"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="579"/>
         <source>— Session history from the customer —</source>
         <translation>— História relácie od zákazníka —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="566"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="582"/>
         <source>— Older history of the session was left out —</source>
         <translation>— Staršia história relácie bola vynechaná —</translation>
     </message>
@@ -8059,104 +8059,109 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         <translation>Účastník povolený (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="452"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="453"/>
         <source>A remote command was dropped (too long or with control characters).</source>
         <translation>Vzdialený príkaz bol zahodený (príliš dlhý alebo s riadiacimi znakmi).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="464"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="486"/>
         <source>Remote commands dropped: more than %1 per second.</source>
         <translation>Vzdialené príkazy zahodené: viac ako %1 za sekundu.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="480"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="470"/>
         <source>command %1</source>
         <translation>príkaz %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="499"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="505"/>
+        <source>Support left the session.</source>
+        <translation>Podpora opustila reláciu.</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/remote_host.cpp" line="520"/>
         <source>An operation request was refused: the participant is not allowed.</source>
         <translation>Žiadosť o operáciu bola odmietnutá: účastník nie je povolený.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="529"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="554"/>
         <source>Participant app: %1.</source>
         <translation>Aplikácia účastníka: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="631"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="656"/>
         <source>Support asks: %1.</source>
         <translation>Podpora žiada: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="634"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="659"/>
         <source>%1: refused (this console has no operations).</source>
         <translation>%1: odmietnuté (táto konzola nemá operácie).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="642"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="667"/>
         <source>%1: refused (not available on this console).</source>
         <translation>%1: odmietnuté (na tejto konzole nie je k dispozícii).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="649"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="674"/>
         <source>%1: refused (another request or operation is in progress).</source>
         <translation>%1: odmietnuté (prebieha iná žiadosť alebo operácia).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="662"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="686"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="687"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="711"/>
         <source>%1: refused (%2).</source>
         <translation>%1: odmietnuté (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="714"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="739"/>
         <source>%1: denied by you.</source>
         <translation>%1: zamietli ste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="733"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="758"/>
         <source>%1: allowed by you.</source>
         <translation>%1: povolili ste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="797"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="822"/>
         <source>%1: waiting for support&apos;s answer: %2</source>
         <translation>%1: čaká sa na odpoveď podpory: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="831"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="856"/>
         <source>Support answered: continue.</source>
         <translation>Podpora odpovedala: pokračovať.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="849"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="852"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="874"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="877"/>
         <source>%1: done.</source>
         <translation>%1: hotovo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="855"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="880"/>
         <source>%1: failed: %2</source>
         <translation>%1: zlyhalo: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="920"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="945"/>
         <source>— Remote: %1 —</source>
         <translation>— Vzdialené: %1 —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="977"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="1002"/>
         <source>You ended sharing.</source>
         <translation>Zdieľanie ste ukončili.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="995"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="1020"/>
         <source>Support did not answer before the session ended.</source>
         <translation>Podpora neodpovedala pred ukončením relácie.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="1022"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="1047"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Nápoveda %n príkazu prečítaná pre dopĺňanie podpory.</numerusform>
@@ -8165,27 +8170,27 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="1029"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="1054"/>
         <source>Sharing ended.</source>
         <translation>Zdieľanie skončilo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="1030"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="1055"/>
         <source>Sharing ended: %1</source>
         <translation>Zdieľanie skončilo: %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="404"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="420"/>
         <source>— The customer&apos;s Monitor refused this command: it changes the device&apos;s keys or identity —</source>
         <translation>— Monitor zákazníka tento príkaz odmietol: mení kľúče alebo identitu zariadenia —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="536"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="561"/>
         <source>Participant app: %1 (capabilities: %2).</source>
         <translation>Aplikácia účastníka: %1 (schopnosti: %2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="960"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="985"/>
         <source>a command that changes the device&apos;s keys or identity was refused (%1)</source>
         <translation>príkaz, ktorý mení kľúče alebo identitu zariadenia, bol odmietnutý (%1)</translation>
     </message>

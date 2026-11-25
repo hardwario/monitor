@@ -895,5 +895,89 @@ TEST(RemoteSession, AnAiLineAndAPersonsLineAreTheSameBytesOnTheRelay) {
     EXPECT_TRUE(relay.droppedEvents().isEmpty());
 }
 
+// ---- leave (plan 0061 Amendment 2, ADR-0439) ----
+
+// close() (Leave session, the tab closed) and the destructor (quit) tell a Monitor host of this
+// build: it withdraws the permission and audits it; Join again asks the customer again.
+TEST(RemoteSession, JoinerLeavesOnCloseAndOnDestruction) {
+    FakeRelay relay;
+    FakeConsole console;
+    ScriptedConsent consent;
+    RemoteHost host(console, consent, nullptr, hostFor(relay));
+    host.start();
+    ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
+    {
+        RemoteConsoleSession joiner(joinFor(relay));
+        ASSERT_TRUE(runUntil([&] {
+            return joiner.hostHello().has_value() && joiner.joinState() == JoinState::Allowed;
+        }));
+        EXPECT_TRUE(tunnel::hasCap(joiner.hostHello().value_or(tunnel::HostHello{}).caps,
+                                   tunnel::cap::leave));
+        ASSERT_TRUE(host.commandsAllowed());
+        joiner.close();
+        ASSERT_TRUE(runUntil([&] { return !host.commandsAllowed(); }));
+        EXPECT_TRUE(console.hasEvent("— Remote: Support left the session. —"));
+        EXPECT_FALSE(joiner.sendLine("info show").has_value()); // ended
+    }
+    EXPECT_EQ(consent.joinQuestions, 1);
+
+    // Join again: asked again; the destructor (quit) leaves too.
+    {
+        RemoteConsoleSession joiner(joinFor(relay));
+        ASSERT_TRUE(runUntil([&] {
+            return consent.joinQuestions == 2 && host.commandsAllowed() &&
+                   joiner.joinState() == JoinState::Allowed && joiner.hostHello().has_value();
+        }));
+    }
+    ASSERT_TRUE(runUntil([&] { return !host.commandsAllowed(); }));
+    EXPECT_EQ(std::ranges::count_if(console.events,
+                                    [](const std::string& e) {
+                                        return e.find("Support left the session.") !=
+                                               std::string::npos;
+                                    }),
+              2);
+    EXPECT_EQ(host.state(), HostState::Sharing);
+}
+
+// Plan 0062 (ADR-0435): an AI client's line travels exactly like a person's line, so after a
+// `leave` it is dropped by the host like any other line: support A leaves; the line support B's AI
+// client sends through the MCP path (CommandCapture with the remote tab's send hook) does not reach
+// the device until the customer allows a participant again.
+TEST(RemoteSession, AnAiLineAfterLeaveIsDropped) {
+    FakeRelay relay;
+    FakeConsole console;
+    ScriptedConsent consent;
+    RemoteHost host(console, consent, nullptr, hostFor(relay));
+    host.start();
+    ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
+    RemoteConsoleSession ai(joinFor(relay));
+    ASSERT_TRUE(runUntil(
+        [&] { return ai.hostHello().has_value() && ai.joinState() == JoinState::Allowed; }));
+    auto leaving = std::make_unique<RemoteConsoleSession>(joinFor(relay));
+    ASSERT_TRUE(runUntil([&] {
+        return consent.joinQuestions == 2 && host.commandsAllowed() &&
+               leaving->joinState() == JoinState::Allowed;
+    }));
+    leaving->close();
+    ASSERT_TRUE(runUntil([&] { return !host.commandsAllowed(); }));
+
+    auto capture = device::CommandCapture::start(
+        ai, "config show",
+        device::CaptureOptions{.timeout = 500ms,
+                               .silence = 100ms,
+                               .maxLines = 100,
+                               .maxBytes = 4096,
+                               .silent = false,
+                               .forceSilence = true},
+        device::CaptureHooks{
+            .send = [&ai](std::string line) { return ai.sendLine(std::move(line)); },
+            .view = [](const device::ConsoleLine& line) { return line; }});
+    ASSERT_TRUE(capture.has_value());
+    ASSERT_TRUE(runUntil([&] { return (*capture)->isFinished(); }));
+    runFor(100ms);
+    EXPECT_TRUE(console.sent.empty());
+    EXPECT_FALSE((*capture)->echoSeen());
+}
+
 } // namespace
 } // namespace hwio::remote

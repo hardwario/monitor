@@ -36,7 +36,12 @@ z webového Terminalu (len konzola) alebo z HARDWARIO Monitor.
    pokynmi na prepojenie kábla (nič neklikáte). Ak kópiu aplikácie nemožno vytvoriť, podpora rozhodne, či pokračovať
    bez nej. Kópia sa na konci vždy zapíše späť. Keď podpora odpovie Nie, uvidíte *Zrušené podporou. Nič sa nezmenilo.* Bez odpovede uvidíte *Podpora neodpovedala. Nič sa nezmenilo.* Ak podpora do 60 sekúnd neodpovie, aktualizácia sa zruší skôr, než sa
    čokoľvek zmení.
-8. Keď skončíte, kliknite na **Ukončiť zdieľanie**.
+8. Keď podpora reláciu opustí (svojím **Opustiť reláciu**, zatvorením karty alebo ukončením HARDWARIO Monitora),
+   v konzole sa zobrazí *— Vzdialené: Podpora opustila reláciu. —* a lišta už nehovorí, že podpora môže posielať
+   príkazy. Zdieľanie pokračuje; ak sa podpora pripojí znova, budete ju musieť znova povoliť. Operácia, ktorá už beží,
+   dobehne. Funguje to s HARDWARIO Monitorom 2.0.0-rc.5 alebo novším na oboch stranách; podpora s webovým Terminalom
+   alebo staršou verziou odchádza bez upozornenia.
+9. Keď skončíte, kliknite na **Ukončiť zdieľanie**.
 
 Zdieľanie sa skončí aj vtedy, keď zariadenie odpojíte, zatvoríte kartu alebo aplikáciu ukončíte, po 30 minútach bez
 aktivity (lišta vás 2 minúty vopred upozorní, **Ponechať zdieľanie** ho predĺži) a najneskôr po 8 hodinách.
@@ -97,7 +102,9 @@ možnosti zostávajú rovnaké: povolenie podpory, otázka pred každou operáci
 Reláciu opustíte tlačidlom **Opustiť reláciu** na lište zariadenia (alebo klávesmi Ctrl+Shift+D). Karta zostane
 otvorená aj s konzolou, takže ju môžete stále uložiť; v konzole je riadok *— opustili ste reláciu —*. **Pripojiť sa
 znova** sa pripojí k rovnakému kódu a zákazník vás musí znova povoliť. Kým beží operácia, o ktorú ste požiadali,
-tlačidlo čaká, kým skončí.
+tlačidlo čaká, kým skončí. Zákazník s HARDWARIO Monitorom 2.0.0-rc.5 alebo novším uvidí, že ste odišli (aj keď
+zatvoríte kartu alebo ukončíte aplikáciu), a príkazy poslané potom sa k zariadeniu nedostanú, kým vás zákazník znova
+nepovolí.
 
 **AI asistent.** Keď je zapnuté **Nastavenia › AI asistenti (MCP) › AI klienti smú používať relácie vzdialenej
 podpory**, môže AI klient, napríklad Claude Code, pracovať vo vzdialenej karte, keď mu to pre reláciu povolíte: číta

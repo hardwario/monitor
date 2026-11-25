@@ -38,6 +38,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -860,6 +861,133 @@ TEST(RemoteHost, DropsIncomingEventsOver64KiB) {
     ASSERT_TRUE(runUntil([&] { return warnings.size() == 1; }));
     EXPECT_EQ(warnings.front().code, ErrorCode::RemoteProtocolError);
     EXPECT_EQ(f.host.state(), HostState::Sharing);
+}
+
+// ---- leave (plan 0061 Amendment 2, ADR-0439) ----
+
+void sendLeave(RawParticipant& p) {
+    p.emitEvent(QStringLiteral("write"), tunnel::encodeJoiner(tunnel::Leave{}));
+}
+
+std::size_t eventCount(const FakeConsole& console, std::string_view part) {
+    return static_cast<std::size_t>(
+        std::ranges::count_if(console.events, [part](const std::string& e) {
+            return e.find(part) != std::string::npos;
+        }));
+}
+
+// The host's hello lists the cap; a `leave` withdraws the permission (audit line, participants
+// changed), a line after it is dropped, and the next join asks the customer again.
+TEST(RemoteHostLeave, LeaveWithdrawsThePermissionAndDropsLaterLines) {
+    FakeRelay relay;
+    HostFixture f(optionsFor(relay));
+    int participantsChanged = 0;
+    QObject::connect(&f.host, &RemoteHost::participantsChanged, [&] { ++participantsChanged; });
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant joiner(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return f.host.commandsAllowed(); }));
+    ASSERT_TRUE(runUntil([&] { return !atEvents(joiner, QStringLiteral("hwio")).isEmpty(); }));
+    auto hello = tunnel::decodeHost(atEvents(joiner, QStringLiteral("hwio")).front());
+    ASSERT_TRUE(hello.has_value());
+    ASSERT_TRUE(std::holds_alternative<tunnel::HostHello>(*hello));
+    EXPECT_TRUE(tunnel::hasCap(std::get<tunnel::HostHello>(*hello).caps, tunnel::cap::leave));
+    joiner.emitEvent(QStringLiteral("write"), QStringLiteral("info show"));
+    ASSERT_TRUE(runUntil([&] { return f.console.sent.size() == 1; }));
+
+    const int changedBefore = participantsChanged;
+    sendLeave(joiner);
+    ASSERT_TRUE(runUntil([&] { return !f.host.commandsAllowed(); }));
+    EXPECT_GT(participantsChanged, changedBefore);
+    EXPECT_TRUE(f.console.hasEvent("— Remote: Support left the session. —"));
+    EXPECT_EQ(f.host.state(), HostState::Sharing); // the session goes on
+    EXPECT_FALSE(f.host.joinQuestionOpen());
+
+    // A line after `leave` is dropped like any line of a participant without permission; a second
+    // `leave` changes nothing.
+    joiner.emitEvent(QStringLiteral("write"), QStringLiteral("reboot"));
+    sendLeave(joiner);
+    runFor(200ms);
+    EXPECT_EQ(f.console.sentLines(), std::vector<std::string>{"info show"});
+    EXPECT_EQ(eventCount(f.console, "Support left the session."), 1U);
+
+    // Join again: the customer is asked, then commands pass again.
+    RawParticipant again(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return f.consent.joinQuestions == 2 && f.host.commandsAllowed(); }));
+    again.emitEvent(QStringLiteral("write"), QStringLiteral("config show"));
+    ASSERT_TRUE(runUntil([&] { return f.console.sent.size() == 2; }));
+    EXPECT_EQ(f.console.sent.back().line, "config show");
+}
+
+// A forged `leave` (anybody who knows the code) never grants anything: before the customer
+// allowed a participant it is dropped; the answer of the open join question decides.
+TEST(RemoteHostLeave, ForgedLeaveBeforeTheConsentIsDropped) {
+    FakeRelay relay;
+    HostFixture f(optionsFor(relay));
+    f.consent.joins = ScriptedConsent::Mode::Manual;
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant joiner(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return f.consent.joinQuestions == 1; }));
+    sendLeave(joiner);
+    runFor(150ms);
+    EXPECT_TRUE(f.host.joinQuestionOpen());
+    EXPECT_FALSE(f.console.hasEvent("Support left the session."));
+    std::exchange(f.consent.pendingJoin, {})(true);
+    ASSERT_TRUE(runUntil([&] { return f.host.commandsAllowed(); }));
+    EXPECT_FALSE(f.host.joinQuestionOpen());
+    EXPECT_EQ(f.consent.joinQuestions, 1);
+}
+
+// The host's rate limit for remote lines applies to `leave` too.
+TEST(RemoteHostLeave, LeaveCountsAgainstTheLineRate) {
+    FakeRelay relay;
+    HostOptions options = optionsFor(relay);
+    options.limits.remoteLinesPerSecond = 2;
+    HostFixture f(options);
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant joiner(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return f.host.commandsAllowed(); }));
+    joiner.emitEvent(QStringLiteral("write"), QStringLiteral("cmd 1"));
+    joiner.emitEvent(QStringLiteral("write"), QStringLiteral("cmd 2"));
+    sendLeave(joiner);
+    runFor(200ms);
+    EXPECT_EQ(f.console.sent.size(), 2U);
+    EXPECT_TRUE(f.host.commandsAllowed()); // dropped: over the rate
+    EXPECT_TRUE(f.console.hasEvent("more than 2 per second"));
+    EXPECT_FALSE(f.console.hasEvent("Support left the session."));
+    runFor(1100ms);
+    sendLeave(joiner);
+    ASSERT_TRUE(runUntil([&] { return !f.host.commandsAllowed(); }));
+}
+
+// A running operation of the participant that left is not cancelled: it finishes and is reported
+// as before.
+TEST(RemoteHostLeave, LeaveDoesNotCancelARunningOperation) {
+    FakeRelay relay;
+    OpsFixture o(relay);
+    o.f.host.start();
+    ASSERT_TRUE(runUntil([&] { return o.f.shared == 1; }));
+    RawParticipant monitor(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return o.f.host.commandsAllowed(); }));
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::HostHello>().has_value(); }));
+    o.requestOp(tunnel::OpRequest{.id = "op1",
+                                  .kind = tunnel::OpKind::Flash,
+                                  .target = tunnel::OpTarget::App,
+                                  .firmwareId = fwId});
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpAccepted>().has_value(); }));
+    ASSERT_TRUE(o.f.host.operationRunning());
+
+    sendLeave(monitor);
+    ASSERT_TRUE(runUntil([&] { return !o.f.host.commandsAllowed(); }));
+    EXPECT_TRUE(o.f.host.operationRunning());
+    EXPECT_EQ(o.operations.abandoned, 0);
+    o.operations.finished(Status{});
+    ASSERT_TRUE(runUntil([&] { return o.last<tunnel::OpResult>().has_value(); }));
+    EXPECT_TRUE(o.last<tunnel::OpResult>().value_or(tunnel::OpResult{}).ok);
+    EXPECT_TRUE(o.f.console.hasEvent(": done."));
+    EXPECT_FALSE(o.f.host.operationRunning());
 }
 
 } // namespace

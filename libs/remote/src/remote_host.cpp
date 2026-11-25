@@ -393,7 +393,8 @@ void RemoteHost::sendHello() {
     // Plan 0059 (ADR-0414): the profile and this host's caps. `targets` and the `targets` /
     // `prepared` caps come with the remote operations matrix (plan 0059 phase B).
     hello.profile = std::string(m_session->profile().id);
-    hello.caps = {std::string(tunnel::cap::detailCodes), std::string(tunnel::cap::refusedLines)};
+    hello.caps = {std::string(tunnel::cap::detailCodes), std::string(tunnel::cap::refusedLines),
+                  std::string(tunnel::cap::leave)}; // ADR-0439
     hello.ops = operationsOffered();
     if (hello.ops) {
         hello.opKinds = m_operations->kinds(); // ADR-0363
@@ -454,20 +455,9 @@ void RemoteHost::onRemoteLine(const QString& text) {
             "A remote command was dropped (too long or with control characters).")));
         return;
     }
-    const auto now = std::chrono::steady_clock::now();
-    while (!m_recentLines.empty() && now - m_recentLines.front() >= std::chrono::seconds(1)) {
-        m_recentLines.pop_front();
-    }
-    if (std::cmp_greater_equal(m_recentLines.size(), m_options.limits.remoteLinesPerSecond)) {
-        if (now - m_lastRateAudit >= std::chrono::seconds(1)) {
-            m_lastRateAudit = now;
-            audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote",
-                                             "Remote commands dropped: more than %1 per second."))
-                      .arg(m_options.limits.remoteLinesPerSecond));
-        }
+    if (!withinLineRate()) {
         return;
     }
-    m_recentLines.push_back(now);
     if (m_session.isNull()) {
         return;
     }
@@ -483,6 +473,37 @@ void RemoteHost::onRemoteLine(const QString& text) {
         emit warning(sent.error());
     }
     activity();
+}
+
+bool RemoteHost::withinLineRate() {
+    const auto now = std::chrono::steady_clock::now();
+    while (!m_recentLines.empty() && now - m_recentLines.front() >= std::chrono::seconds(1)) {
+        m_recentLines.pop_front();
+    }
+    if (std::cmp_greater_equal(m_recentLines.size(), m_options.limits.remoteLinesPerSecond)) {
+        if (now - m_lastRateAudit >= std::chrono::seconds(1)) {
+            m_lastRateAudit = now;
+            audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                             "Remote commands dropped: more than %1 per second."))
+                      .arg(m_options.limits.remoteLinesPerSecond));
+        }
+        return false;
+    }
+    m_recentLines.push_back(now);
+    return true;
+}
+
+void RemoteHost::onLeave() {
+    // ADR-0439: support left (or someone who knows the code says so; the relay does not
+    // authenticate senders). It only withdraws the permission: the next participant is allowed by
+    // the customer again (a join question). A running operation finishes on the customer's side.
+    if (!withinLineRate()) {
+        return;
+    }
+    m_allowed = false;
+    m_commandsTimer.stop();
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Support left the session.")));
+    emit participantsChanged();
 }
 
 void RemoteHost::onTunnel(const QJsonValue& payload) {
@@ -502,6 +523,10 @@ void RemoteHost::onTunnel(const QJsonValue& payload) {
         }
         return;
     }
+    if (std::holds_alternative<tunnel::Leave>(*message)) {
+        onLeave();
+        return;
+    }
     if (const auto* learn = std::get_if<tunnel::Learn>(&*message)) {
         onLearn(*learn);
         return;
@@ -511,37 +536,41 @@ void RemoteHost::onTunnel(const QJsonValue& payload) {
         return;
     }
     if (const auto* hello = std::get_if<tunnel::JoinerHello>(&*message)) {
-        const std::string app = "HARDWARIO Monitor " + hello->version;
-        // Plan 0059 (ADR-0414): the last hello's caps decide the cap-gated messages; the union
-        // of the session's caps is only audited.
-        m_peerCaps = hello->caps;
-        bool newCaps = false;
-        for (const std::string& name : hello->caps) {
-            if (!tunnel::hasCap(m_capsSeen, name) && m_capsSeen.size() < tunnel::maxCaps) {
-                m_capsSeen.push_back(name);
-                newCaps = true;
-            }
-        }
-        if (app != m_peerApp || newCaps) {
-            m_peerApp = app;
-            m_helloTimer.stop();
-            if (hello->caps.empty()) {
-                audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Participant app: %1."))
-                          .arg(toQString(app)));
-            } else {
-                QStringList caps;
-                for (const std::string& name : m_capsSeen) {
-                    caps.append(toQString(name));
-                }
-                audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote",
-                                                 "Participant app: %1 (capabilities: %2)."))
-                          .arg(toQString(app), caps.join(QStringLiteral(", "))));
-            }
-            emit participantsChanged();
-        }
+        onJoinerHello(*hello);
         return;
     }
     onOperationRequest(std::get<tunnel::OpRequest>(*message));
+}
+
+void RemoteHost::onJoinerHello(const tunnel::JoinerHello& joinerHello) {
+    const std::string app = "HARDWARIO Monitor " + joinerHello.version;
+    // Plan 0059 (ADR-0414): the last hello's caps decide the cap-gated messages; the union
+    // of the session's caps is only audited.
+    m_peerCaps = joinerHello.caps;
+    bool newCaps = false;
+    for (const std::string& name : joinerHello.caps) {
+        if (!tunnel::hasCap(m_capsSeen, name) && m_capsSeen.size() < tunnel::maxCaps) {
+            m_capsSeen.push_back(name);
+            newCaps = true;
+        }
+    }
+    if (app != m_peerApp || newCaps) {
+        m_peerApp = app;
+        m_helloTimer.stop();
+        if (joinerHello.caps.empty()) {
+            audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Participant app: %1."))
+                      .arg(toQString(app)));
+        } else {
+            QStringList caps;
+            for (const std::string& name : m_capsSeen) {
+                caps.append(toQString(name));
+            }
+            audit(trRemote(
+                      QT_TRANSLATE_NOOP("hwio::remote", "Participant app: %1 (capabilities: %2)."))
+                      .arg(toQString(app), caps.join(QStringLiteral(", "))));
+        }
+        emit participantsChanged();
+    }
 }
 
 void RemoteHost::setCommandTree(std::shared_ptr<const device::CommandTree> tree) {

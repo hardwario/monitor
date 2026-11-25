@@ -35,7 +35,12 @@ Inne języki: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-sup
    wykonujesz polecenia dotyczące przełożenia kabla (nie ma nic do kliknięcia). Jeśli nie da się zrobić kopii
    aplikacji, wsparcie decyduje, czy kontynuować bez niej. Kopia jest na końcu zawsze zapisywana z powrotem. Gdy wsparcie odpowie Nie, zobaczysz *Anulowane przez wsparcie. Nic nie zostało zmienione.* Bez odpowiedzi zobaczysz *Wsparcie nie odpowiedziało. Nic nie zostało zmienione.* Jeśli
    wsparcie nie odpowie w ciągu 60 sekund, aktualizacja zostaje anulowana, zanim cokolwiek się zmieni.
-8. Gdy skończysz, kliknij **Zakończ udostępnianie**.
+8. Gdy wsparcie opuści sesję (przyciskiem **Opuść sesję**, zamykając kartę lub zamykając HARDWARIO Monitor), konsola
+   pokaże *— Zdalnie: Wsparcie opuściło sesję. —*, a baner nie mówi już, że wsparcie może wysyłać polecenia.
+   Udostępnianie trwa dalej; jeśli wsparcie dołączy ponownie, musisz je ponownie dopuścić. Operacja, która już trwa,
+   zostanie dokończona. Wymaga to HARDWARIO Monitor 2.0.0-rc.5 lub nowszego po obu stronach; wsparcie korzystające z
+   Terminala webowego lub starszej wersji odchodzi bez powiadomienia.
+9. Gdy skończysz, kliknij **Zakończ udostępnianie**.
 
 Udostępnianie kończy się też po odłączeniu urządzenia, zamknięciu karty lub zamknięciu aplikacji, po 30 minutach
 bezczynności (baner ostrzega 2 minuty wcześniej, **Kontynuuj udostępnianie** je przedłuża) i najpóźniej po 8 godzinach.
@@ -99,7 +104,8 @@ udostępnianie**.
 Aby opuścić sesję, kliknij **Opuść sesję** na pasku urządzenia (lub naciśnij Ctrl+Shift+D). Karta pozostaje otwarta
 razem z konsolą, więc nadal możesz ją zapisać; konsola pokazuje *— opuściłeś sesję —*. **Dołącz ponownie** dołącza do
 tego samego kodu, a klient musi Cię ponownie dopuścić. Dopóki trwa operacja, o którą poprosiłeś, przycisk czeka na jej
-zakończenie.
+zakończenie. Klient z HARDWARIO Monitor 2.0.0-rc.5 lub nowszym widzi, że wyszedłeś (także po zamknięciu karty lub
+aplikacji), a polecenia wysłane potem nie docierają do urządzenia, dopóki klient ponownie Cię nie dopuści.
 
 **Asystent AI.** Gdy włączone jest **Ustawienia › Asystenci AI (MCP) › Klienci AI mogą korzystać z sesji
 zdalnego wsparcia**, klient AI, na przykład Claude Code, może pracować w karcie zdalnej, gdy zezwolisz mu na to dla

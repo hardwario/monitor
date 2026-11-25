@@ -79,6 +79,27 @@ TEST(Tunnel, JoinerMessagesRoundTrip) {
     EXPECT_TRUE(std::holds_alternative<JoinerHello>(*hello));
 }
 
+// Plan 0061 Amendment 2 (ADR-0439): `leave` has no fields besides v and type.
+TEST(Tunnel, LeaveRoundTripAndBounds) {
+    const QJsonObject write = encodeJoiner(Leave{});
+    EXPECT_EQ(QJsonDocument(write).toJson(QJsonDocument::Compact),
+              QByteArray(R"({"hwio":{"type":"leave","v":1}})"));
+    auto decoded = decodeJoiner(write);
+    ASSERT_TRUE(decoded.has_value()) << decoded.error().detail;
+    EXPECT_TRUE(std::holds_alternative<Leave>(*decoded));
+    // Unknown fields are ignored (a later joiner); the version stays 1.
+    auto later = decodeJoiner(json(R"({"hwio":{"v":1,"type":"leave","reason":"x"}})"));
+    ASSERT_TRUE(later.has_value()) << later.error().detail;
+    EXPECT_TRUE(std::holds_alternative<Leave>(*later));
+    for (const char* text : {R"({"hwio":{"v":2,"type":"leave"}})", R"({"hwio":{"type":"leave"}})",
+                             R"({"hwio":{"v":1,"type":"Leave"}})"}) {
+        EXPECT_FALSE(decodeJoiner(json(text)).has_value()) << text;
+    }
+    EXPECT_FALSE(decodeJoiner(QJsonValue(QStringLiteral("leave"))).has_value());
+    EXPECT_EQ(cap::leave, "leave");
+    EXPECT_TRUE(validName(cap::leave));
+}
+
 TEST(Tunnel, StringsAreNeverTunnelMessages) {
     EXPECT_FALSE(decodeJoiner(QJsonValue(QStringLiteral("{\"hwio\":{\"v\":1}}"))).has_value());
     EXPECT_FALSE(isTunnelAt(QJsonValue(QStringLiteral("hwio"))));

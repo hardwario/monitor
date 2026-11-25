@@ -33,7 +33,12 @@ Other languages: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-
    cable instructions (there is no button to click). If no copy of the application can be made, support decides
    whether to continue without it. The copy is always written back at the end. If support answers No, you see *Cancelled by support. Nothing was changed.* Without an answer you see *Support did not answer. Nothing was changed.* Without an answer from support within
    60 seconds the update is cancelled before anything changes.
-8. Click **End sharing** when you are done.
+8. When support leaves the session (their **Leave session**, closing their tab or quitting HARDWARIO Monitor), your
+   console shows *— Remote: Support left the session. —* and the banner no longer says that support can send
+   commands. Sharing goes on; if support joins again, you are asked to allow them again. An operation that is already
+   running finishes. This needs HARDWARIO Monitor 2.0.0-rc.5 or newer on both sides; support using the web Terminal
+   or an older version leaves without telling you.
+9. Click **End sharing** when you are done.
 
 Sharing also ends when you disconnect the device, close the tab or quit, after 30 minutes without activity (a banner
 warns you 2 minutes before, **Keep sharing** extends it) and after 8 hours at most.
@@ -95,7 +100,8 @@ Your controls stay the same: allowing support in, the question before each opera
 To leave the session, click **Leave session** in the device bar (or press Ctrl+Shift+D). The tab stays open with the
 console, so you can still save it; the console shows *— you left the session —*. **Join again** joins the same code
 again, and the customer is asked to allow you again. While an operation you asked for runs, the button waits until it
-ends.
+ends. A customer with HARDWARIO Monitor 2.0.0-rc.5 or newer sees that you left (also when you close the tab or quit),
+and commands sent afterwards do not reach the device until the customer allows you again.
 
 **AI assistant.** With **Settings › AI assistants (MCP) › AI clients may use remote support sessions** on, an AI
 client such as Claude Code can work in the remote tab after you allow it for the session: it reads the console with

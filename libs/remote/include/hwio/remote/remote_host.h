@@ -71,6 +71,14 @@
 // an English `read` line for every participant and, to a joiner with the refused-lines cap, a
 // tunnel line-refused (remote.command_refused).
 //
+// Leave (plan 0061 Amendment 2, ADR-0439): the hello lists the `leave` cap. A tunnel `leave` of an
+// allowed participant (no join question open; within the remote line rate) withdraws the
+// permission (commandsAllowed() false, participantsChanged()) and writes the audit line "Support
+// left the session."; the next participant is allowed by the customer again (a newClient asks).
+// It grants nothing: a `leave` from a participant without permission is dropped like its lines.
+// The relay gives no participant identity, so it withdraws the permission for every participant.
+// A running operation is not cancelled.
+//
 // Audit (ADR-0333): ConsoleSession::recordRemoteEvent() for the start and end, every join, allow,
 // the peer's app, remote commands (redacted), dropped commands, and every operation request with
 // its outcome. The texts are translated (the host's language), context "hwio::remote".
@@ -216,6 +224,11 @@ private:
     void onWrite(const QJsonValue& payload);
     void onRemoteLine(const QString& text);
     void onTunnel(const QJsonValue& payload);
+    void onJoinerHello(const tunnel::JoinerHello& joinerHello);
+    void onLeave(); // ADR-0439
+    // The remote line rate (remoteLinesPerSecond, shared by lines and `leave`): false = drop it
+    // (audited at most once per second).
+    [[nodiscard]] bool withinLineRate();
     void onOperationRequest(const tunnel::OpRequest& request);
     void onLearn(const tunnel::Learn& learn);
     void sendCommands();

@@ -37,7 +37,13 @@ Andere Sprachen: [English](../en/remote-support.md) · [Čeština](../cs/remote-
    den Anweisungen zum Umstecken (es gibt nichts zu klicken). Kann keine Kopie der Anwendung erstellt werden,
    entscheidet der Support, ob ohne sie fortgefahren wird. Die Kopie wird am Ende immer zurückgeschrieben. Antwortet der Support mit Nein, sehen Sie *Vom Support abgebrochen. Es wurde nichts geändert.* Ohne Antwort sehen Sie *Der Support hat nicht geantwortet. Es wurde nichts geändert.* Antwortet
    der Support nicht innerhalb von 60 Sekunden, wird das Update abgebrochen, bevor etwas geändert wird.
-8. Klicken Sie auf **Freigabe beenden**, wenn Sie fertig sind.
+8. Wenn der Support die Sitzung verlässt (mit **Sitzung verlassen**, durch Schließen seines Tabs oder Beenden von
+   HARDWARIO Monitor), zeigt Ihre Konsole *— Remote: Der Support hat die Sitzung verlassen. —*, und das Banner sagt
+   nicht mehr, dass der Support Befehle senden kann. Die Freigabe läuft weiter; tritt der Support erneut bei, müssen
+   Sie ihn erneut zulassen. Ein Vorgang, der bereits läuft, wird zu Ende geführt. Dafür braucht es HARDWARIO Monitor
+   2.0.0-rc.5 oder neuer auf beiden Seiten; ein Support mit dem Web-Terminal oder einer älteren Version verlässt die
+   Sitzung ohne Hinweis.
+9. Klicken Sie auf **Freigabe beenden**, wenn Sie fertig sind.
 
 Die Freigabe endet auch, wenn Sie das Gerät trennen, den Tab schließen oder die App beenden, nach 30 Minuten ohne
 Aktivität (ein Banner warnt Sie 2 Minuten vorher, **Weiter freigeben** verlängert sie) und spätestens nach 8 Stunden.
@@ -104,7 +110,9 @@ und **Freigabe beenden**.
 Um die Sitzung zu verlassen, klicken Sie in der Geräteleiste auf **Sitzung verlassen** (oder drücken Sie
 Ctrl+Shift+D). Der Tab bleibt mit der Konsole offen, sodass Sie sie noch speichern können; die Konsole zeigt *— Sie haben
 die Sitzung verlassen —*. **Erneut beitreten** tritt mit demselben Code wieder bei, und der Kunde muss Sie erneut
-zulassen. Solange ein Vorgang läuft, den Sie angefordert haben, wartet die Schaltfläche, bis er beendet ist.
+zulassen. Solange ein Vorgang läuft, den Sie angefordert haben, wartet die Schaltfläche, bis er beendet ist. Ein Kunde
+mit HARDWARIO Monitor 2.0.0-rc.5 oder neuer sieht, dass Sie gegangen sind (auch wenn Sie den Tab schließen oder die
+App beenden), und danach gesendete Befehle erreichen das Gerät erst, wenn der Kunde Sie erneut zulässt.
 
 **KI-Assistent.** Wenn **Einstellungen › KI-Assistenten (MCP) › KI-Clients dürfen Fernsupport-Sitzungen
 verwenden** eingeschaltet ist, kann ein KI-Client wie Claude Code im Remote-Tab arbeiten, sobald Sie es für die

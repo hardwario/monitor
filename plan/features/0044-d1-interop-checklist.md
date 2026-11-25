@@ -50,6 +50,7 @@ release notes or the HIL results.
 | 2.4 | web Terminal | web Terminal | [ ] unchanged behaviour (regression check of the deployed relay) |
 | 2.5 | HARDWARIO mobile app (CHESTER over Bluetooth) | Monitor GUI | [ ] plan 0061 (ADR-0431, ADR-0432): tab "Session NNN NNN — web Terminal or mobile app"; the history and the live answers of `info show` and `config show` show every line (no blank lines instead of text, no line in two pieces, no prompt lines); `claim token`, `ble passkey` and `lrw config appkey …` show `<redacted>`; stopping sharing on the phone ends the session in Monitor ("The session ended.") |
 | 2.6 | Monitor GUI | HARDWARIO mobile app | [ ] the app shows the history and the live output (known: the app joins Monitor's lines without line breaks; the app's to fix, ADR-0431); its commands run after Allow |
+| 2.7 | Monitor GUI 2.0.0-rc.5 | Monitor GUI 2.0.0-rc.5 | [ ] plan 0061 Amendment 2 (ADR-0439): **Leave session** on the joiner → the host's banner drops "Support can send commands." and its console shows "— Remote: Support left the session. —"; **Join again** → the customer's join question; the same after closing the joined tab and after quitting the joiner; with a 2.0.0-rc.4 Monitor on either side nothing changes (no warning on an rc.4 host) |
 
 ## 3. Monitor ↔ Monitor operations (HIL, J-Link CHESTER)
 

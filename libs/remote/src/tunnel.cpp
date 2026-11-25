@@ -849,6 +849,7 @@ QJsonObject encodeJoiner(const JoinerMessage& message) {
                            d.insert(QStringLiteral("path"), path);
                            return d;
                        },
+                       [](const Leave& /*leave*/) { return envelope("leave"); }, // ADR-0439
                    },
                    message);
     QJsonObject write;
@@ -949,6 +950,9 @@ Result<JoinerMessage> decodeJoiner(const QJsonValue& payload) {
     }
     if (type == QStringLiteral("op-answer")) {
         return decodeOpAnswer(*data);
+    }
+    if (type == QStringLiteral("leave")) { // ADR-0439: no fields; unknown ones are ignored
+        return Leave{};
     }
     if (type != QStringLiteral("op-request")) {
         return bad("unknown joiner message type");

@@ -584,13 +584,29 @@ cannot learn that a participant left: the relay sends nothing on a disconnect an
 
 ### Steps
 
-- [ ] III-1 `tunnel`: message `leave` (encode, decode, bounds), capability `leave` in the host hello; compat
+- [x] III-1 `tunnel`: message `leave` (encode, decode, bounds), capability `leave` in the host hello; compat
       tests: an rc.4-shaped host never receives it, an rc.4-shaped joiner ignores the new capability.
-- [ ] III-2 Joiner: send on Leave session, tab close and quit, only with the capability; unit tests.
-- [ ] III-3 Host: withdraw permission, audit line, banner, rate limit; a running operation is not cancelled;
+- [x] III-2 Joiner: send on Leave session, tab close and quit, only with the capability; unit tests.
+- [x] III-3 Host: withdraw permission, audit line, banner, rate limit; a running operation is not cancelled;
       tests incl. a forged `leave` and a command after `leave` being dropped.
-- [ ] III-4 Qt Quick test of the customer's banner; translations (cs, de, pl, sk); docs `remote-support.md` in
-      five languages; release notes; interop checklist row. This completes A4.
+- [x] III-4 Qt Quick test of the customer's banner; translations (cs, de, pl, sk); docs `remote-support.md` in
+      five languages; release notes; interop checklist row (0044 D1, row 2.7). This completes A4.
+
+Implementation notes (2026-11-25):
+
+- The joiner sends `leave` in `RemoteConsoleSession::closeSession()`, the one path behind Leave session, a closed
+  tab and quit (`ConsoleSession::close()` and the destructor); `RelayClient::stop()` sends it before the socket
+  closes, as the host's `end`. Consequence: `hwio remote join` sends it too when it exits.
+- The host handles `leave` after the existing check for an allowed participant: a `leave` while no participant is
+  allowed, or while a join question is open, is dropped like the participant's lines (the open question decides).
+- Open: the audit line has no English `textEn` for MCP. `ConsoleSession::recordRemoteEvent()` takes one text, so no
+  audit line of the host has one today; adding it changes that interface for every transport and is left to a
+  decision. The line is written translated like every other audit line.
+- Open: a `leave` while the customer's operation question for that participant is still open does not withdraw the
+  question (the customer can still allow the operation); a `leave` during a remote LTE update makes the answer to a
+  later question to support be dropped (it times out: "Support did not answer. Nothing was changed."). Not decided
+  by this amendment.
+- Not done: the manual check with two Monitors.
 
 Verification as for the rest of the plan (debug, ASan, TSan, tidy, qmllint, translations, format, includes), plus
 the manual check with two Monitors: Leave session → the customer's banner and audit line; Join again → consent.

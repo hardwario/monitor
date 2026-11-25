@@ -37,6 +37,9 @@
 // Stopped. A Monitor host that ends sharing sends nothing (the relay does not announce it), so the
 // session ends only when the relay connection fails; idleNotice() after idleNoticeAfter without any
 // event from the host (plan 0044 § Joiner, step 5). recordRemoteEvent() adds a marker to the log.
+// close() (Leave session, a closed tab, quit; also the end of `hwio remote join`) sends the tunnel
+// `leave` first when the session is connected and the host's hello lists the `leave` cap
+// (ADR-0439, best effort: no answer is awaited); never to a host without it.
 
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
@@ -152,8 +155,8 @@ public:
     [[nodiscard]] static Status hostOffers(const tunnel::HostHello& hello,
                                            const tunnel::OpRequest& request);
     // Sends a tunnel message (only after the host's hello). Errors:
-    // remote.operation_unsupported_peer (no hello), remote.host_ended; for an op-request those of
-    // hostOffers().
+    // remote.operation_unsupported_peer (no hello; `leave` to a host without the `leave` cap),
+    // remote.host_ended; for an op-request those of hostOffers().
     [[nodiscard]] Status sendTunnel(const tunnel::JoinerMessage& message);
     // ADR-0364: the host's command tree (nullptr: none, e.g. a web Terminal host).
     [[nodiscard]] std::shared_ptr<const device::CommandTree> commandTree() const {

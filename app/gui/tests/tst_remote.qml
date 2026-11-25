@@ -129,6 +129,49 @@ TestCase {
         tryVerify(() => shown("remoteShareBanner").length === 0, 5000);
     }
 
+    // Plan 0061 Amendment 2 (ADR-0439): support leaves (tunnel `leave`): the customer's banner no
+    // longer says that support can send commands, the console has the audit line, a line after it
+    // does not reach the device, and the next join asks again.
+    function test_customerSeesThatSupportLeft() {
+        connectConsole();
+        const share = tab().remoteShare;
+        const index = AppViewModel.currentTab;
+        tryVerify(() => share.available, 5000);
+        mouseClick(one("shareButton"));
+        tryVerify(() => shown("remoteShareDialog").length === 1, 5000);
+        mouseClick(findChild(one("remoteShareDialog"), "remoteShareStart"));
+        tryVerify(() => share.state === "sharing", 10000);
+        const code = share.code;
+
+        verify(testSupport.remoteJoin(code));
+        tryVerify(() => share.joinQuestionOpen, 10000);
+        const dialogs = findAll(window.contentItem, "remoteSessionDialogs").filter(effectivelyVisible)[0];
+        const join = findChild(dialogs, "remoteJoinDialog");
+        tryVerify(() => join.opened, 5000);
+        mouseClick(findChild(join.footer, "dialogAccept")); // Allow
+        tryVerify(() => share.participantAllowed, 5000);
+        tryCompare(one("remoteShareText"), "text",
+                   "Shared with support — code " + code + ". Support can send commands.", 5000);
+
+        testSupport.remoteLeave();
+        tryVerify(() => !share.participantAllowed, 5000);
+        tryCompare(one("remoteShareText"), "text", "Shared with support — code " + code, 5000);
+        tryVerify(() => testSupport.consoleHasLine(index, "— Remote: Support left the session. —"), 5000);
+        verify(share.sharing);
+        verify(shown("remoteShareBanner").length === 1);
+
+        // Join again: the customer is asked again.
+        verify(testSupport.remoteJoin(code));
+        tryVerify(() => share.joinQuestionOpen, 10000);
+        tryVerify(() => join.opened, 5000);
+        mouseClick(findChild(join.footer, "dialogAccept"));
+        tryVerify(() => share.participantAllowed, 5000);
+        tryVerify(() => !join.visible, 5000); // the modal dialog has closed
+
+        mouseClick(one("remoteEndSharing"));
+        tryVerify(() => !share.sharing, 5000);
+    }
+
     function test_joinAWebTerminalHost() {
         AppViewModel.showPage("console");
         mouseClick(one("joinSupportSession"));
@@ -421,6 +464,33 @@ TestCase {
         tryVerify(() => shown("remoteJoinBanner").length === 1, 5000);
         const banner = one("remoteJoinBanner");
         compare(banner.actionText, "Close tab");
+    }
+
+    // ADR-0439: Leave session and closing the tab tell a Monitor host that lists the `leave` cap.
+    function test_leaveAndCloseTabTellTheHost() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        AppViewModel.showPage("console");
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(false);
+        tryVerify(() => tab().remoteJoin.state === "joined" && tab().remoteJoin.operationsAvailable, 10000);
+        tryVerify(() => testSupport.remoteReceived("write") >= 1, 5000); // the joiner's hello
+        tryVerify(() => bar("connectionAction") !== undefined, 5000);
+        const button = bar("connectionAction");
+        tryVerify(() => button.width > 0 && button.enabled, 5000);
+        compare(testSupport.remoteReceivedLeave(), 0);
+
+        mouseClick(button); // Leave session
+        tryVerify(() => tab().remoteJoin.state === "ended", 5000);
+        tryVerify(() => testSupport.remoteReceivedLeave() === 1, 5000);
+
+        mouseClick(button); // Join again
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(false);
+        tryVerify(() => tab().remoteJoin.state === "joined" && tab().remoteJoin.operationsAvailable, 10000);
+        AppViewModel.closeTab(AppViewModel.currentTab, true);
+        tryVerify(() => testSupport.remoteReceivedLeave() === 2, 5000);
     }
 
     // ADR-0429: while an operation support started runs, the button (and the shortcut) waits.

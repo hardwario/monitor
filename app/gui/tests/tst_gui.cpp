@@ -246,8 +246,29 @@ public:
         }
         return result;
     }
+    // ADR-0439: the participant (a Monitor joiner) leaves the session (tunnel `leave`).
+    Q_INVOKABLE void remoteLeave() const {
+        if (m_participant) {
+            m_participant->emitEvent(QStringLiteral("write"), hwio::remote::tunnel::encodeJoiner(
+                                                                  hwio::remote::tunnel::Leave{}));
+        }
+    }
+    // ADR-0439: the number of tunnel `leave` messages the participant (a host) received.
+    Q_INVOKABLE [[nodiscard]] int remoteReceivedLeave() const {
+        int count = 0;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("write"))) {
+                if (auto message = hwio::remote::tunnel::decodeJoiner(event.payload);
+                    message && std::holds_alternative<hwio::remote::tunnel::Leave>(*message)) {
+                    ++count;
+                }
+            }
+        }
+        return count;
+    }
     // The participant acts as a Monitor host: a sync and its hello (operations; `lteUpdate`: the
-    // guided LTE update in opKinds, with support's questions, ADR-0368).
+    // guided LTE update in opKinds, with support's questions, ADR-0368; the `leave` cap of
+    // ADR-0439).
     Q_INVOKABLE void remoteMonitorHost(bool lteUpdate) const {
         if (!m_participant) {
             return;
@@ -270,7 +291,8 @@ public:
                                                                       .firmware = {}},
                                                            .ops = true,
                                                            .opKinds = kinds,
-                                                           .opQuestions = lteUpdate}));
+                                                           .opQuestions = lteUpdate,
+                                                           .caps = {"leave"}}));
     }
     // The ID of the last operation request the participant received ("" for none).
     [[nodiscard]] std::string remoteRequestId() const {

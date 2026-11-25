@@ -198,6 +198,15 @@ RemoteConsoleSession::RemoteConsoleSession(JoinOptions options)
 RemoteConsoleSession::~RemoteConsoleSession() { closeSession(); }
 
 void RemoteConsoleSession::closeSession() {
+    // ADR-0439: Leave session, a closed tab and quitting tell a host that can read it (best
+    // effort, without waiting for an answer); stop() still sends what is queued before the socket
+    // closes. A lost connection sends nothing.
+    if (m_state != JoinState::Ended && m_relay && m_relay->isConnected() && m_hostHello &&
+        tunnel::hasCap(m_hostHello->caps, tunnel::cap::leave)) {
+        if (Status sent = sendTunnel(tunnel::Leave{}); !sent) {
+            qCInfo(log::lcRemote).noquote() << "Leave not sent:" << toQString(sent.error().detail);
+        }
+    }
     if (m_relay) {
         m_relay->stop();
     }
@@ -318,6 +327,12 @@ Status RemoteConsoleSession::sendTunnel(const tunnel::JoinerMessage& message) {
         if (Status offered = hostOffers(*m_hostHello, *request); !offered) {
             return offered;
         }
+    }
+    // ADR-0439: an older host rejects `leave` with a warning.
+    if (std::holds_alternative<tunnel::Leave>(message) &&
+        !tunnel::hasCap(m_hostHello->caps, tunnel::cap::leave)) {
+        return std::unexpected(
+            makeError(ErrorCode::RemoteOperationUnsupportedPeer, "the host has no leave cap"));
     }
     m_relay->emitEvent(QStringLiteral("write"), tunnel::encodeJoiner(message), false);
     return {};

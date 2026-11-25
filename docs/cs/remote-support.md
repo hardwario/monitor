@@ -35,7 +35,12 @@ Další jazyky: [English](../en/remote-support.md) · [Deutsch](../de/remote-sup
    přepojení kabelu (nic neklikáte). Pokud kopii aplikace nelze vytvořit, rozhodne podpora, zda pokračovat bez ní.
    Kopie se na konci vždy zapíše zpět. Když podpora odpoví Ne, uvidíte *Zrušeno podporou. Nic se nezměnilo.* Bez odpovědi uvidíte *Podpora neodpověděla. Nic se nezměnilo.* Když podpora do 60 sekund neodpoví, aktualizace se zruší dřív, než se cokoli
    změní.
-8. Až budete hotovi, klikněte na **Ukončit sdílení**.
+8. Když podpora relaci opustí (svým **Opustit relaci**, zavřením karty nebo ukončením HARDWARIO Monitoru), v konzoli
+   se objeví *— Vzdáleně: Podpora opustila relaci. —* a banner už neříká, že podpora může posílat příkazy. Sdílení
+   pokračuje; pokud se podpora připojí znovu, budete ji muset znovu povolit. Operace, která už běží, doběhne. Funguje
+   to s HARDWARIO Monitorem 2.0.0-rc.5 nebo novějším na obou stranách; podpora s webovým Terminalem nebo starší verzí
+   odchází bez upozornění.
+9. Až budete hotovi, klikněte na **Ukončit sdílení**.
 
 Sdílení skončí také tehdy, když zařízení odpojíte, zavřete kartu nebo aplikaci ukončíte, po 30 minutách bez aktivity
 (banner vás 2 minuty předem upozorní, **Ponechat sdílení** ho prodlouží) a nejpozději po 8 hodinách.
@@ -96,7 +101,8 @@ možnosti zůstávají stejné: povolení podpory, otázka před každou operac�
 Relaci opustíte tlačítkem **Opustit relaci** na liště zařízení (nebo klávesami Ctrl+Shift+D). Karta zůstane otevřená
 i s konzolí, takže ji můžete ještě uložit; v konzoli je řádek *— opustili jste relaci —*. **Připojit se znovu** se
 připojí ke stejnému kódu a zákazník vás musí znovu povolit. Dokud běží operace, o kterou jste požádali, tlačítko čeká,
-až skončí.
+až skončí. Zákazník s HARDWARIO Monitorem 2.0.0-rc.5 nebo novějším uvidí, že jste odešli (i když zavřete kartu nebo
+aplikaci ukončíte), a příkazy poslané potom se k zařízení nedostanou, dokud vás zákazník znovu nepovolí.
 
 **AI asistent.** Když je zapnuté **Nastavení › AI asistenti (MCP) › AI klienti smí používat relace vzdálené
 podpory**, může AI klient, například Claude Code, pracovat ve vzdálené kartě, jakmile mu to pro relaci povolíte: čte

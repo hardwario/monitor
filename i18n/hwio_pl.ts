@@ -6799,12 +6799,12 @@
 <context>
     <name>hwio::gui::GuiRemoteDevice</name>
     <message>
-        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="243"/>
+        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="245"/>
         <source>An AI assistant</source>
         <translation>Asystent AI</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="290"/>
+        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="292"/>
         <source>Remote session (web Terminal or mobile app)</source>
         <translation>Sesja zdalna (Terminal webowy lub aplikacja mobilna)</translation>
     </message>
@@ -7325,7 +7325,7 @@
         <translation>Czekanie na potwierdzenie klienta…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="470"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="472"/>
         <source>AI client active: %1</source>
         <translation>Aktywny klient AI: %1</translation>
     </message>
@@ -7936,43 +7936,43 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>— Połączenie przywrócone; oczekiwanie, aż klient ponownie Cię dopuści —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="218"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="228"/>
         <source>A command line must not be longer than %1 bytes.</source>
         <translation>Wiersz polecenia nie może być dłuższy niż %1 bajtów.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="291"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="301"/>
         <source>Session %1</source>
         <translation>Sesja %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="298"/>
-        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="285"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="308"/>
+        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="287"/>
         <source>%1 — remote</source>
         <translation>%1 — zdalnie</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="303"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="313"/>
         <source>%1 — web Terminal or mobile app</source>
         <translation>%1 — web Terminal lub aplikacja mobilna</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="380"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="396"/>
         <source>— Connected to HARDWARIO Monitor %1 of the customer —</source>
         <translation>— Połączono z HARDWARIO Monitor %1 klienta —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="449"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="465"/>
         <source>The customer&apos;s device is disconnected.</source>
         <translation>Urządzenie klienta jest odłączone.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="563"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="579"/>
         <source>— Session history from the customer —</source>
         <translation>— Historia sesji od klienta —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="566"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="582"/>
         <source>— Older history of the session was left out —</source>
         <translation>— Starsza historia sesji została pominięta —</translation>
     </message>
@@ -8059,104 +8059,109 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>Uczestnik dopuszczony (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="452"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="453"/>
         <source>A remote command was dropped (too long or with control characters).</source>
         <translation>Zdalne polecenie zostało odrzucone (za długie lub ze znakami sterującymi).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="464"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="486"/>
         <source>Remote commands dropped: more than %1 per second.</source>
         <translation>Zdalne polecenia odrzucone: więcej niż %1 na sekundę.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="480"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="470"/>
         <source>command %1</source>
         <translation>polecenie %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="499"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="505"/>
+        <source>Support left the session.</source>
+        <translation>Wsparcie opuściło sesję.</translation>
+    </message>
+    <message>
+        <location filename="../libs/remote/src/remote_host.cpp" line="520"/>
         <source>An operation request was refused: the participant is not allowed.</source>
         <translation>Żądanie operacji odrzucono: uczestnik nie jest dopuszczony.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="529"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="554"/>
         <source>Participant app: %1.</source>
         <translation>Aplikacja uczestnika: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="631"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="656"/>
         <source>Support asks: %1.</source>
         <translation>Prośba wsparcia: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="634"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="659"/>
         <source>%1: refused (this console has no operations).</source>
         <translation>%1: odmowa (ta konsola nie ma operacji).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="642"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="667"/>
         <source>%1: refused (not available on this console).</source>
         <translation>%1: odmowa (niedostępne w tej konsoli).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="649"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="674"/>
         <source>%1: refused (another request or operation is in progress).</source>
         <translation>%1: odmowa (trwa inne żądanie lub operacja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="662"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="686"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="687"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="711"/>
         <source>%1: refused (%2).</source>
         <translation>%1: odmowa (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="714"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="739"/>
         <source>%1: denied by you.</source>
         <translation>%1: odrzucono (Twoja decyzja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="733"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="758"/>
         <source>%1: allowed by you.</source>
         <translation>%1: zezwolono (Twoja decyzja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="797"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="822"/>
         <source>%1: waiting for support&apos;s answer: %2</source>
         <translation>%1: oczekiwanie na odpowiedź wsparcia: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="831"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="856"/>
         <source>Support answered: continue.</source>
         <translation>Wsparcie odpowiedziało: kontynuuj.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="849"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="852"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="874"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="877"/>
         <source>%1: done.</source>
         <translation>%1: gotowe.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="855"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="880"/>
         <source>%1: failed: %2</source>
         <translation>%1: niepowodzenie: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="920"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="945"/>
         <source>— Remote: %1 —</source>
         <translation>— Zdalnie: %1 —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="977"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="1002"/>
         <source>You ended sharing.</source>
         <translation>Zakończono udostępnianie.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="995"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="1020"/>
         <source>Support did not answer before the session ended.</source>
         <translation>Wsparcie nie odpowiedziało przed zakończeniem sesji.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="1022"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="1047"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Odczytano pomoc %n polecenia dla podpowiedzi wsparcia.</numerusform>
@@ -8165,27 +8170,27 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="1029"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="1054"/>
         <source>Sharing ended.</source>
         <translation>Udostępnianie zakończone.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="1030"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="1055"/>
         <source>Sharing ended: %1</source>
         <translation>Udostępnianie zakończone: %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="404"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="420"/>
         <source>— The customer&apos;s Monitor refused this command: it changes the device&apos;s keys or identity —</source>
         <translation>— Monitor klienta odrzucił to polecenie: zmienia ono klucze lub tożsamość urządzenia —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="536"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="561"/>
         <source>Participant app: %1 (capabilities: %2).</source>
         <translation>Aplikacja uczestnika: %1 (możliwości: %2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="960"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="985"/>
         <source>a command that changes the device&apos;s keys or identity was refused (%1)</source>
         <translation>polecenie zmieniające klucze lub tożsamość urządzenia zostało odrzucone (%1)</translation>
     </message>
