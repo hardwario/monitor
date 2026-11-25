@@ -955,8 +955,9 @@ TEST(RemoteSession, AnAiLineAfterLeaveIsDropped) {
         [&] { return ai.hostHello().has_value() && ai.joinState() == JoinState::Allowed; }));
     auto leaving = std::make_unique<RemoteConsoleSession>(joinFor(relay));
     ASSERT_TRUE(runUntil([&] {
+        // The hello too: without the host's `leave` cap close() sends nothing.
         return consent.joinQuestions == 2 && host.commandsAllowed() &&
-               leaving->joinState() == JoinState::Allowed;
+               leaving->joinState() == JoinState::Allowed && leaving->hostHello().has_value();
     }));
     leaving->close();
     ASSERT_TRUE(runUntil([&] { return !host.commandsAllowed(); }));
