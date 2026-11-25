@@ -4,6 +4,7 @@
 #include "hwio/core/bounded_queue.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
@@ -40,6 +41,7 @@
 #include <QtCore/qnamespace.h>
 #include <QtCore/qtmetamacros.h>
 #include <QtLogging>
+#include <QtTranslation>
 
 #include <chrono>
 #include <cstddef>
@@ -67,9 +69,9 @@ template <class... Ts> struct Overloaded : Ts... {
     using Ts::operator()...;
 };
 
-Error invalidOption(const QString& message, std::string detail) {
+Error invalidOption(const LocalizedText& message, std::string detail) {
     Error error = makeError(ErrorCode::UsageInvalidArgument, std::move(detail));
-    error.message = message.toStdString();
+    setText(error, ErrorText::Message, message);
     return error;
 }
 
@@ -77,34 +79,39 @@ Error invalidOption(const QString& message, std::string detail) {
 Result<const TargetProfile*> validate(const SessionOptions& options) {
     if (options.profile == nullptr) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "No device profile was given."), {}));
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "No device profile was given.")),
+            {}));
     }
     const TargetProfile* target = findTarget(*options.profile, options.targetId);
     if (target == nullptr) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "The device %1 has no target \"%2\".")
-                .arg(toQString(options.profile->displayName), toQString(options.targetId)),
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "The device %1 has no target \"%2\"."),
+                          {toQString(options.profile->displayName), toQString(options.targetId)}),
             {}));
     }
     if (target->rttTerminal.empty() && options.attachRtt && options.connectTarget) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "The %1 target of %2 has no console.")
-                .arg(toQString(target->id), toQString(options.profile->displayName)),
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "The %1 target of %2 has no console."),
+                          {toQString(target->id), toQString(options.profile->displayName)}),
             {}));
     }
     if (options.speedKhz && (*options.speedKhz < minSpeedKhz || *options.speedKhz > maxSpeedKhz)) {
-        return std::unexpected(
-            invalidOption(QCoreApplication::translate(
-                              "hwio::device", "The J-Link speed must be between %1 and %2 kHz.")
-                              .arg(minSpeedKhz)
-                              .arg(maxSpeedKhz),
-                          std::to_string(*options.speedKhz)));
+        return std::unexpected(invalidOption(
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device",
+                                            "The J-Link speed must be between %1 and %2 kHz."),
+                          {minSpeedKhz, maxSpeedKhz}),
+            std::to_string(*options.speedKhz)));
     }
     if (options.latencyMs < minLatencyMs || options.latencyMs > maxLatencyMs) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "The latency must be between %1 and %2 ms.")
-                .arg(minLatencyMs)
-                .arg(maxLatencyMs),
+            localizedText(
+                "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device", "The latency must be between %1 and %2 ms."),
+                {minLatencyMs, maxLatencyMs}),
             std::to_string(options.latencyMs)));
     }
     return target;
@@ -178,7 +185,8 @@ SessionInternals::abandonRunning(Error error) {
                                                  .targetStatus = std::nullopt,
                                                  .registers = {},
                                                  .zones = {},
-                                                 .familyMatch = std::nullopt});
+                                                 .familyMatch = std::nullopt,
+                                                 .download = std::nullopt});
     return lastFinished;
 }
 
@@ -482,8 +490,9 @@ Result<OperationId> DeviceSession::startOperation(detail::OperationCommand comma
     const TargetProfile* target = findTarget(*m_internals->profile, targetId);
     if (target == nullptr) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "The device %1 has no target \"%2\".")
-                .arg(toQString(m_internals->profile->displayName), toQString(targetId)),
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "The device %1 has no target \"%2\"."),
+                          {toQString(m_internals->profile->displayName), toQString(targetId)}),
             {}));
     }
     if (m_internals->workerFailed.load()) {
@@ -519,7 +528,9 @@ Result<OperationId> DeviceSession::flash(std::string_view targetId,
                                          FlashOptions options) {
     if (!image || image->empty()) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "The firmware image is empty."), {}));
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "The firmware image is empty.")),
+            {}));
     }
     detail::OperationCommand command;
     command.kind = OperationKind::Flash;
@@ -533,7 +544,9 @@ Result<OperationId> DeviceSession::flashLteBundle(std::string_view targetId,
                                                   FlashOptions options) {
     if (!bundle || bundle->application.empty() || bundle->modemZip.empty()) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "The LTE bundle is incomplete."), {}));
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "The LTE bundle is incomplete.")),
+            {}));
     }
     detail::OperationCommand command;
     command.kind = OperationKind::LteBundle;
@@ -562,7 +575,9 @@ Result<OperationId> DeviceSession::updateModem(std::string_view targetId,
                                                FlashOptions options) {
     if (modemZip.empty()) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "No modem firmware file was given."), {}));
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "No modem firmware file was given.")),
+            {}));
     }
     detail::OperationCommand command;
     command.kind = OperationKind::Modem;
@@ -585,20 +600,23 @@ namespace {
 
 // usage.invalid_argument unless 1 <= size <= limit, a multiple of the width, address aligned.
 Status checkAccess(std::uint32_t address, std::size_t size, AccessWidth width, std::size_t limit,
-                   const QString& what) {
+                   const LocalizedText& what) {
     const std::size_t unit = jlink::unitBytes(width);
     if (size == 0 || size > limit) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "A %1 must be between 1 and %2 bytes.")
-                .arg(what, QString::number(limit)),
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "A %1 must be between 1 and %2 bytes."),
+                          {what, QString::number(limit)}),
             std::to_string(size)));
     }
     if (size % unit != 0 || address % unit != 0) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate(
+            localizedText(
                 "hwio::device",
-                "With %1-bit units the address and the length must be multiples of %2.")
-                .arg(QString::number(unit * 8), QString::number(unit)),
+                QT_TRANSLATE_NOOP(
+                    "hwio::device",
+                    "With %1-bit units the address and the length must be multiples of %2."),
+                {QString::number(unit * 8), QString::number(unit)}),
             std::format("address 0x{:08X}, size {}", address, size)));
     }
     return {};
@@ -609,14 +627,16 @@ Status checkAccess(std::uint32_t address, std::size_t size, AccessWidth width, s
 Result<OperationId> DeviceSession::readMemory(std::string_view targetId, std::uint32_t address,
                                               std::size_t size, AccessWidth width) {
     if (size == 0 || size > maxReadMemoryBytes) {
-        return std::unexpected(
-            invalidOption(QCoreApplication::translate(
-                              "hwio::device", "A memory read must be between 1 and %1 bytes.")
-                              .arg(maxReadMemoryBytes),
-                          std::to_string(size)));
+        return std::unexpected(invalidOption(
+            localizedText(
+                "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device", "A memory read must be between 1 and %1 bytes."),
+                {maxReadMemoryBytes}),
+            std::to_string(size)));
     }
-    if (Status valid = checkAccess(address, size, width, maxReadMemoryBytes,
-                                   QCoreApplication::translate("hwio::device", "memory read"));
+    if (Status valid = checkAccess(
+            address, size, width, maxReadMemoryBytes,
+            localizedText("hwio::device", QT_TRANSLATE_NOOP("hwio::device", "memory read")));
         !valid) {
         return std::unexpected(std::move(valid).error());
     }
@@ -658,8 +678,9 @@ Result<OperationId> DeviceSession::targetStatus(std::string_view targetId) {
 
 Result<OperationId> DeviceSession::writeMemory(std::string_view targetId, std::uint32_t address,
                                                std::vector<std::byte> data, AccessWidth width) {
-    if (Status valid = checkAccess(address, data.size(), width, maxWriteMemoryBytes,
-                                   QCoreApplication::translate("hwio::device", "memory write"));
+    if (Status valid = checkAccess(
+            address, data.size(), width, maxWriteMemoryBytes,
+            localizedText("hwio::device", QT_TRANSLATE_NOOP("hwio::device", "memory write")));
         !valid) {
         return std::unexpected(std::move(valid).error());
     }
@@ -692,11 +713,13 @@ Result<OperationId> DeviceSession::memoryZones(std::string_view targetId) {
 Result<OperationId> DeviceSession::writeFlash(std::string_view targetId, std::uint32_t address,
                                               std::vector<std::byte> data, bool allowUicr) {
     if (data.empty() || data.size() > maxWriteFlashBytes) {
-        return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "A flash write must be between 1 and %1 "
-                                                        "bytes.")
-                .arg(maxWriteFlashBytes),
-            std::to_string(data.size())));
+        return std::unexpected(
+            invalidOption(localizedText("hwio::device",
+                                        QT_TRANSLATE_NOOP("hwio::device",
+                                                          "A flash write must be between 1 and %1 "
+                                                          "bytes."),
+                                        {maxWriteFlashBytes}),
+                          std::to_string(data.size())));
     }
     std::vector<firmware::Segment> segments;
     segments.push_back(firmware::Segment{.address = address, .data = std::move(data)});
@@ -733,15 +756,17 @@ Status DeviceSession::startConnection(bool attachRtt) {
     }
     if (m_connection.state != ConnectionState::ProbeOpen) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device",
-                                        "Only a session with an open probe can be connected."),
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device",
+                                            "Only a session with an open probe can be connected.")),
             std::format("state {}", connectionStateId(m_connection.state))));
     }
     if (attachRtt && m_internals->target->rttTerminal.empty()) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "The %1 target of %2 has no console.")
-                .arg(toQString(m_internals->target->id),
-                     toQString(m_internals->profile->displayName)),
+            localizedText(
+                "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device", "The %1 target of %2 has no console."),
+                {toQString(m_internals->target->id), toQString(m_internals->profile->displayName)}),
             {}));
     }
     if (m_internals->runningOperation) {
@@ -760,7 +785,8 @@ Status DeviceSession::startConnection(bool attachRtt) {
 Status DeviceSession::cancel(OperationId id) {
     if (!m_internals->runningOperation || *m_internals->runningOperation != id) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "Operation %1 is not running.").arg(id),
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "Operation %1 is not running."), {id}),
             {}));
     }
     qCInfo(log::lcDevice) << "Operation" << id << "cancel requested";
@@ -997,7 +1023,8 @@ OperationResult waitForOperation(DeviceSession& session, OperationId id,
             .targetStatus = std::nullopt,
             .registers = {},
             .zones = {},
-            .familyMatch = std::nullopt};
+            .familyMatch = std::nullopt,
+            .download = std::nullopt};
     }
     return std::move(*result);
 }

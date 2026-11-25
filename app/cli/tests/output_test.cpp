@@ -23,6 +23,9 @@ hwio::Error sampleError(std::string detail) {
                        .message = "The file was not found.",
                        .cause = "The path is wrong.",
                        .suggestion = "Check the file path.",
+                       .messageEn = "The file was not found.",
+                       .causeEn = "The path is wrong.",
+                       .suggestionEn = "Check the file path.",
                        .detail = std::move(detail),
                        .wizard = std::nullopt};
 }

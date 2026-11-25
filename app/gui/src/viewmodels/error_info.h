@@ -70,6 +70,11 @@ public:
     [[nodiscard]] QString cause() const { return m_cause; }
     [[nodiscard]] QString suggestion() const { return m_suggestion; }
     [[nodiscard]] QString detail() const { return m_detail; }
+    // The English texts of the error (hwio::Error::messageEn, ..., ADR-0374; C++ only: the
+    // GUI's MCP provider reports a tab's error to AI clients in English).
+    [[nodiscard]] QString messageEn() const { return m_messageEn; }
+    [[nodiscard]] QString causeEn() const { return m_causeEn; }
+    [[nodiscard]] QString suggestionEn() const { return m_suggestionEn; }
     // The kebab-case wizard id ("connect-device") or "" when the error has none.
     [[nodiscard]] QString wizard() const { return m_wizard; }
     [[nodiscard]] int primaryAction() const noexcept { return m_primaryAction; }
@@ -87,6 +92,9 @@ private:
     QString m_message;
     QString m_cause;
     QString m_suggestion;
+    QString m_messageEn;
+    QString m_causeEn;
+    QString m_suggestionEn;
     QString m_detail;
     QString m_wizard;
     int m_primaryAction = error_action::Dismiss;

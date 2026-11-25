@@ -60,13 +60,17 @@ std::optional<WizardId> wizardIdFromString(std::string_view id) noexcept {
     return std::nullopt;
 }
 
-QJsonObject toJson(const Error& error) {
+QJsonObject toJson(const Error& error, ErrorLanguage language) {
+    const auto text = [language](const std::string& translated, const std::string& english) {
+        return toQString(language == ErrorLanguage::English && !english.empty() ? english
+                                                                                : translated);
+    };
     QJsonObject object;
     object.insert(QStringLiteral("code"), latin1(idOf(error.code)));
     object.insert(QStringLiteral("category"), latin1(categoryId(categoryOf(error.code))));
-    object.insert(QStringLiteral("message"), toQString(error.message));
-    object.insert(QStringLiteral("cause"), toQString(error.cause));
-    object.insert(QStringLiteral("suggestion"), toQString(error.suggestion));
+    object.insert(QStringLiteral("message"), text(error.message, error.messageEn));
+    object.insert(QStringLiteral("cause"), text(error.cause, error.causeEn));
+    object.insert(QStringLiteral("suggestion"), text(error.suggestion, error.suggestionEn));
     object.insert(QStringLiteral("detail"), toQString(error.detail));
     object.insert(QStringLiteral("wizard"), error.wizard.has_value()
                                                 ? QJsonValue(latin1(wizardIdString(*error.wizard)))

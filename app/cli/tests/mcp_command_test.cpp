@@ -33,6 +33,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstddef>
+#include <expected>
 #include <filesystem>
 #include <memory>
 #include <optional>
@@ -79,12 +80,15 @@ hwio::mcp::ConsentDecision decide(FlagConsentBroker& broker, ConsentCategories c
     const auto cancel = broker.request(std::move(request),
                                        [&decision](auto answer) { decision = std::move(answer); });
     EXPECT_FALSE(cancel);
-    return decision.value_or(hwio::mcp::ConsentDecision{});
+    return decision.value_or(
+        std::unexpected(hwio::makeError(hwio::ErrorCode::InternalUnexpected, "no answer")));
 }
 
 TEST(FlagConsentBroker, DecidesFromTheFlags) {
     FlagConsentBroker broker(ConsentCategory::Flash);
     EXPECT_TRUE(decide(broker, ConsentCategory::Flash));
+    EXPECT_EQ(decide(broker, ConsentCategory::Flash).value_or(hwio::mcp::ConsentGrant::Prompted),
+              hwio::mcp::ConsentGrant::Flag);              // ADR-0377: "allowed_by_flag"
     EXPECT_TRUE(decide(broker, ConsentCategory::Connect)); // always allowed in the CLI
     const auto erase = decide(broker, ConsentCategory::Erase, "erase");
     ASSERT_FALSE(erase);

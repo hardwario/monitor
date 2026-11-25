@@ -6,6 +6,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/device/console_line.h"
+#include "hwio/device/console_log.h"
 #include "hwio/device/session_events.h"
 #include "hwio/device/shell_query.h"
 #include "hwio/mcp/limits.h"
@@ -279,6 +280,33 @@ TEST_F(ConsoleTools, ReadTerminalNewestAndAfterCursor) {
         harness.call(QStringLiteral("read_terminal"), args({{"after_cursor", 3}, {"lines", 100}}));
     EXPECT_EQ(rest.structured().value(QStringLiteral("lines")).toArray().size(), 2);
     EXPECT_EQ(rest.structured().value(QStringLiteral("cursor_end")).toInteger(), 6);
+}
+
+// Plan 0050 (ADR-0374): a GUI marker written translated is read in English over MCP; the log
+// keeps the translation for the GUI.
+TEST_F(ConsoleTools, MarkersAreReadInEnglish) {
+    Harness harness(provider());
+    auto& session = provider().add("jlink:1");
+    (void)session.mutableLog().appendMarker(Channel::Shell, "— obnoveno —", "— resumed —");
+    (void)session.mutableLog().appendMarker(Channel::Log, "— obnoveno —", "— resumed —");
+    (void)session.mutableLog().appendMarker(Channel::Shell, "— AI —"); // English already
+    auto terminal = harness.call(QStringLiteral("read_terminal"), args({{"lines", 10}}));
+    const QJsonArray lines = terminal.structured().value(QStringLiteral("lines")).toArray();
+    ASSERT_EQ(lines.size(), 2);
+    EXPECT_EQ(lines[0].toObject().value(QStringLiteral("dir")).toString(),
+              QStringLiteral("marker"));
+    EXPECT_EQ(lines[0].toObject().value(QStringLiteral("text")).toString(),
+              QStringLiteral("— resumed —"));
+    EXPECT_EQ(lines[1].toObject().value(QStringLiteral("text")).toString(),
+              QStringLiteral("— AI —"));
+    auto log = harness.call(QStringLiteral("read_log"), args({{"lines", 10}}));
+    const QJsonArray logLines = log.structured().value(QStringLiteral("lines")).toArray();
+    ASSERT_EQ(logLines.size(), 1);
+    EXPECT_EQ(logLines[0].toObject().value(QStringLiteral("text")).toString(),
+              QStringLiteral("— resumed —"));
+    auto matched = harness.call(QStringLiteral("read_log"), args({{"pattern", "resumed"}}));
+    EXPECT_EQ(matched.structured().value(QStringLiteral("lines")).toArray().size(), 1);
+    EXPECT_EQ(session.log().last(1, hwio::device::ChannelMask::Log).at(0).text, "— obnoveno —");
 }
 
 // ADR-0155: a cursor that points to evicted lines reports how many were lost.

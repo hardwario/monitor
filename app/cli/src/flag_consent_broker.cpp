@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/mcp/consent.h"
@@ -52,11 +53,12 @@ Result<ConsentCategories> parseAllowList(std::string_view list) {
             const std::optional<ConsentCategory> category = hwio::mcp::consentCategoryFromId(item);
             if (!category || *category == ConsentCategory::Connect) {
                 Error error = makeError(ErrorCode::UsageInvalidArgument, std::string(item));
-                error.message =
+                setUntranslatedText(
+                    error, ErrorText::Message,
                     std::format("Unknown --allow item \"{}\". Use flash, erase, memory-write, "
                                 "uicr or all, separated by commas.",
-                                item);
-                error.cause.clear();
+                                item));
+                clearText(error, ErrorText::Cause);
                 return std::unexpected(std::move(error));
             }
             categories |= *category;
@@ -75,7 +77,7 @@ FlagConsentBroker::request(hwio::mcp::ConsentRequest request,
     ConsentCategories missing = request.categories & ~m_allowed;
     missing &= ~ConsentCategories(ConsentCategory::Connect); // always allowed in the CLI
     if (missing == ConsentCategories()) {
-        done(hwio::mcp::ConsentDecision{});
+        done(hwio::mcp::ConsentGrant::Flag); // ADR-0377: "allowed_by_flag"
         return {};
     }
     std::string items;
@@ -86,8 +88,10 @@ FlagConsentBroker::request(hwio::mcp::ConsentRequest request,
                                        << "refused; not allowed:" << toQString(items);
     // MCP error texts are plain English (ADR-0103, review R12); std::format, no %n expansion.
     Error error = makeError(ErrorCode::McpToolNotAllowed);
-    error.message = std::format("The tool {} is not allowed by this server.", request.tool);
-    error.suggestion = std::format("Start the server with --allow {} (or --allow all).", items);
+    setUntranslatedText(error, ErrorText::Message,
+                        std::format("The tool {} is not allowed by this server.", request.tool));
+    setUntranslatedText(error, ErrorText::Suggestion,
+                        std::format("Start the server with --allow {} (or --allow all).", items));
     done(std::unexpected(std::move(error)));
     return {};
 }

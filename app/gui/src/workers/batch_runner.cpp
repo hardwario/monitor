@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/command_history.h"
 
@@ -16,23 +17,23 @@
 #include <QStringList>
 #include <QStringLiteral>
 #include <QtContainerFwd>
+#include <QtTranslation>
 
 #include <chrono>
 #include <expected>
 #include <optional>
-#include <string>
 #include <utility>
 
 namespace hwio::gui {
 
 namespace {
 
-Error batchError(ErrorCode code, const QString& message, const QString& cause,
-                 const QString& suggestion, const QString& detail) {
+Error batchError(ErrorCode code, const LocalizedText& message, const LocalizedText& cause,
+                 const LocalizedText& suggestion, const QString& detail) {
     Error error = makeError(code, detail.toStdString());
-    error.message = message.toStdString();
-    error.cause = cause.toStdString();
-    error.suggestion = suggestion.toStdString();
+    setText(error, ErrorText::Message, message);
+    setText(error, ErrorText::Cause, cause);
+    setText(error, ErrorText::Suggestion, suggestion);
     return error;
 }
 
@@ -47,9 +48,18 @@ void BatchRunner::setInterval(std::chrono::milliseconds interval) { m_timer.setI
 
 Result<QStringList> BatchRunner::load(const QString& path) {
     const auto unreadable = [&path](const QString& reason) {
-        return batchError(ErrorCode::IoReadFailed, tr("The batch file could not be read."),
-                          tr("the file is missing or you do not have permission to read it."),
-                          tr("Choose another file."), path + QStringLiteral(": ") + reason);
+        return batchError(
+            ErrorCode::IoReadFailed,
+            localizedText(
+                "hwio::gui::BatchRunner",
+                QT_TRANSLATE_NOOP("hwio::gui::BatchRunner", "The batch file could not be read.")),
+            localizedText(
+                "hwio::gui::BatchRunner",
+                QT_TRANSLATE_NOOP("hwio::gui::BatchRunner",
+                                  "the file is missing or you do not have permission to read it.")),
+            localizedText("hwio::gui::BatchRunner",
+                          QT_TRANSLATE_NOOP("hwio::gui::BatchRunner", "Choose another file.")),
+            path + QStringLiteral(": ") + reason);
     };
     const QFileInfo info(path);
     if (!info.isFile()) {
@@ -58,8 +68,14 @@ Result<QStringList> BatchRunner::load(const QString& path) {
     if (info.size() > maxFileBytes) {
         return std::unexpected(batchError(
             ErrorCode::UsageInvalidArgument,
-            tr("The batch file is too large (max. %1 MiB).").arg(maxFileBytes / (1024LL * 1024)),
-            {}, tr("Split it into smaller files."),
+            localizedText("hwio::gui::BatchRunner",
+                          QT_TRANSLATE_NOOP("hwio::gui::BatchRunner",
+                                            "The batch file is too large (max. %1 MiB)."),
+                          {maxFileBytes / (1024LL * 1024)}),
+            {},
+            localizedText(
+                "hwio::gui::BatchRunner",
+                QT_TRANSLATE_NOOP("hwio::gui::BatchRunner", "Split it into smaller files.")),
             QStringLiteral("%1: %2 bytes").arg(path).arg(info.size())));
     }
     QFile file(path);
@@ -71,8 +87,15 @@ Result<QStringList> BatchRunner::load(const QString& path) {
     if (bytes.size() > maxFileBytes) {
         return std::unexpected(batchError(
             ErrorCode::UsageInvalidArgument,
-            tr("The batch file is too large (max. %1 MiB).").arg(maxFileBytes / (1024LL * 1024)),
-            {}, tr("Split it into smaller files."), path));
+            localizedText("hwio::gui::BatchRunner",
+                          QT_TRANSLATE_NOOP("hwio::gui::BatchRunner",
+                                            "The batch file is too large (max. %1 MiB)."),
+                          {maxFileBytes / (1024LL * 1024)}),
+            {},
+            localizedText(
+                "hwio::gui::BatchRunner",
+                QT_TRANSLATE_NOOP("hwio::gui::BatchRunner", "Split it into smaller files.")),
+            path));
     }
     QStringList commands;
     for (const QByteArray& raw : bytes.split('\n')) {
@@ -84,25 +107,47 @@ Result<QStringList> BatchRunner::load(const QString& path) {
             continue;
         }
         if (commands.size() >= maxCommands) {
-            return std::unexpected(batchError(ErrorCode::UsageInvalidArgument,
-                                              tr("The batch file is too large (max. %1 commands).")
-                                                  .arg(QLocale().toString(maxCommands)),
-                                              {}, tr("Split it into smaller files."), path));
+            return std::unexpected(batchError(
+                ErrorCode::UsageInvalidArgument,
+                localizedText("hwio::gui::BatchRunner",
+                              QT_TRANSLATE_NOOP("hwio::gui::BatchRunner",
+                                                "The batch file is too large (max. %1 commands)."),
+                              {LocalizedText{.translated = QLocale().toString(maxCommands),
+                                             .english = QString::number(maxCommands)}}),
+                {},
+                localizedText(
+                    "hwio::gui::BatchRunner",
+                    QT_TRANSLATE_NOOP("hwio::gui::BatchRunner", "Split it into smaller files.")),
+                path));
         }
         if (std::cmp_greater(line.toUtf8().size(), device::CommandHistory::maxEntryBytes)) {
-            return std::unexpected(
-                batchError(ErrorCode::UsageInvalidArgument,
-                           tr("The batch file contains a command longer than %1 bytes.")
-                               .arg(device::CommandHistory::maxEntryBytes),
-                           {}, tr("Split it into smaller files."),
-                           QStringLiteral("%1: command %2").arg(path).arg(commands.size() + 1)));
+            return std::unexpected(batchError(
+                ErrorCode::UsageInvalidArgument,
+                localizedText(
+                    "hwio::gui::BatchRunner",
+                    QT_TRANSLATE_NOOP("hwio::gui::BatchRunner",
+                                      "The batch file contains a command longer than %1 bytes."),
+                    {device::CommandHistory::maxEntryBytes}),
+                {},
+                localizedText(
+                    "hwio::gui::BatchRunner",
+                    QT_TRANSLATE_NOOP("hwio::gui::BatchRunner", "Split it into smaller files.")),
+                QStringLiteral("%1: command %2").arg(path).arg(commands.size() + 1)));
         }
         commands.append(line);
     }
     if (commands.isEmpty()) {
         return std::unexpected(batchError(
-            ErrorCode::UsageInvalidArgument, tr("The batch file contains no commands."),
-            tr("every line is empty or a comment (#)."), tr("Choose another file."), path));
+            ErrorCode::UsageInvalidArgument,
+            localizedText("hwio::gui::BatchRunner",
+                          QT_TRANSLATE_NOOP("hwio::gui::BatchRunner",
+                                            "The batch file contains no commands.")),
+            localizedText("hwio::gui::BatchRunner",
+                          QT_TRANSLATE_NOOP("hwio::gui::BatchRunner",
+                                            "every line is empty or a comment (#).")),
+            localizedText("hwio::gui::BatchRunner",
+                          QT_TRANSLATE_NOOP("hwio::gui::BatchRunner", "Choose another file.")),
+            path));
     }
     return commands;
 }

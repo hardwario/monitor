@@ -60,13 +60,13 @@ using ::testing::Return;
 class MockProgrammer : public hwio::jlink::IProgrammer {
 public:
     MOCK_METHOD(hwio::Result<ChipInfo>, identify, (), (override));
-    MOCK_METHOD(Status, program,
+    MOCK_METHOD(hwio::Result<hwio::jlink::DownloadReport>, program,
                 (const FirmwareImage&, const hwio::firmware::ProgressFn&, std::stop_token),
                 (override));
     MOCK_METHOD(Status, verify,
                 (const FirmwareImage&, const hwio::firmware::ProgressFn&, std::stop_token),
                 (override));
-    MOCK_METHOD(Status, eraseCode,
+    MOCK_METHOD(hwio::Result<hwio::jlink::DownloadReport>, eraseCode,
                 (hwio::firmware::AddressRange, const hwio::firmware::ProgressFn&, std::stop_token),
                 (override));
     MOCK_METHOD(Status, eraseAll, (), (override));
@@ -114,10 +114,12 @@ class Workflow : public ::testing::Test {
 protected:
     Workflow() {
         ON_CALL(m_programmer, identify()).WillByDefault(Return(chip(0x52840)));
-        ON_CALL(m_programmer, program(_, _, _)).WillByDefault(Return(Status{}));
+        ON_CALL(m_programmer, program(_, _, _))
+            .WillByDefault(Return(hwio::Result<hwio::jlink::DownloadReport>{}));
         ON_CALL(m_programmer, verify(_, _, _)).WillByDefault(Return(Status{}));
         ON_CALL(m_programmer, reset(_)).WillByDefault(Return(Status{}));
-        ON_CALL(m_programmer, eraseCode(_, _, _)).WillByDefault(Return(Status{}));
+        ON_CALL(m_programmer, eraseCode(_, _, _))
+            .WillByDefault(Return(hwio::Result<hwio::jlink::DownloadReport>{}));
         ON_CALL(m_programmer, eraseAll()).WillByDefault(Return(Status{}));
         ON_CALL(m_programmer, recover(_)).WillByDefault(Return(Status{}));
     }
@@ -138,7 +140,8 @@ protected:
                     return Status{};
                 },
             .connectedDevice = std::string(target->jlinkDevice),
-            .cpuHalted = false};
+            .cpuHalted = false,
+            .download = std::nullopt};
     }
 
     NiceMock<MockProgrammer>& programmer() { return m_programmer; }
@@ -263,7 +266,7 @@ TEST_F(Workflow, AllowUicrMergesAndKeepsThePib) {
     EXPECT_CALL(programmer(), program(_, _, _))
         .WillOnce([&written](const FirmwareImage& firmware, const auto&, const std::stop_token&) {
             written = firmware;
-            return Status{};
+            return hwio::Result<hwio::jlink::DownloadReport>{};
         });
     auto ctx = context();
     ASSERT_TRUE(hwio::device::detail::runFlash(
@@ -288,7 +291,7 @@ TEST_F(Workflow, AllowUicrOnTheLteMcuLeavesThePibOut) {
     EXPECT_CALL(programmer(), program(_, _, _))
         .WillOnce([&written](const FirmwareImage& firmware, const auto&, const std::stop_token&) {
             written = firmware;
-            return Status{};
+            return hwio::Result<hwio::jlink::DownloadReport>{};
         });
     auto ctx = context("lte");
     ASSERT_TRUE(hwio::device::detail::runFlash(
@@ -308,9 +311,26 @@ TEST_F(Workflow, LteReconnectsWithTheExactPartName) {
     EXPECT_EQ(connectedAs()[0], "NRF9160_xxAA");
 }
 
+// Plan 0050 (ADR-0376): the programmer's download report is kept for the operation result.
+TEST_F(Workflow, FlashKeepsTheDownloadReport) {
+    const hwio::jlink::DownloadReport unchanged{.affectedBytes = 0, .unchanged = true};
+    EXPECT_CALL(programmer(), program(_, _, _))
+        .WillOnce(Return(hwio::Result<hwio::jlink::DownloadReport>(unchanged)));
+    auto ctx = context();
+    ASSERT_TRUE(hwio::device::detail::runFlash(ctx, image({{0x0, 16}}), {}));
+    EXPECT_EQ(ctx.download, unchanged);
+    const hwio::jlink::DownloadReport erased{.affectedBytes = 4096, .unchanged = false};
+    EXPECT_CALL(programmer(), eraseCode(_, _, _))
+        .WillOnce(Return(hwio::Result<hwio::jlink::DownloadReport>(erased)));
+    auto eraseCtx = context();
+    ASSERT_TRUE(hwio::device::detail::runErase(eraseCtx, EraseScope::Code));
+    EXPECT_EQ(eraseCtx.download, erased);
+}
+
 TEST_F(Workflow, ProgramFailureNamesTheTarget) {
     EXPECT_CALL(programmer(), program(_, _, _))
-        .WillOnce(Return(Status(std::unexpected(hwio::makeError(ErrorCode::TargetProgramFailed)))));
+        .WillOnce(Return(hwio::Result<hwio::jlink::DownloadReport>(
+            std::unexpected(hwio::makeError(ErrorCode::TargetProgramFailed)))));
     EXPECT_CALL(programmer(), verify(_, _, _)).Times(0);
     auto ctx = context();
     const auto result = hwio::device::detail::runFlash(ctx, image({{0x0, 16}}), {});
@@ -375,7 +395,7 @@ TEST_F(Workflow, RecoverLteProgramsTheDisableApProtectImage) {
             .WillOnce(
                 [&written](const FirmwareImage& firmware, const auto&, const std::stop_token&) {
                     written = firmware;
-                    return Status{};
+                    return hwio::Result<hwio::jlink::DownloadReport>{};
                 });
         EXPECT_CALL(programmer(), verify(_, _, _));
         EXPECT_CALL(programmer(), reset(ResetMode::Go));

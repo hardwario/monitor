@@ -56,7 +56,16 @@ struct ConsoleLine {
     // console files or JSON.
     std::uint64_t origin = 0;
     LineSource source = LineSource::Local; // plan 0044
+    // Plan 0050 (ADR-0374): the English text of a Direction::Marker line whose `text` is
+    // translated (the GUI's markers); empty = the same as `text`. MCP shows this one (ADR-0103);
+    // the GUI, console files and the remote session show `text`.
+    std::string textEn;
 };
+
+// The text MCP shows (ADR-0374): textEn of a marker line when set, else text.
+[[nodiscard]] inline const std::string& englishText(const ConsoleLine& line) noexcept {
+    return line.dir == Direction::Marker && !line.textEn.empty() ? line.textEn : line.text;
+}
 
 // Stable lowercase ids used in JSON and console files.
 [[nodiscard]] std::string_view channelId(Channel channel) noexcept;       // "shell", "log"

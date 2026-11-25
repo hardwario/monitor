@@ -247,12 +247,99 @@ TEST_F(JLinkTools, SessionControlTools) {
     EXPECT_TRUE(release.structured().value(QStringLiteral("released")).toBool());
     auto reacquire = harness.call(QStringLiteral("reacquire_probe"));
     EXPECT_FALSE(reacquire.isError()) << reacquire.errorCode();
+    // ADR-0375: it waits for the console.
+    EXPECT_EQ(reacquire.structured()
+                  .value(QStringLiteral("connection"))
+                  .toObject()
+                  .value(QStringLiteral("state"))
+                  .toString(),
+              QStringLiteral("connected"));
+    EXPECT_TRUE(reacquire.structured().value(QStringLiteral("waited")).isDouble());
     EXPECT_TRUE(harness.call(QStringLiteral("wait_for_connection"), args({{"timeout", 10}}))
                     .structured()
                     .value(QStringLiteral("connected"))
                     .toBool());
     // A marker for every control tool (ADR-0105), none for the reads.
     EXPECT_EQ(provider().record().markers.size(), 5U);
+}
+
+// ADR-0375: reacquire_probe waits (bounded) for the console; a slow attach (every J-Link
+// connect takes 0.5 s) is waited for, a wait shorter than the attach returns the current state
+// without an error, and a cancelled wait leaves the reacquire running.
+class ReacquireProbe : public JLinkTools {
+protected:
+    void SetUp() override {
+        QJsonObject slow = scenario();
+        QJsonArray probes = slow.value(QStringLiteral("probes")).toArray();
+        QJsonObject probe = probes.at(0).toObject();
+        probe.insert(QStringLiteral("connectDelayMs"), 500);
+        probes.replace(0, probe);
+        slow.insert(QStringLiteral("probes"), probes);
+        provider().scenario(QJsonDocument(slow).toJson());
+    }
+
+    // release_probe, then wait until the session reports stopped (the release is queued).
+    static void release(Harness& harness) {
+        ASSERT_TRUE(harness.call(QStringLiteral("release_probe"))
+                        .structured()
+                        .value(QStringLiteral("released"))
+                        .toBool());
+        ASSERT_TRUE(runUntil([&] {
+            return harness.call(QStringLiteral("wait_for_connection"), args({{"timeout", 1}}))
+                       .structured()
+                       .value(QStringLiteral("state"))
+                       .toString() == QStringLiteral("stopped");
+        }));
+    }
+
+    static QString stateOf(const QJsonObject& result) {
+        return result.value(QStringLiteral("connection"))
+            .toObject()
+            .value(QStringLiteral("state"))
+            .toString();
+    }
+};
+
+TEST_F(ReacquireProbe, WaitsForTheConsole) {
+    Harness harness(provider(), limits());
+    connectDevice(harness);
+    release(harness);
+    auto reacquire = harness.call(QStringLiteral("reacquire_probe"));
+    ASSERT_FALSE(reacquire.isError()) << reacquire.errorCode();
+    EXPECT_EQ(stateOf(reacquire.structured()), QStringLiteral("connected"));
+    const double waited = reacquire.structured().value(QStringLiteral("waited")).toDouble();
+    EXPECT_GE(waited, 0.4);
+    EXPECT_LT(waited, 10.0);
+}
+
+TEST_F(ReacquireProbe, ShortWaitReturnsTheCurrentState) {
+    hwio::mcp::Limits shrunk = limits();
+    shrunk.tools.reacquireWait = 100ms; // shorter than the 0.5 s connect
+    Harness harness(provider(), shrunk);
+    connectDevice(harness);
+    release(harness);
+    auto reacquire = harness.call(QStringLiteral("reacquire_probe"));
+    ASSERT_FALSE(reacquire.isError()) << reacquire.errorCode();
+    EXPECT_NE(stateOf(reacquire.structured()), QStringLiteral("connected"));
+    EXPECT_LT(reacquire.structured().value(QStringLiteral("waited")).toDouble(), 0.45);
+    // The reacquire goes on; wait_for_connection sees it connect.
+    EXPECT_TRUE(harness.call(QStringLiteral("wait_for_connection"), args({{"timeout", 10}}))
+                    .structured()
+                    .value(QStringLiteral("connected"))
+                    .toBool());
+}
+
+TEST_F(ReacquireProbe, CancelStopsTheWaitOnly) {
+    Harness harness(provider(), limits());
+    connectDevice(harness);
+    release(harness);
+    auto reacquire = harness.start(QStringLiteral("reacquire_probe"));
+    harness.cancel(harness.lastId());
+    runFor(50ms);
+    EXPECT_TRUE(harness.call(QStringLiteral("wait_for_connection"), args({{"timeout", 10}}))
+                    .structured()
+                    .value(QStringLiteral("connected"))
+                    .toBool());
 }
 
 TEST_F(JLinkTools, HaltGoStatusRegistersZones) {
@@ -616,6 +703,52 @@ TEST_F(JLinkTools, FlashFromAPath) {
                     .structured()
                     .value(QStringLiteral("connected"))
                     .toBool());
+}
+
+// Plan 0050 (ADR-0376, ADR-0377): with the fake loader's V9.84 messages, the second flash of the
+// same image says nothing was programmed; the result says how the flash was allowed.
+TEST_F(JLinkTools, FlashReportsUnchangedContents) {
+    provider().scenario(
+        QJsonDocument(scenario({}, QJsonObject{{QStringLiteral("downloadReport"), true}}))
+            .toJson());
+    Harness harness(provider(), limits());
+    connectDevice(harness);
+    const QString path = QString::fromStdString(imagePath(0x0, 8192));
+    auto first = harness.call(QStringLiteral("flash"), args({{"path", path}}), 30s, true);
+    ASSERT_FALSE(first.isError()) << first.errorCode() << " " << first.errorDetail();
+    EXPECT_FALSE(first.structured().value(QStringLiteral("unchanged")).toBool(true));
+    EXPECT_EQ(first.structured().value(QStringLiteral("affected_bytes")).toInteger(), 8192);
+    EXPECT_EQ(first.structured().value(QStringLiteral("consent")).toObject(),
+              (QJsonObject{{QStringLiteral("flash"), QStringLiteral("prompted")}}));
+    ASSERT_TRUE(harness.call(QStringLiteral("wait_for_connection"), args({{"timeout", 10}}))
+                    .structured()
+                    .value(QStringLiteral("connected"))
+                    .toBool());
+    auto second = harness.call(QStringLiteral("flash"), args({{"path", path}}), 30s, true);
+    ASSERT_FALSE(second.isError()) << second.errorCode() << " " << second.errorDetail();
+    EXPECT_TRUE(second.structured().value(QStringLiteral("unchanged")).toBool());
+    EXPECT_EQ(second.structured().value(QStringLiteral("affected_bytes")).toInteger(), 0);
+    ASSERT_TRUE(harness.call(QStringLiteral("wait_for_connection"), args({{"timeout", 10}}))
+                    .structured()
+                    .value(QStringLiteral("connected"))
+                    .toBool());
+    // An erase of the code flash reports too.
+    auto erase = harness.call(QStringLiteral("erase"), args({{"scope", "code"}}), 30s, true);
+    ASSERT_FALSE(erase.isError()) << erase.errorCode() << " " << erase.errorDetail();
+    EXPECT_FALSE(erase.structured().value(QStringLiteral("unchanged")).toBool(true));
+    EXPECT_GT(erase.structured().value(QStringLiteral("affected_bytes")).toInteger(), 0);
+}
+
+// Without the loader's messages (another J-Link wording) the fields are left out.
+TEST_F(JLinkTools, FlashWithoutLoaderMessagesOmitsTheFields) {
+    Harness harness(provider(), limits());
+    connectDevice(harness);
+    auto flash =
+        harness.call(QStringLiteral("flash"),
+                     args({{"path", QString::fromStdString(imagePath(0x0, 4096))}}), 30s, true);
+    ASSERT_FALSE(flash.isError()) << flash.errorCode() << " " << flash.errorDetail();
+    EXPECT_FALSE(flash.structured().contains(QStringLiteral("unchanged")));
+    EXPECT_FALSE(flash.structured().contains(QStringLiteral("affected_bytes")));
 }
 
 TEST_F(JLinkTools, FlashArgumentRules) {

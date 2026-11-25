@@ -3,6 +3,7 @@
 #include "hwio/core/error.h"
 #include "hwio/core/firmware_identity.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/text_sanitizer.h"
@@ -30,6 +31,7 @@
 #include <QtCore/qtmetamacros.h>
 #include <QtCore/qttranslation.h>
 #include <QtLogging>
+#include <QtTranslation>
 
 #include <chrono>
 #include <cstdint>
@@ -122,11 +124,10 @@ Status RemoteConsoleSession::sendLine(std::string line) {
     }
     if (line.size() > maxLineBytes) {
         Error error = makeError(ErrorCode::UsageInvalidArgument, std::to_string(line.size()));
-        error.message =
-            trRemote(QT_TRANSLATE_NOOP("hwio::remote",
-                                       "A command line must not be longer than %1 bytes."))
-                .arg(maxLineBytes)
-                .toStdString();
+        setText(
+            error, ErrorText::Message, "hwio::remote",
+            QT_TRANSLATE_NOOP("hwio::remote", "A command line must not be longer than %1 bytes."),
+            {maxLineBytes});
         return std::unexpected(std::move(error));
     }
     for (const char c : line) {
@@ -326,9 +327,8 @@ void RemoteConsoleSession::onAt(const QJsonValue& payload) {
         } else if (state == QStringLiteral("disconnected")) {
             Error error =
                 makeError(ErrorCode::TargetNotConnected, "the host's device disconnected");
-            error.message = trRemote(QT_TRANSLATE_NOOP("hwio::remote",
-                                                       "The customer's device is disconnected."))
-                                .toStdString();
+            setText(error, ErrorText::Message, "hwio::remote",
+                    QT_TRANSLATE_NOOP("hwio::remote", "The customer's device is disconnected."));
             setConnection(device::ConnectionState::Disconnected, std::move(error));
         }
         return;
