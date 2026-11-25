@@ -959,8 +959,12 @@ TEST(RemoteSession, AnAiLineAfterLeaveIsDropped) {
         return consent.joinQuestions == 2 && host.commandsAllowed() &&
                leaving->joinState() == JoinState::Allowed && leaving->hostHello().has_value();
     }));
-    leaving->close();
-    ASSERT_TRUE(runUntil([&] { return !host.commandsAllowed(); }));
+    // The message itself, with the session left open: close() blocks this thread, which also runs
+    // the fake relay, until the close times out (JoinerLeavesOnCloseAndOnDestruction covers close).
+    ASSERT_TRUE(leaving->sendTunnel(tunnel::Leave{}).has_value());
+    ASSERT_TRUE(runUntil([&] { return !host.commandsAllowed(); }))
+        << "join questions: " << consent.joinQuestions << ", audit lines: " << console.events.size()
+        << ", left: " << console.hasEvent("— Remote: Support left the session. —");
 
     auto capture = device::CommandCapture::start(
         ai, "config show",
