@@ -296,6 +296,27 @@ TEST(RemoteHost, SecretsAreRedactedTowardsTheRelay) {
               QStringLiteral("claim token: <redacted>"));
 }
 
+// Plan 0061 amendment 1 (decision D10): a secret in the command form, as `config show` prints it,
+// goes to the relay with its value, because RemoteHost::redactedOutput() matches only
+// "<key>: <value>". The console file hides this form (ConsoleFileSink::write, ADR-0186 amendment of
+// 2026-11-02). Fails on the current code. The value is made up.
+TEST(RemoteHost, SecretInCommandFormIsRedactedTowardsTheRelay) {
+    FakeRelay relay;
+    HostFixture f(optionsFor(relay));
+    f.host.start();
+    ASSERT_TRUE(runUntil([&] { return f.shared == 1; }));
+    RawParticipant web(relay.url(), nsp);
+    ASSERT_TRUE(runUntil([&] { return f.host.commandsAllowed(); }));
+    f.console.shell("lrw config appkey 00112233445566778899aabbccddeeff");
+    ASSERT_TRUE(runUntil([&] { return !atEvents(web, QStringLiteral("read")).isEmpty(); }));
+    EXPECT_EQ(atEvents(web, QStringLiteral("read"))
+                  .back()
+                  .value(QStringLiteral("data"))
+                  .toString()
+                  .toStdString(),
+              "lrw config appkey <redacted>");
+}
+
 TEST(RemoteHost, IdleWarningKeepSharingAndTimeout) {
     FakeRelay relay;
     HostOptions options = optionsFor(relay);

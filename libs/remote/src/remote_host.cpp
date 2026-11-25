@@ -7,6 +7,7 @@
 #include "hwio/core/result.h"
 #include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
+#include "hwio/device/console_redaction.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
@@ -359,6 +360,15 @@ void RemoteHost::sendSync() {
     QJsonObject sync;
     sync.insert(QStringLiteral("state"), m_deviceState);
     sync.insert(QStringLiteral("commands"), m_transcript.toJson());
+    // ADR-0430: one line per sync, counts and lengths only.
+    std::size_t outputs = 0;
+    for (const TranscriptEntry& entry : m_transcript.entries()) {
+        outputs += static_cast<std::size_t>(entry.outputs.size());
+    }
+    qCDebug(log::lcRemote).noquote() << QString::fromStdString(
+        std::format("Host sync sent: {} entries, {} output lines, {} bytes, truncated: {}",
+                    m_transcript.entries().size(), outputs, m_transcript.bytes(),
+                    m_transcript.truncated() ? "yes" : "no"));
     if (m_relay) {
         m_relay->emitEvent(QStringLiteral("sync"), sync, false);
     }
@@ -467,7 +477,8 @@ void RemoteHost::onRemoteLine(const QString& text) {
         refuseLine(line);
         return;
     }
-    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "command %1")).arg(redactedCommand(line)));
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "command %1"))
+              .arg(redacted(device::Direction::In, line)));
     if (Status sent = m_session->sendRemoteLine(line); !sent) {
         emit warning(sent.error());
     }
@@ -849,23 +860,34 @@ void RemoteHost::finishOperation(const Status& status) {
 }
 
 void RemoteHost::onLines(const QList<device::ConsoleLine>& lines) {
-    bool any = false;
+    // ADR-0430: counts and lengths per batch for the diagnostics, never the text.
+    std::size_t forwarded = 0;
+    std::size_t bytesBefore = 0;
+    std::size_t bytesAfter = 0;
+    std::size_t empty = 0;
     for (const device::ConsoleLine& line : lines) {
         if (line.dir == device::Direction::Marker) {
             continue;
         }
-        any = true;
+        ++forwarded;
+        bytesBefore += line.text.size();
+        const QString text = redacted(line.dir, line.text);
+        const std::size_t sent = static_cast<std::size_t>(text.toUtf8().size());
+        bytesAfter += sent;
+        empty += sent == 0 ? 1 : 0;
         if (line.dir == device::Direction::In) {
-            const QString text = redactedCommand(line.text);
             m_transcript.addCommand(text, line.time);
             sendAt(QStringLiteral("write"), text, false);
         } else {
-            const QString text = redactedOutput(line.text);
             m_transcript.addOutput(text, line.time);
             sendAt(QStringLiteral("read"), text, true);
         }
     }
-    if (any) {
+    if (forwarded > 0) {
+        qCDebug(log::lcRemote).noquote() << QString::fromStdString(std::format(
+            "Host lines forwarded: {} of {} (markers skipped), {} bytes, {} bytes after "
+            "redaction, {} empty",
+            forwarded, lines.size(), bytesBefore, bytesAfter, empty));
         activity();
     }
 }
@@ -910,28 +932,25 @@ const device::TargetProfile* RemoteHost::consoleTarget() const {
                : device::findTarget(m_session->profile(), m_session->consoleTargetId());
 }
 
-QString RemoteHost::redactedCommand(const std::string& line) const {
-    if (const device::TargetProfile* target = consoleTarget()) {
-        if (const auto prefix =
-                device::matchSensitiveCommand(line, target->sensitiveCommandPrefixes)) {
-            return toQString(std::string(*prefix) + " <redacted>");
-        }
+// ADR-0432 (D10): the console file's redaction (device::ConsoleRedaction, one implementation for
+// the console file, Save view, the relay traffic and the joiner): a command with secret arguments
+// as "<prefix> <redacted>" (also in the output, as `config show` prints it), "<key>: <redacted>",
+// and (plan 0059, ADR-0416) a secret printed without a "key:" as "<prefix> <redacted>".
+QString RemoteHost::redacted(device::Direction dir, const std::string& text) const {
+    if (m_session.isNull()) {
+        return toQString(text);
     }
-    return toQString(line);
-}
-
-QString RemoteHost::redactedOutput(const std::string& line) const {
-    if (const device::TargetProfile* target = consoleTarget()) {
-        if (const auto key = device::matchSensitiveOutput(line, target->sensitiveOutputKeys)) {
-            return toQString(*key + ": <redacted>");
-        }
-        // Plan 0059 (ADR-0416): secrets printed without a "key:".
-        if (const auto prefix =
-                device::matchSensitiveOutputPrefix(line, target->sensitiveOutputPrefixes)) {
-            return toQString(std::string(*prefix) + " <redacted>");
-        }
+    device::ConsoleLine line;
+    line.dir = dir;
+    // Every output line is checked as shell output (ADR-0356 checked every read line).
+    line.channel = device::Channel::Shell;
+    line.text = text;
+    // The session's own profile (plan 0059), not looked up by id.
+    const device::ConsoleRedaction redaction(m_session->profile(), m_session->consoleTargetId());
+    if (auto hidden = redaction.redacted(line)) {
+        return toQString(*hidden);
     }
-    return toQString(line);
+    return toQString(text);
 }
 
 void RemoteHost::refuseLine(const std::string& line) {
@@ -941,7 +960,7 @@ void RemoteHost::refuseLine(const std::string& line) {
     audit(trRemote(QT_TRANSLATE_NOOP(
                        "hwio::remote",
                        "a command that changes the device's keys or identity was refused (%1)"))
-              .arg(redactedCommand(line)));
+              .arg(redacted(device::Direction::In, line)));
     const QString text = QString::fromLatin1(refusedRelayText);
     m_transcript.addOutput(text, std::chrono::system_clock::now());
     sendAt(QStringLiteral("read"), text, false);

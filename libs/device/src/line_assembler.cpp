@@ -204,4 +204,24 @@ bool isPrompt(std::string_view partial, std::string_view prompt) {
     return applyCarriageReturns(stripAnsiCsi(partial)) == prompt;
 }
 
+bool isZephyrPrompt(std::string_view text) {
+    const std::string cleaned = applyCarriageReturns(stripAnsiCsi(text));
+    std::string_view rest = cleaned;
+    constexpr std::string_view promptEnd = ":~$";
+    bool any = false;
+    while (!rest.empty()) {
+        const std::size_t end = rest.find(promptEnd);
+        if (end == std::string_view::npos || end == 0 ||
+            rest.substr(0, end).find_first_of(" \t") != std::string_view::npos) {
+            return false;
+        }
+        rest.remove_prefix(end + promptEnd.size());
+        if (rest.starts_with(' ')) {
+            rest.remove_prefix(1);
+        }
+        any = true;
+    }
+    return any;
+}
+
 } // namespace hwio::device

@@ -1,7 +1,8 @@
 // The remote support session banner of a device tab (plan/features/0044 § UX): the host's
 // "Shared with support — code 482 913" with [Copy link] [End sharing], the idle warning with
 // [Keep sharing], a remote operation in progress, and the joiner's "Waiting for the customer…" /
-// "The session ended." states. Presentation only: RemoteShareViewModel / RemoteJoinViewModel.
+// "The session ended." states; [Close tab] closes the tab (ADR-0429: leaving the session is the
+// device bar's Leave session). Presentation only: RemoteShareViewModel / RemoteJoinViewModel.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -111,7 +112,7 @@ ColumnLayout {
         Layout.fillWidth: true
         visible: banner.join !== null && banner.join.active && banner.join.bannerText !== ""
         text: banner.join ? banner.join.bannerText : ""
-        actionText: banner.join && (banner.join.state === "idle" || banner.join.state === "ended") ? qsTr("Leave") : ""
+        actionText: banner.join && (banner.join.state === "idle" || banner.join.state === "ended") ? qsTr("Close tab") : ""
         onActionTriggered: AppViewModel.closeTabObject(banner.tab, false)
         onDismissed: {}
     }

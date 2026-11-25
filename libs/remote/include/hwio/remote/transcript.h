@@ -12,6 +12,13 @@
 // bounded (plan 0044 § Limits): at most maxEntries entries and maxBytes UTF-8 bytes of text; the
 // oldest entries go first, and a single entry over the byte bound loses its oldest output lines.
 // Not thread-safe (one owner).
+//
+// Plan 0061 (ADR-0431): a host that sends pieces of the byte stream (the HARDWARIO mobile app) puts
+// the whole output of a command into one `outputs` element, with "\r\n" inside. fromJson() splits
+// such an element at '\n' (one trailing '\r' removed) before sanitising, so that `outputs` keeps
+// one line per element; streamForm() tells that it did. The unfinished text after the last '\n' of
+// the newest entry (usually the prompt) is not a line: unfinishedTail() hands it to the joiner's
+// reader.
 
 #include "hwio/core/result.h"
 
@@ -19,6 +26,7 @@
 #include <QJsonValue>
 #include <QString>
 #include <QStringList>
+#include <QtTypes>
 
 #include <chrono>
 #include <cstddef>
@@ -63,6 +71,13 @@ public:
                                                      TranscriptLimits limits = {});
     // True when fromJson() dropped entries or lines because of the limits.
     [[nodiscard]] bool truncated() const noexcept { return m_truncated; }
+    // ADR-0431: fromJson() found an `outputs` element with '\n' (a host that sends stream pieces).
+    [[nodiscard]] bool streamForm() const noexcept { return m_streamForm; }
+    // ADR-0431: the raw text after the last '\n' of the newest entry's last output (stream form
+    // only; at most maxTailChars), "" when none.
+    [[nodiscard]] const QString& unfinishedTail() const noexcept { return m_tail; }
+    // The bound of unfinishedTail() (device::LineAssembler::maxPartialBytes).
+    static constexpr qsizetype maxTailChars = 4096;
 
     [[nodiscard]] static QString isoTimestamp(std::chrono::system_clock::time_point time);
 
@@ -75,6 +90,8 @@ private:
     std::size_t m_bytes = 0;
     std::int64_t m_nextIndex = 0;
     bool m_truncated = false;
+    bool m_streamForm = false;
+    QString m_tail;
 };
 
 } // namespace hwio::remote

@@ -66,12 +66,14 @@ Twojej konsoli; plik konsoli zapisuje, ile ich było.
 2. Wpisz kod sesji, który podaje Ci klient (spacje są dozwolone), albo wklej link. Link do innego serwera niż
    skonfigurowany wymaga dodatkowego potwierdzenia.
 3. Otwiera się nowa karta zatytułowana **Sesja 482 913**, a potem *CHESTER-M 2159018247 — zdalnie* (lub *Sesja 482 913 —
-   web Terminal*, gdy klient korzysta z web Terminal). Dopóki klient Ci nie zezwoli, baner pokazuje *Czekanie, aż klient
+   web Terminal lub aplikacja mobilna*, gdy klient korzysta z web Terminal lub aplikacji mobilnej HARDWARIO). Dopóki klient Ci nie zezwoli, baner pokazuje *Czekanie, aż klient
    zezwoli…*. Wyjście na żywo może się już pojawiać.
 4. Po uzyskaniu zgody otrzymujesz historię konsoli klienta i możesz pracować w konsoli jak zwykle: historia,
    wyszukiwanie, filtrowanie i zapisywanie widoku.
    Gdy klient używa HARDWARIO Monitor, podpowiedzi i uzupełnianie klawiszem Tab korzystają z listy poleceń jego
    urządzenia.
+   Web Terminal i aplikacja mobilna nie ukrywają sekretów; Twój HARDWARIO Monitor ukrywa je, zanim trafią do konsoli
+   (na przykład `claim token: <redacted>`, `lrw config appkey <redacted>`), także w zapisanym widoku.
    Wiersze hexdumpu z dziennika urządzenia są domyślnie ukryte, tak jak w lokalnej karcie (przełącznik **H**).
 5. Gdy klient używa HARDWARIO Monitor, strona **Wgraj** oferuje **Poproś o wgranie** (identyfikator firmware z
    katalogu), **Poproś o skasowanie**, **Poproś o recover** i **Poproś o reset** dla rdzenia aplikacji lub LTE. Każda
@@ -89,9 +91,14 @@ Twojej konsoli; plik konsoli zapisuje, ile ich było.
    Kontynuować bez kopii?*. Nie lub brak odpowiedzi w ciągu 60 sekund anuluje aktualizację, zanim cokolwiek się zmieni.
    Kopia jest zapisywana z powrotem automatycznie. Po Twoim Nie karta pokaże *Aktualizacja firmware LTE anulowana przez Ciebie (14:02). Nic nie zostało zmienione.* Klient ze starszym HARDWARIO Monitor odpowiada na te pytania sam.
 
+Aby opuścić sesję, kliknij **Opuść sesję** na pasku urządzenia (lub naciśnij Ctrl+Shift+D). Karta pozostaje otwarta
+razem z konsolą, więc nadal możesz ją zapisać; konsola pokazuje *— opuściłeś sesję —*. **Dołącz ponownie** dołącza do
+tego samego kodu, a klient musi Cię ponownie dopuścić. Dopóki trwa operacja, o którą poprosiłeś, przycisk czeka na jej
+zakończenie.
+
 HARDWARIO Monitor nie zawsze rozpozna, że klient zakończył udostępnianie: serwer tego nie ogłasza. Po 30 minutach bez
-żadnej aktywności baner o tym informuje i oferuje **Opuść**. Karta pozostaje otwarta, więc nadal możesz zapisać
-konsolę.
+żadnej aktywności baner o tym informuje i oferuje **Zamknij kartę**. Dopóki jej nie zamkniesz, karta pozostaje otwarta,
+więc nadal możesz zapisać konsolę.
 
 Wsparcie i klient mogą używać różnych wersji HARDWARIO Monitor. Nowsza wersja działa ze starszą i z Terminalem
 webowym: to, czego druga strona nie obsługuje, nie jest oferowane, a błędy docierają do starszej wersji jako błąd,

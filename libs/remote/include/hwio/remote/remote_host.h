@@ -8,8 +8,10 @@
 // Console mapping (web Terminal compatible): every device line (shell and log) → at {event:
 // "read"}, every line sent to the device (local or remote, its echo) → at {event: "write"},
 // connection events → at {event: "state", data: "connected" | "connection" | "disconnected"}.
-// Commands with secret arguments and secret output values are sent redacted (ADR-0186 rules, as the
-// console file). The lines also go to a bounded Transcript (the sync snapshot).
+// Commands with secret arguments and secret output values are sent redacted with the console
+// file's redaction (device::ConsoleRedaction, ADR-0186; ADR-0432: also a secret command in the
+// output, as `config show` prints it). The lines also go to a bounded Transcript (the sync
+// snapshot).
 //
 // Code and collision (ADR-0334): a fresh CSPRNG code; any `at` or `sync` received within
 // collisionWindow after connecting = another host uses the code: a new code, at most maxCodeTries
@@ -238,8 +240,9 @@ private:
     void activity();
     void audit(const QString& text);
     void finish(std::optional<Error> error, bool notify = true);
-    [[nodiscard]] QString redactedCommand(const std::string& line) const;
-    [[nodiscard]] QString redactedOutput(const std::string& line) const;
+    // ADR-0356, ADR-0432: the text sent to the relay (secrets hidden), by the console target's
+    // rules (plan 0059: also sensitiveOutputPrefixes, ADR-0416).
+    [[nodiscard]] QString redacted(device::Direction dir, const std::string& text) const;
     // The console target of the shared session (its redaction and refusal rules), nullptr when the
     // session is gone or its profile has no such target.
     [[nodiscard]] const device::TargetProfile* consoleTarget() const;

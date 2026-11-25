@@ -68,10 +68,13 @@ Hilfeabfragen erscheinen nicht in Ihrer Konsole; die Konsolendatei hält fest, w
 2. Geben Sie den Code ein, den Ihnen der Kunde vorliest (Leerzeichen sind erlaubt), oder fügen Sie den Link ein. Ein
    Link zu einem anderen als dem eingestellten Server erfordert eine zusätzliche Bestätigung.
 3. Ein neuer Tab öffnet sich mit dem Titel **Sitzung 482 913** und danach *CHESTER-M 2159018247 — remote* (oder *Sitzung
-   482 913 — web Terminal*, wenn der Kunde das web Terminal verwendet). Bis der Kunde es Ihnen erlaubt, zeigt das Banner
+   482 913 — web Terminal oder mobile App*, wenn der Kunde das web Terminal oder die HARDWARIO-App verwendet). Bis der Kunde es Ihnen erlaubt, zeigt das Banner
    *Warten, bis der Kunde es Ihnen erlaubt…*. Die Live-Ausgabe kann bereits erscheinen.
 4. Sobald es Ihnen erlaubt ist, erhalten Sie den Konsolenverlauf des Kunden und können wie gewohnt in der Konsole
    arbeiten: Verlauf, Suche, Filter und Ansicht speichern.
+   Das web Terminal und die mobile App verbergen keine Geheimnisse; Ihr HARDWARIO Monitor verbirgt sie, bevor sie in
+   die Konsole gelangen (zum Beispiel `claim token: <redacted>`, `lrw config appkey <redacted>`), auch in
+   einer gespeicherten Ansicht.
    Bei einem Kunden mit HARDWARIO Monitor verwenden Vorschläge und die Tab-Vervollständigung die Befehlsliste seines
    Geräts.
    Hexdump-Zeilen des Geräteprotokolls sind standardmäßig ausgeblendet, wie in einem lokalen Tab (Chip **H**).
@@ -93,9 +96,14 @@ Hilfeabfragen erscheinen nicht in Ihrer Konsole; die Konsolendatei hält fest, w
    bricht das Update ab, bevor etwas geändert wird. Die Kopie wird automatisch zurückgeschrieben. Nach Ihrem Nein zeigt die Karte *LTE-Firmware-Update von Ihnen abgebrochen (14:02). Es wurde nichts geändert.* Ein Kunde mit einem
    älteren HARDWARIO Monitor beantwortet diese Fragen selbst.
 
+Um die Sitzung zu verlassen, klicken Sie in der Geräteleiste auf **Sitzung verlassen** (oder drücken Sie
+Ctrl+Shift+D). Der Tab bleibt mit der Konsole offen, sodass Sie sie noch speichern können; die Konsole zeigt *— Sie haben
+die Sitzung verlassen —*. **Erneut beitreten** tritt mit demselben Code wieder bei, und der Kunde muss Sie erneut
+zulassen. Solange ein Vorgang läuft, den Sie angefordert haben, wartet die Schaltfläche, bis er beendet ist.
+
 Wenn der Kunde die Freigabe beendet, kann HARDWARIO Monitor das nicht immer erkennen: Der Server kündigt es nicht an.
-Nach 30 Minuten ohne jede Aktivität weist das Banner darauf hin und bietet **Verlassen** an. Der Tab bleibt offen,
-sodass Sie die Konsole noch speichern können.
+Nach 30 Minuten ohne jede Aktivität weist das Banner darauf hin und bietet **Tab schließen** an. Bis Sie ihn schließen,
+bleibt der Tab offen, sodass Sie die Konsole noch speichern können.
 
 Support und Kunde können verschiedene Versionen von HARDWARIO Monitor verwenden. Eine neuere Version funktioniert mit
 einer älteren und mit dem Web-Terminal: Was die andere Seite nicht unterstützt, wird nicht angeboten, und Fehler

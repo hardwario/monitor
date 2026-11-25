@@ -1,6 +1,6 @@
 // Device bar of a tab (ADR-0043, ADR-0052, ADR-0053; ADR-0233: no target box): probe, state text
 // ("Connected", "Connecting…", "Reconnecting… (target not powered)", the busy page's text),
-// Connect / Cancel / Disconnect and the ⋯ Advanced popover. Plan 0012: a Bluetooth tab shows the
+// Connect / Cancel / Disconnect (a remote support tab: Leave session / Join again, ADR-0429) and the ⋯ Advanced popover. Plan 0012: a Bluetooth tab shows the
 // device chip (name · RSSI) with the Bluetooth icon. Plan 0014: Cancel of a running AI operation.
 pragma ComponentBehavior: Bound
 
@@ -158,15 +158,38 @@ Rectangle {
             onClicked: McpController.cancelOperation(bar.tab)
         }
 
-        HButton {
-            objectName: "connectionAction"
+        // ADR-0429: a remote support tab has Leave session / Join again. A disabled button gets no
+        // hover, so the item around it shows why it waits (actionBlockedReason).
+        Item {
             visible: !bar.choosing
-            kind: bar.connection.action === "connect" ? "primary" : "normal"
-            enabled: bar.connection.actionEnabled
-            text: bar.connection.action === "connect" ? qsTr("Connect")
-                : bar.connection.action === "cancel" ? qsTr("Cancel") : qsTr("Disconnect")
-            toolTipText: AppViewModel.shortcuts.tooltip(text, "device.toggle")
-            onClicked: bar.connection.triggerAction()
+            implicitWidth: connectionAction.implicitWidth
+            implicitHeight: connectionAction.implicitHeight
+
+            HButton {
+                id: connectionAction
+
+                objectName: "connectionAction"
+                anchors.fill: parent
+                kind: bar.connection.action === "connect" || bar.connection.action === "join" ? "primary" : "normal"
+                enabled: bar.connection.actionEnabled
+                text: bar.connection.action === "connect" ? qsTr("Connect")
+                    : bar.connection.action === "cancel" ? qsTr("Cancel")
+                    : bar.connection.action === "leave" ? qsTr("Leave session")
+                    : bar.connection.action === "join" ? qsTr("Join again") : qsTr("Disconnect")
+                toolTipText: AppViewModel.shortcuts.tooltip(text, "device.toggle")
+                Accessible.description: bar.connection.actionBlockedReason !== "" ? bar.connection.actionBlockedReason : toolTipText
+                onClicked: bar.connection.triggerAction()
+            }
+
+            HoverHandler {
+                id: connectionActionHover
+            }
+
+            HToolTip {
+                objectName: "connectionActionBlocked"
+                visible: connectionActionHover.hovered && bar.connection.actionBlockedReason !== ""
+                text: bar.connection.actionBlockedReason
+            }
         }
 
         HToolButton {

@@ -153,7 +153,7 @@ TestCase {
 
         testSupport.remoteHostSync("hello from the web host");
         tryVerify(() => tab().remoteJoin.state === "joined", 10000);
-        compare(tab().title, "Session 12345 — web Terminal");
+        compare(tab().title, "Session 12345 — web Terminal or mobile app");
         tryVerify(() => testSupport.consoleLastSeq(AppViewModel.currentTab) > 0, 5000);
 
         AppViewModel.showPage("flash");
@@ -372,6 +372,84 @@ TestCase {
         tryVerify(() => log.totalLines === before + 3, 10000, log.totalLines);
         // The filtered count follows the appended lines asynchronously on some platforms.
         tryCompare(log, "visibleLines", visible + 1, 10000); // only the header
+    }
+
+    function bar(name) {
+        return findAll(window.contentItem, name).filter(effectivelyVisible)[0];
+    }
+
+    // Plan 0061 (ADR-0429): the device bar of a joined remote tab offers Leave session; leaving
+    // keeps the tab and its console with a marker and the banner text; Join again opens a session
+    // with the same code (the host sees a new client); Close tab is the banner's action.
+    function test_leaveSessionAndJoinAgain() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        AppViewModel.showPage("console");
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteHostSync("hello from the web host");
+        tryVerify(() => tab().remoteJoin.state === "joined", 10000);
+        const index = AppViewModel.currentTab;
+        tryVerify(() => bar("connectionAction") !== undefined, 5000);
+        const button = bar("connectionAction");
+        tryVerify(() => button.width > 0 && button.enabled, 5000);
+        compare(button.text, "Leave session");
+        compare(tab().connection.action, "leave");
+        const clients = testSupport.remoteReceived("newClient");
+
+        mouseClick(button);
+        tryVerify(() => tab().remoteJoin.state === "ended", 5000);
+        compare(AppViewModel.currentTab, index);
+        verify(tab().transport === "remote");
+        compare(tab().remoteJoin.bannerText, "You left the session. The console stays here so that you can save it.");
+        tryVerify(() => shown("remoteJoinBanner").length === 1, 5000);
+        verify(testSupport.consoleHasLine(index, "— you left the session —"));
+        verify(testSupport.consoleHasLine(index, "hello from the web host"));
+        tryCompare(button, "text", "Join again", 5000);
+        verify(button.enabled);
+        compare(button.kind, "primary");
+
+        mouseClick(button);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        tryVerify(() => testSupport.remoteReceived("newClient") > clients, 10000);
+        compare(tab().remoteJoin.bannerText, "Waiting for the customer to allow you… The live output may already appear.");
+        tryCompare(button, "text", "Leave session", 5000);
+
+        // The shortcut (device.toggle) leaves as well.
+        AppViewModel.toggleConnection();
+        tryVerify(() => tab().remoteJoin.state === "ended", 5000);
+        tryVerify(() => shown("remoteJoinBanner").length === 1, 5000);
+        const banner = one("remoteJoinBanner");
+        compare(banner.actionText, "Close tab");
+    }
+
+    // ADR-0429: while an operation support started runs, the button (and the shortcut) waits.
+    function test_leaveWaitsForARunningOperation() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        AppViewModel.showPage("console");
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(false);
+        tryVerify(() => tab().remoteJoin.operationsAvailable, 10000);
+        tryVerify(() => bar("connectionAction") !== undefined, 5000);
+        const button = bar("connectionAction");
+        tryVerify(() => button.width > 0 && button.enabled, 5000);
+
+        tab().remoteJoin.requestOperation("reset", "app", "");
+        tryVerify(() => testSupport.remoteRequestedKind() === "reset", 10000);
+        tryVerify(() => !button.enabled, 5000);
+        compare(tab().connection.actionBlockedReason, "Wait until the running operation ends.");
+        AppViewModel.toggleConnection();
+        tab().connection.triggerAction();
+        wait(100);
+        compare(tab().remoteJoin.state, "joined");
+
+        testSupport.remoteHostAccept();
+        testSupport.remoteHostResult("");
+        tryVerify(() => !tab().remoteJoin.operationPending, 5000);
+        tryVerify(() => button.enabled, 5000);
+        compare(tab().connection.actionBlockedReason, "");
     }
 
     function test_shareNotOfferedInARemoteTab() {

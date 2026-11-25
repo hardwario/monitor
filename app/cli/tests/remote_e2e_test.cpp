@@ -494,6 +494,59 @@ TEST_F(RemoteCli, JoinWebTerminalHostHasNoOperations) {
     }
 }
 
+// Plan 0061 (ADR-0431, ADR-0432): a HARDWARIO mobile app host sends the whole output of a command
+// as one string in its sync and pieces of the stream as `read`; `remote join` shows every line,
+// without the prompt, with the secrets hidden. The values are made up.
+TEST_F(RemoteCli, JoinShowsTheLinesOfAMobileAppHost) {
+    FakeRelay relay;
+    RawParticipant mobileHost(relay.url(), QStringLiteral("/12345"));
+    ASSERT_TRUE(mobileHost.waitConnected());
+    QObject::connect(&relay, &FakeRelay::namespaceConnected, &relay, [&](const QString& nsp) {
+        if (nsp != QStringLiteral("/12345")) {
+            return;
+        }
+        QJsonObject response;
+        response.insert(QStringLiteral("outputs"),
+                        QJsonArray{QStringLiteral("\r\nVendor name: HARDWARIO\r\n"
+                                                  "Product name: CHESTER-M\r\n"
+                                                  "Claim token: 0f0e0d0c0b0a\r\nbt_nus:~$ ")});
+        response.insert(QStringLiteral("result"), 0);
+        QJsonObject entry;
+        entry.insert(QStringLiteral("command"), QStringLiteral("info show"));
+        entry.insert(QStringLiteral("response"), response);
+        QJsonObject sync;
+        sync.insert(QStringLiteral("state"), QStringLiteral("connected"));
+        sync.insert(QStringLiteral("commands"), QJsonArray{entry});
+        mobileHost.emitEvent(QStringLiteral("sync"), sync);
+    });
+    QStringList args{QStringLiteral("--json"), QStringLiteral("remote"),   QStringLiteral("join"),
+                     QStringLiteral("012345"), QStringLiteral("--linger"), QStringLiteral("0")};
+    args << relayArgs(relay);
+    Child child(args, fakeEnvironment());
+    ASSERT_TRUE(runUntil(
+        [&] { return child.out().find("Product name: CHESTER-M") != std::string::npos; }, 30s))
+        << child.out() << child.err();
+    QJsonObject read;
+    read.insert(QStringLiteral("event"), QStringLiteral("read"));
+    read.insert(QStringLiteral("data"), QStringLiteral("\r\napp config interval-sa"));
+    mobileHost.emitEvent(QStringLiteral("at"), read);
+    read.insert(QStringLiteral("data"), QStringLiteral("mple 60\r\nbt_nus:~$ "));
+    mobileHost.emitEvent(QStringLiteral("at"), read);
+    ASSERT_TRUE(runUntil(
+        [&] { return child.out().find("app config interval-sample 60") != std::string::npos; },
+        10s))
+        << child.out() << child.err();
+    const std::string out = child.out();
+    EXPECT_NE(out.find("Vendor name: HARDWARIO"), std::string::npos) << out;
+    EXPECT_NE(out.find("Claim token: <redacted>"), std::string::npos) << out;
+    EXPECT_EQ(out.find("0f0e0d"), std::string::npos) << out;
+    EXPECT_EQ(out.find("bt_nus:~$"), std::string::npos) << out;
+    EXPECT_EQ(out.find("interval-sa\""), std::string::npos) << out; // never a half line
+    child.closeInput();
+    ASSERT_TRUE(child.finish()) << child.err();
+    EXPECT_EQ(child.exitCode(), 0) << child.err();
+}
+
 TEST_F(RemoteCli, JoinRejectsAForeignLinkWithoutATerminalAndInvalidCodes) {
     FakeRelay relay;
     QStringList args{QStringLiteral("remote"), QStringLiteral("join"),

@@ -46,8 +46,10 @@ release notes or the HIL results.
 |---|---|---|---|
 | 2.1 | Monitor GUI (J-Link) | Monitor GUI | [ ] code readable aloud; join question, **End session** default; Allow → history (sync) + live output; joiner commands run, marked "— Remote: … —" on the host; **End sharing** |
 | 2.2 | Monitor GUI (BLE) | web Terminal (Chrome, **Join Session**) | [ ] the web Terminal shows the history and live output, its commands run after Allow; the web Terminal shows no garbage from the `hwio` tunnel messages |
-| 2.3 | web Terminal (Chrome, **Create Session**, BLE) | Monitor GUI | [ ] tab "Session NNN NNN — web Terminal"; history and live output; commands reach the device; Flash page says only the console is available; a code under 100000 (leading zero) joins |
+| 2.3 | web Terminal (Chrome, **Create Session**, BLE) | Monitor GUI | [ ] tab "Session NNN NNN — web Terminal or mobile app"; history and live output; commands reach the device; Flash page says only the console is available; a code under 100000 (leading zero) joins |
 | 2.4 | web Terminal | web Terminal | [ ] unchanged behaviour (regression check of the deployed relay) |
+| 2.5 | HARDWARIO mobile app (CHESTER over Bluetooth) | Monitor GUI | [ ] plan 0061 (ADR-0431, ADR-0432): tab "Session NNN NNN — web Terminal or mobile app"; the history and the live answers of `info show` and `config show` show every line (no blank lines instead of text, no line in two pieces, no prompt lines); `claim token`, `ble passkey` and `lrw config appkey …` show `<redacted>`; stopping sharing on the phone ends the session in Monitor ("The session ended.") |
+| 2.6 | Monitor GUI | HARDWARIO mobile app | [ ] the app shows the history and the live output (known: the app joins Monitor's lines without line breaks; the app's to fix, ADR-0431); its commands run after Allow |
 
 ## 3. Monitor ↔ Monitor operations (HIL, J-Link CHESTER)
 

@@ -65,12 +65,14 @@ konzole nezobrazujú; konzolový súbor zaznamená, koľko ich bolo.
 2. Napíšte kód, ktorý vám zákazník prečíta (medzery sú povolené), alebo vložte odkaz. Odkaz na iný server, ako je
    nastavený, potrebuje ďalšie potvrdenie.
 3. Otvorí sa nová karta s názvom **Relácia 482 913** a potom *CHESTER-M 2159018247 — na diaľku* (alebo *Relácia 482 913
-   — web Terminal*, keď zákazník používa web Terminal). Kým vás zákazník nepovolí, lišta zobrazuje *Čaká sa, kým vás
+   — web Terminal alebo mobilná aplikácia*, keď zákazník používa web Terminal alebo mobilnú aplikáciu HARDWARIO). Kým vás zákazník nepovolí, lišta zobrazuje *Čaká sa, kým vás
    zákazník povolí…*. Živý výstup sa už môže zobrazovať.
 4. Po povolení dostanete históriu konzoly zákazníka a môžete s konzolou pracovať ako zvyčajne: história, vyhľadávanie,
    filter a uloženie zobrazenia.
    So zákazníkom, ktorý používa HARDWARIO Monitor, používajú návrhy a dopĺňanie klávesom Tab zoznam príkazov jeho
    zariadenia.
+   Web Terminal a mobilná aplikácia tajné údaje neskrývajú; váš HARDWARIO Monitor ich skryje skôr, než sa dostanú do
+   konzoly (napríklad `claim token: <redacted>`, `lrw config appkey <redacted>`), aj v uloženom zobrazení.
    Riadky hexdumpu zo záznamu zariadenia sú predvolene skryté, rovnako ako v miestnej karte (štítok **H**).
 5. So zákazníkom, ktorý používa HARDWARIO Monitor, ponúka stránka **Nahrávanie firmvéru** voľby **Požiadať o nahranie**
    (ID firmvéru z katalógu), **Požiadať o vymazanie**, **Požiadať o obnovenie** a **Požiadať o reset** pre aplikačné
@@ -88,8 +90,14 @@ konzole nezobrazujú; konzolový súbor zaznamená, koľko ich bolo.
    skopírovať. Pokračovať bez kópie?*. Nie alebo žiadna odpoveď do 60 sekúnd aktualizáciu zruší skôr, než sa čokoľvek
    zmení. Kópia sa zapíše späť automaticky. Po vašom Nie karta ukáže *Aktualizáciu firmvéru LTE ste zrušili (14:02). Nič sa nezmenilo.* Zákazník so starším HARDWARIO Monitorom odpovedá na tieto otázky sám.
 
+Reláciu opustíte tlačidlom **Opustiť reláciu** na lište zariadenia (alebo klávesmi Ctrl+Shift+D). Karta zostane
+otvorená aj s konzolou, takže ju môžete stále uložiť; v konzole je riadok *— opustili ste reláciu —*. **Pripojiť sa
+znova** sa pripojí k rovnakému kódu a zákazník vás musí znova povoliť. Kým beží operácia, o ktorú ste požiadali,
+tlačidlo čaká, kým skončí.
+
 Keď zákazník ukončí zdieľanie, HARDWARIO Monitor to nie vždy rozpozná: server to neoznamuje. Po 30 minútach bez
-akejkoľvek aktivity to lišta oznámi a ponúkne **Opustiť**. Karta zostane otvorená, takže konzolu môžete stále uložiť.
+akejkoľvek aktivity to lišta oznámi a ponúkne **Zatvoriť kartu**. Kým ju nezatvoríte, karta zostane otvorená, takže
+konzolu môžete stále uložiť.
 
 Podpora a zákazník môžu používať rôzne verzie HARDWARIO Monitor. Novšia verzia funguje so staršou aj s webovým
 Terminalom: čo druhá strana nepodporuje, sa neponúka, a chyby prídu do staršej verzie ako chyba, ktorú pozná.

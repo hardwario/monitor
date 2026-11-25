@@ -63,11 +63,13 @@ your console; the console file records how many there were.
 2. Type the code the customer reads to you (spaces are allowed) or paste the link. A link to another server than the
    configured one needs an extra confirmation.
 3. A new tab opens, titled **Session 482 913** and then *CHESTER-M 2159018247 — remote* (or *Session 482 913 — web
-   Terminal* when the customer uses the web Terminal). Until the customer allows you, the banner says *Waiting for the
+   Terminal or mobile app* when the customer uses the web Terminal or the HARDWARIO mobile app). Until the customer allows you, the banner says *Waiting for the
    customer to allow you…*. The live output may already appear.
 4. Once allowed, you get the customer's console history and can work in the console as usual: history, search,
    filter and save view.
    With a HARDWARIO Monitor customer, suggestions and Tab completion use the customer's list of device commands.
+   The web Terminal and the mobile app do not hide secrets; your HARDWARIO Monitor hides them before they reach the
+   console (for example `claim token: <redacted>`, `lrw config appkey <redacted>`), also in a saved view.
    Hexdump lines of the device log are hidden by default, as in a local tab (chip **H**).
 5. With a HARDWARIO Monitor customer, the **Flash** page offers **Ask to flash** (a catalog firmware ID), **Ask to
    erase**, **Ask to recover** and **Ask to reset** for the application or the LTE core. Each request waits for the
@@ -86,8 +88,14 @@ your console; the console file records how many there were.
    changes. The copy is written back automatically. After your No the card says *LTE firmware update cancelled by you (14:02). Nothing was changed.* A customer with an older HARDWARIO Monitor answers these questions
    themselves.
 
+To leave the session, click **Leave session** in the device bar (or press Ctrl+Shift+D). The tab stays open with the
+console, so you can still save it; the console shows *— you left the session —*. **Join again** joins the same code
+again, and the customer is asked to allow you again. While an operation you asked for runs, the button waits until it
+ends.
+
 When the customer ends sharing, HARDWARIO Monitor cannot always tell: the server does not announce it. After 30 minutes
-without any activity the banner says so and offers **Leave**. The tab stays open, so you can still save the console.
+without any activity the banner says so and offers **Close tab**. Until you close it, the tab stays open, so you can
+still save the console.
 
 Support and the customer may use different versions of HARDWARIO Monitor. A newer version works with an older one and
 with the web Terminal: what the other side does not support is not offered, and errors reach an older version as an

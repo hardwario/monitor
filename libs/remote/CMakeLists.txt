@@ -22,6 +22,8 @@ hwio_add_backend_library(hwio_remote
     src/baseline_errors.cpp
     src/consent.cpp
     src/host_operations.cpp
+    src/host_output_reader.cpp
+    src/host_output_reader.h
     src/lte_update_report.cpp
     src/protocol.cpp
     src/relay_client.cpp
