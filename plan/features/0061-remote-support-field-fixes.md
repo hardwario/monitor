@@ -587,7 +587,7 @@ cannot learn that a participant left: the relay sends nothing on a disconnect an
 - [x] III-1 `tunnel`: message `leave` (encode, decode, bounds), capability `leave` in the host hello; compat
       tests: an rc.4-shaped host never receives it, an rc.4-shaped joiner ignores the new capability.
 - [x] III-2 Joiner: send on Leave session, tab close and quit, only with the capability; unit tests.
-- [x] III-3 Host: withdraw permission, audit line, banner, rate limit; a running operation is not cancelled;
+- [x] III-3 (deviation: no English `textEn` of the audit line for MCP, awaiting the user; see the notes) Host: withdraw permission, audit line, banner, rate limit; a running operation is not cancelled;
       tests incl. a forged `leave` and a command after `leave` being dropped.
 - [x] III-4 Qt Quick test of the customer's banner; translations (cs, de, pl, sk); docs `remote-support.md` in
       five languages; release notes; interop checklist row (0044 D1, row 2.7). This completes A4.

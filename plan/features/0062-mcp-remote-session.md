@@ -283,13 +283,13 @@ Phase A — tab, reading, commands:
 
 Phase B — operations:
 
-- [x] B2 `flash` (catalog, prepared), `flash_lte`, `reset` on a remote device; progress; stop waiting (D12);
+- [x] B2 (deviation in the end-to-end test's fixtures, awaiting the user; see the notes) `flash` (catalog, prepared), `flash_lte`, `reset` on a remote device; progress; stop waiting (D12);
       questions (D13); tool tests and an end-to-end test host ↔ joiner with the fake J-Link and a test catalog.
 - [x] B3 GUI: busy text, Stop waiting, permission prompt rows; Qt Quick tests.
 
 Phase C — documents:
 
-- [x] C1 `docs/<lang>/mcp.md`, `remote-support.md`, `privacy.md` in en, cs, de, pl, sk; release notes
+- [x] C1 (deviation: `mcp.md` in English only, awaiting the user; see the notes) `docs/<lang>/mcp.md`, `remote-support.md`, `privacy.md` in en, cs, de, pl, sk; release notes
       `packaging/release-notes/v2.0.0-rc.5.md`; interop checklist rows (AI client with: rc.5 Monitor host,
       rc.4 Monitor host, web Terminal host, mobile app host).
 - [x] C2 ADR-0332 marked superseded; notes in plans 0044 and 0059 (D16); `plan/0004-mcp.md` tool table.
@@ -324,8 +324,9 @@ Phase C — documents:
 - The LTE update question path of an AI client (D13) is covered by the tool tests only, not by a GUI test.
 - Settings key `mcp/remoteSessions`. Several clients in the banner are joined with ", ". Results of remote
   operations are rebuilt from the error id, so the host's own message text does not reach an AI client.
-- Verification 2026-11-25 (with plan 0061 Amendment 2 on top): `linux-debug` 1992 of 1992, `linux-asan` 1923 of
-  1923, `linux-tsan` 1991 of 1991, `linux-tidy` zero findings, QML lint, translations (0 unfinished), format,
+- Verification 2026-11-25 (with plan 0061 Amendment 2 on top): `linux-debug` 1992 of 1992, `linux-asan` 1991 of
+  1991, `linux-tsan` 1923 of 1923 (the difference is the existing TSan exclusion of tests that use
+  QNetworkAccessManager; this branch adds no exclusion), `linux-tidy` zero findings, QML lint, translations (0 unfinished), format,
   includes, LFS. Not done: the manual checks (two Monitors over the production relay with a real AI client; an
   rc.4 Monitor, the web Terminal and the mobile app as host).
 
