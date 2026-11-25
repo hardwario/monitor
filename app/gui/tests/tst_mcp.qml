@@ -1,6 +1,8 @@
 // MCP in the GUI (plan 0014 B1-B3): Settings → AI assistants in its states (off, listening, error
-// with Retry) in light and dark, the permission radios writing mcp/consent/<id>, the consent
-// window per category (detail rows, countdown, Esc = Deny, Allow once, Allow for the client, the
+// with Retry) in light and dark, the permission radios writing mcp/consent/<id> (plan 0055: the
+// rows keep their objects and the focus; the All row with its confirmation), the consent
+// window per category (detail rows, countdown, Esc = Deny, Allow once, Always allow for the client, the
+// catalog firmware by name in Czech at the window's 480 px (plan 0054), the
 // window flags and no transient parent, the queue), the rail indicator states, the "AI" tab badge,
 // the device bar's Cancel of an AI operation, the console input hint, and the layout at 960 x 600 in
 // Czech. With HWIO_SCREENSHOT_DIR the screenshots of plan 0014 are saved (960 x 600, light/dark,
@@ -160,8 +162,8 @@ TestCase {
     // toggle off, leaving the rule without a visible choice).
     function test_permissionsReclickKeepsSelection() {
         openSection();
-        // Every rule change replaces the rules list and rebuilds the rows, so look the buttons up
-        // again after each click.
+        // The rows stay the same objects since plan 0055; looking the buttons up again after each
+        // click also keeps this test independent of that.
         const ask = () => find("mcpAsk_flash");
         const allow = () => find("mcpAllow_flash");
         // Real mouse clicks: wait for the page's own scroll to the section, then bring the rule
@@ -188,19 +190,107 @@ TestCase {
         tryVerify(() => ask().checked && !allow().checked);
     }
 
+    // Plan 0055 (ADR-0390): a click changes one row only; the row delegates and the buttons are the
+    // same objects afterwards (no rebuild, no flicker) and the focus stays on the clicked button.
+    function test_permissionsKeepTheRowsAndTheFocus() {
+        McpController.setAllConsentRules(false);
+        openSection();
+        const ids = ["flash", "erase", "memory-write", "uicr", "connect"];
+        const rows = ids.map(id => find("mcpRule_" + id));
+        rows.forEach(row => verify(row !== null));
+        const askButtons = ids.map(id => find("mcpAsk_" + id));
+        const allowErase = find("mcpAllow_erase");
+        // The page's own scroll to the section has finished (it must not move the focus later).
+        tryCompare(AppViewModel, "settingsSection", "", 5000);
+        // Keyboard: focus the button and press Space (click-to-focus differs per platform).
+        window.requestActivate();
+        allowErase.forceActiveFocus();
+        tryVerify(() => allowErase.activeFocus);
+        keyClick(Qt.Key_Space);
+        compare(testSupport.setting("mcp/consent/erase"), "allow");
+        tryVerify(() => allowErase.checked && !find("mcpAsk_erase").checked);
+        verify(allowErase.activeFocus);
+        verify(find("mcpAllow_erase") === allowErase);
+        ids.forEach((id, i) => {
+            verify(find("mcpRule_" + id) === rows[i], id);
+            verify(find("mcpAsk_" + id) === askButtons[i], id);
+        });
+        // The other rows are unchanged.
+        verify(find("mcpAsk_flash").checked && !find("mcpAllow_flash").checked);
+        McpController.setConsentRule("erase", false);
+        tryVerify(() => find("mcpAsk_erase").checked);
+        verify(find("mcpRule_erase") === rows[1]);
+    }
+
+    // Plan 0055 (ADR-0390): the All row. Ask sets every category at once; Always allow asks first
+    // (Cancel changes nothing); a button is selected only when all categories agree.
+    function test_permissionsAllRow() {
+        McpController.setAllConsentRules(false);
+        openSection();
+        const ids = ["flash", "erase", "memory-write", "uicr", "connect"];
+        const rows = ids.map(id => find("mcpRule_" + id));
+        const askAll = find("mcpAskAll");
+        const allowAll = find("mcpAllowAll");
+        verify(askAll !== null && allowAll !== null);
+        verify(askAll.checked && !allowAll.checked);
+
+        // Mixed: neither is selected.
+        McpController.setConsentRule("uicr", true);
+        tryVerify(() => !askAll.checked && !allowAll.checked);
+
+        // All › Ask: at once, without a question.
+        askAll.clicked();
+        ids.forEach(id => compare(testSupport.setting("mcp/consent/" + id), "ask", id));
+        tryVerify(() => askAll.checked && !allowAll.checked);
+
+        // All › Always allow: Cancel changes nothing. The consent-window cases before this one
+        // activate the prompt window, so activate the main window for the focus check.
+        window.requestActivate();
+        tryVerify(() => window.active);
+        const dialog = findChild(find("mcpSection"), "mcpAllowAllConfirm");
+        verify(dialog !== null);
+        allowAll.clicked();
+        tryVerify(() => dialog.opened);
+        compare(dialog.title, "Always allow everything?");
+        compare(findChild(dialog.footer, "dialogAccept").text, "Always allow everything");
+        tryVerify(() => findChild(dialog.footer, "dialogReject").activeFocus); // ADR-0038
+        mouseClick(findChild(dialog.footer, "dialogReject"));
+        tryVerify(() => !dialog.visible);
+        ids.forEach(id => compare(testSupport.setting("mcp/consent/" + id), "ask", id));
+        verify(askAll.checked && !allowAll.checked);
+
+        // ... and the confirmation sets all five.
+        allowAll.clicked();
+        tryVerify(() => dialog.opened);
+        mouseClick(findChild(dialog.footer, "dialogAccept"));
+        tryVerify(() => !dialog.visible);
+        ids.forEach(id => compare(testSupport.setting("mcp/consent/" + id), "allow", id));
+        tryVerify(() => allowAll.checked && !askAll.checked);
+        ids.forEach((id, i) => {
+            verify(find("mcpRule_" + id) === rows[i], id);
+            verify(find("mcpAllow_" + id).checked, id);
+        });
+        // Clicking it again while everything is allowed asks nothing.
+        allowAll.clicked();
+        verify(!dialog.visible);
+
+        McpController.setAllConsentRules(false);
+        tryVerify(() => askAll.checked && !allowAll.checked);
+    }
+
     function test_consentWindow_data() {
         return [
             { tag: "flash", tool: "flash", categories: ["flash", "uicr"],
               details: { file: "/home/me/proj/build/merged.hex", size: 421888, target: "app", uicr: true },
-              title: "Claude Code wants to flash firmware", remember: "Allow these for Claude Code", rows: 5 },
+              title: "Claude Code wants to flash firmware", remember: "Always allow these for Claude Code", rows: 5 },
             { tag: "erase", tool: "erase", categories: ["erase", "uicr"],
               details: { target: "app", scope: "all" },
-              title: "Claude Code wants to erase the device", remember: "Allow these for Claude Code", rows: 5 },
+              title: "Claude Code wants to erase the device", remember: "Always allow these for Claude Code", rows: 5 },
             { tag: "memory-write", tool: "write_memory", categories: ["memory-write"],
               details: { target: "app", range: "0x20000000-0x2000000F", size: 16 },
-              title: "Claude Code wants to write to the memory", remember: "Allow memory writes for Claude Code", rows: 6 },
+              title: "Claude Code wants to write to the memory", remember: "Always allow memory writes for Claude Code", rows: 6 },
             { tag: "connect", tool: "connect", categories: ["connect"], details: {},
-              title: "Claude Code wants to connect a device", remember: "Allow connecting devices for Claude Code", rows: 2 },
+              title: "Claude Code wants to connect a device", remember: "Always allow connecting devices for Claude Code", rows: 2 },
         ];
     }
 
@@ -232,6 +322,50 @@ TestCase {
         tryVerify(() => McpController.consent.armed); // review H1: 700 ms after a new prompt
         mouseClick(findInPrompt("consentAllowOnce"));
         tryVerify(() => testSupport.consentOutcome(once) === "allowed");
+        tryVerify(() => !w.visible);
+    }
+
+    // Plan 0054 (ADR-0389): catalog firmware by name with the full ID as a note, the Show device
+    // link in the device row, the MCU title, the client last, "Always allow" with its tooltip -
+    // and everything fits the fixed 480 px window in Czech.
+    function test_consentWindowCatalogCzech() {
+        AppViewModel.setLanguage("cs");
+        const w = prompt();
+        const id = "59489e4e91d741da930ab15b1ab9e31f";
+        const index = ask("flash", ["flash"], "jlink:801000001",
+                          { catalog_id: id, firmware_name: "hio-chester-clime", firmware_version: "v3.2.0",
+                            size: 660963, target: "app" });
+        tryVerify(() => w.visible);
+        compare(w.width, 480);
+        tryCompare(findAll(w.contentItem, "consentDetail").filter(effectivelyVisible), "length", 4);
+        waitForRendering(w.contentItem);
+        const rows = findAll(w.contentItem, "consentDetail").filter(effectivelyVisible);
+        // Firmware first: name and version, the full catalog ID as the note.
+        verify(findAll(rows[0], "consentDetailValue")[0].text.indexOf("hio-chester-clime v3.2.0") === 0);
+        const note = findAll(rows[0], "consentDetailNote")[0];
+        verify(effectivelyVisible(note));
+        verify(note.text.indexOf(id) >= 0, note.text);
+        // The Show device link is in the device row (the second), and only there.
+        compare(findAll(rows[1], "consentShowDevice").filter(effectivelyVisible).length, 1);
+        compare(findAll(w.contentItem, "consentShowDevice").filter(effectivelyVisible).length, 1);
+        // The client last: "<name>, <version>" in the GUI language.
+        verify(findAll(rows[3], "consentDetailValue")[0].text.indexOf("Claude Code, ") === 0);
+        const remember = findInPrompt("consentAllowForClient");
+        verify(remember.text.indexOf("Claude Code") > 0, remember.text);
+        verify(remember.toolTipText !== "");
+        verify(remember.toolTipText !== "Until you remove it in Settings › AI assistants (MCP).", "translated");
+        // Nothing sticks out of the window; the remember text is not clipped (it wraps).
+        for (const name of ["consentDeny", "consentAllowOnce", "consentAllowForClient", "consentShowDevice",
+                            "consentDetailNote"]) {
+            const item = findInPrompt(name);
+            verify(item !== null, name);
+            const right = item.mapToItem(w.contentItem, item.width, 0).x;
+            verify(right <= w.width, name + " fits: " + right);
+        }
+        const rememberText = findInPrompt("consentAllowForClientText");
+        verify(rememberText.contentWidth <= rememberText.width + 1, "not clipped: " + rememberText.contentWidth);
+        McpController.consent.deny(McpController.consent.promptId);
+        tryVerify(() => testSupport.consentOutcome(index) === "mcp.consent_denied");
         tryVerify(() => !w.visible);
     }
 

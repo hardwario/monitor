@@ -3,11 +3,13 @@
 #include "file_io.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/firmware/firmware_image.h"
 
 #include <QCoreApplication>
 #include <QString>
+#include <QtTranslation>
 
 #include <algorithm>
 #include <array>
@@ -41,10 +43,10 @@ constexpr std::size_t minRecordBytes = 5; // length, address (2), type, checksum
 Error parseError(std::uint64_t line, std::string_view sourceName, std::string_view reason) {
     Error error = makeError(ErrorCode::FirmwareHexParseError,
                             std::format("{}: line {}: {}", sourceName, line, reason));
-    error.message = QCoreApplication::translate(
-                        "hwio::firmware", "The firmware file is not a valid HEX file (line %1).")
-                        .arg(line)
-                        .toStdString();
+    setText(
+        error, ErrorText::Message, "hwio::firmware",
+        QT_TRANSLATE_NOOP("hwio::firmware", "The firmware file is not a valid HEX file (line %1)."),
+        {line});
     return error;
 }
 

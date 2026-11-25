@@ -28,6 +28,7 @@
 // GUI thread only.
 
 #include "hwio/core/error.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/command_tree.h"
 #include "hwio/device/command_tree_cache.h"
@@ -246,7 +247,8 @@ private:
     void onOperationFinished(device::OperationId id, const device::OperationResult& result);
     void onBatchFinished(const std::optional<Error>& error);
     // Stops a running batch with "The batch stopped after %1 of %2 commands." and `cause`.
-    void stopBatchWithError(ErrorCode code, const QString& cause, const QString& suggestion);
+    void stopBatchWithError(ErrorCode code, const LocalizedText& cause,
+                            const LocalizedText& suggestion);
     void resetHistoryNavigation();
     void onShellRowsAppended();
     void announceNewest();

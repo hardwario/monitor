@@ -3,6 +3,7 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_session.h"
@@ -72,9 +73,12 @@ Error errorOf(const ErrorInfo& info) {
     Error error =
         makeError(errorCodeFromId(toStdString(info.code())).value_or(ErrorCode::InternalUnexpected),
                   toStdString(info.detail()));
-    error.message = toStdString(info.message());
-    error.cause = toStdString(info.cause());
-    error.suggestion = toStdString(info.suggestion());
+    setText(error, ErrorText::Message,
+            LocalizedText{.translated = info.message(), .english = info.messageEn()});
+    setText(error, ErrorText::Cause,
+            LocalizedText{.translated = info.cause(), .english = info.causeEn()});
+    setText(error, ErrorText::Suggestion,
+            LocalizedText{.translated = info.suggestion(), .english = info.suggestionEn()});
     return error;
 }
 
@@ -464,8 +468,10 @@ Result<DeviceRef> GuiDeviceProvider::openDevice(const hwio::mcp::tools::OpenRequ
         Error error = makeError(
             ErrorCode::UsageInvalidArgument,
             std::format("profile {} target {}", toStdString(profileId), request.targetId));
-        error.message = std::format(R"(The profile "{}" or its target "{}" cannot be used for {}.)",
-                                    toStdString(profileId), request.targetId, request.id);
+        setUntranslatedText(
+            error, ErrorText::Message,
+            std::format(R"(The profile "{}" or its target "{}" cannot be used for {}.)",
+                        toStdString(profileId), request.targetId, request.id));
         return std::unexpected(std::move(error));
     }
     // Only for this tab, never remembered for the probe (plan 0014, clarified 2026-11-04).
@@ -487,19 +493,22 @@ Status GuiDeviceProvider::close(std::string_view id, const hwio::mcp::RequestCon
     if (tab->openedBy().isEmpty()) {
         Error error = makeError(ErrorCode::McpToolNotAllowed, std::string(id));
         // ADR-0103 / ADR-0240: an MCP call-site text, English.
-        error.message =
-            std::format("The tab of {} was opened by the user; only the user can close it.", id);
-        error.suggestion.clear();
+        setUntranslatedText(
+            error, ErrorText::Message,
+            std::format("The tab of {} was opened by the user; only the user can close it.", id));
+        clearText(error, ErrorText::Suggestion);
         return std::unexpected(std::move(error));
     }
     if (tab->openedByKey() != context.clientKey) {
         // ADR-0260: only the client that opened the tab may close it.
         Error error = makeError(ErrorCode::McpToolNotAllowed, std::string(id));
-        error.message = std::format(
-            "The tab of {} was opened by another AI client; only that client or the user can "
-            "close it.",
-            id);
-        error.suggestion.clear();
+        setUntranslatedText(
+            error, ErrorText::Message,
+            std::format(
+                "The tab of {} was opened by another AI client; only that client or the user can "
+                "close it.",
+                id));
+        clearText(error, ErrorText::Suggestion);
         return std::unexpected(std::move(error));
     }
     const QPointer<DeviceTabViewModel> target(tab);

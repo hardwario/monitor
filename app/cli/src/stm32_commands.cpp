@@ -4,6 +4,7 @@
 #include "confirm.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
@@ -45,7 +46,7 @@ constexpr std::string_view completed = "Completed";
 
 Error usage(std::string message, std::string detail = {}) {
     Error error = makeError(ErrorCode::UsageInvalidArgument, std::move(detail));
-    error.message = std::move(message);
+    setUntranslatedText(error, ErrorText::Message, std::move(message));
     return error;
 }
 
@@ -61,7 +62,8 @@ Result<Stm32CommandTarget> chipTarget(const std::string& chip) {
         Error error = usage(chip.empty() ? std::string("--chip is required.")
                                          : std::format("Unknown chip \"{}\".", chip),
                             chip);
-        error.suggestion = "Run `hwio stm32 chips` for the chip ids.";
+        setUntranslatedText(error, ErrorText::Suggestion,
+                            "Run `hwio stm32 chips` for the chip ids.");
         return std::unexpected(std::move(error));
     }
     return Stm32CommandTarget{.profile = &stm32Profile(), .targetId = chip};
@@ -162,8 +164,9 @@ Result<CommandResult> stm32Info(const Context& context, const GlobalOptions& glo
     const device::OperationResult& result = outcome->result;
     if (!result.chip || result.chip->devId == 0) {
         Error error = makeError(ErrorCode::TargetConnectFailed, "no STM32 chip answered");
-        error.message = "No STM32 chip answered.";
-        error.suggestion = "Check the cable, the power of the board and the selected chip.";
+        setUntranslatedText(error, ErrorText::Message, "No STM32 chip answered.");
+        setUntranslatedText(error, ErrorText::Suggestion,
+                            "Check the cable, the power of the board and the selected chip.");
         return std::unexpected(std::move(error));
     }
     const jlink::ChipInfo& chip = *result.chip;
@@ -237,7 +240,8 @@ Result<Stm32LoadedImage> loadStm32Image(const Stm32CommandTarget& target,
             !allowed) {
             Error error = std::move(allowed).error();
             if (error.message.find("data EEPROM of") != std::string::npos) {
-                error.suggestion = "Add --allow-eeprom if the file is meant to change it.";
+                setUntranslatedText(error, ErrorText::Suggestion,
+                                    "Add --allow-eeprom if the file is meant to change it.");
             }
             return std::unexpected(std::move(error));
         }

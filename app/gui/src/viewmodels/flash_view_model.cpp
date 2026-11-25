@@ -3,6 +3,7 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/lrw_update_procedure.h"
@@ -878,9 +879,13 @@ void FlashViewModel::onSessionChanged() {
         Error error = makeError(ErrorCode::TargetNotConnected,
                                 "the session was closed while the operation was running");
         if (shown.valid()) {
-            error.message = toStdString(shown.message());
-            error.cause = toStdString(shown.cause());
-            error.suggestion = toStdString(shown.suggestion());
+            setText(error, ErrorText::Message,
+                    LocalizedText{.translated = shown.message(), .english = shown.messageEn()});
+            setText(error, ErrorText::Cause,
+                    LocalizedText{.translated = shown.cause(), .english = shown.causeEn()});
+            setText(
+                error, ErrorText::Suggestion,
+                LocalizedText{.translated = shown.suggestion(), .english = shown.suggestionEn()});
         }
         finish(m_running->kind, Status(std::unexpected(std::move(error))), m_elapsed, std::nullopt);
         return;

@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/device/console_line.h"
@@ -92,8 +93,9 @@ QJsonValue seqJson(std::uint64_t seq) { return {static_cast<qint64>(seq)}; }
 QJsonObject connectionJson(const hwio::device::ConnectionEvent& event) {
     QJsonObject json;
     json.insert(QStringLiteral("state"), qs(hwio::device::connectionStateId(event.state)));
-    json.insert(QStringLiteral("error"), event.error ? QJsonValue(hwio::toJson(*event.error))
-                                                     : QJsonValue(QJsonValue::Null));
+    json.insert(QStringLiteral("error"),
+                event.error ? QJsonValue(hwio::toJson(*event.error, hwio::ErrorLanguage::English))
+                            : QJsonValue(QJsonValue::Null));
     json.insert(QStringLiteral("target_mv"), event.targetMillivolts
                                                  ? QJsonValue(*event.targetMillivolts)
                                                  : QJsonValue(QJsonValue::Null));
@@ -175,13 +177,22 @@ QJsonObject deviceStatusSchema() {
                     {QStringLiteral("id")});
 }
 
-QJsonObject devicesJson(IDeviceProvider& provider) {
+QJsonObject devicesJson(IDeviceProvider& provider, BleListing listing) {
     QJsonArray devices;
+    qint64 hidden = 0;
     for (const DeviceEntry& entry : provider.list()) {
+        // ADR-0373: the same rule as `hwio ble scan` (the scanner's profile match); open devices
+        // and J-Link probes are always listed.
+        if (listing == BleListing::Profiled && entry.kind == "ble" && entry.profileId.empty() &&
+            entry.state != DeviceEntry::State::Open) {
+            ++hidden;
+            continue;
+        }
         devices.append(deviceEntryJson(entry));
     }
     QJsonObject json;
     json.insert(QStringLiteral("devices"), devices);
+    json.insert(QStringLiteral("ble_hidden"), hidden);
     return json;
 }
 
@@ -201,7 +212,7 @@ QJsonObject terminalLineJson(const hwio::device::ConsoleLine& line) {
     QJsonObject json;
     json.insert(QStringLiteral("seq"), seqJson(line.seq));
     json.insert(QStringLiteral("dir"), qs(hwio::device::directionId(line.dir)));
-    json.insert(QStringLiteral("text"), qs(line.text));
+    json.insert(QStringLiteral("text"), qs(hwio::device::englishText(line))); // ADR-0374
     json.insert(QStringLiteral("time"), isoTime(line.time));
     return json;
 }
@@ -212,7 +223,7 @@ QJsonObject logLineJson(const hwio::device::ConsoleLine& line) {
     const auto level = hwio::device::levelId(line.level);
     json.insert(QStringLiteral("level"),
                 level ? QJsonValue(qs(*level)) : QJsonValue(QJsonValue::Null));
-    json.insert(QStringLiteral("text"), qs(line.text));
+    json.insert(QStringLiteral("text"), qs(hwio::device::englishText(line))); // ADR-0374
     json.insert(QStringLiteral("time"), isoTime(line.time));
     return json;
 }
@@ -322,6 +333,32 @@ QJsonObject objectOf(std::initializer_list<std::pair<const char*, QJsonObject>> 
     return json;
 }
 
+void insertDownload(QJsonObject& json,
+                    const std::optional<hwio::device::DownloadReport>& download) {
+    if (!download) {
+        return;
+    }
+    if (download->unchanged) {
+        json.insert(QStringLiteral("unchanged"), *download->unchanged);
+    }
+    if (download->affectedBytes) {
+        json.insert(QStringLiteral("affected_bytes"),
+                    static_cast<qint64>(*download->affectedBytes));
+    }
+}
+
+QJsonObject withDownload(QJsonObject schema) {
+    QJsonObject properties = schema.value(QStringLiteral("properties")).toObject();
+    properties.insert(QStringLiteral("unchanged"),
+                      typed("boolean", "true: the flash already held these bytes; J-Link "
+                                       "programmed nothing (only when J-Link said so)"));
+    properties.insert(QStringLiteral("affected_bytes"),
+                      typed("integer", "bytes of the flash ranges J-Link changed (only when "
+                                       "J-Link said so)"));
+    schema.insert(QStringLiteral("properties"), properties);
+    return schema;
+}
+
 QJsonObject connectionSchema() {
     return objectOf({{"state", typed("string")},
                      {"error", nullable("object")},
@@ -371,7 +408,7 @@ hwio::Error capabilityMissing(const std::string& id) {
 
 hwio::Error invalidArgument(const QString& message, std::string detail) {
     hwio::Error error = makeError(ErrorCode::UsageInvalidArgument, std::move(detail));
-    error.message = utf8(message);
+    setUntranslatedText(error, ErrorText::Message, utf8(message));
     return error;
 }
 

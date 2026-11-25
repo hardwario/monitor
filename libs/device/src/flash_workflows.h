@@ -61,6 +61,8 @@ struct WorkflowContext {
     // Plan 0039: the chip found when an STM32 identify failed with target.wrong_chip (the GUI
     // offers "Use <found>").
     std::optional<jlink::ChipInfo> foundChip;
+    // Plan 0050 (ADR-0376): set by runFlash() / runErase(Code) from the programmer's download.
+    std::optional<jlink::DownloadReport> download;
 };
 
 // The image split into the bytes for the code flash and the target's UICR records.

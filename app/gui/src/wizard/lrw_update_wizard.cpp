@@ -3,6 +3,7 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/lrw_update_procedure.h"
@@ -24,6 +25,7 @@
 #include <QVariantMap>
 #include <QtContainerFwd>
 #include <QtCore/qtmetamacros.h>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <array>
@@ -83,7 +85,9 @@ void LrwUpdateWizard::start(const ErrorInfo& context, DeviceTabViewModel* tab) {
         page != nullptr ? page->takeLrwRequest() : std::nullopt;
     if (!request) {
         Error error = makeError(ErrorCode::UsageInvalidArgument, "no LoRaWAN module request");
-        error.message = tr("Start the LoRaWAN module operations on the Flash page.").toStdString();
+        setText(error, ErrorText::Message, "hwio::gui::LrwUpdateWizard",
+                QT_TRANSLATE_NOOP("hwio::gui::LrwUpdateWizard",
+                                  "Start the LoRaWAN module operations on the Flash page."));
         m_startError = std::move(error);
         emit changed();
         return;

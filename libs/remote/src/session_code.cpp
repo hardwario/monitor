@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
@@ -17,6 +18,7 @@
 #include <QUrlQuery>
 #include <QtCore/qnamespace.h>
 #include <QtLogging>
+#include <QtTranslation>
 
 #include <cstdint>
 #include <expected>
@@ -36,19 +38,16 @@ Error invalidCode(std::string detail) {
 
 Error invalidRelay(std::string detail) {
     Error error = makeError(ErrorCode::UsageInvalidArgument, std::move(detail));
-    error.message =
-        QCoreApplication::translate("hwio::remote", "The support server address is not valid.")
-            .toStdString();
-    error.cause =
-        QCoreApplication::translate(
-            "hwio::remote", "The address must start with https:// and name a server, for example "
-                            "https://terminal.hardwario.com.")
-            .toStdString();
-    error.suggestion =
-        QCoreApplication::translate("hwio::remote",
-                                    "Correct the support server address, or clear it to use the "
-                                    "default server.")
-            .toStdString();
+    setText(error, ErrorText::Message, "hwio::remote",
+            QT_TRANSLATE_NOOP("hwio::remote", "The support server address is not valid."));
+    setText(error, ErrorText::Cause, "hwio::remote",
+            QT_TRANSLATE_NOOP("hwio::remote",
+                              "The address must start with https:// and name a server, for example "
+                              "https://terminal.hardwario.com."));
+    setText(error, ErrorText::Suggestion, "hwio::remote",
+            QT_TRANSLATE_NOOP("hwio::remote",
+                              "Correct the support server address, or clear it to use the "
+                              "default server."));
     return error;
 }
 

@@ -3,6 +3,7 @@
 #include "http_fetch.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/firmware/designated_firmware.h"
@@ -28,6 +29,7 @@
 #include <QtCore/qtmetamacros.h>
 #include <QtEnvironmentVariables>
 #include <QtLogging>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <chrono>
@@ -53,18 +55,17 @@ namespace {
 
 Error downloadFailed(const FirmwareId& id, std::string detail) {
     Error error = makeError(ErrorCode::NetworkDownloadFailed, std::move(detail));
-    error.message = QCoreApplication::translate("hwio::firmware", "Downloading firmware %1 failed.")
-                        .arg(toQString(id.value()))
-                        .toStdString();
+    setText(error, ErrorText::Message, "hwio::firmware",
+            QT_TRANSLATE_NOOP("hwio::firmware", "Downloading firmware %1 failed."),
+            {toQString(id.value())});
     return error;
 }
 
 Error notFoundInCatalog(const FirmwareId& id, std::string detail) {
     Error error = makeError(ErrorCode::FirmwareNotFoundInCatalog, std::move(detail));
-    error.message =
-        QCoreApplication::translate("hwio::firmware", "Firmware %1 was not found in the catalog.")
-            .arg(toQString(id.value()))
-            .toStdString();
+    setText(error, ErrorText::Message, "hwio::firmware",
+            QT_TRANSLATE_NOOP("hwio::firmware", "Firmware %1 was not found in the catalog."),
+            {toQString(id.value())});
     return error;
 }
 
@@ -271,10 +272,9 @@ DesignatedOperation::load(const std::filesystem::path& file) const {
     if (m_kind != FirmwareKind::LteBundle || bundle == nullptr) {
         Error error = makeError(ErrorCode::FirmwareInvalidImage,
                                 toUtf8(file) + ": not the expected kind of firmware");
-        error.message =
-            QCoreApplication::translate("hwio::firmware", "The downloaded file is not %1.")
-                .arg(toQString(m_name))
-                .toStdString();
+        setText(error, ErrorText::Message, "hwio::firmware",
+                QT_TRANSLATE_NOOP("hwio::firmware", "The downloaded file is not %1."),
+                {toQString(m_name)});
         return std::unexpected(std::move(error));
     }
     return std::make_shared<const LteBundle>(std::move(*bundle));
@@ -287,9 +287,8 @@ void DesignatedOperation::onFetched() {
     const detail::FetchOutcome& outcome = *m_fetch->outcome();
     const auto failed = [this](std::string detail) {
         Error error = makeError(ErrorCode::NetworkDownloadFailed, std::move(detail));
-        error.message = QCoreApplication::translate("hwio::firmware", "Downloading %1 failed.")
-                            .arg(toQString(m_name))
-                            .toStdString();
+        setText(error, ErrorText::Message, "hwio::firmware",
+                QT_TRANSLATE_NOOP("hwio::firmware", "Downloading %1 failed."), {toQString(m_name)});
         return error;
     };
     if (auto error =
@@ -329,10 +328,9 @@ void DesignatedOperation::finishVerified(std::span<const std::byte> bytes, bool 
         if (!image) {
             Error error = std::move(image).error();
             error.code = ErrorCode::FirmwareInvalidImage;
-            error.message =
-                QCoreApplication::translate("hwio::firmware", "The downloaded file is not %1.")
-                    .arg(toQString(m_name))
-                    .toStdString();
+            setText(error, ErrorText::Message, "hwio::firmware",
+                    QT_TRANSLATE_NOOP("hwio::firmware", "The downloaded file is not %1."),
+                    {toQString(m_name)});
             finish(std::unexpected(std::move(error)));
             return;
         }

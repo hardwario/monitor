@@ -4,6 +4,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
@@ -87,8 +88,9 @@ constexpr const char* readMemoryDescription =
 
 constexpr const char* readRegistersDescription =
     "Read the core registers (R0-R15, xPSR, MSP, PSP, ...) as hex strings. The CPU must be "
-    "halted first (halt), else target.not_halted. PC/LR/SP show where the firmware is. J-Link "
-    "only.";
+    "halted first (halt), else target.not_halted - or pass halt=true to halt it for the read and "
+    "let it run again if it was running (a halted CPU stays halted). PC/LR/SP show where the "
+    "firmware is. J-Link only.";
 
 constexpr const char* memoryZonesDescription =
     "List the memory zones the J-Link library reports for the target (often none). J-Link only.";
@@ -280,9 +282,11 @@ public:
             hwio::Error error =
                 makeError(ErrorCode::IoWriteFailed, path.toStdString() + ": the folder " +
                                                         hwio::toUtf8(parent) + " does not exist");
-            error.cause = "The folder of the file does not exist; it is not created.";
-            error.suggestion = "Create the dump folder again, or restart the server with another "
-                               "--dump-dir.";
+            setUntranslatedText(error, ErrorText::Cause,
+                                "The folder of the file does not exist; it is not created.");
+            setUntranslatedText(error, ErrorText::Suggestion,
+                                "Create the dump folder again, or restart the server with another "
+                                "--dump-dir.");
             completeError(std::move(error));
             return;
         }
@@ -626,9 +630,11 @@ hwio::Status addReadMemory(hwio::mcp::Registry& registry, ToolsContext& context)
                 if (args.contains(QStringLiteral("to_file")) && !isPlainDumpName(name)) {
                     hwio::Error error =
                         makeError(ErrorCode::McpToFileNotAllowed, name.toStdString());
-                    error.message = "The file name must be a plain name. Memory dumps are written "
-                                    "only to " +
-                                    hwio::toUtf8(directory) + ".";
+                    setUntranslatedText(
+                        error, ErrorText::Message,
+                        "The file name must be a plain name. Memory dumps are written "
+                        "only to " +
+                            hwio::toUtf8(directory) + ".");
                     return failed(std::move(error));
                 }
                 auto device = resolveJLinkDevice(context.provider(), args);
@@ -716,7 +722,15 @@ hwio::Status addReadRegisters(hwio::mcp::Registry& registry, ToolsContext& conte
             .name = "read_registers",
             .title = "Read core registers",
             .description = readRegistersDescription,
-            .inputSchema = deviceTargetSchema(),
+            .inputSchema =
+                Schema::object()
+                    .property(QStringLiteral("device"), deviceArgument())
+                    .property(QStringLiteral("target"), targetArgument())
+                    .property(QStringLiteral("halt"),
+                              Schema::boolean(QStringLiteral("Halt a running CPU for the read and "
+                                                             "let it run again."))
+                                  .defaultValue(false))
+                    .json(),
             .outputSchema =
                 objectOf({{"registers", typed("object")}}, {QStringLiteral("registers")}),
             .annotations = readOnly,
@@ -724,17 +738,23 @@ hwio::Status addReadRegisters(hwio::mcp::Registry& registry, ToolsContext& conte
             .marker = false,
             .start = operationStart(
                 context,
-                [](const QJsonObject&, const ResolvedDevice&,
+                [](const QJsonObject& args, const ResolvedDevice&,
                    const hwio::device::TargetProfile& target,
                    const hwio::mcp::ToolLimits& limits) -> hwio::Result<SimpleOperation> {
                     const std::string id(target.id);
                     const std::size_t max = limits.maxRegisters;
+                    // Plan 0049 (ADR-0372): the prior run state is restored, so it stays readOnly.
+                    const bool halt = args.value(QStringLiteral("halt")).toBool();
                     return SimpleOperation{
                         .settings = readSettings("read_registers"),
                         .consent = {},
                         .details = {},
                         .action = {},
-                        .start = [id](DeviceSession& s) { return s.readRegisters(id); },
+                        .start =
+                            [id, halt](DeviceSession& s) {
+                                return s.readRegisters(
+                                    id, hwio::device::ReadRegistersOptions{.haltIfRunning = halt});
+                            },
                         .result = [max](const OperationResult& r) -> hwio::Result<QJsonObject> {
                             QJsonObject registers;
                             std::size_t count = 0;
@@ -959,10 +979,11 @@ hwio::Status addWriteFlash(hwio::mcp::Registry& registry, ToolsContext& context)
                               Schema::boolean(QStringLiteral("Allow writing into the UICR."))
                                   .defaultValue(false))
                     .json(),
-            .outputSchema = addressedSchema({{"bytes", typed("integer")},
-                                             {"duration", typed("number")},
-                                             {"log_cursor_end", typed("integer")},
-                                             {"terminal_cursor_end", typed("integer")}}),
+            .outputSchema =
+                withDownload(addressedSchema({{"bytes", typed("integer")},
+                                              {"duration", typed("number")},
+                                              {"log_cursor_end", typed("integer")},
+                                              {"terminal_cursor_end", typed("integer")}})),
             .annotations = destructive,
             .consent = hwio::mcp::ConsentCategory::Flash,
             .marker = true,
@@ -1026,6 +1047,7 @@ hwio::Status addWriteFlash(hwio::mcp::Registry& registry, ToolsContext& context)
                             json.insert(QStringLiteral("address"), formatAddress(address));
                             json.insert(QStringLiteral("bytes"), static_cast<qint64>(size));
                             json.insert(QStringLiteral("duration"), seconds(r.duration));
+                            insertDownload(json, r.download); // ADR-0376
                             return json;
                         }};
                 }),

@@ -1,6 +1,7 @@
 #include "hwio/device/profile.h"
 
 #include "hwio/core/error.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/line_assembler.h"
 #include "hwio/firmware/designated_firmware.h"
@@ -10,6 +11,7 @@
 #include <QCoreApplication>
 #include <QString>
 #include <QStringLiteral>
+#include <QtTranslation>
 
 #include <algorithm>
 #include <array>
@@ -233,6 +235,12 @@ QString targetDisplayName(const TargetProfile& target) {
     return QCoreApplication::translate("hwio::device", source.c_str());
 }
 
+LocalizedText targetDisplayNameText(const TargetProfile& target) {
+    const std::string source(target.displayName.empty() ? target.id : target.displayName);
+    return LocalizedText{.translated = targetDisplayName(target),
+                         .english = QString::fromStdString(source)};
+}
+
 QString profileDisplayName(const DeviceProfile& profile) {
     const std::string source(profile.displayName);
     return QCoreApplication::translate("hwio::device", source.c_str());
@@ -303,12 +311,10 @@ Status checkMemoryRead(std::uint32_t address, std::size_t size) {
     Error error = makeError(ErrorCode::TargetAddressOutOfRange,
                             std::format("requested {}; the address space ends at 0x{:X}",
                                         rangeText(requested), addressSpaceEnd));
-    error.cause = QCoreApplication::translate("hwio::device",
-                                              "The range runs past the end of the address space.")
-                      .toStdString();
-    error.suggestion =
-        QCoreApplication::translate("hwio::device", "Use a shorter range or a lower address.")
-            .toStdString();
+    setText(error, ErrorText::Cause, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device", "The range runs past the end of the address space."));
+    setText(error, ErrorText::Suggestion, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device", "Use a shorter range or a lower address."));
     return std::unexpected(std::move(error));
 }
 
@@ -322,17 +328,15 @@ Status checkMemoryWrite(const TargetProfile& target, std::uint32_t address, std:
         Error error = makeError(
             ErrorCode::TargetAddressOutOfRange,
             std::format("requested {}; denied {}", rangeText(requested), rangeText(*denied)));
-        error.cause = denied->start >= privatePeripheralBus
-                          ? QCoreApplication::translate(
-                                "hwio::device",
-                                "The range overlaps system or debug registers of the CPU, through "
-                                "which a write could make the device run arbitrary code.")
-                                .toStdString()
-                          : QCoreApplication::translate(
-                                "hwio::device",
-                                "The range overlaps the flash controller registers, whose tasks "
-                                "erase flash, UICR and the product information.")
-                                .toStdString();
+        setText(error, ErrorText::Cause, "hwio::device",
+                denied->start >= privatePeripheralBus
+                    ? QT_TRANSLATE_NOOP("hwio::device",
+                                        "The range overlaps system or debug registers of the CPU, "
+                                        "through which a write could make the device run "
+                                        "arbitrary code.")
+                    : QT_TRANSLATE_NOOP("hwio::device",
+                                        "The range overlaps the flash controller registers, whose "
+                                        "tasks erase flash, UICR and the product information."));
         return std::unexpected(std::move(error));
     }
     const auto inside = [&](const firmware::AddressRange& range) {
@@ -372,16 +376,15 @@ Status checkStm32FlashWrite(const TargetProfile& target, const firmware::Address
                             std::format("segment {}; flash {}, data EEPROM {}", rangeText(range),
                                         rangeText(target.flash), eepromText));
     if (inEeprom) {
-        error.message =
-            QCoreApplication::translate(
-                "hwio::device", "The firmware writes into the data EEPROM of the %1 (address %2).")
-                .arg(targetDisplayName(target), hexAddress(range.start))
-                .toStdString();
-        error.suggestion =
-            QCoreApplication::translate("hwio::device",
-                                        "Allow writing the data EEPROM if the file is meant to "
-                                        "change it.")
-                .toStdString();
+        setText(
+            error, ErrorText::Message, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device",
+                              "The firmware writes into the data EEPROM of the %1 (address %2)."),
+            {targetDisplayNameText(target), hexAddress(range.start)});
+        setText(error, ErrorText::Suggestion, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device",
+                                  "Allow writing the data EEPROM if the file is meant to "
+                                  "change it."));
         return std::unexpected(std::move(error));
     }
     // The family's data EEPROM area (a part without a usable EEPROM range rejects it by name).
@@ -389,20 +392,19 @@ Status checkStm32FlashWrite(const TargetProfile& target, const firmware::Address
         !target.dataEeprom && target.stm32 && target.stm32->dataEepromArea.contains(range.start);
     const std::uint64_t outside =
         target.flash.contains(range.start) ? target.flash.end : range.start;
-    error.message =
-        eepromRecords
-            ? QCoreApplication::translate("hwio::device",
-                                          "Data EEPROM is not supported for the %1 (address %2).")
-                  .arg(targetDisplayName(target), hexAddress(range.start))
-                  .toStdString()
-            : QCoreApplication::translate("hwio::device",
-                                          "The firmware does not fit the %1 (address %2).")
-                  .arg(targetDisplayName(target), hexAddress(outside))
-                  .toStdString();
-    error.suggestion =
-        QCoreApplication::translate("hwio::device", "Check that the firmware is for the %1.")
-            .arg(targetDisplayName(target))
-            .toStdString();
+    if (eepromRecords) {
+        setText(error, ErrorText::Message, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device",
+                                  "Data EEPROM is not supported for the %1 (address %2)."),
+                {targetDisplayNameText(target), hexAddress(range.start)});
+    } else {
+        setText(error, ErrorText::Message, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device", "The firmware does not fit the %1 (address %2)."),
+                {targetDisplayNameText(target), hexAddress(outside)});
+    }
+    setText(error, ErrorText::Suggestion, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device", "Check that the firmware is for the %1."),
+            {targetDisplayNameText(target)});
     return std::unexpected(std::move(error));
 }
 
@@ -420,11 +422,11 @@ Status checkFlashWrite(const TargetProfile& target, std::uint32_t address, std::
                                 std::format("segment 0x{:08X}-0x{:08X} overlaps the PIB "
                                             "0x{:08X}-0x{:08X}",
                                             range.start, range.end, pib.start, pib.end));
-        error.message = QCoreApplication::translate(
-                            "hwio::device",
-                            "The firmware writes into the Product Information Block (address %1).")
-                            .arg(hexAddress(std::max(range.start, pib.start)))
-                            .toStdString();
+        setText(error, ErrorText::Message, "hwio::device",
+                QT_TRANSLATE_NOOP(
+                    "hwio::device",
+                    "The firmware writes into the Product Information Block (address %1)."),
+                {hexAddress(std::max(range.start, pib.start))});
         return std::unexpected(std::move(error));
     }
     if (!target.flash.contains(range) && !target.uicr.contains(range)) {
@@ -435,14 +437,13 @@ Status checkFlashWrite(const TargetProfile& target, std::uint32_t address, std::
                                             "UICR 0x{:08X}-0x{:08X}",
                                             range.start, range.end, target.flash.start,
                                             target.flash.end, target.uicr.start, target.uicr.end));
-        error.message = QCoreApplication::translate(
-                            "hwio::device", "The firmware does not fit the %1 MCU (address %2).")
-                            .arg(targetDisplayName(target), hexAddress(outside))
-                            .toStdString();
-        error.suggestion = QCoreApplication::translate("hwio::device",
-                                                       "Check that the firmware is for the %1 MCU.")
-                               .arg(targetDisplayName(target))
-                               .toStdString();
+        setText(
+            error, ErrorText::Message, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device", "The firmware does not fit the %1 MCU (address %2)."),
+            {targetDisplayNameText(target), hexAddress(outside)});
+        setText(error, ErrorText::Suggestion, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device", "Check that the firmware is for the %1 MCU."),
+                {targetDisplayNameText(target)});
         return std::unexpected(std::move(error));
     }
     if (!allowUicr && range.overlaps(target.uicr)) {

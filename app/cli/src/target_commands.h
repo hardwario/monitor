@@ -2,7 +2,7 @@
 
 // M6 low-level target commands of `hwio chester app` and `hwio chester lte` (plan/features/0013 B4,
 // ADR-0099, ADR-0153):
-//   status | halt | go | regs | zones
+//   status | halt | go | regs [--halt] | zones   (regs --halt: plan 0049, ADR-0372)
 //   mem read ADDR [-l LEN=64] [-w 8|16|32] [-o FILE]
 //   mem write ADDR (HEX | -i FILE) [-w 8|16|32] [--yes]
 //   flash-write ADDR (HEX | -i FILE) [--allow-uicr] [--yes]

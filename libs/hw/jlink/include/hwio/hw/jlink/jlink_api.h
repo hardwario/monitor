@@ -72,6 +72,11 @@ inline constexpr std::size_t optionalFunctionCount = 8;
 // Largest register list requested from the library (pylink MAX_NUM_CPU_REGISTERS).
 inline constexpr std::size_t maxRegisterListItems = 256;
 
+// Most registers passed to one JLINKARM_ReadRegs call (ADR-0371, plan 0048): J-Link V9.84 handles
+// only about 45 per call; it returns 0, writes junk into the remaining values and leaves their
+// status bytes untouched. 32 leaves a margin below the measured limit.
+inline constexpr std::size_t maxRegistersPerRead = 32;
+
 class IJLinkApi {
 public:
     IJLinkApi() = default;
@@ -152,10 +157,14 @@ public:
     [[nodiscard]] virtual std::expected<std::vector<std::uint32_t>, int> registerList() = 0;
     // JLINKARM_GetRegisterName: "" when the library has no name.
     [[nodiscard]] virtual std::string registerName(std::uint32_t index) = 0;
-    // JLINKARM_ReadRegs of `indexes` into `values` (same size). Returns the vendor code (< 0:
-    // error).
+    // JLINKARM_ReadRegs of `indexes` into `values`, in blocks of at most maxRegistersPerRead
+    // (ADR-0371: the library handles about 45 per call and silently leaves the rest).
+    // confirmed[i] = 1 when the library wrote status 0 for indexes[i], else 0 (its value is then
+    // unspecified). All three spans have the same size. Returns the number of confirmed
+    // registers (>= 0) or the first negative vendor code.
     [[nodiscard]] virtual int readRegisters(std::span<const std::uint32_t> indexes,
-                                            std::span<std::uint32_t> values) = 0;
+                                            std::span<std::uint32_t> values,
+                                            std::span<std::uint8_t> confirmed) = 0;
     // JLINK_GetMemZones: at most `maxZones` zones (empty when the target reports none; a longer
     // list is cut and the cut is logged, review S10). Error:
     // the negative vendor code.
@@ -217,6 +226,10 @@ public:
     // ---- library output (log / warning / error out handlers) --------------------------------
     // Logs the messages the library reported since the last call into the hwio.jlink category.
     virtual void flushMessages() = 0;
+    // flushMessages(), and returns the texts of the flushed messages that contain `marker` (the
+    // last `maxLines` of them; plan 0050: the "Flash download:" lines of a download).
+    [[nodiscard]] virtual std::vector<std::string>
+    flushMessagesContaining(std::string_view marker, std::size_t maxLines) = 0;
     // flushMessages(), then returns the library's error texts reported since the previous call
     // (newest last, "; "-separated, bounded) for the `detail` of the next hwio::Error.
     [[nodiscard]] virtual std::string takeErrorText() = 0;

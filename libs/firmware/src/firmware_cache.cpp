@@ -3,6 +3,7 @@
 #include "file_io.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/firmware/designated_firmware.h"
@@ -17,6 +18,7 @@
 #include <QStandardPaths>
 #include <QString>
 #include <QtLogging>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <algorithm>
@@ -83,9 +85,9 @@ bool FirmwareId::looksLikeId(std::string_view text) noexcept {
 Result<FirmwareId> FirmwareId::parse(std::string_view text) {
     if (!looksLikeId(text)) {
         Error error = makeError(ErrorCode::UsageInvalidArgument, std::string(text));
-        error.message = QCoreApplication::translate(
-                            "hwio::firmware", "A firmware ID has exactly 32 hexadecimal digits.")
-                            .toStdString();
+        setText(error, ErrorText::Message, "hwio::firmware",
+                QT_TRANSLATE_NOOP("hwio::firmware",
+                                  "A firmware ID has exactly 32 hexadecimal digits."));
         return std::unexpected(std::move(error));
     }
     std::string value(text);

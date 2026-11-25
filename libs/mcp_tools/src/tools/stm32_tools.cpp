@@ -5,6 +5,7 @@
 // itself (ADR-0276).
 
 #include "hwio/core/error.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
@@ -268,7 +269,8 @@ hwio::Status addInfo(hwio::mcp::Registry& registry, ToolsContext& context) {
                             if (!r.chip || r.chip->devId == 0) {
                                 hwio::Error error =
                                     makeError(ErrorCode::TargetConnectFailed, "no STM32 chip");
-                                error.message = "No STM32 chip answered.";
+                                setUntranslatedText(error, ErrorText::Message,
+                                                    "No STM32 chip answered.");
                                 return std::unexpected(std::move(error));
                             }
                             const auto& chip = *r.chip;

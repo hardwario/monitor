@@ -6,6 +6,7 @@
 #include "flash_commands.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/lrw_update_procedure.h"
 #include "hwio/device/profile.h"
@@ -65,7 +66,7 @@ Stm32CommandTarget lrwTarget() {
 
 Error usage(std::string message, std::string detail) {
     Error error = makeError(ErrorCode::UsageInvalidArgument, std::move(detail));
-    error.message = std::move(message);
+    setUntranslatedText(error, ErrorText::Message, std::move(message));
     return error;
 }
 
@@ -74,7 +75,7 @@ Result<CommandResult> withHoldHint(Result<CommandResult> result) {
     if (!result && (result.error().code == ErrorCode::TargetConnectFailed ||
                     result.error().code == ErrorCode::TargetNotConnected)) {
         Error error = std::move(result).error();
-        error.suggestion = std::string(holdHint);
+        setUntranslatedText(error, ErrorText::Suggestion, std::string(holdHint));
         return std::unexpected(std::move(error));
     }
     return result;
@@ -90,8 +91,9 @@ Status checkGuided(const Context& context, std::string_view command) {
                     "interactive terminal (not --json). Use --direct in scripts.",
                     command),
         "guided LoRaWAN module operation");
-    error.suggestion =
-        std::format("{} Then run `hwio chester lrw {} --direct`.", holdHint, command);
+    setUntranslatedText(
+        error, ErrorText::Suggestion,
+        std::format("{} Then run `hwio chester lrw {} --direct`.", holdHint, command));
     return std::unexpected(std::move(error));
 }
 
@@ -254,16 +256,22 @@ Result<CommandResult> guidedResult(const Procedure& procedure, const QJsonObject
     }
     if (procedure.step() == Step::Cancelled) {
         Error error = makeError(ErrorCode::Cancelled, "guided LoRaWAN module operation");
-        error.message = toStdString(procedure.promptText());
+        setUntranslatedText(error, ErrorText::Message, toStdString(procedure.promptText()));
         if (procedure.applicationHeld()) {
-            error.suggestion = stopped;
+            setUntranslatedText(error, ErrorText::Suggestion, stopped);
         }
         return std::unexpected(std::move(error));
     }
     Error error = procedure.error().value_or(makeError(
         ErrorCode::InternalUnexpected, "the guided LoRaWAN module operation ended unexpectedly"));
     if (procedure.applicationHeld()) {
-        error.suggestion = error.suggestion.empty() ? stopped : error.suggestion + " " + stopped;
+        const LocalizedText suggestion = textOf(error, ErrorText::Suggestion);
+        const QString added = QString::fromStdString(stopped);
+        setText(error, ErrorText::Suggestion,
+                suggestion.translated.isEmpty()
+                    ? LocalizedText{.translated = added, .english = added}
+                    : LocalizedText{.translated = suggestion.translated + u' ' + added,
+                                    .english = suggestion.english + u' ' + added});
     }
     return std::unexpected(std::move(error));
 }

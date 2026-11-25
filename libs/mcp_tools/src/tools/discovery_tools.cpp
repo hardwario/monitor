@@ -43,7 +43,10 @@ constexpr const char* listDevicesDescription =
     "by the last enumeration, with their id (\"jlink:<serial>\" or \"ble:<id>\"), state (open, "
     "available, in_use_by_other_process with the owner) and connection state. Right after the "
     "server starts, the first call waits for the first enumeration. Pass refresh=true to "
-    "enumerate the probes again (takes up to 2 s). Use an id with connect.";
+    "enumerate the probes again (takes up to 2 s). Bluetooth devices are listed like `hwio ble "
+    "scan`: only those with a known profile (e.g. CHESTER) and open ones; ble_hidden counts the "
+    "nearby Bluetooth devices left out. Pass all_ble=true to list every nearby Bluetooth "
+    "advertiser (can be large). Use an id with connect.";
 
 constexpr const char* connectDescription =
     "Connect a device by its id from list_devices (\"jlink:<serial>\" or \"ble:<id>\") and start "
@@ -73,7 +76,8 @@ constexpr const char* statusDescription =
 // plain list_devices (`reportErrors` false).
 class RefreshDevicesCall final : public hwio::mcp::ToolCall {
 public:
-    RefreshDevicesCall(IDeviceProvider& provider, bool reportErrors) : m_provider(&provider) {
+    RefreshDevicesCall(IDeviceProvider& provider, bool reportErrors, BleListing listing)
+        : m_provider(&provider), m_listing(listing) {
         const QPointer<RefreshDevicesCall> self(this);
         provider.refresh([self, reportErrors](const hwio::Status& refreshed) {
             if (self.isNull() || self->isFinished()) {
@@ -83,12 +87,13 @@ public:
                 self->finish(std::unexpected(refreshed.error()));
                 return;
             }
-            self->finish(hwio::mcp::toolResult(devicesJson(*self->m_provider)));
+            self->finish(hwio::mcp::toolResult(devicesJson(*self->m_provider, self->m_listing)));
         });
     }
 
 private:
     IDeviceProvider* m_provider; // non-owning, outlives the call (ToolsContext)
+    BleListing m_listing;
 };
 
 // connect: open (after consent) and wait for the outcome of the first attempt (waitForFirstAttempt
@@ -241,21 +246,32 @@ hwio::Status addListDevices(hwio::mcp::Registry& registry, ToolsContext& context
                         QStringLiteral("refresh"),
                         Schema::boolean(QStringLiteral("Enumerate the J-Link probes again first."))
                             .defaultValue(false))
+                    .property(QStringLiteral("all_ble"),
+                              Schema::boolean(
+                                  QStringLiteral(
+                                      "List every nearby Bluetooth device, also those without a "
+                                      "known profile (default: only profiled and open ones, like "
+                                      "`hwio ble scan`)."))
+                                  .defaultValue(false))
                     .json(),
-            .outputSchema =
-                objectOf({{"devices", arrayOf(deviceEntrySchema())}}, {QStringLiteral("devices")}),
+            .outputSchema = objectOf(
+                {{"devices", arrayOf(deviceEntrySchema())}, {"ble_hidden", typed("integer")}},
+                {QStringLiteral("devices"), QStringLiteral("ble_hidden")}),
             .annotations = readOnly,
             .consent = {},
             .marker = false,
             .start = [&context](const hwio::mcp::RequestContext&, const QJsonObject& args,
                                 hwio::mcp::ToolEnv&) -> std::unique_ptr<hwio::mcp::ToolCall> {
+                const BleListing listing = args.value(QStringLiteral("all_ble")).toBool()
+                                               ? BleListing::All
+                                               : BleListing::Profiled;
                 if (args.value(QStringLiteral("refresh")).toBool()) {
-                    return std::make_unique<RefreshDevicesCall>(context.provider(), true);
+                    return std::make_unique<RefreshDevicesCall>(context.provider(), true, listing);
                 }
                 if (context.provider().firstScanPending()) { // review V1
-                    return std::make_unique<RefreshDevicesCall>(context.provider(), false);
+                    return std::make_unique<RefreshDevicesCall>(context.provider(), false, listing);
                 }
-                return done(devicesJson(context.provider()));
+                return done(devicesJson(context.provider(), listing));
             },
             .validate = {}});
 }

@@ -3,6 +3,7 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/ble_lock.h"
 #include "hwio/device/ble_session.h"
@@ -30,6 +31,7 @@
 #include <QtContainerFwd>
 #include <QtCore/qnamespace.h>
 #include <QtCore/qsystemdetection.h>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <cmath>
@@ -804,9 +806,10 @@ void ConnectionViewModel::setWarning(const Error& warning) {
         // The session's only io.write_failed warning is its console log file, which it then stops
         // writing (the GUI always uses the default files; plan 0005 amendment, 2026-10-16). The
         // backend detail (file and reason) stays for [Details].
-        shown.message = tr("The console log file could not be written; logging to file is off "
-                           "for this session.")
-                            .toStdString();
+        setText(shown, ErrorText::Message, "hwio::gui::ConnectionViewModel",
+                QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel",
+                                  "The console log file could not be written; logging to file is "
+                                  "off for this session."));
     }
     m_warning = ErrorInfo(shown);
     warningChanged(); // signal
@@ -819,41 +822,58 @@ void ConnectionViewModel::refresh() {
     stateChanged();   // signal
 }
 
-QString ConnectionViewModel::shortCause(const Error& error) {
+LocalizedText ConnectionViewModel::shortCauseText(const Error& error) {
+    constexpr const char* context = "hwio::gui::ConnectionViewModel";
     switch (error.code) {
     case ErrorCode::TargetNoPower:
-        return tr("target not powered");
+        return localizedText(
+            context, QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel", "target not powered"));
     case ErrorCode::ProbeNotFound:
-        return tr("J-Link not found");
+        return localizedText(
+            context, QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel", "J-Link not found"));
     case ErrorCode::ProbeInUseByOtherProcess:
-        return tr("J-Link used by another program");
+        return localizedText(context, QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel",
+                                                        "J-Link used by another program"));
     case ErrorCode::ProbeOpenFailed:
-        return tr("J-Link could not be opened");
+        return localizedText(context, QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel",
+                                                        "J-Link could not be opened"));
     case ErrorCode::TargetConnectFailed:
-        return tr("target does not respond");
+        return localizedText(context, QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel",
+                                                        "target does not respond"));
     case ErrorCode::TargetRttNotFound:
     case ErrorCode::TargetRttBufferNotFound:
-        return tr("no RTT console found");
+        return localizedText(
+            context, QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel", "no RTT console found"));
     case ErrorCode::TargetRttReadFailed:
     case ErrorCode::TargetRttWriteFailed:
     case ErrorCode::TargetRttWriteTimeout:
-        return tr("connection lost");
+        return localizedText(
+            context, QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel", "connection lost"));
     case ErrorCode::BleDeviceNotFound:
-        return tr("out of range");
+        return localizedText(context,
+                             QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel", "out of range"));
     case ErrorCode::BleDisconnected:
-        return tr("connection lost");
+        return localizedText(
+            context, QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel", "connection lost"));
     case ErrorCode::BleNotPaired:
     case ErrorCode::BlePairingFailed:
-        return tr("not paired");
+        return localizedText(context,
+                             QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel", "not paired"));
     case ErrorCode::BleAdapterOff:
-        return tr("Bluetooth is off");
+        return localizedText(
+            context, QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel", "Bluetooth is off"));
     case ErrorCode::DependencyJLinkNotFound:
     case ErrorCode::DependencyJLinkLoadFailed:
     case ErrorCode::DependencyJLinkTooOld:
-        return tr("J-Link Software missing");
+        return localizedText(context, QT_TRANSLATE_NOOP("hwio::gui::ConnectionViewModel",
+                                                        "J-Link Software missing"));
     default:
-        return toQString(error.message);
+        return textOf(error, ErrorText::Message);
     }
+}
+
+QString ConnectionViewModel::shortCause(const Error& error) {
+    return shortCauseText(error).translated;
 }
 
 } // namespace hwio::gui

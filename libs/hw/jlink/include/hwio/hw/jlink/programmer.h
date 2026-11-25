@@ -44,6 +44,11 @@
 // reported as an interrupted flash: target.program_failed, "may be partly written" (ADR-0109). The
 // session reopens the probe.
 //
+// Download report (plan 0050, ADR-0376): program() and eraseCode() return what the flash loader
+// said about the download in its per-bank log messages (J-Link V9.84 wording,
+// parseDownloadMessages()): every bank skipped ("Contents already match") -> unchanged; bytes of
+// the affected ranges otherwise. Unknown wording -> both fields empty, never guessed.
+//
 // Thread safety: none (the session worker).
 
 #include "hwio/core/error.h"
@@ -67,6 +72,24 @@
 #include <vector>
 
 namespace hwio::jlink {
+
+// What one flash download changed (ADR-0376). Both empty when the library said nothing known.
+struct DownloadReport {
+    std::optional<std::uint64_t> affectedBytes; // sum over the banks; 0 when all were skipped
+    std::optional<bool> unchanged;              // true only when every reported bank was skipped
+
+    [[nodiscard]] bool operator==(const DownloadReport& other) const = default;
+};
+
+// At most this many "Flash download:" lines of one download are kept for parsing.
+inline constexpr std::size_t maxDownloadMessages = 64;
+
+// The report from the library's log lines of one download. Recognised (J-Link V9.84, plan 0050;
+// anywhere in a line, e.g. after a "J-Link: " prefix):
+//   "Flash download: Bank <n> @ 0x<address>: Skipped. Contents already match"
+//   "Flash download: Bank <n> @ 0x<address>: <k> range(s) affected (<bytes> bytes)"
+// Other lines are ignored; no recognised line -> an empty report.
+[[nodiscard]] DownloadReport parseDownloadMessages(std::span<const std::string> lines);
 
 enum class ResetMode : std::uint8_t {
     Go,   // reset and let the CPU run
@@ -205,19 +228,19 @@ public:
 
     // Errors: target.connect_failed (FICR unreadable and the chip is not protected).
     [[nodiscard]] virtual Result<ChipInfo> identify() = 0;
-    // Errors: target.program_failed, timeout, cancelled.
-    [[nodiscard]] virtual Status program(const firmware::FirmwareImage& image,
-                                         const firmware::ProgressFn& progress,
-                                         std::stop_token stop) = 0;
+    // Errors: target.program_failed, timeout, cancelled. The loader's report on success.
+    [[nodiscard]] virtual Result<DownloadReport> program(const firmware::FirmwareImage& image,
+                                                         const firmware::ProgressFn& progress,
+                                                         std::stop_token stop) = 0;
     // Errors: firmware.verify_failed, target.connect_failed (read failed), timeout, cancelled.
     [[nodiscard]] virtual Status verify(const firmware::FirmwareImage& image,
                                         const firmware::ProgressFn& progress,
                                         std::stop_token stop) = 0;
     // Errors: target.erase_failed, target.program_failed (abandoned download, ADR-0109), timeout,
-    // cancelled.
-    [[nodiscard]] virtual Status eraseCode(firmware::AddressRange flash,
-                                           const firmware::ProgressFn& progress,
-                                           std::stop_token stop) = 0;
+    // cancelled. The loader's report on success (unchanged: the range was already erased).
+    [[nodiscard]] virtual Result<DownloadReport> eraseCode(firmware::AddressRange flash,
+                                                           const firmware::ProgressFn& progress,
+                                                           std::stop_token stop) = 0;
     // Flash + UICR, after a reset and halt (HIL H5). Errors: target.connect_failed (reset failed),
     // target.erase_failed, timeout.
     [[nodiscard]] virtual Status eraseAll() = 0;
@@ -263,15 +286,15 @@ public:
     JLinkProgrammer(IJLinkApi& api, JLinkProbe& probe, Clock& clock, ProgrammerConfig config);
 
     [[nodiscard]] Result<ChipInfo> identify() override;
-    [[nodiscard]] Status program(const firmware::FirmwareImage& image,
-                                 const firmware::ProgressFn& progress,
-                                 std::stop_token stop) override;
+    [[nodiscard]] Result<DownloadReport> program(const firmware::FirmwareImage& image,
+                                                 const firmware::ProgressFn& progress,
+                                                 std::stop_token stop) override;
     [[nodiscard]] Status verify(const firmware::FirmwareImage& image,
                                 const firmware::ProgressFn& progress,
                                 std::stop_token stop) override;
-    [[nodiscard]] Status eraseCode(firmware::AddressRange flash,
-                                   const firmware::ProgressFn& progress,
-                                   std::stop_token stop) override;
+    [[nodiscard]] Result<DownloadReport> eraseCode(firmware::AddressRange flash,
+                                                   const firmware::ProgressFn& progress,
+                                                   std::stop_token stop) override;
     [[nodiscard]] Status eraseAll() override;
     [[nodiscard]] Status recover(std::stop_token stop) override;
     [[nodiscard]] Status programRdpLevel0(std::stop_token stop) override;
@@ -316,9 +339,10 @@ private:
     [[nodiscard]] Error abandonDownload(std::string detail);
     // One BeginDownload / WriteMem / EndDownload pass. `programsData`: the loader's non-erase
     // progress is reported as Programming (program), otherwise everything as Erasing (eraseCode).
-    [[nodiscard]] Status download(const std::vector<firmware::Segment>& segments, bool programsData,
-                                  ErrorCode failure, const firmware::ProgressFn& progress,
-                                  const std::stop_token& stop);
+    [[nodiscard]] Result<DownloadReport> download(const std::vector<firmware::Segment>& segments,
+                                                  bool programsData, ErrorCode failure,
+                                                  const firmware::ProgressFn& progress,
+                                                  const std::stop_token& stop);
     // A 32-bit STM32 write that refuses an RDP level 2 option word (ADR-0276); the vendor code.
     [[nodiscard]] int writeStm32(std::uint32_t address, std::uint32_t value);
     // target.unlock_failed with `detail` and the library's last message.

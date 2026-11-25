@@ -14,10 +14,12 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
+#include <format>
 #include <initializer_list>
 #include <map>
 #include <optional>
@@ -641,12 +643,14 @@ TEST_F(TargetOps, HaltGoAndStatus) {
 TEST_F(TargetOps, RegistersNeedAHaltedCore) {
     EXPECT_CALL(api(), isHalted()).WillOnce(Return(0)).WillOnce(Return(1));
     EXPECT_CALL(api(), registerList()).WillOnce(Return(std::vector<std::uint32_t>{0, 15}));
-    EXPECT_CALL(api(), readRegisters(_, _))
-        .WillOnce([](std::span<const std::uint32_t> indexes, std::span<std::uint32_t> values) {
+    EXPECT_CALL(api(), readRegisters(_, _, _))
+        .WillOnce([](std::span<const std::uint32_t> indexes, std::span<std::uint32_t> values,
+                     std::span<std::uint8_t> confirmed) {
             EXPECT_EQ(indexes.size(), 2U);
             values[0] = 7;
             values[1] = 0x1000;
-            return 0;
+            std::ranges::fill(confirmed, 1);
+            return 2;
         });
     EXPECT_CALL(api(), registerName(0U)).WillOnce(Return("R0"));
     EXPECT_CALL(api(), registerName(15U)).WillOnce(Return(""));
@@ -667,14 +671,53 @@ TEST_F(TargetOps, RegistersAreCappedAt128) {
     ON_CALL(api(), isHalted()).WillByDefault(Return(1));
     ON_CALL(api(), registerList()).WillByDefault(Return(many));
     ON_CALL(api(), registerName(_)).WillByDefault(Return("R"));
-    EXPECT_CALL(api(), readRegisters(_, _))
-        .WillOnce([](std::span<const std::uint32_t> indexes, std::span<std::uint32_t>) {
+    EXPECT_CALL(api(), readRegisters(_, _, _))
+        .WillOnce([](std::span<const std::uint32_t> indexes, std::span<std::uint32_t>,
+                     std::span<std::uint8_t> confirmed) {
             EXPECT_EQ(indexes.size(), 128U);
-            return 0;
+            std::ranges::fill(confirmed, 1);
+            return 128;
         });
     EXPECT_EQ(
         programmer().readRegisters().value_or(std::vector<hwio::jlink::RegisterValue>{}).size(),
         128U);
+}
+
+// ADR-0371: a register the library did not confirm is left out (and logged); the rest keep their
+// order and values.
+TEST_F(TargetOps, UnconfirmedRegistersAreLeftOut) {
+    ON_CALL(api(), isHalted()).WillByDefault(Return(1));
+    ON_CALL(api(), registerList()).WillByDefault(Return(std::vector<std::uint32_t>{0, 1, 2, 3}));
+    ON_CALL(api(), registerName(_)).WillByDefault([](std::uint32_t index) {
+        return std::format("R{}", index);
+    });
+    EXPECT_CALL(api(), readRegisters(_, _, _))
+        .WillOnce([](std::span<const std::uint32_t>, std::span<std::uint32_t> values,
+                     std::span<std::uint8_t> confirmed) {
+            const std::array<std::uint32_t, 4> read{10, 0x00AD9390U, 30, 0x0064006FU};
+            std::ranges::copy(read, values.begin());
+            const std::array<std::uint8_t, 4> ok{1, 0, 1, 0};
+            std::ranges::copy(ok, confirmed.begin());
+            return 2;
+        });
+    const auto registers = programmer().readRegisters();
+    ASSERT_TRUE(registers);
+    ASSERT_EQ(registers->size(), 2U);
+    EXPECT_EQ((*registers)[0].name, "R0");
+    EXPECT_EQ((*registers)[0].value, 10U);
+    EXPECT_EQ((*registers)[1].name, "R2");
+    EXPECT_EQ((*registers)[1].value, 30U);
+}
+
+TEST_F(TargetOps, NoConfirmedRegisterIsAnError) {
+    ON_CALL(api(), isHalted()).WillByDefault(Return(1));
+    ON_CALL(api(), registerList()).WillByDefault(Return(std::vector<std::uint32_t>{0, 1}));
+    ON_CALL(api(), registerName(_)).WillByDefault(Return("R"));
+    EXPECT_CALL(api(), readRegisters(_, _, _)).WillOnce(Return(0));
+    const auto registers = programmer().readRegisters();
+    ASSERT_FALSE(registers);
+    EXPECT_EQ(registers.error().code, ErrorCode::TargetConnectFailed);
+    EXPECT_EQ(registers.error().detail, "JLINKARM_ReadRegs confirmed no register");
 }
 
 TEST_F(TargetOps, MemoryZonesAreBounded) {
@@ -684,6 +727,69 @@ TEST_F(TargetOps, MemoryZonesAreBounded) {
         .WillOnce(Return(std::unexpected(-5)));
     EXPECT_EQ(programmer().memoryZones().value_or(std::vector<MemoryZone>{}).size(), 1U);
     EXPECT_EQ(programmer().memoryZones().error().code, ErrorCode::TargetConnectFailed);
+}
+
+} // namespace
+
+// ---- download report (plan 0050, ADR-0376) ------------------------------------------------------
+
+namespace {
+
+using hwio::jlink::DownloadReport;
+using hwio::jlink::parseDownloadMessages;
+
+// J-Link V9.84 wording (seen in a HARDWARIO Monitor log, 2026-11-13).
+constexpr const char* skippedBank0 =
+    "J-Link: Flash download: Bank 0 @ 0x00000000: Skipped. Contents already match";
+constexpr const char* affectedBank0 =
+    "J-Link: Flash download: Bank 0 @ 0x00000000: 1 range affected (688128 bytes)";
+constexpr const char* total = "J-Link: Flash download: Total: 15.985s (Prepare: 0.163s, Compare: "
+                              "1.247s, Erase: 14.054s, Program: 0.000s, Verify: 0.386s, Restore: "
+                              "0.133s)";
+
+TEST(DownloadMessages, SkippedBankIsUnchanged) {
+    const std::vector<std::string> lines{skippedBank0, total};
+    EXPECT_EQ(parseDownloadMessages(lines),
+              (DownloadReport{.affectedBytes = 0, .unchanged = true}));
+}
+
+TEST(DownloadMessages, AffectedBankCountsItsBytes) {
+    const std::vector<std::string> lines{affectedBank0, total};
+    EXPECT_EQ(parseDownloadMessages(lines),
+              (DownloadReport{.affectedBytes = 688128, .unchanged = false}));
+}
+
+TEST(DownloadMessages, MixedBanksAreChangedAndSummed) {
+    const std::vector<std::string> lines{
+        affectedBank0,
+        "J-Link: Flash download: Bank 1 @ 0x10001000: 2 ranges affected (4096 bytes)",
+        "J-Link: Flash download: Bank 2 @ 0x00FF8000: Skipped. Contents already match"};
+    EXPECT_EQ(parseDownloadMessages(lines),
+              (DownloadReport{.affectedBytes = 692224, .unchanged = false}));
+}
+
+TEST(DownloadMessages, UnknownWordingSaysNothing) {
+    EXPECT_EQ(parseDownloadMessages({}), DownloadReport{});
+    const std::vector<std::string> lines{total, "Flash download: Bank 0: something else"};
+    EXPECT_EQ(parseDownloadMessages(lines), DownloadReport{});
+}
+
+TEST_F(Programmer, ProgramReturnsTheLoaderReport) {
+    EXPECT_CALL(api(), flushMessagesContaining(std::string_view("Flash download:"),
+                                               hwio::jlink::maxDownloadMessages))
+        .WillOnce(Return(std::vector<std::string>{skippedBank0, total}));
+    const auto report = programmer().program(image(0, 16), recorder(), {});
+    ASSERT_TRUE(report);
+    EXPECT_EQ(*report, (DownloadReport{.affectedBytes = 0, .unchanged = true}));
+}
+
+TEST_F(Programmer, EraseCodeReturnsTheLoaderReport) {
+    EXPECT_CALL(api(), flushMessagesContaining(_, _))
+        .WillOnce(Return(std::vector<std::string>{affectedBank0}));
+    const auto report = programmer().eraseCode({.start = 0, .end = 0x100000}, recorder(), {});
+    ASSERT_TRUE(report);
+    EXPECT_EQ(report->affectedBytes, 688128U);
+    EXPECT_EQ(report->unchanged, false);
 }
 
 } // namespace

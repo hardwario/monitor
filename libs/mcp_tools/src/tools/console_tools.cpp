@@ -56,6 +56,7 @@ using hwio::device::Channel;
 using hwio::device::ChannelMask;
 using hwio::device::ConsoleLine;
 using hwio::device::Direction;
+using hwio::device::englishText;
 using hwio::mcp::Required;
 using hwio::mcp::Schema;
 
@@ -189,11 +190,11 @@ public:
         if (m_taken >= m_wanted) {
             return Verdict::Enough;
         }
-        if (m_taken >= m_maxLines || m_bytes + line.text.size() > m_maxBytes) {
+        if (m_taken >= m_maxLines || m_bytes + englishText(line).size() > m_maxBytes) {
             return Verdict::Bounded;
         }
         ++m_taken;
-        m_bytes += line.text.size();
+        m_bytes += englishText(line).size();
         return Verdict::Take;
     }
     // Lines to fetch for a read of the newest lines without a pattern.
@@ -219,7 +220,7 @@ private:
 
 [[nodiscard]] bool matches(const std::optional<QRegularExpression>& regex, const ConsoleLine& line,
                            std::size_t maxBytes) {
-    return !regex || matchesText(*regex, line.text, maxBytes);
+    return !regex || matchesText(*regex, englishText(line), maxBytes);
 }
 
 [[nodiscard]] ChannelMask maskOf(Channel channel) {
@@ -395,7 +396,7 @@ private:
         for (const ConsoleLine& line : captured.lines) {
             QJsonObject item;
             item.insert(QStringLiteral("dir"), qs(hwio::device::directionId(line.dir)));
-            item.insert(QStringLiteral("text"), qs(line.text));
+            item.insert(QStringLiteral("text"), qs(englishText(line))); // ADR-0374
             output.append(item);
         }
         const std::uint64_t cursor = ref().console->log().lastSeq();
@@ -696,8 +697,10 @@ private:
                       connected ? QStringLiteral("ok") : QStringLiteral("timeout"));
         result.insert(QStringLiteral("connected"), connected);
         result.insert(QStringLiteral("state"), qs(hwio::device::connectionStateId(event.state)));
-        result.insert(QStringLiteral("error"), event.error ? QJsonValue(hwio::toJson(*event.error))
-                                                           : QJsonValue(QJsonValue::Null));
+        result.insert(QStringLiteral("error"),
+                      event.error
+                          ? QJsonValue(hwio::toJson(*event.error, hwio::ErrorLanguage::English))
+                          : QJsonValue(QJsonValue::Null));
         result.insert(QStringLiteral("elapsed"),
                       seconds(std::chrono::milliseconds(m_elapsed.elapsed())));
         complete(result);

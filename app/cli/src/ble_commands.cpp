@@ -7,6 +7,7 @@
 #include "console_ui.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
 #include "hwio/device/ble_lock.h"
@@ -115,7 +116,7 @@ struct CommandOptions {
 
 Error usage(std::string message, std::string detail = {}) {
     Error error = makeError(ErrorCode::UsageInvalidArgument, std::move(detail));
-    error.message = std::move(message);
+    setUntranslatedText(error, ErrorText::Message, std::move(message));
     return error;
 }
 
@@ -263,7 +264,8 @@ Result<ResolvedDevice> resolveDevice(const Context& context, ble::BleHost& host,
     }
     if (matches.empty()) {
         Error error = makeError(ErrorCode::BleDeviceNotFound, options.name);
-        error.message = std::format("The Bluetooth device {} was not found.", options.name);
+        setUntranslatedText(error, ErrorText::Message,
+                            std::format("The Bluetooth device {} was not found.", options.name));
         return std::unexpected(std::move(error));
     }
     if (matches.size() > 1) {

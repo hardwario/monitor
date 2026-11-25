@@ -4,6 +4,7 @@
 #include "hwio/core/docs_urls.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/command_history.h"
 #include "hwio/device/command_tree.h"
@@ -49,6 +50,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 #include <QtContainerFwd>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <algorithm>
@@ -68,12 +70,12 @@ namespace hwio::gui {
 
 namespace {
 
-Error guiError(ErrorCode code, const QString& message, const QString& cause,
-               const QString& suggestion, const QString& detail) {
+Error guiError(ErrorCode code, const LocalizedText& message, const LocalizedText& cause,
+               const LocalizedText& suggestion, const QString& detail) {
     Error error = makeError(code, detail.toStdString());
-    error.message = message.toStdString();
-    error.cause = cause.toStdString();
-    error.suggestion = suggestion.toStdString();
+    setText(error, ErrorText::Message, message);
+    setText(error, ErrorText::Cause, cause);
+    setText(error, ErrorText::Suggestion, suggestion);
     return error;
 }
 
@@ -165,9 +167,14 @@ ConsoleViewModel::ConsoleViewModel(DeviceTabViewModel* tab, ConsoleContext conte
         if (busy()) {
             // The other page owns the session now (review K9: said in the ErrorPanel).
             // internal.busy: the ErrorPanel offers Dismiss, not Reconnect.
-            stopBatchWithError(ErrorCode::InternalBusy,
-                               tr("another operation started on the device."),
-                               tr("Run the batch file again when it has finished."));
+            stopBatchWithError(
+                ErrorCode::InternalBusy,
+                localizedText("hwio::gui::ConsoleViewModel",
+                              QT_TRANSLATE_NOOP("hwio::gui::ConsoleViewModel",
+                                                "another operation started on the device.")),
+                localizedText("hwio::gui::ConsoleViewModel",
+                              QT_TRANSLATE_NOOP("hwio::gui::ConsoleViewModel",
+                                                "Run the batch file again when it has finished.")));
         }
         stateChanged(); // signal
         scheduleRefresh();
@@ -244,22 +251,32 @@ void ConsoleViewModel::onConnectionChanged(const device::ConnectionEvent& event)
         m_learningStarted = false;
     }
     if (event.state != device::ConnectionState::Connected) {
-        stopBatchWithError(ErrorCode::TargetNotConnected, tr("the device disconnected."),
-                           tr("Reconnect and run the batch file again."));
+        stopBatchWithError(
+            ErrorCode::TargetNotConnected,
+            localizedText(
+                "hwio::gui::ConsoleViewModel",
+                QT_TRANSLATE_NOOP("hwio::gui::ConsoleViewModel", "the device disconnected.")),
+            localizedText("hwio::gui::ConsoleViewModel",
+                          QT_TRANSLATE_NOOP("hwio::gui::ConsoleViewModel",
+                                            "Reconnect and run the batch file again.")));
     }
     stateChanged(); // signal
     scheduleRefresh();
 }
 
-void ConsoleViewModel::stopBatchWithError(ErrorCode code, const QString& cause,
-                                          const QString& suggestion) {
+void ConsoleViewModel::stopBatchWithError(ErrorCode code, const LocalizedText& cause,
+                                          const LocalizedText& suggestion) {
     if (!m_batch->running()) {
         return;
     }
     const int done = m_batch->done();
     const int total = m_batch->total();
     m_batch->stop();
-    setError(guiError(code, tr("The batch stopped after %1 of %2 commands.").arg(done).arg(total),
+    setError(guiError(code,
+                      localizedText("hwio::gui::ConsoleViewModel",
+                                    QT_TRANSLATE_NOOP("hwio::gui::ConsoleViewModel",
+                                                      "The batch stopped after %1 of %2 commands."),
+                                    {done, total}),
                       cause, suggestion, QString()));
 }
 
@@ -734,9 +751,18 @@ void ConsoleViewModel::saveView(int channel, const QUrl& file) {
     }
     const QString path = file.toLocalFile();
     const auto failed = [this, &path](const QString& reason) {
-        setError(guiError(ErrorCode::IoWriteFailed, tr("The file could not be saved."),
-                          tr("the folder is not writable or the disk is full."),
-                          tr("Choose another folder."), path + QStringLiteral(": ") + reason));
+        setError(guiError(
+            ErrorCode::IoWriteFailed,
+            localizedText(
+                "hwio::gui::ConsoleViewModel",
+                QT_TRANSLATE_NOOP("hwio::gui::ConsoleViewModel", "The file could not be saved.")),
+            localizedText("hwio::gui::ConsoleViewModel",
+                          QT_TRANSLATE_NOOP("hwio::gui::ConsoleViewModel",
+                                            "the folder is not writable or the disk is full.")),
+            localizedText(
+                "hwio::gui::ConsoleViewModel",
+                QT_TRANSLATE_NOOP("hwio::gui::ConsoleViewModel", "Choose another folder.")),
+            path + QStringLiteral(": ") + reason));
     };
     QSaveFile out(path);
     if (!out.open(QIODevice::WriteOnly | QIODevice::Text)) {
