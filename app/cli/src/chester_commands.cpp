@@ -9,6 +9,7 @@
 #include "flash_commands.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
 #include "hwio/device/command_history.h"
@@ -322,9 +323,11 @@ Result<CommandResult> info(const Context& context, const GlobalOptions& globals,
         device::parseInfoShow(answer ? answer->lines : std::vector<std::string>{});
     if (parsed.fields.empty()) {
         Error error = makeError(ErrorCode::Timeout, "info show: no fields in the answer");
-        error.message = "The device did not answer `info show`.";
-        error.cause = "The firmware has no `info show` command, or the shell is busy.";
-        error.suggestion = "Check the console with `hwio chester app console`.";
+        setUntranslatedText(error, ErrorText::Message, "The device did not answer `info show`.");
+        setUntranslatedText(error, ErrorText::Cause,
+                            "The firmware has no `info show` command, or the shell is busy.");
+        setUntranslatedText(error, ErrorText::Suggestion,
+                            "Check the console with `hwio chester app console`.");
         return std::unexpected(std::move(error));
     }
     QJsonObject data;
@@ -352,8 +355,9 @@ Result<std::optional<int>> parseJLinkSpeed(std::string_view text) {
     }
     if (!digits || kiloHertz < device::minSpeedKhz || kiloHertz > device::maxSpeedKhz) {
         Error invalid = makeError(ErrorCode::UsageInvalidArgument, std::string(text));
-        invalid.message = std::format("The J-Link speed must be auto or between {} and {} kHz.",
-                                      device::minSpeedKhz, device::maxSpeedKhz);
+        setUntranslatedText(invalid, ErrorText::Message,
+                            std::format("The J-Link speed must be auto or between {} and {} kHz.",
+                                        device::minSpeedKhz, device::maxSpeedKhz));
         return std::unexpected(std::move(invalid));
     }
     return std::optional<int>(kiloHertz);

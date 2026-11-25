@@ -30,7 +30,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <format>
 #include <fstream>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -462,9 +464,11 @@ TEST_F(FakeLibrary, TargetFunctionsReachTheLibrary) {
     ASSERT_EQ(list->size(), 2U);
     EXPECT_EQ(api.registerName((*list)[1]), "PC");
     std::array<std::uint32_t, 2> values{};
-    EXPECT_GE(api.readRegisters(*list, values), 0);
+    std::array<std::uint8_t, 2> confirmed{};
+    EXPECT_EQ(api.readRegisters(*list, values, confirmed), 2);
     EXPECT_EQ(values[0], 17U);
     EXPECT_EQ(values[1], 4096U);
+    EXPECT_EQ(confirmed, (std::array<std::uint8_t, 2>{1, 1}));
 
     const auto zones = api.memoryZones(32);
     ASSERT_TRUE(zones);
@@ -472,6 +476,96 @@ TEST_F(FakeLibrary, TargetFunctionsReachTheLibrary) {
     EXPECT_EQ((*zones)[0].name, "AHB-AP");
     EXPECT_EQ((*zones)[0].description, "AHB-AP (AP0)");
     EXPECT_EQ(api.memoryZones(0).value_or(std::vector<hwio::jlink::MemoryZone>{{}}).size(), 0U);
+}
+
+// Plan 0048 / ADR-0371: the fake library with "readRegsLimit" behaves like J-Link V9.84 (only the
+// first N registers of a call are read, the rest keep their status byte). 115 registers.
+class RegisterBlocks : public FakeLibrary {
+protected:
+    static constexpr std::size_t count = 115;
+
+    // A connected copy whose chip has `count` registers (value 0x1000 + index) and the limit.
+    [[nodiscard]] std::unique_ptr<JLinkLibrary> connected(int limit) {
+        std::string registers;
+        for (std::size_t i = 0; i < count; ++i) {
+            registers += std::format(R"({}{{"name": "R{}", "value": {}}})", i == 0 ? "" : ", ", i,
+                                     0x1000 + i);
+        }
+        const std::string scenario = std::format(R"({{"probes": [{{"serialNumber": 5, "chip": {{
+            "halted": true, "readRegsLimit": {}, "registers": [{}]}}}}]}})",
+                                                 limit, registers);
+        useScenario(scenario.c_str());
+        auto library = JLinkLibrary::loadCopy(fakeLocation(), instanceRoot());
+        if (!library) {
+            ADD_FAILURE() << library.error().detail;
+            return nullptr;
+        }
+        EXPECT_EQ((*library)->selectBySerialNumber(5), 0);
+        EXPECT_FALSE((*library)->open().has_value());
+        EXPECT_GE((*library)->connect(), 0);
+        return std::move(*library);
+    }
+};
+
+TEST_F(RegisterBlocks, AllRegistersAreConfirmedBelowTheLibraryLimit) {
+    for (const int limit : {45, 32}) {
+        const auto api = connected(limit);
+        ASSERT_NE(api, nullptr);
+        const auto list = api->registerList();
+        ASSERT_TRUE(list);
+        ASSERT_EQ(list->size(), count);
+        std::vector<std::uint32_t> values(count, 0);
+        std::vector<std::uint8_t> confirmed(count, 0);
+        EXPECT_EQ(api->readRegisters(*list, values, confirmed), static_cast<int>(count)) << limit;
+        for (std::size_t i = 0; i < count; ++i) {
+            EXPECT_EQ(values[i], 0x1000U + i) << limit << " R" << i;
+            EXPECT_EQ(confirmed[i], 1U) << limit << " R" << i;
+        }
+    }
+}
+
+// A limit of 31 leaves out the last entry of every full block: blocks of exactly 32, i.e. four
+// calls (32 + 32 + 32 + 19) for 115 registers; an unconfirmed value is reported as such.
+TEST_F(RegisterBlocks, ReadsInBlocksOf32) {
+    const auto api = connected(31);
+    ASSERT_NE(api, nullptr);
+    const auto list = api->registerList();
+    ASSERT_TRUE(list);
+    std::vector<std::uint32_t> values(count, 0);
+    std::vector<std::uint8_t> confirmed(count, 0);
+    EXPECT_EQ(api->readRegisters(*list, values, confirmed), static_cast<int>(count) - 3);
+    for (std::size_t i = 0; i < count; ++i) {
+        const bool lastOfFullBlock = i % 32 == 31;
+        EXPECT_EQ(confirmed[i], lastOfFullBlock ? 0U : 1U) << "R" << i;
+        if (!lastOfFullBlock) {
+            EXPECT_EQ(values[i], 0x1000U + i) << "R" << i;
+        }
+    }
+}
+
+TEST_F(RegisterBlocks, AFailingBlockReturnsItsCode) {
+    const auto api = connected(0);
+    ASSERT_NE(api, nullptr);
+    std::vector<std::uint32_t> indexes(40, 0);
+    indexes[35] = 999; // unknown index in the second block: the fake returns -1
+    std::vector<std::uint32_t> values(indexes.size(), 0);
+    std::vector<std::uint8_t> confirmed(indexes.size(), 0);
+    EXPECT_EQ(api->readRegisters(indexes, values, confirmed), -1);
+    EXPECT_EQ(values[0], 0x1000U); // the first block was read
+}
+
+TEST_F(RegisterBlocks, SpanSizeMismatchIsRejected) {
+    const auto api = connected(0);
+    ASSERT_NE(api, nullptr);
+    const std::array<std::uint32_t, 2> indexes{0, 1};
+    std::array<std::uint32_t, 2> values{7, 7};
+    std::array<std::uint8_t, 1> confirmed{};
+    EXPECT_EQ(api->readRegisters(indexes, values, confirmed), -1);
+    std::array<std::uint32_t, 1> fewValues{7};
+    std::array<std::uint8_t, 2> twoConfirmed{};
+    EXPECT_EQ(api->readRegisters(indexes, fewValues, twoConfirmed), -1);
+    EXPECT_EQ(values, (std::array<std::uint32_t, 2>{7, 7})); // no vendor call
+    EXPECT_EQ(fewValues[0], 7U);
 }
 
 // The hwio.jlink messages logged while it lives (owner thread only; restores the previous handler).

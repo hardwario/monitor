@@ -643,7 +643,7 @@ Zpráva může uvádět zařízení, například „Spojení Bluetooth s `<name>
 - **Pravděpodobně:** Registry lze číst jen při zastaveném jádru.
 - **Co dělat:** Nejprve zastavte jádro.
 
-Pochází z `hwio chester app regs` (nebo `lte regs`) a ze serveru MCP (`hwio mcp`). Nejprve zastavte jádro příkazem `hwio chester app halt`.
+Pochází z `hwio chester app regs` (nebo `lte regs`) a ze serveru MCP (`hwio mcp`). Použijte `hwio chester app regs --halt`: zastaví CPU jen na dobu čtení a pak ho nechá znovu běžet (v MCP `read_registers` s `halt: true`). Předchozí `hwio chester app halt` nepomůže, protože při připojení dalšího příkazu CPU opět běží.
 
 <a id="target.address_out_of_range"></a>
 #### `target.address_out_of_range`

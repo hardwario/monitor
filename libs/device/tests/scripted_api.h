@@ -42,6 +42,9 @@ struct ScriptedChip {
     std::vector<std::uint8_t> ram = std::vector<std::uint8_t>(0x10000, 0);
     std::vector<jlink::RegisterValue> registers{{.name = "R0", .value = 1},
                                                 {.name = "PC", .value = 0x1000}};
+    // Plan 0048: > 0 = registers the "library" confirms per JLINKARM_ReadRegs call (J-Link V9.84
+    // about 45); the adapter's blocks of jlink::maxRegistersPerRead apply. 0 = unlimited.
+    std::size_t readRegsLimit = 0;
     std::vector<jlink::MemoryZone> zones{
         {.name = "AHB-AP", .description = "AHB-AP (AP0)", .virtualAddress = 0}};
     std::uint32_t coreId = 0x2BA01477U;
@@ -461,16 +464,26 @@ public:
                                                      : std::string();
         });
     }
-    int readRegisters(std::span<const std::uint32_t> indexes,
-                      std::span<std::uint32_t> values) override {
+    // Like JLinkLibrary::readRegisters (ADR-0371): blocks of jlink::maxRegistersPerRead; with
+    // chip.readRegsLimit only the first entries of each block are confirmed.
+    int readRegisters(std::span<const std::uint32_t> indexes, std::span<std::uint32_t> values,
+                      std::span<std::uint8_t> confirmed) override {
+        if (indexes.size() != values.size() || indexes.size() != confirmed.size()) {
+            return -1;
+        }
         return m_target->get([&](ScriptedTarget& t) {
+            const std::size_t limit = t.chip().readRegsLimit;
+            int total = 0;
             for (std::size_t i = 0; i < indexes.size(); ++i) {
                 if (indexes[i] >= t.chip().registers.size()) {
                     return -1;
                 }
-                values[i] = t.chip().registers[indexes[i]].value;
+                const bool ok = limit == 0 || i % jlink::maxRegistersPerRead < limit;
+                values[i] = ok ? t.chip().registers[indexes[i]].value : 0x00AD9390U;
+                confirmed[i] = ok ? 1 : 0;
+                total += ok ? 1 : 0;
             }
-            return 0;
+            return total;
         });
     }
     std::expected<std::vector<jlink::MemoryZone>, int> memoryZones(std::size_t maxZones) override {
@@ -747,6 +760,10 @@ public:
     }
 
     void flushMessages() override {}
+    std::vector<std::string> flushMessagesContaining(std::string_view /*marker*/,
+                                                     std::size_t /*maxLines*/) override {
+        return {};
+    }
     std::string takeErrorText() override { return {}; }
 
 private:

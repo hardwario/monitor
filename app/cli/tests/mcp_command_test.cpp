@@ -33,6 +33,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstddef>
+#include <expected>
 #include <filesystem>
 #include <memory>
 #include <optional>
@@ -79,12 +80,15 @@ hwio::mcp::ConsentDecision decide(FlagConsentBroker& broker, ConsentCategories c
     const auto cancel = broker.request(std::move(request),
                                        [&decision](auto answer) { decision = std::move(answer); });
     EXPECT_FALSE(cancel);
-    return decision.value_or(hwio::mcp::ConsentDecision{});
+    return decision.value_or(
+        std::unexpected(hwio::makeError(hwio::ErrorCode::InternalUnexpected, "no answer")));
 }
 
 TEST(FlagConsentBroker, DecidesFromTheFlags) {
     FlagConsentBroker broker(ConsentCategory::Flash);
     EXPECT_TRUE(decide(broker, ConsentCategory::Flash));
+    EXPECT_EQ(decide(broker, ConsentCategory::Flash).value_or(hwio::mcp::ConsentGrant::Prompted),
+              hwio::mcp::ConsentGrant::Flag);              // ADR-0377: "allowed_by_flag"
     EXPECT_TRUE(decide(broker, ConsentCategory::Connect)); // always allowed in the CLI
     const auto erase = decide(broker, ConsentCategory::Erase, "erase");
     ASSERT_FALSE(erase);
@@ -140,8 +144,20 @@ StdinLineReader::ReadFunction chunks(std::vector<std::string> parts) {
 
 TEST(StdinLineSource, DeliversLinesOverlongMarkersAndTheEnd) {
     std::atomic<int> wakeups{0};
-    StdinLineSource source(8, 4, 0, chunks({"one\n", "much too long line\n", "two\r\n"}));
+    // The reader thread starts in the constructor: it reads nothing until the wake-up is set, or
+    // it could queue everything first and never call it.
+    std::atomic<bool> wakeupSet{false};
+    StdinLineSource source(
+        8, 4, 0,
+        [&wakeupSet, read = chunks({"one\n", "much too long line\n", "two\r\n"})](
+            std::span<char> buffer, std::size_t& count) mutable {
+            while (!wakeupSet.load()) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            return read(buffer, count);
+        });
     source.setWakeup([&wakeups] { ++wakeups; });
+    wakeupSet = true;
     std::vector<hwio::mcp::ILineSource::Line> lines;
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
     while (!source.atEnd() && std::chrono::steady_clock::now() < deadline) {

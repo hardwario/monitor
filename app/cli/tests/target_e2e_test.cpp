@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 
+#include <format>
 #include <initializer_list>
 #include <string>
 #include <vector>
@@ -148,9 +149,31 @@ TEST_F(TargetCli, RegsOnARunningCore) {
     const RunResult human = app(args({"regs"}));
     EXPECT_EQ(human.exitCode, 6) << human.err;
     EXPECT_NE(human.err.find("The CPU is running."), std::string::npos) << human.err;
+    // Plan 0049: the CLI suggests `regs --halt`.
+    EXPECT_NE(human.err.find("Use `regs --halt` to halt the CPU for the read"), std::string::npos)
+        << human.err;
     const RunResult json = app(args({"regs"}), true);
     EXPECT_EQ(json.exitCode, 6);
     EXPECT_EQ(errorCode(json), QStringLiteral("target.not_halted"));
+}
+
+// Plan 0049 (ADR-0372): `regs --halt` halts the running fake target for the read and lets it run
+// again, in one process; human and --json output as without the option.
+TEST_F(TargetCli, RegsHaltOnARunningCore) {
+    const RunResult human = app(args({"regs", "--halt"}));
+    ASSERT_EQ(human.exitCode, 0) << human.err;
+    EXPECT_EQ(human.out, "R0  0x00000001\nPC  0x00001234\n");
+    const RunResult json = app(args({"regs", "--halt"}), true);
+    ASSERT_EQ(json.exitCode, 0) << json.out << json.err;
+    ASSERT_EQ(envelopes(json.out).size(), 1U) << json.out;
+    const QJsonObject registers = lastData(json).value(QStringLiteral("registers")).toObject();
+    EXPECT_EQ(registers.size(), 2);
+    EXPECT_EQ(registers.value(QStringLiteral("PC")).toString(), QStringLiteral("0x00001234"));
+    const RunResult status = app(args({"status"}), true);
+    ASSERT_EQ(status.exitCode, 0) << status.out << status.err;
+    EXPECT_FALSE(lastData(status).value(QStringLiteral("halted")).toBool());
+    const RunResult help = app(args({"regs", "--help"}));
+    EXPECT_NE(help.out.find("--halt"), std::string::npos) << help.out;
 }
 
 TEST_F(TargetCli, Zones) {
@@ -414,6 +437,34 @@ TEST_F(TargetCli, RegsOnAHaltedCore) {
     EXPECT_EQ(registers.value(QStringLiteral("R0")).toString(), QStringLiteral("0x00000001"));
     EXPECT_EQ(registers.value(QStringLiteral("PC")).toString(), QStringLiteral("0x00001234"));
     EXPECT_EQ(registers.size(), 2);
+}
+
+// Plan 0048 / ADR-0371: a library that handles only 45 registers per ReadRegs call (like J-Link
+// V9.84); all 60 registers still come back with their scenario values.
+TEST_F(TargetCli, RegsBeyondTheLibraryPerCallLimit) {
+    constexpr int count = 60;
+    QJsonArray list;
+    for (int i = 0; i < count; ++i) {
+        list.append(QJsonObject{{QStringLiteral("name"), QStringLiteral("REG%1").arg(i)},
+                                {QStringLiteral("value"), 0x1000 + i}});
+    }
+    const QJsonObject chip{{QStringLiteral("halted"), true},
+                           {QStringLiteral("readRegsLimit"), 45},
+                           {QStringLiteral("registers"), list}};
+    const QJsonObject probe{{QStringLiteral("serialNumber"), 801000001},
+                            {QStringLiteral("product"), QStringLiteral("Test Probe")},
+                            {QStringLiteral("chip"), chip}};
+    writeFile(QStringLiteral("scenario.json"),
+              QJsonDocument(QJsonObject{{QStringLiteral("probes"), QJsonArray{probe}}}).toJson());
+    const RunResult json = app(args({"regs"}), true);
+    ASSERT_EQ(json.exitCode, 0) << json.out << json.err;
+    const QJsonObject registers = lastData(json).value(QStringLiteral("registers")).toObject();
+    EXPECT_EQ(registers.size(), count);
+    for (int i = 0; i < count; ++i) {
+        EXPECT_EQ(registers.value(QStringLiteral("REG%1").arg(i)).toString().toStdString(),
+                  std::format("0x{:08X}", 0x1000 + i))
+            << "REG" << i;
+    }
 }
 
 // ADR-0151: a J-Link library without the optional functions.

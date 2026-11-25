@@ -1,9 +1,11 @@
 #include "mcp/consent_view_model.h"
 
 #include "hwio/core/json.h"
+#include "hwio/firmware/firmware_catalog.h"
 #include "hwio/mcp/consent.h"
 #include "mcp/gui_consent_broker.h"
 
+#include <QChar>
 #include <QCursor>
 #include <QGuiApplication>
 #include <QJsonObject>
@@ -15,6 +17,7 @@
 #include <QScreen>
 #include <QString>
 #include <QStringLiteral>
+#include <QStringView>
 #include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
@@ -23,6 +26,7 @@
 #include <QtTypes>
 
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <string>
@@ -34,33 +38,179 @@ namespace {
 
 using hwio::mcp::ConsentCategory;
 
-QVariantMap row(const QString& label, const QString& value, bool warning = false) {
+// One detail row (plan 0054): `note` is a small second line under the value, `action` puts the
+// "Show device" link into the row.
+QVariantMap row(const QString& label, const QString& value, bool warning = false,
+                const QString& note = QString(), bool action = false) {
     return {{QStringLiteral("label"), label},
             {QStringLiteral("value"), value},
-            {QStringLiteral("warning"), warning}};
+            {QStringLiteral("warning"), warning},
+            {QStringLiteral("note"), note},
+            {QStringLiteral("action"), action}};
 }
 
+constexpr std::size_t utf8Size(char32_t codePoint) {
+    if (codePoint < 0x80U) {
+        return 1;
+    }
+    if (codePoint < 0x800U) {
+        return 2;
+    }
+    return codePoint < 0x10000U ? 3 : 4;
+}
+
+// A field from the catalog page (plan 0054, ADR-0389): one line of printable text (whitespace
+// runs become one space; control and format characters such as bidi overrides are dropped), at
+// most maxCatalogFieldBytes of UTF-8, cut with "…". It never replaces the catalog ID, which is
+// always shown in full.
+QString plainField(const QString& text) {
+    QString result;
+    std::size_t bytes = 0;
+    bool space = false;
+    for (const char32_t codePoint : text.toUcs4()) {
+        if (QChar::isSpace(codePoint)) {
+            space = !result.isEmpty();
+            continue;
+        }
+        if (!QChar::isPrint(codePoint)) {
+            continue;
+        }
+        const std::size_t size = utf8Size(codePoint) + (space ? 1 : 0);
+        if (bytes + size > hwio::firmware::maxCatalogFieldBytes) {
+            result.append(QChar(u'\u2026')); // …
+            return result;
+        }
+        if (space) {
+            result.append(QLatin1Char(' '));
+            space = false;
+        }
+        result.append(QStringView(QChar::fromUcs4(codePoint)));
+        bytes += size;
+    }
+    return result;
+}
+
+// The MCU of a target as the mock of plan 0054 shows it; an unknown target shows its id.
+// (Plan 0040's LoRaWAN module target adds "LoRaWAN module" here when the branches meet.)
+QString mcuTitle(const QString& target) {
+    if (target == QStringLiteral("app")) {
+        return ConsentViewModel::tr("Application MCU");
+    }
+    if (target == QStringLiteral("lte")) {
+        return ConsentViewModel::tr("LTE MCU");
+    }
+    return target;
+}
+
+// ADR-0389: the permanent choice says that it is permanent.
 QString rememberText(hwio::mcp::ConsentCategories categories, const QString& client) {
     int count = 0;
     for (const ConsentCategory category : GuiConsentBroker::categories) {
         count += categories.testFlag(category) ? 1 : 0;
     }
     if (count != 1) {
-        return ConsentViewModel::tr("Allow these for %1").arg(client);
+        return ConsentViewModel::tr("Always allow these for %1").arg(client);
     }
     if (categories.testFlag(ConsentCategory::Flash)) {
-        return ConsentViewModel::tr("Allow flashing for %1").arg(client);
+        return ConsentViewModel::tr("Always allow flashing for %1").arg(client);
     }
     if (categories.testFlag(ConsentCategory::Erase)) {
-        return ConsentViewModel::tr("Allow erasing for %1").arg(client);
+        return ConsentViewModel::tr("Always allow erasing for %1").arg(client);
     }
     if (categories.testFlag(ConsentCategory::MemoryWrite)) {
-        return ConsentViewModel::tr("Allow memory writes for %1").arg(client);
+        return ConsentViewModel::tr("Always allow memory writes for %1").arg(client);
     }
     if (categories.testFlag(ConsentCategory::Uicr)) {
-        return ConsentViewModel::tr("Allow UICR writes for %1").arg(client);
+        return ConsentViewModel::tr("Always allow UICR writes for %1").arg(client);
     }
-    return ConsentViewModel::tr("Allow connecting devices for %1").arg(client);
+    return ConsentViewModel::tr("Always allow connecting devices for %1").arg(client);
+}
+
+// Plan 0054 (ADR-0389): what is written first. The full file path and the full catalog ID are
+// always shown; a firmware name from the catalog page never replaces them.
+void appendWrittenRow(QVariantList& rows, const QJsonObject& details) {
+    const QLocale locale;
+    const qint64 size = details.value(QStringLiteral("size")).toInteger(-1);
+    const QString sizeText = size >= 0 ? locale.formattedDataSize(size) : QString();
+    const auto withSize = [&sizeText](const QString& text) {
+        return sizeText.isEmpty() ? text : QStringLiteral("%1  (%2)").arg(text, sizeText);
+    };
+    const QString file = details.value(QStringLiteral("file")).toString();
+    const QString catalog = details.value(QStringLiteral("catalog_id")).toString();
+    if (!file.isEmpty()) {
+        rows.append(row(ConsentViewModel::tr("File"), withSize(file)));
+        return;
+    }
+    if (catalog.isEmpty()) {
+        if (!sizeText.isEmpty()) {
+            rows.append(row(ConsentViewModel::tr("Size"), sizeText));
+        }
+        return;
+    }
+    const QString name = plainField(details.value(QStringLiteral("firmware_name")).toString());
+    const QString version =
+        plainField(details.value(QStringLiteral("firmware_version")).toString());
+    if (name.isEmpty()) {
+        rows.append(row(ConsentViewModel::tr("Catalog ID"), withSize(catalog)));
+        return;
+    }
+    rows.append(row(ConsentViewModel::tr("Firmware"),
+                    withSize(version.isEmpty() ? name : QStringLiteral("%1 %2").arg(name, version)),
+                    false, ConsentViewModel::tr("Catalog ID %1").arg(catalog)));
+}
+
+// The device, with the "Show device" link when it has a tab.
+QVariantMap deviceRow(const hwio::mcp::ConsentRequest& request,
+                      const ConsentViewModel::DeviceDescription& device) {
+    const bool showDevice = device.tabIndex >= 0;
+    if (request.categories.testFlag(ConsentCategory::Connect)) {
+        return row(ConsentViewModel::tr("Device"),
+                   showDevice ? ConsentViewModel::tr("Connect the tab %1").arg(device.text)
+                              : ConsentViewModel::tr("Open a new tab for %1").arg(device.text),
+                   false, QString(), showDevice);
+    }
+    return row(ConsentViewModel::tr("Device"), device.text, false, QString(), showDevice);
+}
+
+// Profile, MCU, scope and address range, each only when given.
+void appendTargetRows(QVariantList& rows, const QJsonObject& details) {
+    if (const QString profile = details.value(QStringLiteral("profile")).toString();
+        !profile.isEmpty()) {
+        rows.append(row(ConsentViewModel::tr("Profile"), profile));
+    }
+    if (const QString target = details.value(QStringLiteral("target")).toString();
+        !target.isEmpty()) {
+        rows.append(row(ConsentViewModel::tr("MCU"), mcuTitle(target)));
+    }
+    if (const QString scope = details.value(QStringLiteral("scope")).toString(); !scope.isEmpty()) {
+        rows.append(row(ConsentViewModel::tr("Scope"), scope));
+    }
+    if (const QString range = details.value(QStringLiteral("range")).toString(); !range.isEmpty()) {
+        rows.append(row(ConsentViewModel::tr("Address range"), range));
+    }
+}
+
+// Warnings (ADR-0161, ADR-0164).
+void appendWarningRows(QVariantList& rows, const hwio::mcp::ConsentRequest& request) {
+    const bool pibLoss =
+        request.tool == "recover" ||
+        (request.tool == "erase" && request.categories.testFlag(ConsentCategory::Uicr));
+    if (pibLoss) {
+        rows.append(
+            row(QString(), ConsentViewModel::tr("The PIB (serial number, keys) is lost."), true));
+    } else if (request.categories.testFlag(ConsentCategory::Uicr) ||
+               request.details.value(QStringLiteral("uicr")).toBool()) {
+        rows.append(
+            row(QString(),
+                ConsentViewModel::tr("Contains UICR data: factory data of the device may be "
+                                     "overwritten."),
+                true));
+    }
+    if (request.categories.testFlag(ConsentCategory::MemoryWrite)) {
+        rows.append(row(
+            QString(),
+            ConsentViewModel::tr("Writing memory can make the device run arbitrary code."), true));
+    }
 }
 
 } // namespace
@@ -153,68 +303,19 @@ QVariantList ConsentViewModel::details() const {
         return {};
     }
     const hwio::mcp::ConsentRequest& request = prompt->request;
-    const QJsonObject& details = request.details;
     QVariantList rows;
-    // ADR-0241: the client with its version when given.
-    if (!request.client.version.empty()) {
-        rows.append(row(tr("Client"),
-                        QStringLiteral("%1 %2").arg(client(), toQString(request.client.version))));
-    }
+    appendWrittenRow(rows, request.details);
     const DeviceDescription device =
         m_describe ? m_describe(request.deviceId)
                    : DeviceDescription{.text = toQString(request.deviceId), .tabIndex = -1};
-    if (request.categories.testFlag(ConsentCategory::Connect)) {
-        rows.append(row(tr("Device"), device.tabIndex < 0
-                                          ? tr("Open a new tab for %1").arg(device.text)
-                                          : tr("Connect the tab %1").arg(device.text)));
-    } else {
-        rows.append(row(tr("Device"), device.text));
+    rows.append(deviceRow(request, device));
+    appendTargetRows(rows, request.details);
+    // ADR-0241: the client with its version when given (last, ADR-0389).
+    if (!request.client.version.empty()) {
+        rows.append(row(tr("Client"),
+                        tr("%1, version %2").arg(client(), toQString(request.client.version))));
     }
-    const QLocale locale;
-    const qint64 size = details.value(QStringLiteral("size")).toInteger(-1);
-    const QString sizeText = size >= 0 ? locale.formattedDataSize(size) : QString();
-    if (const QString file = details.value(QStringLiteral("file")).toString(); !file.isEmpty()) {
-        rows.append(row(tr("File"), sizeText.isEmpty()
-                                        ? file
-                                        : QStringLiteral("%1  (%2)").arg(file, sizeText)));
-    } else if (!sizeText.isEmpty()) {
-        rows.append(row(tr("Size"), sizeText));
-    }
-    if (const QString catalog = details.value(QStringLiteral("catalog_id")).toString();
-        !catalog.isEmpty()) {
-        rows.append(row(tr("Catalog ID"), catalog));
-    }
-    if (const QString profile = details.value(QStringLiteral("profile")).toString();
-        !profile.isEmpty()) {
-        rows.append(row(tr("Profile"), profile));
-    }
-    if (const QString target = details.value(QStringLiteral("target")).toString();
-        !target.isEmpty()) {
-        rows.append(row(tr("Target"), target));
-    }
-    if (const QString scope = details.value(QStringLiteral("scope")).toString(); !scope.isEmpty()) {
-        rows.append(row(tr("Scope"), scope));
-    }
-    if (const QString range = details.value(QStringLiteral("range")).toString(); !range.isEmpty()) {
-        rows.append(row(tr("Address range"), range));
-    }
-    // Warnings (ADR-0161, ADR-0164).
-    const bool pibLoss =
-        request.tool == "recover" ||
-        (request.tool == "erase" && request.categories.testFlag(ConsentCategory::Uicr));
-    if (pibLoss) {
-        rows.append(row(QString(), tr("The PIB (serial number, keys) is lost."), true));
-    } else if (request.categories.testFlag(ConsentCategory::Uicr) ||
-               details.value(QStringLiteral("uicr")).toBool()) {
-        rows.append(row(QString(),
-                        tr("Contains UICR data: factory data of the device may be "
-                           "overwritten."),
-                        true));
-    }
-    if (request.categories.testFlag(ConsentCategory::MemoryWrite)) {
-        rows.append(
-            row(QString(), tr("Writing memory can make the device run arbitrary code."), true));
-    }
+    appendWarningRows(rows, request);
     return rows;
 }
 

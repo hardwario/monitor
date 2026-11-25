@@ -2,6 +2,7 @@
 // (plan/features/0013 "Protocol core").
 
 #include "hwio/core/error.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/mcp/consent.h"
 #include "hwio/mcp/request_context.h"
@@ -13,7 +14,6 @@
 #include <QObject>
 #include <QStringLiteral>
 #include <QtCore/qcborcommon.h>
-#include <QtCore/qhashfunctions.h>
 
 #include <gtest/gtest.h>
 
@@ -96,6 +96,43 @@ TEST(ToolCall, ConsentGrantedAndDenied) {
     EXPECT_FALSE(call.grantedConsent().testFlag(ConsentCategory::Uicr));
 }
 
+// Plan 0050 (ADR-0374): an error is rendered with its English texts in every UI language.
+TEST(ToolCall, ErrorResultIsEnglish) {
+    hwio::Error error = makeError(ErrorCode::TargetNotHalted);
+    error.message = "Procesor běží.";
+    error.suggestion = "Nejprve zastavte jádro.";
+    const ToolResult result = toolErrorResult(error);
+    EXPECT_EQ(result.text, QStringLiteral("target.not_halted: ") +
+                               QString::fromStdString(error.messageEn) + QStringLiteral(" — ") +
+                               QString::fromStdString(error.suggestionEn));
+    EXPECT_EQ(result.structured.value(QStringLiteral("error"))
+                  .toObject()
+                  .value(QStringLiteral("message"))
+                  .toString()
+                  .toStdString(),
+              error.messageEn);
+}
+
+// Plan 0050 (ADR-0377): how each granted category was allowed, also run-time ones (uicr).
+TEST(ToolCall, ConsentJsonSaysHowEachCategoryWasAllowed) {
+    FakeConsentBroker broker;
+    broker.mode = FakeConsentBroker::Mode::Manual;
+    ManualToolCall call;
+    RequestContext context;
+    context.tool = "flash";
+    EXPECT_TRUE(call.consentJson().isEmpty());
+    call.requestConsent(broker, makeConsentRequest(context, ConsentCategory::Flash, "dev"),
+                        [](ConsentDecision) {});
+    broker.decide(0, ConsentGrant::Prompted);
+    call.requestConsent(broker, makeConsentRequest(context, ConsentCategory::Uicr, "dev"),
+                        [](ConsentDecision) {});
+    broker.decide(1, ConsentGrant::Remembered);
+    EXPECT_EQ(call.consentJson(),
+              (QJsonObject{{QStringLiteral("flash"), QStringLiteral("prompted")},
+                           {QStringLiteral("uicr"), QStringLiteral("remembered")}}));
+    EXPECT_EQ(consentGrantId(ConsentGrant::Flag), "allowed_by_flag");
+}
+
 TEST(ToolCall, CancelWithdrawsPendingConsent) {
     FakeConsentBroker broker;
     broker.mode = FakeConsentBroker::Mode::Manual;
@@ -104,7 +141,7 @@ TEST(ToolCall, CancelWithdrawsPendingConsent) {
     call.requestConsent(broker, ConsentRequest{}, [&called](ConsentDecision) { called = true; });
     call.cancel();
     EXPECT_TRUE(broker.withdrawn(0));
-    broker.decide(0, {});
+    broker.decide(0, ConsentGrant::Prompted);
     EXPECT_FALSE(called);
     EXPECT_TRUE(call.isFinished());
 }
@@ -140,8 +177,9 @@ TEST(ToolCall, ResultHelpers) {
     EXPECT_FALSE(ok.isError);
 
     Error error = makeError(ErrorCode::McpToolNotAllowed);
-    error.message = "The tool erase is not allowed by this server.";
-    error.suggestion = "Start the server with --allow erase (or --allow all).";
+    setUntranslatedText(error, ErrorText::Message, "The tool erase is not allowed by this server.");
+    setUntranslatedText(error, ErrorText::Suggestion,
+                        "Start the server with --allow erase (or --allow all).");
     const ToolResult failed = toolErrorResult(error);
     EXPECT_TRUE(failed.isError);
     EXPECT_EQ(failed.text, QStringLiteral("mcp.tool_not_allowed: The tool erase is not allowed by "
@@ -152,7 +190,7 @@ TEST(ToolCall, ResultHelpers) {
                   .value(QStringLiteral("code"))
                   .toString(),
               QStringLiteral("mcp.tool_not_allowed"));
-    error.suggestion.clear();
+    clearText(error, ErrorText::Suggestion);
     EXPECT_FALSE(toolErrorResult(error).text.contains(QChar(0x2014)));
 
     const QJsonObject json = toolResultJson(ok);

@@ -191,6 +191,20 @@
                                 },
                                 "name": "flash_fake",
                                 "outputSchema": {
+                                    "properties": {
+                                        "consent": {
+                                            "additionalProperties": {
+                                                "enum": [
+                                                    "prompted",
+                                                    "remembered",
+                                                    "allowed_by_flag"
+                                                ],
+                                                "type": "string"
+                                            },
+                                            "description": "How each consent category (flash, erase, memory-write, uicr, connect) of this call was allowed: prompted (the user answered a prompt), remembered (an earlier \"allow for this client\"), allowed_by_flag (the server's --allow).",
+                                            "type": "object"
+                                        }
+                                    },
                                     "type": "object"
                                 }
                             },
@@ -210,6 +224,20 @@
                                 },
                                 "name": "no_consent",
                                 "outputSchema": {
+                                    "properties": {
+                                        "consent": {
+                                            "additionalProperties": {
+                                                "enum": [
+                                                    "prompted",
+                                                    "remembered",
+                                                    "allowed_by_flag"
+                                                ],
+                                                "type": "string"
+                                            },
+                                            "description": "How each consent category (flash, erase, memory-write, uicr, connect) of this call was allowed: prompted (the user answered a prompt), remembered (an earlier \"allow for this client\"), allowed_by_flag (the server's --allow).",
+                                            "type": "object"
+                                        }
+                                    },
                                     "type": "object"
                                 }
                             }
@@ -586,13 +614,16 @@
                         },
                         "content": [
                             {
-                                "text": "{\"flashed\":true}",
+                                "text": "{\"consent\":{\"flash\":\"prompted\"},\"flashed\":true}",
                                 "type": "text"
                             }
                         ],
                         "isError": false,
                         "resultType": "complete",
                         "structuredContent": {
+                            "consent": {
+                                "flash": "prompted"
+                            },
                             "flashed": true
                         }
                     }

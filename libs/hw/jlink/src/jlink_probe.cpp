@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/hw/jlink/clock.h"
@@ -13,6 +14,7 @@
 #include <QString>
 #include <QStringLiteral>
 #include <QtLogging>
+#include <QtTranslation>
 
 #include <algorithm>
 #include <array>
@@ -98,17 +100,14 @@ Result<ProbeInfo> JLinkProbe::open(std::optional<std::uint32_t> serialNumber, Op
         Error error =
             makeError(ErrorCode::ProbeNotFound, std::format("{} probe(s) listed", probes->size()));
         if (serialNumber) {
-            error.message =
-                isNetworkProbe(*serialNumber)
-                    ? QCoreApplication::translate("hwio::jlink",
-                                                  "The J-Link %1 is a network J-Link; network "
-                                                  "J-Links are not supported for sessions yet.")
-                          .arg(*serialNumber)
-                          .toStdString()
-                    : QCoreApplication::translate("hwio::jlink",
-                                                  "No J-Link probe with serial number %1 found.")
-                          .arg(*serialNumber)
-                          .toStdString();
+            setText(error, ErrorText::Message, "hwio::jlink",
+                    isNetworkProbe(*serialNumber)
+                        ? QT_TRANSLATE_NOOP("hwio::jlink",
+                                            "The J-Link %1 is a network J-Link; network "
+                                            "J-Links are not supported for sessions yet.")
+                        : QT_TRANSLATE_NOOP("hwio::jlink",
+                                            "No J-Link probe with serial number %1 found."),
+                    {*serialNumber});
         }
         return std::unexpected(std::move(error));
     }
@@ -119,10 +118,9 @@ Result<ProbeInfo> JLinkProbe::open(std::optional<std::uint32_t> serialNumber, Op
             makeError(ErrorCode::ProbeNotFound,
                       libraryDetail(std::format("JLINKARM_EMU_SelectByUSBSN({}) returned {}",
                                                 chosen->serialNumber, selected)));
-        error.message = QCoreApplication::translate("hwio::jlink",
-                                                    "No J-Link probe with serial number %1 found.")
-                            .arg(chosen->serialNumber)
-                            .toStdString();
+        setText(error, ErrorText::Message, "hwio::jlink",
+                QT_TRANSLATE_NOOP("hwio::jlink", "No J-Link probe with serial number %1 found."),
+                {chosen->serialNumber});
         return std::unexpected(std::move(error));
     }
     execCommands(mode == OpenMode::Normal ? std::span<const std::string_view>(beforeOpenCommands)
@@ -272,20 +270,18 @@ Status JLinkProbe::connect(std::string_view deviceName, int minTargetMillivolts,
         Error error = makeError(
             ErrorCode::TargetNoPower,
             libraryDetail(std::format("{}; VTref {} mV", lastFailure, status->targetMillivolts)));
-        error.message =
-            QCoreApplication::translate("hwio::jlink", "The device has no power (%1 mV).")
-                .arg(status->targetMillivolts)
-                .toStdString();
+        setText(error, ErrorText::Message, "hwio::jlink",
+                QT_TRANSLATE_NOOP("hwio::jlink", "The device has no power (%1 mV)."),
+                {status->targetMillivolts});
         return std::unexpected(std::move(error));
     }
     Error error = makeError(
         ErrorCode::TargetConnectFailed,
         libraryDetail(status ? std::format("{}; VTref {} mV", lastFailure, status->targetMillivolts)
                              : lastFailure));
-    error.message =
-        QCoreApplication::translate("hwio::jlink", "Could not connect to the device's %1 MCU.")
-            .arg(toQString(deviceName))
-            .toStdString();
+    setText(error, ErrorText::Message, "hwio::jlink",
+            QT_TRANSLATE_NOOP("hwio::jlink", "Could not connect to the device's %1 MCU."),
+            {toQString(deviceName)});
     return std::unexpected(std::move(error));
 }
 

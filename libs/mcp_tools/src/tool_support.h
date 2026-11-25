@@ -63,9 +63,18 @@ namespace hwio::mcp::tools::detail {
 // buffer_size, busy_operation (operationKindId or null), paused_by_operation}
 [[nodiscard]] QJsonObject deviceStatusJson(const std::string& id, const DeviceRef& ref);
 [[nodiscard]] QJsonObject deviceStatusSchema();
-// {devices: [deviceEntryJson]}
-[[nodiscard]] QJsonObject devicesJson(IDeviceProvider& provider);
+// Whether devicesJson() lists every BLE device or only those like `hwio ble scan` (ADR-0373).
+enum class BleListing : std::uint8_t { Profiled, All };
+// {devices: [deviceEntryJson], ble_hidden}. BleListing::Profiled (list_devices' default, the
+// hwio://devices resource) leaves out BLE devices without a known profile that are not open, like
+// `hwio ble scan` without --all; ble_hidden counts them (0 with BleListing::All).
+[[nodiscard]] QJsonObject devicesJson(IDeviceProvider& provider,
+                                      BleListing listing = BleListing::Profiled);
 [[nodiscard]] QJsonObject deviceEntrySchema();
+// Plan 0050 (ADR-0376): `unchanged` (bool) and `affected_bytes` (integer) of a flash download,
+// each only when the J-Link library reported it; withDownload() adds them to an output schema.
+void insertDownload(QJsonObject& json, const std::optional<hwio::device::DownloadReport>& download);
+[[nodiscard]] QJsonObject withDownload(QJsonObject schema);
 // read_terminal: {seq, dir, text, time}; read_log: {seq, level, text, time}.
 [[nodiscard]] QJsonObject terminalLineJson(const hwio::device::ConsoleLine& line);
 [[nodiscard]] QJsonObject logLineJson(const hwio::device::ConsoleLine& line);

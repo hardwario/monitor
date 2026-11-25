@@ -79,7 +79,7 @@ public:
         requests.push_back(request);
         switch (mode) {
         case Mode::Allow:
-            done({});
+            done(ConsentGrant::Prompted);
             return {};
         case Mode::Deny:
             done(std::unexpected(makeError(ErrorCode::McpToolNotAllowed)));

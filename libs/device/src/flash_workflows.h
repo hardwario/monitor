@@ -50,6 +50,8 @@ struct WorkflowContext {
     std::string connectedDevice;
     // Set by the workflows: the CPU is halted now (reset(Halt), erase); cleared by reset(Go).
     bool cpuHalted = false;
+    // Plan 0050 (ADR-0376): set by runFlash() / runErase(Code) from the programmer's download.
+    std::optional<jlink::DownloadReport> download;
 };
 
 // The image split into the bytes for the code flash and the target's UICR records.

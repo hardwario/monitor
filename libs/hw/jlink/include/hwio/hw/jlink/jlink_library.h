@@ -97,7 +97,8 @@ public:
     [[nodiscard]] std::expected<std::vector<std::uint32_t>, int> registerList() override;
     [[nodiscard]] std::string registerName(std::uint32_t index) override;
     [[nodiscard]] int readRegisters(std::span<const std::uint32_t> indexes,
-                                    std::span<std::uint32_t> values) override;
+                                    std::span<std::uint32_t> values,
+                                    std::span<std::uint8_t> confirmed) override;
     [[nodiscard]] std::expected<std::vector<MemoryZone>, int>
     memoryZones(std::size_t maxZones) override;
     [[nodiscard]] int rttStart(std::optional<std::uint32_t> blockAddress) override;
@@ -122,6 +123,8 @@ public:
                                                                   bool ap) override;
     [[nodiscard]] int coresightWrite(std::uint8_t index, bool ap, std::uint32_t value) override;
     void flushMessages() override;
+    [[nodiscard]] std::vector<std::string> flushMessagesContaining(std::string_view marker,
+                                                                   std::size_t maxLines) override;
     [[nodiscard]] std::string takeErrorText() override;
 
 private:

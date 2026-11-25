@@ -1,11 +1,13 @@
 #include "hwio/diag/check.h"
 
 #include "hwio/core/error.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 
 #include <QCoreApplication>
 #include <QLoggingCategory>
 #include <QString>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <algorithm>
@@ -230,10 +232,10 @@ std::vector<CheckResult> CheckRunner::run(std::span<const Check> checks,
                 std::format("{}: {} ms > {} ms", check.id,
                             std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count(),
                             timeout.count()));
-            error.message = QCoreApplication::translate("hwio::diag",
-                                                        "The check \"%1\" did not finish in time.")
-                                .arg(QString::fromStdString(result.title))
-                                .toStdString();
+            setText(error, ErrorText::Message, "hwio::diag",
+                    QT_TRANSLATE_NOOP("hwio::diag", "The check \"%1\" did not finish in time."),
+                    {LocalizedText{.translated = QString::fromStdString(result.title),
+                                   .english = QString::fromUtf8(check.titleSourceText)}});
             result = problemResult(check, CheckStatus::Warning, std::move(error));
         } else if (stop.stop_requested() && result.status != CheckStatus::Ok &&
                    result.status != CheckStatus::Warning && result.status != CheckStatus::Failed) {

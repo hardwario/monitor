@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/firmware/intel_hex.h"
@@ -15,6 +16,7 @@
 #include <QString>
 #include <QTemporaryDir>
 #include <QtLogging>
+#include <QtTranslation>
 
 #include <algorithm>
 #include <cstdint>
@@ -40,10 +42,9 @@ constexpr std::string_view bundleApplication = "application.hex";
 Error notSupported(const fs::path& path, std::string reason) {
     Error error =
         makeError(ErrorCode::FirmwareInvalidImage, toUtf8(path) + ": " + std::move(reason));
-    error.message =
-        QCoreApplication::translate(
-            "hwio::firmware", "The file is not a CHESTER LTE bundle, modem firmware or HEX file.")
-            .toStdString();
+    setText(error, ErrorText::Message, "hwio::firmware",
+            QT_TRANSLATE_NOOP("hwio::firmware",
+                              "The file is not a CHESTER LTE bundle, modem firmware or HEX file."));
     return error;
 }
 

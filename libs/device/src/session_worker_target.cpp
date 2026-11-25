@@ -103,11 +103,37 @@ Status runWriteMemory(WorkflowContext& context, std::uint32_t address,
     return context.programmer->writeMemory(address, data, width);
 }
 
-Result<std::vector<RegisterValue>> runReadRegisters(WorkflowContext& context) {
+Result<std::vector<RegisterValue>> runReadRegisters(WorkflowContext& context, bool haltIfRunning) {
     if (Status ready = identified(context); !ready) {
         return std::unexpected(std::move(ready).error());
     }
-    return context.programmer->readRegisters();
+    // Plan 0049 (ADR-0372): halt only a running core and let only that one run again.
+    bool weHalted = false;
+    if (haltIfRunning) {
+        auto halted = context.programmer->isHalted();
+        if (!halted) {
+            return std::unexpected(std::move(halted).error());
+        }
+        if (!*halted) {
+            log(context, "Halting the CPU to read the registers");
+            if (Status stopped = context.programmer->halt(); !stopped) {
+                return std::unexpected(std::move(stopped).error());
+            }
+            weHalted = true;
+        }
+    }
+    auto registers = context.programmer->readRegisters();
+    if (weHalted) {
+        // Always, also after a failed read; the first error wins.
+        log(context, "Letting the CPU run again");
+        if (Status running = context.programmer->go(); !running) {
+            log(context, "Go failed: the CPU may remain halted");
+            if (registers) {
+                return std::unexpected(std::move(running).error());
+            }
+        }
+    }
+    return registers;
 }
 
 Result<std::vector<MemoryZone>> runMemoryZones(WorkflowContext& context) {

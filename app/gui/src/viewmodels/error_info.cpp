@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 
 #include <QCoreApplication>
 #include <QJsonObject>
@@ -9,6 +10,7 @@
 #include <QString>
 #include <QStringLiteral>
 #include <QUrl>
+#include <QtTranslation>
 
 namespace hwio::gui {
 
@@ -41,7 +43,9 @@ ErrorInfo::ErrorInfo(const Error& error)
     : m_valid(true), m_code(toQString(idOf(error.code))),
       m_category(toQString(categoryId(categoryOf(error.code)))),
       m_message(toQString(error.message)), m_cause(toQString(error.cause)),
-      m_suggestion(toQString(error.suggestion)), m_detail(toQString(error.detail)),
+      m_suggestion(toQString(error.suggestion)), m_messageEn(toQString(error.messageEn)),
+      m_causeEn(toQString(error.causeEn)), m_suggestionEn(toQString(error.suggestionEn)),
+      m_detail(toQString(error.detail)),
       // The kebab-case id comes from the JSON form, the single place that names wizards.
       m_wizard(toJson(error).value(QStringLiteral("wizard")).toString()),
       m_primaryAction(error_action::forCategory(categoryOf(error.code))) {}
@@ -67,15 +71,13 @@ Error nonLocalFileError(const QUrl& url) {
     Error error =
         makeError(ErrorCode::IoWriteFailed,
                   "not a local file: " + url.toString(QUrl::RemoveUserInfo).toStdString());
-    error.message =
-        QCoreApplication::translate("hwio::gui::FileErrors", "The file could not be saved.")
-            .toStdString();
-    error.cause = QCoreApplication::translate("hwio::gui::FileErrors",
-                                              "Only folders on this computer can be used.")
-                      .toStdString();
-    error.suggestion =
-        QCoreApplication::translate("hwio::gui::FileErrors", "Choose a folder on this computer.")
-            .toStdString();
+    setText(error, ErrorText::Message, "hwio::gui::FileErrors",
+            QT_TRANSLATE_NOOP("hwio::gui::FileErrors", "The file could not be saved."));
+    setText(
+        error, ErrorText::Cause, "hwio::gui::FileErrors",
+        QT_TRANSLATE_NOOP("hwio::gui::FileErrors", "Only folders on this computer can be used."));
+    setText(error, ErrorText::Suggestion, "hwio::gui::FileErrors",
+            QT_TRANSLATE_NOOP("hwio::gui::FileErrors", "Choose a folder on this computer."));
     return error;
 }
 

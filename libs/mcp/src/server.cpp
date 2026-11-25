@@ -131,6 +131,24 @@ std::string resultCode(const hwio::Result<ToolResult>& result) {
     return "ok";
 }
 
+// The "consent" property of a consent-gated tool's output schema (plan 0050, ADR-0377).
+QJsonObject consentSchema() {
+    QJsonObject grant;
+    grant.insert(QStringLiteral("type"), QStringLiteral("string"));
+    grant.insert(QStringLiteral("enum"),
+                 QJsonArray{QStringLiteral("prompted"), QStringLiteral("remembered"),
+                            QStringLiteral("allowed_by_flag")});
+    QJsonObject schema;
+    schema.insert(QStringLiteral("type"), QStringLiteral("object"));
+    schema.insert(QStringLiteral("description"),
+                  QStringLiteral("How each consent category (flash, erase, memory-write, uicr, "
+                                 "connect) of this call was allowed: prompted (the user answered "
+                                 "a prompt), remembered (an earlier \"allow for this client\"), "
+                                 "allowed_by_flag (the server's --allow)."));
+    schema.insert(QStringLiteral("additionalProperties"), grant);
+    return schema;
+}
+
 } // namespace
 
 struct McpServer::Impl {
@@ -743,7 +761,14 @@ struct McpServer::Impl {
                                       static_cast<qsizetype>(spec.description.size())));
         tool.insert(QStringLiteral("inputSchema"), spec.inputSchema);
         if (!spec.outputSchema.isEmpty()) {
-            tool.insert(QStringLiteral("outputSchema"), spec.outputSchema);
+            QJsonObject schema = spec.outputSchema;
+            if (spec.consent != ConsentCategories()) {
+                // Plan 0050 (ADR-0377): how each requested category was allowed.
+                QJsonObject properties = schema.value(QStringLiteral("properties")).toObject();
+                properties.insert(QStringLiteral("consent"), consentSchema());
+                schema.insert(QStringLiteral("properties"), properties);
+            }
+            tool.insert(QStringLiteral("outputSchema"), schema);
         }
         QJsonObject annotations;
         annotations.insert(QStringLiteral("readOnlyHint"), spec.annotations.readOnlyHint);
@@ -816,8 +841,11 @@ struct McpServer::Impl {
         case ResourceReadResult::Status::Failed: {
             QJsonObject data;
             const Error error = read.error.value_or(makeError(ErrorCode::InternalUnexpected));
-            data.insert(QStringLiteral("error"), hwio::toJson(error));
-            replyError(in, rpcError(protocol::errc::internalError, toQString(error.message), data),
+            const QJsonObject json = hwio::toJson(error, hwio::ErrorLanguage::English); // ADR-0374
+            data.insert(QStringLiteral("error"), json);
+            replyError(in,
+                       rpcError(protocol::errc::internalError,
+                                json.value(QStringLiteral("message")).toString(), data),
                        ReplyStatus::Ok);
             return;
         }
@@ -913,11 +941,13 @@ struct McpServer::Impl {
         const auto prompt = spec->get(context, arguments);
         if (!prompt) {
             QJsonObject data;
-            data.insert(QStringLiteral("error"), hwio::toJson(prompt.error()));
-            replyError(
-                in,
-                rpcError(protocol::errc::internalError, toQString(prompt.error().message), data),
-                ReplyStatus::Ok);
+            const QJsonObject json =
+                hwio::toJson(prompt.error(), hwio::ErrorLanguage::English); // ADR-0374
+            data.insert(QStringLiteral("error"), json);
+            replyError(in,
+                       rpcError(protocol::errc::internalError,
+                                json.value(QStringLiteral("message")).toString(), data),
+                       ReplyStatus::Ok);
             return;
         }
         QJsonArray messages;
@@ -1098,6 +1128,14 @@ struct McpServer::Impl {
                 << "succeeded without the consent its spec requires; result withheld";
             result = std::unexpected(
                 makeError(ErrorCode::InternalUnexpected, "consent was not requested"));
+        }
+        // Plan 0050 (ADR-0377): a successful consent-gated call says how it was allowed.
+        if (result && !result->isError) {
+            if (const QJsonObject grants = entry.call->consentJson(); !grants.isEmpty()) {
+                QJsonObject structured = result->structured;
+                structured.insert(QStringLiteral("consent"), grants);
+                result = toolResult(structured);
+            }
         }
         const ToolResult toolResultValue = result ? *result : toolErrorResult(result.error());
         if (!entry.suppressReply && entry.reply->isOpen()) {

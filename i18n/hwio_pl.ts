@@ -357,21 +357,6 @@
         <translation>Czy kabel USB jest podłączony?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="174"/>
-        <source>Guide me</source>
-        <translation>Poprowadź mnie</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="318"/>
-        <source>Not sure how to connect? Guide me</source>
-        <translation>Nie wiesz, jak połączyć? Poprowadź mnie</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="329"/>
-        <source>Flash firmware with a guide</source>
-        <translation>Wgraj firmware z kreatorem</translation>
-    </message>
-    <message>
         <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="202"/>
         <source>Choose a device to connect</source>
         <translation>Wybierz urządzenie do połączenia</translation>
@@ -396,6 +381,21 @@
         <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="306"/>
         <source>Connect</source>
         <translation>Połącz</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="174"/>
+        <source>Guide me</source>
+        <translation>Poprowadź mnie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="318"/>
+        <source>Not sure how to connect? Guide me</source>
+        <translation>Nie wiesz, jak połączyć? Poprowadź mnie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="329"/>
+        <source>Flash firmware with a guide</source>
+        <translation>Wgraj firmware z kreatorem</translation>
     </message>
 </context>
 <context>
@@ -432,27 +432,32 @@
         <translation>HARDWARIO Monitor — zezwolić asystentowi AI?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="146"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="168"/>
         <source>Show device ↗</source>
         <translation>Pokaż urządzenie ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="150"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="172"/>
         <source>Show device</source>
         <translation>Pokaż urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="172"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="197"/>
         <source>Deny</source>
         <translation>Odmów</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="182"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="210"/>
         <source>Allow once</source>
         <translation>Zezwól raz</translation>
     </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="225"/>
+        <source>Until you remove it in Settings › AI assistants (MCP).</source>
+        <translation>Dopóki nie usuniesz tego w Ustawienia › Asystenci AI (MCP).</translation>
+    </message>
     <message numerus="yes">
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="211"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="259"/>
         <source>%n more request(s) waiting.</source>
         <translation>
             <numerusform>Czeka jeszcze %n żądanie.</numerusform>
@@ -1562,178 +1567,200 @@
 <context>
     <name>McpSection</name>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="37"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="47"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="38"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="48"/>
         <source>Allow AI assistants to use HARDWARIO Monitor</source>
         <translation>Zezwól asystentom AI na korzystanie z HARDWARIO Monitor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="38"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="39"/>
         <source>AI tools such as Claude Code can read the console, send commands and, with your permission, flash devices.</source>
         <translation>Narzędzia AI, takie jak Claude Code, mogą czytać konsolę, wysyłać polecenia i za twoją zgodą wgrywać firmware do urządzeń.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="71"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="72"/>
         <source>Retry</source>
         <translation>Spróbuj ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="81"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="82"/>
         <source>Regenerate token</source>
         <translation>Wygeneruj nowy token</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="88"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="89"/>
         <source>Address</source>
         <translation>Adres</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="89"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="90"/>
         <source>After a port change, AI clients have to be configured again.</source>
         <translation>Po zmianie portu skonfiguruj klientów AI ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="111"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="112"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="124"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="161"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="205"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="386"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="125"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="162"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="206"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="440"/>
         <source>Copy</source>
         <translation>Kopiuj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="125"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="126"/>
         <source>Copied.</source>
         <translation>Skopiowano.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="132"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="149"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="133"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="150"/>
         <source>Token</source>
         <translation>Token</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="133"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="134"/>
         <source>AI clients send it with every request. Keep it private.</source>
         <translation>Klienci AI wysyłają go z każdym żądaniem. Nikomu go nie udostępniaj.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="145"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="146"/>
         <source>Created when the server starts</source>
         <translation>Zostanie utworzony przy uruchomieniu serwera</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="149"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="150"/>
         <source>Token, hidden</source>
         <translation>Token, ukryty</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="154"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="155"/>
         <source>Hide</source>
         <translation>Ukryj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="154"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="155"/>
         <source>Show</source>
         <translation>Pokaż</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="168"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="169"/>
         <source>Regenerate…</source>
         <translation>Wygeneruj nowy…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="176"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="177"/>
         <source>Connect a client</source>
         <translation>Połącz klienta</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="206"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="207"/>
         <source>Copy %1</source>
         <translation>Kopiuj %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="246"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="247"/>
         <source>Permissions</source>
         <translation>Uprawnienia</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="247"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="248"/>
         <source>What an AI assistant may do without asking you first.</source>
         <translation>Co asystent AI może zrobić bez pytania cię o zgodę.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="260"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="261"/>
         <source>Ask</source>
         <translation>Pytaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="268"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="269"/>
         <source>Always allow</source>
         <translation>Zawsze zezwalaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="316"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="287"/>
+        <source>All</source>
+        <translation>Wszystkie</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="299"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="370"/>
         <source>%1: ask</source>
         <translation>%1: pytaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="327"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="309"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="381"/>
         <source>%1: always allow</source>
         <translation>%1: zawsze zezwalaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="339"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="393"/>
         <source>No answers are remembered for a client.</source>
         <translation>Dla żadnego klienta nie zapamiętano odpowiedzi.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="368"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="422"/>
         <source>Revoke</source>
         <translation>Odwołaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="369"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="423"/>
         <source>Revoke the permissions of %1</source>
         <translation>Odwołaj uprawnienia klienta %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="378"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="421"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="432"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="475"/>
         <source>Activity</source>
         <translation>Aktywność</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="379"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="433"/>
         <source>The last %1 calls, kept until the application quits.</source>
         <translation>Ostatnie %1 wywołań, przechowywane do zamknięcia aplikacji.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="393"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="447"/>
         <source>Clear</source>
         <translation>Wyczyść</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="404"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="458"/>
         <source>No calls yet.</source>
         <translation>Brak wywołań.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="522"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="577"/>
+        <source>Always allow everything?</source>
+        <translation>Zawsze zezwalać na wszystko?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="578"/>
+        <source>An AI assistant will be able to flash, erase and write the memory of your devices without asking you.</source>
+        <translation>Asystent AI będzie mógł wgrywać firmware do twoich urządzeń, wymazywać je i zapisywać ich pamięć bez pytania cię o zgodę.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="579"/>
+        <source>Always allow everything</source>
+        <translation>Zawsze zezwalaj na wszystko</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="587"/>
         <source>Regenerate the token?</source>
         <translation>Wygenerować nowy token?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="523"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="588"/>
         <source>Connected AI clients stop working until you update their configuration.</source>
         <translation>Połączeni klienci AI przestaną działać, dopóki nie zaktualizujesz ich konfiguracji.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="524"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="589"/>
         <source>Regenerate</source>
         <translation>Wygeneruj</translation>
     </message>
@@ -2069,14 +2096,14 @@
         <translation>Zamknij</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="173"/>
-        <source>Help me fix this</source>
-        <translation>Pomóż mi to rozwiązać</translation>
-    </message>
-    <message>
         <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="215"/>
         <source>Update</source>
         <translation>Aktualizuj</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="173"/>
+        <source>Help me fix this</source>
+        <translation>Pomóż mi to rozwiązać</translation>
     </message>
 </context>
 <context>
@@ -2584,45 +2611,45 @@
         <translation>Wybierz plik firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="483"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="479"/>
         <source>New device tab</source>
         <translation>Nowa karta urządzenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="486"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="482"/>
         <source>Close the device tab</source>
         <translation>Zamknij kartę urządzenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="489"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="492"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="485"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="488"/>
         <source>Next tab</source>
         <translation>Następna karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="495"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="498"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="491"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="494"/>
         <source>Previous tab</source>
         <translation>Poprzednia karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="501"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="497"/>
         <source>Settings</source>
         <translation>Ustawienia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="504"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="500"/>
         <source>Connect or disconnect</source>
         <translation>Połącz lub rozłącz</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="507"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="503"/>
         <source>Reconnect</source>
         <translation>Połącz ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="510"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="513"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="506"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="509"/>
         <source>Keyboard shortcuts</source>
         <translation>Skróty klawiszowe</translation>
     </message>
@@ -2768,15 +2795,15 @@
     <message>
         <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="39"/>
         <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="76"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="131"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="165"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="227"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="285"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="330"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="387"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="444"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="470"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="507"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="132"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="166"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="228"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="286"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="331"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="388"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="445"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="471"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="508"/>
         <source>Check</source>
         <translation>Sprawdzenie</translation>
     </message>
@@ -2805,9 +2832,9 @@
     <message>
         <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="60"/>
         <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="108"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="150"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="194"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="353"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="151"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="195"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="354"/>
         <source>Check again</source>
         <translation>Sprawdź ponownie</translation>
     </message>
@@ -2852,402 +2879,402 @@
         <translation>Otwieranie J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="122"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="407"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="434"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="123"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="408"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="435"/>
         <source>Power</source>
         <translation>Zasilanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="123"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="124"/>
         <source>Power the device</source>
         <translation>Zasil urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="132"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="133"/>
         <source>Measuring the power</source>
         <translation>Pomiar zasilania</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="140"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="174"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="313"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="479"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="141"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="175"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="314"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="480"/>
         <source>Cable</source>
         <translation>Kabel</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="141"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="175"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="142"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="176"/>
         <source>Check the flat cable</source>
         <translation>Sprawdź kabel taśmowy</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="142"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="143"/>
         <source>Check that the flat cable is fully inserted at both ends.</source>
         <translation>Sprawdź, czy kabel taśmowy jest całkowicie wsunięty na obu końcach.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="152"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="153"/>
         <source>Measuring the power again</source>
         <translation>Ponowny pomiar zasilania</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="166"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="228"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="286"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="388"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="445"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="167"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="229"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="287"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="389"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="446"/>
         <source>Checking the connection</source>
         <translation>Sprawdzanie połączenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="183"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="267"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="396"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="184"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="268"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="397"/>
         <source>Speed</source>
         <translation>Prędkość</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="184"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="397"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="185"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="398"/>
         <source>Lower the J-Link speed</source>
         <translation>Zmniejsz prędkość J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="185"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="186"/>
         <source>A long or poor cable may need a lower speed. Use 1000 kHz for this J-Link, then check again.</source>
         <translation>Długi lub słabej jakości kabel może wymagać niższej prędkości. Użyj 1000 kHz dla tego J-Linka, a potem sprawdź ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="190"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="403"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="191"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="404"/>
         <source>Use 1000 kHz</source>
         <translation>Użyj 1000 kHz</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="196"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="197"/>
         <source>Checking the connection again</source>
         <translation>Ponowne sprawdzanie połączenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="208"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="209"/>
         <source>Connector</source>
         <translation>Złącze</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="210"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="569"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="211"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="570"/>
         <source>The J-Link is on the LTE connector</source>
         <translation>J-Link jest na złączu LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="211"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="212"/>
         <source>A tab works with the application MCU. Move the cable to the APP connector and press &lt;b&gt;Retry&lt;/b&gt; on the tab, or update the LTE firmware.</source>
         <translation>Karta pracuje z MCU aplikacji. Przełóż kabel na złącze APP i naciśnij na karcie &lt;b&gt;Spróbuj ponownie&lt;/b&gt; albo zaktualizuj firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="217"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="499"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="218"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="500"/>
         <source>Update LTE firmware…</source>
         <translation>Aktualizuj firmware LTE…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="236"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="242"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="294"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="300"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="237"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="243"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="295"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="301"/>
         <source>Reset</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="237"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="295"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="238"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="296"/>
         <source>Reset the device</source>
         <translation>Zresetuj urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="238"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="239"/>
         <source>A reset starts the firmware again, and with it the console.</source>
         <translation>Reset ponownie uruchamia firmware, a z nim konsolę.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="246"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="304"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="247"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="305"/>
         <source>Console</source>
         <translation>Konsola</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="247"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="305"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="248"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="306"/>
         <source>Looking for the console</source>
         <translation>Wyszukiwanie konsoli</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="255"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="256"/>
         <source>Firmware</source>
         <translation>Firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="257"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="258"/>
         <source>Flash firmware with the console</source>
         <translation>Wgraj firmware z konsolą</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="258"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="259"/>
         <source>The console needs firmware with the CHESTER console (RTT shell). Flash such firmware.</source>
         <translation>Konsola wymaga firmware z konsolą CHESTER (powłoka RTT). Wgraj taki firmware.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="263"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="264"/>
         <source>Flash firmware…</source>
         <translation>Wgraj firmware…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="268"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="269"/>
         <source>Use Automatic speed</source>
         <translation>Użyj automatycznej prędkości</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="269"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="270"/>
         <source>A very low J-Link speed can also hide the console. Choose &lt;b&gt;Automatic speed&lt;/b&gt; in the ⋯ menu of the device bar.</source>
         <translation>Bardzo niska prędkość J-Linka również może ukryć konsolę. W menu ⋯ paska urządzenia wybierz &lt;b&gt;Automatyczna prędkość&lt;/b&gt;.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="297"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="298"/>
         <source>The device may be busy or hung.</source>
         <translation>Urządzenie może być zajęte lub zawieszone.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="314"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="315"/>
         <source>Check the cables</source>
         <translation>Sprawdź kable</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="315"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="316"/>
         <source>Check the USB cable and the flat cable. When auto-reconnect is on, the console reconnects by itself.</source>
         <translation>Sprawdź kabel USB i kabel taśmowy. Przy włączonym automatycznym ponownym łączeniu konsola połączy się sama.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="332"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="333"/>
         <source>Checking the J-Link firmware</source>
         <translation>Sprawdzanie firmware J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="340"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="492"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="341"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="493"/>
         <source>Update</source>
         <translation>Aktualizacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="342"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="343"/>
         <source>Update the J-Link firmware</source>
         <translation>Zaktualizuj firmware J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="343"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="344"/>
         <source>Update the firmware here, or run the command below. The J-Link must not be used by a tab. Do not unplug it during the update.</source>
         <translation>Zaktualizuj firmware tutaj lub uruchom poniższe polecenie. Żadna karta nie może używać J-Linka. Nie odłączaj go podczas aktualizacji.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="355"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="356"/>
         <source>Checking the J-Link firmware again</source>
         <translation>Ponowne sprawdzanie firmware J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="368"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="453"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="369"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="454"/>
         <source>Recover</source>
         <translation>Odzyskaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="370"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="371"/>
         <source>The MCU is read-back protected</source>
         <translation>MCU jest chronione przed odczytem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="371"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="372"/>
         <source>Recover removes the protection, but it erases the whole MCU, including the UICR and the Product Information Block. Recover is on the Flash page.</source>
         <translation>Odzyskiwanie usuwa ochronę, ale kasuje całe MCU, łącznie z UICR i blokiem Product Information Block. Odzyskiwanie znajdziesz na stronie Wgraj.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="377"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="461"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="378"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="462"/>
         <source>Open Flash page</source>
         <translation>Otwórz stronę Wgraj</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="398"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="399"/>
         <source>If verification fails again and again, use 1000 kHz for this J-Link.</source>
         <translation>Jeśli weryfikacja raz po raz kończy się niepowodzeniem, użyj 1000 kHz dla tego J-Linka.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="408"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="409"/>
         <source>Keep the power stable</source>
         <translation>Zapewnij stabilne zasilanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="409"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="410"/>
         <source>Make sure the power is stable during flashing: charged batteries or the USB-C power input.</source>
         <translation>Podczas wgrywania zapewnij stabilne zasilanie: naładowane baterie lub wejście zasilania USB-C.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="418"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="419"/>
         <source>Flash</source>
         <translation>Wgraj</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="419"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="420"/>
         <source>Flash again</source>
         <translation>Wgraj ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="421"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="422"/>
         <source>Check the cables and the power, then flash the firmware again.</source>
         <translation>Sprawdź kable i zasilanie, a następnie wgraj firmware ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="425"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="426"/>
         <source>Try again</source>
         <translation>Spróbuj ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="435"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="436"/>
         <source>Restart the power</source>
         <translation>Uruchom ponownie zasilanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="436"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="437"/>
         <source>Disconnect the power for 10 seconds, then connect it again.</source>
         <translation>Odłącz zasilanie na 10 sekund, a następnie podłącz je ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="454"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="455"/>
         <source>Recover again</source>
         <translation>Odzyskaj ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="455"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="456"/>
         <source>Run Recover again on the Flash page. It erases the whole MCU, including the UICR and the Product Information Block.</source>
         <translation>Uruchom ponownie odzyskiwanie na stronie Wgraj. Kasuje ono całe MCU, łącznie z UICR i blokiem Product Information Block.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="471"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="472"/>
         <source>Checking nRF Util</source>
         <translation>Sprawdzanie nRF Util</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="481"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="482"/>
         <source>Check the cable and the power</source>
         <translation>Sprawdź kabel i zasilanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="482"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="483"/>
         <source>The modem update takes 1–3 minutes and must not be interrupted. Check the cable and the power before you start it again.</source>
         <translation>Aktualizacja modemu trwa 1–3 minuty i nie może zostać przerwana. Przed ponownym uruchomieniem sprawdź kabel i zasilanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="493"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="494"/>
         <source>Update the LTE firmware</source>
         <translation>Zaktualizuj firmware LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="494"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="495"/>
         <source>The guided LTE firmware update moves the J-Link between the connectors and updates the modem.</source>
         <translation>Prowadzona aktualizacja firmware LTE przeprowadzi Cię przez przełożenie J-Linka między złączami i zaktualizuje modem.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="508"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="509"/>
         <source>Checking Bluetooth</source>
         <translation>Sprawdzanie Bluetooth</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="516"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="517"/>
         <source>Device</source>
         <translation>Urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="517"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="518"/>
         <source>Prepare the device</source>
         <translation>Przygotuj urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="518"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="519"/>
         <source>Turn the device on and bring it closer. Disconnect it from phones and other computers.</source>
         <translation>Włącz urządzenie i przybliż je. Odłącz je od telefonów i innych komputerów.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="527"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="528"/>
         <source>Pairing</source>
         <translation>Parowanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="528"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="529"/>
         <source>Pair again</source>
         <translation>Sparuj ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="529"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="530"/>
         <source>If pairing fails, remove the device in the system Bluetooth settings and pair again. On Linux, a pairing agent must run to ask for the passkey.</source>
         <translation>Jeśli parowanie się nie powiedzie, usuń urządzenie w systemowych ustawieniach Bluetooth i sparuj je ponownie. W Linuksie musi działać agent parowania, który zapyta o klucz.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="542"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="543"/>
         <source>No J-Link found</source>
         <translation>Nie znaleziono J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="549"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="550"/>
         <source>The J-Link is used by another program</source>
         <translation>J-Link jest używany przez inny program</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="556"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="557"/>
         <source>The device has no power or does not respond</source>
         <translation>Urządzenie nie ma zasilania lub nie odpowiada</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="562"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="563"/>
         <source>The device does not respond</source>
         <translation>Urządzenie nie odpowiada</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="575"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="576"/>
         <source>The console stays empty</source>
         <translation>Konsola pozostaje pusta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="581"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="582"/>
         <source>The console does not answer</source>
         <translation>Konsola nie odpowiada</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="587"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="588"/>
         <source>Flashing fails</source>
         <translation>Wgrywanie się nie udaje</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="593"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="594"/>
         <source>The MCU is protected</source>
         <translation>MCU jest chronione</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="599"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="600"/>
         <source>Recover fails</source>
         <translation>Odzyskiwanie się nie udaje</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="605"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="606"/>
         <source>J-Link firmware</source>
         <translation>Firmware J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="611"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="612"/>
         <source>LTE modem firmware</source>
         <translation>Firmware modemu LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="617"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_topics.cpp" line="618"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
@@ -3381,22 +3408,22 @@
 <context>
     <name>hwio::ble</name>
     <message>
-        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="117"/>
+        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="120"/>
         <source>The device refused to start the console: it may still be connected (to this or another computer) or the pairing was not completed.</source>
         <translation>Urządzenie odmówiło uruchomienia konsoli: może być nadal połączone (z tym lub innym komputerem) albo parowanie nie zostało ukończone.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="123"/>
+        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="125"/>
         <source>Wait a few seconds and try again. If it repeats, disconnect the device in the system Bluetooth settings or restart it.</source>
         <translation>Odczekaj kilka sekund i spróbuj ponownie. Jeśli problem się powtarza, rozłącz urządzenie w systemowych ustawieniach Bluetooth lub uruchom je ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="137"/>
+        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="139"/>
         <source>No passkey dialog appeared (no pairing agent is running), or the passkey was wrong, or one side still has an old bond.</source>
         <translation>Nie pojawiło się okno klucza dostępu (nie działa żaden agent parowania), klucz dostępu był błędny albo jedna ze stron ma jeszcze stare powiązanie.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="142"/>
+        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="144"/>
         <source>Pair from the system Bluetooth settings, or with bluetoothctl (scan le, pair &lt;id&gt;). If a dialog appeared, check the passkey, remove the device in the system Bluetooth settings and pair again.</source>
         <translation>Sparuj urządzenie w systemowych ustawieniach Bluetooth lub za pomocą bluetoothctl (scan le, pair &lt;id&gt;). Jeśli okno się pojawiło, sprawdź klucz dostępu, usuń urządzenie w systemowych ustawieniach Bluetooth i sparuj je ponownie.</translation>
     </message>
@@ -3404,1816 +3431,1816 @@
 <context>
     <name>hwio::core</name>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="197"/>
+        <location filename="../libs/core/src/error.cpp" line="198"/>
         <source>An unexpected internal error occurred.</source>
         <comment>internal.unexpected message</comment>
         <translation>Wystąpił nieoczekiwany błąd wewnętrzny.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="199"/>
+        <location filename="../libs/core/src/error.cpp" line="200"/>
         <source>This is a bug in HARDWARIO Monitor.</source>
         <comment>internal.unexpected cause</comment>
         <translation>To błąd w aplikacji HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="202"/>
+        <location filename="../libs/core/src/error.cpp" line="203"/>
         <source>Please report it with the log file (see Details).</source>
         <comment>internal.unexpected suggestion</comment>
         <translation>Zgłoś go, dołączając plik dziennika (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="207"/>
+        <location filename="../libs/core/src/error.cpp" line="208"/>
         <source>An internal buffer is full.</source>
         <comment>internal.queue_full message</comment>
         <translation>Wewnętrzny bufor jest pełny.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="209"/>
+        <location filename="../libs/core/src/error.cpp" line="210"/>
         <source>This is a bug in HARDWARIO Monitor or the computer is overloaded.</source>
         <comment>internal.queue_full cause</comment>
         <translation>To błąd w aplikacji HARDWARIO Monitor lub komputer jest przeciążony.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="213"/>
+        <location filename="../libs/core/src/error.cpp" line="214"/>
         <source>Please report it with the log file (see Details).</source>
         <comment>internal.queue_full suggestion</comment>
         <translation>Zgłoś go, dołączając plik dziennika (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="218"/>
+        <location filename="../libs/core/src/error.cpp" line="219"/>
         <source>An argument or option is invalid.</source>
         <comment>usage.invalid_argument message</comment>
         <translation>Argument lub opcja jest nieprawidłowa.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="221"/>
+        <location filename="../libs/core/src/error.cpp" line="222"/>
         <source>The request contains a value that is not supported.</source>
         <comment>usage.invalid_argument cause</comment>
         <translation>Żądanie zawiera nieobsługiwaną wartość.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="223"/>
+        <location filename="../libs/core/src/error.cpp" line="224"/>
         <source>Check the arguments and try again.</source>
         <comment>usage.invalid_argument suggestion</comment>
         <translation>Sprawdź argumenty i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="228"/>
+        <location filename="../libs/core/src/error.cpp" line="229"/>
         <source>The file was not found.</source>
         <comment>io.file_not_found message</comment>
         <translation>Nie znaleziono pliku.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="231"/>
+        <location filename="../libs/core/src/error.cpp" line="232"/>
         <source>The path is wrong or the file was moved or deleted.</source>
         <comment>io.file_not_found cause</comment>
         <translation>Ścieżka jest błędna albo plik został przeniesiony lub usunięty.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="233"/>
+        <location filename="../libs/core/src/error.cpp" line="234"/>
         <source>Check the file path (see Details).</source>
         <comment>io.file_not_found suggestion</comment>
         <translation>Sprawdź ścieżkę do pliku (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="238"/>
+        <location filename="../libs/core/src/error.cpp" line="239"/>
         <source>The file could not be read.</source>
         <comment>io.read_failed message</comment>
         <translation>Nie można odczytać pliku.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="240"/>
+        <location filename="../libs/core/src/error.cpp" line="241"/>
         <source>You do not have permission to read it or the disk reported an error.</source>
         <comment>io.read_failed cause</comment>
         <translation>Brak uprawnień do odczytu lub dysk zgłosił błąd.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="243"/>
+        <location filename="../libs/core/src/error.cpp" line="244"/>
         <source>Check the file path and its permissions (see Details).</source>
         <comment>io.read_failed suggestion</comment>
         <translation>Sprawdź ścieżkę do pliku i jego uprawnienia (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="249"/>
+        <location filename="../libs/core/src/error.cpp" line="250"/>
         <source>The file could not be written.</source>
         <comment>io.write_failed message</comment>
         <translation>Nie można zapisać pliku.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="251"/>
+        <location filename="../libs/core/src/error.cpp" line="252"/>
         <source>The disk is full or read-only, or you do not have permission to write.</source>
         <comment>io.write_failed cause</comment>
         <translation>Dysk jest pełny lub tylko do odczytu albo brak uprawnień do zapisu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="254"/>
+        <location filename="../libs/core/src/error.cpp" line="255"/>
         <source>Check the path, the free disk space and the permissions (see Details).</source>
         <comment>io.write_failed suggestion</comment>
         <translation>Sprawdź ścieżkę, wolne miejsce na dysku i uprawnienia (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="260"/>
+        <location filename="../libs/core/src/error.cpp" line="261"/>
         <source>Settings were written by a newer version and are opened read-only.</source>
         <comment>settings.newer_schema message</comment>
         <translation>Ustawienia zostały zapisane przez nowszą wersję i są otwarte tylko do odczytu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="263"/>
+        <location filename="../libs/core/src/error.cpp" line="264"/>
         <source>An older version of HARDWARIO Monitor is running now.</source>
         <comment>settings.newer_schema cause</comment>
         <translation>Uruchomiona jest starsza wersja aplikacji HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="267"/>
+        <location filename="../libs/core/src/error.cpp" line="268"/>
         <source>Changes will not be saved; update HARDWARIO Monitor.</source>
         <comment>settings.newer_schema suggestion</comment>
         <translation>Zmiany nie zostaną zapisane; zaktualizuj HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="272"/>
+        <location filename="../libs/core/src/error.cpp" line="273"/>
         <source>The operation timed out.</source>
         <comment>timeout message</comment>
         <translation>Upłynął limit czasu operacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="273"/>
+        <location filename="../libs/core/src/error.cpp" line="274"/>
         <source>The other side did not respond in time.</source>
         <comment>timeout cause</comment>
         <translation>Druga strona nie odpowiedziała na czas.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="275"/>
+        <location filename="../libs/core/src/error.cpp" line="276"/>
         <source>Try it again.</source>
         <comment>timeout suggestion</comment>
         <translation>Spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="279"/>
+        <location filename="../libs/core/src/error.cpp" line="280"/>
         <source>Cancelled by user.</source>
         <comment>cancelled message</comment>
         <translation>Anulowano przez użytkownika.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="280"/>
+        <location filename="../libs/core/src/error.cpp" line="281"/>
         <source>The operation was stopped before it finished.</source>
         <comment>cancelled cause</comment>
         <translation>Operacja została zatrzymana przed zakończeniem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="282"/>
+        <location filename="../libs/core/src/error.cpp" line="283"/>
         <source>Run the operation again if needed.</source>
         <comment>cancelled suggestion</comment>
         <translation>W razie potrzeby uruchom operację ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="287"/>
+        <location filename="../libs/core/src/error.cpp" line="288"/>
         <source>SEGGER J-Link Software was not found.</source>
         <comment>dependency.jlink_not_found message</comment>
         <translation>Nie znaleziono oprogramowania SEGGER J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="289"/>
+        <location filename="../libs/core/src/error.cpp" line="290"/>
         <source>It is not installed, or it is installed in a non-standard location.</source>
         <comment>dependency.jlink_not_found cause</comment>
         <translation>Nie jest zainstalowane albo jest zainstalowane w niestandardowej lokalizacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="292"/>
+        <location filename="../libs/core/src/error.cpp" line="293"/>
         <source>Install J-Link Software 8.00 or newer, or set its path with --jlink-library.</source>
         <comment>dependency.jlink_not_found suggestion</comment>
         <translation>Zainstaluj J-Link Software 8.00 lub nowsze albo podaj jego ścieżkę opcją --jlink-library.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="300"/>
+        <location filename="../libs/core/src/error.cpp" line="301"/>
         <source>The J-Link library could not be loaded.</source>
         <comment>dependency.jlink_load_failed message</comment>
         <translation>Nie udało się wczytać biblioteki J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="302"/>
+        <location filename="../libs/core/src/error.cpp" line="303"/>
         <source>The installation is damaged, is for another processor architecture, or lacks a required function.</source>
         <comment>dependency.jlink_load_failed cause</comment>
         <translation>Instalacja jest uszkodzona, przeznaczona dla innej architektury procesora albo brakuje w niej wymaganej funkcji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="306"/>
+        <location filename="../libs/core/src/error.cpp" line="307"/>
         <source>Reinstall J-Link Software.</source>
         <comment>dependency.jlink_load_failed suggestion</comment>
         <translation>Zainstaluj ponownie J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="312"/>
+        <location filename="../libs/core/src/error.cpp" line="313"/>
         <source>The J-Link Software is too old.</source>
         <comment>dependency.jlink_too_old message</comment>
         <translation>J-Link Software jest zbyt stare.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="314"/>
+        <location filename="../libs/core/src/error.cpp" line="315"/>
         <source>HARDWARIO Monitor needs J-Link Software 8.00 or newer.</source>
         <comment>dependency.jlink_too_old cause</comment>
         <translation>HARDWARIO Monitor wymaga J-Link Software 8.00 lub nowszego.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="317"/>
+        <location filename="../libs/core/src/error.cpp" line="318"/>
         <source>Install the current J-Link Software.</source>
         <comment>dependency.jlink_too_old suggestion</comment>
         <translation>Zainstaluj aktualne J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="324"/>
+        <location filename="../libs/core/src/error.cpp" line="325"/>
         <source>No J-Link probe found.</source>
         <comment>probe.not_found message</comment>
         <translation>Nie znaleziono programatora J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="325"/>
+        <location filename="../libs/core/src/error.cpp" line="326"/>
         <source>The USB cable is disconnected or the J-Link is not powered.</source>
         <comment>probe.not_found cause</comment>
         <translation>Kabel USB jest odłączony lub J-Link nie jest zasilany.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="328"/>
+        <location filename="../libs/core/src/error.cpp" line="329"/>
         <source>Check the USB cable between the J-Link and the computer.</source>
         <comment>probe.not_found suggestion</comment>
         <translation>Sprawdź kabel USB między J-Linkiem a komputerem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="335"/>
+        <location filename="../libs/core/src/error.cpp" line="336"/>
         <source>The J-Link is used by another program.</source>
         <comment>probe.in_use_by_other_process message</comment>
         <translation>J-Link jest używany przez inny program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="337"/>
+        <location filename="../libs/core/src/error.cpp" line="338"/>
         <source>Another HARDWARIO Monitor window or hwio command is using it.</source>
         <comment>probe.in_use_by_other_process cause</comment>
         <translation>Używa go inne okno aplikacji HARDWARIO Monitor lub polecenie hwio.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="341"/>
+        <location filename="../libs/core/src/error.cpp" line="342"/>
         <source>Close the other program, or choose another J-Link.</source>
         <comment>probe.in_use_by_other_process suggestion</comment>
         <translation>Zamknij drugi program albo wybierz inny J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="347"/>
+        <location filename="../libs/core/src/error.cpp" line="348"/>
         <source>The J-Link probe could not be opened.</source>
         <comment>probe.open_failed message</comment>
         <translation>Nie udało się otworzyć programatora J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="349"/>
+        <location filename="../libs/core/src/error.cpp" line="350"/>
         <source>It is used by another program or session, or the USB permissions are missing (Linux udev rules).</source>
         <comment>probe.open_failed cause</comment>
         <translation>Używa go inny program lub sesja albo brakuje uprawnień do USB (reguły udev w Linuksie).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="354"/>
+        <location filename="../libs/core/src/error.cpp" line="355"/>
         <source>Close other programs using the J-Link and try again.</source>
         <comment>probe.open_failed suggestion</comment>
         <translation>Zamknij inne programy używające J-Linka i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="360"/>
+        <location filename="../libs/core/src/error.cpp" line="361"/>
         <source>The J-Link firmware is outdated.</source>
         <comment>probe.firmware_outdated message</comment>
         <translation>Firmware J-Linka jest nieaktualny.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="362"/>
+        <location filename="../libs/core/src/error.cpp" line="363"/>
         <source>The J-Link firmware differs from the firmware bundled with the J-Link Software.</source>
         <comment>probe.firmware_outdated cause</comment>
         <translation>Firmware J-Linka różni się od firmware dostarczanego z J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="366"/>
+        <location filename="../libs/core/src/error.cpp" line="367"/>
         <source>Run `hwio jlink update-firmware`.</source>
         <comment>probe.firmware_outdated suggestion</comment>
         <translation>Uruchom `hwio jlink update-firmware`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="373"/>
+        <location filename="../libs/core/src/error.cpp" line="374"/>
         <source>The device has no power.</source>
         <comment>target.no_power message</comment>
         <translation>Urządzenie nie ma zasilania.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="374"/>
+        <location filename="../libs/core/src/error.cpp" line="375"/>
         <source>The device is not powered or the flat cable is disconnected.</source>
         <comment>target.no_power cause</comment>
         <translation>Urządzenie nie jest zasilane lub taśma jest odłączona.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="377"/>
+        <location filename="../libs/core/src/error.cpp" line="378"/>
         <source>Power the device and check the flat cable.</source>
         <comment>target.no_power suggestion</comment>
         <translation>Włącz zasilanie urządzenia i sprawdź taśmę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="383"/>
+        <location filename="../libs/core/src/error.cpp" line="384"/>
         <source>Could not connect to the device.</source>
         <comment>target.connect_failed message</comment>
         <translation>Nie udało się połączyć z urządzeniem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="385"/>
+        <location filename="../libs/core/src/error.cpp" line="386"/>
         <source>The flat cable is disconnected or in the wrong connector, or the MCU is in a low-power or protected state.</source>
         <comment>target.connect_failed cause</comment>
         <translation>Taśma jest odłączona lub podłączona do niewłaściwego złącza albo MCU jest w trybie niskiego poboru energii lub w stanie chronionym.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="389"/>
+        <location filename="../libs/core/src/error.cpp" line="390"/>
         <source>Check the flat cable between the J-Link and the device.</source>
         <comment>target.connect_failed suggestion</comment>
         <translation>Sprawdź taśmę między J-Linkiem a urządzeniem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="396"/>
+        <location filename="../libs/core/src/error.cpp" line="397"/>
         <source>The device&apos;s console (RTT) was not found.</source>
         <comment>target.rtt_not_found message</comment>
         <translation>Nie znaleziono konsoli urządzenia (RTT).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="398"/>
+        <location filename="../libs/core/src/error.cpp" line="399"/>
         <source>The firmware has no RTT console, is still booting, or the CPU is halted.</source>
         <comment>target.rtt_not_found cause</comment>
         <translation>Firmware nie ma konsoli RTT, jeszcze się uruchamia albo procesor jest zatrzymany.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="402"/>
+        <location filename="../libs/core/src/error.cpp" line="403"/>
         <source>Reset the device or flash firmware with RTT console support.</source>
         <comment>target.rtt_not_found suggestion</comment>
         <translation>Zresetuj urządzenie lub wgraj firmware z obsługą konsoli RTT.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="409"/>
+        <location filename="../libs/core/src/error.cpp" line="410"/>
         <source>An RTT buffer was not found.</source>
         <comment>target.rtt_buffer_not_found message</comment>
         <translation>Nie znaleziono bufora RTT.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="411"/>
+        <location filename="../libs/core/src/error.cpp" line="412"/>
         <source>The firmware is older or different.</source>
         <comment>target.rtt_buffer_not_found cause</comment>
         <translation>Firmware jest starszy lub inny.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="413"/>
+        <location filename="../libs/core/src/error.cpp" line="414"/>
         <source>Use firmware with the CHESTER shell.</source>
         <comment>target.rtt_buffer_not_found suggestion</comment>
         <translation>Użyj firmware z powłoką (shell) CHESTER.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="419"/>
+        <location filename="../libs/core/src/error.cpp" line="420"/>
         <source>The device is not reading commands.</source>
         <comment>target.rtt_write_timeout message</comment>
         <translation>Urządzenie nie odczytuje poleceń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="421"/>
+        <location filename="../libs/core/src/error.cpp" line="422"/>
         <source>The firmware is hung or its shell is disabled.</source>
         <comment>target.rtt_write_timeout cause</comment>
         <translation>Firmware się zawiesił lub ma wyłączoną powłokę (shell).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="423"/>
+        <location filename="../libs/core/src/error.cpp" line="424"/>
         <source>Reset the device.</source>
         <comment>target.rtt_write_timeout suggestion</comment>
         <translation>Zresetuj urządzenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="429"/>
+        <location filename="../libs/core/src/error.cpp" line="430"/>
         <source>Reading from the device failed.</source>
         <comment>target.rtt_read_failed message</comment>
         <translation>Odczyt z urządzenia nie powiódł się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="432"/>
+        <location filename="../libs/core/src/error.cpp" line="433"/>
         <source>A cable was disconnected or the device was reset.</source>
         <comment>target.rtt_read_failed cause</comment>
         <translation>Odłączono kabel lub urządzenie zostało zresetowane.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="434"/>
+        <location filename="../libs/core/src/error.cpp" line="435"/>
         <source>Check the cables; the console reconnects automatically if enabled.</source>
         <comment>target.rtt_read_failed suggestion</comment>
         <translation>Sprawdź kable; jeśli ta opcja jest włączona, konsola połączy się ponownie automatycznie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="441"/>
+        <location filename="../libs/core/src/error.cpp" line="442"/>
         <source>Too many devices are open (max 8).</source>
         <comment>internal.session_limit message</comment>
         <translation>Otwartych jest zbyt wiele urządzeń (maks. 8).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="443"/>
+        <location filename="../libs/core/src/error.cpp" line="444"/>
         <source>HARDWARIO Monitor works with at most 8 devices at the same time.</source>
         <comment>internal.session_limit cause</comment>
         <translation>HARDWARIO Monitor obsługuje jednocześnie najwyżej 8 urządzeń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="446"/>
+        <location filename="../libs/core/src/error.cpp" line="447"/>
         <source>Close a device first.</source>
         <comment>internal.session_limit suggestion</comment>
         <translation>Najpierw zamknij jedno z urządzeń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="451"/>
+        <location filename="../libs/core/src/error.cpp" line="452"/>
         <source>This operation needs confirmation.</source>
         <comment>usage.confirmation_required message</comment>
         <translation>Ta operacja wymaga potwierdzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="453"/>
+        <location filename="../libs/core/src/error.cpp" line="454"/>
         <source>The command runs non-interactively, so it cannot ask.</source>
         <comment>usage.confirmation_required cause</comment>
         <translation>Polecenie działa w trybie nieinteraktywnym, więc nie może zapytać.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="456"/>
+        <location filename="../libs/core/src/error.cpp" line="457"/>
         <source>Re-run with --yes.</source>
         <comment>usage.confirmation_required suggestion</comment>
         <translation>Uruchom ponownie z opcją --yes.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="461"/>
+        <location filename="../libs/core/src/error.cpp" line="462"/>
         <source>Writing to the device failed.</source>
         <comment>target.rtt_write_failed message</comment>
         <translation>Zapis do urządzenia nie powiódł się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="464"/>
+        <location filename="../libs/core/src/error.cpp" line="465"/>
         <source>A cable was disconnected or the device was reset.</source>
         <comment>target.rtt_write_failed cause</comment>
         <translation>Odłączono kabel lub urządzenie zostało zresetowane.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="466"/>
+        <location filename="../libs/core/src/error.cpp" line="467"/>
         <source>Check the cables; the console reconnects automatically if enabled.</source>
         <comment>target.rtt_write_failed suggestion</comment>
         <translation>Sprawdź kable; jeśli ta opcja jest włączona, konsola połączy się ponownie automatycznie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="473"/>
+        <location filename="../libs/core/src/error.cpp" line="474"/>
         <source>The J-Link firmware could not be updated.</source>
         <comment>probe.firmware_update_failed message</comment>
         <translation>Nie udało się zaktualizować firmware J-Linka.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="475"/>
+        <location filename="../libs/core/src/error.cpp" line="476"/>
         <source>The update failed or the probe still reports a firmware different from the library&apos;s.</source>
         <comment>probe.firmware_update_failed cause</comment>
         <translation>Aktualizacja nie powiodła się lub programator nadal zgłasza firmware inny niż w bibliotece.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="479"/>
+        <location filename="../libs/core/src/error.cpp" line="480"/>
         <source>Disconnect and reconnect the J-Link, then run `hwio jlink update-firmware` again.</source>
         <comment>probe.firmware_update_failed suggestion</comment>
         <translation>Odłącz i ponownie podłącz J-Link, a następnie ponownie uruchom `hwio jlink update-firmware`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="487"/>
+        <location filename="../libs/core/src/error.cpp" line="488"/>
         <source>The device is not connected.</source>
         <comment>target.not_connected message</comment>
         <translation>Urządzenie nie jest połączone.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="490"/>
+        <location filename="../libs/core/src/error.cpp" line="491"/>
         <source>The console is disconnected or still reconnecting.</source>
         <comment>target.not_connected cause</comment>
         <translation>Konsola jest rozłączona lub dopiero ponownie się łączy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="492"/>
+        <location filename="../libs/core/src/error.cpp" line="493"/>
         <source>Reconnect the console (F4).</source>
         <comment>target.not_connected suggestion</comment>
         <translation>Połącz ponownie konsolę (F4).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="499"/>
+        <location filename="../libs/core/src/error.cpp" line="500"/>
         <source>The firmware file is not a valid HEX file.</source>
         <comment>firmware.hex_parse_error message</comment>
         <translation>Plik z firmware nie jest prawidłowym plikiem HEX.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="501"/>
+        <location filename="../libs/core/src/error.cpp" line="502"/>
         <source>The file is damaged or it is not a HEX file.</source>
         <comment>firmware.hex_parse_error cause</comment>
         <translation>Plik jest uszkodzony lub nie jest plikiem HEX.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="503"/>
+        <location filename="../libs/core/src/error.cpp" line="504"/>
         <source>Use the .hex file produced by the build or download it again.</source>
         <comment>firmware.hex_parse_error suggestion</comment>
         <translation>Użyj pliku .hex utworzonego podczas kompilacji lub pobierz go ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="510"/>
+        <location filename="../libs/core/src/error.cpp" line="511"/>
         <source>The file is not a supported firmware file.</source>
         <comment>firmware.invalid_image message</comment>
         <translation>Plik nie jest obsługiwanym plikiem z firmware.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="512"/>
+        <location filename="../libs/core/src/error.cpp" line="513"/>
         <source>It is not a CHESTER LTE bundle, a modem firmware zip or a HEX file, or the zip exceeds the safety limits.</source>
         <comment>firmware.invalid_image cause</comment>
         <translation>Nie jest to pakiet CHESTER LTE, archiwum zip z firmware modemu ani plik HEX albo archiwum zip przekracza limity bezpieczeństwa.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="517"/>
+        <location filename="../libs/core/src/error.cpp" line="518"/>
         <source>Use a CHESTER .hex file or LTE bundle (.zip).</source>
         <comment>firmware.invalid_image suggestion</comment>
         <translation>Użyj pliku .hex dla CHESTER lub pakietu LTE (.zip).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="523"/>
+        <location filename="../libs/core/src/error.cpp" line="524"/>
         <source>The firmware does not fit the MCU.</source>
         <comment>firmware.out_of_range message</comment>
         <translation>Firmware nie pasuje do MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="525"/>
+        <location filename="../libs/core/src/error.cpp" line="526"/>
         <source>The image was built for another MCU.</source>
         <comment>firmware.out_of_range cause</comment>
         <translation>Obraz został zbudowany dla innego MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="527"/>
+        <location filename="../libs/core/src/error.cpp" line="528"/>
         <source>Check that the firmware is for this MCU.</source>
         <comment>firmware.out_of_range suggestion</comment>
         <translation>Sprawdź, czy firmware jest przeznaczony dla tego MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="533"/>
+        <location filename="../libs/core/src/error.cpp" line="534"/>
         <source>The firmware also writes the UICR configuration area.</source>
         <comment>firmware.uicr_in_image message</comment>
         <translation>Firmware zapisuje również obszar konfiguracyjny UICR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="536"/>
+        <location filename="../libs/core/src/error.cpp" line="537"/>
         <source>The build includes UICR settings.</source>
         <comment>firmware.uicr_in_image cause</comment>
         <translation>Kompilacja zawiera ustawienia UICR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="538"/>
+        <location filename="../libs/core/src/error.cpp" line="539"/>
         <source>Re-run with --allow-uicr if this is intended; the Product Information Block is kept.</source>
         <comment>firmware.uicr_in_image suggestion</comment>
         <translation>Jeśli jest to zamierzone, uruchom polecenie ponownie z --allow-uicr; blok informacji o produkcie (PIB) zostanie zachowany.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="545"/>
+        <location filename="../libs/core/src/error.cpp" line="546"/>
         <source>Verification of the written firmware failed.</source>
         <comment>firmware.verify_failed message</comment>
         <translation>Weryfikacja zapisanego firmware nie powiodła się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="547"/>
+        <location filename="../libs/core/src/error.cpp" line="548"/>
         <source>The connection is unstable, or the flash is protected or faulty.</source>
         <comment>firmware.verify_failed cause</comment>
         <translation>Połączenie jest niestabilne albo pamięć flash jest chroniona lub uszkodzona.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="550"/>
+        <location filename="../libs/core/src/error.cpp" line="551"/>
         <source>Flash again; if it repeats, lower the J-Link speed or check the cables.</source>
         <comment>firmware.verify_failed suggestion</comment>
         <translation>Wgraj firmware ponownie; jeśli błąd się powtarza, zmniejsz prędkość J-Linka lub sprawdź kable.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="557"/>
+        <location filename="../libs/core/src/error.cpp" line="558"/>
         <source>The firmware was not found in the catalog.</source>
         <comment>firmware.not_found_in_catalog message</comment>
         <translation>Nie znaleziono firmware w katalogu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="559"/>
+        <location filename="../libs/core/src/error.cpp" line="560"/>
         <source>The firmware ID is wrong or it was deleted.</source>
         <comment>firmware.not_found_in_catalog cause</comment>
         <translation>ID firmware jest błędne lub firmware został usunięty.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="561"/>
+        <location filename="../libs/core/src/error.cpp" line="562"/>
         <source>Check the firmware ID.</source>
         <comment>firmware.not_found_in_catalog suggestion</comment>
         <translation>Sprawdź ID firmware.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="567"/>
+        <location filename="../libs/core/src/error.cpp" line="568"/>
         <source>The modem firmware update failed.</source>
         <comment>firmware.modem_update_failed message</comment>
         <translation>Aktualizacja firmware modemu nie powiodła się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="569"/>
+        <location filename="../libs/core/src/error.cpp" line="570"/>
         <source>The modem firmware zip is wrong, the connection was lost, or nRF Util reported an error (see Details).</source>
         <comment>firmware.modem_update_failed cause</comment>
         <translation>Archiwum zip z firmware modemu jest błędne, połączenie zostało przerwane lub nRF Util zgłosił błąd (zob. Szczegóły).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="573"/>
+        <location filename="../libs/core/src/error.cpp" line="574"/>
         <source>Check the cable and power, then flash the modem firmware again.</source>
         <comment>firmware.modem_update_failed suggestion</comment>
         <translation>Sprawdź kabel i zasilanie, a następnie ponownie wgraj firmware modemu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="580"/>
+        <location filename="../libs/core/src/error.cpp" line="581"/>
         <source>Downloading the firmware failed.</source>
         <comment>network.download_failed message</comment>
         <translation>Pobieranie firmware nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="582"/>
+        <location filename="../libs/core/src/error.cpp" line="583"/>
         <source>There is no internet connection, a proxy blocks it, or the server failed.</source>
         <comment>network.download_failed cause</comment>
         <translation>Brak połączenia z internetem, blokuje je serwer proxy lub wystąpił błąd serwera.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="587"/>
+        <location filename="../libs/core/src/error.cpp" line="588"/>
         <source>Check the internet connection and try again.</source>
         <comment>network.download_failed suggestion</comment>
         <translation>Sprawdź połączenie z internetem i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="592"/>
+        <location filename="../libs/core/src/error.cpp" line="593"/>
         <source>The J-Link is connected to another MCU.</source>
         <comment>target.wrong_family message</comment>
         <translation>J-Link jest podłączony do innego MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="594"/>
+        <location filename="../libs/core/src/error.cpp" line="595"/>
         <source>The J-Link is connected to the other connector of the device.</source>
         <comment>target.wrong_family cause</comment>
         <translation>J-Link jest podłączony do drugiego złącza urządzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="597"/>
+        <location filename="../libs/core/src/error.cpp" line="598"/>
         <source>Connect the J-Link to the connector of the MCU you want to program.</source>
         <comment>target.wrong_family suggestion</comment>
         <translation>Podłącz J-Link do złącza MCU, który chcesz zaprogramować.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="604"/>
+        <location filename="../libs/core/src/error.cpp" line="605"/>
         <source>The MCU is read-back protected.</source>
         <comment>target.protected message</comment>
         <translation>MCU jest chroniony przed odczytem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="606"/>
+        <location filename="../libs/core/src/error.cpp" line="607"/>
         <source>Access port protection (APPROTECT) is enabled.</source>
         <comment>target.protected cause</comment>
         <translation>Włączona jest ochrona portu dostępu (APPROTECT).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="608"/>
+        <location filename="../libs/core/src/error.cpp" line="609"/>
         <source>Recover the MCU (this erases it), then flash it again.</source>
         <comment>target.protected suggestion</comment>
         <translation>Odzyskaj MCU (recover – spowoduje to jego wymazanie), a następnie ponownie wgraj firmware.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="615"/>
+        <location filename="../libs/core/src/error.cpp" line="616"/>
         <source>Programming the MCU failed.</source>
         <comment>target.program_failed message</comment>
         <translation>Programowanie MCU nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="617"/>
+        <location filename="../libs/core/src/error.cpp" line="618"/>
         <source>The connection was lost, the power is low or the MCU is protected.</source>
         <comment>target.program_failed cause</comment>
         <translation>Połączenie zostało przerwane, zasilanie jest zbyt niskie lub MCU jest chroniony.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="621"/>
+        <location filename="../libs/core/src/error.cpp" line="622"/>
         <source>Check the cables and power, then try again.</source>
         <comment>target.program_failed suggestion</comment>
         <translation>Sprawdź kable i zasilanie, a następnie spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="627"/>
+        <location filename="../libs/core/src/error.cpp" line="628"/>
         <source>Erasing the MCU failed.</source>
         <comment>target.erase_failed message</comment>
         <translation>Wymazywanie MCU nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="629"/>
+        <location filename="../libs/core/src/error.cpp" line="630"/>
         <source>The connection was lost, the power is low or the MCU is protected.</source>
         <comment>target.erase_failed cause</comment>
         <translation>Połączenie zostało przerwane, zasilanie jest zbyt niskie lub MCU jest chroniony.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="633"/>
+        <location filename="../libs/core/src/error.cpp" line="634"/>
         <source>Check the cables and power, then try again.</source>
         <comment>target.erase_failed suggestion</comment>
         <translation>Sprawdź kable i zasilanie, a następnie spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="639"/>
+        <location filename="../libs/core/src/error.cpp" line="640"/>
         <source>Recovering the MCU failed.</source>
         <comment>target.recover_failed message</comment>
         <translation>Odzyskiwanie MCU (recover) nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="641"/>
+        <location filename="../libs/core/src/error.cpp" line="642"/>
         <source>The device has no power or its control access port does not answer.</source>
         <comment>target.recover_failed cause</comment>
         <translation>Urządzenie nie ma zasilania lub jego sterujący port dostępu nie odpowiada.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="645"/>
+        <location filename="../libs/core/src/error.cpp" line="646"/>
         <source>Power-cycle the device and try again.</source>
         <comment>target.recover_failed suggestion</comment>
         <translation>Odłącz i ponownie podłącz zasilanie urządzenia, a następnie spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="652"/>
+        <location filename="../libs/core/src/error.cpp" line="653"/>
         <source>The Product Information Block is missing or damaged.</source>
         <comment>pib.invalid message</comment>
         <translation>Brak bloku informacji o produkcie (PIB) lub jest on uszkodzony.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="654"/>
+        <location filename="../libs/core/src/error.cpp" line="655"/>
         <source>It was never written, or it was erased by a full erase or a recover.</source>
         <comment>pib.invalid cause</comment>
         <translation>Nigdy nie został zapisany albo został wymazany przez pełne wymazanie lub odzyskiwanie (recover).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="658"/>
+        <location filename="../libs/core/src/error.cpp" line="659"/>
         <source>Contact HARDWARIO support to restore it.</source>
         <comment>pib.invalid suggestion</comment>
         <translation>Aby go przywrócić, skontaktuj się z pomocą techniczną HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="663"/>
+        <location filename="../libs/core/src/error.cpp" line="664"/>
         <source>nRF Util was not found.</source>
         <comment>dependency.nrfutil_not_found message</comment>
         <translation>Nie znaleziono nRF Util.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="665"/>
+        <location filename="../libs/core/src/error.cpp" line="666"/>
         <source>It is not installed; it is needed only for the modem firmware.</source>
         <comment>dependency.nrfutil_not_found cause</comment>
         <translation>Nie jest zainstalowany; jest potrzebny tylko do firmware modemu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="668"/>
+        <location filename="../libs/core/src/error.cpp" line="669"/>
         <source>Install nRF Util and its device command, or set its path with --nrfutil.</source>
         <comment>dependency.nrfutil_not_found suggestion</comment>
         <translation>Zainstaluj nRF Util i jego polecenie device albo podaj jego ścieżkę opcją --nrfutil.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="676"/>
+        <location filename="../libs/core/src/error.cpp" line="677"/>
         <source>The nRF Util device command is not installed.</source>
         <comment>dependency.nrfutil_device_missing message</comment>
         <translation>Polecenie device programu nRF Util nie jest zainstalowane.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="679"/>
+        <location filename="../libs/core/src/error.cpp" line="680"/>
         <source>nRF Util is installed without its device command.</source>
         <comment>dependency.nrfutil_device_missing cause</comment>
         <translation>nRF Util jest zainstalowany bez polecenia device.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="681"/>
+        <location filename="../libs/core/src/error.cpp" line="682"/>
         <source>Run `nrfutil install device`.</source>
         <comment>dependency.nrfutil_device_missing suggestion</comment>
         <translation>Uruchom `nrfutil install device`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="687"/>
+        <location filename="../libs/core/src/error.cpp" line="688"/>
         <source>nRF Util is too old.</source>
         <comment>dependency.nrfutil_too_old message</comment>
         <translation>nRF Util jest zbyt stary.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="689"/>
+        <location filename="../libs/core/src/error.cpp" line="690"/>
         <source>HARDWARIO Monitor needs a newer nRF Util or device command.</source>
         <comment>dependency.nrfutil_too_old cause</comment>
         <translation>HARDWARIO Monitor wymaga nowszej wersji nRF Util lub polecenia device.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="692"/>
+        <location filename="../libs/core/src/error.cpp" line="693"/>
         <source>Run `nrfutil self-upgrade` and `nrfutil upgrade device`.</source>
         <comment>dependency.nrfutil_too_old suggestion</comment>
         <translation>Uruchom `nrfutil self-upgrade` i `nrfutil upgrade device`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="699"/>
+        <location filename="../libs/core/src/error.cpp" line="700"/>
         <source>Another operation is running on this device.</source>
         <comment>internal.busy message</comment>
         <translation>Na tym urządzeniu trwa inna operacja.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="701"/>
+        <location filename="../libs/core/src/error.cpp" line="702"/>
         <source>Only one operation can run at a time.</source>
         <comment>internal.busy cause</comment>
         <translation>Jednocześnie może trwać tylko jedna operacja.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="703"/>
+        <location filename="../libs/core/src/error.cpp" line="704"/>
         <source>Wait for it to finish or cancel it.</source>
         <comment>internal.busy suggestion</comment>
         <translation>Poczekaj na jej zakończenie lub ją anuluj.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="708"/>
+        <location filename="../libs/core/src/error.cpp" line="709"/>
         <source>Communication with the J-Link failed.</source>
         <comment>probe.io_failed message</comment>
         <translation>Komunikacja z J-Linkiem nie powiodła się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="710"/>
+        <location filename="../libs/core/src/error.cpp" line="711"/>
         <source>The J-Link did not answer: a USB glitch, or the USB cable was disconnected.</source>
         <comment>probe.io_failed cause</comment>
         <translation>J-Link nie odpowiedział: chwilowy zanik USB lub odłączono kabel USB.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="714"/>
+        <location filename="../libs/core/src/error.cpp" line="715"/>
         <source>Check the USB cable between the J-Link and the computer; the console reconnects automatically if enabled.</source>
         <comment>probe.io_failed suggestion</comment>
         <translation>Sprawdź kabel USB między J-Linkiem a komputerem; jeśli ta opcja jest włączona, konsola połączy się ponownie automatycznie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="724"/>
+        <location filename="../libs/core/src/error.cpp" line="725"/>
         <source>This computer does not allow access to the J-Link (USB permissions).</source>
         <comment>usb.access_denied message</comment>
         <translation>Ten komputer nie zezwala na dostęp do J-Linka (uprawnienia USB).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="727"/>
+        <location filename="../libs/core/src/error.cpp" line="728"/>
         <source>The udev rule for SEGGER devices is missing.</source>
         <comment>usb.access_denied cause</comment>
         <translation>Brakuje reguły udev dla urządzeń SEGGER.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="729"/>
+        <location filename="../libs/core/src/error.cpp" line="730"/>
         <source>Install the udev rule shown in the setup wizard, then reconnect the J-Link. The rule gives access only to the user logged in at this computer; users connected only over SSH need their own udev rule.</source>
         <comment>usb.access_denied suggestion</comment>
         <translation>Zainstaluj regułę udev pokazaną w kreatorze konfiguracji, a następnie ponownie podłącz J-Link. Reguła daje dostęp tylko użytkownikowi zalogowanemu bezpośrednio przy tym komputerze; użytkownicy połączeni tylko przez SSH potrzebują własnej reguły udev.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="739"/>
+        <location filename="../libs/core/src/error.cpp" line="740"/>
         <source>Another program is running and may be using the J-Link.</source>
         <comment>probe.held_by_program message</comment>
         <translation>Działa inny program, który może używać J-Linka.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="742"/>
+        <location filename="../libs/core/src/error.cpp" line="743"/>
         <source>Another debugging or programming tool keeps the probe open.</source>
         <comment>probe.held_by_program cause</comment>
         <translation>Inne narzędzie do debugowania lub programowania utrzymuje programator otwarty.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="745"/>
+        <location filename="../libs/core/src/error.cpp" line="746"/>
         <source>Close the other program and try again.</source>
         <comment>probe.held_by_program suggestion</comment>
         <translation>Zamknij drugi program i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="751"/>
+        <location filename="../libs/core/src/error.cpp" line="752"/>
         <source>The diagnostic report could not be saved.</source>
         <comment>diag.report_write_failed message</comment>
         <translation>Nie udało się zapisać raportu diagnostycznego.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="753"/>
+        <location filename="../libs/core/src/error.cpp" line="754"/>
         <source>The folder is not writable or the disk is full.</source>
         <comment>diag.report_write_failed cause</comment>
         <translation>Folder nie jest zapisywalny lub dysk jest pełny.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="755"/>
+        <location filename="../libs/core/src/error.cpp" line="756"/>
         <source>Choose another folder.</source>
         <comment>diag.report_write_failed suggestion</comment>
         <translation>Wybierz inny folder.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="760"/>
+        <location filename="../libs/core/src/error.cpp" line="761"/>
         <source>A check did not finish in time.</source>
         <comment>diag.check_timeout message</comment>
         <translation>Sprawdzanie nie zakończyło się na czas.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="762"/>
+        <location filename="../libs/core/src/error.cpp" line="763"/>
         <source>The system is slow or a tool does not answer.</source>
         <comment>diag.check_timeout cause</comment>
         <translation>System działa wolno lub któreś narzędzie nie odpowiada.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="764"/>
+        <location filename="../libs/core/src/error.cpp" line="765"/>
         <source>Run the checks again.</source>
         <comment>diag.check_timeout suggestion</comment>
         <translation>Uruchom sprawdzanie ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="770"/>
+        <location filename="../libs/core/src/error.cpp" line="771"/>
         <source>No Bluetooth adapter was found.</source>
         <comment>ble.adapter_not_found message</comment>
         <translation>Nie znaleziono adaptera Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="772"/>
+        <location filename="../libs/core/src/error.cpp" line="773"/>
         <source>The computer has no Bluetooth or it is disabled in the system.</source>
         <comment>ble.adapter_not_found cause</comment>
         <translation>Komputer nie ma Bluetooth lub jest on wyłączony w systemie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="776"/>
+        <location filename="../libs/core/src/error.cpp" line="777"/>
         <source>Enable Bluetooth or connect a USB Bluetooth adapter.</source>
         <comment>ble.adapter_not_found suggestion</comment>
         <translation>Włącz Bluetooth lub podłącz adapter Bluetooth USB.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="783"/>
+        <location filename="../libs/core/src/error.cpp" line="784"/>
         <source>Bluetooth is turned off.</source>
         <comment>ble.adapter_off message</comment>
         <translation>Bluetooth jest wyłączony.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="784"/>
+        <location filename="../libs/core/src/error.cpp" line="785"/>
         <source>Bluetooth is turned off in the system settings or with a hardware switch.</source>
         <comment>ble.adapter_off cause</comment>
         <translation>Bluetooth jest wyłączony w ustawieniach systemu lub przełącznikiem sprzętowym.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="788"/>
+        <location filename="../libs/core/src/error.cpp" line="789"/>
         <source>Turn Bluetooth on in the system settings.</source>
         <comment>ble.adapter_off suggestion</comment>
         <translation>Włącz Bluetooth w ustawieniach systemu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="795"/>
+        <location filename="../libs/core/src/error.cpp" line="796"/>
         <source>HARDWARIO Monitor is not allowed to use Bluetooth.</source>
         <comment>ble.permission_denied message</comment>
         <translation>HARDWARIO Monitor nie ma uprawnień do korzystania z Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="798"/>
+        <location filename="../libs/core/src/error.cpp" line="799"/>
         <source>Bluetooth access was denied in the privacy settings.</source>
         <comment>ble.permission_denied cause</comment>
         <translation>Dostęp do Bluetooth został odrzucony w ustawieniach prywatności.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="800"/>
+        <location filename="../libs/core/src/error.cpp" line="801"/>
         <source>Allow Bluetooth for HARDWARIO Monitor (or your terminal) in System Settings → Privacy &amp; Security → Bluetooth.</source>
         <comment>ble.permission_denied suggestion</comment>
         <translation>Zezwól na Bluetooth dla HARDWARIO Monitor (lub swojego terminala) w Ustawienia systemowe → Prywatność i ochrona → Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="810"/>
+        <location filename="../libs/core/src/error.cpp" line="811"/>
         <source>The Bluetooth service of the system is not available.</source>
         <comment>ble.stack_unavailable message</comment>
         <translation>Systemowa usługa Bluetooth jest niedostępna.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="813"/>
+        <location filename="../libs/core/src/error.cpp" line="814"/>
         <source>The Bluetooth service of the system (BlueZ on Linux) is not running.</source>
         <comment>ble.stack_unavailable cause</comment>
         <translation>Systemowa usługa Bluetooth (w Linuksie BlueZ) nie działa.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="816"/>
+        <location filename="../libs/core/src/error.cpp" line="817"/>
         <source>Start the Bluetooth service: `sudo systemctl start bluetooth`.</source>
         <comment>ble.stack_unavailable suggestion</comment>
         <translation>Uruchom usługę Bluetooth: `sudo systemctl start bluetooth`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="823"/>
+        <location filename="../libs/core/src/error.cpp" line="824"/>
         <source>The Bluetooth device was not found.</source>
         <comment>ble.device_not_found message</comment>
         <translation>Nie znaleziono urządzenia Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="825"/>
+        <location filename="../libs/core/src/error.cpp" line="826"/>
         <source>The device is out of range, turned off or its Bluetooth is disabled.</source>
         <comment>ble.device_not_found cause</comment>
         <translation>Urządzenie jest poza zasięgiem, wyłączone lub ma wyłączony Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="828"/>
+        <location filename="../libs/core/src/error.cpp" line="829"/>
         <source>Bring the device closer and make sure its Bluetooth is on.</source>
         <comment>ble.device_not_found suggestion</comment>
         <translation>Przybliż urządzenie i upewnij się, że ma włączony Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="836"/>
+        <location filename="../libs/core/src/error.cpp" line="837"/>
         <source>Could not connect to the device over Bluetooth.</source>
         <comment>ble.connect_failed message</comment>
         <translation>Nie udało się połączyć z urządzeniem przez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="838"/>
+        <location filename="../libs/core/src/error.cpp" line="839"/>
         <source>The signal is weak or the device is busy with another connection.</source>
         <comment>ble.connect_failed cause</comment>
         <translation>Sygnał jest słaby lub urządzenie jest zajęte innym połączeniem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="841"/>
+        <location filename="../libs/core/src/error.cpp" line="842"/>
         <source>Move closer, disconnect other phones or computers from the device and try again.</source>
         <comment>ble.connect_failed suggestion</comment>
         <translation>Podejdź bliżej, rozłącz od urządzenia inne telefony lub komputery i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="850"/>
+        <location filename="../libs/core/src/error.cpp" line="851"/>
         <source>The device does not offer the console service (NUS).</source>
         <comment>ble.service_not_found message</comment>
         <translation>Urządzenie nie oferuje usługi konsoli (NUS).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="852"/>
+        <location filename="../libs/core/src/error.cpp" line="853"/>
         <source>The firmware has no Bluetooth shell.</source>
         <comment>ble.service_not_found cause</comment>
         <translation>Firmware nie ma powłoki (shell) przez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="855"/>
+        <location filename="../libs/core/src/error.cpp" line="856"/>
         <source>Use firmware with the Bluetooth console enabled.</source>
         <comment>ble.service_not_found suggestion</comment>
         <translation>Użyj firmware z włączoną konsolą przez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="861"/>
+        <location filename="../libs/core/src/error.cpp" line="862"/>
         <source>The device is not paired with this computer.</source>
         <comment>ble.not_paired message</comment>
         <translation>Urządzenie nie jest sparowane z tym komputerem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="863"/>
+        <location filename="../libs/core/src/error.cpp" line="864"/>
         <source>Pairing was cancelled, failed or was removed on one side.</source>
         <comment>ble.not_paired cause</comment>
         <translation>Parowanie zostało anulowane, nie powiodło się lub zostało usunięte po jednej ze stron.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="866"/>
+        <location filename="../libs/core/src/error.cpp" line="867"/>
         <source>Pair the device: enter its passkey when the system asks.</source>
         <comment>ble.not_paired suggestion</comment>
         <translation>Sparuj urządzenie: wpisz jego klucz dostępu, gdy system o to poprosi.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="873"/>
+        <location filename="../libs/core/src/error.cpp" line="874"/>
         <source>Pairing with the device failed.</source>
         <comment>ble.pairing_failed message</comment>
         <translation>Parowanie z urządzeniem nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="875"/>
+        <location filename="../libs/core/src/error.cpp" line="876"/>
         <source>A wrong passkey, a timeout or a stale bond on one side.</source>
         <comment>ble.pairing_failed cause</comment>
         <translation>Błędny klucz dostępu, przekroczenie limitu czasu lub nieaktualne powiązanie po jednej ze stron.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="878"/>
+        <location filename="../libs/core/src/error.cpp" line="879"/>
         <source>Remove the device in the system Bluetooth settings and pair again.</source>
         <comment>ble.pairing_failed suggestion</comment>
         <translation>Usuń urządzenie w systemowych ustawieniach Bluetooth i sparuj je ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="885"/>
+        <location filename="../libs/core/src/error.cpp" line="886"/>
         <source>This system pairs Bluetooth devices only when connecting.</source>
         <comment>ble.pairing_not_supported message</comment>
         <translation>Ten system paruje urządzenia Bluetooth tylko podczas łączenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="889"/>
+        <location filename="../libs/core/src/error.cpp" line="890"/>
         <source>macOS pairs a device automatically when it connects.</source>
         <comment>ble.pairing_not_supported cause</comment>
         <translation>macOS paruje urządzenie automatycznie, gdy się z nim łączy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="892"/>
+        <location filename="../libs/core/src/error.cpp" line="893"/>
         <source>Connect to the device; macOS asks for the passkey.</source>
         <comment>ble.pairing_not_supported suggestion</comment>
         <translation>Połącz się z urządzeniem; macOS poprosi o klucz dostępu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="897"/>
+        <location filename="../libs/core/src/error.cpp" line="898"/>
         <source>Sending to the device over Bluetooth failed.</source>
         <comment>ble.write_failed message</comment>
         <translation>Wysyłanie do urządzenia przez Bluetooth nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="899"/>
+        <location filename="../libs/core/src/error.cpp" line="900"/>
         <source>The link was lost during the write.</source>
         <comment>ble.write_failed cause</comment>
         <translation>Połączenie zostało utracone podczas zapisu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="901"/>
+        <location filename="../libs/core/src/error.cpp" line="902"/>
         <source>Reconnect.</source>
         <comment>ble.write_failed suggestion</comment>
         <translation>Połącz ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="906"/>
+        <location filename="../libs/core/src/error.cpp" line="907"/>
         <source>The device is not reading commands.</source>
         <comment>ble.write_timeout message</comment>
         <translation>Urządzenie nie odczytuje poleceń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="908"/>
+        <location filename="../libs/core/src/error.cpp" line="909"/>
         <source>The firmware is busy or the link is stalled.</source>
         <comment>ble.write_timeout cause</comment>
         <translation>Firmware jest zajęty lub połączenie się zablokowało.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="911"/>
+        <location filename="../libs/core/src/error.cpp" line="912"/>
         <source>Reconnect; if it repeats, restart the device.</source>
         <comment>ble.write_timeout suggestion</comment>
         <translation>Połącz ponownie; jeśli problem się powtarza, uruchom urządzenie ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="918"/>
+        <location filename="../libs/core/src/error.cpp" line="919"/>
         <source>The Bluetooth connection to the device was lost.</source>
         <comment>ble.disconnected message</comment>
         <translation>Połączenie Bluetooth z urządzeniem zostało utracone.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="920"/>
+        <location filename="../libs/core/src/error.cpp" line="921"/>
         <source>The device is out of range, was restarted or turned off.</source>
         <comment>ble.disconnected cause</comment>
         <translation>Urządzenie jest poza zasięgiem, zostało uruchomione ponownie lub wyłączone.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="923"/>
+        <location filename="../libs/core/src/error.cpp" line="924"/>
         <source>Bring the device closer; the console reconnects automatically if enabled.</source>
         <comment>ble.disconnected suggestion</comment>
         <translation>Przybliż urządzenie; jeśli ta opcja jest włączona, konsola połączy się ponownie automatycznie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="931"/>
+        <location filename="../libs/core/src/error.cpp" line="932"/>
         <source>The device is used by another program.</source>
         <comment>ble.in_use_by_other_process message</comment>
         <translation>Urządzenie jest używane przez inny program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="933"/>
+        <location filename="../libs/core/src/error.cpp" line="934"/>
         <source>Another HARDWARIO Monitor window or `hwio` command is connected to it.</source>
         <comment>ble.in_use_by_other_process cause</comment>
         <translation>Jest z nim połączone inne okno HARDWARIO Monitor lub polecenie `hwio`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="936"/>
+        <location filename="../libs/core/src/error.cpp" line="937"/>
         <source>Close the other program.</source>
         <comment>ble.in_use_by_other_process suggestion</comment>
         <translation>Zamknij drugi program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="941"/>
+        <location filename="../libs/core/src/error.cpp" line="942"/>
         <source>No program is ready to ask for the Bluetooth passkey.</source>
         <comment>ble.no_pairing_agent message</comment>
         <translation>Żaden program nie jest gotowy, by poprosić o klucz dostępu Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="944"/>
+        <location filename="../libs/core/src/error.cpp" line="945"/>
         <source>No pairing agent is running (on GNOME the agent may only be active in Settings → Bluetooth).</source>
         <comment>ble.no_pairing_agent cause</comment>
         <translation>Nie działa żaden agent parowania (w środowisku GNOME agent może być aktywny tylko w Ustawienia → Bluetooth).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="949"/>
+        <location filename="../libs/core/src/error.cpp" line="950"/>
         <source>Pair the device from the system Bluetooth settings, or with bluetoothctl: `agent KeyboardOnly`, `default-agent`, `pair &lt;id&gt;`.</source>
         <comment>ble.no_pairing_agent suggestion</comment>
         <translation>Sparuj urządzenie w systemowych ustawieniach Bluetooth lub za pomocą bluetoothctl: `agent KeyboardOnly`, `default-agent`, `pair &lt;id&gt;`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="958"/>
+        <location filename="../libs/core/src/error.cpp" line="959"/>
         <source>The MCP port is already in use.</source>
         <comment>mcp.port_in_use message</comment>
         <translation>Port MCP jest już używany.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="960"/>
+        <location filename="../libs/core/src/error.cpp" line="961"/>
         <source>Another HARDWARIO Monitor, `hwio mcp --http` or another MCP server (for example rttt) is listening on it.</source>
         <comment>mcp.port_in_use cause</comment>
         <translation>Nasłuchuje na nim inny HARDWARIO Monitor, `hwio mcp --http` lub inny serwer MCP (na przykład rttt).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="964"/>
+        <location filename="../libs/core/src/error.cpp" line="965"/>
         <source>Stop the other server or choose another port with --port.</source>
         <comment>mcp.port_in_use suggestion</comment>
         <translation>Zatrzymaj drugi serwer lub wybierz inny port opcją --port.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="970"/>
+        <location filename="../libs/core/src/error.cpp" line="971"/>
         <source>The MCP server could not start.</source>
         <comment>mcp.listen_failed message</comment>
         <translation>Nie udało się uruchomić serwera MCP.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="972"/>
+        <location filename="../libs/core/src/error.cpp" line="973"/>
         <source>The operating system refused to open the listening socket on 127.0.0.1.</source>
         <comment>mcp.listen_failed cause</comment>
         <translation>System operacyjny odmówił otwarcia gniazda nasłuchującego na 127.0.0.1.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="975"/>
+        <location filename="../libs/core/src/error.cpp" line="976"/>
         <source>Choose another port with --port.</source>
         <comment>mcp.listen_failed suggestion</comment>
         <translation>Wybierz inny port opcją --port.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="980"/>
+        <location filename="../libs/core/src/error.cpp" line="981"/>
         <source>The MCP token file cannot be read or created.</source>
         <comment>mcp.token_file message</comment>
         <translation>Nie można odczytać ani utworzyć pliku z tokenem MCP.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="982"/>
+        <location filename="../libs/core/src/error.cpp" line="983"/>
         <source>The file or its folder has the wrong permissions, or the file does not contain a valid token.</source>
         <comment>mcp.token_file cause</comment>
         <translation>Plik lub jego folder ma nieprawidłowe uprawnienia albo plik nie zawiera prawidłowego tokenu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="986"/>
+        <location filename="../libs/core/src/error.cpp" line="987"/>
         <source>Check the file permissions, or delete the file to create a new token.</source>
         <comment>mcp.token_file suggestion</comment>
         <translation>Sprawdź uprawnienia pliku albo usuń plik, aby utworzyć nowy token.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="992"/>
+        <location filename="../libs/core/src/error.cpp" line="993"/>
         <source>This MCP tool is not allowed by the server.</source>
         <comment>mcp.tool_not_allowed message</comment>
         <translation>Serwer nie zezwala na to narzędzie MCP.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="994"/>
+        <location filename="../libs/core/src/error.cpp" line="995"/>
         <source>Destructive tools must be allowed when the server starts.</source>
         <comment>mcp.tool_not_allowed cause</comment>
         <translation>Na narzędzia destrukcyjne trzeba zezwolić przy uruchamianiu serwera.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="997"/>
+        <location filename="../libs/core/src/error.cpp" line="998"/>
         <source>Start the server with --allow and the tool&apos;s category, or with --allow all.</source>
         <comment>mcp.tool_not_allowed suggestion</comment>
         <translation>Uruchom serwer z --allow i kategorią narzędzia albo z --allow all.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1004"/>
+        <location filename="../libs/core/src/error.cpp" line="1005"/>
         <source>The user did not allow this action.</source>
         <comment>mcp.consent_denied message</comment>
         <translation>Użytkownik nie zezwolił na tę czynność.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1006"/>
+        <location filename="../libs/core/src/error.cpp" line="1007"/>
         <source>The user declined the permission request in HARDWARIO Monitor.</source>
         <comment>mcp.consent_denied cause</comment>
         <translation>Użytkownik odrzucił prośbę o zgodę w HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1010"/>
+        <location filename="../libs/core/src/error.cpp" line="1011"/>
         <source>Ask the user to allow it in HARDWARIO Monitor.</source>
         <comment>mcp.consent_denied suggestion</comment>
         <translation>Poproś użytkownika, aby zezwolił na nią w HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1015"/>
+        <location filename="../libs/core/src/error.cpp" line="1016"/>
         <source>Nobody answered the permission request.</source>
         <comment>mcp.consent_timeout message</comment>
         <translation>Nikt nie odpowiedział na prośbę o zgodę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1017"/>
+        <location filename="../libs/core/src/error.cpp" line="1018"/>
         <source>The permission request in HARDWARIO Monitor was not answered within 2 minutes.</source>
         <comment>mcp.consent_timeout cause</comment>
         <translation>Nikt nie odpowiedział na prośbę o zgodę w HARDWARIO Monitor w ciągu 2 minut.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1021"/>
+        <location filename="../libs/core/src/error.cpp" line="1022"/>
         <source>Ask the user to watch HARDWARIO Monitor and try again.</source>
         <comment>mcp.consent_timeout suggestion</comment>
         <translation>Poproś użytkownika, aby obserwował HARDWARIO Monitor, i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1027"/>
+        <location filename="../libs/core/src/error.cpp" line="1028"/>
         <source>Several devices are connected and the tool does not know which one to use.</source>
         <comment>mcp.device_ambiguous message</comment>
         <translation>Połączonych jest kilka urządzeń i narzędzie nie wie, którego użyć.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1031"/>
+        <location filename="../libs/core/src/error.cpp" line="1032"/>
         <source>The device argument was left out while more than one device is open.</source>
         <comment>mcp.device_ambiguous cause</comment>
         <translation>Pominięto argument device, a otwartych jest więcej urządzeń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1034"/>
+        <location filename="../libs/core/src/error.cpp" line="1035"/>
         <source>Pass the device argument; list_devices shows the ids.</source>
         <comment>mcp.device_ambiguous suggestion</comment>
         <translation>Podaj argument device; identyfikatory pokazuje list_devices.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1040"/>
+        <location filename="../libs/core/src/error.cpp" line="1041"/>
         <source>The device is not connected.</source>
         <comment>mcp.device_not_open message</comment>
         <translation>Urządzenie nie jest połączone.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1042"/>
+        <location filename="../libs/core/src/error.cpp" line="1043"/>
         <source>It was never connected, it was disconnected, or its tab was closed.</source>
         <comment>mcp.device_not_open cause</comment>
         <translation>Nigdy nie zostało połączone, zostało rozłączone lub jego karta została zamknięta.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1045"/>
+        <location filename="../libs/core/src/error.cpp" line="1046"/>
         <source>Call connect first.</source>
         <comment>mcp.device_not_open suggestion</comment>
         <translation>Najpierw wywołaj connect.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1050"/>
+        <location filename="../libs/core/src/error.cpp" line="1051"/>
         <source>This tool needs a J-Link connection.</source>
         <comment>mcp.capability_missing message</comment>
         <translation>To narzędzie wymaga połączenia przez J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1052"/>
+        <location filename="../libs/core/src/error.cpp" line="1053"/>
         <source>The device is connected over Bluetooth, which provides only the console.</source>
         <comment>mcp.capability_missing cause</comment>
         <translation>Urządzenie jest połączone przez Bluetooth, który udostępnia tylko konsolę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1056"/>
+        <location filename="../libs/core/src/error.cpp" line="1057"/>
         <source>Connect the device with a J-Link probe.</source>
         <comment>mcp.capability_missing suggestion</comment>
         <translation>Połącz urządzenie za pomocą programatora J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1061"/>
+        <location filename="../libs/core/src/error.cpp" line="1062"/>
         <source>Too many MCP requests are running.</source>
         <comment>mcp.too_many_requests message</comment>
         <translation>Trwa zbyt wiele żądań MCP.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1063"/>
+        <location filename="../libs/core/src/error.cpp" line="1064"/>
         <source>The server runs at most 32 tool calls at the same time.</source>
         <comment>mcp.too_many_requests cause</comment>
         <translation>Serwer wykonuje jednocześnie najwyżej 32 wywołania narzędzi.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1067"/>
+        <location filename="../libs/core/src/error.cpp" line="1068"/>
         <source>Wait for running calls to finish and try again.</source>
         <comment>mcp.too_many_requests suggestion</comment>
         <translation>Poczekaj na zakończenie trwających wywołań i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1073"/>
+        <location filename="../libs/core/src/error.cpp" line="1074"/>
         <source>The CPU is running.</source>
         <comment>target.not_halted message</comment>
         <translation>Procesor pracuje.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1075"/>
+        <location filename="../libs/core/src/error.cpp" line="1076"/>
         <source>Registers can be read only while the core is halted.</source>
         <comment>target.not_halted cause</comment>
         <translation>Rejestry można odczytać tylko przy zatrzymanym rdzeniu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1077"/>
+        <location filename="../libs/core/src/error.cpp" line="1078"/>
         <source>Halt the core first.</source>
         <comment>target.not_halted suggestion</comment>
         <translation>Najpierw zatrzymaj rdzeń.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1083"/>
+        <location filename="../libs/core/src/error.cpp" line="1084"/>
         <source>The address range is not allowed for this operation.</source>
         <comment>target.address_out_of_range message</comment>
         <translation>Ten zakres adresów jest niedozwolony dla tej operacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1085"/>
+        <location filename="../libs/core/src/error.cpp" line="1086"/>
         <source>Memory writes are allowed only in the RAM and peripheral ranges of the target.</source>
         <comment>target.address_out_of_range cause</comment>
         <translation>Zapis do pamięci jest dozwolony tylko w zakresach RAM i peryferiów docelowego MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1089"/>
+        <location filename="../libs/core/src/error.cpp" line="1090"/>
         <source>Use an address inside the RAM or peripheral ranges of the target.</source>
         <comment>target.address_out_of_range suggestion</comment>
         <translation>Użyj adresu z zakresów RAM lub peryferiów docelowego MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1095"/>
+        <location filename="../libs/core/src/error.cpp" line="1096"/>
         <source>Reading or writing target memory failed.</source>
         <comment>target.memory_access_failed message</comment>
         <translation>Odczyt lub zapis pamięci docelowego MCU nie powiódł się.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1097"/>
+        <location filename="../libs/core/src/error.cpp" line="1098"/>
         <source>The address is not mapped, or the core is in a fault state.</source>
         <comment>target.memory_access_failed cause</comment>
         <translation>Adres nie jest zmapowany lub rdzeń jest w stanie błędu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1101"/>
+        <location filename="../libs/core/src/error.cpp" line="1102"/>
         <source>Check the address and try again after a reset.</source>
         <comment>target.memory_access_failed suggestion</comment>
         <translation>Sprawdź adres i spróbuj ponownie po resecie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1106"/>
+        <location filename="../libs/core/src/error.cpp" line="1107"/>
         <source>The output file already exists.</source>
         <comment>io.file_exists message</comment>
         <translation>Plik wyjściowy już istnieje.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1108"/>
+        <location filename="../libs/core/src/error.cpp" line="1109"/>
         <source>Existing files are never overwritten by this command.</source>
         <comment>io.file_exists cause</comment>
         <translation>To polecenie nigdy nie nadpisuje istniejących plików.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1112"/>
+        <location filename="../libs/core/src/error.cpp" line="1113"/>
         <source>Choose a new file name or delete the file first.</source>
         <comment>io.file_exists suggestion</comment>
         <translation>Wybierz nową nazwę pliku lub najpierw usuń plik.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1117"/>
+        <location filename="../libs/core/src/error.cpp" line="1118"/>
         <source>The installed J-Link software does not provide a function this operation needs.</source>
         <comment>dependency.jlink_function_missing message</comment>
         <translation>Zainstalowane oprogramowanie J-Link nie udostępnia funkcji wymaganej przez tę operację.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1121"/>
+        <location filename="../libs/core/src/error.cpp" line="1122"/>
         <source>The J-Link library is older than, or different from, the versions HARDWARIO Monitor was tested with.</source>
         <comment>dependency.jlink_function_missing cause</comment>
         <translation>Biblioteka J-Link jest starsza od wersji, z którymi testowano HARDWARIO Monitor, lub się od nich różni.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1125"/>
+        <location filename="../libs/core/src/error.cpp" line="1126"/>
         <source>Install the latest J-Link Software and Documentation Pack.</source>
         <comment>dependency.jlink_function_missing suggestion</comment>
         <translation>Zainstaluj najnowszy J-Link Software and Documentation Pack.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1131"/>
+        <location filename="../libs/core/src/error.cpp" line="1132"/>
         <source>The downloaded firmware is damaged (checksum mismatch).</source>
         <comment>firmware.checksum_mismatch message</comment>
         <translation>Pobrany firmware jest uszkodzony (niezgodna suma kontrolna).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1135"/>
+        <location filename="../libs/core/src/error.cpp" line="1136"/>
         <source>The file was changed or damaged during the download.</source>
         <comment>firmware.checksum_mismatch cause</comment>
         <translation>Plik został zmieniony lub uszkodzony podczas pobierania.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1138"/>
+        <location filename="../libs/core/src/error.cpp" line="1139"/>
         <source>Try again; if it repeats, report it to HARDWARIO.</source>
         <comment>firmware.checksum_mismatch suggestion</comment>
         <translation>Spróbuj ponownie; jeśli problem się powtarza, zgłoś go firmie HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1145"/>
+        <location filename="../libs/core/src/error.cpp" line="1146"/>
         <source>Could not reach GitHub to check for updates.</source>
         <comment>update.network message</comment>
         <translation>Nie udało się połączyć z GitHubem, aby sprawdzić dostępność aktualizacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1147"/>
+        <location filename="../libs/core/src/error.cpp" line="1148"/>
         <source>There is no internet connection, or a firewall or proxy blocks GitHub.</source>
         <comment>update.network cause</comment>
         <translation>Brak połączenia z internetem albo zapora sieciowa lub serwer proxy blokuje GitHub.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1150"/>
+        <location filename="../libs/core/src/error.cpp" line="1151"/>
         <source>Check your connection or try again later.</source>
         <comment>update.network suggestion</comment>
         <translation>Sprawdź połączenie lub spróbuj ponownie później.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1156"/>
+        <location filename="../libs/core/src/error.cpp" line="1157"/>
         <source>GitHub temporarily refused the update check.</source>
         <comment>update.rate_limited message</comment>
         <translation>GitHub tymczasowo odrzucił sprawdzanie aktualizacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1158"/>
+        <location filename="../libs/core/src/error.cpp" line="1159"/>
         <source>GitHub limits how often a network address may ask; other computers on the same network may have used up the limit.</source>
         <comment>update.rate_limited cause</comment>
         <translation>GitHub ogranicza, jak często można wysyłać zapytania z jednego adresu sieciowego; limit mogły wyczerpać inne komputery w tej samej sieci.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1163"/>
+        <location filename="../libs/core/src/error.cpp" line="1164"/>
         <source>Try again in an hour.</source>
         <comment>update.rate_limited suggestion</comment>
         <translation>Spróbuj ponownie za godzinę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1169"/>
-        <location filename="../libs/core/src/error.cpp" line="1186"/>
+        <location filename="../libs/core/src/error.cpp" line="1170"/>
+        <location filename="../libs/core/src/error.cpp" line="1187"/>
         <source>The update information from GitHub could not be read.</source>
         <comment>update.bad_response message</comment>
         <translation>Nie udało się odczytać informacji o aktualizacjach z GitHuba.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1172"/>
-        <location filename="../libs/core/src/error.cpp" line="1189"/>
+        <location filename="../libs/core/src/error.cpp" line="1173"/>
+        <location filename="../libs/core/src/error.cpp" line="1190"/>
         <source>GitHub sent an unexpected answer, or a proxy changed it.</source>
         <comment>update.bad_response cause</comment>
         <translation>GitHub wysłał nieoczekiwaną odpowiedź lub zmienił ją serwer proxy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1176"/>
-        <location filename="../libs/core/src/error.cpp" line="1193"/>
+        <location filename="../libs/core/src/error.cpp" line="1177"/>
+        <location filename="../libs/core/src/error.cpp" line="1194"/>
         <source>Try again later; if it persists, check the releases page: https://github.com/hardwario/monitor/releases</source>
         <comment>update.bad_response suggestion</comment>
         <translation>Spróbuj ponownie później; jeśli problem nie ustąpi, zajrzyj na stronę wydań: https://github.com/hardwario/monitor/releases</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1203"/>
+        <location filename="../libs/core/src/error.cpp" line="1204"/>
         <source>The file name must be a plain name.</source>
         <comment>mcp.to_file_not_allowed message</comment>
         <translation>Nazwa pliku musi być samą nazwą (bez ścieżki).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1205"/>
+        <location filename="../libs/core/src/error.cpp" line="1206"/>
         <source>Memory dumps are written only into the server&apos;s dump folder.</source>
         <comment>mcp.to_file_not_allowed cause</comment>
         <translation>Zrzuty pamięci są zapisywane tylko w folderze zrzutów serwera.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1208"/>
+        <location filename="../libs/core/src/error.cpp" line="1209"/>
         <source>Use a plain file name such as flash.bin, or start the server with --dump-dir DIR.</source>
         <comment>mcp.to_file_not_allowed suggestion</comment>
         <translation>Użyj samej nazwy pliku, na przykład flash.bin, lub uruchom serwer z opcją --dump-dir DIR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1216"/>
+        <location filename="../libs/core/src/error.cpp" line="1217"/>
         <source>The output file is a symbolic link.</source>
         <comment>cli.file_is_symlink message</comment>
         <translation>Plik wyjściowy jest dowiązaniem symbolicznym.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1218"/>
+        <location filename="../libs/core/src/error.cpp" line="1219"/>
         <source>Symbolic links are never followed or replaced, even with --force.</source>
         <comment>cli.file_is_symlink cause</comment>
         <translation>Dowiązania symboliczne nigdy nie są śledzone ani zastępowane, nawet z opcją --force.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1222"/>
+        <location filename="../libs/core/src/error.cpp" line="1223"/>
         <source>Choose another file name or remove the link first.</source>
         <comment>cli.file_is_symlink suggestion</comment>
         <translation>Wybierz inną nazwę pliku lub najpierw usuń dowiązanie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1229"/>
+        <location filename="../libs/core/src/error.cpp" line="1230"/>
         <source>Every user account on this computer can use the J-Link (USB permissions).</source>
         <comment>usb.world_accessible message</comment>
         <translation>Każde konto użytkownika na tym komputerze może używać J-Linka (uprawnienia USB).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1233"/>
+        <location filename="../libs/core/src/error.cpp" line="1234"/>
         <source>A udev rule, usually /etc/udev/rules.d/99-jlink.rules from the SEGGER J-Link Software, makes the probe accessible to all accounts.</source>
         <comment>usb.world_accessible cause</comment>
         <translation>Reguła udev, zwykle /etc/udev/rules.d/99-jlink.rules z SEGGER J-Link Software, udostępnia programator wszystkim kontom.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1238"/>
+        <location filename="../libs/core/src/error.cpp" line="1239"/>
         <source>Remove that rule (or its MODE=&quot;0666&quot;), install the rule shown in the setup wizard, then reconnect the J-Link. A J-Link Software update may install the rule again.</source>
         <comment>usb.world_accessible suggestion</comment>
         <translation>Usuń tę regułę (lub jej MODE=&quot;0666&quot;), zainstaluj regułę pokazaną w kreatorze konfiguracji, a następnie ponownie podłącz J-Link. Aktualizacja J-Link Software może ponownie zainstalować tę regułę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1249"/>
+        <location filename="../libs/core/src/error.cpp" line="1250"/>
         <source>The J-Link is connected to another MCU of the device.</source>
         <comment>target.other_connector message</comment>
         <translation>J-Link jest podłączony do innego MCU urządzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1252"/>
+        <location filename="../libs/core/src/error.cpp" line="1253"/>
         <source>The console runs on another MCU; the J-Link cable is on the other connector.</source>
         <comment>target.other_connector cause</comment>
         <translation>Konsola działa na innym MCU; kabel J-Linka jest podłączony do drugiego złącza.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1256"/>
+        <location filename="../libs/core/src/error.cpp" line="1257"/>
         <source>Move the J-Link cable to the connector of the console&apos;s MCU, or update the LTE firmware.</source>
         <comment>target.other_connector suggestion</comment>
         <translation>Przełóż kabel J-Linka do złącza MCU konsoli albo zaktualizuj firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1268"/>
+        <location filename="../libs/core/src/error.cpp" line="1269"/>
         <source>The LTE MCU was reset during the update.</source>
         <comment>target.reset_during_update message</comment>
         <translation>MCU LTE został zresetowany podczas aktualizacji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1270"/>
+        <location filename="../libs/core/src/error.cpp" line="1271"/>
         <source>The application firmware on the application MCU reset the LTE MCU through its reset pin while the LTE MCU was being updated.</source>
         <comment>target.reset_during_update cause</comment>
         <translation>Firmware aplikacji na MCU aplikacji zresetował MCU LTE przez jego pin resetu podczas aktualizacji MCU LTE.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1275"/>
+        <location filename="../libs/core/src/error.cpp" line="1276"/>
         <source>Use the guided update, which stops the application first: Flash › Update LTE firmware… in the desktop app, or `hwio chester lte flash --guided`.</source>
         <comment>target.reset_during_update suggestion</comment>
         <translation>Użyj aktualizacji z przewodnikiem, która najpierw zatrzymuje aplikację: Wgraj FW › Aktualizuj firmware LTE… w aplikacji desktopowej albo `hwio chester lte flash --guided`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1284"/>
+        <location filename="../libs/core/src/error.cpp" line="1285"/>
         <source>Cannot reach the support server.</source>
         <comment>remote.relay_unreachable message</comment>
         <translation>Nie można połączyć się z serwerem wsparcia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1286"/>
+        <location filename="../libs/core/src/error.cpp" line="1287"/>
         <source>The network, a proxy or a firewall blocks the connection to the support server (wss://terminal.hardwario.com).</source>
         <comment>remote.relay_unreachable cause</comment>
         <translation>Sieć, serwer proxy lub zapora blokuje połączenie z serwerem wsparcia (wss://terminal.hardwario.com).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1290"/>
+        <location filename="../libs/core/src/error.cpp" line="1291"/>
         <source>Check the internet connection or try another network.</source>
         <comment>remote.relay_unreachable suggestion</comment>
         <translation>Sprawdź połączenie z internetem lub spróbuj innej sieci.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1296"/>
+        <location filename="../libs/core/src/error.cpp" line="1297"/>
         <source>The session code is not valid.</source>
         <comment>remote.code_invalid message</comment>
         <translation>Kod sesji jest nieprawidłowy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1298"/>
+        <location filename="../libs/core/src/error.cpp" line="1299"/>
         <source>The session code must be a number: 6 digits from HARDWARIO Monitor, up to 6 digits from the web Terminal.</source>
         <comment>remote.code_invalid cause</comment>
         <translation>Kod sesji musi być liczbą: 6 cyfr z HARDWARIO Monitor, do 6 cyfr z Terminala webowego.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1302"/>
+        <location filename="../libs/core/src/error.cpp" line="1303"/>
         <source>Check the code and type it again.</source>
         <comment>remote.code_invalid suggestion</comment>
         <translation>Sprawdź kod i wpisz go ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1307"/>
+        <location filename="../libs/core/src/error.cpp" line="1308"/>
         <source>Another device is using this session code.</source>
         <comment>remote.code_collision message</comment>
         <translation>Inne urządzenie używa tego kodu sesji.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1309"/>
+        <location filename="../libs/core/src/error.cpp" line="1310"/>
         <source>Someone else shares a console under the same session code. The session was ended for safety.</source>
         <comment>remote.code_collision cause</comment>
         <translation>Ktoś inny udostępnia konsolę pod tym samym kodem sesji. Ze względów bezpieczeństwa sesja została zakończona.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1313"/>
+        <location filename="../libs/core/src/error.cpp" line="1314"/>
         <source>Start sharing again to get a new code.</source>
         <comment>remote.code_collision suggestion</comment>
         <translation>Rozpocznij udostępnianie ponownie, aby otrzymać nowy kod.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1318"/>
+        <location filename="../libs/core/src/error.cpp" line="1319"/>
         <source>The customer did not allow you to join.</source>
         <comment>remote.join_not_allowed message</comment>
         <translation>Klient nie zezwolił Ci na dołączenie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1320"/>
+        <location filename="../libs/core/src/error.cpp" line="1321"/>
         <source>The customer ended the session instead of allowing you, or did not answer within 2 minutes.</source>
         <comment>remote.join_not_allowed cause</comment>
         <translation>Klient zakończył sesję zamiast Ci zezwolić lub nie odpowiedział w ciągu 2 minut.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1324"/>
+        <location filename="../libs/core/src/error.cpp" line="1325"/>
         <source>Ask the customer to share the console again and to allow you when you join.</source>
         <comment>remote.join_not_allowed suggestion</comment>
         <translation>Poproś klienta, aby ponownie udostępnił konsolę i zezwolił Ci, gdy dołączysz.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1331"/>
+        <location filename="../libs/core/src/error.cpp" line="1332"/>
         <source>The remote session ended.</source>
         <comment>remote.host_ended message</comment>
         <translation>Sesja zdalna została zakończona.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1333"/>
+        <location filename="../libs/core/src/error.cpp" line="1334"/>
         <source>The customer ended sharing, or their device or HARDWARIO Monitor disconnected.</source>
         <comment>remote.host_ended cause</comment>
         <translation>Klient zakończył udostępnianie albo jego urządzenie lub HARDWARIO Monitor zostało odłączone.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1337"/>
+        <location filename="../libs/core/src/error.cpp" line="1338"/>
         <source>Ask the customer to share the console again if you need more time.</source>
         <comment>remote.host_ended suggestion</comment>
         <translation>Jeśli potrzebujesz więcej czasu, poproś klienta o ponowne udostępnienie konsoli.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1343"/>
+        <location filename="../libs/core/src/error.cpp" line="1344"/>
         <source>The customer denied the request.</source>
         <comment>remote.operation_denied message</comment>
         <translation>Klient odrzucił prośbę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1345"/>
+        <location filename="../libs/core/src/error.cpp" line="1346"/>
         <source>The customer denied the operation, or did not answer within 60 seconds.</source>
         <comment>remote.operation_denied cause</comment>
         <translation>Klient odrzucił operację lub nie odpowiedział w ciągu 60 sekund.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1348"/>
+        <location filename="../libs/core/src/error.cpp" line="1349"/>
         <source>Ask the customer to allow the operation and try again.</source>
         <comment>remote.operation_denied suggestion</comment>
         <translation>Poproś klienta o zezwolenie na operację i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1354"/>
+        <location filename="../libs/core/src/error.cpp" line="1355"/>
         <source>The customer&apos;s application supports only the console.</source>
         <comment>remote.operation_unsupported_peer message</comment>
         <translation>Aplikacja klienta obsługuje tylko konsolę.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1357"/>
+        <location filename="../libs/core/src/error.cpp" line="1358"/>
         <source>The customer uses the web Terminal, which cannot flash, erase, recover or reset the device remotely.</source>
         <comment>remote.operation_unsupported_peer cause</comment>
         <translation>Klient używa Terminala webowego, który nie potrafi zdalnie wgrać firmware, skasować, odblokować (recover) ani zresetować urządzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1361"/>
+        <location filename="../libs/core/src/error.cpp" line="1362"/>
         <source>Ask the customer to share the console from HARDWARIO Monitor.</source>
         <comment>remote.operation_unsupported_peer suggestion</comment>
         <translation>Poproś klienta o udostępnienie konsoli z HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1368"/>
+        <location filename="../libs/core/src/error.cpp" line="1369"/>
         <source>This firmware is not in the HARDWARIO catalog.</source>
         <comment>remote.firmware_not_in_catalog message</comment>
         <translation>Tego firmware nie ma w katalogu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1370"/>
+        <location filename="../libs/core/src/error.cpp" line="1371"/>
         <source>Remote flashing accepts only firmware from the HARDWARIO firmware catalog, identified by its ID.</source>
         <comment>remote.firmware_not_in_catalog cause</comment>
         <translation>Zdalne wgrywanie akceptuje tylko firmware z katalogu firmware HARDWARIO, wskazane jego identyfikatorem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1374"/>
+        <location filename="../libs/core/src/error.cpp" line="1375"/>
         <source>Check the firmware ID, or ask the customer to flash a file locally.</source>
         <comment>remote.firmware_not_in_catalog suggestion</comment>
         <translation>Sprawdź identyfikator firmware lub poproś klienta o lokalne wgranie pliku.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1380"/>
+        <location filename="../libs/core/src/error.cpp" line="1381"/>
         <source>Unexpected data in the remote session.</source>
         <comment>remote.protocol_error message</comment>
         <translation>Nieoczekiwane dane w sesji zdalnej.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1382"/>
+        <location filename="../libs/core/src/error.cpp" line="1383"/>
         <source>The support server or the other participant sent data that HARDWARIO Monitor does not understand. It was ignored, or the session was ended for safety.</source>
         <comment>remote.protocol_error cause</comment>
         <translation>Serwer wsparcia lub drugi uczestnik wysłał dane, których HARDWARIO Monitor nie rozumie. Zostały zignorowane albo sesja została zakończona ze względów bezpieczeństwa.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1387"/>
+        <location filename="../libs/core/src/error.cpp" line="1388"/>
         <source>Report the issue with a diagnostic report.</source>
         <comment>remote.protocol_error suggestion</comment>
         <translation>Zgłoś problem wraz z raportem diagnostycznym.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1392"/>
+        <location filename="../libs/core/src/error.cpp" line="1393"/>
         <source>The LTE firmware was updated, but the application was not written back.</source>
         <comment>remote.application_not_restored message</comment>
         <translation>Firmware LTE został zaktualizowany, ale aplikacja nie została zapisana z powrotem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1395"/>
+        <location filename="../libs/core/src/error.cpp" line="1396"/>
         <source>The guided LTE update ended before the application was written back, or no copy of the application could be saved. The application MCU is empty.</source>
         <comment>remote.application_not_restored cause</comment>
         <translation>Prowadzona aktualizacja LTE zakończyła się przed zapisaniem aplikacji z powrotem lub nie udało się zapisać kopii aplikacji. MCU aplikacji jest pusty.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1400"/>
+        <location filename="../libs/core/src/error.cpp" line="1401"/>
         <source>Flash an application: ask the customer to flash it, or ask to flash catalog firmware.</source>
         <comment>remote.application_not_restored suggestion</comment>
         <translation>Wgraj aplikację: poproś klienta o jej wgranie lub poproś o wgranie firmware z katalogu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1409"/>
+        <location filename="../libs/core/src/error.cpp" line="1410"/>
         <source>The LTE MCU reports too low supply voltage.</source>
         <comment>target.low_voltage message</comment>
         <translation>MCU LTE zgłasza zbyt niskie napięcie zasilania.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1411"/>
+        <location filename="../libs/core/src/error.cpp" line="1412"/>
         <source>The CHESTER is not powered enough (battery, power supply) or the J-Link cable does not connect the supply reference.</source>
         <comment>target.low_voltage cause</comment>
         <translation>CHESTER nie jest wystarczająco zasilany (bateria, zasilacz) lub kabel J-Link nie łączy napięcia odniesienia zasilania.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1415"/>
+        <location filename="../libs/core/src/error.cpp" line="1416"/>
         <source>Check the power supply or batteries of the CHESTER and the J-Link cable on the connector, then try again.</source>
         <comment>target.low_voltage suggestion</comment>
         <translation>Sprawdź zasilanie lub baterie CHESTER oraz kabel J-Link na złączu, a następnie spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1464"/>
+        <location filename="../libs/core/src/error.cpp" line="1468"/>
         <source>Check the power supply of the CHESTER and the J-Link cable on the LTE connector, then click Try again.</source>
         <comment>suggestion of an LTE update failure in the guided update (ADR-0383)</comment>
         <translation>Sprawdź zasilanie CHESTER oraz kabel J-Link na złączu LTE, a następnie kliknij Spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1476"/>
+        <location filename="../libs/core/src/error.cpp" line="1480"/>
         <source>The output was closed.</source>
         <comment>cancelled message when the stdout was closed</comment>
         <translation>Wyjście zostało zamknięte.</translation>
@@ -5222,35 +5249,35 @@
 <context>
     <name>hwio::device</name>
     <message>
-        <location filename="../libs/device/src/ble_lock.cpp" line="40"/>
+        <location filename="../libs/device/src/ble_lock.cpp" line="44"/>
         <source>The device %1 is used by another program (%2, PID %3).</source>
         <translation>Urządzenie %1 jest używane przez inny program (%2, PID %3).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_lock.cpp" line="47"/>
+        <location filename="../libs/device/src/ble_lock.cpp" line="48"/>
         <location filename="../libs/device/src/probe_lock.cpp" line="74"/>
         <source>If no other HARDWARIO program is running, delete %1.</source>
         <translation>Jeśli żaden inny program HARDWARIO nie jest uruchomiony, usuń %1.</translation>
     </message>
     <message>
         <location filename="../libs/device/src/ble_lock.cpp" line="81"/>
-        <location filename="../libs/device/src/session_registry.cpp" line="123"/>
+        <location filename="../libs/device/src/session_registry.cpp" line="127"/>
         <source>The device %1 is already used by this application.</source>
         <translation>Urządzenie %1 jest już używane przez tę aplikację.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="298"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="300"/>
         <location filename="../libs/device/src/session_worker.cpp" line="696"/>
         <source>Wait for the console to reconnect.</source>
         <translation>Poczekaj, aż konsola ponownie się połączy.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="313"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="315"/>
         <source>The Bluetooth connection to %1 was lost.</source>
         <translation>Połączenie Bluetooth z %1 zostało utracone.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="318"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="319"/>
         <source>Could not connect to %1 over Bluetooth.</source>
         <translation>Nie udało się połączyć z %1 przez Bluetooth.</translation>
     </message>
@@ -5260,132 +5287,127 @@
         <translation>Parowanie z %1 nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="379"/>
-        <location filename="../libs/device/src/device_session.cpp" line="81"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="378"/>
+        <location filename="../libs/device/src/device_session.cpp" line="84"/>
         <source>No device profile was given.</source>
         <translation>Nie podano profilu urządzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="383"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="385"/>
         <source>The device %1 has no Bluetooth console.</source>
         <translation>Urządzenie %1 nie ma konsoli przez Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="391"/>
-        <location filename="../libs/device/src/device_session.cpp" line="86"/>
-        <location filename="../libs/device/src/device_session.cpp" line="486"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="395"/>
+        <location filename="../libs/device/src/device_session.cpp" line="91"/>
+        <location filename="../libs/device/src/device_session.cpp" line="495"/>
         <source>The device %1 has no target &quot;%2&quot;.</source>
         <translation>Urządzenie %1 nie ma celu &quot;%2&quot;.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="399"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="404"/>
         <source>No Bluetooth device was given.</source>
         <translation>Nie podano urządzenia Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="532"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="539"/>
         <source>A command line must not be longer than %1 bytes.</source>
         <translation>Wiersz polecenia nie może być dłuższy niż %1 bajtów.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/console_session.cpp" line="200"/>
+        <location filename="../libs/device/src/console_session.cpp" line="202"/>
         <source>The device did not connect in time.</source>
         <translation>Urządzenie nie połączyło się na czas.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="92"/>
-        <location filename="../libs/device/src/device_session.cpp" line="753"/>
+        <location filename="../libs/device/src/device_session.cpp" line="98"/>
+        <location filename="../libs/device/src/device_session.cpp" line="782"/>
         <source>The %1 target of %2 has no console.</source>
         <translation>Cel %1 urządzenia %2 nie ma konsoli.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="98"/>
+        <location filename="../libs/device/src/device_session.cpp" line="105"/>
         <source>The J-Link speed must be between %1 and %2 kHz.</source>
         <translation>Prędkość J-Linka musi mieścić się w zakresie od %1 do %2 kHz.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="106"/>
+        <location filename="../libs/device/src/device_session.cpp" line="114"/>
         <source>The latency must be between %1 and %2 ms.</source>
         <translation>Opóźnienie musi mieścić się w zakresie od %1 do %2 ms.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="120"/>
+        <location filename="../libs/device/src/device_session.cpp" line="127"/>
         <source>At this J-Link speed the console may not be found within %1 s. Use auto or %2 kHz or more.</source>
         <translation>Przy tej prędkości J-Linka konsola może nie zostać znaleziona w ciągu %1 s. Użyj auto lub co najmniej %2 kHz.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="523"/>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="165"/>
+        <location filename="../libs/device/src/device_session.cpp" line="533"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="161"/>
         <source>The firmware image is empty.</source>
         <translation>Obraz firmware jest pusty.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="537"/>
+        <location filename="../libs/device/src/device_session.cpp" line="549"/>
         <source>The LTE bundle is incomplete.</source>
         <translation>Pakiet LTE jest niekompletny.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="566"/>
+        <location filename="../libs/device/src/device_session.cpp" line="580"/>
         <source>No modem firmware file was given.</source>
         <translation>Nie podano pliku z firmware modemu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="593"/>
+        <location filename="../libs/device/src/device_session.cpp" line="609"/>
         <source>A %1 must be between 1 and %2 bytes.</source>
         <translation>%1 musi mieć od 1 do %2 bajtów.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="599"/>
+        <location filename="../libs/device/src/device_session.cpp" line="617"/>
         <source>With %1-bit units the address and the length must be multiples of %2.</source>
         <translation>W przypadku jednostek %1-bitowych adres i długość muszą być wielokrotnościami %2.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="614"/>
+        <location filename="../libs/device/src/device_session.cpp" line="634"/>
         <source>A memory read must be between 1 and %1 bytes.</source>
         <translation>Odczyt pamięci musi mieć od 1 do %1 bajtów.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="620"/>
+        <location filename="../libs/device/src/device_session.cpp" line="640"/>
         <source>memory read</source>
         <translation>Odczyt pamięci</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="663"/>
+        <location filename="../libs/device/src/device_session.cpp" line="684"/>
         <source>memory write</source>
         <translation>Zapis do pamięci</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="697"/>
+        <location filename="../libs/device/src/device_session.cpp" line="721"/>
         <source>A flash write must be between 1 and %1 bytes.</source>
         <translation>Zapis do pamięci flash musi mieć od 1 do %1 bajtów.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="728"/>
-        <source>Unknown last check &quot;%1&quot;.</source>
-        <translation>Nieznane ostatnie sprawdzenie „%1”.</translation>
-    </message>
-    <message>
-        <location filename="../libs/device/src/device_session.cpp" line="747"/>
+        <location filename="../libs/device/src/device_session.cpp" line="774"/>
         <source>Only a session with an open probe can be connected.</source>
         <translation>Połączyć można tylko sesję z otwartym J-Linkiem.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="774"/>
+        <location filename="../libs/device/src/device_session.cpp" line="803"/>
         <source>Operation %1 is not running.</source>
         <translation>Operacja %1 nie jest wykonywana.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="47"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="49"/>
         <source>an unknown MCU (part %1)</source>
         <translation>nieznany MCU (część %1)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="130"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="132"/>
         <source>Programming the %1 MCU failed.</source>
         <translation>Programowanie MCU %1 nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="135"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="136"/>
         <source>Erasing the %1 MCU failed.</source>
         <translation>Wymazywanie MCU %1 nie powiodło się.</translation>
     </message>
@@ -5395,52 +5417,52 @@
         <translation>Odzyskiwanie MCU %1 nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="146"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="144"/>
         <source>The %1 MCU is read-back protected.</source>
         <translation>MCU %1 jest zabezpieczony przed odczytem.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="149"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="146"/>
         <source>Run `hwio %1 %2 recover` (erases the MCU).</source>
         <translation>Uruchom `hwio %1 %2 recover` (wymaże MCU).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="207"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="202"/>
         <source>Expected the %1 MCU (%2) but found %3.</source>
         <translation>Oczekiwano MCU %1 (%2), a znaleziono %3.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="211"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="205"/>
         <source>Connect the J-Link to the %1 connector.</source>
         <translation>Podłącz J-Link do złącza %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="225"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="218"/>
         <source>an %1 MCU</source>
         <translation>MCU %1</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="242"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="235"/>
         <source>The type of the %1 MCU could not be read.</source>
         <translation>Nie można odczytać typu MCU %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="267"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="259"/>
         <source>The J-Link is connected to the %1 MCU.</source>
         <translation>J-Link jest podłączony do MCU %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="270"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="262"/>
         <source>The console runs on the %1 MCU; the J-Link cable is on the other connector.</source>
         <translation>Konsola działa na MCU %1; kabel J-Linka jest podłączony do drugiego złącza.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="276"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="269"/>
         <source>Move the J-Link cable to the %1 connector, or update the LTE firmware.</source>
         <translation>Przełóż kabel J-Linka do złącza %1 albo zaktualizuj firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="408"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="409"/>
         <source>The Product Information Block of the %1 MCU could not be checked after the erase.</source>
         <translation>Nie można sprawdzić bloku informacji o produkcie (PIB) MCU %1 po wymazaniu.</translation>
     </message>
@@ -5490,53 +5512,53 @@
         <translation>Kanały konsoli</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/pib.cpp" line="73"/>
+        <location filename="../libs/device/src/pib.cpp" line="76"/>
         <source>The Product Information Block is missing or damaged (%1).</source>
         <translation>Brak bloku informacji o produkcie (PIB) lub jest on uszkodzony (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/probe_lock.cpp" line="63"/>
+        <location filename="../libs/device/src/probe_lock.cpp" line="67"/>
         <source>The J-Link %1 is used by another program (%2, PID %3).</source>
         <translation>J-Link %1 jest używany przez inny program (%2, PID %3).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/probe_lock.cpp" line="104"/>
-        <location filename="../libs/device/src/session_registry.cpp" line="148"/>
+        <location filename="../libs/device/src/probe_lock.cpp" line="103"/>
+        <location filename="../libs/device/src/session_registry.cpp" line="152"/>
         <source>The J-Link %1 is already used by this application.</source>
         <translation>J-Link %1 jest już używany przez tę aplikację.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="239"/>
+        <location filename="../libs/device/src/profile.cpp" line="248"/>
         <source>The range runs past the end of the address space.</source>
         <translation>Zakres wykracza poza koniec przestrzeni adresowej.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="243"/>
+        <location filename="../libs/device/src/profile.cpp" line="250"/>
         <source>Use a shorter range or a lower address.</source>
         <translation>Użyj krótszego zakresu lub niższego adresu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="259"/>
+        <location filename="../libs/device/src/profile.cpp" line="266"/>
         <source>The range overlaps system or debug registers of the CPU, through which a write could make the device run arbitrary code.</source>
         <translation>Zakres obejmuje rejestry systemowe lub debugowania procesora, przez które zapis mógłby spowodować uruchomienie dowolnego kodu na urządzeniu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="264"/>
+        <location filename="../libs/device/src/profile.cpp" line="270"/>
         <source>The range overlaps the flash controller registers, whose tasks erase flash, UICR and the product information.</source>
         <translation>Zakres obejmuje rejestry kontrolera flash, którego zadania wymazują flash, UICR i informacje o produkcie.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="297"/>
+        <location filename="../libs/device/src/profile.cpp" line="302"/>
         <source>The firmware writes into the Product Information Block (address %1).</source>
         <translation>Firmware zapisuje do bloku informacji o produkcie (PIB) (adres %1).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="312"/>
+        <location filename="../libs/device/src/profile.cpp" line="318"/>
         <source>The firmware does not fit the %1 MCU (address %2).</source>
         <translation>Firmware nie pasuje do MCU %1 (adres %2).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="316"/>
+        <location filename="../libs/device/src/profile.cpp" line="321"/>
         <source>Check that the firmware is for the %1 MCU.</source>
         <translation>Sprawdź, czy firmware jest przeznaczony dla MCU %1.</translation>
     </message>
@@ -5597,98 +5619,103 @@
         <translation>Klucz dostępu to 123456, chyba że zmieniono go podczas konfiguracji urządzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="365"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1576"/>
-        <location filename="../libs/diag/src/environment.cpp" line="298"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="368"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1590"/>
+        <location filename="../libs/diag/src/environment.cpp" line="297"/>
         <source>The J-Link firmware is newer than the J-Link library.</source>
         <translation>Firmware J-Linka jest nowszy niż biblioteka J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="415"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1860"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="418"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1874"/>
         <source>RTT buffer &quot;%1&quot; not found; the device log is not shown.</source>
         <translation>Nie znaleziono bufora RTT &quot;%1&quot;; dziennik urządzenia nie jest wyświetlany.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="678"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1596"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="679"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1609"/>
         <source>The device has no power (%1 mV).</source>
         <translation>Urządzenie nie ma zasilania (%1 mV).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1474"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1554"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1657"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1661"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1755"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1826"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1489"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1568"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1669"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1673"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1768"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1839"/>
         <source>Cancelled</source>
         <translation>Anulowano</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1479"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1494"/>
         <source>Not checked</source>
         <translation>Nie sprawdzono</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1492"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1507"/>
         <source>Not checked: the time for the checks ran out</source>
         <translation>Nie sprawdzono: skończył się czas na sprawdzenie</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1651"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1663"/>
         <source>Not measured by this J-Link</source>
         <translation>Ten J-Link nie mierzy napięcia</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1678"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1690"/>
         <source>Only the debug port answers</source>
         <translation>Odpowiada tylko port debugowania</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1689"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1701"/>
         <source>Connected (SWD %1 kHz)</source>
         <translation>Połączono (SWD %1 kHz)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1691"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1703"/>
         <source>Connected (SWD, automatic speed)</source>
         <translation>Połączono (SWD, prędkość automatyczna)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1769"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1782"/>
         <source>%1, not protected</source>
         <translation>%1, niezabezpieczony</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1791"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1804"/>
         <source>This MCU has no console</source>
         <translation>Ten MCU nie ma konsoli</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1795"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1808"/>
         <source>Not checked: the MCU is protected</source>
         <translation>Nie sprawdzono: MCU jest zabezpieczony</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1842"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1855"/>
         <source>Found</source>
         <translation>Znaleziono</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="2134"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="2150"/>
         <source>Another program opened the J-Link after it was released.</source>
         <translation>Po zwolnieniu J-Linka otworzył go inny program.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="2138"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="2153"/>
         <source>Close the other program, then reacquire the J-Link.</source>
         <translation>Zamknij inny program, a następnie ponownie przejmij J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_registry.cpp" line="138"/>
+        <location filename="../libs/device/src/session_registry.cpp" line="142"/>
         <source>The firmware of the J-Link %1 is being updated.</source>
         <translation>Firmware J-Linka %1 jest właśnie aktualizowane.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_session.cpp" line="754"/>
+        <source>Unknown last check &quot;%1&quot;.</source>
+        <translation>Nieznane ostatnie sprawdzenie „%1”.</translation>
     </message>
 </context>
 <context>
@@ -5777,104 +5804,104 @@
 <context>
     <name>hwio::diag</name>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1516"/>
-        <location filename="../libs/diag/src/check.cpp" line="233"/>
-        <location filename="../libs/diag/src/environment.cpp" line="203"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1531"/>
+        <location filename="../libs/diag/src/check.cpp" line="236"/>
+        <location filename="../libs/diag/src/environment.cpp" line="204"/>
         <source>The check &quot;%1&quot; did not finish in time.</source>
         <translation>Sprawdzenie „%1” nie zakończyło się na czas.</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/check.cpp" line="189"/>
-        <location filename="../libs/diag/src/check.cpp" line="241"/>
+        <location filename="../libs/diag/src/check.cpp" line="191"/>
+        <location filename="../libs/diag/src/check.cpp" line="243"/>
         <source>Cancelled</source>
         <translation>Anulowano</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/check.cpp" line="202"/>
-        <location filename="../libs/diag/src/environment.cpp" line="244"/>
-        <location filename="../libs/diag/src/environment.cpp" line="309"/>
+        <location filename="../libs/diag/src/check.cpp" line="204"/>
+        <location filename="../libs/diag/src/environment.cpp" line="242"/>
+        <location filename="../libs/diag/src/environment.cpp" line="307"/>
         <source>Skipped: an earlier check did not pass</source>
         <translation>Pominięto: poprzednie sprawdzenie nie powiodło się</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="59"/>
+        <location filename="../libs/diag/src/environment.cpp" line="60"/>
         <source>J-Link Software</source>
         <translation>J-Link Software</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="60"/>
+        <location filename="../libs/diag/src/environment.cpp" line="61"/>
         <source>nRF Util</source>
         <translation>nRF Util</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="61"/>
+        <location filename="../libs/diag/src/environment.cpp" line="62"/>
         <source>USB access to J-Link</source>
         <translation>Dostęp USB do J-Linka</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="62"/>
+        <location filename="../libs/diag/src/environment.cpp" line="63"/>
         <source>Other programs using J-Link</source>
         <translation>Inne programy używające J-Linka</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="63"/>
+        <location filename="../libs/diag/src/environment.cpp" line="64"/>
         <source>J-Link probes</source>
         <translation>J-Linki</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="64"/>
+        <location filename="../libs/diag/src/environment.cpp" line="65"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="68"/>
+        <location filename="../libs/diag/src/environment.cpp" line="69"/>
         <source>J-Link firmware</source>
         <translation>Firmware J-Linka</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="69"/>
+        <location filename="../libs/diag/src/environment.cpp" line="70"/>
         <source>Settings and log folders</source>
         <translation>Foldery ustawień i dzienników</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="125"/>
+        <location filename="../libs/diag/src/environment.cpp" line="126"/>
         <source>%1 — needed only for LTE modem firmware</source>
         <translation>%1 — potrzebne tylko do firmware modemu LTE</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="134"/>
+        <location filename="../libs/diag/src/environment.cpp" line="135"/>
         <source>Not found — needed only for LTE modem firmware</source>
         <translation>Nie znaleziono — potrzebne tylko do firmware modemu LTE</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="148"/>
+        <location filename="../libs/diag/src/environment.cpp" line="149"/>
         <source>%1, device %2</source>
         <translation>%1, device %2</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="161"/>
+        <location filename="../libs/diag/src/environment.cpp" line="162"/>
         <source>Not needed on this system</source>
         <translation>Niepotrzebne w tym systemie</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="168"/>
-        <location filename="../libs/diag/src/environment.cpp" line="199"/>
+        <location filename="../libs/diag/src/environment.cpp" line="169"/>
+        <location filename="../libs/diag/src/environment.cpp" line="200"/>
         <source>Could not be checked</source>
         <translation>Nie można sprawdzić</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="172"/>
-        <location filename="../libs/diag/src/environment.cpp" line="321"/>
+        <location filename="../libs/diag/src/environment.cpp" line="173"/>
+        <location filename="../libs/diag/src/environment.cpp" line="319"/>
         <source>No J-Link connected</source>
         <translation>Nie podłączono J-Linka</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="181"/>
+        <location filename="../libs/diag/src/environment.cpp" line="182"/>
         <source>Accessible to every account</source>
         <translation>Dostępne dla wszystkich kont</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="184"/>
+        <location filename="../libs/diag/src/environment.cpp" line="185"/>
         <source>Access granted</source>
         <translation>Dostęp przyznany</translation>
     </message>
@@ -5885,7 +5912,7 @@
     </message>
     <message>
         <location filename="../libs/diag/src/environment.cpp" line="211"/>
-        <location filename="../libs/diag/src/environment.cpp" line="255"/>
+        <location filename="../libs/diag/src/environment.cpp" line="253"/>
         <source>None found</source>
         <translation>Nic nie znaleziono</translation>
     </message>
@@ -5895,57 +5922,57 @@
         <translation>%1 (PID %2) jest uruchomiony</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="224"/>
+        <location filename="../libs/diag/src/environment.cpp" line="225"/>
         <source>%1 (PID %2) is running and may be using the J-Link.</source>
         <translation>%1 (PID %2) jest uruchomiony i może używać J-Linka.</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="229"/>
+        <location filename="../libs/diag/src/environment.cpp" line="228"/>
         <source>Close %1 and try again.</source>
         <translation>Zamknij %1 i spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="270"/>
+        <location filename="../libs/diag/src/environment.cpp" line="268"/>
         <source>%1 found: %2</source>
         <translation>Znaleziono %1: %2</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="365"/>
+        <location filename="../libs/diag/src/environment.cpp" line="363"/>
         <source>Could not be checked: %1</source>
         <translation>Nie można sprawdzić: %1</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="372"/>
+        <location filename="../libs/diag/src/environment.cpp" line="370"/>
         <source>Not checked: the J-Link is in use</source>
         <translation>Nie sprawdzono: J-Link jest w użyciu</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="377"/>
+        <location filename="../libs/diag/src/environment.cpp" line="375"/>
         <source>Not known</source>
         <translation>Nieznany</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="380"/>
+        <location filename="../libs/diag/src/environment.cpp" line="378"/>
         <source>Current (a J-Link in use was not checked)</source>
         <translation>Aktualny (używany J-Link nie został sprawdzony)</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="384"/>
+        <location filename="../libs/diag/src/environment.cpp" line="382"/>
         <source>Current</source>
         <translation>Aktualny</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="414"/>
+        <location filename="../libs/diag/src/environment.cpp" line="412"/>
         <source>Writable</source>
         <translation>Zapisywalne</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="433"/>
+        <location filename="../libs/diag/src/environment.cpp" line="431"/>
         <source>Permission will be asked on first use</source>
         <translation>Uprawnienie zostanie wymagane przy pierwszym użyciu</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="441"/>
+        <location filename="../libs/diag/src/environment.cpp" line="439"/>
         <source>Adapter ready</source>
         <translation>Adapter gotowy</translation>
     </message>
@@ -5953,37 +5980,37 @@
 <context>
     <name>hwio::firmware</name>
     <message>
-        <location filename="../libs/firmware/src/firmware_cache.cpp" line="73"/>
+        <location filename="../libs/firmware/src/firmware_cache.cpp" line="76"/>
         <source>A firmware ID has exactly 32 hexadecimal digits.</source>
         <translation>Identyfikator firmware ma dokładnie 32 cyfry szesnastkowe.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="56"/>
+        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="59"/>
         <source>Downloading firmware %1 failed.</source>
         <translation>Pobieranie firmware %1 nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="65"/>
+        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="67"/>
         <source>Firmware %1 was not found in the catalog.</source>
         <translation>Nie znaleziono firmware %1 w katalogu.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="250"/>
+        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="251"/>
         <source>The downloaded file is not %1.</source>
         <translation>Pobrany plik nie jest %1.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="265"/>
+        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="266"/>
         <source>Downloading %1 failed.</source>
         <translation>Pobieranie %1 nie powiodło się.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/intel_hex.cpp" line="44"/>
+        <location filename="../libs/firmware/src/intel_hex.cpp" line="48"/>
         <source>The firmware file is not a valid HEX file (line %1).</source>
         <translation>Plik firmware nie jest prawidłowym plikiem HEX (wiersz %1).</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/lte_input.cpp" line="44"/>
+        <location filename="../libs/firmware/src/lte_input.cpp" line="46"/>
         <source>The file is not a CHESTER LTE bundle, modem firmware or HEX file.</source>
         <translation>Plik nie jest pakietem CHESTER LTE, firmware modemu ani plikiem HEX.</translation>
     </message>
@@ -5999,17 +6026,17 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="707"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="703"/>
         <source>Wait until the J-Link firmware update has finished.</source>
         <translation>Poczekaj na zakończenie aktualizacji firmware J-Linka.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="926"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="921"/>
         <source>Close a tab first: at most %1 device tabs can be open.</source>
         <translation>Najpierw zamknij kartę: otwartych może być najwyżej %1 kart urządzeń.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1513"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1508"/>
         <source>Copied to clipboard.</source>
         <translation>Skopiowano do schowka.</translation>
     </message>
@@ -6017,52 +6044,52 @@
 <context>
     <name>hwio::gui::BatchRunner</name>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="50"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="55"/>
         <source>The batch file could not be read.</source>
         <translation>Nie można odczytać pliku wsadowego.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="51"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="58"/>
         <source>the file is missing or you do not have permission to read it.</source>
         <translation>plik nie istnieje lub nie masz uprawnień do jego odczytu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="52"/>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="105"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="61"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="149"/>
         <source>Choose another file.</source>
         <translation>Wybierz inny plik.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="61"/>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="74"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="72"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="91"/>
         <source>The batch file is too large (max. %1 MiB).</source>
         <translation>Plik wsadowy jest za duży (maks. %1 MiB).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="62"/>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="75"/>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="90"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="78"/>
         <location filename="../app/gui/src/workers/batch_runner.cpp" line="97"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="120"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="134"/>
         <source>Split it into smaller files.</source>
         <translation>Podziel go na mniejsze pliki.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="88"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="113"/>
         <source>The batch file is too large (max. %1 commands).</source>
         <translation>Plik wsadowy jest za duży (maks. %1 poleceń).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="95"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="128"/>
         <source>The batch file contains a command longer than %1 bytes.</source>
         <translation>Plik wsadowy zawiera polecenie dłuższe niż %1 bajtów.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="104"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="143"/>
         <source>The batch file contains no commands.</source>
         <translation>Plik wsadowy nie zawiera żadnych poleceń.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="105"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="146"/>
         <source>every line is empty or a comment (#).</source>
         <translation>wszystkie wiersze są puste lub są komentarzami (#).</translation>
     </message>
@@ -6247,172 +6274,172 @@
 <context>
     <name>hwio::gui::ConnectionViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="294"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="310"/>
         <source>Disconnected — %1</source>
         <translation>Rozłączono — %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="294"/>
         <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="310"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="312"/>
         <source>Disconnected</source>
         <translation>Rozłączono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="296"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="298"/>
         <source>Connecting…</source>
         <translation>Łączenie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="298"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="300"/>
         <source>J-Link open, device not connected</source>
         <translation>J-Link otwarty, urządzenie niepołączone</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="301"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="291"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="303"/>
         <source>Connected</source>
         <translation>Połączono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="120"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="122"/>
         <source>%1 · %2 dBm</source>
         <translation>%1 · %2 dBm</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="162"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="164"/>
         <source>Click Pair and enter the passkey in the system dialog.</source>
         <translation>Kliknij Sparuj i wpisz klucz dostępu w oknie systemowym.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="163"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="165"/>
         <source>Click Connect and enter the passkey when macOS asks for it.</source>
         <translation>Kliknij Połącz i wpisz klucz dostępu, gdy macOS o niego poprosi.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="166"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="168"/>
         <source>Already paired but it does not work? Remove the device in the system Bluetooth settings and pair it again.</source>
         <translation>Urządzenie jest sparowane, ale nie działa? Usuń je w systemowych ustawieniach Bluetooth i sparuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="197"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="199"/>
         <source>Pair</source>
         <translation>Sparuj</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="204"/>
         <source>Choose another device</source>
         <translation>Wybierz inne urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="204"/>
         <source>Choose another probe</source>
         <translation>Wybierz inny programator</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="205"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="207"/>
         <source>Open Bluetooth settings</source>
         <translation>Otwórz ustawienia Bluetooth</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="209"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="211"/>
         <source>Open Privacy settings</source>
         <translation>Otwórz ustawienia prywatności</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="281"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="283"/>
         <source>Pairing — confirm the passkey in the system dialog…</source>
         <translation>Parowanie — potwierdź klucz dostępu w oknie systemowym…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="285"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="287"/>
         <source>Waiting for pairing — enter the passkey in the system dialog</source>
         <translation>Oczekiwanie na sparowanie — wpisz klucz dostępu w oknie systemowym</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="291"/>
         <source>Connected · MTU %1</source>
         <translation>Połączono · MTU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="302"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="304"/>
         <source>Connected · %1 V</source>
         <translation>Połączono · %1 V</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="305"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="307"/>
         <source>Reconnecting… (%1)</source>
         <translation>Ponowne łączenie… (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="306"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
         <source>Reconnecting…</source>
         <translation>Ponowne łączenie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="531"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="533"/>
         <source>The J-Link firmware is outdated (%1, available: %2).</source>
         <translation>Firmware J-Linka jest nieaktualne (%1, dostępne: %2).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="807"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="810"/>
         <source>The console log file could not be written; logging to file is off for this session.</source>
         <translation>Nie można zapisać pliku dziennika konsoli; zapis do pliku jest wyłączony w tej sesji.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="825"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="830"/>
         <source>target not powered</source>
         <translation>urządzenie nie jest zasilane</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="827"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="833"/>
         <source>J-Link not found</source>
         <translation>nie znaleziono J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="829"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="835"/>
         <source>J-Link used by another program</source>
         <translation>J-Link używany przez inny program</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="831"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="838"/>
         <source>J-Link could not be opened</source>
         <translation>nie można otworzyć J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="833"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="841"/>
         <source>target does not respond</source>
         <translation>urządzenie nie odpowiada</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="836"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="846"/>
         <source>no RTT console found</source>
         <translation>nie znaleziono konsoli RTT</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="840"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="844"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="851"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="857"/>
         <source>connection lost</source>
         <translation>utracono połączenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="842"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="854"/>
         <source>out of range</source>
         <translation>poza zasięgiem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="847"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="861"/>
         <source>not paired</source>
         <translation>niesparowane</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="849"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="864"/>
         <source>Bluetooth is off</source>
         <translation>Bluetooth jest wyłączony</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="853"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="868"/>
         <source>J-Link Software missing</source>
         <translation>brak J-Link Software</translation>
     </message>
@@ -6420,153 +6447,178 @@
 <context>
     <name>hwio::gui::ConsentViewModel</name>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="49"/>
-        <source>Allow these for %1</source>
-        <translation>Zezwól na to dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="52"/>
-        <source>Allow flashing for %1</source>
-        <translation>Zezwól na wgrywanie dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="55"/>
-        <source>Allow erasing for %1</source>
-        <translation>Zezwól na wymazywanie dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="58"/>
-        <source>Allow memory writes for %1</source>
-        <translation>Zezwól na zapis pamięci dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="61"/>
-        <source>Allow UICR writes for %1</source>
-        <translation>Zezwól na zapis UICR dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="63"/>
-        <source>Allow connecting devices for %1</source>
-        <translation>Zezwól na łączenie urządzeń dla %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="116"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="266"/>
         <source>An AI assistant</source>
         <translation>Asystent AI</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="127"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="277"/>
         <source>%1 wants to flash firmware</source>
         <translation>%1 chce wgrać firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="130"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="280"/>
         <source>%1 wants to update the LTE modem firmware</source>
         <translation>%1 chce zaktualizować firmware modemu LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="133"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="283"/>
         <source>%1 wants to write to the flash memory</source>
         <translation>%1 chce zapisać pamięć flash</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="136"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="286"/>
         <source>%1 wants to erase the device</source>
         <translation>%1 chce wymazać urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="139"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="289"/>
         <source>%1 wants to recover the device (erases everything)</source>
         <translation>%1 chce odzyskać urządzenie (wymazuje wszystko)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="142"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="292"/>
         <source>%1 wants to write to the memory</source>
         <translation>%1 chce zapisać pamięć</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="145"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="295"/>
         <source>%1 wants to connect a device</source>
         <translation>%1 chce połączyć urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="147"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="297"/>
         <source>%1 wants to run %2</source>
         <translation>%1 chce uruchomić %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="160"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="183"/>
+        <source>MCU</source>
+        <translation>MCU</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="315"/>
         <source>Client</source>
         <translation>Klient</translation>
     </message>
     <message>
         <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="167"/>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="171"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="172"/>
         <source>Device</source>
         <translation>Urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="168"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="97"/>
+        <source>Application MCU</source>
+        <translation>MCU aplikacji</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="100"/>
+        <source>LTE MCU</source>
+        <translation>MCU LTE</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="112"/>
+        <source>Always allow these for %1</source>
+        <translation>Zawsze zezwalaj na to dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="115"/>
+        <source>Always allow flashing for %1</source>
+        <translation>Zawsze zezwalaj na wgrywanie dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="118"/>
+        <source>Always allow erasing for %1</source>
+        <translation>Zawsze zezwalaj na wymazywanie dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="121"/>
+        <source>Always allow memory writes for %1</source>
+        <translation>Zawsze zezwalaj na zapis pamięci dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="124"/>
+        <source>Always allow UICR writes for %1</source>
+        <translation>Zawsze zezwalaj na zapis UICR dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="126"/>
+        <source>Always allow connecting devices for %1</source>
+        <translation>Zawsze zezwalaj na łączenie urządzeń dla %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="157"/>
+        <source>Firmware</source>
+        <translation>Firmware</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="159"/>
+        <source>Catalog ID %1</source>
+        <translation>ID w katalogu %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="169"/>
         <source>Open a new tab for %1</source>
         <translation>Otwórz nową kartę dla %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="169"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="168"/>
         <source>Connect the tab %1</source>
         <translation>Połącz kartę %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="177"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="141"/>
         <source>File</source>
         <translation>Plik</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="181"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="146"/>
         <source>Size</source>
         <translation>Rozmiar</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="185"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="154"/>
         <source>Catalog ID</source>
         <translation>ID w katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="189"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="179"/>
         <source>Profile</source>
         <translation>Profil</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="193"/>
-        <source>Target</source>
-        <translation>Cel</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="196"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="186"/>
         <source>Scope</source>
         <translation>Zakres</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="199"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="189"/>
         <source>Address range</source>
         <translation>Zakres adresów</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="206"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="316"/>
+        <source>%1, version %2</source>
+        <translation>%1, wersja %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="200"/>
         <source>The PIB (serial number, keys) is lost.</source>
         <translation>PIB (numer seryjny, klucze) zostanie utracony.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="210"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="205"/>
         <source>Contains UICR data: factory data of the device may be overwritten.</source>
         <translation>Zawiera dane UICR: dane fabryczne urządzenia mogą zostać nadpisane.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="216"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="212"/>
         <source>Writing memory can make the device run arbitrary code.</source>
         <translation>Zapis pamięci może sprawić, że urządzenie wykona dowolny kod.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="245"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="346"/>
         <source>Denied automatically in %1 if not answered.</source>
         <translation>Bez odpowiedzi odmowa nastąpi automatycznie za %1.</translation>
     </message>
@@ -6574,92 +6626,92 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="169"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="173"/>
         <source>another operation started on the device.</source>
         <translation>na urządzeniu uruchomiono inną operację.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="170"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="176"/>
         <source>Run the batch file again when it has finished.</source>
         <translation>Uruchom plik wsadowy ponownie po jej zakończeniu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="247"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="258"/>
         <source>the device disconnected.</source>
         <translation>urządzenie zostało rozłączone.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="248"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="260"/>
         <source>Reconnect and run the batch file again.</source>
         <translation>Połącz się ponownie i jeszcze raz uruchom plik wsadowy.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="262"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="277"/>
         <source>The batch stopped after %1 of %2 commands.</source>
         <translation>Wsad zatrzymał się po %1 z %2 poleceń.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="275"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="292"/>
         <source>The device was reset and halted.</source>
         <translation>Urządzenie zostało zresetowane i zatrzymane.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="276"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="293"/>
         <source>The device was reset.</source>
         <translation>Urządzenie zostało zresetowane.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="358"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="375"/>
         <source>%1 — the console resumes automatically</source>
         <translation>%1 — konsola wznowi działanie automatycznie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="361"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="378"/>
         <source>This target has no console</source>
         <translation>Ten cel nie ma konsoli</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="364"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="381"/>
         <source>Waiting for pairing…</source>
         <translation>Oczekiwanie na sparowanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="365"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="382"/>
         <source>Connecting…</source>
         <translation>Łączenie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="367"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="384"/>
         <source>Not connected</source>
         <translation>Nie połączono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="737"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="758"/>
         <source>The file could not be saved.</source>
         <translation>Nie można zapisać pliku.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="738"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="760"/>
         <source>the folder is not writable or the disk is full.</source>
         <translation>nie można zapisywać w folderze lub dysk jest pełny.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="739"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="764"/>
         <source>Choose another folder.</source>
         <translation>Wybierz inny folder.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="759"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="785"/>
         <source>The view was saved to %1.</source>
         <translation>Widok zapisano w %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="788"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="814"/>
         <source>Sends each line of a UTF-8 text file to the device as a shell command, one line every %1 ms. Empty lines and lines starting with # are skipped. At most %2 commands, %3 MiB per file and %4 bytes per line.</source>
         <translation>Wysyła każdy wiersz pliku tekstowego UTF-8 do urządzenia jako polecenie powłoki, jeden wiersz co %1 ms. Puste wiersze i wiersze zaczynające się od # są pomijane. Najwyżej %2 poleceń, %3 MiB na plik i %4 bajtów na wiersz.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="816"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="842"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Skopiowano do schowka pierwszy %n wiersz (limit kopiowania).</numerusform>
@@ -6668,7 +6720,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="831"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="857"/>
         <source>There is no console log file for this device yet.</source>
         <translation>Dla tego urządzenia nie ma jeszcze pliku dziennika konsoli.</translation>
     </message>
@@ -6704,61 +6756,61 @@
 <context>
     <name>hwio::gui::DeviceTabViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="205"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="208"/>
         <source>New device</source>
         <translation>Nowe urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="237"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="240"/>
         <source>Flashing needs a J-Link. Open a J-Link tab to flash this device.</source>
         <translation>Wgrywanie firmware wymaga J-Linka. Aby wgrać firmware do tego urządzenia, otwórz kartę z J-Linkiem.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="761"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="852"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="765"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="859"/>
         <source>— disconnected: %1 —</source>
         <translation>— rozłączono: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="775"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="853"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="781"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="862"/>
         <source>— disconnected —</source>
         <translation>— rozłączono —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="796"/>
-        <source>Close the wizard first: it works on this tab&apos;s device.</source>
-        <translation>Najpierw zamknij kreator: pracuje z urządzeniem tej karty.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="842"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="850"/>
         <source>— connected (remote) —</source>
         <translation>— połączono (zdalnie) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="844"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="853"/>
         <source>— connected —</source>
         <translation>— połączono —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="840"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="847"/>
         <source>— connected (Bluetooth) —</source>
         <translation>— połączono (Bluetooth) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="197"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="200"/>
         <source>Session %1</source>
         <translation>Sesja %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="974"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="991"/>
         <source>— paused: %1 —</source>
         <translation>— wstrzymano: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="987"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="1005"/>
         <source>— resumed —</source>
         <translation>— wznowiono —</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="802"/>
+        <source>Close the wizard first: it works on this tab&apos;s device.</source>
+        <translation>Najpierw zamknij kreator: pracuje z urządzeniem tej karty.</translation>
     </message>
 </context>
 <context>
@@ -6783,17 +6835,17 @@
 <context>
     <name>hwio::gui::FileErrors</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="71"/>
+        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="75"/>
         <source>The file could not be saved.</source>
         <translation>Nie można zapisać pliku.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="73"/>
+        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="78"/>
         <source>Only folders on this computer can be used.</source>
         <translation>Można używać tylko folderów na tym komputerze.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="77"/>
+        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="80"/>
         <source>Choose a folder on this computer.</source>
         <translation>Wybierz folder na tym komputerze.</translation>
     </message>
@@ -6801,141 +6853,141 @@
 <context>
     <name>hwio::gui::FirmwareSourceViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="198"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="200"/>
         <source>%1 · LTE bundle (application + modem firmware)</source>
         <translation>%1 · pakiet LTE (aplikacja + firmware modemu)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="202"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="204"/>
         <source>Loading %1…</source>
         <translation>Wczytywanie %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="205"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="207"/>
         <source>Downloading %1…</source>
         <translation>Pobieranie %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="221"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="223"/>
         <source>%1 · LTE application · %2 · %3</source>
         <translation>%1 · aplikacja LTE · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="224"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="226"/>
         <source>%1 · Intel HEX · %2 · %3</source>
         <translation>%1 · Intel HEX · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="227"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="229"/>
         <source>%1 · LTE bundle (application + modem firmware) · %2</source>
         <translation>%1 · pakiet LTE (aplikacja + firmware modemu) · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="231"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="233"/>
         <source>%1 · Modem firmware (modem only) · %2</source>
         <translation>%1 · firmware modemu (tylko modem) · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="233"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="235"/>
         <source>%1 · Modem firmware %2 (modem only) · %3</source>
         <translation>%1 · firmware modemu %2 (tylko modem) · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="282"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="284"/>
         <source>This is LTE firmware — switch to LTE firmware?</source>
         <translation>To jest firmware LTE — przełączyć na firmware LTE?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="323"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="325"/>
         <source>Intel HEX files (*.hex)</source>
         <translation>Pliki Intel HEX (*.hex)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="323"/>
         <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="325"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="327"/>
         <source>All files (*)</source>
         <translation>Wszystkie pliki (*)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="325"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="327"/>
         <source>LTE firmware (*.hex *.zip)</source>
         <translation>Firmware LTE (*.hex *.zip)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="330"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="332"/>
         <source>Drop a .hex file here</source>
         <translation>Upuść tutaj plik .hex</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="332"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="334"/>
         <source>Drop a .hex file, an LTE bundle .zip or a modem firmware .zip here</source>
         <translation>Upuść tutaj plik .hex, pakiet LTE .zip lub firmware modemu .zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="360"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="362"/>
         <source>%1 %2 (recommended)</source>
         <translation>%1 %2 (zalecane)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="368"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="370"/>
         <source>Downloading… %1 / %2 MB</source>
         <translation>Pobieranie… %1 / %2 MB</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="370"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="372"/>
         <source>Downloading…</source>
         <translation>Pobieranie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="372"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="374"/>
         <source>Ready</source>
         <translation>Gotowe</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="454"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="457"/>
         <source>The downloaded file is damaged. Try again.</source>
         <translation>Pobrany plik jest uszkodzony. Spróbuj ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="456"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="460"/>
         <source>You can also choose your own file.</source>
         <translation>Możesz też wybrać własny plik.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="495"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="499"/>
         <source>Looking up the firmware…</source>
         <translation>Wyszukiwanie firmware…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="498"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="502"/>
         <source>Unknown firmware — it can still be flashed.</source>
         <translation>Nieznany firmware — mimo to można go wgrać.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="505"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="509"/>
         <source>%1 · uploaded %2</source>
         <translation>%1 · wgrano %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="601"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="620"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="972"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="605"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="624"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="976"/>
         <source>The ID has 32 characters 0–9 a–f.</source>
         <translation>Identyfikator ma 32 znaki 0–9 a–f.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="636"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="963"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="640"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="967"/>
         <source>Catalog ID %1</source>
         <translation>ID z katalogu %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="781"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="785"/>
         <source>Application copy of %1 from %2</source>
         <translation>Kopia aplikacji urządzenia %1 z %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="782"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="786"/>
         <source>Application copy from %1</source>
         <translation>Kopia aplikacji z %1</translation>
     </message>
@@ -6943,402 +6995,402 @@
 <context>
     <name>hwio::gui::FlashViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="200"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="201"/>
         <source>Application firmware</source>
         <translation>Firmware aplikacji</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="201"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="202"/>
         <source>Application MCU</source>
         <translation>MCU aplikacji</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="202"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="203"/>
         <source>.hex file or catalog ID</source>
         <translation>plik .hex lub ID z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="206"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="207"/>
         <source>LTE firmware</source>
         <translation>Firmware LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="207"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="208"/>
         <source>%1 + modem</source>
         <translation>%1 + modem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="207"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="208"/>
         <source>LTE MCU</source>
         <translation>MCU LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="208"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="209"/>
         <source>The HARDWARIO LTE firmware or your own .hex / .zip</source>
         <translation>Firmware HARDWARIO LTE lub własny plik .hex / .zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="245"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="246"/>
         <source>nRF Util was not found. It is needed for LTE firmware.</source>
         <translation>Nie znaleziono nRF Util. Jest potrzebny do firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="267"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="268"/>
         <source>Choose a device first</source>
         <translation>Najpierw wybierz urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="271"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="272"/>
         <source>Use Update LTE firmware… above: the J-Link has to be moved between the connectors.</source>
         <translation>Użyj przycisku Aktualizuj firmware LTE… powyżej: J-Link trzeba przełożyć między złączami.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="275"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="276"/>
         <source>Another operation is running</source>
         <translation>Trwa inna operacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="280"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="281"/>
         <source>The LTE firmware is not downloaded yet</source>
         <translation>Firmware LTE nie został jeszcze pobrany</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="283"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="284"/>
         <source>Choose a firmware file</source>
         <translation>Wybierz plik firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="285"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="286"/>
         <source>Choose a firmware file or enter a catalog ID</source>
         <translation>Wybierz plik firmware lub wpisz ID z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="287"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="288"/>
         <source>Loading the firmware file…</source>
         <translation>Wczytywanie pliku firmware…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="289"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="290"/>
         <source>Downloading the firmware…</source>
         <translation>Pobieranie firmware…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="292"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="293"/>
         <source>The LTE firmware could not be downloaded</source>
         <translation>Nie udało się pobrać firmware LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="294"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="295"/>
         <source>The file does not match the chosen kind</source>
         <translation>Plik nie pasuje do wybranego rodzaju firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="295"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="296"/>
         <source>The firmware cannot be used</source>
         <translation>Nie można użyć tego firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="302"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="303"/>
         <source>nRF Util was not found</source>
         <translation>Nie znaleziono nRF Util</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="307"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="308"/>
         <source>The firmware writes the UICR: allow it in Options</source>
         <translation>Firmware zapisuje UICR: zezwól na to w Opcjach</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="465"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="466"/>
         <source>%1 MCU</source>
         <translation>MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="556"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="557"/>
         <source>Flashing is in progress. Cancel it and close the tab?</source>
         <translation>Trwa wgrywanie. Anulować je i zamknąć kartę?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="557"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="558"/>
         <source>An operation is running on this device. Cancel it and close the tab?</source>
         <translation>Na urządzeniu trwa operacja. Anulować ją i zamknąć kartę?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="699"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="704"/>
         <source>In the device: %1</source>
         <translation>W urządzeniu: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="704"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="709"/>
         <source>Now in the device: %1</source>
         <translation>Teraz w urządzeniu: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="784"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="789"/>
         <source>Flashing…</source>
         <translation>Wgrywanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="786"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="791"/>
         <source>Updating the modem…</source>
         <translation>Aktualizacja modemu…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="789"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="794"/>
         <source>Erasing…</source>
         <translation>Wymazywanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="791"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="796"/>
         <source>Recovering…</source>
         <translation>Odzyskiwanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="793"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="798"/>
         <source>Resetting…</source>
         <translation>Resetowanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="806"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="811"/>
         <source>Working…</source>
         <translation>Trwa…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="814"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="819"/>
         <source>Flashing %1 to the %2 MCU</source>
         <translation>Wgrywanie %1 do MCU %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="816"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="821"/>
         <source>Flashing the LTE bundle %1</source>
         <translation>Wgrywanie pakietu LTE %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="818"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="823"/>
         <source>Updating the modem firmware with %1</source>
         <translation>Aktualizacja firmware modemu z %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="820"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="825"/>
         <source>Erasing the application firmware of the %1 MCU</source>
         <translation>Wymazywanie firmware aplikacji MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="822"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="827"/>
         <source>Erasing everything on the %1 MCU</source>
         <translation>Wymazywanie całego MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="824"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="829"/>
         <source>Recovering the %1 MCU</source>
         <translation>Odzyskiwanie MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="826"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="831"/>
         <source>Resetting the %1 MCU</source>
         <translation>Resetowanie MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="845"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="850"/>
         <source>Connecting</source>
         <translation>Łączenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="847"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="852"/>
         <source>Switching MCU</source>
         <translation>Przełączanie MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="849"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="854"/>
         <source>Erasing</source>
         <translation>Wymazywanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="851"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="856"/>
         <source>Programming</source>
         <translation>Programowanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="853"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="858"/>
         <source>Verifying</source>
         <translation>Weryfikacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="855"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="860"/>
         <source>Updating the modem</source>
         <translation>Aktualizacja modemu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="857"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="862"/>
         <source>Recovering</source>
         <translation>Odzyskiwanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="859"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="864"/>
         <source>Resetting</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="861"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="866"/>
         <source>Restoring console</source>
         <translation>Przywracanie konsoli</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="883"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="888"/>
         <source>Step %1 of %2</source>
         <translation>Krok %1 z %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="922"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="927"/>
         <source>The console is disconnected during the modem update and resumes automatically afterwards.</source>
         <translation>Podczas aktualizacji modemu konsola jest rozłączona, a potem automatycznie wznawia działanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="926"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="931"/>
         <source>The console is paused. The erased MCU stays halted: reconnect after flashing.</source>
         <translation>Konsola jest wstrzymana. Wymazany MCU pozostaje zatrzymany: po wgraniu połącz się ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="928"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="933"/>
         <source>The console is paused. The CPU stays halted after flashing.</source>
         <translation>Konsola jest wstrzymana. Procesor po wgraniu pozostaje zatrzymany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="929"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="934"/>
         <source>The console is paused and resumes automatically after flashing.</source>
         <translation>Konsola jest wstrzymana i po wgraniu automatycznie wznowi działanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="944"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="949"/>
         <source>The console is paused and resumes automatically afterwards.</source>
         <translation>Konsola jest wstrzymana i potem automatycznie wznowi działanie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="954"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="959"/>
         <source>Firmware flashed and verified in %1 s.</source>
         <translation>Firmware wgrany i zweryfikowany w %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="956"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="961"/>
         <source>LTE modem firmware and LTE firmware flashed in %1 s.</source>
         <translation>Firmware modemu LTE i firmware LTE wgrane w %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="959"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="964"/>
         <source>Modem firmware updated in %1 s.</source>
         <translation>Firmware modemu zaktualizowany w %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="961"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="966"/>
         <source>The application firmware of the %1 MCU was erased.</source>
         <translation>Firmware aplikacji MCU %1 został wymazany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="963"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="968"/>
         <source>Everything on the %1 MCU was erased.</source>
         <translation>Cały MCU %1 został wymazany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="965"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="970"/>
         <source>The %1 MCU was recovered.</source>
         <translation>MCU %1 został odzyskany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="967"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="972"/>
         <source>The %1 MCU was reset and halted.</source>
         <translation>MCU %1 został zresetowany i zatrzymany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="968"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="973"/>
         <source>The %1 MCU was reset.</source>
         <translation>MCU %1 został zresetowany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="984"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="989"/>
         <source>The modem update was cancelled. Flash the modem firmware again before you use LTE.</source>
         <translation>Aktualizacja modemu została anulowana. Przed użyciem LTE wgraj ponownie firmware modemu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="988"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="993"/>
         <source>Flashing was cancelled. The device may not start until you flash it again.</source>
         <translation>Wgrywanie zostało anulowane. Urządzenie może się nie uruchomić, dopóki nie wgrasz firmware ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="990"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="995"/>
         <source>The operation was cancelled.</source>
         <translation>Operacja została anulowana.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="994"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="999"/>
         <source>Flashing was interrupted. The firmware may be partly written: flash it again.</source>
         <translation>Wgrywanie zostało przerwane. Firmware może być zapisany tylko częściowo: wgraj go ponownie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1010"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1015"/>
         <source>Chip: %1</source>
         <translation>Układ: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1029"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1034"/>
         <source>Maintenance — %1 MCU</source>
         <translation>Konserwacja — MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1030"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1035"/>
         <source>Maintenance</source>
         <translation>Konserwacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1039"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1044"/>
         <source>Firmware (flash)</source>
         <translation>Firmware (flash)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1039"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1044"/>
         <source>UICR configuration</source>
         <translation>Konfiguracja UICR</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1040"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1045"/>
         <source>Product Information Block (serial number, hardware version, …)</source>
         <translation>Blok informacji o produkcie (numer seryjny, wersja sprzętu, …)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1041"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1046"/>
         <source>This erases:</source>
         <translation>Zostanie wymazane:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1044"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1049"/>
         <source>Recover removes the read-out protection by erasing the %1 MCU completely, then programs a small image that keeps it debuggable. This erases:</source>
         <translation>Odzyskiwanie (recover) usuwa zabezpieczenie przed odczytem przez całkowite wymazanie MCU %1, a następnie wgrywa mały obraz, dzięki któremu MCU pozostaje dostępny do debugowania. Zostanie wymazane:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1047"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1052"/>
         <source>Recover removes the read-out protection by erasing the %1 MCU completely. This erases:</source>
         <translation>Odzyskiwanie (recover) usuwa zabezpieczenie przed odczytem przez całkowite wymazanie MCU %1. Zostanie wymazane:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1052"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1057"/>
         <source>Recover the %1 MCU?</source>
         <translation>Odzyskać MCU %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1053"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1058"/>
         <source>Erase everything on the %1 MCU?</source>
         <translation>Wymazać cały MCU %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1056"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1061"/>
         <source>This cannot be undone.</source>
         <translation>Tej operacji nie można cofnąć.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1057"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1062"/>
         <source>Recover</source>
         <translation>Odzyskaj</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1057"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1062"/>
         <source>Erase everything</source>
         <translation>Wymaż wszystko</translation>
     </message>
@@ -7484,114 +7536,114 @@
         <translation>Wgraj inny</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="702"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="703"/>
         <source>Not checked</source>
         <translation>Nie sprawdzono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="766"/>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="797"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="767"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="798"/>
         <source>This is LTE firmware. Update it with the LTE firmware update, which moves the J-Link between the connectors.</source>
         <translation>To jest firmware LTE. Wgraj go aktualizacją firmware LTE, która przeprowadzi przełożenie J-Linka między złączami.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="769"/>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="799"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="770"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="800"/>
         <source>This firmware is for another MCU. Check whether it is application or LTE firmware.</source>
         <translation>Ten firmware jest przeznaczony dla innego MCU. Sprawdź, czy to firmware aplikacji, czy firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="784"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="785"/>
         <source>The file is not a valid HEX file (line %1). Use the .hex file produced by the build, or download it from the catalog again.</source>
         <translation>Plik nie jest prawidłowym plikiem HEX (wiersz %1). Użyj pliku .hex utworzonego przez kompilację albo pobierz go ponownie z katalogu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="788"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="789"/>
         <source>The file is not a valid HEX file. Use the .hex file produced by the build, or download it from the catalog again.</source>
         <translation>Plik nie jest prawidłowym plikiem HEX. Użyj pliku .hex utworzonego przez kompilację albo pobierz go ponownie z katalogu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="792"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="793"/>
         <source>This file is not CHESTER firmware. Application and LTE firmware are .hex files; LTE bundles and modem firmware are .zip files.</source>
         <translation>Ten plik nie jest firmware dla CHESTER. Firmware aplikacji i firmware LTE to pliki .hex; pakiety LTE i firmware modemu to pliki .zip.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="803"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="804"/>
         <source>No firmware has this ID. Copy the ID from the firmware catalog again.</source>
         <translation>Żaden firmware nie ma tego ID. Skopiuj ID ponownie z katalogu firmware.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="838"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="839"/>
         <source>The device tab was closed</source>
         <translation>Karta urządzenia została zamknięta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="841"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="842"/>
         <source>Choose a firmware file</source>
         <translation>Wybierz plik firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="844"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="845"/>
         <source>Another operation is running</source>
         <translation>Trwa inna operacja</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="863"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="864"/>
         <source>%1 (Intel HEX, %2) → %3 of %4 via J-Link %5.</source>
         <translation>%1 (Intel HEX, %2) → %3 urządzenia %4 przez J-Link %5.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="869"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="870"/>
         <source>The current application firmware is replaced. The UICR configuration is also written; the Product Information Block is kept.</source>
         <translation>Obecny firmware aplikacji zostanie zastąpiony. Zostanie też zapisana konfiguracja UICR; blok informacji o produkcie (PIB) zostanie zachowany.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="872"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="873"/>
         <source>The current application firmware is replaced. Configuration and the Product Information Block are kept.</source>
         <translation>Obecny firmware aplikacji zostanie zastąpiony. Konfiguracja i blok informacji o produkcie (PIB) zostaną zachowane.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="916"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="917"/>
         <source>Flashing…</source>
         <translation>Wgrywanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="917"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="918"/>
         <source>Flashing is in progress. Cancel it and close the tab?</source>
         <translation>Trwa wgrywanie. Anulować je i zamknąć kartę?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1004"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1005"/>
         <source>Flashing is in progress. Cancel it and close the wizard?</source>
         <translation>Trwa wgrywanie. Anulować je i zamknąć kreatora?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1007"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1008"/>
         <source>The connection is being checked. Cancel it and close the wizard?</source>
         <translation>Trwa sprawdzanie połączenia. Przerwać je i zamknąć kreator?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1066"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1067"/>
         <source>Flashing %1 to the %2 MCU</source>
         <translation>Wgrywanie %1 do MCU %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1093"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1094"/>
         <source>Cancelling…</source>
         <translation>Anulowanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1113"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1114"/>
         <source>Firmware flashed and verified in %1 s.</source>
         <translation>Firmware wgrany i zweryfikowany w %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1115"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1116"/>
         <source>Chip: %1</source>
         <translation>Układ: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1123"/>
+        <location filename="../app/gui/src/wizard/flash_wizard.cpp" line="1124"/>
         <source>Flashing was interrupted. The firmware may be partly written: flash it again.</source>
         <translation>Wgrywanie zostało przerwane. Firmware może być zapisany tylko częściowo: wgraj go ponownie.</translation>
     </message>
@@ -7599,7 +7651,7 @@
 <context>
     <name>hwio::gui::GuiDeviceProvider</name>
     <message>
-        <location filename="../app/gui/src/mcp/gui_device_provider.cpp" line="528"/>
+        <location filename="../app/gui/src/mcp/gui_device_provider.cpp" line="537"/>
         <source>An AI assistant is running an operation on this device. Cancel it and close the tab?</source>
         <translation>Asystent AI wykonuje operację na tym urządzeniu. Anulować ją i zamknąć kartę?</translation>
     </message>
@@ -7836,98 +7888,98 @@
 <context>
     <name>hwio::gui::McpController</name>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="69"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="70"/>
         <source>Flash firmware (flash, LTE, raw flash)</source>
         <translation>Wgrywanie firmware (flash, LTE, surowy zapis flash)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="71"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="72"/>
         <source>Erase and recover</source>
         <translation>Wymazywanie i odzyskiwanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="73"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="74"/>
         <source>Write memory</source>
         <translation>Zapis pamięci</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="75"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="76"/>
         <source>Write UICR / factory data</source>
         <translation>Zapis UICR / danych fabrycznych</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="77"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="78"/>
         <source>Connect devices (opens a tab)</source>
         <translation>Łączenie urządzeń (otwiera kartę)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="153"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="170"/>
         <source>The AI assistant cancelled the request</source>
         <translation>Asystent AI anulował żądanie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="260"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="86"/>
         <source>Writing memory can make the device run arbitrary code.</source>
         <translation>Zapis pamięci może sprawić, że urządzenie wykona dowolny kod.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="277"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="305"/>
         <source>An AI assistant</source>
         <translation>Asystent AI</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="285"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="313"/>
         <source>Allowed until disconnect: %1 — %2</source>
         <translation>Dozwolone do rozłączenia: %1 — %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="317"/>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="379"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="345"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="407"/>
         <source>Copied.</source>
         <translation>Skopiowano.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="354"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="382"/>
         <source>Claude Code (HTTP)</source>
         <translation>Claude Code (HTTP)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="357"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="385"/>
         <source>Claude Code (.mcp.json, token from HWIO_MCP_TOKEN)</source>
         <translation>Claude Code (.mcp.json, token z HWIO_MCP_TOKEN)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="360"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="388"/>
         <source>Claude Desktop (runs the hwio command separately)</source>
         <translation>Claude Desktop (uruchamia polecenie hwio osobno)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="361"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="389"/>
         <source>Runs separately from this window and cannot use a probe that is open here.</source>
         <translation>Działa niezależnie od tego okna i nie może użyć programatora otwartego tutaj.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="378"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="406"/>
         <source>Copied. Run it in a terminal.</source>
         <translation>Skopiowano. Uruchom to w terminalu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="387"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="415"/>
         <source>Off</source>
         <translation>Wyłączony</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="389"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="417"/>
         <source>Starting…</source>
         <translation>Uruchamianie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="391"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="419"/>
         <source>Listening</source>
         <translation>Nasłuchuje</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="392"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="420"/>
         <source>Listening · %n client(s)</source>
         <translation>
             <numerusform>Nasłuchuje · %n klient</numerusform>
@@ -7936,22 +7988,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="394"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="422"/>
         <source>Stopping…</source>
         <translation>Zatrzymywanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="397"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="425"/>
         <source>Port %1 is in use by another program — choose another port</source>
         <translation>Port %1 jest używany przez inny program — wybierz inny port</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="408"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="436"/>
         <source>AI assistants: listening on port %1</source>
         <translation>Asystenci AI: nasłuchuje na porcie %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="409"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="437"/>
         <source>AI assistants: listening on port %1, %n client(s)</source>
         <translation>
             <numerusform>Asystenci AI: nasłuchuje na porcie %1, %n klient</numerusform>
@@ -7960,12 +8012,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="417"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="445"/>
         <source>AI assistants: %1</source>
         <translation>Asystenci AI: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="626"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="654"/>
         <source>%1 (tab %2)</source>
         <translation>%1 (karta %2)</translation>
     </message>
@@ -8246,20 +8298,20 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
     </message>
     <message>
         <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="225"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="755"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="754"/>
         <source>J-Link</source>
         <translation>J-Link</translation>
     </message>
     <message>
         <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="227"/>
         <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="375"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="751"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="750"/>
         <source>USB access</source>
         <translation>Dostęp USB</translation>
     </message>
     <message>
         <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="229"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="753"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="752"/>
         <source>nRF Util</source>
         <translation>nRF Util</translation>
     </message>
@@ -8342,7 +8394,7 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
     </message>
     <message>
         <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="338"/>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="749"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="748"/>
         <source>J-Link Software</source>
         <translation>J-Link Software</translation>
     </message>
@@ -8421,22 +8473,22 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>Zaktualizuj firmware J-Link %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="773"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="772"/>
         <source>Not checked</source>
         <translation>Nie sprawdzono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="778"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="777"/>
         <source>Ready</source>
         <translation>Gotowe</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="781"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="780"/>
         <source>Skipped</source>
         <translation>Pominięto</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="784"/>
+        <location filename="../app/gui/src/wizard/setup_wizard.cpp" line="783"/>
         <source>Not ready</source>
         <translation>Niegotowe</translation>
     </message>
@@ -8520,116 +8572,116 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>Rozwiązywanie problemów</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="345"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="344"/>
         <source>Not checked: no J-Link chosen</source>
         <translation>Nie sprawdzono: nie wybrano J-Linka</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="374"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="373"/>
         <source>Problem</source>
         <translation>Problem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="379"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="378"/>
         <source>Error</source>
         <translation>Błąd</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="384"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="383"/>
         <source>Probe</source>
         <translation>Programator</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="392"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="391"/>
         <source>Support</source>
         <translation>Wsparcie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="420"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="419"/>
         <source>The J-Link is on the LTE connector. Move it to the APP connector.</source>
         <translation>J-Link jest na złączu LTE. Przełóż go na złącze APP.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="431"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="430"/>
         <source>Learn more</source>
         <translation>Więcej informacji</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="438"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="521"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="532"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="539"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="437"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="520"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="531"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="538"/>
         <source>Next</source>
         <translation>Dalej</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="447"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="446"/>
         <source>Setup wizard…</source>
         <translation>Kreator konfiguracji…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="451"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="450"/>
         <source>Found — connect now</source>
         <translation>Znaleziono — połącz teraz</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="454"/>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="465"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="453"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="464"/>
         <source>Check again</source>
         <translation>Sprawdź ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="462"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="461"/>
         <source>Connect a device</source>
         <translation>Połącz urządzenie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="510"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="509"/>
         <source>What is the problem?</source>
         <translation>Na czym polega problem?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="529"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="528"/>
         <source>Let&apos;s find the cause.</source>
         <translation>Znajdźmy przyczynę.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="537"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="536"/>
         <source>Choose the J-Link</source>
         <translation>Wybierz J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="538"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="537"/>
         <source>The checks need a J-Link. Choose the one connected to the device.</source>
         <translation>Sprawdzenia wymagają J-Linka. Wybierz ten, który jest podłączony do urządzenia.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="546"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="545"/>
         <source>Still not working?</source>
         <translation>Nadal nie działa?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="547"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="546"/>
         <source>Create a diagnostic report and send it to HARDWARIO support.</source>
         <translation>Utwórz raport diagnostyczny i wyślij go do wsparcia HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="548"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="547"/>
         <source>Create diagnostic report…</source>
         <translation>Utwórz raport diagnostyczny…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="737"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="736"/>
         <source>J-Link speed set to 1000 kHz for this probe.</source>
         <translation>Prędkość J-Linka dla tego programatora ustawiona na 1000 kHz.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="767"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="766"/>
         <source>Update J-Link firmware %1…</source>
         <translation>Aktualizuj firmware J-Linka %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="802"/>
+        <location filename="../app/gui/src/wizard/troubleshooting_wizard.cpp" line="801"/>
         <source>A check is running. Cancel it and close the wizard?</source>
         <translation>Trwa sprawdzanie. Przerwać je i zamknąć kreator?</translation>
     </message>
@@ -8721,12 +8773,12 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
 <context>
     <name>hwio::jlink</name>
     <message>
-        <location filename="../libs/hw/jlink/src/jlink_library.cpp" line="373"/>
+        <location filename="../libs/hw/jlink/src/jlink_library.cpp" line="376"/>
         <source>J-Link Software %1 is too old.</source>
         <translation>J-Link Software %1 jest za stary.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="103"/>
+        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="105"/>
         <source>The J-Link %1 is a network J-Link; network J-Links are not supported for sessions yet.</source>
         <translation>J-Link %1 jest sieciowym J-Linkiem; sieciowe J-Linki nie są jeszcze obsługiwane w sesjach.</translation>
     </message>
@@ -8737,37 +8789,37 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>Nie znaleziono programatora J-Link o numerze seryjnym %1.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="276"/>
+        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="274"/>
         <source>The device has no power (%1 mV).</source>
         <translation>Urządzenie nie ma zasilania (%1 mV).</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="286"/>
+        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="283"/>
         <source>Could not connect to the device&apos;s %1 MCU.</source>
         <translation>Nie można połączyć się z MCU %1 urządzenia.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="158"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="166"/>
         <source>The MCU type could not be read (FICR).</source>
         <translation>Nie można odczytać typu MCU (FICR).</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="173"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="215"/>
         <source>Programming was interrupted; the firmware may be partly written.</source>
         <translation>Programowanie zostało przerwane; firmware może być zapisany tylko częściowo.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="177"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="218"/>
         <source>Check the cables and power, then flash the firmware again.</source>
         <translation>Sprawdź kable i zasilanie, a następnie wgraj firmware ponownie.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="290"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="348"/>
         <source>Verification failed at address %1.</source>
         <translation>Weryfikacja nie powiodła się pod adresem %1.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/rtt_channel.cpp" line="58"/>
+        <location filename="../libs/hw/jlink/src/rtt_channel.cpp" line="61"/>
         <source>RTT buffer &quot;%1&quot; not found.</source>
         <translation>Nie znaleziono bufora RTT &quot;%1&quot;.</translation>
     </message>
@@ -8775,52 +8827,52 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
 <context>
     <name>hwio::mcp</name>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="496"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="533"/>
         <source>— AI (%1): %2 —</source>
         <translation>— AI (%1): %2 —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="500"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="537"/>
         <source>— AI: %1 done in %2 s —</source>
         <translation>— AI: %1 ukończono w %2 s —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="505"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="542"/>
         <source>— AI: %1 failed: %2 —</source>
         <translation>— AI: %1 nie powiodło się: %2 —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="510"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="547"/>
         <source>— AI: %1 cancelled —</source>
         <translation>— AI: %1 anulowano —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="515"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="552"/>
         <source>AI: Flashing…</source>
         <translation>AI: Wgrywanie…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="518"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="555"/>
         <source>AI: Erasing…</source>
         <translation>AI: Wymazywanie…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="521"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="558"/>
         <source>AI: Recovering…</source>
         <translation>AI: Odzyskiwanie…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="524"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="561"/>
         <source>AI: Writing memory…</source>
         <translation>AI: Zapis do pamięci…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="527"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="564"/>
         <source>AI: Resetting…</source>
         <translation>AI: Resetowanie…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="529"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="566"/>
         <source>AI: %1…</source>
         <translation>AI: %1…</translation>
     </message>
@@ -8828,7 +8880,7 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
 <context>
     <name>hwio::nrfutil</name>
     <message>
-        <location filename="../libs/hw/nrfutil/src/nrfutil.cpp" line="304"/>
+        <location filename="../libs/hw/nrfutil/src/nrfutil.cpp" line="307"/>
         <source>nRF Util %1 is too old.</source>
         <translation>nRF Util %1 jest za stary.</translation>
     </message>
@@ -9095,22 +9147,22 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_operation_client.cpp" line="32"/>
+        <location filename="../libs/remote/src/remote_operation_client.cpp" line="34"/>
         <source>Reported by the customer&apos;s Monitor: %1</source>
         <translation>Zgłoszone przez Monitor klienta: %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_operation_client.cpp" line="47"/>
+        <location filename="../libs/remote/src/remote_operation_client.cpp" line="50"/>
         <source>The customer&apos;s Monitor did not answer in time.</source>
         <translation>Monitor klienta nie odpowiedział na czas.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/session_code.cpp" line="40"/>
+        <location filename="../libs/remote/src/session_code.cpp" line="42"/>
         <source>The support server address is not valid.</source>
         <translation>Adres serwera wsparcia jest nieprawidłowy.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/session_code.cpp" line="43"/>
+        <location filename="../libs/remote/src/session_code.cpp" line="44"/>
         <source>The address must start with https:// and name a server, for example https://terminal.hardwario.com.</source>
         <translation>Adres musi zaczynać się od https:// i wskazywać serwer, na przykład https://terminal.hardwario.com.</translation>
     </message>
@@ -9120,37 +9172,37 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>Popraw adres serwera wsparcia lub wyczyść go, aby używać domyślnego serwera.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="77"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="79"/>
         <source>— Connection restored; waiting for the customer to allow you again —</source>
         <translation>— Połączenie przywrócone; oczekiwanie, aż klient ponownie Cię dopuści —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="126"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="129"/>
         <source>A command line must not be longer than %1 bytes.</source>
         <translation>Wiersz polecenia nie może być dłuższy niż %1 bajtów.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="189"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="190"/>
         <source>Session %1</source>
         <translation>Sesja %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="196"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="197"/>
         <source>%1 — remote</source>
         <translation>%1 — zdalnie</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="200"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="201"/>
         <source>%1 — web Terminal</source>
         <translation>%1 — web Terminal</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="278"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="279"/>
         <source>— Connected to HARDWARIO Monitor %1 of the customer —</source>
         <translation>— Połączono z HARDWARIO Monitor %1 klienta —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="329"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="331"/>
         <source>The customer&apos;s device is disconnected.</source>
         <translation>Urządzenie klienta jest odłączone.</translation>
     </message>
@@ -9165,65 +9217,65 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         <translation>— Starsza historia sesji została pominięta —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="117"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="119"/>
         <source>Sharing started, session %1 (%2).</source>
         <translation>Udostępnianie rozpoczęte, sesja %1 (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="126"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="128"/>
         <source>The join question was not answered within 2 minutes.</source>
         <translation>Na pytanie o dołączenie nie odpowiedziano w ciągu 2 minut.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="140"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="142"/>
         <source>%1: denied (no answer within 60 s).</source>
         <translation>%1: odrzucono (brak odpowiedzi w ciągu 60 s).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="150"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="153"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="152"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="156"/>
         <source>Sharing ended after 30 minutes without activity.</source>
         <translation>Udostępnianie zakończone po 30 minutach bez aktywności.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="158"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="172"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="159"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="171"/>
         <source>Start sharing again if support still needs the console.</source>
         <translation>Udostępnij ponownie, jeśli wsparcie nadal potrzebuje konsoli.</translation>
     </message>
     <message>
         <location filename="../libs/remote/src/remote_host.cpp" line="165"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="167"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="168"/>
         <source>Sharing ended after the maximum of 8 hours.</source>
         <translation>Udostępnianie zakończone po maksymalnym czasie 8 godzin.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="180"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="178"/>
         <source>Participant app: web Terminal or unknown.</source>
         <translation>Aplikacja uczestnika: web Terminal lub nieznana.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="240"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="238"/>
         <source>Connection to the support server restored.</source>
         <translation>Połączenie z serwerem wsparcia przywrócone.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="265"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="263"/>
         <source>Another device uses this session code; the session was ended for safety.</source>
         <translation>Inne urządzenie używa tego kodu sesji; sesja została zakończona ze względów bezpieczeństwa.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="280"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="278"/>
         <source>Someone joined the session.</source>
         <translation>Ktoś dołączył do sesji.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="299"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="297"/>
         <source>%1: denied (someone joined).</source>
         <translation>%1: odrzucono (ktoś dołączył).</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="323"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="321"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n zdalne polecenie zostało odrzucone podczas oczekiwania na Twoją odpowiedź.</numerusform>
@@ -9232,119 +9284,119 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="329"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="327"/>
         <source>You ended the session instead of allowing the participant.</source>
         <translation>Zakończono sesję zamiast dopuścić uczestnika.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="336"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="334"/>
         <source>Participant allowed.</source>
         <translation>Uczestnik dopuszczony.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="337"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="335"/>
         <source>Participant allowed (%1).</source>
         <translation>Uczestnik dopuszczony (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="426"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="424"/>
         <source>A remote command was dropped (too long or with control characters).</source>
         <translation>Zdalne polecenie zostało odrzucone (za długie lub ze znakami sterującymi).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="438"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="436"/>
         <source>Remote commands dropped: more than %1 per second.</source>
         <translation>Zdalne polecenia odrzucone: więcej niż %1 na sekundę.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="448"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="446"/>
         <source>command %1</source>
         <translation>polecenie %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="466"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="464"/>
         <source>An operation request was refused: the participant is not allowed.</source>
         <translation>Żądanie operacji odrzucono: uczestnik nie jest dopuszczony.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="485"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="483"/>
         <source>Participant app: %1.</source>
         <translation>Aplikacja uczestnika: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="578"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="576"/>
         <source>Support asks: %1.</source>
         <translation>Prośba wsparcia: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="581"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="579"/>
         <source>%1: refused (this console has no operations).</source>
         <translation>%1: odmowa (ta konsola nie ma operacji).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="589"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="587"/>
         <source>%1: refused (not available on this console).</source>
         <translation>%1: odmowa (niedostępne w tej konsoli).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="596"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="594"/>
         <source>%1: refused (another request or operation is in progress).</source>
         <translation>%1: odmowa (trwa inne żądanie lub operacja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="604"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="628"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="602"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="626"/>
         <source>%1: refused (%2).</source>
         <translation>%1: odmowa (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="656"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="654"/>
         <source>%1: denied by you.</source>
         <translation>%1: odrzucono (Twoja decyzja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="675"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="673"/>
         <source>%1: allowed by you.</source>
         <translation>%1: zezwolono (Twoja decyzja).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="739"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="737"/>
         <source>%1: waiting for support&apos;s answer: %2</source>
         <translation>%1: oczekiwanie na odpowiedź wsparcia: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="773"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="771"/>
         <source>Support answered: continue.</source>
         <translation>Wsparcie odpowiedziało: kontynuuj.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="791"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="794"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="789"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="792"/>
         <source>%1: done.</source>
         <translation>%1: gotowe.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="797"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="795"/>
         <source>%1: failed: %2</source>
         <translation>%1: niepowodzenie: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="851"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="849"/>
         <source>— Remote: %1 —</source>
         <translation>— Zdalnie: %1 —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="884"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="882"/>
         <source>You ended sharing.</source>
         <translation>Zakończono udostępnianie.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="902"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="900"/>
         <source>Support did not answer before the session ended.</source>
         <translation>Wsparcie nie odpowiedziało przed zakończeniem sesji.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="929"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="927"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Odczytano pomoc %n polecenia dla podpowiedzi wsparcia.</numerusform>
@@ -9353,12 +9405,12 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="936"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="934"/>
         <source>Sharing ended.</source>
         <translation>Udostępnianie zakończone.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="937"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="935"/>
         <source>Sharing ended: %1</source>
         <translation>Udostępnianie zakończone: %1</translation>
     </message>

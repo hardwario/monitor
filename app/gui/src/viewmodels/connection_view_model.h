@@ -27,6 +27,7 @@
 //
 // Ownership: child of its DeviceTabViewModel (Qt parent). GUI thread only.
 
+#include "hwio/core/localized_text.h"
 #include "hwio/device/session_events.h"
 #include "viewmodels/error_info.h"
 
@@ -255,6 +256,8 @@ public:
 
     // The short cause for state texts and markers ("target not powered"), translated.
     [[nodiscard]] static QString shortCause(const Error& error);
+    // The same with its English text (console markers, ADR-0374).
+    [[nodiscard]] static LocalizedText shortCauseText(const Error& error);
 
 signals:
     void probeChanged();

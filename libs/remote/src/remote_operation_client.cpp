@@ -1,6 +1,7 @@
 #include "hwio/remote/remote_operation_client.h"
 
 #include "hwio/core/error.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/remote/remote_console_session.h"
 #include "hwio/remote/tunnel.h"
@@ -10,6 +11,7 @@
 #include <QRandomGenerator>
 #include <QTimer>
 #include <QtCore/qtmetamacros.h>
+#include <QtTranslation>
 
 #include <expected>
 #include <format>
@@ -28,10 +30,9 @@ Error fromHostCode(const std::string& code, bool reportedResult) {
     const std::optional<ErrorCode> known = errorCodeFromId(code);
     Error error = makeError(known.value_or(ErrorCode::RemoteProtocolError), "host: " + code);
     if (reportedResult) {
-        error.message =
-            QCoreApplication::translate("hwio::remote", "Reported by the customer's Monitor: %1")
-                .arg(QString::fromStdString(error.message))
-                .toStdString();
+        setText(error, ErrorText::Message, "hwio::remote",
+                QT_TRANSLATE_NOOP("hwio::remote", "Reported by the customer's Monitor: %1"),
+                {textOf(error, ErrorText::Message)});
     }
     return error;
 }
@@ -44,9 +45,9 @@ RemoteOperationClient::RemoteOperationClient(RemoteConsoleSession& session,
     m_timer.setSingleShot(true);
     connect(&m_timer, &QTimer::timeout, this, [this] {
         Error error = makeError(ErrorCode::Timeout, "no answer from the customer's Monitor");
-        error.message = QCoreApplication::translate(
-                            "hwio::remote", "The customer's Monitor did not answer in time.")
-                            .toStdString();
+        setText(
+            error, ErrorText::Message, "hwio::remote",
+            QT_TRANSLATE_NOOP("hwio::remote", "The customer's Monitor did not answer in time."));
         finish(std::move(error));
     });
     connect(&session, &RemoteConsoleSession::hostMessage, this, &RemoteOperationClient::onMessage);

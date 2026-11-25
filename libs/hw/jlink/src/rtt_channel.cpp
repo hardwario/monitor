@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/firmware/firmware_image.h"
@@ -15,6 +16,7 @@
 #include <QString>
 #include <QStringLiteral>
 #include <QtLogging>
+#include <QtTranslation>
 
 #include <algorithm>
 #include <cstddef>
@@ -55,9 +57,8 @@ void logBuffers(const std::vector<RttBufferInfo>& buffers, const char* direction
 
 Error bufferNotFound(const std::string& name, std::string detail) {
     Error error = makeError(ErrorCode::TargetRttBufferNotFound, std::move(detail));
-    error.message = QCoreApplication::translate("hwio::jlink", "RTT buffer \"%1\" not found.")
-                        .arg(toQString(name))
-                        .toStdString();
+    setText(error, ErrorText::Message, "hwio::jlink",
+            QT_TRANSLATE_NOOP("hwio::jlink", "RTT buffer \"%1\" not found."), {toQString(name)});
     return error;
 }
 
