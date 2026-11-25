@@ -120,6 +120,8 @@ qt_add_qml_module(hwio_gui
         src/mcp/client_name.h
         src/mcp/client_snippets.cpp
         src/mcp/client_snippets.h
+        src/mcp/consent_rules_model.cpp
+        src/mcp/consent_rules_model.h
         src/mcp/consent_view_model.cpp
         src/mcp/consent_view_model.h
         src/mcp/gui_consent_broker.cpp

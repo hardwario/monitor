@@ -481,7 +481,13 @@ struct Error {
     std::string message;    // what happened (translated, UTF-8)
     std::string cause;      // why it probably happened (translated, UTF-8)
     std::string suggestion; // what the user should do (translated, UTF-8)
-    std::string detail;     // technical detail: codes, paths, versions (not translated)
+    // Plan 0050 (ADR-0374): the same three texts in English (the source text with the same
+    // arguments), sent over MCP (ADR-0103). Set together with the translated text by makeError()
+    // and hwio::setText() (localized_text.h); never set only one of a pair.
+    std::string messageEn;
+    std::string causeEn;
+    std::string suggestionEn;
+    std::string detail; // technical detail: codes, paths, versions (not translated)
     std::optional<WizardId> wizard;
 
     // ADR-0177: hwio::Error is the error type of every meta-registered Result<T> (signal
@@ -490,8 +496,9 @@ struct Error {
 };
 
 // Error with the default texts of `code`, translated into the current process language
-// (context "hwio::core", ADR-0027). The texts have no placeholders; values such as paths go into
-// `detail`. Call sites that know more use the full hwio::fail(code, message, cause, ...).
+// (context "hwio::core", ADR-0027), and their English source (messageEn, ..., ADR-0374). The texts
+// have no placeholders; values such as paths go into `detail`. Call sites that know more replace
+// a text with hwio::setText() (localized_text.h), which sets both languages.
 [[nodiscard]] Error makeError(ErrorCode code, std::string detail = {});
 
 // ADR-0383: the suggestion of an LTE update failure inside the guided update (GUI wizard,

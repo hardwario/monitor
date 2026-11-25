@@ -3,6 +3,7 @@
 #include "ble_session_internal.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/version.h"
@@ -31,6 +32,7 @@
 #include <QTimer>
 #include <QtCore/qnamespace.h>
 #include <QtLogging>
+#include <QtTranslation>
 
 #include <chrono>
 #include <cstddef>
@@ -57,9 +59,9 @@ template <class... Ts> struct Overloaded : Ts... {
 
 using Clock = std::chrono::steady_clock;
 
-Error invalidOption(const QString& message, std::string detail) {
+Error invalidOption(const LocalizedText& message, std::string detail) {
     Error error = makeError(ErrorCode::UsageInvalidArgument, std::move(detail));
-    error.message = message.toStdString();
+    setText(error, ErrorText::Message, message);
     return error;
 }
 
@@ -294,9 +296,8 @@ void BleConsoleHandler::onLineRejected(std::string /*line*/, Error error) {
     emitEvent(BleLineRejected{});
     if (error.code == ErrorCode::TargetNotConnected && m_config.autoReconnect && !m_fatal) {
         // Only when the session will really reconnect by itself (as DeviceSession, review R35).
-        error.suggestion =
-            QCoreApplication::translate("hwio::device", "Wait for the console to reconnect.")
-                .toStdString();
+        setText(error, ErrorText::Suggestion, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device", "Wait for the console to reconnect."));
     }
     warn(std::move(error));
 }
@@ -310,19 +311,16 @@ void BleConsoleHandler::onDown(Error error) {
             m_config.deviceName.empty() ? m_config.deviceId : m_config.deviceName;
         const QString who = toQString(name);
         if (error.code == ErrorCode::BleDisconnected) {
-            error.message = QCoreApplication::translate("hwio::device",
-                                                        "The Bluetooth connection to %1 was lost.")
-                                .arg(who)
-                                .toStdString();
+            setText(error, ErrorText::Message, "hwio::device",
+                    QT_TRANSLATE_NOOP("hwio::device", "The Bluetooth connection to %1 was lost."),
+                    {who});
         } else if (error.code == ErrorCode::BleConnectFailed) {
-            error.message = QCoreApplication::translate("hwio::device",
-                                                        "Could not connect to %1 over Bluetooth.")
-                                .arg(who)
-                                .toStdString();
+            setText(error, ErrorText::Message, "hwio::device",
+                    QT_TRANSLATE_NOOP("hwio::device", "Could not connect to %1 over Bluetooth."),
+                    {who});
         } else if (error.code == ErrorCode::BlePairingFailed) {
-            error.message = QCoreApplication::translate("hwio::device", "Pairing with %1 failed.")
-                                .arg(who)
-                                .toStdString();
+            setText(error, ErrorText::Message, "hwio::device",
+                    QT_TRANSLATE_NOOP("hwio::device", "Pairing with %1 failed."), {who});
         }
     }
     emitEvent(BleAttemptEnded{});
@@ -376,27 +374,35 @@ Result<std::unique_ptr<BleSession>> BleSessionInternals::open(SessionRegistry& r
     // 1. options
     if (options.profile == nullptr) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "No device profile was given."), {}));
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "No device profile was given.")),
+            {}));
     }
     if (!options.profile->ble) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "The device %1 has no Bluetooth console.")
-                .arg(toQString(options.profile->displayName)),
+            localizedText(
+                "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device", "The device %1 has no Bluetooth console."),
+                {toQString(options.profile->displayName)}),
             std::string(options.profile->id)));
     }
     const BleProfile& ble = *options.profile->ble;
     const TargetProfile* target = findTarget(*options.profile, ble.consoleTargetId);
     if (target == nullptr) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "The device %1 has no target \"%2\".")
-                .arg(toQString(options.profile->displayName), toQString(ble.consoleTargetId)),
+            localizedText(
+                "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device", "The device %1 has no target \"%2\"."),
+                {toQString(options.profile->displayName), toQString(ble.consoleTargetId)}),
             {}));
     }
     // Review B6: one form per device (lock file, registry key, console file name).
     options.deviceId = ble::canonicalDeviceId(options.deviceId);
     if (options.deviceId.empty()) {
         return std::unexpected(invalidOption(
-            QCoreApplication::translate("hwio::device", "No Bluetooth device was given."), {}));
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "No Bluetooth device was given.")),
+            {}));
     }
     // 2. the registry slot, 3. the cross-process lock (ADR-0083)
     if (auto available =
@@ -528,11 +534,12 @@ Status BleSession::sendLine(std::string line) {
         return fail(ErrorCode::Cancelled);
     }
     if (line.size() > ble::NusLink::maxLineBytes) {
-        return std::unexpected(
-            invalidOption(QCoreApplication::translate(
-                              "hwio::device", "A command line must not be longer than %1 bytes.")
-                              .arg(ble::NusLink::maxLineBytes),
-                          std::to_string(line.size())));
+        return std::unexpected(invalidOption(
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device",
+                                            "A command line must not be longer than %1 bytes."),
+                          {ble::NusLink::maxLineBytes}),
+            std::to_string(line.size())));
     }
     // Review B4: synchronous back-pressure as DeviceSession (R39): the caller keeps the line and
     // sends it again later instead of losing it in the link's queue.

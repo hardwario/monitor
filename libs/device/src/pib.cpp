@@ -1,6 +1,7 @@
 #include "hwio/device/pib.h"
 
 #include "hwio/core/error.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/core/text_sanitizer.h"
 
@@ -8,6 +9,7 @@
 #include <QJsonObject>
 #include <QString>
 #include <QStringLiteral>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <cstddef>
@@ -70,10 +72,10 @@ std::string ascii(std::span<const std::byte> bytes, const Field& field) {
 
 Error invalid(std::string_view check, std::string detail) {
     Error error = makeError(ErrorCode::PibInvalid, std::move(detail));
-    error.message = QCoreApplication::translate(
-                        "hwio::device", "The Product Information Block is missing or damaged (%1).")
-                        .arg(QString::fromUtf8(check.data(), static_cast<qsizetype>(check.size())))
-                        .toStdString();
+    setText(error, ErrorText::Message, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device",
+                              "The Product Information Block is missing or damaged (%1)."),
+            {QString::fromUtf8(check.data(), static_cast<qsizetype>(check.size()))});
     return error;
 }
 

@@ -33,14 +33,15 @@ target_link_libraries(hwio_mcp_tools_tests PRIVATE hwio::mcp_tools GTest::gmock 
 target_compile_definitions(hwio_mcp_tools_tests PRIVATE
     "HWIO_MCP_TOOLS_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\"")
 
-# Under ThreadSanitizer the catalog test is left out like the libs/firmware catalog tests:
+# Under ThreadSanitizer the catalog tests (FlashFromTheCatalog; CatalogFlash.* of plan 0054, approved by the
+# user 2026-11-23) are left out like the libs/firmware catalog tests:
 # QNetworkAccessManager's HTTP thread lives inside the uninstrumented Qt libraries, so TSan reports
 # Qt's own posted events as races (plan/features/0003, review R11).
 # The owner-thread stall test (OwnerThread.*) measures dispatch latency, so it runs alone
 # (RUN_SERIAL): parallel test processes on the same machine would distort the measurement.
 set(_hwio_mcp_tools_test_filter "-OwnerThread.*")
 if("thread" IN_LIST HWIO_SANITIZERS)
-    set(_hwio_mcp_tools_test_filter "-OwnerThread.*:JLinkTools.FlashFromTheCatalog")
+    set(_hwio_mcp_tools_test_filter "-OwnerThread.*:JLinkTools.FlashFromTheCatalog:CatalogFlash.*")
 endif()
 gtest_discover_tests(hwio_mcp_tools_tests
     DISCOVERY_TIMEOUT 60

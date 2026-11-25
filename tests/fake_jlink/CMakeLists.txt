@@ -29,3 +29,14 @@ target_link_libraries(hwio_fake_jlink_basic PRIVATE Qt6::Core)
 set_target_properties(hwio_fake_jlink_basic PROPERTIES
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN ON)
+
+# macOS AddressSanitizer: every session loads its own copy of the fake library and unloads it
+# again. A later copy mapped where an earlier image was found that image's global redzones still
+# poisoned ("global-buffer-overflow ... inside (anonymous namespace)::state()::instance" in State's
+# constructor, tst_gui on the macos-asan runner, 2026-11-23). The globals of these test-only
+# libraries are therefore not instrumented there; heap and stack checks stay on.
+if(APPLE AND "address" IN_LIST HWIO_SANITIZERS)
+    foreach(_hwio_fake IN ITEMS hwio_fake_jlink hwio_fake_jlink_incomplete hwio_fake_jlink_basic)
+        target_compile_options(${_hwio_fake} PRIVATE "SHELL:-mllvm -asan-globals=0")
+    endforeach()
+endif()

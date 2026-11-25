@@ -6,6 +6,7 @@
 #include "flag_consent_broker.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
@@ -112,8 +113,8 @@ fs::path toPath(const std::string& text) { return {toQString(text).toStdU16Strin
 
 Error usage(std::string message, std::string detail = {}) {
     Error error = makeError(ErrorCode::UsageInvalidArgument, std::move(detail));
-    error.message = std::move(message);
-    error.cause.clear();
+    setUntranslatedText(error, ErrorText::Message, std::move(message));
+    clearText(error, ErrorText::Cause);
     return error;
 }
 
@@ -124,16 +125,21 @@ Status checkGivenDir(const fs::path& directory, std::string_view what, std::stri
     const std::string shown = toUtf8(directory);
     if (!fs::is_directory(directory, ec)) {
         Error error = makeError(ErrorCode::IoFileNotFound, shown);
-        error.message = std::format("The {} {} does not exist.", what, shown);
-        error.suggestion =
-            std::format("Create the directory or choose another one with {}.", option);
+        setUntranslatedText(error, ErrorText::Message,
+                            std::format("The {} {} does not exist.", what, shown));
+        setUntranslatedText(
+            error, ErrorText::Suggestion,
+            std::format("Create the directory or choose another one with {}.", option));
         return std::unexpected(std::move(error));
     }
     if (!QFileInfo(QString::fromStdU16String(directory.u16string())).isWritable()) {
         Error error = makeError(ErrorCode::IoWriteFailed, shown);
-        error.message = std::format("The {} {} is not writable.", what, shown);
-        error.suggestion = std::format(
-            "Check the permissions of the directory or choose another one with {}.", option);
+        setUntranslatedText(error, ErrorText::Message,
+                            std::format("The {} {} is not writable.", what, shown));
+        setUntranslatedText(
+            error, ErrorText::Suggestion,
+            std::format("Check the permissions of the directory or choose another one with {}.",
+                        option));
         return std::unexpected(std::move(error));
     }
     return {};

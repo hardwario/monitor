@@ -16,6 +16,7 @@
 #include "hwio/hw/jlink/jlink_api.h"
 #include "hwio/hw/jlink/library_locator.h"
 #include "hwio/hw/jlink/programmer.h"
+#include "hwio/hw/jlink/types.h"
 #include "scripted_api.h"
 #include "session_internal.h"
 #include "session_test_support.h"
@@ -30,6 +31,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <format>
 #include <initializer_list>
 #include <memory>
 #include <optional>
@@ -277,6 +279,152 @@ TEST_F(TargetOperations, MemoryRegistersAndZonesKeepRttAttached) {
 }
 
 // ADR-0157: on another target the light operations switch and restore (M2 pattern).
+// Plan 0048 / ADR-0371: a library that confirms only the first N registers of a call. With the
+// V9.84 limit (45) the adapter's blocks of 32 return the full list; with 31 the last register of
+// every full block is left out (never reported with a junk value).
+TEST_F(TargetOperations, RegistersBeyondTheLibraryPerCallLimit) {
+    constexpr std::size_t count = 115;
+    target().set([](ScriptedTarget& t) {
+        t.app.registers.clear();
+        for (std::size_t i = 0; i < count; ++i) {
+            t.app.registers.push_back(hwio::jlink::RegisterValue{
+                .name = std::format("R{}", i), .value = static_cast<std::uint32_t>(0x1000 + i)});
+        }
+        t.app.readRegsLimit = 45;
+    });
+    auto session = openConnected(options());
+    ASSERT_TRUE(session);
+    ASSERT_TRUE(finish(session->halt("app"))->status);
+    const OperationResult* full = finish(session->readRegisters("app"));
+    ASSERT_NE(full, nullptr);
+    ASSERT_TRUE(full->status) << full->status.error().detail;
+    ASSERT_EQ(full->registers.size(), count);
+    for (std::size_t i = 0; i < count; ++i) {
+        EXPECT_EQ(full->registers[i].name, std::format("R{}", i));
+        EXPECT_EQ(full->registers[i].value, 0x1000U + i);
+    }
+
+    target().set([](ScriptedTarget& t) { t.app.readRegsLimit = 31; });
+    const OperationResult* partial = finish(session->readRegisters("app"));
+    ASSERT_NE(partial, nullptr);
+    ASSERT_TRUE(partial->status) << partial->status.error().detail;
+    ASSERT_EQ(partial->registers.size(), count - 3);
+    for (const auto& reg : partial->registers) {
+        EXPECT_NE(reg.value, 0x00AD9390U) << reg.name;
+        EXPECT_NE(reg.name, "R31");
+    }
+}
+
+// Plan 0049 (ADR-0372): readRegisters with haltIfRunning on a running core halts it for the read
+// and lets it run again; RTT stays attached and the console Connected.
+TEST_F(TargetOperations, ReadRegistersHaltsARunningCoreForTheRead) {
+    auto session = openConnected(options());
+    ASSERT_TRUE(session);
+    const int starts = rttStarts();
+    const int stops = rttStops();
+    const std::size_t connections = events().connections.size();
+    const std::size_t opsBefore = target().get([](ScriptedTarget& t) { return t.ops.size(); });
+    ASSERT_FALSE(target().get([](ScriptedTarget& t) { return t.halted; }));
+
+    const OperationResult* registers =
+        finish(session->readRegisters("app", {.haltIfRunning = true}));
+    ASSERT_NE(registers, nullptr);
+    ASSERT_TRUE(registers->status) << registers->status.error().detail;
+    ASSERT_EQ(registers->registers.size(), 2U);
+    EXPECT_EQ(registers->registers[1].name, "PC");
+    EXPECT_FALSE(target().get([](ScriptedTarget& t) { return t.halted; })); // running again
+    const auto sequence = target().get([](ScriptedTarget& t) { return t.ops; });
+    const std::vector<std::string> added(sequence.begin() + static_cast<std::ptrdiff_t>(opsBefore),
+                                         sequence.end());
+    EXPECT_EQ(added, (std::vector<std::string>{"halt", "go"}));
+
+    target().output(0, "after the read\n");
+    EXPECT_TRUE(receives("after the read"));
+    EXPECT_EQ(rttStarts(), starts);
+    EXPECT_EQ(rttStops(), stops);
+    EXPECT_EQ(events().connections.size(), connections);
+}
+
+// An already halted core stays halted (no halt, no go); without the option a running core gives
+// target.not_halted and is neither halted nor resumed.
+TEST_F(TargetOperations, ReadRegistersHaltOptionKeepsAHaltedCoreHalted) {
+    auto session = openConnected(options());
+    ASSERT_TRUE(session);
+    const OperationResult* running = finish(session->readRegisters("app"));
+    ASSERT_NE(running, nullptr);
+    ASSERT_FALSE(running->status);
+    EXPECT_EQ(running->status.error().code, ErrorCode::TargetNotHalted);
+
+    ASSERT_TRUE(finish(session->halt("app"))->status);
+    const std::size_t opsBefore = target().get([](ScriptedTarget& t) { return t.ops.size(); });
+    const OperationResult* registers =
+        finish(session->readRegisters("app", {.haltIfRunning = true}));
+    ASSERT_NE(registers, nullptr);
+    ASSERT_TRUE(registers->status) << registers->status.error().detail;
+    EXPECT_EQ(registers->registers.size(), 2U);
+    EXPECT_TRUE(target().get([](ScriptedTarget& t) { return t.halted; }));
+    EXPECT_EQ(target().get([](ScriptedTarget& t) { return t.ops.size(); }), opsBefore);
+}
+
+// A failed read still lets the CPU run again; the result is the read error.
+TEST_F(TargetOperations, ReadRegistersHaltOptionResumesAfterAFailedRead) {
+    auto session = openConnected(options());
+    ASSERT_TRUE(session);
+    target().set([](ScriptedTarget& t) { t.missing = {hwio::jlink::OptionalFunction::ReadRegs}; });
+    const OperationResult* failed = finish(session->readRegisters("app", {.haltIfRunning = true}));
+    ASSERT_NE(failed, nullptr);
+    ASSERT_FALSE(failed->status);
+    EXPECT_EQ(failed->status.error().code, ErrorCode::DependencyJLinkFunctionMissing);
+    EXPECT_FALSE(target().get([](ScriptedTarget& t) { return t.halted; }));
+    const auto sequence = target().get([](ScriptedTarget& t) { return t.ops; });
+    ASSERT_GE(sequence.size(), 2U);
+    EXPECT_EQ(sequence[sequence.size() - 2], "halt");
+    EXPECT_EQ(sequence.back(), "go");
+}
+
+// Review S7 / ADR-0034: a haltIfRunning read restores the state it found, so it does not stop
+// auto-reconnect (unlike halt).
+TEST_F(TargetOperations, ReadRegistersHaltOptionKeepsAutoReconnect) {
+    SessionOptions opts = options();
+    opts.autoReconnect = true;
+    auto session = openConnected(opts);
+    ASSERT_TRUE(session);
+    ASSERT_TRUE(finish(session->readRegisters("app", {.haltIfRunning = true}))->status);
+    EXPECT_EQ(session->connection().state, ConnectionState::Connected);
+    const auto connects = [this] {
+        return target().get([](ScriptedTarget& t) { return t.connects; });
+    };
+    target().set([](ScriptedTarget& t) { t.readFails = true; });
+    ASSERT_TRUE(waitFor([&] { return events().reached(ConnectionState::Disconnected); }));
+    const int before = connects();
+    EXPECT_TRUE(waitFor([&] { return connects() > before; })); // auto-reconnect still runs
+    target().set([](ScriptedTarget& t) { t.readFails = false; });
+    EXPECT_TRUE(waitFor([&] { return events().reached(ConnectionState::Connected); }));
+}
+
+// ... and after halt a haltIfRunning read leaves auto-reconnect stopped until go.
+TEST_F(TargetOperations, ReadRegistersHaltOptionAfterHaltKeepsAutoReconnectStopped) {
+    SessionOptions opts = options();
+    opts.autoReconnect = true;
+    auto session = openConnected(opts);
+    ASSERT_TRUE(session);
+    ASSERT_TRUE(finish(session->halt("app"))->status);
+    ASSERT_TRUE(finish(session->readRegisters("app", {.haltIfRunning = true}))->status);
+    EXPECT_TRUE(target().get([](ScriptedTarget& t) { return t.halted; }));
+    const auto connects = [this] {
+        return target().get([](ScriptedTarget& t) { return t.connects; });
+    };
+    target().set([](ScriptedTarget& t) { t.readFails = true; });
+    ASSERT_TRUE(waitFor([&] { return events().reached(ConnectionState::Disconnected); }));
+    const int before = connects();
+    hwio::device::test::spin(std::chrono::milliseconds(300)); // 5 reconnect intervals
+    EXPECT_EQ(connects(), before);
+    ASSERT_TRUE(finish(session->go("app"))->status);
+    EXPECT_TRUE(waitFor([&] { return connects() > before; }));
+    target().set([](ScriptedTarget& t) { t.readFails = false; });
+    EXPECT_TRUE(waitFor([&] { return events().reached(ConnectionState::Connected); }));
+}
+
 TEST_F(TargetOperations, LightOperationOnAnotherTargetSwitchesAndRestores) {
     auto session = openConnected(options());
     ASSERT_TRUE(session);

@@ -37,6 +37,18 @@ std::string_view consentCategoryId(ConsentCategory category) noexcept {
     return "flash";
 }
 
+std::string_view consentGrantId(ConsentGrant grant) noexcept {
+    switch (grant) {
+    case ConsentGrant::Prompted:
+        return "prompted";
+    case ConsentGrant::Remembered:
+        return "remembered";
+    case ConsentGrant::Flag:
+        return "allowed_by_flag";
+    }
+    return "prompted";
+}
+
 std::optional<ConsentCategory> consentCategoryFromId(std::string_view id) noexcept {
     for (const ConsentCategory category : allCategories) {
         if (consentCategoryId(category) == id) {

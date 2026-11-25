@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/hw/ble/ble_api.h"
@@ -30,6 +31,7 @@
 #include <QtCore/qtconfigmacros.h>
 #include <QtGlobal>
 #include <QtLogging>
+#include <QtTranslation>
 #include <QtTypes>
 
 #if QT_CONFIG(permissions)
@@ -114,17 +116,16 @@ Error mapLinkError(const QtLinkError& error) {
     if (error.phase == LinkPhase::PairingPending) {
         // HIL H2: a rejected CCCD write is not a weak signal; the device refused the console
         // (still connected from an earlier link or another computer, or the pairing failed).
-        failed.cause = QCoreApplication::translate(
-                           "hwio::ble", "The device refused to start the console: it may still "
-                                        "be connected (to this or another computer) or the "
-                                        "pairing was not completed.")
-                           .toStdString();
-        failed.suggestion =
-            QCoreApplication::translate("hwio::ble",
-                                        "Wait a few seconds and try again. If it repeats, "
-                                        "disconnect the device in the system Bluetooth settings "
-                                        "or restart it.")
-                .toStdString();
+        setText(failed, ErrorText::Cause, "hwio::ble",
+                QT_TRANSLATE_NOOP("hwio::ble",
+                                  "The device refused to start the console: it may still "
+                                  "be connected (to this or another computer) or the "
+                                  "pairing was not completed."));
+        setText(failed, ErrorText::Suggestion, "hwio::ble",
+                QT_TRANSLATE_NOOP("hwio::ble",
+                                  "Wait a few seconds and try again. If it repeats, "
+                                  "disconnect the device in the system Bluetooth settings "
+                                  "or restart it."));
     }
     return failed;
 }
@@ -134,17 +135,17 @@ Error pairingFailed(std::string detail) {
 #ifdef Q_OS_LINUX
     // HIL H1 rework: with the host's bond removed and no agent, BlueZ connects first and fails
     // after ~24 s, so only the instant failure is known to be "no agent".
-    error.cause = QCoreApplication::translate(
-                      "hwio::ble", "No passkey dialog appeared (no pairing agent is running), or "
-                                   "the passkey was wrong, or one side still has an old bond.")
-                      .toStdString();
-    error.suggestion =
-        QCoreApplication::translate(
+    setText(error, ErrorText::Cause, "hwio::ble",
+            QT_TRANSLATE_NOOP("hwio::ble",
+                              "No passkey dialog appeared (no pairing agent is running), or "
+                              "the passkey was wrong, or one side still has an old bond."));
+    setText(
+        error, ErrorText::Suggestion, "hwio::ble",
+        QT_TRANSLATE_NOOP(
             "hwio::ble",
             "Pair from the system Bluetooth settings, or with bluetoothctl (scan le, pair <id>). "
             "If a dialog appeared, check the passkey, remove the device in the system Bluetooth "
-            "settings and pair again.")
-            .toStdString();
+            "settings and pair again."));
 #endif
     return error;
 }

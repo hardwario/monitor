@@ -639,7 +639,7 @@ Die Meldung kann das Gerät nennen, etwa „The Bluetooth connection to `<name>`
 - **Probably:** Registers can be read only while the core is halted.
 - **What to do:** Halt the core first.
 
-Kommt von `hwio chester app regs` (oder `lte regs`) und dem MCP-Server (`hwio mcp`). Halten Sie den Kern zuerst mit `hwio chester app halt` an.
+Kommt von `hwio chester app regs` (oder `lte regs`) und dem MCP-Server (`hwio mcp`). Verwenden Sie `hwio chester app regs --halt`: Es hält die CPU nur für das Lesen an und lässt sie danach weiterlaufen (im MCP `read_registers` mit `halt: true`). Ein vorheriges `hwio chester app halt` hilft nicht, weil die CPU wieder läuft, sobald sich der nächste Befehl verbindet.
 
 <a id="target.address_out_of_range"></a>
 #### `target.address_out_of_range`

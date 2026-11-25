@@ -52,12 +52,15 @@ std::uint64_t ConsoleLog::append(ConsoleLine line) {
     return m_lastSeq;
 }
 
-std::uint64_t ConsoleLog::appendMarker(Channel channel, std::string text) {
+std::uint64_t ConsoleLog::appendMarker(Channel channel, std::string text, std::string textEn) {
     ConsoleLine line;
     line.channel = channel;
     line.dir = Direction::Marker;
     line.time = std::chrono::system_clock::now();
     line.text = std::move(text);
+    if (textEn != line.text) {
+        line.textEn = std::move(textEn); // kept only when it differs (an English GUI: empty)
+    }
     return append(std::move(line));
 }
 

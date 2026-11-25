@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "lock_file.h"
 
@@ -17,6 +18,7 @@
 #include <QString>
 #include <QSysInfo>
 #include <QtLogging>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <cstdint>
@@ -60,21 +62,18 @@ Error inUseError(std::uint32_t serialNumber, const ProbeLockOwner& owner, const 
     Error error =
         makeError(ErrorCode::ProbeInUseByOtherProcess,
                   std::format("lock held by {} (PID {}): {}", owner.app, owner.pid, toUtf8(path)));
-    error.message = QCoreApplication::translate(
-                        "hwio::device", "The J-Link %1 is used by another program (%2, PID %3).")
-                        .arg(serialNumber)
-                        .arg(toQString(owner.app))
-                        .arg(owner.pid)
-                        .toStdString();
+    setText(
+        error, ErrorText::Message, "hwio::device",
+        QT_TRANSLATE_NOOP("hwio::device", "The J-Link %1 is used by another program (%2, PID %3)."),
+        {serialNumber, toQString(owner.app), owner.pid});
     if (owner.pid == 0) {
         // An empty or unreadable lock file (e.g. left by a crash while it was being written): not
         // stale for QLockFile, so it is not removed automatically; the user is told which file it
         // is (review R53).
-        error.suggestion =
-            QCoreApplication::translate("hwio::device",
-                                        "If no other HARDWARIO program is running, delete %1.")
-                .arg(QDir::toNativeSeparators(toQString(toUtf8(path))))
-                .toStdString();
+        setText(error, ErrorText::Suggestion, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device",
+                                  "If no other HARDWARIO program is running, delete %1."),
+                {QDir::toNativeSeparators(toQString(toUtf8(path)))});
     }
     return error;
 }
@@ -100,11 +99,10 @@ Result<ProbeLock> ProbeLock::acquire(std::uint32_t serialNumber, const fs::path&
             [serialNumber] {
                 Error error =
                     makeError(ErrorCode::ProbeOpenFailed, "the probe lock is held by this process");
-                error.message =
-                    QCoreApplication::translate(
-                        "hwio::device", "The J-Link %1 is already used by this application.")
-                        .arg(serialNumber)
-                        .toStdString();
+                setText(error, ErrorText::Message, "hwio::device",
+                        QT_TRANSLATE_NOOP("hwio::device",
+                                          "The J-Link %1 is already used by this application."),
+                        {serialNumber});
                 return error;
             }};
     auto lock = detail::acquireLockFile(directory, lockPath(serialNumber, directory),

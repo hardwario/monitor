@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
@@ -25,6 +26,7 @@
 #include <QtCore/qnamespace.h>
 #include <QtEnvironmentVariables>
 #include <QtLogging>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <algorithm>
@@ -301,9 +303,9 @@ Result<NrfUtilInfo> checkVersions(const fs::path& executable, std::chrono::milli
         Error error = makeError(
             ErrorCode::DependencyNrfUtilTooOld,
             std::format("{} {}, minimum {}", what, formatVersion(found), formatVersion(minimum)));
-        error.message = QCoreApplication::translate("hwio::nrfutil", "nRF Util %1 is too old.")
-                            .arg(toQString(formatVersion(found)))
-                            .toStdString();
+        setText(error, ErrorText::Message, "hwio::nrfutil",
+                QT_TRANSLATE_NOOP("hwio::nrfutil", "nRF Util %1 is too old."),
+                {toQString(formatVersion(found))});
         return error;
     };
     if (*coreVersion < minimumCoreVersion) {

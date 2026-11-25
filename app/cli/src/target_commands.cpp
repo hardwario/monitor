@@ -4,6 +4,7 @@
 #include "confirm.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
@@ -57,7 +58,7 @@ constexpr std::uint64_t addressSpace = 0x100000000ULL;
 
 Error usage(std::string message, std::string detail) {
     Error error = makeError(ErrorCode::UsageInvalidArgument, std::move(detail));
-    error.message = std::move(message);
+    setUntranslatedText(error, ErrorText::Message, std::move(message));
     return error;
 }
 
@@ -209,13 +210,20 @@ Result<CommandResult> haltOrGo(const Context& context, const GlobalOptions& glob
         .data = data, .humanText = halted ? "CPU halted" : "CPU running", .streamed = false};
 }
 
+// Plan 0049 (ADR-0372): `--halt` halts a running CPU for the read and lets it run again.
 Result<CommandResult> regs(const Context& context, const GlobalOptions& globals,
                            const ProbeOptions& group, const ProbeOptions& own,
-                           const std::string& targetId) {
-    auto result = runQuiet(context, globals, group, own, targetId,
-                           [&](device::DeviceSession& s) { return s.readRegisters(targetId); });
+                           const std::string& targetId, bool halt) {
+    auto result = runQuiet(context, globals, group, own, targetId, [&](device::DeviceSession& s) {
+        return s.readRegisters(targetId, device::ReadRegistersOptions{.haltIfRunning = halt});
+    });
     if (!result) {
-        return std::unexpected(std::move(result).error());
+        Error error = std::move(result).error();
+        if (!halt && error.code == ErrorCode::TargetNotHalted) {
+            error.suggestion = "Use `regs --halt` to halt the CPU for the read and let it run "
+                               "again.";
+        }
+        return std::unexpected(std::move(error));
     }
     return CommandResult{.data = registersJson(result->registers),
                          .humanText = registersText(result->registers),
@@ -310,7 +318,8 @@ Result<CommandResult> memRead(const Context& context, const GlobalOptions& globa
     auto length = parseAddress(options.length);
     if (!length) {
         Error error = std::move(length).error();
-        error.message = "The length must be a decimal number or 0x followed by hex digits.";
+        setUntranslatedText(error, ErrorText::Message,
+                            "The length must be a decimal number or 0x followed by hex digits.");
         return std::unexpected(std::move(error));
     }
     const AccessWidth width = widthOf(options.width);
@@ -711,8 +720,21 @@ void registerTargetCommands(CLI::App& targetGroup, const std::shared_ptr<ProbeOp
                      "Halt the CPU (without a reset)", halt);
     addSimpleCommand(targetGroup, group, slot, globals, targetId, "go",
                      "Let the halted CPU run (without a reset)", go);
-    addSimpleCommand(targetGroup, group, slot, globals, targetId, "regs",
-                     "Show the CPU registers (the CPU must be halted)", regs);
+    // Plan 0049 (ADR-0372): `regs [--halt]`.
+    auto regsProbe = std::make_shared<ProbeOptions>();
+    auto regsHalt = std::make_shared<bool>(false);
+    CLI::App* regsCommand = targetGroup.add_subcommand(
+        "regs", "Show the CPU registers (the CPU must be halted, or use --halt)");
+    regsCommand->add_flag(
+        "--halt", *regsHalt,
+        "Halt the CPU for the read and let it run again if it was running (unlike `reset --halt` "
+        "and `flash --halt`, the CPU does not stay halted)");
+    addProbeOptions(*regsCommand, *regsProbe);
+    regsCommand->callback([&slot, &globals, group, regsProbe, regsHalt, targetId] {
+        slot.command = [&globals, group, regsProbe, regsHalt, targetId](const Context& context) {
+            return regs(context, globals, *group, *regsProbe, targetId, *regsHalt);
+        };
+    });
     addSimpleCommand(targetGroup, group, slot, globals, targetId, "zones",
                      "List the memory zones the J-Link library reports for the target", zones);
 
