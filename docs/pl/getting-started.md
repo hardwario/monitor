@@ -175,3 +175,6 @@ hwio doctor                           # check the installation
 ```
 
 Zobacz [Wiersz poleceń](../en/cli.md).
+
+`hwio-monitor --version` wypisuje wersję aplikacji desktopowej, a `hwio-monitor --help` jej opcje; żadne z nich nie
+otwiera okna. W systemie Windows tekst pojawia się w oknie wiersza poleceń lub PowerShell, z którego ją uruchomiono.

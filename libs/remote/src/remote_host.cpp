@@ -7,6 +7,7 @@
 #include "hwio/core/result.h"
 #include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
+#include "hwio/device/console_redaction.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
@@ -78,6 +79,16 @@ QString stateOf(device::ConnectionState state) {
     }
     return QStringLiteral("disconnected");
 }
+
+// Plan 0059 (ADR-0414): the legacy `ops` / `opKinds` describe only what a 2.0.0-rc.4 joiner can
+// request correctly: the CHESTER app / lte operations. Any other profile says ops: false (an older
+// joiner then offers the console only).
+bool legacyOperations(const device::DeviceProfile& profile) { return profile.id == "chester"; }
+
+// The English text that the web Terminal and older joiners see for a refused remote command (the
+// other host-generated relay texts are English too).
+constexpr auto refusedRelayText =
+    "(HARDWARIO Monitor: the command was refused: it changes the device's keys or identity.)";
 
 bool hasControlCharacters(std::string_view line) {
     return std::ranges::any_of(line, [](const char c) {
@@ -349,6 +360,15 @@ void RemoteHost::sendSync() {
     QJsonObject sync;
     sync.insert(QStringLiteral("state"), m_deviceState);
     sync.insert(QStringLiteral("commands"), m_transcript.toJson());
+    // ADR-0430: one line per sync, counts and lengths only.
+    std::size_t outputs = 0;
+    for (const TranscriptEntry& entry : m_transcript.entries()) {
+        outputs += static_cast<std::size_t>(entry.outputs.size());
+    }
+    qCDebug(log::lcRemote).noquote() << QString::fromStdString(
+        std::format("Host sync sent: {} entries, {} output lines, {} bytes, truncated: {}",
+                    m_transcript.entries().size(), outputs, m_transcript.bytes(),
+                    m_transcript.truncated() ? "yes" : "no"));
     if (m_relay) {
         m_relay->emitEvent(QStringLiteral("sync"), sync, false);
     }
@@ -370,8 +390,13 @@ void RemoteHost::sendHello() {
         hello.device.firmware =
             adopted->version.empty() ? adopted->name : adopted->name + " " + adopted->version;
     }
-    hello.ops = m_operations != nullptr;
-    if (m_operations != nullptr) {
+    // Plan 0059 (ADR-0414): the profile and this host's caps. `targets` and the `targets` /
+    // `prepared` caps come with the remote operations matrix (plan 0059 phase B).
+    hello.profile = std::string(m_session->profile().id);
+    hello.caps = {std::string(tunnel::cap::detailCodes), std::string(tunnel::cap::refusedLines),
+                  std::string(tunnel::cap::leave)}; // ADR-0439
+    hello.ops = operationsOffered();
+    if (hello.ops) {
         hello.opKinds = m_operations->kinds(); // ADR-0363
         // ADR-0368: support answers the questions of the LTE update.
         hello.opQuestions =
@@ -379,6 +404,10 @@ void RemoteHost::sendHello() {
     }
     sendHost(hello);
     m_helloSent = true;
+}
+
+bool RemoteHost::operationsOffered() const {
+    return m_operations != nullptr && !m_session.isNull() && legacyOperations(m_session->profile());
 }
 
 void RemoteHost::sendHost(const tunnel::HostMessage& message) {
@@ -426,6 +455,27 @@ void RemoteHost::onRemoteLine(const QString& text) {
             "A remote command was dropped (too long or with control characters).")));
         return;
     }
+    if (!withinLineRate()) {
+        return;
+    }
+    if (m_session.isNull()) {
+        return;
+    }
+    // Plan 0059 (ADR-0416): commands that change the device's keys or identity stay local.
+    if (const device::TargetProfile* target = consoleTarget();
+        target != nullptr && device::refusedFromRemote(*target, line)) {
+        refuseLine(line);
+        return;
+    }
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "command %1"))
+              .arg(redacted(device::Direction::In, line)));
+    if (Status sent = m_session->sendRemoteLine(line); !sent) {
+        emit warning(sent.error());
+    }
+    activity();
+}
+
+bool RemoteHost::withinLineRate() {
     const auto now = std::chrono::steady_clock::now();
     while (!m_recentLines.empty() && now - m_recentLines.front() >= std::chrono::seconds(1)) {
         m_recentLines.pop_front();
@@ -437,17 +487,23 @@ void RemoteHost::onRemoteLine(const QString& text) {
                                              "Remote commands dropped: more than %1 per second."))
                       .arg(m_options.limits.remoteLinesPerSecond));
         }
-        return;
+        return false;
     }
     m_recentLines.push_back(now);
-    if (m_session.isNull()) {
+    return true;
+}
+
+void RemoteHost::onLeave() {
+    // ADR-0439: support left (or someone who knows the code says so; the relay does not
+    // authenticate senders). It only withdraws the permission: the next participant is allowed by
+    // the customer again (a join question). A running operation finishes on the customer's side.
+    if (!withinLineRate()) {
         return;
     }
-    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "command %1")).arg(redactedCommand(line)));
-    if (Status sent = m_session->sendRemoteLine(line); !sent) {
-        emit warning(sent.error());
-    }
-    activity();
+    m_allowed = false;
+    m_commandsTimer.stop();
+    audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Support left the session.")));
+    emit participantsChanged();
 }
 
 void RemoteHost::onTunnel(const QJsonValue& payload) {
@@ -467,6 +523,10 @@ void RemoteHost::onTunnel(const QJsonValue& payload) {
         }
         return;
     }
+    if (std::holds_alternative<tunnel::Leave>(*message)) {
+        onLeave();
+        return;
+    }
     if (const auto* learn = std::get_if<tunnel::Learn>(&*message)) {
         onLearn(*learn);
         return;
@@ -476,17 +536,41 @@ void RemoteHost::onTunnel(const QJsonValue& payload) {
         return;
     }
     if (const auto* hello = std::get_if<tunnel::JoinerHello>(&*message)) {
-        const std::string app = "HARDWARIO Monitor " + hello->version;
-        if (app != m_peerApp) {
-            m_peerApp = app;
-            m_helloTimer.stop();
-            audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Participant app: %1."))
-                      .arg(toQString(app)));
-            emit participantsChanged();
-        }
+        onJoinerHello(*hello);
         return;
     }
     onOperationRequest(std::get<tunnel::OpRequest>(*message));
+}
+
+void RemoteHost::onJoinerHello(const tunnel::JoinerHello& joinerHello) {
+    const std::string app = "HARDWARIO Monitor " + joinerHello.version;
+    // Plan 0059 (ADR-0414): the last hello's caps decide the cap-gated messages; the union
+    // of the session's caps is only audited.
+    m_peerCaps = joinerHello.caps;
+    bool newCaps = false;
+    for (const std::string& name : joinerHello.caps) {
+        if (!tunnel::hasCap(m_capsSeen, name) && m_capsSeen.size() < tunnel::maxCaps) {
+            m_capsSeen.push_back(name);
+            newCaps = true;
+        }
+    }
+    if (app != m_peerApp || newCaps) {
+        m_peerApp = app;
+        m_helloTimer.stop();
+        if (joinerHello.caps.empty()) {
+            audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Participant app: %1."))
+                      .arg(toQString(app)));
+        } else {
+            QStringList caps;
+            for (const std::string& name : m_capsSeen) {
+                caps.append(toQString(name));
+            }
+            audit(trRemote(
+                      QT_TRANSLATE_NOOP("hwio::remote", "Participant app: %1 (capabilities: %2)."))
+                      .arg(toQString(app), caps.join(QStringLiteral(", "))));
+        }
+        emit participantsChanged();
+    }
 }
 
 void RemoteHost::setCommandTree(std::shared_ptr<const device::CommandTree> tree) {
@@ -574,7 +658,7 @@ void RemoteHost::onOperationRequest(const tunnel::OpRequest& request) {
     }
     const QString summary = operationSummary(question);
     audit(trRemote(QT_TRANSLATE_NOOP("hwio::remote", "Support asks: %1.")).arg(summary));
-    if (m_operations == nullptr || !m_helloSent) {
+    if (!operationsOffered() || !m_helloSent) {
         denyOperation(request.id, ErrorCode::RemoteOperationUnsupportedPeer,
                       trRemote(QT_TRANSLATE_NOOP("hwio::remote",
                                                  "%1: refused (this console has no operations)."))
@@ -598,7 +682,12 @@ void RemoteHost::onOperationRequest(const tunnel::OpRequest& request) {
         return;
     }
     if (Status valid = m_operations->validate(request); !valid) {
-        denyOperation(request.id, ErrorCode::RemoteProtocolError,
+        // Plan 0059: a target or prepared firmware this host does not offer (only newer joiners
+        // send those); every other invalid request stays remote.protocol_error as before.
+        denyOperation(request.id,
+                      valid.error().code == ErrorCode::RemoteTargetUnsupported
+                          ? ErrorCode::RemoteTargetUnsupported
+                          : ErrorCode::RemoteProtocolError,
                       trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1: refused (%2)."))
                           .arg(summary, toQString(valid.error().detail)));
         return;
@@ -800,23 +889,34 @@ void RemoteHost::finishOperation(const Status& status) {
 }
 
 void RemoteHost::onLines(const QList<device::ConsoleLine>& lines) {
-    bool any = false;
+    // ADR-0430: counts and lengths per batch for the diagnostics, never the text.
+    std::size_t forwarded = 0;
+    std::size_t bytesBefore = 0;
+    std::size_t bytesAfter = 0;
+    std::size_t empty = 0;
     for (const device::ConsoleLine& line : lines) {
         if (line.dir == device::Direction::Marker) {
             continue;
         }
-        any = true;
+        ++forwarded;
+        bytesBefore += line.text.size();
+        const QString text = redacted(line.dir, line.text);
+        const std::size_t sent = static_cast<std::size_t>(text.toUtf8().size());
+        bytesAfter += sent;
+        empty += sent == 0 ? 1 : 0;
         if (line.dir == device::Direction::In) {
-            const QString text = redactedCommand(line.text);
             m_transcript.addCommand(text, line.time);
             sendAt(QStringLiteral("write"), text, false);
         } else {
-            const QString text = redactedOutput(line.text);
             m_transcript.addOutput(text, line.time);
             sendAt(QStringLiteral("read"), text, true);
         }
     }
-    if (any) {
+    if (forwarded > 0) {
+        qCDebug(log::lcRemote).noquote() << QString::fromStdString(std::format(
+            "Host lines forwarded: {} of {} (markers skipped), {} bytes, {} bytes after "
+            "redaction, {} empty",
+            forwarded, lines.size(), bytesBefore, bytesAfter, empty));
         activity();
     }
 }
@@ -853,26 +953,50 @@ void RemoteHost::audit(const QString& text) {
     }
 }
 
-QString RemoteHost::redactedCommand(const std::string& line) const {
-    if (!m_session.isNull()) {
-        const auto prefixes =
-            device::sensitivePrefixesOf(m_session->profile().id, m_session->consoleTargetId());
-        if (const auto prefix = device::matchSensitiveCommand(line, prefixes)) {
-            return toQString(std::string(*prefix) + " <redacted>");
-        }
-    }
-    return toQString(line);
+const device::TargetProfile* RemoteHost::consoleTarget() const {
+    // The session's own profile (plan 0059: not looked up by id, so that every profile's rules
+    // apply, including ones that are not registered).
+    return m_session.isNull()
+               ? nullptr
+               : device::findTarget(m_session->profile(), m_session->consoleTargetId());
 }
 
-QString RemoteHost::redactedOutput(const std::string& line) const {
-    if (!m_session.isNull()) {
-        const auto keys =
-            device::sensitiveOutputKeysOf(m_session->profile().id, m_session->consoleTargetId());
-        if (const auto key = device::matchSensitiveOutput(line, keys)) {
-            return toQString(*key + ": <redacted>");
-        }
+// ADR-0432 (D10): the console file's redaction (device::ConsoleRedaction, one implementation for
+// the console file, Save view, the relay traffic and the joiner): a command with secret arguments
+// as "<prefix> <redacted>" (also in the output, as `config show` prints it), "<key>: <redacted>",
+// and (plan 0059, ADR-0416) a secret printed without a "key:" as "<prefix> <redacted>".
+QString RemoteHost::redacted(device::Direction dir, const std::string& text) const {
+    if (m_session.isNull()) {
+        return toQString(text);
     }
-    return toQString(line);
+    device::ConsoleLine line;
+    line.dir = dir;
+    // Every output line is checked as shell output (ADR-0356 checked every read line).
+    line.channel = device::Channel::Shell;
+    line.text = text;
+    // The session's own profile (plan 0059), not looked up by id.
+    const device::ConsoleRedaction redaction(m_session->profile(), m_session->consoleTargetId());
+    if (auto hidden = redaction.redacted(line)) {
+        return toQString(*hidden);
+    }
+    return toQString(text);
+}
+
+void RemoteHost::refuseLine(const std::string& line) {
+    // Plan 0059 (ADR-0416): never sent to the device; audited (redacted), an English `read` line
+    // for every participant (the web Terminal, older joiners), and line-refused for joiners whose
+    // last hello listed the refused-lines cap.
+    audit(trRemote(QT_TRANSLATE_NOOP(
+                       "hwio::remote",
+                       "a command that changes the device's keys or identity was refused (%1)"))
+              .arg(redacted(device::Direction::In, line)));
+    const QString text = QString::fromLatin1(refusedRelayText);
+    m_transcript.addOutput(text, std::chrono::system_clock::now());
+    sendAt(QStringLiteral("read"), text, false);
+    if (tunnel::hasCap(m_peerCaps, tunnel::cap::refusedLines)) {
+        sendHost(tunnel::LineRefused{.code = std::string(idOf(ErrorCode::RemoteCommandRefused))});
+    }
+    activity();
 }
 
 void RemoteHost::end() {

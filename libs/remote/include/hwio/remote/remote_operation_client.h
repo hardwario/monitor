@@ -46,10 +46,13 @@ public:
 
     // Sends the request; the id is new and random. Errors: internal.busy (one is pending),
     // remote.operation_unsupported_peer (web Terminal host, or ops: false, or lteUpdate not in the
-    // hello's opKinds, ADR-0363), usage.invalid_argument
-    // (flash without a firmware ID, a firmware ID for another kind), remote.host_ended.
+    // hello's opKinds, ADR-0363), remote.target_unsupported (plan 0059: a target or prepared
+    // firmware the host's hello does not list; RemoteConsoleSession::sendTunnel),
+    // usage.invalid_argument (flash without a firmware ID or prepared firmware, or with both, one
+    // of them for another kind), remote.host_ended.
     [[nodiscard]] Result<std::string> request(tunnel::OpKind kind, tunnel::OpTarget target,
-                                              std::optional<std::string> firmwareId = std::nullopt);
+                                              std::optional<std::string> firmwareId = std::nullopt,
+                                              std::optional<std::string> prepared = std::nullopt);
     [[nodiscard]] bool busy() const noexcept { return m_pending.has_value(); }
     // ADR-0368: this joiner answers the questions of a remote LTE update (a person is there).
     void setAnswersQuestions(bool answers) noexcept { m_answers = answers; }

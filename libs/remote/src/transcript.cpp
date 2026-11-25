@@ -8,6 +8,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLatin1Char>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
@@ -141,12 +142,41 @@ Result<Transcript> Transcript::fromJson(const QJsonValue& commands, TranscriptLi
                                        .toObject()
                                        .value(QStringLiteral("outputs"))
                                        .toArray();
-        for (const auto& output : outputs) {
-            if (output.isString()) {
-                const QString line = sanitizeDeviceText(output.toString());
-                entry.bytes += utf8Bytes(line);
-                entry.outputs.append(line);
+        const auto addLine = [&entry](QString raw) {
+            if (raw.endsWith(QLatin1Char('\r'))) {
+                raw.chop(1);
             }
+            const QString line = sanitizeDeviceText(raw);
+            entry.bytes += utf8Bytes(line);
+            entry.outputs.append(line);
+        };
+        // ADR-0431: the unfinished text after the last '\n' of an element; it becomes a line when
+        // more output of this entry follows or the entry is not the newest.
+        QString pending;
+        for (const auto& output : outputs) {
+            if (!output.isString()) {
+                continue;
+            }
+            const QString text = output.toString();
+            if (!pending.isEmpty()) {
+                addLine(std::exchange(pending, QString()));
+            }
+            if (!text.contains(QLatin1Char('\n'))) {
+                entry.outputs.append(sanitizeDeviceText(text));
+                entry.bytes += utf8Bytes(entry.outputs.back());
+                continue;
+            }
+            transcript.m_streamForm = true;
+            const QStringList pieces = text.split(QLatin1Char('\n'));
+            for (qsizetype piece = 0; piece + 1 < pieces.size(); ++piece) {
+                addLine(pieces.at(piece));
+            }
+            pending = pieces.back();
+        }
+        if (i + 1 == array.size()) {
+            transcript.m_tail = pending.left(maxTailChars);
+        } else if (!pending.isEmpty()) {
+            addLine(pending);
         }
         transcript.m_bytes += entry.bytes;
         transcript.m_entries.push_back(std::move(entry));

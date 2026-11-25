@@ -38,6 +38,7 @@ namespace hwio::mcp::tools {
 
 namespace detail {
 class ScanScheduler;
+class RemoteCommands;
 struct ResourceWatch;
 } // namespace detail
 
@@ -71,23 +72,32 @@ public:
     // Forwards device changes to `server` (ADR-0107): resources/list_changed when a device opens
     // or closes, resources/updated for hwio://devices and hwio://device/{id}/status on connection
     // changes, for hwio://device/{id}/log and /terminal on new lines (the server throttles to one
-    // per second per URI). One server at a time; a second call replaces the first.
+    // per second per URI). One server at a time; a second call replaces the first. Plan 0062
+    // (ADR-0436): the notifications of a remote device go only to the clients support allowed.
     void attachServer(hwio::mcp::McpServer& server);
     void detachServer();
 
     // Internal (tool handlers).
     [[nodiscard]] detail::ScanScheduler& scanScheduler() const noexcept { return *m_scheduler; }
+    // Plan 0062: one AI command at a time and the command rate per remote device.
+    [[nodiscard]] detail::RemoteCommands& remoteCommands() const noexcept {
+        return *m_remoteCommands;
+    }
 
 private:
     void devicesChanged();
     void rewatch();
     void watch(const std::string& id, const DeviceRef& ref);
-    void linesArrived(const std::string& id, const QList<hwio::device::ConsoleLine>& lines);
+    void linesArrived(const std::string& id, const DeviceRef& ref,
+                      const QList<hwio::device::ConsoleLine>& lines);
+    // Plan 0062: resources/updated for `uri`, for a remote device only to the allowed clients.
+    void notifyDevice(const DeviceRef& ref, const QString& uri);
 
     IDeviceProvider* m_provider;                // non-owning, never null
     hwio::firmware::FirmwareCatalog* m_catalog; // non-owning, may be null
     ToolsOptions m_options;
     std::unique_ptr<detail::ScanScheduler> m_scheduler;
+    std::unique_ptr<detail::RemoteCommands> m_remoteCommands;
     QPointer<hwio::mcp::McpServer> m_server;
     std::unique_ptr<detail::ResourceWatch> m_watch;
 };

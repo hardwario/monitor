@@ -113,7 +113,7 @@ Kódy chyb: [`target.reset_during_update`](#target.reset_during_update), [`targe
 
 HARDWARIO Monitor se k serveru podpory `terminal.hardwario.com` připojuje přes `wss` (HTTPS, port 443). Firewall nebo proxy, které blokují WebSockety, znemožní sdílení i připojení k relaci. Pokud stejný kód relace používá někdo jiný (velmi vzácné), sdílení se z bezpečnostních důvodů ukončí: zahajte ho znovu a dostanete nový kód. Kdo se připojí a do 2 minut nedostane povolení (nebo je odmítnut), musí zákazníka požádat, aby sdílení zahájil znovu. Viz [Vzdálená podpora](remote-support.md).
 
-Kódy chyb: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored).
+Kódy chyb: [`remote.relay_unreachable`](#remote.relay_unreachable), [`remote.code_invalid`](#remote.code_invalid), [`remote.code_collision`](#remote.code_collision), [`remote.join_not_allowed`](#remote.join_not_allowed), [`remote.host_ended`](#remote.host_ended), [`remote.operation_denied`](#remote.operation_denied), [`remote.operation_unsupported_peer`](#remote.operation_unsupported_peer), [`remote.firmware_not_in_catalog`](#remote.firmware_not_in_catalog), [`remote.protocol_error`](#remote.protocol_error), [`remote.application_not_restored`](#remote.application_not_restored), [`remote.target_unsupported`](#remote.target_unsupported), [`remote.command_refused`](#remote.command_refused), [`remote.command_not_delivered`](#remote.command_not_delivered), [`remote.waiting_for_customer`](#remote.waiting_for_customer).
 
 <a id="lte-modem-firmware-needs-nrf-util"></a>
 ### Firmware modemu LTE potřebuje nRF Util
@@ -866,7 +866,7 @@ Pochází z kontroly aktualizací, když je odpověď z GitHubu větší, než j
 - **Pravděpodobně:** Cesta je chybná nebo byl soubor přesunut či smazán.
 - **Co dělat:** Zkontrolujte cestu k souboru (viz Podrobnosti).
 
-Cesta je v **Podrobnosti**. U serveru MCP (`hwio mcp`) může zpráva znít "The `<what>` `<dir>` does not exist." u volby se složkou, například `--dump-dir`.
+Cesta je v **Podrobnosti**. U serveru MCP (`hwio mcp`) může zpráva znít "The `<what>` `<dir>` does not exist." u volby se složkou, například `--dump-dir`. U `hwio chester app flash` a `hwio chester lte flash` jmenuje soubor firmwaru, který neexistuje, například "The file `<path>` does not exist."
 
 <a id="io.read_failed"></a>
 #### `io.read_failed`
@@ -988,6 +988,44 @@ Zpráva obvykle přesně uvádí, která hodnota je chybná, například chybná
 - **Co dělat:** Požádejte zákazníka, aby konzoli sdílel z aplikace HARDWARIO Monitor.
 
 Také když zákazník sdílí konzoli přes Bluetooth, která flashování nemá.
+
+<a id="remote.target_unsupported"></a>
+#### `remote.target_unsupported`
+
+**Zařízení zákazníka takový cíl nemá, nebo tato operace na něm není vzdáleně dostupná.**
+
+- **Pravděpodobně:** Zařízení nebo jeho firmware ji v relaci vzdálené podpory nepodporuje.
+- **Co dělat:** Zvolte jinou operaci, nebo požádejte zákazníka, aby ji provedl lokálně.
+
+Podpora se starší verzí HARDWARIO Monitor místo toho vidí `remote.operation_denied`.
+
+<a id="remote.command_refused"></a>
+#### `remote.command_refused`
+
+**Monitor zákazníka tento příkaz odmítl.**
+
+- **Pravděpodobně:** Četl by nebo měnil klíče či identitu zařízení, což v relaci vzdálené podpory není možné.
+- **Co dělat:** Pokud je opravdu potřeba, požádejte zákazníka, aby jej spustil lokálně.
+
+<a id="remote.command_not_delivered"></a>
+#### `remote.command_not_delivered`
+
+**Aplikace zákazníka příkaz do zařízení nepředala.**
+
+- **Pravděpodobně:** Ještě nemáte v relaci povolení, bylo odesláno příliš mnoho příkazů za sekundu, nebo je relace zaneprázdněná.
+- **Co dělat:** Chvíli počkejte a zkuste to znovu.
+
+Tuto chybu dostane jen klient AI, který pracuje se zařízením zákazníka přes váš HARDWARIO Monitor.
+
+<a id="remote.waiting_for_customer"></a>
+#### `remote.waiting_for_customer`
+
+**Zákazník vás do relace ještě nepustil.**
+
+- **Pravděpodobně:** HARDWARIO Monitor zákazníka se zákazníka zeptá, než podpora může posílat příkazy.
+- **Co dělat:** Požádejte zákazníka, aby vás pustil, a zkuste to znovu.
+
+Tuto chybu dostane jen klient AI, který pracuje se zařízením zákazníka přes váš HARDWARIO Monitor.
 
 <a id="usage.confirmation_required"></a>
 #### `usage.confirmation_required`

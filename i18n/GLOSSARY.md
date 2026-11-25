@@ -77,3 +77,6 @@ change a term here should change it in the whole catalog.
 | allow / deny | povolit / zamítnout | erlauben / ablehnen | zezwól / odmów | povoliť / zamietnuť |
 | End sharing / End session | Ukončit sdílení / Ukončit relaci | Freigabe beenden / Sitzung beenden | Zakończ udostępnianie / Zakończ sesję | Ukončiť zdieľanie / Ukončiť reláciu |
 | web Terminal | webový Terminal | Web-Terminal | Terminal webowy | webový Terminal |
+| AI client / AI assistant (MCP, plan 0062) | AI klient / AI asistent | KI-Client / KI-Assistent | klient AI / asystent AI (`klient` alone is the customer) | AI klient / AI asistent |
+| Stop AI (plan 0062) | Zastavit AI | KI stoppen | Zatrzymaj AI | Zastaviť AI |
+| Stop waiting (plan 0062) | Přestat čekat | Nicht mehr warten | Przestań czekać | Prestať čakať |

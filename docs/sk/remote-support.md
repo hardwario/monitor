@@ -36,7 +36,12 @@ z webového Terminalu (len konzola) alebo z HARDWARIO Monitor.
    pokynmi na prepojenie kábla (nič neklikáte). Ak kópiu aplikácie nemožno vytvoriť, podpora rozhodne, či pokračovať
    bez nej. Kópia sa na konci vždy zapíše späť. Keď podpora odpovie Nie, uvidíte *Zrušené podporou. Nič sa nezmenilo.* Bez odpovede uvidíte *Podpora neodpovedala. Nič sa nezmenilo.* Ak podpora do 60 sekúnd neodpovie, aktualizácia sa zruší skôr, než sa
    čokoľvek zmení.
-8. Keď skončíte, kliknite na **Ukončiť zdieľanie**.
+8. Keď podpora reláciu opustí (svojím **Opustiť reláciu**, zatvorením karty alebo ukončením HARDWARIO Monitora),
+   v konzole sa zobrazí *— Vzdialené: Podpora opustila reláciu. —* a lišta už nehovorí, že podpora môže posielať
+   príkazy. Zdieľanie pokračuje; ak sa podpora pripojí znova, budete ju musieť znova povoliť. Operácia, ktorá už beží,
+   dobehne. Funguje to s HARDWARIO Monitorom 2.0.0-rc.5 alebo novším na oboch stranách; podpora s webovým Terminalom
+   alebo staršou verziou odchádza bez upozornenia.
+9. Keď skončíte, kliknite na **Ukončiť zdieľanie**.
 
 Zdieľanie sa skončí aj vtedy, keď zariadenie odpojíte, zatvoríte kartu alebo aplikáciu ukončíte, po 30 minútach bez
 aktivity (lišta vás 2 minúty vopred upozorní, **Ponechať zdieľanie** ho predĺži) a najneskôr po 8 hodinách.
@@ -58,6 +63,10 @@ Na dopĺňanie príkazov u podpory posiela váš HARDWARIO Monitor podpore zozna
 keď podpora potrebuje podpríkazy niektorého príkazu, prečíta si jeho nápovedu sám. Tieto dotazy na nápovedu sa vo vašej
 konzole nezobrazujú; konzolový súbor zaznamená, koľko ich bolo.
 
+Podpora HARDWARIO môže v relácii používať AI asistenta. Jeho príkazy a žiadosti k vám prídu ako príkazy podpory:
+rovnaký riadok *— Remote: command … —*, rovnaká otázka pred každou operáciou, rovnaké záznamy v súbore konzoly. Vaše
+možnosti zostávajú rovnaké: povolenie podpory, otázka pred každou operáciou a **Ukončiť zdieľanie**.
+
 <a id="join-a-session"></a>
 ## Pripojenie k relácii (podpora)
 
@@ -65,12 +74,14 @@ konzole nezobrazujú; konzolový súbor zaznamená, koľko ich bolo.
 2. Napíšte kód, ktorý vám zákazník prečíta (medzery sú povolené), alebo vložte odkaz. Odkaz na iný server, ako je
    nastavený, potrebuje ďalšie potvrdenie.
 3. Otvorí sa nová karta s názvom **Relácia 482 913** a potom *CHESTER-M 2159018247 — na diaľku* (alebo *Relácia 482 913
-   — web Terminal*, keď zákazník používa web Terminal). Kým vás zákazník nepovolí, lišta zobrazuje *Čaká sa, kým vás
+   — web Terminal alebo mobilná aplikácia*, keď zákazník používa web Terminal alebo mobilnú aplikáciu HARDWARIO). Kým vás zákazník nepovolí, lišta zobrazuje *Čaká sa, kým vás
    zákazník povolí…*. Živý výstup sa už môže zobrazovať.
 4. Po povolení dostanete históriu konzoly zákazníka a môžete s konzolou pracovať ako zvyčajne: história, vyhľadávanie,
    filter a uloženie zobrazenia.
    So zákazníkom, ktorý používa HARDWARIO Monitor, používajú návrhy a dopĺňanie klávesom Tab zoznam príkazov jeho
    zariadenia.
+   Web Terminal a mobilná aplikácia tajné údaje neskrývajú; váš HARDWARIO Monitor ich skryje skôr, než sa dostanú do
+   konzoly (napríklad `claim token: <redacted>`, `lrw config appkey <redacted>`), aj v uloženom zobrazení.
    Riadky hexdumpu zo záznamu zariadenia sú predvolene skryté, rovnako ako v miestnej karte (štítok **H**).
 5. So zákazníkom, ktorý používa HARDWARIO Monitor, ponúka stránka **Nahrávanie firmvéru** voľby **Požiadať o nahranie**
    (ID firmvéru z katalógu), **Požiadať o vymazanie**, **Požiadať o obnovenie** a **Požiadať o reset** pre aplikačné
@@ -92,8 +103,26 @@ Sprievodca pripojením, sprievodca riešením problémov a nahrávanie so spriev
 vášmu vlastnému počítaču: na karte relácie podpory sa neotvoria (*Tento sprievodca funguje len so zariadením pripojeným
 k tomuto počítaču, nie v relácii podpory.*) a relácia pokračuje.
 
+Reláciu opustíte tlačidlom **Opustiť reláciu** na lište zariadenia (alebo klávesmi Ctrl+Shift+D). Karta zostane
+otvorená aj s konzolou, takže ju môžete stále uložiť; v konzole je riadok *— opustili ste reláciu —*. **Pripojiť sa
+znova** sa pripojí k rovnakému kódu a zákazník vás musí znova povoliť. Kým beží operácia, o ktorú ste požiadali,
+tlačidlo čaká, kým skončí. Zákazník s HARDWARIO Monitorom 2.0.0-rc.5 alebo novším uvidí, že ste odišli (aj keď
+zatvoríte kartu alebo ukončíte aplikáciu), a príkazy poslané potom sa k zariadeniu nedostanú, kým vás zákazník znova
+nepovolí.
+
+**AI asistent.** Keď je zapnuté **Nastavenia › AI asistenti (MCP) › AI klienti smú používať relácie vzdialenej
+podpory**, môže AI klient, napríklad Claude Code, pracovať vo vzdialenej karte, keď mu to pre reláciu povolíte: číta
+konzolu so skrytými tajnými hodnotami, posiela príkazy a žiada o nahratie firmvéru z katalógu, aktualizáciu LTE alebo
+reset rovnako ako vy. Zákazník vidí jeho príkazy ako vaše. Banner ukazuje *Aktívny AI klient: Claude Code*
+s tlačidlom **Zastaviť AI**; operácia, o ktorú AI klient požiadal, je na stránke **Nahrať** označená *AI:* s tlačidlom
+**Prestať čakať**. Pozrite si [MCP server](../en/mcp.md#remote-support-sessions) (po anglicky).
+
 Keď zákazník ukončí zdieľanie, HARDWARIO Monitor to nie vždy rozpozná: server to neoznamuje. Po 30 minútach bez
-akejkoľvek aktivity to lišta oznámi a ponúkne **Opustiť**. Karta zostane otvorená, takže konzolu môžete stále uložiť.
+akejkoľvek aktivity to lišta oznámi a ponúkne **Zatvoriť kartu**. Kým ju nezatvoríte, karta zostane otvorená, takže
+konzolu môžete stále uložiť.
+
+Podpora a zákazník môžu používať rôzne verzie HARDWARIO Monitor. Novšia verzia funguje so staršou aj s webovým
+Terminalom: čo druhá strana nepodporuje, sa neponúka, a chyby prídu do staršej verzie ako chyba, ktorú pozná.
 
 <a id="command-line"></a>
 ## Príkazový riadok

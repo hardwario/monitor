@@ -213,6 +213,11 @@ void appendWarningRows(QVariantList& rows, const hwio::mcp::ConsentRequest& requ
     }
 }
 
+// Plan 0062 (ADR-0436): support's prompt before an AI client works with a customer's device.
+bool sessionPrompt(const hwio::mcp::ConsentRequest& request) {
+    return request.categories.testFlag(ConsentCategory::RemoteDevice);
+}
+
 } // namespace
 
 ConsentViewModel::ConsentViewModel(GuiConsentBroker& broker, DeviceDescriber describe,
@@ -272,6 +277,10 @@ QString ConsentViewModel::title() const {
         return {};
     }
     const QString who = client();
+    if (sessionPrompt(prompt->request)) {
+        // Before the tool's name: the first call on a remote tab can be any tool (plan 0062).
+        return tr("%1 wants to work with a customer's device").arg(who);
+    }
     const std::string& tool = prompt->request.tool;
     if (tool == "flash") {
         return tr("%1 wants to flash firmware").arg(who);
@@ -304,11 +313,43 @@ QVariantList ConsentViewModel::details() const {
     }
     const hwio::mcp::ConsentRequest& request = prompt->request;
     QVariantList rows;
-    appendWrittenRow(rows, request.details);
     const DeviceDescription device =
         m_describe ? m_describe(request.deviceId)
                    : DeviceDescription{.text = toQString(request.deviceId), .tabIndex = -1};
-    rows.append(deviceRow(request, device));
+    if (sessionPrompt(request)) {
+        // Plan 0062 (ADR-0436): the session (never its code) and what the client may do.
+        rows.append(row(tr("Session"), device.text, false, QString(), device.tabIndex >= 0));
+        rows.append(
+            row(QString(), tr("It will read the customer's console and may send commands to the "
+                              "customer's device. Secret values are hidden from it. The customer "
+                              "sees its commands as yours.")));
+        if (!request.client.version.empty()) {
+            rows.append(row(tr("Client"),
+                            tr("%1, version %2").arg(client(), toQString(request.client.version))));
+        }
+        return rows;
+    }
+    appendWrittenRow(rows, request.details);
+    if (request.remoteDevice) {
+        // Plan 0062: an operation on a customer's device (always asked, never remembered). The
+        // firmware the customer's Monitor flashes: a prepared one, or its recommended LTE
+        // firmware.
+        if (request.details.contains(QStringLiteral("prepared_id"))) {
+            rows.append(
+                row(tr("Firmware"),
+                    plainField(request.details.value(QStringLiteral("firmware")).toString()), false,
+                    tr("Prepared by the customer's HARDWARIO Monitor (%1)")
+                        .arg(plainField(
+                            request.details.value(QStringLiteral("prepared_id")).toString()))));
+        } else if (request.tool == "flash_lte") {
+            rows.append(row(tr("Firmware"),
+                            tr("The recommended version of the customer's HARDWARIO Monitor")));
+        }
+        rows.append(row(tr("Device"), tr("the customer's device (remote session)"), false,
+                        QString(), device.tabIndex >= 0));
+    } else {
+        rows.append(deviceRow(request, device));
+    }
     appendTargetRows(rows, request.details);
     // ADR-0241: the client with its version when given (last, ADR-0389).
     if (!request.client.version.empty()) {
@@ -321,7 +362,20 @@ QVariantList ConsentViewModel::details() const {
 
 QString ConsentViewModel::rememberLabel() const {
     const auto* prompt = m_broker->current();
-    return prompt == nullptr ? QString() : rememberText(prompt->request.categories, client());
+    return prompt == nullptr || !canRemember() ? QString()
+                                               : rememberText(prompt->request.categories, client());
+}
+
+bool ConsentViewModel::canRemember() const {
+    const auto* prompt = m_broker->current();
+    // Plan 0062 (ADR-0436): a customer's device is asked every time.
+    return prompt != nullptr && !prompt->request.remoteDevice && !sessionPrompt(prompt->request);
+}
+
+QString ConsentViewModel::allowLabel() const {
+    const auto* prompt = m_broker->current();
+    return prompt != nullptr && sessionPrompt(prompt->request) ? tr("Allow for this session")
+                                                               : tr("Allow once");
 }
 
 bool ConsentViewModel::canShowDevice() const {
@@ -357,7 +411,7 @@ void ConsentViewModel::allowOnce(qint64 promptId) {
 }
 
 void ConsentViewModel::allowForClient(qint64 promptId) {
-    if (m_armed) {
+    if (m_armed && canRemember()) {
         m_broker->answer(static_cast<std::uint64_t>(promptId),
                          GuiConsentBroker::Answer::AllowForClient);
     }

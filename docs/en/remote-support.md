@@ -33,7 +33,12 @@ Other languages: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-
    cable instructions (there is no button to click). If no copy of the application can be made, support decides
    whether to continue without it. The copy is always written back at the end. If support answers No, you see *Cancelled by support. Nothing was changed.* Without an answer you see *Support did not answer. Nothing was changed.* Without an answer from support within
    60 seconds the update is cancelled before anything changes.
-8. Click **End sharing** when you are done.
+8. When support leaves the session (their **Leave session**, closing their tab or quitting HARDWARIO Monitor), your
+   console shows *— Remote: Support left the session. —* and the banner no longer says that support can send
+   commands. Sharing goes on; if support joins again, you are asked to allow them again. An operation that is already
+   running finishes. This needs HARDWARIO Monitor 2.0.0-rc.5 or newer on both sides; support using the web Terminal
+   or an older version leaves without telling you.
+9. Click **End sharing** when you are done.
 
 Sharing also ends when you disconnect the device, close the tab or quit, after 30 minutes without activity (a banner
 warns you 2 minutes before, **Keep sharing** extends it) and after 8 hours at most.
@@ -56,6 +61,10 @@ For support's autocomplete, your HARDWARIO Monitor sends support the list of dev
 support needs the subcommands of a command, it reads that command's help itself. These help queries are not shown in
 your console; the console file records how many there were.
 
+HARDWARIO Support may use an AI assistant in the session. Its commands and requests reach you as support's: the
+same *— Remote: command … —* line, the same question before every operation, the same entries in the console file.
+Your controls stay the same: allowing support in, the question before each operation, and **End sharing**.
+
 <a id="join-a-session"></a>
 ## Join a session (support)
 
@@ -63,11 +72,13 @@ your console; the console file records how many there were.
 2. Type the code the customer reads to you (spaces are allowed) or paste the link. A link to another server than the
    configured one needs an extra confirmation.
 3. A new tab opens, titled **Session 482 913** and then *CHESTER-M 2159018247 — remote* (or *Session 482 913 — web
-   Terminal* when the customer uses the web Terminal). Until the customer allows you, the banner says *Waiting for the
+   Terminal or mobile app* when the customer uses the web Terminal or the HARDWARIO mobile app). Until the customer allows you, the banner says *Waiting for the
    customer to allow you…*. The live output may already appear.
 4. Once allowed, you get the customer's console history and can work in the console as usual: history, search,
    filter and save view.
    With a HARDWARIO Monitor customer, suggestions and Tab completion use the customer's list of device commands.
+   The web Terminal and the mobile app do not hide secrets; your HARDWARIO Monitor hides them before they reach the
+   console (for example `claim token: <redacted>`, `lrw config appkey <redacted>`), also in a saved view.
    Hexdump lines of the device log are hidden by default, as in a local tab (chip **H**).
 5. With a HARDWARIO Monitor customer, the **Flash** page offers **Ask to flash** (a catalog firmware ID), **Ask to
    erase**, **Ask to recover** and **Ask to reset** for the application or the LTE core. Each request waits for the
@@ -90,8 +101,26 @@ The Connect, Troubleshooting and guided flash wizards work with a device connect
 support session tab they do not open (*This wizard works only with a device connected to this computer, not in a
 support session.*), and the session goes on.
 
+To leave the session, click **Leave session** in the device bar (or press Ctrl+Shift+D). The tab stays open with the
+console, so you can still save it; the console shows *— you left the session —*. **Join again** joins the same code
+again, and the customer is asked to allow you again. While an operation you asked for runs, the button waits until it
+ends. A customer with HARDWARIO Monitor 2.0.0-rc.5 or newer sees that you left (also when you close the tab or quit),
+and commands sent afterwards do not reach the device until the customer allows you again.
+
+**AI assistant.** With **Settings › AI assistants (MCP) › AI clients may use remote support sessions** on, an AI
+client such as Claude Code can work in the remote tab after you allow it for the session: it reads the console with
+secret values hidden, sends commands, and asks for a catalog flash, the LTE update or a reset as you would. The
+customer sees its commands as yours. The banner shows *AI client active: Claude Code* with **Stop AI**; an operation
+the AI client asked for shows *AI:* on the **Flash** page with **Stop waiting**. See
+[MCP server](mcp.md#remote-support-sessions).
+
 When the customer ends sharing, HARDWARIO Monitor cannot always tell: the server does not announce it. After 30 minutes
-without any activity the banner says so and offers **Leave**. The tab stays open, so you can still save the console.
+without any activity the banner says so and offers **Close tab**. Until you close it, the tab stays open, so you can
+still save the console.
+
+Support and the customer may use different versions of HARDWARIO Monitor. A newer version works with an older one and
+with the web Terminal: what the other side does not support is not offered, and errors reach an older version as an
+error it knows.
 
 <a id="command-line"></a>
 ## Command line

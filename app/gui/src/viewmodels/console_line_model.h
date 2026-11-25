@@ -34,6 +34,7 @@
 #include "hwio/core/result.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
+#include "hwio/device/console_redaction.h"
 #include "viewmodels/find_filter_engine.h"
 
 #include <QAbstractListModel>
@@ -175,9 +176,11 @@ public:
     };
     // The selected rows joined with "\n" (with the time column when `withTime`).
     [[nodiscard]] CopyText selectedText(bool withTime) const;
-    // Writes every row (the current view, filter applied) to `device`, one line each.
-    // Errors: io.write_failed.
-    [[nodiscard]] Status writeRows(QIODevice& device, bool withTime) const;
+    // Writes every row (the current view, filter applied) to `device`, one line each, with the
+    // secrets that `redaction` finds replaced (ADR-0426: "Save view…" writes them as the console
+    // file does; the rows on screen and selectedText() are unchanged). Errors: io.write_failed.
+    [[nodiscard]] Status writeRows(QIODevice& device, bool withTime,
+                                   const device::ConsoleRedaction& redaction) const;
 
     // Removes every row (after ConsoleLog::clear of this channel).
     void resetRows();

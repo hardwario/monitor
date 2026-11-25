@@ -12,6 +12,10 @@
 // (nothing is read or written), without the single-instance lock, and exits 0 when the window was
 // created (1 otherwise). The installed-tree CTest runs it with QT_QPA_PLATFORM=offscreen to prove
 // that the deployed tree (Qt libraries, plugins, QML modules) is complete.
+//
+// --version and --help (plan/features/0060 A3, D11) print English text on stdout and exit 0 before
+// anything else: no QGuiApplication (no display needed), no single-instance activation, no window.
+// They are not translated: no language is loaded yet (the CLI rule of ADR-0027).
 
 #include "fonts.h"
 #include "gui_log.h"
@@ -59,7 +63,9 @@
 #include <format>
 #include <iostream>
 #include <optional>
+#include <span>
 #include <string>
+#include <string_view>
 #include <utility>
 
 Q_IMPORT_QML_PLUGIN(HardwarioMonitorPlugin)
@@ -111,6 +117,34 @@ bool askStartAnyway() {
     });
     loop.exec();
     return window->property("startAnyway").toBool();
+}
+
+// Plan 0060 A3: `--version` / `--help` (exactly, anywhere after the program name). Returns the
+// exit code when one of them was given and printed, nullopt otherwise.
+std::optional<int> printInfoOption(std::span<char* const> args) {
+    for (const char* argument : args.subspan(args.empty() ? 0 : 1)) {
+        const std::string_view option = argument == nullptr ? std::string_view() : argument;
+        if (option != "--version" && option != "--help") {
+            continue;
+        }
+        hwio::gui::attachParentConsole(); // Windows: a GUI program has no console of its own
+        if (option == "--version") {
+            const hwio::BuildInfo build = hwio::buildInfo();
+            std::cout << std::format("HARDWARIO Monitor {} ({})\n", build.version, build.gitHash);
+        } else {
+            std::cout << "Usage: hwio-monitor [options]\n"
+                         "HARDWARIO Monitor: console, logs and flashing of HARDWARIO devices.\n"
+                         "\n"
+                         "Options:\n"
+                         "  --version  Print the version and exit\n"
+                         "  --help     Print this help and exit\n"
+                         "\n"
+                         "The command-line tool is hwio (hwio --help).\n";
+        }
+        std::cout.flush();
+        return 0;
+    }
+    return std::nullopt;
 }
 
 int run(int& argc, char** argv) {
@@ -223,6 +257,10 @@ int run(int& argc, char** argv) {
 
 int main(int argc, char** argv) {
     try {
+        if (const auto exitCode =
+                printInfoOption(std::span<char* const>(argv, static_cast<std::size_t>(argc)))) {
+            return *exitCode;
+        }
         // ADR-0123: local crash files, first thing (the identity gives the data directory).
         hwio::initApplicationIdentity();
         const hwio::BuildInfo build = hwio::buildInfo();

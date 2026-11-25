@@ -90,6 +90,7 @@ add_executable(hwio_gui_tests
     viewmodels/mcp_gui_test_support.h
     viewmodels/mcp_models_test.cpp
     viewmodels/mcp_provider_test.cpp
+    viewmodels/mcp_remote_test.cpp
     viewmodels/page_registry_test.cpp
     viewmodels/probe_firmware_view_model_test.cpp
     viewmodels/probe_picker_test.cpp
@@ -115,8 +116,11 @@ target_include_directories(hwio_gui_tests PRIVATE
     # mcp_test_support.h (plan 0014 tests: RecordingReplyChannel)
     "${PROJECT_SOURCE_DIR}/libs/mcp/tests"
     # hex_builder.h, zip_builder.h, http_fixture.h (plan 0006 tests)
-    "${PROJECT_SOURCE_DIR}/libs/firmware/tests")
-target_link_libraries(hwio_gui_tests PRIVATE hwio_gui hwio::miniz Qt6::Test GTest::gmock)
+    "${PROJECT_SOURCE_DIR}/libs/firmware/tests"
+    # fake_console.h (plan 0062: the in-process customer's Monitor of mcp_remote_test)
+    "${PROJECT_SOURCE_DIR}/libs/remote/tests")
+target_link_libraries(hwio_gui_tests PRIVATE hwio_gui hwio::miniz Qt6::Test GTest::gmock
+    hwio_remote_fake_relay) # plan 0062: the fake relay of mcp_remote_test
 target_compile_definitions(hwio_gui_tests PRIVATE
     "HWIO_FAKE_JLINK_LIBRARY=\"$<TARGET_FILE:hwio_fake_jlink>\""
     "HWIO_FAKE_JLINK_INCOMPLETE_LIBRARY=\"$<TARGET_FILE:hwio_fake_jlink_incomplete>\""

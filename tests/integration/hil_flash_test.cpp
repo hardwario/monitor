@@ -1,12 +1,15 @@
 // Hardware-in-the-loop tests of M2 flashing (plan/features/0003, phase G1). Skipped unless
 // HWIO_HIL=1 (see CMakeLists.txt). Environment:
 //   HWIO_HIL_SN=SERIAL_NUMBER        the probe (default: the first free one)
-//   HWIO_HIL_APP_HEX=PATH            a CHESTER application HEX file (flash tests)
+//   HWIO_HIL_APP_HEX=PATH            a CHESTER application HEX file (flash tests; the erase-code
+//                                   test flashes it back afterwards)
 //   HWIO_HIL_FIRMWARE_ID=ID          a catalog firmware ID (download test; needs the internet)
 //   HWIO_HIL_LTE_SN=SERIAL_NUMBER    a probe on the LTE connector (LTE tests)
 //   HWIO_HIL_LTE_BUNDLE=PATH         a CHESTER LTE bundle (.zip; needs nRF Util)
 //   HWIO_HIL_DESTRUCTIVE=1           also run erase --all and recover, which ERASE THE PIB (use
-//                                   a board whose PIB can be restored)
+//                                   a board whose PIB can be restored), and the erase-code test
+//                                   without HWIO_HIL_APP_HEX, which leaves the board without an
+//                                   application (plan 0060 A1, D12)
 
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
@@ -138,6 +141,13 @@ TEST_F(HilFlash, FlashByFileVerifiesAndKeepsThePib) {
 }
 
 TEST_F(HilFlash, EraseCodeKeepsThePibAndPibDecodes) {
+    // Erasing the code leaves the board without an application unless the test can flash one back
+    // (plan 0060 A1, D12): run it with HWIO_HIL_APP_HEX, or knowingly with HWIO_HIL_DESTRUCTIVE=1.
+    const auto image = appImage();
+    if (!image && !enabled("HWIO_HIL_DESTRUCTIVE")) {
+        GTEST_SKIP() << "leaves the board erased; set HWIO_HIL_APP_HEX (flashed back afterwards) "
+                        "or HWIO_HIL_DESTRUCTIVE=1";
+    }
     auto session = open("app", serialFrom("HWIO_HIL_SN"));
     ASSERT_TRUE(session);
     const auto before = readPib(*session, "app");
@@ -145,7 +155,7 @@ TEST_F(HilFlash, EraseCodeKeepsThePibAndPibDecodes) {
     EXPECT_TRUE(hwio::device::decodePib(std::span<const std::byte, 128>(before.data(), 128)));
     run(*session, session->erase("app", hwio::device::EraseScope::Code));
     EXPECT_EQ(readPib(*session, "app"), before);
-    if (const auto image = appImage()) {
+    if (image) {
         run(*session, session->flash("app", image, {})); // leave the board usable
     }
 }

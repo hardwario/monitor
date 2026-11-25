@@ -135,6 +135,8 @@ qt_add_qml_module(hwio_gui
         src/mcp/gui_consent_broker.h
         src/mcp/gui_device_provider.cpp
         src/mcp/gui_device_provider.h
+        src/mcp/gui_remote_device.cpp
+        src/mcp/gui_remote_device.h
         src/mcp/mcp_controller.cpp
         src/mcp/mcp_controller.h
         src/mcp/mcp_registration.cpp

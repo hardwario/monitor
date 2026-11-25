@@ -169,3 +169,6 @@ hwio doctor                           # check the installation
 ```
 
 Viz [Příkazová řádka](../en/cli.md).
+
+`hwio-monitor --version` vypíše verzi desktopové aplikace a `hwio-monitor --help` její volby; ani jedno neotevře
+okno. Ve Windows se text zobrazí v okně příkazového řádku nebo PowerShellu, ze kterého jste ji spustili.

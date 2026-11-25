@@ -51,6 +51,10 @@ struct EnvironmentFacts {
         std::optional<jlink::FirmwareStatus> firmware;
     };
     std::vector<Probe> probes; // bounded by the library's probe list
+    // Plan 0060 A5 (ADR-0427): the address of this computer's Bluetooth adapter as the
+    // `bluetooth` check read it (at most one: the check queries the default adapter; empty when
+    // unknown, e.g. macOS). Only for the report's redaction, not part of toJson().
+    std::vector<std::string> bluetoothAdapterAddresses;
 };
 
 [[nodiscard]] QJsonObject toJson(const EnvironmentFacts& facts);

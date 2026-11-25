@@ -3,7 +3,9 @@
 // screen under the mouse cursor, raised with requestActivate() and a taskbar / dock alert of the
 // main window. One prompt at a time (the queue is GuiConsentBroker's); the main window does not
 // switch tabs (Show device, in the device row, does; plan 0054). Esc = Deny, no default button; the title and the action are
-// announced to screen readers. Presentation only: McpController.consent (ConsentViewModel).
+// announced to screen readers. Plan 0062: a customer's device has no remember button and its
+// session prompt's allow button is "Allow for this session". Presentation only:
+// McpController.consent (ConsentViewModel).
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -207,17 +209,20 @@ Window {
 
                 objectName: "consentAllowOnce"
                 Layout.minimumWidth: allowOnceButton.implicitWidth
-                text: qsTr("Allow once")
+                // "Allow once"; "Allow for this session" for a customer's device (plan 0062).
+                text: prompt.vm ? prompt.vm.allowLabel : ""
                 enabled: prompt.vm !== null && prompt.vm.armed
                 onClicked: prompt.vm.allowOnce(prompt.vm.promptId)
             }
 
             // ADR-0389: "Always allow … for <client>"; its natural width when it fits, otherwise it
-            // wraps (the window is 480 px wide, the client name may be long).
+            // wraps (the window is 480 px wide, the client name may be long). Plan 0062: none for
+            // a customer's device (never remembered).
             HButton {
                 id: rememberButton
 
                 objectName: "consentAllowForClient"
+                visible: prompt.vm !== null && prompt.vm.canRemember
                 Layout.fillWidth: true
                 Layout.maximumWidth: rememberButton.implicitWidth
                 implicitHeight: Math.max(Theme.controlHeight, rememberText.implicitHeight + 2 * Theme.spacingXs)

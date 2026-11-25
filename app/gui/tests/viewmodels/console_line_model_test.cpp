@@ -7,6 +7,7 @@
 #include "gui_test_support.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
+#include "hwio/device/console_redaction.h"
 #include "viewmodels/console_line_model.h"
 #include "viewmodels/find_filter_engine.h"
 
@@ -426,7 +427,8 @@ TEST_F(ConsoleLineModelTest, WritesTheView) {
     ASSERT_TRUE(scanDone());
     QBuffer buffer;
     ASSERT_TRUE(buffer.open(QIODevice::WriteOnly));
-    ASSERT_TRUE(model().writeRows(buffer, false).has_value());
+    ASSERT_TRUE(
+        model().writeRows(buffer, false, hwio::device::ConsoleRedaction("", "")).has_value());
     EXPECT_EQ(buffer.data(), QByteArray("a\nc\n"));
 }
 

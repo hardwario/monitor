@@ -35,7 +35,12 @@ Inne języki: [Čeština](../cs/remote-support.md) · [Deutsch](../de/remote-sup
    wykonujesz polecenia dotyczące przełożenia kabla (nie ma nic do kliknięcia). Jeśli nie da się zrobić kopii
    aplikacji, wsparcie decyduje, czy kontynuować bez niej. Kopia jest na końcu zawsze zapisywana z powrotem. Gdy wsparcie odpowie Nie, zobaczysz *Anulowane przez wsparcie. Nic nie zostało zmienione.* Bez odpowiedzi zobaczysz *Wsparcie nie odpowiedziało. Nic nie zostało zmienione.* Jeśli
    wsparcie nie odpowie w ciągu 60 sekund, aktualizacja zostaje anulowana, zanim cokolwiek się zmieni.
-8. Gdy skończysz, kliknij **Zakończ udostępnianie**.
+8. Gdy wsparcie opuści sesję (przyciskiem **Opuść sesję**, zamykając kartę lub zamykając HARDWARIO Monitor), konsola
+   pokaże *— Zdalnie: Wsparcie opuściło sesję. —*, a baner nie mówi już, że wsparcie może wysyłać polecenia.
+   Udostępnianie trwa dalej; jeśli wsparcie dołączy ponownie, musisz je ponownie dopuścić. Operacja, która już trwa,
+   zostanie dokończona. Wymaga to HARDWARIO Monitor 2.0.0-rc.5 lub nowszego po obu stronach; wsparcie korzystające z
+   Terminala webowego lub starszej wersji odchodzi bez powiadomienia.
+9. Gdy skończysz, kliknij **Zakończ udostępnianie**.
 
 Udostępnianie kończy się też po odłączeniu urządzenia, zamknięciu karty lub zamknięciu aplikacji, po 30 minutach
 bezczynności (baner ostrzega 2 minuty wcześniej, **Kontynuuj udostępnianie** je przedłuża) i najpóźniej po 8 godzinach.
@@ -59,6 +64,11 @@ Na potrzeby podpowiedzi wsparcia Twój HARDWARIO Monitor wysyła wsparciu poznan
 wsparcie potrzebuje podpoleceń jakiegoś polecenia, sam odczytuje jego pomoc. Te zapytania o pomoc nie pojawiają się w
 Twojej konsoli; plik konsoli zapisuje, ile ich było.
 
+Wsparcie HARDWARIO może w sesji korzystać z asystenta AI. Jego polecenia i prośby docierają do Ciebie jako
+polecenia wsparcia: ten sam wiersz *— Remote: command … —*, to samo pytanie przed każdą operacją, te same wpisy w pliku
+konsoli. Twoje możliwości pozostają te same: zezwolenie wsparciu, pytanie przed każdą operacją i **Zakończ
+udostępnianie**.
+
 <a id="join-a-session"></a>
 ## Dołączanie do sesji (wsparcie)
 
@@ -66,12 +76,14 @@ Twojej konsoli; plik konsoli zapisuje, ile ich było.
 2. Wpisz kod sesji, który podaje Ci klient (spacje są dozwolone), albo wklej link. Link do innego serwera niż
    skonfigurowany wymaga dodatkowego potwierdzenia.
 3. Otwiera się nowa karta zatytułowana **Sesja 482 913**, a potem *CHESTER-M 2159018247 — zdalnie* (lub *Sesja 482 913 —
-   web Terminal*, gdy klient korzysta z web Terminal). Dopóki klient Ci nie zezwoli, baner pokazuje *Czekanie, aż klient
+   web Terminal lub aplikacja mobilna*, gdy klient korzysta z web Terminal lub aplikacji mobilnej HARDWARIO). Dopóki klient Ci nie zezwoli, baner pokazuje *Czekanie, aż klient
    zezwoli…*. Wyjście na żywo może się już pojawiać.
 4. Po uzyskaniu zgody otrzymujesz historię konsoli klienta i możesz pracować w konsoli jak zwykle: historia,
    wyszukiwanie, filtrowanie i zapisywanie widoku.
    Gdy klient używa HARDWARIO Monitor, podpowiedzi i uzupełnianie klawiszem Tab korzystają z listy poleceń jego
    urządzenia.
+   Web Terminal i aplikacja mobilna nie ukrywają sekretów; Twój HARDWARIO Monitor ukrywa je, zanim trafią do konsoli
+   (na przykład `claim token: <redacted>`, `lrw config appkey <redacted>`), także w zapisanym widoku.
    Wiersze hexdumpu z dziennika urządzenia są domyślnie ukryte, tak jak w lokalnej karcie (przełącznik **H**).
 5. Gdy klient używa HARDWARIO Monitor, strona **Wgraj** oferuje **Poproś o wgranie** (identyfikator firmware z
    katalogu), **Poproś o skasowanie**, **Poproś o recover** i **Poproś o reset** dla rdzenia aplikacji lub LTE. Każda
@@ -93,9 +105,27 @@ Kreator połączenia, kreator rozwiązywania problemów i wgrywanie z kreatorem 
 Twojego komputera: na karcie sesji wsparcia się nie otwierają (*Ten kreator działa tylko z urządzeniem podłączonym do
 tego komputera, nie w sesji wsparcia.*), a sesja trwa dalej.
 
+Aby opuścić sesję, kliknij **Opuść sesję** na pasku urządzenia (lub naciśnij Ctrl+Shift+D). Karta pozostaje otwarta
+razem z konsolą, więc nadal możesz ją zapisać; konsola pokazuje *— opuściłeś sesję —*. **Dołącz ponownie** dołącza do
+tego samego kodu, a klient musi Cię ponownie dopuścić. Dopóki trwa operacja, o którą poprosiłeś, przycisk czeka na jej
+zakończenie. Klient z HARDWARIO Monitor 2.0.0-rc.5 lub nowszym widzi, że wyszedłeś (także po zamknięciu karty lub
+aplikacji), a polecenia wysłane potem nie docierają do urządzenia, dopóki klient ponownie Cię nie dopuści.
+
+**Asystent AI.** Gdy włączone jest **Ustawienia › Asystenci AI (MCP) › Klienci AI mogą korzystać z sesji
+zdalnego wsparcia**, klient AI, na przykład Claude Code, może pracować w karcie zdalnej, gdy zezwolisz mu na to dla
+danej sesji: czyta konsolę z ukrytymi wartościami tajnymi, wysyła polecenia i prosi o wgranie firmware z katalogu,
+aktualizację LTE lub reset tak jak Ty. Klient widzi jego polecenia jako Twoje. Baner pokazuje *Aktywny klient AI:
+Claude Code* z przyciskiem **Zatrzymaj AI**; operacja, o którą poprosił klient AI, jest na stronie **Wgrywanie**
+oznaczona *AI:* z przyciskiem **Przestań czekać**. Zobacz [Serwer MCP](../en/mcp.md#remote-support-sessions) (po
+angielsku).
+
 HARDWARIO Monitor nie zawsze rozpozna, że klient zakończył udostępnianie: serwer tego nie ogłasza. Po 30 minutach bez
-żadnej aktywności baner o tym informuje i oferuje **Opuść**. Karta pozostaje otwarta, więc nadal możesz zapisać
-konsolę.
+żadnej aktywności baner o tym informuje i oferuje **Zamknij kartę**. Dopóki jej nie zamkniesz, karta pozostaje otwarta,
+więc nadal możesz zapisać konsolę.
+
+Wsparcie i klient mogą używać różnych wersji HARDWARIO Monitor. Nowsza wersja działa ze starszą i z Terminalem
+webowym: to, czego druga strona nie obsługuje, nie jest oferowane, a błędy docierają do starszej wersji jako błąd,
+który zna.
 
 <a id="command-line"></a>
 ## Wiersz poleceń

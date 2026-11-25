@@ -17,6 +17,12 @@ wszystko, co przechowuje, pozostaje na Twoim komputerze.
 Serwer MCP (`hwio mcp --http`) nasłuchuje tylko na tym komputerze (127.0.0.1) i nie jest dostępny z sieci.
 SEGGER J-Link Software i nRF Util to osobne programy, które działają według własnych zasad.
 
+W aplikacji desktopowej wsparcie może włączyć **Klienci AI mogą korzystać z sesji zdalnego wsparcia**
+(domyślnie wyłączone). Gdy wsparcie zezwoli na to dla sesji, tekst konsoli zdalnej sesji klienta trafia do klienta AI
+używanego przez wsparcie, a przez niego do jego dostawcy. Wartości tajne są ukrywane według nazw, tak jak w plikach
+konsoli: tajne wartości firmware, którego HARDWARIO Monitor nie zna, nie są rozpoznawane. Zobacz
+[Serwer MCP](../en/mcp.md#remote-support-sessions).
+
 ## Sprawdzanie aktualizacji
 
 Aplikacja desktopowa pobiera z GitHub listę wydań HARDWARIO Monitor 10 sekund po uruchomieniu, najwyżej raz na
@@ -47,8 +53,9 @@ report…** w aplikacji lub `hwio diag report` (`-o FILE`). Jest to plik zip zaw
 - najnowsze raporty o awariach, jeśli istnieją.
 
 Przed zapisaniem nazwa użytkownika, folder domowy i nazwa komputera są zastępowane (`<user>`, `~`, `<host>`), a
-wartości wyglądające na hasła, tokeny lub klucze są zastępowane przez `<redacted>`. Numery seryjne sond pozostają w
-raporcie. Logi mogą zawierać dane wyjściowe Twojego urządzenia, więc przejrzyj raport przed wysłaniem. Pliki konsoli
+wartości wyglądające na hasła, tokeny lub klucze są zastępowane przez `<redacted>`. Adres adaptera Bluetooth Twojego
+komputera jest zastępowany przez `<adapter address>` (aplikacja i `hwio doctor` nadal go pokazują). Numery seryjne
+sond i adresy Twoich urządzeń pozostają w raporcie. Logi mogą zawierać dane wyjściowe Twojego urządzenia, więc przejrzyj raport przed wysłaniem. Pliki konsoli
 i historia poleceń nie są częścią raportu.
 
 Raport jest zapisywany na Twoim komputerze (domyślnie `hwio-diagnostics-YYYYMMDD-HHMMSS.zip` w folderze Dokumenty

@@ -5,6 +5,7 @@
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/localized_text.h"
+#include "hwio/core/owner_only.h"
 #include "hwio/core/result.h"
 #include "hwio/device/command_history.h"
 #include "hwio/device/command_tree.h"
@@ -13,6 +14,7 @@
 #include "hwio/device/completer.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
+#include "hwio/device/console_redaction.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/device_info.h"
 #include "hwio/device/device_session.h"
@@ -769,8 +771,14 @@ void ConsoleViewModel::saveView(int channel, const QUrl& file) {
         failed(out.errorString());
         return;
     }
+    // ADR-0426: owner-only before the first write (QSaveFile: its temporary file, which replaces
+    // `path` on commit), and the secrets written as in the console file of the same console: the
+    // tab's profile and console target are the ones its session gives its ConsoleFileConfig.
+    restrictToOwner(out);
+    const device::ConsoleRedaction redaction(toStdString(m_tab->profileId()),
+                                             toStdString(m_tab->consoleTargetId()));
     const bool withTime = m_context.settings != nullptr && m_context.settings->showTimestamps();
-    if (const Status written = model(channel)->writeRows(out, withTime); !written) {
+    if (const Status written = model(channel)->writeRows(out, withTime, redaction); !written) {
         out.cancelWriting();
         failed(toQString(written.error().detail));
         return;

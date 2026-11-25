@@ -17,6 +17,11 @@ ukládá, zůstává ve vašem počítači.
 Server MCP (`hwio mcp --http`) naslouchá jen na tomto počítači (127.0.0.1) a ze sítě není dostupný. SEGGER J-Link
 Software a nRF Util jsou samostatné programy s vlastním chováním.
 
+V desktopové aplikaci může podpora zapnout **AI klienti smí používat relace vzdálené podpory** (výchozí je
+vypnuto). Jakmile to podpora pro relaci povolí, jde text konzole vzdálené relace zákazníka AI klientovi, kterého
+podpora používá, a přes něj jeho poskytovateli. Tajné hodnoty se skrývají podle názvů, stejně jako v souborech konzole:
+tajné hodnoty firmwaru, který HARDWARIO Monitor nezná, se nerozpoznají. Viz [Server MCP](../en/mcp.md#remote-support-sessions).
+
 ## Kontrola aktualizací
 
 Desktopová aplikace se 10 sekund po spuštění zeptá GitHubu na seznam vydání HARDWARIO Monitor, nejvýše jednou za
@@ -46,7 +51,9 @@ diagnostickou zprávu…**, nebo `hwio diag report` (`-o FILE`). Je to soubor zi
 - poslední zprávy o pádu, pokud nějaké jsou.
 
 Před zapsáním se vaše uživatelské jméno, domovská složka a název počítače nahradí (`<user>`, `~`, `<host>`) a hodnoty,
-které vypadají jako hesla, tokeny nebo klíče, se nahradí `<redacted>`. Sériová čísla sond ve zprávě zůstávají. Logy
+které vypadají jako hesla, tokeny nebo klíče, se nahradí `<redacted>`. Adresa Bluetooth adaptéru vašeho počítače se
+nahradí `<adapter address>` (aplikace a `hwio doctor` ji dál zobrazují). Sériová čísla sond a adresy vašich zařízení
+ve zprávě zůstávají. Logy
 mohou obsahovat výstup vašeho zařízení, proto si zprávu před odesláním prohlédněte. Soubory konzole a historie
 příkazů nejsou součástí zprávy.
 

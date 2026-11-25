@@ -37,6 +37,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <expected>
 #include <filesystem>
 #include <functional>
 #include <map>
@@ -311,6 +312,73 @@ TEST(CommandCaptureTest, CancelGivesNoResult) {
     session.output("late");
     session.prompt();
     EXPECT_FALSE((*capture)->isFinished());
+}
+
+// Plan 0062 (ADR-0438): forceSilence ignores the profile's prompt and ends by the silence rule.
+TEST(CommandCaptureTest, ForceSilenceIgnoresThePrompt) {
+    FakeSession session(promptProfile());
+    auto opts = options();
+    opts.forceSilence = true;
+    auto capture = CommandCapture::start(session, "version", opts);
+    ASSERT_TRUE(capture);
+    EXPECT_TRUE((*capture)->echoSeen());
+    session.output("Firmware version: v3.1.0");
+    session.prompt();
+    EXPECT_FALSE((*capture)->isFinished()); // the prompt does not end it
+    session.output("more after the prompt");
+    ASSERT_TRUE(runUntil([&] { return (*capture)->isFinished(); }));
+    const auto result = resultOf(**capture);
+    EXPECT_EQ(result.end, CaptureEnd::Silence);
+    EXPECT_EQ(texts(result.lines),
+              (std::vector<std::string>{"Firmware version: v3.1.0", "more after the prompt"}));
+}
+
+// Plan 0062 (ADR-0437): the caller's sender and line view; the capture sees only the view.
+TEST(CommandCaptureTest, HooksSendAndViewEveryLine) {
+    FakeSession session;
+    session.setEcho(false);
+    std::vector<std::string> sent;
+    const auto view = [](const ConsoleLine& line) {
+        ConsoleLine copy = line;
+        if (const auto at = copy.text.find("SECRET"); at != std::string::npos) {
+            copy.text.replace(at, 6, "<hidden>");
+        }
+        return copy;
+    };
+    auto opts = options();
+    opts.timeout = std::chrono::milliseconds(500);
+    auto capture =
+        CommandCapture::start(session, "show SECRET", opts,
+                              hwio::device::CaptureHooks{.send =
+                                                             [&sent](std::string line) {
+                                                                 sent.push_back(std::move(line));
+                                                                 return hwio::Status{};
+                                                             },
+                                                         .view = view});
+    ASSERT_TRUE(capture);
+    EXPECT_EQ(sent, std::vector<std::string>{"show SECRET"});
+    EXPECT_TRUE(session.written().empty()); // not ConsoleSession::sendLine
+    EXPECT_FALSE((*capture)->echoSeen());
+    session.deliver(Channel::Shell, Direction::In, "show SECRET");
+    EXPECT_TRUE((*capture)->echoSeen()); // matched in the view
+    session.output("value: SECRET");
+    ASSERT_TRUE(runUntil([&] { return (*capture)->isFinished(); }));
+    EXPECT_EQ(texts(resultOf(**capture).lines), std::vector<std::string>{"value: <hidden>"});
+
+    // A failing sender fails start(); silent options and missing hooks are refused.
+    auto refused = CommandCapture::start(
+        session, "x", opts,
+        hwio::device::CaptureHooks{.send = [](const std::string&) -> hwio::Status {
+                                       return std::unexpected(
+                                           hwio::makeError(hwio::ErrorCode::RemoteHostEnded));
+                                   },
+                                   .view = view});
+    ASSERT_FALSE(refused);
+    EXPECT_EQ(refused.error().code, hwio::ErrorCode::RemoteHostEnded);
+    auto silent = opts;
+    silent.silent = true;
+    EXPECT_FALSE(CommandCapture::start(session, "x", silent,
+                                       hwio::device::CaptureHooks{.send = {}, .view = view}));
 }
 
 TEST(ShellQueryTest, SilentAndUserLinesWait) {

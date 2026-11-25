@@ -1,6 +1,7 @@
 # ADR-0332 — No MCP surface for remote sessions
 
-- **Status:** Accepted
+- **Status:** Superseded by ADR-0433 (2026-11-24: AI clients may use a joined remote tab behind a setting; the
+  part "an AI client cannot create, join, leave or end a session" stays in ADR-0433)
 - **Date:** 2026-11-06
 - **Decided by:** Matej Strnad (remote support session planning, plan [0044](../features/0044-remote-support-session.md))
 

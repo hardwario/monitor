@@ -254,6 +254,35 @@ TEST_F(McpConsent, AlwaysAllowRuleSkipsThePrompt) {
     EXPECT_NE(broker().current(), nullptr);
 }
 
+// Plan 0062 (ADR-0436): a customer's device is asked every time: no rule, no client grant covers
+// it, and "Allow for this client" on it is not remembered.
+TEST_F(McpConsent, ACustomersDeviceIsNeverCoveredOrRemembered) {
+    ASSERT_TRUE(broker().setAlwaysAllowed(ConsentCategory::Flash, true));
+    const auto remoteRequest = [this](ConsentCategories categories) {
+        auto outcome = std::make_shared<Outcome>();
+        ConsentRequest request;
+        request.client = {.name = "Claude Code", .version = "1"};
+        request.clientKey = "Claude Code";
+        request.tool = "flash";
+        request.deviceId = "remote:1";
+        request.categories = categories;
+        request.remoteDevice = true;
+        outcome->cancel = broker().request(
+            std::move(request), [outcome](ConsentDecision d) { outcome->decision = std::move(d); });
+        return outcome;
+    };
+    const auto flash = remoteRequest(ConsentCategory::Flash);
+    EXPECT_FALSE(flash->decision.has_value()); // the rule does not cover it
+    answer(GuiConsentBroker::Answer::AllowForClient);
+    ASSERT_TRUE(allowed(*flash));
+    EXPECT_EQ(grant(*flash), hwio::mcp::ConsentGrant::Prompted);
+    EXPECT_TRUE(broker().grants().empty()); // not remembered
+    const auto device = remoteRequest(ConsentCategory::RemoteDevice);
+    EXPECT_FALSE(device->decision.has_value());
+    answer(GuiConsentBroker::Answer::Deny);
+    EXPECT_EQ(code(*device), "mcp.consent_denied");
+}
+
 // Plan 0055 (ADR-0390): a test describer; `prefix` makes a language switch visible.
 ConsentRulesModel::Describer rulesDescriber(const QString& prefix) {
     return [&prefix](ConsentCategory category) {

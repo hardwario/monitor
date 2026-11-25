@@ -29,6 +29,10 @@
 //   not called when the call was cancelled meanwhile. Granted categories are remembered
 //   (grantedConsent()) for the server's safety net (consent.h).
 // - setDeviceId(): the device the call works on, for the activity entry (ADR-0105).
+// - setActivityArguments(): plan 0062 (ADR-0437) - the arguments the activity entry shows instead
+//   of the received ones (a remote device's command, redacted).
+// - adoptConsent(): plan 0062 - the consent granted to another call (a call this one runs) counts
+//   as granted to this one (the server's safety net, the result's "consent" object).
 //
 // Thread safety: owner thread only.
 
@@ -93,6 +97,10 @@ public:
     // Plan 0050 (ADR-0377): {"<category id>": "<consentGrantId>"} of every category granted
     // during the call (static and run-time ones), in the enum order; empty when none.
     [[nodiscard]] QJsonObject consentJson() const;
+    // Plan 0062: set by setActivityArguments(), else nullopt (the server records the arguments).
+    [[nodiscard]] const std::optional<QJsonObject>& activityArguments() const noexcept {
+        return m_activityArguments;
+    }
 
 signals:
     void progress(double done, std::optional<double> total, const QString& message);
@@ -106,6 +114,8 @@ protected:
                         const QString& message = {});
     virtual void onCancel();
     void setDeviceId(std::string id) { m_deviceId = std::move(id); }
+    void setActivityArguments(QJsonObject arguments) { m_activityArguments = std::move(arguments); }
+    void adoptConsent(const ToolCall& other);
     // At most one request at a time (a second one is answered with internal.unexpected).
     void requestConsent(IConsentBroker& broker, ConsentRequest request,
                         std::function<void(ConsentDecision)> done);
@@ -114,6 +124,7 @@ protected:
 private:
     std::optional<hwio::Result<ToolResult>> m_result;
     std::string m_deviceId;
+    std::optional<QJsonObject> m_activityArguments;
     ConsentCategories m_granted;
     // How each granted category was allowed (plan 0050), by its bit index in ConsentCategory;
     // the latest grant of a category wins.

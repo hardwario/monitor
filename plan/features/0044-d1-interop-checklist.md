@@ -46,8 +46,11 @@ release notes or the HIL results.
 |---|---|---|---|
 | 2.1 | Monitor GUI (J-Link) | Monitor GUI | [ ] code readable aloud; join question, **End session** default; Allow → history (sync) + live output; joiner commands run, marked "— Remote: … —" on the host; **End sharing** |
 | 2.2 | Monitor GUI (BLE) | web Terminal (Chrome, **Join Session**) | [ ] the web Terminal shows the history and live output, its commands run after Allow; the web Terminal shows no garbage from the `hwio` tunnel messages |
-| 2.3 | web Terminal (Chrome, **Create Session**, BLE) | Monitor GUI | [ ] tab "Session NNN NNN — web Terminal"; history and live output; commands reach the device; Flash page says only the console is available; a code under 100000 (leading zero) joins |
+| 2.3 | web Terminal (Chrome, **Create Session**, BLE) | Monitor GUI | [ ] tab "Session NNN NNN — web Terminal or mobile app"; history and live output; commands reach the device; Flash page says only the console is available; a code under 100000 (leading zero) joins |
 | 2.4 | web Terminal | web Terminal | [ ] unchanged behaviour (regression check of the deployed relay) |
+| 2.5 | HARDWARIO mobile app (CHESTER over Bluetooth) | Monitor GUI | [ ] plan 0061 (ADR-0431, ADR-0432): tab "Session NNN NNN — web Terminal or mobile app"; the history and the live answers of `info show` and `config show` show every line (no blank lines instead of text, no line in two pieces, no prompt lines); `claim token`, `ble passkey` and `lrw config appkey …` show `<redacted>`; stopping sharing on the phone ends the session in Monitor ("The session ended.") |
+| 2.6 | Monitor GUI | HARDWARIO mobile app | [ ] the app shows the history and the live output (known: the app joins Monitor's lines without line breaks; the app's to fix, ADR-0431); its commands run after Allow |
+| 2.7 | Monitor GUI 2.0.0-rc.5 | Monitor GUI 2.0.0-rc.5 | [ ] plan 0061 Amendment 2 (ADR-0439): **Leave session** on the joiner → the host's banner drops "Support can send commands." and its console shows "— Remote: Support left the session. —"; **Join again** → the customer's join question; the same after closing the joined tab and after quitting the joiner; with a 2.0.0-rc.4 Monitor on either side nothing changes (no warning on an rc.4 host) |
 
 ## 3. Monitor ↔ Monitor operations (HIL, J-Link CHESTER)
 
@@ -73,3 +76,38 @@ release notes or the HIL results.
 
 - [ ] Linux, macOS, Windows: packages contain Qt WebSockets (`Qt6WebSockets` library next to the app), sharing and
       joining work on each.
+
+## 6. Plan 0059 protocol base (A1–A4: caps, profile, string targets, detail codes)
+
+Nothing visible may change for CHESTER. The automated part runs in `libs/remote/tests/compat_test.cpp` against the
+frozen rc.4 codec (`rc4_tunnel.*`); these rows check the real packages and the real relay.
+
+- [ ] Monitor with 0059 (host, J-Link CHESTER) ↔ Monitor 2.0.0-rc.4 / rc.5 (joiner): tab title, console, history and
+      the Flash card as before; **no** connection warning in the joiner's tab; Ask to reset / flash work; the host's
+      audit says "Participant app: HARDWARIO Monitor 2.0.0-rc.… ." (no capabilities).
+- [ ] Monitor 2.0.0-rc.4 / rc.5 (host) ↔ Monitor with 0059 (joiner): tab title, console and the Flash card (Application
+      core / LTE modem core) as before; operations work; no connection warning.
+- [ ] Monitor with 0059 ↔ Monitor with 0059: the host's audit names the joiner's capabilities
+      ("… (capabilities: targets, detail-codes, refused-lines)."); operations as before.
+- [ ] An LTE update that fails with low supply voltage (`target.low_voltage`, a weak supply on purpose) on a 0059 host:
+      an rc.4 / rc.5 joiner shows `target.no_power` (before 0059 it showed a connection warning and waited for the
+      result); a 0059 joiner shows `target.low_voltage`.
+- [ ] Web Terminal joiner on a 0059 host and web Terminal host with a 0059 joiner: as rows 2.2 and 2.3 (no garbage
+      from the new hello fields).
+
+## 7. Plan 0062: an AI client (MCP) on support's joined tab
+
+Support's Monitor 2.0.0-rc.5 with **Settings › AI assistants (MCP) › AI clients may use remote support sessions** on
+and a real AI client (for example Claude Code over HTTP). The customer's side needs nothing new (ADR-0435). In every
+row: `list_devices` shows `remote:<n>` without the session code; support's prompt *… wants to work with a customer's
+device* (Deny default, no "Always allow"); after **Allow for this session** `read_terminal` and `send_command`
+(`info show`, `config show`) return the output with `<redacted>` for secrets and `<session>` for the code; the
+customer sees the commands as support's ("— Remote: command … —"); **Stop AI** ends a running `wait_for_state` with
+`cancelled`; Leave session / Join again ask support again.
+
+| # | Host (customer) | Check |
+|---|---|---|
+| 7.1 | Monitor 2.0.0-rc.5 (J-Link CHESTER) | [ ] the rows above; `flash` (`catalog_id`) and `reset`: support's prompt every time (device row "the customer's device (remote session)"), the customer's question, the result in the tool call and on support's Flash card ("AI: …"); **Stop waiting** ends the call with `cancelled` and the card follows the operation to its result; `flash_lte`: support answers the LTE update's questions on the card, the AI client sees "waiting for support's answer" |
+| 7.2 | Monitor 2.0.0-rc.4 | [ ] the rows above; `lrw config appkey <value>` from the AI client is refused on support's side (`remote.command_refused`, nothing sent); `config show` output reaches the AI client with `<redacted>` although the rc.4 host passes the key; `flash` / `reset` as in 7.1 |
+| 7.3 | web Terminal | [ ] the rows above; display name "Remote session (web Terminal or mobile app)"; `flash`, `flash_lte`, `reset` answer `remote.target_unsupported` / nothing offered; `send_command` ends by silence (1 s) with the whole answer |
+| 7.4 | HARDWARIO mobile app (CHESTER over Bluetooth) | [ ] the rows above; `send_command` returns every line of a multi-line answer (`info show`) without blank lines or the prompt (plan 0061 stream mode); no operations offered |

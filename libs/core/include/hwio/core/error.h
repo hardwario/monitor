@@ -144,6 +144,13 @@ enum class ErrorCode : std::uint8_t {
     RemoteApplicationNotRestored,
     // rc.4 issue #9 (plan/features/0051-rc4-issues-5-11.md, ADR-0383): nRF Util LOW_VOLTAGE
     TargetLowVoltage,
+    // Plan 0059 (ADR-0414, ADR-0416): remote sessions for every device profile
+    RemoteTargetUnsupported,
+    RemoteCommandRefused,
+    // Plan 0062 (ADR-0438): an AI client's command on a joined remote tab (support's side only;
+    // never sent over the wire)
+    RemoteCommandNotDelivered,
+    RemoteWaitingForCustomer,
 };
 
 // Wizards the UI can offer to fix an error (M4). Serialized as kebab-case ids.
@@ -457,6 +464,18 @@ inline constexpr std::array errorTable{
     ErrorInfo{.code = ErrorCode::TargetLowVoltage,
               .id = "target.low_voltage",
               .category = ErrorCategory::Target},
+    ErrorInfo{.code = ErrorCode::RemoteTargetUnsupported,
+              .id = "remote.target_unsupported",
+              .category = ErrorCategory::Usage},
+    ErrorInfo{.code = ErrorCode::RemoteCommandRefused,
+              .id = "remote.command_refused",
+              .category = ErrorCategory::Usage},
+    ErrorInfo{.code = ErrorCode::RemoteCommandNotDelivered,
+              .id = "remote.command_not_delivered",
+              .category = ErrorCategory::Timeout},
+    ErrorInfo{.code = ErrorCode::RemoteWaitingForCustomer,
+              .id = "remote.waiting_for_customer",
+              .category = ErrorCategory::Cancelled},
 };
 
 // Compile-time checks of errorTable (ids unique and well-formed, index == enum value, every

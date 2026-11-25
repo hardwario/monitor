@@ -37,7 +37,13 @@ Andere Sprachen: [English](../en/remote-support.md) · [Čeština](../cs/remote-
    den Anweisungen zum Umstecken (es gibt nichts zu klicken). Kann keine Kopie der Anwendung erstellt werden,
    entscheidet der Support, ob ohne sie fortgefahren wird. Die Kopie wird am Ende immer zurückgeschrieben. Antwortet der Support mit Nein, sehen Sie *Vom Support abgebrochen. Es wurde nichts geändert.* Ohne Antwort sehen Sie *Der Support hat nicht geantwortet. Es wurde nichts geändert.* Antwortet
    der Support nicht innerhalb von 60 Sekunden, wird das Update abgebrochen, bevor etwas geändert wird.
-8. Klicken Sie auf **Freigabe beenden**, wenn Sie fertig sind.
+8. Wenn der Support die Sitzung verlässt (mit **Sitzung verlassen**, durch Schließen seines Tabs oder Beenden von
+   HARDWARIO Monitor), zeigt Ihre Konsole *— Remote: Der Support hat die Sitzung verlassen. —*, und das Banner sagt
+   nicht mehr, dass der Support Befehle senden kann. Die Freigabe läuft weiter; tritt der Support erneut bei, müssen
+   Sie ihn erneut zulassen. Ein Vorgang, der bereits läuft, wird zu Ende geführt. Dafür braucht es HARDWARIO Monitor
+   2.0.0-rc.5 oder neuer auf beiden Seiten; ein Support mit dem Web-Terminal oder einer älteren Version verlässt die
+   Sitzung ohne Hinweis.
+9. Klicken Sie auf **Freigabe beenden**, wenn Sie fertig sind.
 
 Die Freigabe endet auch, wenn Sie das Gerät trennen, den Tab schließen oder die App beenden, nach 30 Minuten ohne
 Aktivität (ein Banner warnt Sie 2 Minuten vorher, **Weiter freigeben** verlängert sie) und spätestens nach 8 Stunden.
@@ -61,6 +67,11 @@ Für die Autovervollständigung des Supports sendet Ihr HARDWARIO Monitor dem Su
 Gerätebefehle, und wenn der Support die Unterbefehle eines Befehls braucht, liest er dessen Hilfe selbst. Diese
 Hilfeabfragen erscheinen nicht in Ihrer Konsole; die Konsolendatei hält fest, wie viele es waren.
 
+Der HARDWARIO Support kann in der Sitzung einen KI-Assistenten verwenden. Dessen Befehle und Anfragen erreichen
+Sie als Befehle des Supports: dieselbe Zeile *— Remote: command … —*, dieselbe Frage vor jeder Aktion, dieselben
+Einträge in der Konsolendatei. Ihre Möglichkeiten bleiben dieselben: den Support zulassen, die Frage vor jeder Aktion
+und **Freigabe beenden**.
+
 <a id="join-a-session"></a>
 ## Einer Sitzung beitreten (Support)
 
@@ -68,10 +79,13 @@ Hilfeabfragen erscheinen nicht in Ihrer Konsole; die Konsolendatei hält fest, w
 2. Geben Sie den Code ein, den Ihnen der Kunde vorliest (Leerzeichen sind erlaubt), oder fügen Sie den Link ein. Ein
    Link zu einem anderen als dem eingestellten Server erfordert eine zusätzliche Bestätigung.
 3. Ein neuer Tab öffnet sich mit dem Titel **Sitzung 482 913** und danach *CHESTER-M 2159018247 — remote* (oder *Sitzung
-   482 913 — web Terminal*, wenn der Kunde das web Terminal verwendet). Bis der Kunde es Ihnen erlaubt, zeigt das Banner
+   482 913 — web Terminal oder mobile App*, wenn der Kunde das web Terminal oder die HARDWARIO-App verwendet). Bis der Kunde es Ihnen erlaubt, zeigt das Banner
    *Warten, bis der Kunde es Ihnen erlaubt…*. Die Live-Ausgabe kann bereits erscheinen.
 4. Sobald es Ihnen erlaubt ist, erhalten Sie den Konsolenverlauf des Kunden und können wie gewohnt in der Konsole
    arbeiten: Verlauf, Suche, Filter und Ansicht speichern.
+   Das web Terminal und die mobile App verbergen keine Geheimnisse; Ihr HARDWARIO Monitor verbirgt sie, bevor sie in
+   die Konsole gelangen (zum Beispiel `claim token: <redacted>`, `lrw config appkey <redacted>`), auch in
+   einer gespeicherten Ansicht.
    Bei einem Kunden mit HARDWARIO Monitor verwenden Vorschläge und die Tab-Vervollständigung die Befehlsliste seines
    Geräts.
    Hexdump-Zeilen des Geräteprotokolls sind standardmäßig ausgeblendet, wie in einem lokalen Tab (Chip **H**).
@@ -98,9 +112,27 @@ eigenen Computer angeschlossen ist: Auf dem Tab einer Support-Sitzung öffnen si
 funktioniert nur mit einem Gerät, das an diesen Computer angeschlossen ist, nicht in einer Support-Sitzung.*), und die
 Sitzung läuft weiter.
 
+Um die Sitzung zu verlassen, klicken Sie in der Geräteleiste auf **Sitzung verlassen** (oder drücken Sie
+Ctrl+Shift+D). Der Tab bleibt mit der Konsole offen, sodass Sie sie noch speichern können; die Konsole zeigt *— Sie haben
+die Sitzung verlassen —*. **Erneut beitreten** tritt mit demselben Code wieder bei, und der Kunde muss Sie erneut
+zulassen. Solange ein Vorgang läuft, den Sie angefordert haben, wartet die Schaltfläche, bis er beendet ist. Ein Kunde
+mit HARDWARIO Monitor 2.0.0-rc.5 oder neuer sieht, dass Sie gegangen sind (auch wenn Sie den Tab schließen oder die
+App beenden), und danach gesendete Befehle erreichen das Gerät erst, wenn der Kunde Sie erneut zulässt.
+
+**KI-Assistent.** Wenn **Einstellungen › KI-Assistenten (MCP) › KI-Clients dürfen Fernsupport-Sitzungen
+verwenden** eingeschaltet ist, kann ein KI-Client wie Claude Code im Remote-Tab arbeiten, sobald Sie es für die
+Sitzung erlauben: Er liest die Konsole mit verborgenen geheimen Werten, sendet Befehle und bittet wie Sie um das
+Flashen einer Katalog-Firmware, das LTE-Update oder einen Reset. Der Kunde sieht seine Befehle als Ihre. Das Banner
+zeigt *KI-Client aktiv: Claude Code* mit **KI stoppen**; eine Aktion, um die der KI-Client gebeten hat, zeigt die Seite
+**Flashen** mit *KI:* und **Nicht mehr warten**. Siehe [MCP-Server](../en/mcp.md#remote-support-sessions) (Englisch).
+
 Wenn der Kunde die Freigabe beendet, kann HARDWARIO Monitor das nicht immer erkennen: Der Server kündigt es nicht an.
-Nach 30 Minuten ohne jede Aktivität weist das Banner darauf hin und bietet **Verlassen** an. Der Tab bleibt offen,
-sodass Sie die Konsole noch speichern können.
+Nach 30 Minuten ohne jede Aktivität weist das Banner darauf hin und bietet **Tab schließen** an. Bis Sie ihn schließen,
+bleibt der Tab offen, sodass Sie die Konsole noch speichern können.
+
+Support und Kunde können verschiedene Versionen von HARDWARIO Monitor verwenden. Eine neuere Version funktioniert mit
+einer älteren und mit dem Web-Terminal: Was die andere Seite nicht unterstützt, wird nicht angeboten, und Fehler
+erreichen eine ältere Version als ein Fehler, den sie kennt.
 
 <a id="command-line"></a>
 ## Kommandozeile

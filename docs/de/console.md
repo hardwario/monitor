@@ -97,7 +97,9 @@ die Zeilen („Copied to clipboard.“); höchstens 100 000 Zeilen werden auf ei
 **Save view…** (<kbd>Ctrl</kbd>+<kbd>S</kbd>) speichert den fokussierten Bereich so, wie er angezeigt wird, mit
 Zeitstempeln, wenn sie eingeschaltet sind. Der Name ist vorausgefüllt, zum Beispiel
 `chester-app-clime-v3.2.0-20261103-101500-log.txt`, und der Ordner ist der zuletzt verwendete (beim ersten Mal
-Dokumente).
+Dokumente). Geheime Werte werden wie in den [Konsolendateien](#konsolendateien) als `<redacted>` geschrieben (zum
+Beispiel `claim token: <redacted>`); auf dem Bildschirm und beim **Kopieren** bleiben sie sichtbar. Unter Linux und
+macOS kann nur Ihr Benutzer die gespeicherte Datei lesen.
 
 <a id="batch-files"></a>
 ## Batch-Dateien
