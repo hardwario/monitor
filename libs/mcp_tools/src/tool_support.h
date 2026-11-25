@@ -59,8 +59,35 @@ namespace hwio::mcp::tools::detail {
 // {id, kind, display_name, profile, state, owner {app, pid} | null, connection | null,
 //  opened_by_mcp}
 [[nodiscard]] QJsonObject deviceEntryJson(const DeviceEntry& entry);
+// Plan 0062 (ADR-0434, ADR-0436): the entry of a remote device. Before support allowed the client
+// (`allowed` false) only {id, kind, display_name "Remote support session", profile null, state,
+// owner null, connection null, opened_by_mcp, remote {owner, secrets, note}}; afterwards the full
+// entry (display name and connection error in the hidden view) with remote {owner, host, join,
+// commands, operations, secrets, note}.
+[[nodiscard]] QJsonObject remoteEntryJson(const DeviceEntry& entry, const DeviceRef& ref,
+                                          bool allowed);
+// Plan 0062: the client may see the device: not a remote device, or a remote device whose
+// IRemoteDevice::aiAllowed(clientKey) holds.
+[[nodiscard]] bool visibleTo(const DeviceRef& ref, std::string_view clientKey);
+
+// ---- the hidden view of a remote device (plan 0062, ADR-0437) -----------------------------------
+
+// `line` as an AI client may see it: unchanged for a local device; for a remote device `text` =
+// IRemoteDevice::hiddenText(line) and textEn cleared (empty text when the remote device is gone).
+[[nodiscard]] hwio::device::ConsoleLine visibleLine(const DeviceRef& ref,
+                                                    const hwio::device::ConsoleLine& line);
+// A text of this server (marker, argument, error text, name) with the session code replaced;
+// unchanged for a local device.
+[[nodiscard]] QString visibleText(const DeviceRef& ref, const QString& text);
+// A command as a sent line in the hidden view (secret arguments redacted, the code replaced).
+[[nodiscard]] QString visibleCommand(const DeviceRef& ref, const std::string& command);
+// connectionJson() of a device: for a remote device the error without its detail and with its
+// texts in the hidden view (the relay URL and the code never reach a client).
+[[nodiscard]] QJsonObject deviceConnectionJson(const DeviceRef& ref,
+                                               const hwio::device::ConnectionEvent& event);
 // status: {id, connection, terminal_total, terminal_buffered, log_total, log_buffered,
-// buffer_size, busy_operation (operationKindId or null), paused_by_operation}
+// buffer_size, busy_operation (operationKindId or null), paused_by_operation}; a remote device
+// also remote: true and note (plan 0062).
 [[nodiscard]] QJsonObject deviceStatusJson(const std::string& id, const DeviceRef& ref);
 [[nodiscard]] QJsonObject deviceStatusSchema();
 // Whether devicesJson() lists every BLE device or only those like `hwio ble scan` (ADR-0373).
@@ -68,7 +95,8 @@ enum class BleListing : std::uint8_t { Profiled, All };
 // {devices: [deviceEntryJson], ble_hidden}. BleListing::Profiled (list_devices' default, the
 // hwio://devices resource) leaves out BLE devices without a known profile that are not open, like
 // `hwio ble scan` without --all; ble_hidden counts them (0 with BleListing::All).
-[[nodiscard]] QJsonObject devicesJson(IDeviceProvider& provider,
+// Plan 0062: remote devices as remoteEntryJson() for the client `clientKey`.
+[[nodiscard]] QJsonObject devicesJson(IDeviceProvider& provider, std::string_view clientKey,
                                       BleListing listing = BleListing::Profiled);
 [[nodiscard]] QJsonObject deviceEntrySchema();
 // Plan 0050 (ADR-0376): `unchanged` (bool) and `affected_bytes` (integer) of a flash download,

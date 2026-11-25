@@ -18,11 +18,14 @@
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/mcp/activity.h"
 #include "hwio/mcp/consent.h"
+#include "hwio/mcp/request_context.h"
+#include "hwio/mcp/tools/device_provider.h"
 #include "hwio/remote/session_code.h"
 #include "hwio/remote/tunnel.h"
 #include "language_manager.h"
 #include "mcp/activity_model.h"
 #include "mcp/gui_device_provider.h"
+#include "mcp/gui_remote_device.h"
 #include "mcp/mcp_controller.h"
 #include "pages/builtin_pages.h"
 #include "remote_test_support.h"
@@ -36,6 +39,7 @@
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
 #include "viewmodels/history_store.h"
+#include "viewmodels/remote_join_view_model.h"
 #include "viewmodels/ui_mode_controller.h"
 #include "wizard/wizard_view_model.h"
 #include "zip_builder.h"
@@ -52,6 +56,7 @@
 #include <QJsonObject>
 #include <QLatin1Char>
 #include <QObject>
+#include <QPointer>
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QQuickStyle>
@@ -241,8 +246,29 @@ public:
         }
         return result;
     }
+    // ADR-0439: the participant (a Monitor joiner) leaves the session (tunnel `leave`).
+    Q_INVOKABLE void remoteLeave() const {
+        if (m_participant) {
+            m_participant->emitEvent(QStringLiteral("write"), hwio::remote::tunnel::encodeJoiner(
+                                                                  hwio::remote::tunnel::Leave{}));
+        }
+    }
+    // ADR-0439: the number of tunnel `leave` messages the participant (a host) received.
+    Q_INVOKABLE [[nodiscard]] int remoteReceivedLeave() const {
+        int count = 0;
+        if (m_participant) {
+            for (const auto& event : m_participant->named(QStringLiteral("write"))) {
+                if (auto message = hwio::remote::tunnel::decodeJoiner(event.payload);
+                    message && std::holds_alternative<hwio::remote::tunnel::Leave>(*message)) {
+                    ++count;
+                }
+            }
+        }
+        return count;
+    }
     // The participant acts as a Monitor host: a sync and its hello (operations; `lteUpdate`: the
-    // guided LTE update in opKinds, with support's questions, ADR-0368).
+    // guided LTE update in opKinds, with support's questions, ADR-0368; the `leave` cap of
+    // ADR-0439).
     Q_INVOKABLE void remoteMonitorHost(bool lteUpdate) const {
         if (!m_participant) {
             return;
@@ -265,7 +291,8 @@ public:
                                                                       .firmware = {}},
                                                            .ops = true,
                                                            .opKinds = kinds,
-                                                           .opQuestions = lteUpdate}));
+                                                           .opQuestions = lteUpdate,
+                                                           .caps = {"leave"}}));
     }
     // The ID of the last operation request the participant received ("" for none).
     [[nodiscard]] std::string remoteRequestId() const {
@@ -746,6 +773,90 @@ public:
                              : QString::fromLatin1(hwio::idOf(decision.error().code));
             });
     }
+    // Plan 0062: the same for a customer's device (ConsentRequest::remoteDevice).
+    Q_INVOKABLE void requestRemoteConsent(const QString& client, const QString& tool,
+                                          const QStringList& categories, const QString& deviceId,
+                                          const QVariantMap& details) {
+        auto* mcp =
+            m_app->findChild<hwio::gui::McpController*>(QString(), Qt::FindDirectChildrenOnly);
+        if (mcp == nullptr) {
+            return;
+        }
+        hwio::mcp::ConsentRequest request;
+        request.client = {.name = client.toStdString(), .version = "1"};
+        request.clientKey = client.toStdString();
+        request.tool = tool.toStdString();
+        request.deviceId = deviceId.toStdString();
+        for (const QString& id : categories) {
+            if (const auto category = hwio::mcp::consentCategoryFromId(id.toStdString())) {
+                request.categories |= *category;
+            }
+        }
+        request.details = QJsonObject::fromVariantMap(details);
+        request.remoteDevice = true;
+        m_consentOutcomes.append(QStringLiteral("pending"));
+        const qsizetype index = m_consentOutcomes.size() - 1;
+        (void)mcp->broker().request(
+            std::move(request), [this, index](const hwio::mcp::ConsentDecision& decision) {
+                m_consentOutcomes[index] =
+                    decision ? QStringLiteral("allowed")
+                             : QString::fromLatin1(hwio::idOf(decision.error().code));
+            });
+    }
+    // Plan 0062: support allowed `client` for the remote tab `index` (as the tools do after the
+    // prompt).
+    Q_INVOKABLE [[nodiscard]] bool remoteAllowAi(int index, const QString& client) const {
+        hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);
+        hwio::gui::GuiRemoteDevice* device =
+            tab != nullptr ? tab->remoteJoin()->remoteDevice() : nullptr;
+        if (device == nullptr) {
+            return false;
+        }
+        hwio::mcp::RequestContext who;
+        who.client = {.name = client.toStdString(), .version = "1"};
+        who.clientKey = client.toStdString();
+        device->allowAi(who);
+        return true;
+    }
+    // Plan 0062: an AI client's reset on the remote tab `index` as the reset tool runs it (busy
+    // text, request; Stop waiting detaches it). remoteAiOutcome(): "pending", "ok", "stopped" or
+    // the error id.
+    Q_INVOKABLE [[nodiscard]] bool remoteAiReset(int index) {
+        hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);
+        if (tab == nullptr) {
+            return false;
+        }
+        hwio::gui::RemoteJoinViewModel* join = tab->remoteJoin();
+        const QPointer<hwio::gui::RemoteJoinViewModel> guard(join);
+        if (!join->beginAiBusy(QStringLiteral("AI: Resetting…"), [this, guard] {
+                if (!guard.isNull()) {
+                    guard->detachAiOperation(m_aiOperation);
+                    guard->endAiBusy();
+                }
+                m_aiOutcome = QStringLiteral("stopped");
+            })) {
+            return false;
+        }
+        m_aiOutcome = QStringLiteral("pending");
+        auto requested = join->requestAiOperation(
+            hwio::mcp::tools::RemoteOperationRequest{
+                .kind = hwio::mcp::tools::RemoteOperationKind::Reset, .target = "app"},
+            hwio::mcp::tools::RemoteOperationCallbacks{
+                .progress = {}, .done = [this, guard](const hwio::Status& status) {
+                    if (!guard.isNull()) {
+                        guard->endAiBusy();
+                    }
+                    m_aiOutcome = status ? QStringLiteral("ok")
+                                         : QString::fromLatin1(hwio::idOf(status.error().code));
+                }});
+        if (!requested) {
+            join->endAiBusy();
+            return false;
+        }
+        m_aiOperation = *requested;
+        return true;
+    }
+    Q_INVOKABLE [[nodiscard]] QString remoteAiOutcome() const { return m_aiOutcome; }
     // "pending", "allowed" or the error id of the request number `index`.
     Q_INVOKABLE [[nodiscard]] QString consentOutcome(int index) const {
         return m_consentOutcomes.value(index);
@@ -821,6 +932,8 @@ private:
     QTcpServer m_blocker;                                                 // blockPort()
     QStringList m_consentOutcomes;                                        // requestConsent()
     bool m_aiCancelled = false;                                           // setAiBusy()
+    QString m_aiOutcome;                                   // remoteAiReset() (plan 0062)
+    hwio::mcp::tools::RemoteOperationId m_aiOperation = 0; // remoteAiReset()
 };
 
 class Setup : public QObject {

@@ -427,6 +427,11 @@ CheckResult checkBluetooth(const Check& check, const EnvironmentContext& context
                           : std::move(adapter).error();
         return problemResult(check, CheckStatus::Warning, std::move(error));
     }
+    // ADR-0427: the report hides this address (also when the adapter is off); the check text
+    // keeps it.
+    if (context.facts && !adapter->address.empty()) {
+        context.facts->bluetoothAdapterAddresses.assign(1, adapter->address);
+    }
     if (adapter->state == ble::AdapterState::PermissionUndetermined) {
         return okResult(check, QCoreApplication::translate("hwio::diag",
                                                            "Permission will be asked on first use")

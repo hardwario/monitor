@@ -8,5 +8,7 @@
 namespace hwio::device::profiles {
 
 extern const DeviceProfile chester;
+// Plan 0059 (ADR-0415): not registered (genericConsoleProfile()).
+extern const DeviceProfile generic;
 
 } // namespace hwio::device::profiles

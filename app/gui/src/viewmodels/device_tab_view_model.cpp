@@ -127,6 +127,12 @@ DeviceTabViewModel::DeviceTabViewModel(TabContext context, QObject* parent)
     // Plan 0044: sharing this console / the joiner state (children, Qt parent ownership).
     m_remoteShare = new RemoteShareViewModel(this); // NOLINT(cppcoreguidelines-owning-memory)
     m_remoteJoin = new RemoteJoinViewModel(this);   // NOLINT(cppcoreguidelines-owning-memory)
+    // ADR-0429: the device bar's Leave session / Join again follows the join state and a running
+    // remote operation.
+    connect(m_remoteJoin, &RemoteJoinViewModel::changed, m_connection,
+            &ConnectionViewModel::stateChanged);
+    connect(m_remoteJoin, &RemoteJoinViewModel::operationChanged, m_connection,
+            &ConnectionViewModel::stateChanged);
     createWizard();
 
     if (m_context.pages != nullptr) {
@@ -408,6 +414,7 @@ bool DeviceTabViewModel::configureRemote(const QString& code, const QUrl& relay)
         return false;
     }
     releaseSession();
+    m_remoteJoin->setLeft(false); // ADR-0429: another session
     m_profile = profile;
     m_targetId = toQString(device::consoleTargetId(*profile));
     m_serial.reset();
@@ -588,8 +595,16 @@ Status DeviceTabViewModel::openRemoteSession() {
                             .consoleLog = m_consoleLog});
     connect(m_remoteSession.get(), &remote::RemoteConsoleSession::transcriptReplaced, this,
             &DeviceTabViewModel::consoleReplaced);
-    connect(m_remoteSession.get(), &remote::RemoteConsoleSession::hostHelloReceived, this,
-            &DeviceTabViewModel::titleChanged);
+    connect(m_remoteSession.get(), &remote::RemoteConsoleSession::hostHelloReceived, this, [this] {
+        // Plan 0059 (ADR-0415): the console rules of the host's profile (CHESTER for an older
+        // host; the neutral console profile for one this build does not know).
+        if (m_remoteSession && &m_remoteSession->profile() != m_profile) {
+            m_profile = &m_remoteSession->profile();
+            m_targetId = toQString(device::consoleTargetId(*m_profile));
+            configurationChanged(); // signal
+        }
+        titleChanged(); // signal
+    });
     connect(m_remoteSession.get(), &remote::RemoteConsoleSession::joinStateChanged, this,
             &DeviceTabViewModel::titleChanged);
     adoptSession(*m_remoteSession);
@@ -695,9 +710,16 @@ void DeviceTabViewModel::disconnectDevice() {
         return;
     }
     const bool hadSession = consoleSession() != nullptr;
+    const bool leaving = hadSession && isRemote();
+    if (leaving) {
+        m_remoteJoin->setLeft(true); // ADR-0429: before releaseSession() re-attaches the view model
+    }
     releaseSession();
     m_connection->setOpenError(std::nullopt);
-    if (hadSession) {
+    if (leaving) {
+        addMarker(markerText(
+            QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel", "— you left the session —")));
+    } else if (hadSession) {
         addMarker(
             markerText(QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel", "— disconnected —")));
     }

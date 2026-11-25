@@ -123,6 +123,23 @@ struct TargetProfile {
     // bit is set afterwards, the failure becomes target.reset_during_update (another MCU of the
     // device reset this one). nullopt = not checked.
     std::optional<ResetReasonRegister> resetReason = std::nullopt;
+    // ---- plan 0059 (ADR-0416) ----
+    // Shell output lines whose first words are one of these (words as in sensitiveCommandPrefixes)
+    // carry a secret without a "key:" (STICKER debug `config secret-key <hex>`). The console file,
+    // the shell query log and a remote session's relay show "<prefix> <redacted>", whoever typed
+    // the command (matchSensitiveOutputPrefix).
+    // NOLINTNEXTLINE(readability-redundant-member-init): keeps designated initializers optional
+    std::span<const std::string_view> sensitiveOutputPrefixes = {};
+    // A remote support session (RemoteHost) does not pass a remote command line to the device when
+    // (refusedFromRemote): refuseRemoteSensitive and the line is a sensitiveCommandPrefixes command
+    // with an argument (it sets a secret); it is a remoteRefusedSetters command with an argument;
+    // or it is a remoteRefusedCommands command (with or without arguments). Reading a secret
+    // (no argument) passes; its output is redacted. Empty for CHESTER (its behaviour unchanged).
+    bool refuseRemoteSensitive = false;
+    // NOLINTNEXTLINE(readability-redundant-member-init): keeps designated initializers optional
+    std::span<const std::string_view> remoteRefusedSetters = {};
+    // NOLINTNEXTLINE(readability-redundant-member-init): keeps designated initializers optional
+    std::span<const std::string_view> remoteRefusedCommands = {};
 };
 
 // A URL for one UI language (ADR-0167): `language` is a BCP 47 primary language subtag ("en",
@@ -180,6 +197,11 @@ public:
     findByAdvertisement(std::string_view name, std::span<const std::string> serviceUuids) noexcept;
 };
 
+// Plan 0059 (ADR-0415): the neutral console profile "generic" (one console target "app", no
+// prompt assumption, no sensitive rules, nothing to flash) for a remote support tab whose host
+// names a profile this build does not know. Not in ProfileRegistry.
+[[nodiscard]] const DeviceProfile& genericConsoleProfile() noexcept;
+
 // nullptr when the profile has no target with this id.
 [[nodiscard]] const TargetProfile* findTarget(const DeviceProfile& profile,
                                               std::string_view id) noexcept;
@@ -202,6 +224,22 @@ sensitiveOutputKeysOf(std::string_view profileId, std::string_view targetId) noe
 // `keys`: the key as printed (without ANSI codes, trimmed), else nullopt.
 [[nodiscard]] std::optional<std::string>
 matchSensitiveOutput(std::string_view line, std::span<const std::string_view> keys);
+
+// Plan 0059 (ADR-0416): the prefix of `prefixes` whose words are the first words of the output
+// `line` (ANSI codes ignored), nullopt when none matches. The line is shown as
+// "<prefix> <redacted>".
+[[nodiscard]] std::optional<std::string_view>
+matchSensitiveOutputPrefix(std::string_view line, std::span<const std::string_view> prefixes);
+
+// Plan 0062 (ADR-0437): `line` starts with one of `prefixes` (as matchSensitiveCommand) and has
+// more words than that prefix: it sets the secret value.
+[[nodiscard]] bool setsSensitiveValue(std::string_view line,
+                                      std::span<const std::string_view> prefixes) noexcept;
+
+// Plan 0059 (ADR-0416): a remote command `line` that a remote support session does not pass to
+// the device on `target` (TargetProfile::refuseRemoteSensitive, remoteRefusedSetters,
+// remoteRefusedCommands; words matched as matchSensitiveCommand).
+[[nodiscard]] bool refusedFromRemote(const TargetProfile& target, std::string_view line) noexcept;
 
 // The part of `target` with this FICR part number, nullptr when it is not one of its parts.
 [[nodiscard]] const ChipPart* findPart(const TargetProfile& target, std::uint32_t part) noexcept;

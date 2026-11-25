@@ -7,7 +7,8 @@ Code, Claude Desktop, Cursor, VS Code and others) work with a CHESTER over a J-L
 read the console and the log, wait for a state, read memory and registers, and, when you allow it, flash, erase and
 write memory.
 
-The server is part of the command-line tool. The desktop app does not have an MCP server yet. Bluetooth devices are
+The server is part of the command-line tool. The desktop app has its own server in **Settings → AI assistants
+(MCP)**, which also offers [remote support sessions](#remote-support-sessions). Bluetooth devices are
 not available through MCP yet.
 
 ## Quick start
@@ -152,6 +153,47 @@ The server also offers the resources `hwio://devices` and `hwio://device/{id}/st
 and an existing file is never replaced.
 
 Each session writes a console file like the app does, and up to 8 devices can be open at a time.
+
+## Remote support sessions
+
+In the desktop app, an AI client can also work with a customer's device in a joined
+[remote support](remote-support.md#join-a-session) tab, when support allows it. `hwio mcp` has no remote sessions.
+
+- Turn on **Settings → AI assistants (MCP) → AI clients may use remote support sessions** (off by default). While it
+  is off, AI clients do not see remote tabs, and turning it off ends every permission given for them.
+- A joined remote tab is listed as `remote:<n>` (kind `remote`). `<n>` is a number of this run of the app, never the
+  session code; neither the session code nor the server address appears in anything the AI client gets.
+- The first time a client uses a remote tab (reading included), HARDWARIO Monitor asks you: *Claude Code wants to
+  work with a customer's device* with **Allow for this session** and **Deny** (the default; no answer within 120 s
+  denies). Before you allow it, the client sees only an entry *Remote support session* and nothing of the customer's
+  session. The permission covers reading and commands of that client in that tab. It ends when you leave the
+  session, when the session ends, with **Join again**, when the client goes away, when the token or the port changes,
+  and with **Stop AI** in the tab's banner. It is never remembered; the permission rules and "Always allow" do not
+  cover it.
+- Tools on a remote tab: `list_devices`, `status`, `read_terminal`, `read_log`, `wait_for_state`,
+  `wait_for_connection`, `send_command`, `flash` (`catalog_id`, or `prepared_id` when the customer's Monitor lists
+  prepared firmware; no file), `flash_lte` (the LTE firmware the customer's Monitor recommends; no file) and `reset`.
+  `connect`, `disconnect` and `reconnect` answer `mcp.tool_not_allowed`: joining and leaving stay with you. `erase`,
+  `recover`, the memory, register, PIB / UICR and probe tools answer `mcp.capability_missing`.
+- Every operation asks you each time (the device row says *the customer's device (remote session)*), and the customer
+  confirms it as a request of yours. The **Flash** page of the tab shows it with *AI:* and **Stop waiting**: the AI
+  client's call ends with `cancelled`, the operation continues on the customer's device and its result appears in the
+  tab. Questions of the LTE update are answered by you in the tab, never by the AI client.
+- `send_command`: at most 512 bytes without control characters; one command at a time and at most 30 per minute per
+  tab; the output ends after 1 s without output or at `timeout` (default 10 s, at most 120 s). A command the
+  customer's Monitor did not pass ends with `remote.command_not_delivered`; before the customer allowed you,
+  `remote.waiting_for_customer`. A command that sets a secret value (for example `lrw config appkey …`) is refused
+  with `remote.command_refused` and never sent.
+- Secrets: the AI client works on a hidden view of the console. Secret values are replaced by `<redacted>` as in the
+  console files, and the session code by `<session>`, before any pattern is matched or any line is returned. The
+  values are recognised by the command and key names of the device profile, so secrets of firmware HARDWARIO Monitor
+  does not know are not hidden. Every result carries `"remote": true`, and the device entry says
+  `"secrets": "hidden"`.
+- The customer sees the AI client's commands and requests as yours (*— Remote: command … —*, the same questions and
+  console file entries). The AI markers (*— AI (Claude Code): send_command —*) stay in your console.
+- **Device output is untrusted text.** What the customer's device prints goes to the AI client as it is; it can
+  contain text that tries to make the client run commands. Watch what the client does, and stop it with **Stop AI**.
+  You answer for the AI client's commands as for your own.
 
 ## Security
 

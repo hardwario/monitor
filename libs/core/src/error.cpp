@@ -158,6 +158,10 @@ consteval bool isEnumerator(ErrorCode code) {
     case ErrorCode::RemoteProtocolError:
     case ErrorCode::RemoteApplicationNotRestored:
     case ErrorCode::TargetLowVoltage:
+    case ErrorCode::RemoteTargetUnsupported:
+    case ErrorCode::RemoteCommandRefused:
+    case ErrorCode::RemoteCommandNotDelivered:
+    case ErrorCode::RemoteWaitingForCustomer:
         return true;
     }
     return false;
@@ -1416,6 +1420,63 @@ constexpr std::array defaultTexts{
                                          "the J-Link cable on the connector, then try again.",
                                          "target.low_voltage suggestion"),
         .wizard = WizardId::Troubleshooting,
+    },
+    // Plan 0059 (ADR-0414): a request for a target or operation the customer's device does not
+    // offer in a support session.
+    DefaultTexts{
+        .code = ErrorCode::RemoteTargetUnsupported,
+        .message = QT_TRANSLATE_NOOP3("hwio::core",
+                                      "The customer's device has no such target, or this "
+                                      "operation is not available on it remotely.",
+                                      "remote.target_unsupported message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core", "The device or its firmware does not support it in a support session.",
+            "remote.target_unsupported cause"),
+        .suggestion = QT_TRANSLATE_NOOP3(
+            "hwio::core", "Choose another operation or ask the customer to do it locally.",
+            "remote.target_unsupported suggestion"),
+    },
+    // Plan 0059 (ADR-0416): the host refused a remote command line (keys or identity).
+    DefaultTexts{
+        .code = ErrorCode::RemoteCommandRefused,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "The customer's Monitor refused this command.",
+                                      "remote.command_refused message"),
+        .cause = QT_TRANSLATE_NOOP3("hwio::core",
+                                    "It would read or change the device's keys or identity, which "
+                                    "is not possible in a support session.",
+                                    "remote.command_refused cause"),
+        .suggestion = QT_TRANSLATE_NOOP3(
+            "hwio::core", "Ask the customer to run it locally if it is really needed.",
+            "remote.command_refused suggestion"),
+    },
+    // Plan 0062 (ADR-0438): the customer's Monitor did not pass an AI client's command to the
+    // device (no echo within 5 s). Support's side only.
+    DefaultTexts{
+        .code = ErrorCode::RemoteCommandNotDelivered,
+        .message = QT_TRANSLATE_NOOP3("hwio::core",
+                                      "The customer's app did not pass the command to the device.",
+                                      "remote.command_not_delivered message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "You are not allowed in the session yet, too many commands were sent per second, or "
+            "the session is busy.",
+            "remote.command_not_delivered cause"),
+        .suggestion = QT_TRANSLATE_NOOP3("hwio::core", "Wait a moment and try again.",
+                                         "remote.command_not_delivered suggestion"),
+    },
+    // Plan 0062 (ADR-0438): a command before the customer allowed support in the session.
+    DefaultTexts{
+        .code = ErrorCode::RemoteWaitingForCustomer,
+        .message =
+            QT_TRANSLATE_NOOP3("hwio::core", "The customer has not allowed you in the session yet.",
+                               "remote.waiting_for_customer message"),
+        .cause = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "The customer's HARDWARIO Monitor asks the customer before support can send commands.",
+            "remote.waiting_for_customer cause"),
+        .suggestion =
+            QT_TRANSLATE_NOOP3("hwio::core", "Ask the customer to allow you, then try again.",
+                               "remote.waiting_for_customer suggestion"),
     },
 };
 

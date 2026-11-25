@@ -17,6 +17,8 @@
 //
 // Grants are forgotten by clientGone() (legacy session end, modern client idle 30 min), revoke(),
 // and forgetAll() (token regenerated, server stopped / port changed, quit; McpController).
+// Plan 0062 (ADR-0436): clientGone() and forgetAll() also emit clientLeft / forgotAll, so that the
+// session grants of remote tabs (kept by the tabs' remote devices, never here) end too.
 //
 // `done` callbacks may start new requests synchronously; the queue is updated before any of them
 // runs.
@@ -120,6 +122,9 @@ signals:
     void withdrawn();
     // A client asked (for the active-client count).
     void clientSeen(const QString& clientKey);
+    // Plan 0062: clientGone(clientKey) / forgetAll() ran (whether or not a grant was kept here).
+    void clientLeft(const QString& clientKey);
+    void forgotAll();
 
 private:
     [[nodiscard]] bool covered(const hwio::mcp::ConsentRequest& request) const;

@@ -6,7 +6,9 @@
 #   HWIO_HIL_SN=SERIAL_NUMBER   the probe (default: the first free one)
 #   HWIO_HIL_SN2=SERIAL_NUMBER  a second probe with a second CHESTER (two-session test)
 #   M2 flashing (hil_flash_test.cpp, plan/features/0003 G1): HWIO_HIL_APP_HEX, HWIO_HIL_FIRMWARE_ID,
-#   HWIO_HIL_LTE_SN, HWIO_HIL_LTE_BUNDLE, HWIO_HIL_DESTRUCTIVE=1 (erase --all / recover erase the PIB)
+#   HWIO_HIL_LTE_SN, HWIO_HIL_LTE_BUNDLE, HWIO_HIL_DESTRUCTIVE=1 (erase --all / recover erase the PIB).
+#   HilFlash.EraseCodeKeepsThePibAndPibDecodes runs only with HWIO_HIL_APP_HEX (flashed back
+#   afterwards) or HWIO_HIL_DESTRUCTIVE=1 (the board is left without an application; plan 0060 A1)
 #   Plan 0021 phase 2 (hil_test.cpp): Hil.InfoShowAndCommandTreeThroughSilentQueries (HWIO_HIL_SN)
 # Run: ctest --preset linux-debug -L hil --output-on-failure   (with HWIO_HIL=1 exported)
 

@@ -20,6 +20,15 @@ struct ToolLimits {
     std::size_t commandMaxBytes = std::size_t{4} * 1024;
     std::size_t sendCommandMaxLines = 2000;
     std::size_t sendCommandMaxBytes = std::size_t{256} * 1024;
+    // The default `timeout` (no schema default: a remote device has its own, plan 0062).
+    std::chrono::milliseconds sendCommandDefaultTimeout = std::chrono::seconds{5};
+    // send_command / wait_for_state commands on a customer's device (plan 0062, ADR-0438)
+    std::size_t remoteLineMaxBytes = 512; // the host's limit (RemoteConsoleSession::maxLineBytes)
+    std::chrono::milliseconds remoteEchoTimeout = std::chrono::seconds{5};
+    std::chrono::milliseconds remoteCommandSilence = std::chrono::milliseconds{1000};
+    std::chrono::milliseconds remoteCommandDefaultTimeout = std::chrono::seconds{10};
+    std::size_t remoteCommandsPerWindow = 30; // per remote device
+    std::chrono::milliseconds remoteCommandWindow = std::chrono::minutes{1};
     // read_log / read_terminal
     std::size_t readMaxLines = 5000;
     std::size_t readMaxBytes = std::size_t{1024} * 1024;

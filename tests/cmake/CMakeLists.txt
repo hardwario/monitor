@@ -138,3 +138,16 @@ set_tests_properties(product_name_check PROPERTIES
     PASS_REGULAR_EXPRESSION "product_name_check: [0-9]+ files OK"
     FAIL_REGULAR_EXPRESSION "ADR-0237"
     LABELS "cmake")
+
+# Plan 0060 A3 (D11): `hwio-monitor --version` / `--help` print and exit before any window.
+if(TARGET hwio-monitor)
+    add_test(NAME gui_version_check
+        COMMAND "${CMAKE_COMMAND}" "-DHWIO_GUI=$<TARGET_FILE:hwio-monitor>"
+            "-DHWIO_CLI=$<TARGET_FILE:hwio>"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/check_gui_version.cmake")
+    set_tests_properties(gui_version_check PROPERTIES
+        PASS_REGULAR_EXPRESSION "gui_version_check: --version and --help OK"
+        FAIL_REGULAR_EXPRESSION "gui_version_check: (hwio|unexpected)"
+        TIMEOUT 180
+        LABELS "cmake")
+endif()

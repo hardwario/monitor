@@ -5,8 +5,10 @@
 #include "hwio/device/session_events.h"
 #include "hwio/mcp/server.h"
 #include "hwio/mcp/tools/device_provider.h"
+#include "remote_support.h"
 #include "resources.h"
 #include "scan_scheduler.h"
+#include "tool_support.h"
 
 #include <QList>
 #include <QObject>
@@ -17,7 +19,9 @@
 #include <algorithm>
 #include <filesystem>
 #include <memory>
+#include <set>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace hwio::mcp::tools {
@@ -34,7 +38,8 @@ struct ResourceWatch {
 ToolsContext::ToolsContext(IDeviceProvider& provider, hwio::firmware::FirmwareCatalog* catalog,
                            ToolsOptions options, QObject* parent)
     : QObject(parent), m_provider(&provider), m_catalog(catalog), m_options(std::move(options)),
-      m_scheduler(std::make_unique<detail::ScanScheduler>()) {
+      m_scheduler(std::make_unique<detail::ScanScheduler>()),
+      m_remoteCommands(std::make_unique<detail::RemoteCommands>()) {
     connect(&provider.notifier(), &DeviceProviderNotifier::devicesChanged, this,
             &ToolsContext::devicesChanged);
 }
@@ -60,6 +65,13 @@ void ToolsContext::detachServer() {
 }
 
 void ToolsContext::devicesChanged() {
+    std::set<std::string> remote;
+    for (const DeviceEntry& entry : m_provider->list()) {
+        if (entry.kind == "remote") {
+            remote.insert(entry.id);
+        }
+    }
+    m_remoteCommands->keepOnly(remote);
     if (m_server.isNull()) {
         return;
     }
@@ -86,18 +98,41 @@ void ToolsContext::rewatch() {
 void ToolsContext::watch(const std::string& id, const DeviceRef& ref) {
     QObject* context = m_watch->connections.get();
     connect(ref.console.data(), &hwio::device::ConsoleSession::linesReceived, context,
-            [this, id](const QList<hwio::device::ConsoleLine>& lines) { linesArrived(id, lines); });
+            [this, id, ref](const QList<hwio::device::ConsoleLine>& lines) {
+                linesArrived(id, ref, lines);
+            });
     connect(ref.console.data(), &hwio::device::ConsoleSession::connectionChanged, context,
-            [this, id](const hwio::device::ConnectionEvent&) {
+            [this, id, ref](const hwio::device::ConnectionEvent&) {
                 if (m_server.isNull()) {
                     return;
                 }
-                m_server->notifyResourceUpdated(detail::deviceUri(id, QStringLiteral("status")));
+                notifyDevice(ref, detail::deviceUri(id, QStringLiteral("status")));
                 m_server->notifyResourceUpdated(detail::devicesUri());
             });
+    if (ref.isRemote && !ref.remote.isNull()) {
+        // The join state or the host's hello changed the devices entry.
+        connect(ref.remote.data(), &IRemoteDevice::infoChanged, context, [this] {
+            if (!m_server.isNull()) {
+                m_server->notifyResourceUpdated(detail::devicesUri());
+            }
+        });
+    }
 }
 
-void ToolsContext::linesArrived(const std::string& id,
+void ToolsContext::notifyDevice(const DeviceRef& ref, const QString& uri) {
+    if (m_server.isNull()) {
+        return;
+    }
+    if (!ref.isRemote) {
+        m_server->notifyResourceUpdated(uri);
+        return;
+    }
+    // ADR-0436: nothing of a customer's device reaches a client before support's Allow.
+    m_server->notifyResourceUpdated(
+        uri, [ref](std::string_view clientKey) { return detail::visibleTo(ref, clientKey); });
+}
+
+void ToolsContext::linesArrived(const std::string& id, const DeviceRef& ref,
                                 const QList<hwio::device::ConsoleLine>& lines) {
     if (m_server.isNull()) {
         return;
@@ -109,10 +144,10 @@ void ToolsContext::linesArrived(const std::string& id,
         return line.channel == hwio::device::Channel::Log;
     });
     if (shell) {
-        m_server->notifyResourceUpdated(detail::deviceUri(id, QStringLiteral("terminal")));
+        notifyDevice(ref, detail::deviceUri(id, QStringLiteral("terminal")));
     }
     if (log) {
-        m_server->notifyResourceUpdated(detail::deviceUri(id, QStringLiteral("log")));
+        notifyDevice(ref, detail::deviceUri(id, QStringLiteral("log")));
     }
 }
 

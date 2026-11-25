@@ -47,6 +47,8 @@ public:
     // NOLINTBEGIN(cppcoreguidelines-non-private-member-variables-in-classes)
     std::vector<Sent> sent;
     std::vector<std::string> events; // recordRemoteEvent()
+    // Plan 0059: another profile than CHESTER (static storage; e.g. testing::testProfile).
+    const device::DeviceProfile* profileOverride = nullptr;
     // NOLINTEND(cppcoreguidelines-non-private-member-variables-in-classes)
 
     Status sendLine(std::string line) override {
@@ -74,7 +76,8 @@ public:
     }
     [[nodiscard]] device::Capabilities capabilities() const override { return {}; }
     [[nodiscard]] const device::DeviceProfile& profile() const override {
-        return *device::ProfileRegistry::find("chester");
+        return profileOverride != nullptr ? *profileOverride
+                                          : *device::ProfileRegistry::find("chester");
     }
     [[nodiscard]] std::string_view consoleTargetId() const override { return "app"; }
     [[nodiscard]] std::filesystem::path consoleFile() const override { return {}; }
@@ -197,6 +200,12 @@ public:
         return {"HARDWARIO LTE firmware", "1.7.0"};
     }
     [[nodiscard]] Status validate(const tunnel::OpRequest& request) const override {
+        // Plan 0059: as DeviceSessionOperations, a target the CHESTER profile does not have, or
+        // prepared firmware.
+        if ((request.kind != tunnel::OpKind::LteUpdate && !request.target.isChesterTarget()) ||
+            request.prepared) {
+            return std::unexpected(makeError(ErrorCode::RemoteTargetUnsupported, "no such target"));
+        }
         if (request.kind == tunnel::OpKind::Flash && request.target != tunnel::OpTarget::App) {
             return std::unexpected(makeError(ErrorCode::UsageInvalidArgument, "flash to lte"));
         }

@@ -68,7 +68,8 @@ public:
     // `sensitiveOutput`: the console's sensitive output keys (static profile data), whose values
     // the debug log shows as <redacted> (HIL 2026-11-03 H15, ADR-0186).
     ShellQuery(Passkey key, std::string command, std::unique_ptr<CommandCapture> capture,
-               std::span<const std::string_view> sensitiveOutput);
+               std::span<const std::string_view> sensitiveOutput,
+               std::span<const std::string_view> sensitiveOutputPrefixes = {});
     ~ShellQuery() override;
     ShellQuery(const ShellQuery&) = delete;
     ShellQuery& operator=(const ShellQuery&) = delete;
@@ -90,7 +91,8 @@ signals:
 private:
     std::string m_command;
     std::unique_ptr<CommandCapture> m_capture;
-    std::span<const std::string_view> m_sensitiveOutput; // profile data (static storage)
+    std::span<const std::string_view> m_sensitiveOutput;         // profile data (static storage)
+    std::span<const std::string_view> m_sensitiveOutputPrefixes; // plan 0059 (profile data)
     std::optional<ShellQueryResult> m_result;
     bool m_done = false;
 };

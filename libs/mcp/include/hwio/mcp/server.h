@@ -25,7 +25,8 @@
 // notifications/resources/updated to the subscribers of `uri`, at most once per
 // Limits::resourceUpdateInterval per URI (later calls are coalesced into one trailing
 // notification); notifyResourceListChanged() sends notifications/resources/list_changed (device
-// opened or closed).
+// opened or closed). Plan 0062 (ADR-0436): `recipient` (optional) limits a notification to the
+// subscribers whose client key it accepts (a remote device before the client's grant).
 //
 // Thread safety: owner thread only. No nested event loops (ADR-0097).
 
@@ -43,6 +44,7 @@
 
 #include <any>
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <string_view>
 
@@ -89,7 +91,8 @@ public:
     // callsDrained() follows when the last call has finished.
     void stop();
 
-    void notifyResourceUpdated(const QString& uri);
+    void notifyResourceUpdated(const QString& uri,
+                               std::function<bool(std::string_view)> recipient = {});
     void notifyResourceListChanged();
 
     [[nodiscard]] bool isStopped() const noexcept;

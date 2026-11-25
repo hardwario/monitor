@@ -8,8 +8,10 @@
 // Console mapping (web Terminal compatible): every device line (shell and log) → at {event:
 // "read"}, every line sent to the device (local or remote, its echo) → at {event: "write"},
 // connection events → at {event: "state", data: "connected" | "connection" | "disconnected"}.
-// Commands with secret arguments and secret output values are sent redacted (ADR-0186 rules, as the
-// console file). The lines also go to a bounded Transcript (the sync snapshot).
+// Commands with secret arguments and secret output values are sent redacted with the console
+// file's redaction (device::ConsoleRedaction, ADR-0186; ADR-0432: also a secret command in the
+// output, as `config show` prints it). The lines also go to a bounded Transcript (the sync
+// snapshot).
 //
 // Code and collision (ADR-0334): a fresh CSPRNG code; any `at` or `sync` received within
 // collisionWindow after connecting = another host uses the code: a new code, at most maxCodeTries
@@ -59,6 +61,24 @@
 // idleTimeout - idleWarningBefore (idleWarning()), keepSharing() restarts the idle time; idle or
 // maxLifetime end the session. ConsoleSession closed → the session ends.
 //
+// Plan 0059 (ADR-0414, ADR-0416): the hello names the session's profile and the host's caps
+// (detail-codes, refused-lines); its legacy ops / opKinds are those of today on a CHESTER and
+// ops: false on any other profile (an operation request is then refused as on a console without
+// operations). The joiner's hello caps: the last hello's decide line-refused, their union is
+// audited (at most tunnel::maxCaps names). The redaction rules are those of the session's profile
+// and console target (sensitiveCommandPrefixes, sensitiveOutputKeys, sensitiveOutputPrefixes). A
+// remote line that device::refusedFromRemote() matches is not sent to the device: an audit line,
+// an English `read` line for every participant and, to a joiner with the refused-lines cap, a
+// tunnel line-refused (remote.command_refused).
+//
+// Leave (plan 0061 Amendment 2, ADR-0439): the hello lists the `leave` cap. A tunnel `leave` of an
+// allowed participant (no join question open; within the remote line rate) withdraws the
+// permission (commandsAllowed() false, participantsChanged()) and writes the audit line "Support
+// left the session."; the next participant is allowed by the customer again (a newClient asks).
+// It grants nothing: a `leave` from a participant without permission is dropped like its lines.
+// The relay gives no participant identity, so it withdraws the permission for every participant.
+// A running operation is not cancelled.
+//
 // Audit (ADR-0333): ConsoleSession::recordRemoteEvent() for the start and end, every join, allow,
 // the peer's app, remote commands (redacted), dropped commands, and every operation request with
 // its outcome. The texts are translated (the host's language), context "hwio::remote".
@@ -92,9 +112,11 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace hwio::device {
 class ConsoleSession;
+struct TargetProfile;
 } // namespace hwio::device
 
 namespace hwio::remote {
@@ -202,6 +224,11 @@ private:
     void onWrite(const QJsonValue& payload);
     void onRemoteLine(const QString& text);
     void onTunnel(const QJsonValue& payload);
+    void onJoinerHello(const tunnel::JoinerHello& joinerHello);
+    void onLeave(); // ADR-0439
+    // The remote line rate (remoteLinesPerSecond, shared by lines and `leave`): false = drop it
+    // (audited at most once per second).
+    [[nodiscard]] bool withinLineRate();
     void onOperationRequest(const tunnel::OpRequest& request);
     void onLearn(const tunnel::Learn& learn);
     void sendCommands();
@@ -226,8 +253,15 @@ private:
     void activity();
     void audit(const QString& text);
     void finish(std::optional<Error> error, bool notify = true);
-    [[nodiscard]] QString redactedCommand(const std::string& line) const;
-    [[nodiscard]] QString redactedOutput(const std::string& line) const;
+    // ADR-0356, ADR-0432: the text sent to the relay (secrets hidden), by the console target's
+    // rules (plan 0059: also sensitiveOutputPrefixes, ADR-0416).
+    [[nodiscard]] QString redacted(device::Direction dir, const std::string& text) const;
+    // The console target of the shared session (its redaction and refusal rules), nullptr when the
+    // session is gone or its profile has no such target.
+    [[nodiscard]] const device::TargetProfile* consoleTarget() const;
+    // The hello's legacy ops (plan 0059: HostOperations and a CHESTER profile).
+    [[nodiscard]] bool operationsOffered() const;
+    void refuseLine(const std::string& line);
 
     QPointer<device::ConsoleSession> m_session;
     ConsentProvider* m_consent;   // non-owning
@@ -248,6 +282,9 @@ private:
     std::uint64_t m_joinToken = 0; // answers of withdrawn questions are ignored
     std::uint64_t m_droppedWhilePending = 0;
     std::string m_peerApp;
+    // Plan 0059: the caps of the last joiner hello, and of every hello (<= tunnel::maxCaps).
+    std::vector<std::string> m_peerCaps;
+    std::vector<std::string> m_capsSeen;
     std::optional<PendingOperation> m_operation;
     // ADR-0368: the open question to support (of m_operation).
     struct SupportQuestion {

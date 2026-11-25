@@ -16,6 +16,7 @@
 #include "viewmodels/error_info.h"
 #include "viewmodels/probe_firmware_view_model.h"
 #include "viewmodels/probe_picker_view_model.h"
+#include "viewmodels/remote_join_view_model.h"
 
 #include <QChar>
 #include <QLocale>
@@ -313,6 +314,14 @@ QString ConnectionViewModel::stateText() const {
 }
 
 QString ConnectionViewModel::action() const {
+    if (m_tab->isRemote()) {
+        // ADR-0429: from the join state; a joined session whose customer device is disconnected
+        // is still a session to leave.
+        const RemoteJoinViewModel* join = m_tab->remoteJoin();
+        return join != nullptr && join->state() == QStringLiteral("ended")
+                   ? QStringLiteral("join")
+                   : QStringLiteral("leave");
+    }
     if (m_pairing) {
         return QStringLiteral("connect"); // disabled (actionEnabled) until the result
     }
@@ -327,7 +336,18 @@ QString ConnectionViewModel::action() const {
 }
 
 bool ConnectionViewModel::actionEnabled() const {
+    if (m_tab->isRemote()) {
+        return !m_tab->isBusy() && actionBlockedReason().isEmpty(); // ADR-0429
+    }
     return !m_tab->isBusy() && !m_pairing && (m_serial || isBle());
+}
+
+QString ConnectionViewModel::actionBlockedReason() const {
+    const RemoteJoinViewModel* join = m_tab->remoteJoin();
+    if (m_tab->isRemote() && join != nullptr && join->operationPending()) {
+        return tr("Wait until the running operation ends.");
+    }
+    return {};
 }
 
 double ConnectionViewModel::targetVolts() const {
@@ -471,6 +491,18 @@ void ConnectionViewModel::disconnectDevice() { m_tab->disconnectDevice(); }
 void ConnectionViewModel::reconnect() { m_tab->reconnect(); }
 
 void ConnectionViewModel::toggleConnection() {
+    if (m_tab->isRemote()) {
+        // ADR-0429: also the shortcut (device.toggle) waits for a running remote operation.
+        if (!actionEnabled()) {
+            return;
+        }
+        if (action() == QStringLiteral("join")) {
+            connectDevice();
+        } else {
+            disconnectDevice();
+        }
+        return;
+    }
     if (action() == QStringLiteral("connect")) {
         connectDevice();
     } else {

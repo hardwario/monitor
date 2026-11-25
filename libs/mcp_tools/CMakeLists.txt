@@ -8,9 +8,14 @@
 hwio_add_backend_library(hwio_mcp_tools
     include/hwio/mcp/tools/device_provider.h
     include/hwio/mcp/tools/register_tools.h
+    include/hwio/mcp/tools/remote_hidden_view.h
     include/hwio/mcp/tools/tools_context.h
+    src/device_provider.cpp
     src/prompts.cpp
     src/register_tools.cpp
+    src/remote_hidden_view.cpp
+    src/remote_support.cpp
+    src/remote_support.h
     src/resources.cpp
     src/resources.h
     src/scan_scheduler.cpp

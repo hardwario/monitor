@@ -4,8 +4,10 @@
 //   FakeConsoleSession - an in-process ConsoleSession driven by the test (lines, prompt,
 //                        connection), no threads;
 //   MockDeviceProvider - GMock IDeviceProvider;
+//   FakeRemoteDevice   - plan 0062: an IRemoteDevice over a FakeConsoleSession (the remote
+//                        tab's log): records lines and operation requests, echoes or refuses;
 //   FakeProvider       - an IDeviceProvider over FakeConsoleSessions that records markers, busy
-//                        state and command hints;
+//                        state and command hints (and remote tabs "remote:<n>");
 //   Harness            - ToolsContext + registerTools + McpServer, calls tools over the modern
 //                        dialect (stdio transport) and pumps the event loop.
 // Production code never runs nested loops (ADR-0097); tests pump with runUntil().
@@ -24,6 +26,7 @@
 #include "hwio/mcp/server.h"
 #include "hwio/mcp/tools/device_provider.h"
 #include "hwio/mcp/tools/register_tools.h"
+#include "hwio/mcp/tools/remote_hidden_view.h"
 #include "hwio/mcp/tools/tools_context.h"
 #include "mcp_test_support.h"
 
@@ -32,6 +35,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QList>
+#include <QPointer>
 #include <QString>
 
 #include <gmock/gmock.h>
@@ -45,6 +49,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <set>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -183,6 +188,113 @@ private:
     bool m_echo = true;
 };
 
+// Plan 0062: a joined remote tab. sendLine() records the line and, like a Monitor host, echoes it
+// on the session (dir In); with `echo` false nothing comes back (a dropped line), with `refuse`
+// the host answers line-refused. Operations wait for the test (finishOperation()).
+class FakeRemoteDevice final : public IRemoteDevice {
+public:
+    FakeRemoteDevice(FakeConsoleSession& session, std::string_view code)
+        : m_session(&session), m_view(hwio::device::ConsoleRedaction("chester", "app"), code) {
+        remoteInfo.host = RemoteHost::Monitor;
+        remoteInfo.join = RemoteJoin::Allowed;
+        remoteInfo.operations = {
+            RemoteTargetOffer{.target = "app",
+                              .kinds = {RemoteOperationKind::Flash, RemoteOperationKind::Reset},
+                              .catalog = true,
+                              .prepared = {RemotePreparedFirmware{
+                                  .id = "release", .name = "STICKER", .version = "2.0.0"}}},
+            RemoteTargetOffer{.target = "", .kinds = {RemoteOperationKind::LteUpdate}}};
+    }
+
+    struct Operation {
+        RemoteOperationRequest request;
+        std::string client;
+        RemoteOperationCallbacks callbacks;
+        bool detached = false;
+    };
+
+    // NOLINTBEGIN(cppcoreguidelines-non-private-member-variables-in-classes): test knobs
+    RemoteInfo remoteInfo;
+    bool echo = true;
+    bool refuse = false;
+    std::optional<hwio::Error> sendError;
+    std::optional<hwio::Error> operationError;
+    std::vector<std::string> lines;
+    std::vector<Operation> operations;
+    std::set<std::string> allowed;
+    // NOLINTEND(cppcoreguidelines-non-private-member-variables-in-classes)
+
+    [[nodiscard]] RemoteInfo info() const override { return remoteInfo; }
+    hwio::Status sendLine(std::string line, const hwio::mcp::RequestContext& /*who*/) override {
+        if (sendError) {
+            return std::unexpected(*sendError);
+        }
+        lines.push_back(line);
+        if (refuse) {
+            emit lineRefused(QStringLiteral("remote.command_refused"));
+        } else if (echo) {
+            m_session->emitLines({{hwio::device::Channel::Shell, line}},
+                                 hwio::device::Direction::In);
+        }
+        return {};
+    }
+    hwio::Result<RemoteOperationId> requestOperation(const RemoteOperationRequest& request,
+                                                     const hwio::mcp::RequestContext& who,
+                                                     RemoteOperationCallbacks callbacks) override {
+        if (operationError) {
+            return std::unexpected(*operationError);
+        }
+        operations.push_back(Operation{.request = request,
+                                       .client = who.clientKey,
+                                       .callbacks = std::move(callbacks),
+                                       .detached = false});
+        return operations.size();
+    }
+    void detachOperation(RemoteOperationId id) override {
+        if (id >= 1 && id <= operations.size()) {
+            operations.at(id - 1).detached = true;
+        }
+    }
+    [[nodiscard]] hwio::device::ConsoleRedaction redaction() const override {
+        return {"chester", "app"};
+    }
+    [[nodiscard]] std::string hiddenText(const hwio::device::ConsoleLine& line) const override {
+        return m_view.text(line);
+    }
+    [[nodiscard]] bool aiAllowed(std::string_view clientKey) const override {
+        return allowed.contains(std::string(clientKey));
+    }
+    void allowAi(const hwio::mcp::RequestContext& who) override { allowed.insert(who.clientKey); }
+
+    // Stop AI.
+    void revoke(const std::string& clientKey) {
+        allowed.erase(clientKey);
+        emit aiRevoked(QString::fromStdString(clientKey));
+    }
+    void setJoin(RemoteJoin join) {
+        remoteInfo.join = join;
+        emit infoChanged();
+    }
+    // Progress or the end of operation `index` (0-based), unless detached.
+    void progressOperation(std::size_t index, const RemoteOperationProgress& progress) {
+        Operation& operation = operations.at(index);
+        if (!operation.detached && operation.callbacks.progress) {
+            operation.callbacks.progress(progress);
+        }
+    }
+    void finishOperation(std::size_t index, hwio::Status status) {
+        Operation& operation = operations.at(index);
+        if (!operation.detached && operation.callbacks.done) {
+            operation.detached = true;
+            operation.callbacks.done(std::move(status));
+        }
+    }
+
+private:
+    FakeConsoleSession* m_session; // non-owning, the provider keeps it alive longer
+    RemoteHiddenView m_view;
+};
+
 class MockDeviceProvider : public IDeviceProvider {
 public:
     MOCK_METHOD(std::vector<DeviceEntry>, list, (), (override));
@@ -238,14 +350,43 @@ public:
         return ref;
     }
     void remove(const std::string& id) {
+        m_remotes.erase(id);
         m_sessions.erase(id);
         emit m_notifier.devicesChanged();
     }
+    // Plan 0062: a joined remote tab "remote:<n>" whose session code is `code`.
+    FakeRemoteDevice& addRemote(const std::string& id, std::string_view code = "482913",
+                                std::string displayName = "CHESTER-M 2159018247 — remote") {
+        auto session = std::make_unique<FakeConsoleSession>(
+            chesterProfile(), hwio::device::ConsoleLog::defaultCapacityPerChannel,
+            hwio::device::Transport::Remote);
+        auto remote = std::make_unique<FakeRemoteDevice>(*session, code);
+        FakeRemoteDevice& ref = *remote;
+        m_sessions[id] = std::move(session);
+        m_remotes[id] = RemoteTab{.device = std::move(remote), .name = std::move(displayName)};
+        emit m_notifier.devicesChanged();
+        return ref;
+    }
+    // The remote device goes away while its console session stays (the tab left the session).
+    void dropRemoteDevice(const std::string& id) { m_remotes.at(id).device.reset(); }
+    [[nodiscard]] FakeConsoleSession& session(const std::string& id) { return *m_sessions.at(id); }
 
     std::vector<DeviceEntry> list() override {
         std::vector<DeviceEntry> entries;
         entries.reserve(m_sessions.size());
         for (const auto& [id, session] : m_sessions) {
+            const auto remote = m_remotes.find(id);
+            if (remote != m_remotes.end()) {
+                entries.push_back(DeviceEntry{.id = id,
+                                              .kind = "remote",
+                                              .displayName = remote->second.name,
+                                              .profileId = "chester",
+                                              .state = DeviceEntry::State::Open,
+                                              .owner = std::nullopt,
+                                              .connection = session->connection(),
+                                              .openedByMcp = false});
+                continue;
+            }
             entries.push_back(DeviceEntry{.id = id,
                                           .kind = "jlink",
                                           .displayName = id,
@@ -263,6 +404,7 @@ public:
         done(std::unexpected(makeError(ErrorCode::UsageInvalidArgument)));
     }
     hwio::Status close(std::string_view id, const hwio::mcp::RequestContext& /*context*/) override {
+        m_remotes.erase(std::string(id));
         if (m_sessions.erase(std::string(id)) == 0) {
             return std::unexpected(makeError(ErrorCode::McpDeviceNotOpen, std::string(id)));
         }
@@ -273,6 +415,13 @@ public:
         const auto it = m_sessions.find(std::string(id));
         if (it == m_sessions.end()) {
             return std::nullopt;
+        }
+        const auto remote = m_remotes.find(std::string(id));
+        if (remote != m_remotes.end()) {
+            return DeviceRef{.console = it->second.get(),
+                             .jlink = nullptr,
+                             .remote = remote->second.device.get(),
+                             .isRemote = true};
         }
         return DeviceRef{.console = it->second.get(), .jlink = nullptr};
     }
@@ -295,7 +444,13 @@ public:
     DeviceProviderNotifier& notifier() override { return m_notifier; }
 
 private:
+    struct RemoteTab {
+        std::unique_ptr<FakeRemoteDevice> device;
+        std::string name;
+    };
+    // Declared after the sessions: the remote devices are destroyed first (they point at one).
     std::map<std::string, std::unique_ptr<FakeConsoleSession>> m_sessions;
+    std::map<std::string, RemoteTab> m_remotes;
     DeviceProviderNotifier m_notifier;
     ProviderRecord m_record;
 };

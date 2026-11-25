@@ -23,6 +23,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <miniz.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -292,6 +293,49 @@ TEST_F(DiagCli, ReportIncludesCrashFiles) {
     ASSERT_TRUE(zip.open(QIODevice::ReadOnly));
     // The zip's directory holds the entry names as plain text.
     EXPECT_TRUE(zip.readAll().contains("crashes/crash-hwio-monitor-20261016-100000.txt"));
+}
+
+// Plan 0060 A5 (ADR-0427): `hwio diag report` hides this computer's Bluetooth adapter address
+// in every entry of the zip (searched after extracting: the zip is compressed), while `hwio
+// doctor` shows it.
+TEST_F(DiagCli, ReportHidesTheBluetoothAdapterAddress) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (HWIO_FAKE_BLE_SCENARIO)";
+#endif
+    const RunResult doctor = hwio({QStringLiteral("doctor")});
+    EXPECT_NE(doctor.out.find("00:11:22:33:44:55"), std::string::npos) << doctor.out;
+    const QString target = home() + QStringLiteral("/report.zip");
+    const RunResult result =
+        hwio({QStringLiteral("diag"), QStringLiteral("report"), QStringLiteral("-o"), target});
+    ASSERT_EQ(result.exitCode, 0) << result.out << result.err;
+    EXPECT_EQ(result.out.find("00:11:22:33:44:55"), std::string::npos) << result.out;
+    QFile zip(target);
+    ASSERT_TRUE(zip.open(QIODevice::ReadOnly));
+    const QByteArray bytes = zip.readAll();
+    mz_zip_archive archive{};
+    mz_zip_zero_struct(&archive);
+    ASSERT_NE(mz_zip_reader_init_mem(&archive, bytes.constData(),
+                                     static_cast<std::size_t>(bytes.size()), 0),
+              MZ_FALSE);
+    bool summaryRedacted = false;
+    for (mz_uint i = 0; i < mz_zip_reader_get_num_files(&archive); ++i) {
+        mz_zip_archive_file_stat stat{};
+        ASSERT_NE(mz_zip_reader_file_stat(&archive, i, &stat), MZ_FALSE);
+        std::size_t size = 0;
+        void* data = mz_zip_reader_extract_to_heap(&archive, i, &size, 0);
+        const std::string entry(static_cast<const char*>(data), size);
+        mz_free(data);
+        const std::string name(&stat.m_filename[0]);
+        for (const char* address : {"00:11:22:33:44:55", "001122334455"}) {
+            EXPECT_EQ(entry.find(address), std::string::npos) << name << ": " << address;
+        }
+        if (name == "summary.txt") {
+            summaryRedacted =
+                entry.find("Adapter ready (fake0, <adapter address>)") != std::string::npos;
+        }
+    }
+    mz_zip_reader_end(&archive);
+    EXPECT_TRUE(summaryRedacted);
 }
 
 TEST_F(DiagCli, ReportToTheTerminalIsRefused) {

@@ -3,9 +3,9 @@
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/log.h"
+#include "hwio/core/owner_only.h"
 #include "hwio/core/result.h"
 #include "hwio/device/profile.h"
-#include "owner_only.h"
 
 #include <QByteArray>
 #include <QFile>
@@ -119,7 +119,7 @@ Result<CommandHistory> CommandHistory::open(fs::path file,
     CommandHistory history(std::move(file), sensitivePrefixes);
     // Review R3: a file of an older version is tightened at once (also when nothing is recorded).
     if (QFile existing(toQString(toUtf8(history.m_file))); existing.exists()) {
-        detail::restrictToOwner(existing);
+        restrictToOwner(existing);
     }
     auto loaded = readEntries(history.m_file, history.m_sensitivePrefixes);
     if (!loaded) {
@@ -253,14 +253,14 @@ Status CommandHistory::writeFile() {
                           toUtf8(m_file) + ": " + target.errorString().toStdString()));
         }
     } else {
-        detail::restrictToOwner(target);
+        restrictToOwner(target);
     }
     QSaveFile output(toQString(toUtf8(m_file)));
     if (!output.open(QIODevice::WriteOnly)) {
         return std::unexpected(makeError(
             ErrorCode::IoWriteFailed, toUtf8(m_file) + ": " + output.errorString().toStdString()));
     }
-    detail::restrictToOwner(output); // ADR-0186: the temporary file too, before any write
+    restrictToOwner(output); // ADR-0186: the temporary file too, before any write
     for (const std::string& entry : merged) {
         output.write(entry.data(), static_cast<qint64>(entry.size()));
         output.write("\n", 1);

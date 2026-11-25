@@ -51,7 +51,9 @@ Result<ConsentCategories> parseAllowList(std::string_view list) {
             categories |= allDestructiveCategories();
         } else if (!item.empty()) {
             const std::optional<ConsentCategory> category = hwio::mcp::consentCategoryFromId(item);
-            if (!category || *category == ConsentCategory::Connect) {
+            // Plan 0062 (ADR-0436): remote-device is never an --allow item.
+            if (!category || *category == ConsentCategory::Connect ||
+                *category == ConsentCategory::RemoteDevice) {
                 Error error = makeError(ErrorCode::UsageInvalidArgument, std::string(item));
                 setUntranslatedText(
                     error, ErrorText::Message,
@@ -76,6 +78,21 @@ FlagConsentBroker::request(hwio::mcp::ConsentRequest request,
                            std::function<void(hwio::mcp::ConsentDecision)> done) {
     ConsentCategories missing = request.categories & ~m_allowed;
     missing &= ~ConsentCategories(ConsentCategory::Connect); // always allowed in the CLI
+    // Plan 0062 (ADR-0436, D14): a customer's device is never allowed by a flag (the CLI holds
+    // no remote session in rc.5; refused in case one is ever offered).
+    if (request.remoteDevice || request.categories.testFlag(ConsentCategory::RemoteDevice)) {
+        qCInfo(hwio::log::lcMcp).noquote()
+            << "MCP consent: tool" << toQString(request.tool) << "refused on a customer's device";
+        Error error = makeError(ErrorCode::McpToolNotAllowed);
+        setUntranslatedText(
+            error, ErrorText::Message,
+            std::format("The tool {} cannot work with a customer's device here.", request.tool));
+        setUntranslatedText(error, ErrorText::Suggestion,
+                            "Use the MCP server of HARDWARIO Monitor (the application) for a "
+                            "remote support session.");
+        done(std::unexpected(std::move(error)));
+        return {};
+    }
     if (missing == ConsentCategories()) {
         done(hwio::mcp::ConsentGrant::Flag); // ADR-0377: "allowed_by_flag"
         return {};

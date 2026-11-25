@@ -145,3 +145,6 @@ hwio doctor                           # check the installation
 ```
 
 See [Command line](cli.md).
+
+`hwio-monitor --version` prints the version of the desktop app and `hwio-monitor --help` its options; neither opens
+a window. On Windows the text appears in the Command Prompt or PowerShell window you started it from.

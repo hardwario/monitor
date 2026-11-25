@@ -130,13 +130,13 @@ group and on the subcommand; the subcommand value wins only if given (py-hardwar
 
 | Command | Behaviour |
 |---|---|
-| `hio chester app flash [HEX_FILE_OR_ID] [--halt] [--allow-uicr] [--no-cache]` | Argument rules: an existing path → file; else 32 hex digits → catalog ID (download / cache, ADR-0037); else `usage.invalid_argument` "path does not exist". No argument → first non-empty of `build/` then `build/zephyr/` × `merged.hex`, `zephyr.hex`, `merged_chester_nrf52840.hex`; none → `usage.invalid_argument` listing searched paths. Sequence per Design. `--halt` leaves the CPU halted. `--allow-uicr` per ADR-0036. |
+| `hio chester app flash [HEX_FILE_OR_ID] [--halt] [--allow-uicr] [--no-cache]` | Argument rules: an existing path → file; else 32 hex digits → catalog ID (download / cache, ADR-0037); else `usage.invalid_argument` "path does not exist" (**amended by ADR-0423, plan 0060 A2: `io.file_not_found`, exit 3**). No argument → first non-empty of `build/` then `build/zephyr/` × `merged.hex`, `zephyr.hex`, `merged_chester_nrf52840.hex`; none → `usage.invalid_argument` listing searched paths. Sequence per Design. `--halt` leaves the CPU halted. `--allow-uicr` per ADR-0036. |
 | `hio chester app erase [--all] [--yes]` | Without `--all`: erase the code flash of the target (UICR and PIB kept). `--all`: erase-all of flash **and UICR** (PIB lost) — confirmation per ADR-0038. |
 | `hio chester app reset [--halt]` | Reset; go (default) or halt. |
 | `hio chester app recover [--yes]` | ADR-0039: confirmation, CTRL-AP ERASEALL, reset. |
 | `hio chester app pib read [--json]` | Read 128 B at UICR + 0x80, decode PIB v2. Human: the seven `Name: value` lines of py-hardwario. `--json`: `data = {"signature":"0xbabecafe","version":"0x02","size":"0x7b","crc":"0x…","vendor_name","product_name","hw_variant","hw_revision","serial_number","claim_token","ble_passkey"}` (py-hardwario keys). Invalid PIB → `pib.invalid` naming the failed check. |
 | `hio chester app uicr read --format hex\|bin FILE` | 128 B at UICR + 0x80 as lowercase hex without newline, or raw bytes; `FILE` `-` = stdout (py-hardwario compatible). |
-| `hio chester lte flash FILE [--allow-uicr]` | ADR-0040 input detection: bundle → modem (nRF Util) then application (J-Link); modem zip → modem only; `.hex` → application only. No catalog IDs (as py-hardwario). Always resets and runs. |
+| `hio chester lte flash FILE [--allow-uicr]` | (ADR-0423: a missing FILE is `io.file_not_found`, exit 3.) ADR-0040 input detection: bundle → modem (nRF Util) then application (J-Link); modem zip → modem only; `.hex` → application only. No catalog IDs (as py-hardwario). Always resets and runs. |
 | `hio chester lte erase [--yes]` | Erase-all (py-hardwario semantics) — confirmation per ADR-0038. |
 | `hio chester lte reset` | Reset and run. |
 | `hio chester lte recover [--yes]` | ADR-0039: confirmation, ERASEALL, program the disable-AP-protect image, reset. |

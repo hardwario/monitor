@@ -106,6 +106,7 @@ public:
     // "1.7.0"); empty when the host has no LTE update.
     [[nodiscard]] virtual std::pair<std::string, std::string> lteUpdateFirmware() const = 0;
     // The request fits the device (profile target exists, flash only to app). Errors:
+    // remote.target_unsupported (no such target, prepared firmware: plan 0059),
     // usage.invalid_argument.
     [[nodiscard]] virtual Status validate(const tunnel::OpRequest& request) const = 0;
     // The catalog page of a flash request's firmware (for the confirmation text); `done` once.

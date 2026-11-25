@@ -43,6 +43,7 @@
 #include <optional>
 #include <stop_token>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -369,6 +370,32 @@ TEST_F(ServerTest, LegacySubscriptionUpdatesAreThrottledPerResource) {
     server->notifyResourceUpdated(QStringLiteral("test://static"));
     runFor(200ms);
     EXPECT_EQ(channel->notifications.size(), 3U);
+}
+
+// Plan 0062 (ADR-0436): a notification only for the client keys the recipient filter accepts
+// (a legacy session's key is its session id).
+TEST_F(ServerTest, ResourceUpdateRecipientFilter) {
+    Limits limits;
+    limits.resourceUpdateInterval = 0ms;
+    makeServer(limits);
+    auto channel = std::make_shared<RecordingReplyChannel>(true, true);
+    server->handle(initialize(), channel, stdio());
+    server->handle(request(2, QStringLiteral("resources/subscribe"),
+                           {{QStringLiteral("uri"), QStringLiteral("test://static")}}, false),
+                   channel, stdio());
+    channel->notifications.clear();
+    std::vector<std::string> asked;
+    server->notifyResourceUpdated(QStringLiteral("test://static"), [&asked](std::string_view key) {
+        asked.emplace_back(key);
+        return false;
+    });
+    EXPECT_TRUE(channel->notifications.empty());
+    ASSERT_EQ(asked.size(), 1U);
+    EXPECT_FALSE(asked.front().empty());
+    const std::string key = asked.front();
+    server->notifyResourceUpdated(QStringLiteral("test://static"),
+                                  [key](std::string_view client) { return client == key; });
+    EXPECT_EQ(channel->notifications.size(), 1U);
 }
 
 TEST_F(ServerTest, ModernListenAcknowledgesAndDeliversWithSubscriptionId) {

@@ -3,14 +3,14 @@
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
 #include "hwio/core/log.h"
+#include "hwio/core/owner_only.h"
 #include "hwio/core/result.h"
 #include "hwio/device/ble_lock.h"
 #include "hwio/device/console_line.h"
+#include "hwio/device/console_redaction.h"
 #include "hwio/device/firmware_identity.h"
 #include "hwio/device/probe_lock.h"
-#include "hwio/device/profile.h"
 #include "hwio/device/session_key.h"
-#include "owner_only.h"
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -306,18 +306,7 @@ ConsoleFileSink::open(const ConsoleFileConfig& config, std::uint32_t probeSerial
 
 ConsoleFileSink::ConsoleFileSink(Passkey /*key*/, ConsoleFileConfig config, fs::path baseFile)
     : m_config(std::move(config)), m_base(std::move(baseFile)), m_current(m_base),
-      m_sensitivePrefixes(sensitivePrefixesOf(m_config.profileId, m_config.targetId)),
-      m_sensitiveOutput(sensitiveOutputKeysOf(m_config.profileId, m_config.targetId)) {
-    // Review R4: the shell prompts of the profile (RTT target, BLE), stripped from echoed lines.
-    if (const DeviceProfile* profile = ProfileRegistry::find(m_config.profileId)) {
-        if (const TargetProfile* target = findTarget(*profile, m_config.targetId)) {
-            m_prompts.at(0) = target->shellPrompt;
-        }
-        if (profile->ble) {
-            m_prompts.at(1) = profile->ble->shellPrompt;
-        }
-    }
-}
+      m_redaction(m_config.profileId, m_config.targetId) {}
 
 ConsoleFileSink::~ConsoleFileSink() {
     if (m_file && !m_buffer.empty()) {
@@ -341,7 +330,7 @@ Status ConsoleFileSink::openCurrent() {
         m_file = nullptr;
         return std::unexpected(writeFailed(m_current, reason));
     }
-    detail::restrictToOwner(*m_file); // ADR-0186: before the first write; existing files too
+    restrictToOwner(*m_file); // ADR-0186: before the first write; existing files too
     m_written = static_cast<std::uintmax_t>(m_file->size());
     openFiles().add(m_current);
     qCInfo(log::lcDevice).noquote() << "Console file:" << toQString(toUtf8(m_current));
@@ -416,43 +405,11 @@ Status ConsoleFileSink::append(std::string_view prefix, std::string_view text,
 }
 
 Status ConsoleFileSink::write(const ConsoleLine& line) {
-    // ADR-0186: a command with secret arguments is written as "<prefix> <redacted>": the input
-    // line and (review R4) a shell's echo of it in the output, after its prompt.
-    if (line.dir == Direction::In ||
-        (line.dir == Direction::Out && line.channel == Channel::Shell)) {
-        const std::size_t promptLength =
-            line.dir == Direction::Out ? echoPromptLength(line.text) : 0;
-        const std::string_view command = std::string_view(line.text).substr(promptLength);
-        if (const auto prefix = matchSensitiveCommand(command, m_sensitivePrefixes)) {
-            return append(consoleFilePrefix(line),
-                          line.text.substr(0, promptLength) + std::string(*prefix) + " <redacted>",
-                          line.time);
-        } // Plan 0028 (U2): the value of a secret printed by the device ("claim token:
-          // <redacted>").
-        if (line.dir == Direction::Out) {
-            if (const auto key = matchSensitiveOutput(command, m_sensitiveOutput)) {
-                return append(consoleFilePrefix(line),
-                              line.text.substr(0, promptLength) + *key + ": <redacted>", line.time);
-            }
-        }
+    // ADR-0186, plan 0028 (U2): secrets are written as "<redacted>" (ConsoleRedaction).
+    if (const auto text = m_redaction.redacted(line)) {
+        return append(consoleFilePrefix(line), *text, line.time);
     }
     return append(consoleFilePrefix(line), line.text, line.time);
-}
-
-std::size_t ConsoleFileSink::echoPromptLength(std::string_view text) const noexcept {
-    for (const std::string_view prompt : m_prompts) {
-        if (!prompt.empty() && text.starts_with(prompt)) {
-            return prompt.size();
-        }
-    }
-    // A Zephyr shell prompt "<name>:~$ " (CHESTER's RTT prompt is not in the profile yet).
-    constexpr std::string_view zephyrPromptEnd = ":~$ ";
-    const std::size_t end = text.find(zephyrPromptEnd);
-    if (end != std::string_view::npos && end > 0 &&
-        text.substr(0, end).find_first_of(" \t") == std::string_view::npos) {
-        return end + zephyrPromptEnd.size();
-    }
-    return 0;
 }
 
 Status ConsoleFileSink::writeConnection(std::string_view text,
