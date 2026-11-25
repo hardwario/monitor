@@ -15,6 +15,7 @@
 #include "hwio/mcp/server.h"
 #include "hwio/mcp/token.h"
 #include "mcp/activity_model.h"
+#include "mcp/consent_rules_model.h"
 #include "mcp/consent_view_model.h"
 #include "mcp/gui_device_provider.h"
 #include "mcp/mcp_controller.h"
@@ -33,6 +34,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLatin1String>
+#include <QList>
 #include <QObject>
 #include <QSignalSpy>
 #include <QString>
@@ -58,8 +61,10 @@
 
 namespace {
 
+using hwio::gui::ConsentRulesModel;
 using hwio::gui::DeviceTabViewModel;
 using hwio::gui::McpController;
+using hwio::gui::SettingsStore;
 using hwio::gui::test::freePort;
 using hwio::gui::test::HttpCall;
 using hwio::gui::test::HttpResponse;
@@ -253,12 +258,11 @@ TEST_F(McpControllerTest, RulesAndActiveClients) {
     EXPECT_EQ(mcp().consentRule(QStringLiteral("flash")), QStringLiteral("allow"));
     EXPECT_EQ(app().settingsStore()->value(QStringLiteral("mcp/consent/flash")).toString(),
               QStringLiteral("allow"));
-    EXPECT_EQ(mcp().rules().size(), 5);
+    ASSERT_NE(mcp().rules(), nullptr);
+    EXPECT_EQ(mcp().rules()->rowCount(), 5);
     EXPECT_FALSE(mcp()
                      .rules()
-                     .at(2)
-                     .toMap()
-                     .value(QStringLiteral("hint"))
+                     ->data(mcp().rules()->index(2), ConsentRulesModel::HintRole)
                      .toString()
                      .isEmpty()); // memory-write (ADR-0164)
     mcp().setConsentRule(QStringLiteral("flash"), false);
@@ -272,6 +276,48 @@ TEST_F(McpControllerTest, RulesAndActiveClients) {
     EXPECT_TRUE(mcp().stateText().startsWith(QStringLiteral("Listening · 2 client")));
     EXPECT_TRUE(mcp().summary().contains(QStringLiteral(", 2 client")));
     EXPECT_EQ(mcp().activity()->count(), 2);
+}
+
+// Plan 0055 (ADR-0390): the All row's state and setAllConsentRules (only the categories that
+// differ are written, each once; the rows report changes, never a reset).
+TEST_F(McpControllerTest, AllConsentRules) {
+    (void)app();
+    SettingsStore& settings = *app().settingsStore();
+    ConsentRulesModel& rows = *mcp().rules();
+    EXPECT_EQ(mcp().allRules(), McpController::AllRulesAsk);
+    mcp().setConsentRule(QStringLiteral("flash"), true);
+    EXPECT_EQ(mcp().allRules(), McpController::AllRulesMixed);
+
+    QSignalSpy written(&settings, &SettingsStore::valueChanged);
+    QSignalSpy rulesChanged(&mcp(), &McpController::rulesChanged);
+    QSignalSpy rowsChanged(&rows, &ConsentRulesModel::dataChanged);
+    QSignalSpy reset(&rows, &ConsentRulesModel::modelAboutToBeReset);
+    mcp().setAllConsentRules(true);
+    EXPECT_EQ(mcp().allRules(), McpController::AllRulesAllow);
+    EXPECT_EQ(written.count(), 4); // flash was already allowed
+    EXPECT_FALSE(std::ranges::any_of(written, [](const QList<QVariant>& args) {
+        return args.front().toString() == QStringLiteral("mcp/consent/flash");
+    }));
+    EXPECT_EQ(rowsChanged.count(), 4);
+    EXPECT_GE(rulesChanged.count(), 1);
+    for (const char* id : {"flash", "erase", "memory-write", "uicr", "connect"}) {
+        EXPECT_EQ(settings.value(QStringLiteral("mcp/consent/") + QLatin1String(id)).toString(),
+                  QStringLiteral("allow"))
+            << id;
+    }
+    for (int row = 0; row < rows.rowCount(); ++row) {
+        EXPECT_TRUE(rows.data(rows.index(row), ConsentRulesModel::AllowRole).toBool()) << row;
+    }
+
+    written.clear();
+    mcp().setAllConsentRules(true); // nothing differs: nothing written
+    EXPECT_EQ(written.count(), 0);
+
+    mcp().setAllConsentRules(false);
+    EXPECT_EQ(mcp().allRules(), McpController::AllRulesAsk);
+    EXPECT_EQ(written.count(), 5);
+    EXPECT_EQ(rowsChanged.count(), 9);
+    EXPECT_EQ(reset.count(), 0);
 }
 
 // ---- C1: integration ---------------------------------------------------------------------------
@@ -666,7 +712,7 @@ TEST_F(McpControllerTest, GrantForgottenWhenTheLegacySessionEnds) {
             session));
     ASSERT_TRUE(prompted("flash"));
     // ADR-0241: the client and its version in the prompt.
-    EXPECT_EQ(detailValue(QStringLiteral("Client")), QStringLiteral("Legacy 2.0"));
+    EXPECT_EQ(detailValue(QStringLiteral("Client")), QStringLiteral("Legacy, version 2.0"));
     allowForClient();
     ASSERT_FALSE(flashing.wait(60s).isError());
     ASSERT_EQ(mcp().grants().size(), 1);

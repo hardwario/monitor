@@ -2,8 +2,10 @@
 // fake J-Link library and BleSessions on the fake BLE backend (HWIO_TEST_OVERRIDES builds).
 // connect / disconnect, send_command by prompt / silence / timeout with the fake's responses and
 // echo, the session control tools, every target tool, flash (path, catalog id, both, UICR with
-// and without allow_uicr, cancel, stall), erase, recover, internal.busy with the kind, the device
-// closed mid-call, a BLE session (mcp.capability_missing), a missing optional J-Link export.
+// and without allow_uicr, cancel, stall; plan 0054: the catalog page before the download, its
+// name in the consent details, an unreadable page, a checksum mismatch, a cancelled lookup),
+// erase, recover, internal.busy with the kind, the device closed mid-call, a BLE session
+// (mcp.capability_missing), a missing optional J-Link export.
 
 #include "hex_builder.h"
 #include "http_fixture.h"
@@ -844,6 +846,141 @@ TEST_F(JLinkTools, FlashFromTheCatalog) {
               QString::fromStdString(id));
     EXPECT_EQ(harness.consent.requests.at(0).details.value(QStringLiteral("catalog_id")).toString(),
               QString::fromStdString(id));
+    // Plan 0054 D-5: no catalog page (HTTP 404 here): the flash goes on, the prompt shows the ID.
+    EXPECT_EQ(http.requests(QStringLiteral("/chester/%1").arg(QString::fromStdString(id))), 1);
+    EXPECT_FALSE(harness.consent.requests.at(0).details.contains(QStringLiteral("firmware_name")));
+    EXPECT_FALSE(
+        harness.consent.requests.at(0).details.contains(QStringLiteral("firmware_version")));
+}
+
+// ---- plan 0054 D-5 (ADR-0389): the catalog page before the download, like the CLI -----------
+
+class CatalogFlash : public JLinkTools {
+protected:
+    static constexpr const char* id = "0123456789abcdef0123456789abcdef";
+
+    CatalogFlash()
+        : m_hex(QByteArray::fromStdString(hwio::firmware::test::toHex(
+              *hwio::firmware::FirmwareImage::fromSegments({hwio::firmware::Segment{
+                  .address = 0, .data = hwio::firmware::test::filled(4096, 0x44)}})))) {}
+
+    static QString pagePath() { return QStringLiteral("/chester/%1").arg(QString::fromLatin1(id)); }
+    static QString hexPath() { return pagePath() + QStringLiteral("/hex"); }
+    static QString sha256Hex(const QByteArray& bytes) {
+        return QString::fromLatin1(
+            QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
+    }
+    // The public catalog page as the CLI tests serve it (app/cli/tests/flash_e2e_test.cpp).
+    static QByteArray page(const QString& sha) {
+        return QStringLiteral("<html><head><title> CHESTER Firmware: hio-chester-push-fm:v4.0.1"
+                              "</title></head><body><h2>hio-chester-push-fm:v4.0.1</h2>"
+                              "<div>For a firmware update via the J-Link USB debugger, download "
+                              "the HEX file:</div><div>SHA256 checksum: %1</div>"
+                              "<div>Upload date/time</div><div>2026-09-07 12:13:53</div>"
+                              "</body></html>")
+            .arg(sha)
+            .toUtf8();
+    }
+
+    [[nodiscard]] hwio::firmware::test::HttpFixture& http() { return m_http; }
+    [[nodiscard]] const QByteArray& hex() const { return m_hex; }
+
+private:
+    hwio::firmware::test::HttpFixture m_http;
+    QByteArray m_hex;
+};
+
+// The page was read: the consent details carry its name and version; the tool result does not
+// change (ADR-0377); the download was verified against the page's SHA-256 (see the mismatch test).
+TEST_F(CatalogFlash, ThePageNamesTheFirmwareInTheConsentDetails) {
+    ASSERT_TRUE(http().listening());
+    http().set(pagePath(), hwio::firmware::test::HttpFixture::Response::ok(page(sha256Hex(hex()))));
+    http().set(hexPath(), hwio::firmware::test::HttpFixture::Response::ok(hex()));
+    hwio::firmware::FirmwareCatalog catalog(
+        hwio::firmware::CatalogOptions{.baseUrl = QUrl(http().baseUrl()),
+                                       .transferTimeout = 5s,
+                                       .maxBodyBytes = 1024ULL * 1024},
+        nullptr);
+    Harness harness(provider(), limits(), &catalog);
+    connectDevice(harness);
+    auto flash = harness.call(QStringLiteral("flash"), args({{"catalog_id", id}}), 30s);
+    ASSERT_FALSE(flash.isError()) << flash.errorCode() << " " << flash.errorDetail();
+    EXPECT_EQ(http().requests(pagePath()), 1);
+    EXPECT_EQ(http().requests(hexPath()), 1);
+    ASSERT_EQ(harness.consent.requests.size(), 1U);
+    const QJsonObject& details = harness.consent.requests.at(0).details;
+    EXPECT_EQ(details.value(QStringLiteral("catalog_id")).toString(), QString::fromLatin1(id));
+    EXPECT_EQ(details.value(QStringLiteral("firmware_name")).toString(),
+              QStringLiteral("hio-chester-push-fm"));
+    EXPECT_EQ(details.value(QStringLiteral("firmware_version")).toString(),
+              QStringLiteral("v4.0.1"));
+    EXPECT_FALSE(flash.structured().contains(QStringLiteral("firmware_name")));
+    EXPECT_FALSE(flash.structured().contains(QStringLiteral("firmware_version")));
+}
+
+// An unreadable page (not a catalog page): the flash goes on with the ID-only details.
+TEST_F(CatalogFlash, AnUnreadablePageFlashesWithTheIdOnly) {
+    ASSERT_TRUE(http().listening());
+    http().set(pagePath(),
+               hwio::firmware::test::HttpFixture::Response::ok("<html>maintenance</html>"));
+    http().set(hexPath(), hwio::firmware::test::HttpFixture::Response::ok(hex()));
+    hwio::firmware::FirmwareCatalog catalog(
+        hwio::firmware::CatalogOptions{.baseUrl = QUrl(http().baseUrl()),
+                                       .transferTimeout = 5s,
+                                       .maxBodyBytes = 1024ULL * 1024},
+        nullptr);
+    Harness harness(provider(), limits(), &catalog);
+    connectDevice(harness);
+    auto flash = harness.call(QStringLiteral("flash"), args({{"catalog_id", id}}), 30s);
+    ASSERT_FALSE(flash.isError()) << flash.errorCode() << " " << flash.errorDetail();
+    ASSERT_EQ(harness.consent.requests.size(), 1U);
+    const QJsonObject& details = harness.consent.requests.at(0).details;
+    EXPECT_EQ(details.value(QStringLiteral("catalog_id")).toString(), QString::fromLatin1(id));
+    EXPECT_FALSE(details.contains(QStringLiteral("firmware_name")));
+    EXPECT_FALSE(details.contains(QStringLiteral("firmware_version")));
+}
+
+// The HEX file does not have the page's SHA-256: firmware.checksum_mismatch (as in the CLI),
+// no consent prompt, nothing flashed.
+TEST_F(CatalogFlash, AChecksumMismatchFailsBeforeTheConsent) {
+    ASSERT_TRUE(http().listening());
+    http().set(pagePath(),
+               hwio::firmware::test::HttpFixture::Response::ok(page(sha256Hex("another file"))));
+    http().set(hexPath(), hwio::firmware::test::HttpFixture::Response::ok(hex()));
+    hwio::firmware::FirmwareCatalog catalog(
+        hwio::firmware::CatalogOptions{.baseUrl = QUrl(http().baseUrl()),
+                                       .transferTimeout = 5s,
+                                       .maxBodyBytes = 1024ULL * 1024},
+        nullptr);
+    Harness harness(provider(), limits(), &catalog);
+    connectDevice(harness);
+    auto flash = harness.call(QStringLiteral("flash"), args({{"catalog_id", id}}), 30s);
+    EXPECT_EQ(flash.errorCode(), "firmware.checksum_mismatch");
+    EXPECT_TRUE(harness.consent.requests.empty());
+    EXPECT_TRUE(provider().record().busy.empty());
+}
+
+// Cancelled while the page is read: no download, no consent prompt, no flash.
+TEST_F(CatalogFlash, ACancelDuringTheLookupEndsTheCall) {
+    ASSERT_TRUE(http().listening());
+    http().set(pagePath(), hwio::firmware::test::HttpFixture::Response::hanging());
+    http().set(hexPath(), hwio::firmware::test::HttpFixture::Response::ok(hex()));
+    hwio::firmware::FirmwareCatalog catalog(
+        hwio::firmware::CatalogOptions{.baseUrl = QUrl(http().baseUrl()),
+                                       .transferTimeout = 5s,
+                                       .maxBodyBytes = 1024ULL * 1024},
+        nullptr);
+    Harness harness(provider(), limits(), &catalog);
+    connectDevice(harness);
+    auto flash = harness.start(QStringLiteral("flash"), args({{"catalog_id", id}}));
+    const int callId = harness.lastId();
+    ASSERT_TRUE(runUntil([&] { return http().requests(pagePath()) == 1; }, 5s));
+    harness.cancel(callId);
+    runFor(300ms);
+    EXPECT_FALSE(flash.done()); // a cancelled call gets no response
+    EXPECT_EQ(http().requests(hexPath()), 0);
+    EXPECT_TRUE(harness.consent.requests.empty());
+    EXPECT_TRUE(provider().record().busy.empty());
 }
 
 TEST_F(JLinkTools, BusyCancelAndDeviceClosedMidFlash) {

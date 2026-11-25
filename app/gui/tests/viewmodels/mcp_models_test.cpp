@@ -1,7 +1,9 @@
 // Plan 0014 A1/A2: the activity list (ring of 1000, roles, copy, clear), the client snippets (port,
 // token, masked, CLI path, valid JSON), the consent broker (rules, grants per client and category,
 // revoke, clientGone, forgetAll, queue overflow, timeout, withdrawal of the shown and of a queued
-// prompt, several categories in one prompt, denyAll) and the prompt's view model texts.
+// prompt, several categories in one prompt, denyAll) and the prompt's view model texts (plan 0054:
+// rows, labels, order, the firmware name with the full catalog ID, its bounds) and the Permissions
+// rows (plan 0055: only the changed row is reported, never a reset; a language switch).
 
 #include "gui_test_support.h"
 #include "hwio/core/error.h"
@@ -10,16 +12,21 @@
 #include "mcp/activity_model.h"
 #include "mcp/client_name.h"
 #include "mcp/client_snippets.h"
+#include "mcp/consent_rules_model.h"
 #include "mcp/consent_view_model.h"
 #include "mcp/gui_consent_broker.h"
 #include "settings_store.h"
 
+#include <QByteArray>
 #include <QChar>
 #include <QDateTime>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
+#include <QLatin1Char>
+#include <QList>
+#include <QModelIndex>
 #include <QSignalSpy>
 #include <QString>
 #include <QStringList>
@@ -45,6 +52,7 @@
 namespace {
 
 using hwio::gui::ActivityModel;
+using hwio::gui::ConsentRulesModel;
 using hwio::gui::ConsentViewModel;
 using hwio::gui::GuiConsentBroker;
 using hwio::gui::SettingsStore;
@@ -246,6 +254,82 @@ TEST_F(McpConsent, AlwaysAllowRuleSkipsThePrompt) {
     EXPECT_NE(broker().current(), nullptr);
 }
 
+// Plan 0055 (ADR-0390): a test describer; `prefix` makes a language switch visible.
+ConsentRulesModel::Describer rulesDescriber(const QString& prefix) {
+    return [&prefix](ConsentCategory category) {
+        return ConsentRulesModel::Texts{
+            .title = prefix + QString::number(static_cast<int>(category)),
+            .hint =
+                category == ConsentCategory::MemoryWrite ? QStringLiteral("warning") : QString()};
+    };
+}
+
+TEST_F(McpConsent, RulesModelReportsOnlyTheChangedRow) {
+    const QString prefix = QStringLiteral("en ");
+    ASSERT_TRUE(broker().setAlwaysAllowed(ConsentCategory::Connect, true));
+    ConsentRulesModel model(broker(), rulesDescriber(prefix));
+    ASSERT_EQ(model.rowCount(), 5);
+    EXPECT_EQ(model.data(model.index(0), ConsentRulesModel::RuleIdRole).toString(),
+              QStringLiteral("flash"));
+    EXPECT_EQ(model.data(model.index(2), ConsentRulesModel::RuleIdRole).toString(),
+              QStringLiteral("memory-write"));
+    EXPECT_EQ(model.data(model.index(2), ConsentRulesModel::HintRole).toString(),
+              QStringLiteral("warning"));
+    EXPECT_TRUE(model.data(model.index(0), ConsentRulesModel::HintRole).toString().isEmpty());
+    EXPECT_FALSE(model.data(model.index(1), ConsentRulesModel::AllowRole).toBool());
+    EXPECT_TRUE(model.data(model.index(4), ConsentRulesModel::AllowRole).toBool()); // stored
+    const QList<QByteArray> names = model.roleNames().values();
+    for (const char* role : {"ruleId", "title", "hint", "allow"}) {
+        EXPECT_TRUE(names.contains(role)) << role;
+    }
+
+    QSignalSpy changed(&model, &ConsentRulesModel::dataChanged);
+    QSignalSpy reset(&model, &ConsentRulesModel::modelAboutToBeReset);
+    QSignalSpy inserted(&model, &ConsentRulesModel::rowsInserted);
+    QSignalSpy removed(&model, &ConsentRulesModel::rowsRemoved);
+    QSignalSpy layout(&model, &ConsentRulesModel::layoutChanged);
+
+    ASSERT_TRUE(broker().setAlwaysAllowed(ConsentCategory::Erase, true));
+    ASSERT_EQ(changed.count(), 1);
+    EXPECT_EQ(changed.front().at(0).value<QModelIndex>().row(), 1);
+    EXPECT_EQ(changed.front().at(1).value<QModelIndex>().row(), 1);
+    EXPECT_EQ(changed.front().at(2).value<QList<int>>(), QList<int>{ConsentRulesModel::AllowRole});
+    EXPECT_TRUE(model.data(model.index(1), ConsentRulesModel::AllowRole).toBool());
+
+    // The same value again (the store still reports the write): nothing changed, nothing emitted.
+    ASSERT_TRUE(broker().setAlwaysAllowed(ConsentCategory::Erase, true));
+    EXPECT_EQ(changed.count(), 1);
+    ASSERT_TRUE(broker().setAlwaysAllowed(ConsentCategory::Erase, false));
+    EXPECT_EQ(changed.count(), 2);
+    EXPECT_FALSE(model.data(model.index(1), ConsentRulesModel::AllowRole).toBool());
+
+    EXPECT_EQ(reset.count(), 0);
+    EXPECT_EQ(inserted.count(), 0);
+    EXPECT_EQ(removed.count(), 0);
+    EXPECT_EQ(layout.count(), 0);
+}
+
+TEST_F(McpConsent, RulesModelRetranslatesTheTexts) {
+    QString prefix = QStringLiteral("en ");
+    ConsentRulesModel model(broker(), rulesDescriber(prefix));
+    EXPECT_EQ(model.data(model.index(0), ConsentRulesModel::TitleRole).toString(),
+              QStringLiteral("en ") + QString::number(static_cast<int>(ConsentCategory::Flash)));
+    QSignalSpy changed(&model, &ConsentRulesModel::dataChanged);
+    QSignalSpy reset(&model, &ConsentRulesModel::modelAboutToBeReset);
+    prefix = QStringLiteral("cs ");
+    model.retranslate();
+    ASSERT_EQ(changed.count(), 1);
+    EXPECT_EQ(changed.front().at(0).value<QModelIndex>().row(), 0);
+    EXPECT_EQ(changed.front().at(1).value<QModelIndex>().row(), 4);
+    const auto roles = changed.front().at(2).value<QList<int>>();
+    EXPECT_TRUE(roles.contains(ConsentRulesModel::TitleRole));
+    EXPECT_TRUE(roles.contains(ConsentRulesModel::HintRole));
+    EXPECT_FALSE(roles.contains(ConsentRulesModel::AllowRole));
+    EXPECT_EQ(model.data(model.index(0), ConsentRulesModel::TitleRole).toString(),
+              QStringLiteral("cs ") + QString::number(static_cast<int>(ConsentCategory::Flash)));
+    EXPECT_EQ(reset.count(), 0);
+}
+
 TEST_F(McpConsent, AllowOnceAndDeny) {
     const auto first = ask("Claude Code", ConsentCategory::Erase, "erase");
     const auto second = ask("Claude Code", ConsentCategory::Erase, "erase");
@@ -378,7 +462,7 @@ TEST_F(McpConsent, PromptTextsPerCategory) {
     (void)broker().request(erase, [](const ConsentDecision&) {});
     EXPECT_TRUE(vm.active());
     EXPECT_EQ(vm.title(), QStringLiteral("Claude Code wants to erase the device"));
-    EXPECT_EQ(vm.rememberLabel(), QStringLiteral("Allow these for Claude Code"));
+    EXPECT_EQ(vm.rememberLabel(), QStringLiteral("Always allow these for Claude Code"));
     EXPECT_TRUE(vm.canShowDevice());
     const QVariantList rows = vm.details();
     QStringList texts;
@@ -404,11 +488,14 @@ TEST_F(McpConsent, PromptTextsPerCategory) {
     connect.categories = ConsentCategory::Connect;
     connect.details = {};
     (void)broker().request(connect, [](const ConsentDecision&) {});
-    EXPECT_EQ(vm.rememberLabel(), QStringLiteral("Allow connecting devices for Claude Code"));
+    EXPECT_EQ(vm.rememberLabel(),
+              QStringLiteral("Always allow connecting devices for Claude Code"));
     EXPECT_TRUE(vm.details().contains(QVariant(QVariantMap{
         {QStringLiteral("label"), QStringLiteral("Device")},
         {QStringLiteral("value"), QStringLiteral("Open a new tab for J-Link 801000002")},
-        {QStringLiteral("warning"), false}})));
+        {QStringLiteral("warning"), false},
+        {QStringLiteral("note"), QString()},
+        {QStringLiteral("action"), false}})));
     EXPECT_FALSE(vm.canShowDevice());
     ASSERT_TRUE(waitFor([&] { return vm.armed(); }));
     vm.allowOnce(vm.promptId());
@@ -434,6 +521,203 @@ TEST_F(McpConsent, PromptTextsPerCategory) {
     vm.allowForClient(vm.promptId());
     EXPECT_FALSE(vm.active());
     spin(10ms);
+}
+
+// ---- plan 0054 (ADR-0389): rows, labels and order -------------------------------------------
+
+// The labels of the shown prompt's rows ("" for a warning), in order.
+QStringList labels(const ConsentViewModel& vm) {
+    QStringList result;
+    for (const QVariant& row : vm.details()) {
+        result.append(row.toMap().value(QStringLiteral("label")).toString());
+    }
+    return result;
+}
+
+// The row with `label` (empty map when none).
+QVariantMap rowOf(const ConsentViewModel& vm, const QString& label) {
+    for (const QVariant& row : vm.details()) {
+        if (row.toMap().value(QStringLiteral("label")).toString() == label) {
+            return row.toMap();
+        }
+    }
+    return {};
+}
+
+class McpConsentRows : public McpConsent {
+protected:
+    static constexpr const char* catalogId = "59489e4e91d741da930ab15b1ab9e31f";
+
+    // Shows `request` (the previous prompt is denied first).
+    void show(ConsentViewModel& vm, ConsentRequest request) {
+        if (vm.active()) {
+            vm.deny(vm.promptId());
+        }
+        (void)broker().request(std::move(request), [](const ConsentDecision&) {});
+        ASSERT_TRUE(vm.active());
+    }
+
+    static ConsentRequest request(std::string tool, ConsentCategories categories,
+                                  QJsonObject details) {
+        ConsentRequest result;
+        result.client = {.name = "Claude Code", .version = "1"};
+        result.clientKey = "Claude Code";
+        result.tool = std::move(tool);
+        result.deviceId = "jlink:801000001";
+        result.categories = categories;
+        result.details = std::move(details);
+        return result;
+    }
+
+    static QJsonObject catalogDetails(const QString& name, const QString& version) {
+        QJsonObject details{{QStringLiteral("catalog_id"), QString::fromLatin1(catalogId)},
+                            {QStringLiteral("size"), 660963},
+                            {QStringLiteral("target"), QStringLiteral("app")}};
+        if (!name.isNull()) {
+            details.insert(QStringLiteral("firmware_name"), name);
+            details.insert(QStringLiteral("firmware_version"), version);
+        }
+        return details;
+    }
+
+    static ConsentViewModel::DeviceDescription describe(std::string_view /*id*/) {
+        return {.text = QStringLiteral("CHESTER · J-Link 822005109 (tab 1)"), .tabIndex = 0};
+    }
+};
+
+// Catalog firmware with the page read: "<name> <version>  (<size>)" with the full ID as the
+// note; then Device (with the link), MCU, Client; the permanent button says "Always".
+TEST_F(McpConsentRows, CatalogFirmwareByName) {
+    ConsentViewModel vm(broker(), &McpConsentRows::describe, {});
+    show(vm,
+         request("flash", ConsentCategory::Flash,
+                 catalogDetails(QStringLiteral("hio-chester-clime"), QStringLiteral("v3.2.0"))));
+    EXPECT_EQ(labels(vm), (QStringList{QStringLiteral("Firmware"), QStringLiteral("Device"),
+                                       QStringLiteral("MCU"), QStringLiteral("Client")}));
+    const QVariantMap firmware = rowOf(vm, QStringLiteral("Firmware"));
+    EXPECT_TRUE(firmware.value(QStringLiteral("value"))
+                    .toString()
+                    .startsWith(QStringLiteral("hio-chester-clime v3.2.0  (")));
+    EXPECT_EQ(firmware.value(QStringLiteral("note")).toString(),
+              QStringLiteral("Catalog ID %1").arg(QString::fromLatin1(catalogId)));
+    EXPECT_FALSE(firmware.value(QStringLiteral("action")).toBool());
+    const QVariantMap device = rowOf(vm, QStringLiteral("Device"));
+    EXPECT_EQ(device.value(QStringLiteral("value")).toString(),
+              QStringLiteral("CHESTER · J-Link 822005109 (tab 1)"));
+    EXPECT_TRUE(device.value(QStringLiteral("action")).toBool());
+    EXPECT_EQ(rowOf(vm, QStringLiteral("MCU")).value(QStringLiteral("value")).toString(),
+              QStringLiteral("Application MCU"));
+    EXPECT_EQ(rowOf(vm, QStringLiteral("Client")).value(QStringLiteral("value")).toString(),
+              QStringLiteral("Claude Code, version 1"));
+    EXPECT_EQ(vm.rememberLabel(), QStringLiteral("Always allow flashing for Claude Code"));
+    vm.deny(vm.promptId());
+}
+
+// The page was not read (cached file, offline): the ID row as before, "<id>  (<size>)", no note.
+TEST_F(McpConsentRows, CatalogFirmwareWithoutTheName) {
+    ConsentViewModel vm(broker(), &McpConsentRows::describe, {});
+    show(vm, request("flash", ConsentCategory::Flash, catalogDetails(QString(), QString())));
+    EXPECT_EQ(labels(vm), (QStringList{QStringLiteral("Catalog ID"), QStringLiteral("Device"),
+                                       QStringLiteral("MCU"), QStringLiteral("Client")}));
+    const QVariantMap id = rowOf(vm, QStringLiteral("Catalog ID"));
+    EXPECT_TRUE(id.value(QStringLiteral("value"))
+                    .toString()
+                    .startsWith(QStringLiteral("%1  (").arg(QString::fromLatin1(catalogId))));
+    EXPECT_TRUE(id.value(QStringLiteral("note")).toString().isEmpty());
+    // An empty name (or only whitespace and control characters) counts as no name.
+    show(vm, request("flash", ConsentCategory::Flash,
+                     catalogDetails(QStringLiteral(" \n\t‮"), QStringLiteral("v1"))));
+    EXPECT_EQ(labels(vm).value(0), QStringLiteral("Catalog ID"));
+    vm.deny(vm.promptId());
+}
+
+// Security property (ADR-0389): a name can never replace or hide the full ID; it is one line of
+// plain text, bounded to maxCatalogFieldBytes and cut with "…".
+TEST_F(McpConsentRows, AFirmwareNameNeverHidesTheId) {
+    ConsentViewModel vm(broker(), &McpConsentRows::describe, {});
+    const QString id = QString::fromLatin1(catalogId);
+    // A forged second line and a bidi override are flattened / dropped.
+    show(vm,
+         request("flash", ConsentCategory::Flash,
+                 catalogDetails(QStringLiteral("evil\nCatalog ID 00000000000000000000000000000000"
+                                               "‮"),
+                                QStringLiteral("v1\r\n"))));
+    QVariantMap firmware = rowOf(vm, QStringLiteral("Firmware"));
+    const QString value = firmware.value(QStringLiteral("value")).toString();
+    EXPECT_TRUE(
+        value.startsWith(QStringLiteral("evil Catalog ID 00000000000000000000000000000000 v1  (")))
+        << value.toStdString();
+    EXPECT_FALSE(value.contains(QLatin1Char('\n')));
+    EXPECT_FALSE(value.contains(QChar(u'‮')));
+    EXPECT_EQ(firmware.value(QStringLiteral("note")).toString(),
+              QStringLiteral("Catalog ID %1").arg(id));
+    // Longer than the limit: cut with "…"; the ID stays complete.
+    show(vm,
+         request("flash", ConsentCategory::Flash,
+                 catalogDetails(QString(300, QLatin1Char('a')), QString(300, QLatin1Char('1')))));
+    firmware = rowOf(vm, QStringLiteral("Firmware"));
+    const QString cut = firmware.value(QStringLiteral("value")).toString();
+    const QString expectedName = QString(128, QLatin1Char('a')) + QChar(u'…');
+    const QString expectedVersion = QString(128, QLatin1Char('1')) + QChar(u'…');
+    EXPECT_TRUE(cut.startsWith(QStringLiteral("%1 %2  (").arg(expectedName, expectedVersion)))
+        << cut.toStdString();
+    EXPECT_EQ(firmware.value(QStringLiteral("note")).toString(),
+              QStringLiteral("Catalog ID %1").arg(id));
+    // A catalog ID without a name, and a file: the full ID / path in the value.
+    show(vm, request("flash", ConsentCategory::Flash, catalogDetails(QString(), QString())));
+    EXPECT_TRUE(rowOf(vm, QStringLiteral("Catalog ID"))
+                    .value(QStringLiteral("value"))
+                    .toString()
+                    .contains(id));
+    vm.deny(vm.promptId());
+}
+
+// A file: "File <full path>  (<size>)" first; LTE: the MCU title "LTE MCU"; an unknown target
+// shows its id; erase and connect keep their rows with the client last.
+TEST_F(McpConsentRows, FileLteEraseAndConnect) {
+    ConsentViewModel vm(broker(), &McpConsentRows::describe, {});
+    const QString path =
+        QStringLiteral("/home/me/a very long directory name/build/zephyr/merged.hex");
+    show(vm, request("flash", ConsentCategory::Flash,
+                     QJsonObject{{QStringLiteral("file"), path},
+                                 {QStringLiteral("size"), 1000},
+                                 {QStringLiteral("target"), QStringLiteral("app")}}));
+    EXPECT_EQ(labels(vm), (QStringList{QStringLiteral("File"), QStringLiteral("Device"),
+                                       QStringLiteral("MCU"), QStringLiteral("Client")}));
+    EXPECT_TRUE(rowOf(vm, QStringLiteral("File"))
+                    .value(QStringLiteral("value"))
+                    .toString()
+                    .startsWith(path + QStringLiteral("  (")));
+
+    show(vm,
+         request("flash_lte", ConsentCategory::Flash,
+                 QJsonObject{{QStringLiteral("file"), QStringLiteral("/tmp/mfw_nrf91x1_2.0.2.zip")},
+                             {QStringLiteral("target"), QStringLiteral("lte")},
+                             {QStringLiteral("kind"), QStringLiteral("modem")}}));
+    EXPECT_EQ(rowOf(vm, QStringLiteral("File")).value(QStringLiteral("value")).toString(),
+              QStringLiteral("/tmp/mfw_nrf91x1_2.0.2.zip"));
+    EXPECT_EQ(rowOf(vm, QStringLiteral("MCU")).value(QStringLiteral("value")).toString(),
+              QStringLiteral("LTE MCU"));
+
+    show(vm, request("erase", ConsentCategory::Erase,
+                     QJsonObject{{QStringLiteral("target"), QStringLiteral("radio")},
+                                 {QStringLiteral("scope"), QStringLiteral("code")}}));
+    EXPECT_EQ(labels(vm), (QStringList{QStringLiteral("Device"), QStringLiteral("MCU"),
+                                       QStringLiteral("Scope"), QStringLiteral("Client")}));
+    EXPECT_EQ(rowOf(vm, QStringLiteral("MCU")).value(QStringLiteral("value")).toString(),
+              QStringLiteral("radio"));
+    EXPECT_EQ(vm.rememberLabel(), QStringLiteral("Always allow erasing for Claude Code"));
+
+    ConsentRequest connect = request("connect", ConsentCategory::Connect, {});
+    show(vm, std::move(connect));
+    EXPECT_EQ(labels(vm), (QStringList{QStringLiteral("Device"), QStringLiteral("Client")}));
+    EXPECT_TRUE(rowOf(vm, QStringLiteral("Device")).value(QStringLiteral("action")).toBool());
+    // Without a client version the Client row is absent (ADR-0241).
+    ConsentRequest unversioned = request("erase", ConsentCategory::Erase, {});
+    unversioned.client.version.clear();
+    show(vm, std::move(unversioned));
+    EXPECT_FALSE(labels(vm).contains(QStringLiteral("Client")));
+    vm.deny(vm.promptId());
 }
 
 // ---- review H1: answers carry the prompt id ----------------------------------------------------

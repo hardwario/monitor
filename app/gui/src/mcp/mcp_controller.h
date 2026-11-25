@@ -27,6 +27,7 @@
 
 #include "hwio/core/error.h"
 #include "mcp/activity_model.h"
+#include "mcp/consent_rules_model.h"
 #include "mcp/consent_view_model.h"
 #include "mcp/gui_consent_broker.h"
 #include "viewmodels/device_tab_view_model.h"
@@ -87,8 +88,10 @@ class McpController : public QObject {
     Q_PROPERTY(QVariantList snippets READ snippets NOTIFY tokenChanged)
     // [{client (with the version), categories, text ("Allowed until disconnect: …")}]
     Q_PROPERTY(QVariantList grants READ grants NOTIFY grantsChanged)
-    // [{id, title, hint, allow}] in the settings order (ADR-0101)
-    Q_PROPERTY(QVariantList rules READ rules NOTIFY rulesChanged)
+    // The rows of Permissions, in the settings order (ADR-0101, ADR-0390).
+    Q_PROPERTY(hwio::gui::ConsentRulesModel* rules READ rules CONSTANT)
+    // The All row (ADR-0390): AllRulesMixed, AllRulesAsk or AllRulesAllow.
+    Q_PROPERTY(int allRules READ allRules NOTIFY rulesChanged)
     Q_PROPERTY(hwio::gui::ActivityModel* activity READ activity CONSTANT)
     Q_PROPERTY(hwio::gui::ConsentViewModel* consent READ consent CONSTANT)
     Q_PROPERTY(int minPort READ minPort CONSTANT)
@@ -104,6 +107,14 @@ public:
         Error
     };
     Q_ENUM(State)
+
+    // allRules: whether all consent categories agree (unscoped: QML compares the int property).
+    enum AllRules : quint8 { // NOLINT(cppcoreguidelines-use-enum-class)
+        AllRulesMixed,
+        AllRulesAsk,
+        AllRulesAllow
+    };
+    Q_ENUM(AllRules)
 
     static constexpr int defaultPort = 47800; // ADR-0102
     static constexpr int minPortValue = 1024;
@@ -150,7 +161,8 @@ public:
     [[nodiscard]] QString maskedToken() const;
     [[nodiscard]] QVariantList snippets() const;
     [[nodiscard]] QVariantList grants() const;
-    [[nodiscard]] QVariantList rules() const;
+    [[nodiscard]] ConsentRulesModel* rules() const noexcept { return m_rules; }
+    [[nodiscard]] int allRules() const;
     [[nodiscard]] ActivityModel* activity() const noexcept { return m_activity; }
     [[nodiscard]] ConsentViewModel* consent() const noexcept { return m_consentView; }
     [[nodiscard]] static int minPort() noexcept { return minPortValue; }
@@ -166,6 +178,8 @@ public:
     // "ask" | "allow" for a category id ("flash", "erase", "memory-write", "uicr", "connect").
     Q_INVOKABLE [[nodiscard]] QString consentRule(const QString& category) const;
     Q_INVOKABLE void setConsentRule(const QString& category, bool allow);
+    // Every category at once (the All row, ADR-0390); writes only the categories that differ.
+    Q_INVOKABLE void setAllConsentRules(bool allow);
     Q_INVOKABLE void revokeGrant(int row);
     Q_INVOKABLE void copySnippet(int row);
     // The device bar's Cancel of a running AI operation (ADR-0244).
@@ -219,6 +233,7 @@ private:
     QTimer m_drainTimer;
     ActivityModel* m_activity = nullptr;       // child
     ConsentViewModel* m_consentView = nullptr; // child
+    ConsentRulesModel* m_rules = nullptr;      // child
     // Destroyed in reverse order: the HTTP server, the server, the tools, the broker, the provider.
     std::unique_ptr<GuiDeviceProvider> m_provider;
     std::unique_ptr<GuiConsentBroker> m_consent;

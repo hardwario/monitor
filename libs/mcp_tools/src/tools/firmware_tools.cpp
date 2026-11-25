@@ -3,10 +3,12 @@
 // not cleared (the AI reads only new output with after_cursor).
 
 #include "hwio/core/error.h"
+#include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
 #include "hwio/device/profile.h"
+#include "hwio/firmware/designated_firmware.h"
 #include "hwio/firmware/firmware_cache.h"
 #include "hwio/firmware/firmware_catalog.h"
 #include "hwio/firmware/firmware_image.h"
@@ -25,10 +27,12 @@
 
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QLoggingCategory>
 #include <QString>
 #include <QStringLiteral>
 #include <QtTypes>
 
+#include <cstddef>
 #include <expected>
 #include <filesystem>
 #include <memory>
@@ -164,7 +168,51 @@ public:
                 id->value()));
             return;
         }
-        m_download = tools.catalog()->download(*id, hwio::firmware::DownloadOptions{});
+        // Plan 0054 D-5 (ADR-0389), like the CLI (ADR-0166): the catalog page first (name and
+        // version for the consent prompt, its SHA-256 verifies the download), then the download.
+        m_catalog = tools.catalog();
+        m_id = std::move(*id);
+        m_lookup = m_catalog->lookup(*m_id);
+        connect(m_lookup.get(), &hwio::firmware::LookupOperation::finished, this,
+                [this] { lookedUp(); });
+        if (m_lookup->isFinished()) {
+            lookedUp();
+        }
+    }
+
+protected:
+    void cancelPending() override {
+        m_parse.cancel();
+        if (m_lookup && !m_lookup->isFinished()) {
+            m_lookup->cancel();
+        }
+        if (m_download && !m_download->isFinished()) {
+            m_download->cancel();
+        }
+    }
+
+private:
+    // The catalog page was read (or not): an unreadable page does not stop the flash (the HEX
+    // download is authoritative, as in the CLI); the prompt then shows the catalog ID only.
+    void lookedUp() {
+        if (isFinished() || m_download || !m_lookup || !m_lookup->result() || !m_id) {
+            return;
+        }
+        const hwio::Result<hwio::firmware::CatalogInfo>& info = *m_lookup->result();
+        std::optional<hwio::firmware::Sha256> expected;
+        if (info) {
+            m_firmwareName = boundedField(info->name);
+            m_firmwareVersion = boundedField(info->version);
+            expected = info->sha256;
+        } else if (info.error().code == hwio::ErrorCode::Cancelled) {
+            completeError(info.error());
+            return;
+        } else {
+            qCInfo(hwio::log::lcMcp).noquote()
+                << "Catalog page not read:" << qs(m_id->value()) << qs(info.error().detail);
+        }
+        m_download = m_catalog->download(
+            *m_id, hwio::firmware::DownloadOptions{.noCache = false, .expectedSha256 = expected});
         connect(m_download.get(), &hwio::firmware::CatalogOperation::finished, this,
                 [this] { downloaded(); });
         if (m_download->isFinished()) {
@@ -172,15 +220,19 @@ public:
         }
     }
 
-protected:
-    void cancelPending() override {
-        m_parse.cancel();
-        if (m_download && !m_download->isFinished()) {
-            m_download->cancel();
+    // At most maxCatalogFieldBytes of UTF-8, cut at a character boundary (parseCatalogPage()
+    // already rejects longer fields; this keeps the consent details bounded on their own).
+    static QString boundedField(std::string_view text) {
+        if (text.size() > hwio::firmware::maxCatalogFieldBytes) {
+            std::size_t end = hwio::firmware::maxCatalogFieldBytes;
+            while (end > 0 && (static_cast<unsigned char>(text[end]) & 0xC0U) == 0x80U) {
+                --end;
+            }
+            text = text.substr(0, end);
         }
+        return qs(text);
     }
 
-private:
     void downloaded() {
         if (isFinished() || !m_download || !m_download->result()) {
             return;
@@ -206,6 +258,11 @@ private:
         QJsonObject details;
         details.insert(m_fromFile ? QStringLiteral("file") : QStringLiteral("catalog_id"),
                        m_source);
+        // Plan 0054 (ADR-0389): what the catalog page says, only when it was read.
+        if (!m_firmwareName.isEmpty()) {
+            details.insert(QStringLiteral("firmware_name"), m_firmwareName);
+            details.insert(QStringLiteral("firmware_version"), m_firmwareVersion);
+        }
         details.insert(QStringLiteral("target"), qs(m_target->id));
         details.insert(QStringLiteral("size"), static_cast<qint64>(m_image->totalBytes()));
         details.insert(QStringLiteral("sha256"), qs(m_image->sha256()));
@@ -241,6 +298,13 @@ private:
     bool m_fromFile = false;
     QString m_source;
     hwio::mcp::Offloader::Handle m_parse; // the offloaded HEX parse (cancelled with the call)
+    // Catalog ID only: the catalog (non-owning, ToolsContext's, outlives the calls), the ID, the
+    // page lookup (before the download) and its name / version ("" when the page was not read).
+    hwio::firmware::FirmwareCatalog* m_catalog = nullptr;
+    std::optional<hwio::firmware::FirmwareId> m_id;
+    std::unique_ptr<hwio::firmware::LookupOperation> m_lookup;
+    QString m_firmwareName;
+    QString m_firmwareVersion;
     std::unique_ptr<hwio::firmware::CatalogOperation> m_download;
     std::shared_ptr<const hwio::firmware::FirmwareImage> m_image;
 };

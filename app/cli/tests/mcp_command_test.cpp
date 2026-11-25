@@ -144,8 +144,20 @@ StdinLineReader::ReadFunction chunks(std::vector<std::string> parts) {
 
 TEST(StdinLineSource, DeliversLinesOverlongMarkersAndTheEnd) {
     std::atomic<int> wakeups{0};
-    StdinLineSource source(8, 4, 0, chunks({"one\n", "much too long line\n", "two\r\n"}));
+    // The reader thread starts in the constructor: it reads nothing until the wake-up is set, or
+    // it could queue everything first and never call it.
+    std::atomic<bool> wakeupSet{false};
+    StdinLineSource source(
+        8, 4, 0,
+        [&wakeupSet, read = chunks({"one\n", "much too long line\n", "two\r\n"})](
+            std::span<char> buffer, std::size_t& count) mutable {
+            while (!wakeupSet.load()) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            return read(buffer, count);
+        });
     source.setWakeup([&wakeups] { ++wakeups; });
+    wakeupSet = true;
     std::vector<hwio::mcp::ILineSource::Line> lines;
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
     while (!source.atEnd() && std::chrono::steady_clock::now() < deadline) {
