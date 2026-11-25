@@ -3,6 +3,7 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/core/version.h"
 #include "hwio/device/ble_session.h"
@@ -28,6 +29,8 @@
 #include "viewmodels/probe_picker_view_model.h"
 #include "viewmodels/remote_join_view_model.h"
 #include "viewmodels/remote_share_view_model.h"
+#include "wizard/wizard_registry.h"
+#include "wizard/wizard_view_model.h"
 #include "workers/ble_service.h"
 
 #include <QDesktopServices>
@@ -41,12 +44,14 @@
 #include <QVariantMap>
 #include <QtContainerFwd>
 #include <QtCore/qnamespace.h>
+#include <QtTranslation>
 
 #include <chrono>
 #include <cstdint>
 #include <expected>
 #include <filesystem>
 #include <functional>
+#include <initializer_list>
 #include <memory>
 #include <optional>
 #include <string>
@@ -63,6 +68,12 @@ bool probeReserved(const device::SessionRegistry* registry, std::uint32_t serial
 }
 
 const QString lastTransportKey = QStringLiteral("ui/lastTransport");
+
+// Plan 0052: the registry of a tab built without one (tests): no wizard is registered.
+const WizardRegistry& emptyWizardRegistry() {
+    static const WizardRegistry registry;
+    return registry;
+}
 
 } // namespace
 
@@ -116,6 +127,7 @@ DeviceTabViewModel::DeviceTabViewModel(TabContext context, QObject* parent)
     // Plan 0044: sharing this console / the joiner state (children, Qt parent ownership).
     m_remoteShare = new RemoteShareViewModel(this); // NOLINT(cppcoreguidelines-owning-memory)
     m_remoteJoin = new RemoteJoinViewModel(this);   // NOLINT(cppcoreguidelines-owning-memory)
+    createWizard();
 
     if (m_context.pages != nullptr) {
         for (const PageDescriptor& page : m_context.pages->pages()) {
@@ -160,6 +172,15 @@ void DeviceTabViewModel::createBlePicker() {
                     connectDevice();
                 }
             });
+}
+
+// Plan 0052 (ADR-0386): the tab's wizard (a child, Qt parent ownership).
+void DeviceTabViewModel::createWizard() {
+    m_wizard = new WizardViewModel( // NOLINT(cppcoreguidelines-owning-memory)
+        m_context.wizards != nullptr ? *m_context.wizards : emptyWizardRegistry(), this,
+        [this](const QString& text) { copyToClipboard(text); }); // ADR-0202
+    connect(m_wizard, &WizardViewModel::openChanged, this,
+            &DeviceTabViewModel::onWizardOpenChanged);
 }
 
 DeviceTabViewModel::~DeviceTabViewModel() { shutdown(); }
@@ -219,12 +240,37 @@ QString DeviceTabViewModel::pageDisabledReason(const QString& pageId) const {
 }
 
 void DeviceTabViewModel::setCurrentPage(const QString& pageId) {
-    if (pageId == m_currentPage || !m_pageIds.contains(pageId) ||
-        !pageDisabledReason(pageId).isEmpty()) {
+    if (pageId == m_currentPage) {
+        return;
+    }
+    if (pageId == wizardPageId()) {
+        // Plan 0052: the wizard view, while the wizard is open (also while choosing a device).
+        if (!m_wizard->isOpen()) {
+            return;
+        }
+        m_pageBeforeWizard = m_currentPage;
+    } else if (!m_pageIds.contains(pageId) || !pageDisabledReason(pageId).isEmpty()) {
         return;
     }
     m_currentPage = pageId;
     currentPageChanged(); // signal
+}
+
+void DeviceTabViewModel::onWizardOpenChanged() {
+    if (m_wizard->isOpen()) {
+        setCurrentPage(wizardPageId()); // the wizard view replaces the page area
+        return;
+    }
+    // Closed: the page shown before it, unless a hand-off chose another page meanwhile.
+    if (m_currentPage == wizardPageId()) {
+        QString page = m_pageBeforeWizard;
+        if (!m_pageIds.contains(page) || !pageDisabledReason(page).isEmpty()) {
+            page = m_pageIds.isEmpty() ? QString() : m_pageIds.front();
+        }
+        m_currentPage = page;
+        currentPageChanged(); // signal
+    }
+    m_pageBeforeWizard.clear();
 }
 
 QString DeviceTabViewModel::busyPage() const { return m_busy ? m_busy->pageId : QString(); }
@@ -636,7 +682,9 @@ void DeviceTabViewModel::connectDevice() {
     if (Status status = openSession(); !status) {
         qCInfo(lcGui) << "Connect failed:" << toQString(idOf(status.error().code))
                       << toQString(status.error().detail);
-        addMarker(tr("— disconnected: %1 —").arg(ConnectionViewModel::shortCause(status.error())));
+        addMarker(
+            markerText(QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel", "— disconnected: %1 —"),
+                       {ConnectionViewModel::shortCauseText(status.error())}));
         m_connection->setOpenError(std::move(status).error());
         updateState();
     }
@@ -650,7 +698,8 @@ void DeviceTabViewModel::disconnectDevice() {
     releaseSession();
     m_connection->setOpenError(std::nullopt);
     if (hadSession) {
-        addMarker(tr("— disconnected —"));
+        addMarker(
+            markerText(QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel", "— disconnected —")));
     }
     updateState();
 }
@@ -697,20 +746,24 @@ void DeviceTabViewModel::onConnectionChanged(const device::ConnectionEvent& even
     case device::ConnectionState::Connected:
         m_connection->setPairingPending(false);
         if (isBle()) {
-            addMarker(tr("— connected (Bluetooth) —"));
+            addMarker(markerText(
+                QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel", "— connected (Bluetooth) —")));
         } else if (isRemote()) {
-            addMarker(tr("— connected (remote) —"));
+            addMarker(markerText(
+                QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel", "— connected (remote) —")));
         } else {
-            addMarker(tr("— connected —"));
+            addMarker(
+                markerText(QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel", "— connected —")));
         }
         consoleAttached(); // signal (`info show`: m_infoWatcher, plan 0028)
         break;
     case device::ConnectionState::Disconnected:
     case device::ConnectionState::Stopped:
-        addMarker(
-            event.error
-                ? tr("— disconnected: %1 —").arg(ConnectionViewModel::shortCause(*event.error))
-                : tr("— disconnected —"));
+        addMarker(event.error ? markerText(QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel",
+                                                             "— disconnected: %1 —"),
+                                           {ConnectionViewModel::shortCauseText(*event.error)})
+                              : markerText(QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel",
+                                                             "— disconnected —")));
         break;
     case device::ConnectionState::Connecting:
     case device::ConnectionState::ProbeOpen: // a wizard's probe-only session (ADR-0069)
@@ -808,13 +861,20 @@ void DeviceTabViewModel::resetInfoWatcher() {
     }
 }
 
-void DeviceTabViewModel::addMarker(const QString& text) {
-    m_consoleLog->appendMarker(device::Channel::Shell, toStdString(text));
+void DeviceTabViewModel::addMarker(const LocalizedText& text) {
+    m_consoleLog->appendMarker(device::Channel::Shell, toStdString(text.translated),
+                               toStdString(text.english));
     // Plan 0012 (ADR-0082): a Bluetooth console has no log channel; its pane stays hidden while
     // the channel is empty, so the markers go to the shell only.
     if (!isBle() && !isRemote()) {
-        m_consoleLog->appendMarker(device::Channel::Log, toStdString(text));
+        m_consoleLog->appendMarker(device::Channel::Log, toStdString(text.translated),
+                                   toStdString(text.english));
     }
+}
+
+LocalizedText DeviceTabViewModel::markerText(const char* source,
+                                             std::initializer_list<TextArg> args) {
+    return localizedText("hwio::gui::DeviceTabViewModel", source, args);
 }
 
 void DeviceTabViewModel::setBusy(const QString& pageId, QString busyText, QString confirmText,
@@ -831,7 +891,8 @@ void DeviceTabViewModel::setBusy(const QString& pageId, QString busyText, QStrin
                        .cancel = std::move(cancel),
                        .cancelled = false};
     if (!wasBusy) {
-        addMarker(tr("— paused: %1 —").arg(m_busy->text));
+        addMarker(markerText(QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel", "— paused: %1 —"),
+                             {m_busy->text}));
     }
     busyChanged(); // signal
     m_connection->refresh();
@@ -844,7 +905,7 @@ void DeviceTabViewModel::clearBusy(const QString& pageId) {
     }
     m_busy.reset();
     if (!m_closePending) {
-        addMarker(tr("— resumed —"));
+        addMarker(markerText(QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel", "— resumed —")));
     }
     busyChanged(); // signal
     m_connection->refresh();
@@ -922,6 +983,11 @@ void DeviceTabViewModel::copyToClipboard(const QString& text, const QString& toa
 }
 
 void DeviceTabViewModel::shutdown() {
+    // Plan 0052 (review V2): the tab's wizard closes first (its operation is cancelled) while the
+    // session still exists.
+    if (m_wizard != nullptr) {
+        m_wizard->tabClosing(this);
+    }
     if (m_picker != nullptr) {
         m_picker->setActive(false);
     }

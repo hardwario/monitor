@@ -11,6 +11,8 @@
 //   <directory>/<serial>-<UTC yyyyMMdd-HHmmss>.hex   (owner-only, ADR-0186; Windows: the per-user
 //                                                    AppData ACL)
 // Default directory: <AppLocalDataLocation>/backups (requires initApplicationIdentity()).
+// Plan 0051 (ADR-0381): list() names the copies of a directory (newest first, at most keepFiles)
+// for the application firmware picker and `hwio chester app backups`.
 //
 // Thread safety: free functions without shared state; file access on the calling thread.
 
@@ -22,6 +24,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -31,6 +34,14 @@ namespace hwio::device {
 
 class ApplicationBackup {
 public:
+    // One copy found by list().
+    struct Entry {
+        std::filesystem::path path;
+        std::string serial; // as in the file name ("unknown" when it was not readable)
+        std::chrono::system_clock::time_point time; // UTC stamp of the file name
+        std::uintmax_t size = 0;                    // bytes of the file
+    };
+
     // Plan 0033 (D3): the largest code flash a backup reads, and the files kept per directory.
     static constexpr std::size_t maxBytes = 4ULL * 1024 * 1024;
     static constexpr std::size_t keepFiles = 10;
@@ -54,6 +65,17 @@ public:
          std::span<const std::byte> data);
 
     [[nodiscard]] static std::filesystem::path defaultDirectory();
+
+    // `serial` as it appears in a file name (characters other than [A-Za-z0-9_-] become '_', at
+    // most 32; "" = "unknown").
+    [[nodiscard]] static std::string fileSerial(std::string_view serial);
+
+    // The copies in `directory` ("<serial>-yyyyMMdd-HHmmss.hex"; other files are skipped), newest
+    // first, at most keepFiles. `serial`: only that device's copies (compared like the file name).
+    // A missing or unreadable directory gives an empty list.
+    [[nodiscard]] static std::vector<Entry>
+    list(const std::filesystem::path& directory,
+         const std::optional<std::string>& serial = std::nullopt);
 };
 
 } // namespace hwio::device

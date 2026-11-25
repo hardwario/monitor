@@ -3,6 +3,7 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
@@ -40,6 +41,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace hwio::gui {
@@ -106,10 +108,11 @@ FlashViewModel::FlashViewModel(DeviceTabViewModel* tab, FirmwareServices& servic
         // [Recover…] is hidden again (plan 0033).
         m_maintenanceTarget = m_tab->consoleTargetId();
         m_revealedRecover.clear();
-        kindChanged();        // signal
-        textsChanged();       // signal: the MCU names of the profile
-        maintenanceChanged(); // signal
-        stateChanged();       // signal
+        m_source->setDeviceSerial({}); // ADR-0381: another device
+        kindChanged();                 // signal
+        textsChanged();                // signal: the MCU names of the profile
+        maintenanceChanged();          // signal
+        stateChanged();                // signal
     });
     // Plan 0045 (ADR-0360): the expert actions follow the user mode.
     connect(&m_mode, &UiModeController::modeChanged, this, &FlashViewModel::onExpertActionsChanged);
@@ -337,7 +340,8 @@ void FlashViewModel::flash() {
         .targetId = targetId(),
         .source = *loaded,
         .options = device::FlashOptions{.halt = haltAvailable() && m_halt,
-                                        .allowUicr = m_source->hasUicr() && m_source->allowUicr()},
+                                        .allowUicr = m_source->hasUicr() && m_source->allowUicr(),
+                                        .guided = false},
         .sourceName = m_source->sourceName()});
 }
 
@@ -596,9 +600,13 @@ void FlashViewModel::onSessionChanged() {
         Error error = makeError(ErrorCode::TargetNotConnected,
                                 "the session was closed while the operation was running");
         if (shown.valid()) {
-            error.message = toStdString(shown.message());
-            error.cause = toStdString(shown.cause());
-            error.suggestion = toStdString(shown.suggestion());
+            setText(error, ErrorText::Message,
+                    LocalizedText{.translated = shown.message(), .english = shown.messageEn()});
+            setText(error, ErrorText::Cause,
+                    LocalizedText{.translated = shown.cause(), .english = shown.causeEn()});
+            setText(
+                error, ErrorText::Suggestion,
+                LocalizedText{.translated = shown.suggestion(), .english = shown.suggestionEn()});
         }
         finish(m_running->kind, Status(std::unexpected(std::move(error))), m_elapsed, std::nullopt);
         return;
@@ -728,6 +736,11 @@ void FlashViewModel::stopDeviceInfoWatch() {
 
 void FlashViewModel::onDeviceInfoChanged() {
     deviceInfoChanged(); // signal
+    // Plan 0051 (ADR-0381): the copies of this device (the last known serial is kept, e.g. while
+    // the application is erased).
+    if (const std::string_view serial = m_tab->deviceInfoFields().deviceSerial(); !serial.empty()) {
+        m_source->setDeviceSerial(toQString(serial));
+    }
     if (!m_deviceInfoDeadline.isActive()) {
         return;
     }

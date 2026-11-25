@@ -200,6 +200,44 @@ TEST_F(FlashCli, FlashHumanOutput) {
     EXPECT_NE(result.err.find("Target: nRF52840 (app)"), std::string::npos);
 }
 
+// Plan 0050 (ADR-0376): what the J-Link loader reported (the fake: computed V9.84 lines, or given
+// ones); nothing reported -> no fields.
+TEST_F(FlashCli, FlashReportsWhatTheLoaderChanged) {
+    useScenario(QStringLiteral(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+        "chip": {"downloadReport": true}}]})"));
+    const RunResult changed =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("flash"), path(QStringLiteral("app.hex"))});
+    ASSERT_EQ(changed.exitCode, 0) << changed.out << changed.err;
+    const QJsonObject result = data(envelopes(changed.out).back());
+    EXPECT_FALSE(result.value(QStringLiteral("unchanged")).toBool(true));
+    EXPECT_EQ(result.value(QStringLiteral("affected_bytes")).toInt(), 4096);
+
+    useScenario(QStringLiteral(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+        "chip": {"downloadMessages": [
+            "J-Link: Flash download: Bank 0 @ 0x00000000: Skipped. Contents already match"]}}]})"));
+    const RunResult same =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("flash"), path(QStringLiteral("app.hex"))});
+    ASSERT_EQ(same.exitCode, 0) << same.out << same.err;
+    const QJsonObject unchanged = data(envelopes(same.out).back());
+    EXPECT_TRUE(unchanged.value(QStringLiteral("unchanged")).toBool());
+    EXPECT_EQ(unchanged.value(QStringLiteral("affected_bytes")).toInt(-1), 0);
+    const RunResult human = hwio({QStringLiteral("chester"), QStringLiteral("app"),
+                                  QStringLiteral("flash"), path(QStringLiteral("app.hex"))});
+    ASSERT_EQ(human.exitCode, 0) << human.err;
+    EXPECT_EQ(human.out,
+              "Flash contents already matched; nothing was programmed.\nSuccessfully completed\n");
+
+    SetUp(); // the fixture's scenario: no loader messages
+    const RunResult silent =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("flash"), path(QStringLiteral("app.hex"))});
+    ASSERT_EQ(silent.exitCode, 0) << silent.out << silent.err;
+    EXPECT_FALSE(data(envelopes(silent.out).back()).contains(QStringLiteral("unchanged")));
+    EXPECT_FALSE(data(envelopes(silent.out).back()).contains(QStringLiteral("affected_bytes")));
+}
+
 TEST_F(FlashCli, SubcommandSerialNumberWinsOverTheGroup) {
     // Probe 2 has an nRF91: flashing the app there is a wrong family (exit 6).
     const RunResult group = hwio({QStringLiteral("chester"), QStringLiteral("app"),
@@ -582,6 +620,83 @@ TEST_F(FlashCli, GuidedLteFlashWithScriptedConnectorMoves) {
               -1)
         << read.out;
 }
+
+#ifndef _WIN32
+// Plan 0051 (ADR-0381): Ctrl+C after the erase asks to write the application back; Enter writes
+// the copy back (exit code 130). The copy is then listed by `app backups` and flashed by
+// `app flash --backup latest`.
+TEST_F(FlashCli, GuidedLteFlashCancelAfterTheEraseWritesBackAndListsTheCopy) {
+    writeFile(QStringLiteral("lte.hex"), QByteArray::fromStdString(appHex()));
+    writeFile(QStringLiteral("connector"), "app");
+    useScenario(QStringLiteral(R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+        "connectors": {"file": "%1", "chips": {
+          "app": {"memory": [{"address": 4096, "hex": "a5a5a5a5"}]},
+          "lte": {"family": "nrf91"}}}}]})")
+                    .arg(path(QStringLiteral("connector"))));
+    QProcessEnvironment env = fakeEnvironment();
+    env.insert(QStringLiteral("HWIO_TEST_INTERACTIVE"), QStringLiteral("1"));
+    QProcess process;
+    process.setProcessEnvironment(env);
+    process.start(QStringLiteral(HWIO_CLI_EXECUTABLE),
+                  {QStringLiteral("chester"), QStringLiteral("lte"), QStringLiteral("flash"),
+                   QStringLiteral("--guided"), path(QStringLiteral("lte.hex"))});
+    ASSERT_TRUE(process.waitForStarted(10000));
+    QByteArray err;
+    const auto waitFor = [&](const char* text) {
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+        while (!err.contains(text) && std::chrono::steady_clock::now() < deadline &&
+               process.state() != QProcess::NotRunning) {
+            process.waitForReadyRead(50);
+            err += process.readAllStandardError();
+        }
+        return err.contains(text);
+    };
+    ASSERT_TRUE(waitFor("Continue? [y/N] ")) << err.toStdString();
+    process.write("y\n");
+    ASSERT_TRUE(waitFor("Connect the J-Link cable to the LTE connector.")) << err.toStdString();
+    process.terminate(); // SIGTERM: handled like Ctrl+C
+    ASSERT_TRUE(waitFor("Write the application back first? [Y/n] ")) << err.toStdString();
+    process.write("\n"); // the default: yes
+    ASSERT_TRUE(process.waitForFinished(60000));
+    err += process.readAllStandardError();
+    const std::string out = process.readAllStandardOutput().toStdString();
+    EXPECT_EQ(process.exitCode(), 130) << out << err.toStdString();
+    EXPECT_TRUE(err.contains("LTE firmware not updated. The application was written back."))
+        << err.toStdString();
+    const RunResult read =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("mem"), QStringLiteral("read"), QStringLiteral("0x1000"),
+              QStringLiteral("--length"), QStringLiteral("4")});
+    ASSERT_EQ(read.exitCode, 0) << read.out << read.err;
+    EXPECT_NE(QString::fromStdString(read.out)
+                  .remove(QLatin1Char(' '))
+                  .toLower()
+                  .indexOf(QStringLiteral("a5a5a5a5")),
+              -1)
+        << read.out;
+
+    // The copy (the board has no PIB: serial "unknown").
+    const RunResult listed = hwio({QStringLiteral("--json"), QStringLiteral("chester"),
+                                   QStringLiteral("app"), QStringLiteral("backups")});
+    ASSERT_EQ(listed.exitCode, 0) << listed.out << listed.err;
+    EXPECT_NE(listed.out.find("\"serial\":\"unknown\""), std::string::npos) << listed.out;
+    EXPECT_NE(listed.out.find("unknown-"), std::string::npos) << listed.out;
+    const RunResult other =
+        hwio({QStringLiteral("chester"), QStringLiteral("app"), QStringLiteral("backups"),
+              QStringLiteral("--serial"), QStringLiteral("999")});
+    ASSERT_EQ(other.exitCode, 0) << other.out << other.err;
+    EXPECT_NE(other.out.find("No application copies of the device 999"), std::string::npos)
+        << other.out;
+    const RunResult flashed =
+        hwio({QStringLiteral("chester"), QStringLiteral("app"), QStringLiteral("flash"),
+              QStringLiteral("--backup"), QStringLiteral("latest")});
+    EXPECT_EQ(flashed.exitCode, 0) << flashed.out << flashed.err;
+    const RunResult both = hwio({QStringLiteral("chester"), QStringLiteral("app"),
+                                 QStringLiteral("flash"), QStringLiteral("--backup"),
+                                 QStringLiteral("latest"), path(QStringLiteral("lte.hex"))});
+    EXPECT_NE(both.exitCode, 0);
+}
+#endif
 
 // Plan 0034 (B1, ADR-0238): an empty application flash needs no copy; the LTE MCU is updated, the
 // application MCU stays empty, and the command is not completed - exit code 130 with what to do.

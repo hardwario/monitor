@@ -200,12 +200,15 @@
                     "result": {
                         "content": [
                             {
-                                "text": "{\"flashed\":true}",
+                                "text": "{\"consent\":{\"flash\":\"prompted\"},\"flashed\":true}",
                                 "type": "text"
                             }
                         ],
                         "isError": false,
                         "structuredContent": {
+                            "consent": {
+                                "flash": "prompted"
+                            },
                             "flashed": true
                         }
                     }

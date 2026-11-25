@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/settings.h"
@@ -25,6 +26,7 @@
 #include <QtCore/qnamespace.h>
 #include <QtEnvironmentVariables>
 #include <QtLogging>
+#include <QtTranslation>
 #include <QtTypes>
 
 #include <algorithm>
@@ -301,9 +303,9 @@ Result<NrfUtilInfo> checkVersions(const fs::path& executable, std::chrono::milli
         Error error = makeError(
             ErrorCode::DependencyNrfUtilTooOld,
             std::format("{} {}, minimum {}", what, formatVersion(found), formatVersion(minimum)));
-        error.message = QCoreApplication::translate("hwio::nrfutil", "nRF Util %1 is too old.")
-                            .arg(toQString(formatVersion(found)))
-                            .toStdString();
+        setText(error, ErrorText::Message, "hwio::nrfutil",
+                QT_TRANSLATE_NOOP("hwio::nrfutil", "nRF Util %1 is too old."),
+                {toQString(formatVersion(found))});
         return error;
     };
     if (*coreVersion < minimumCoreVersion) {
@@ -422,6 +424,12 @@ Status NrfUtilModemUpdater::waitForProcess(QProcess& process, const std::functio
     return {};
 }
 
+ErrorCode modemFailureCode(std::string_view output) noexcept {
+    return output.find("LOW_VOLTAGE") != std::string_view::npos
+               ? ErrorCode::TargetLowVoltage
+               : ErrorCode::FirmwareModemUpdateFailed;
+}
+
 Status NrfUtilModemUpdater::updateModem(const fs::path& modemZip, std::uint32_t probeSn,
                                         const firmware::ProgressFn& progress,
                                         std::stop_token stop) {
@@ -478,7 +486,8 @@ Status NrfUtilModemUpdater::updateModem(const fs::path& modemZip, std::uint32_t 
             detail += "; stderr: " + stderrTail;
         }
         qCWarning(log::lcFlash).noquote() << "Modem update failed:" << toQString(detail);
-        return std::unexpected(makeError(ErrorCode::FirmwareModemUpdateFailed, std::move(detail)));
+        const ErrorCode code = modemFailureCode(detail);
+        return std::unexpected(makeError(code, std::move(detail)));
     }
     report(100);
     qCInfo(log::lcFlash) << "Modem firmware updated";

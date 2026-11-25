@@ -14,7 +14,9 @@
 // Every step but Done is an Embedded step "lte-update" (LteUpdateStep.qml) bound to this object.
 // While the procedure runs the tab is busy ("Paused for the LTE firmware update"; the session is
 // held by the procedure, D4). Cancel: not while a flash or the erase runs (canCancel); after the
-// erase it asks first ("The application MCU is erased…", with the path of the copy).
+// erase it asks first ("The application MCU is erased…", with the path of the copy). Plan 0051
+// (ADR-0381): with a copy it asks "Write the application back first?" - Write back (the wizard
+// stays open, the APP connector, the copy is written, a summary) · Leave it erased · Back.
 //
 // Plan 0044 (ADR-0363): opened for a remote lteUpdate request (RemoteShareViewModel's
 // takeLteUpdateRequest() at start()), the wizard selects the recommended (designated) firmware and
@@ -112,6 +114,8 @@ public:
     [[nodiscard]] QString busyCancelText() const override;
     [[nodiscard]] QString cancelAcceptText() const override;
     [[nodiscard]] QString cancelRejectText() const override;
+    [[nodiscard]] QString cancelAlternativeText() const override; // ADR-0381: "Write back"
+    void cancelAlternative() override;
     void cancelOperation() override;
     [[nodiscard]] QObject* embeddedViewModel() override { return this; }
     void action(const QString& actionId) override;
@@ -145,6 +149,9 @@ private:
     // The step index of plannedSteps() for the procedure's state.
     [[nodiscard]] int stepIndex() const;
     [[nodiscard]] bool needsNrfUtil() const;
+    // ADR-0381: the Cancel confirmation offers Write back (a local update after the erase with a
+    // copy, not yet writing it back).
+    [[nodiscard]] bool offersWriteBack() const;
     [[nodiscard]] bool firmwareReady() const;
     void startProcedure();
     void onProcedureChanged();

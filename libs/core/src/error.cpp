@@ -1,5 +1,6 @@
 #include "hwio/core/error.h"
 
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 
 #include <QCoreApplication>
@@ -156,6 +157,7 @@ consteval bool isEnumerator(ErrorCode code) {
     case ErrorCode::RemoteFirmwareNotInCatalog:
     case ErrorCode::RemoteProtocolError:
     case ErrorCode::RemoteApplicationNotRestored:
+    case ErrorCode::TargetLowVoltage:
         return true;
     }
     return false;
@@ -1399,6 +1401,22 @@ constexpr std::array defaultTexts{
             "Flash an application: ask the customer to flash it, or ask to flash catalog firmware.",
             "remote.application_not_restored suggestion"),
     },
+    // Plan 0051 (ADR-0383): nRF Util reports LOW_VOLTAGE ("Failed to configure Coresight:
+    // LOW_VOLTAGE").
+    DefaultTexts{
+        .code = ErrorCode::TargetLowVoltage,
+        .message = QT_TRANSLATE_NOOP3("hwio::core", "The LTE MCU reports too low supply voltage.",
+                                      "target.low_voltage message"),
+        .cause = QT_TRANSLATE_NOOP3("hwio::core",
+                                    "The CHESTER is not powered enough (battery, power supply) or "
+                                    "the J-Link cable does not connect the supply reference.",
+                                    "target.low_voltage cause"),
+        .suggestion = QT_TRANSLATE_NOOP3("hwio::core",
+                                         "Check the power supply or batteries of the CHESTER and "
+                                         "the J-Link cable on the connector, then try again.",
+                                         "target.low_voltage suggestion"),
+        .wizard = WizardId::Troubleshooting,
+    },
 };
 
 consteval bool defaultTextsComplete() {
@@ -1434,15 +1452,32 @@ Error makeError(ErrorCode code, std::string detail) {
                  .message = translate(texts.message),
                  .cause = translate(texts.cause),
                  .suggestion = translate(texts.suggestion),
+                 .messageEn = texts.message.source,
+                 .causeEn = texts.cause.source,
+                 .suggestionEn = texts.suggestion.source,
                  .detail = std::move(detail),
                  .wizard = texts.wizard};
 }
 
+Error withGuidedLteSuggestion(Error error) {
+    if (error.code == ErrorCode::FirmwareModemUpdateFailed ||
+        error.code == ErrorCode::TargetLowVoltage) {
+        // Both languages (plan 0050, ADR-0374).
+        constexpr SourceText guided = QT_TRANSLATE_NOOP3(
+            "hwio::core",
+            "Check the power supply of the CHESTER and the J-Link cable on the "
+            "LTE connector, then click Try again.",
+            "suggestion of an LTE update failure in the guided update (ADR-0383)");
+        setText(error, ErrorText::Suggestion, "hwio::core", guided.source, {}, guided.comment);
+    }
+    return error;
+}
+
 Error outputClosedError(std::string detail) {
     Error error = makeError(ErrorCode::Cancelled, std::move(detail));
-    error.message = QCoreApplication::translate("hwio::core", "The output was closed.",
-                                                "cancelled message when the stdout was closed")
-                        .toStdString();
+    constexpr SourceText outputClosed = QT_TRANSLATE_NOOP3(
+        "hwio::core", "The output was closed.", "cancelled message when the stdout was closed");
+    setText(error, ErrorText::Message, "hwio::core", outputClosed.source, {}, outputClosed.comment);
     return error;
 }
 
@@ -1490,10 +1525,15 @@ std::string_view categoryId(ErrorCategory category) noexcept {
 
 std::unexpected<Error> fail(ErrorCode code, std::string message, std::string cause,
                             std::string suggestion, std::string detail) {
+    // The texts are used for both languages (ADR-0374): callers pass English-only texts (tests,
+    // tools without translations); translated texts go through hwio::setText().
     return std::unexpected<Error>(Error{.code = code,
-                                        .message = std::move(message),
-                                        .cause = std::move(cause),
-                                        .suggestion = std::move(suggestion),
+                                        .message = message,
+                                        .cause = cause,
+                                        .suggestion = suggestion,
+                                        .messageEn = std::move(message),
+                                        .causeEn = std::move(cause),
+                                        .suggestionEn = std::move(suggestion),
                                         .detail = std::move(detail),
                                         .wizard = std::nullopt});
 }

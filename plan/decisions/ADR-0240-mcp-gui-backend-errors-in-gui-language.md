@@ -1,6 +1,6 @@
 # ADR-0240 — Backend errors reach the AI in the GUI language (amends ADR-0103)
 
-- **Status:** Accepted
+- **Status:** Superseded by ADR-0374
 - **Date:** 2026-11-03
 - **Decided by:** Matej Strnad (plan 0014 revision session)
 

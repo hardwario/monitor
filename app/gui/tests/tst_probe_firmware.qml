@@ -1,6 +1,7 @@
 // J-Link firmware update (plan 0036; ADR-0132, ADR-0246): the banner of an outdated probe with
 // [Disconnect and update…] and [Not now], the disabled button with its reason while the tab is
-// busy, the dialog keyboard-only (focus on Cancel, Esc = Cancel, no Esc while updating), both
+// busy, the view keyboard-only (focus on Cancel, Esc = Cancel, no Esc while updating; plan 0052: a
+// view of the page area, a tab switch is refused while it updates), both
 // themes, and the layout at 960 x 600 in German and Czech (geometry assertions). Fake J-Link.
 import QtQuick
 import QtTest
@@ -37,16 +38,10 @@ TestCase {
         return true;
     }
 
-    // In the window or in the update dialog (a popup).
+    // In the window (plan 0052: the update is a view of the page area).
     function find(name) {
-        const dialog = findChild(window, "probeFirmwareDialog");
-        const roots = [window.contentItem, dialog.contentItem.parent]; // the popup item
-        for (const root of roots) {
-            const items = findAll(root, name).filter(effectivelyVisible);
-            if (items.length > 0)
-                return items[0];
-        }
-        return null;
+        const items = findAll(window.contentItem, name).filter(effectivelyVisible);
+        return items.length > 0 ? items[0] : null;
     }
 
     function rect(item) {
@@ -167,7 +162,22 @@ TestCase {
         keyClick(Qt.Key_Escape); // ignored
         compare(AppViewModel.probeFirmware.state, ProbeFirmwareViewModel.Updating);
         verify(find("probeFirmwareTitle") !== null);
+        verify(!find("probeFirmwareHeaderClose").enabled); // no × while updating
+        // Plan 0052 (ADR-0387): the update keeps its tab (the probe is busy).
+        const tabs = AppViewModel.tabs.count;
+        const current = AppViewModel.currentTab;
+        AppViewModel.newTab();
+        compare(AppViewModel.currentTab, current);
+        compare(AppViewModel.tabs.count, tabs); // no tab is added meanwhile
+        verify(AppViewModel.toasts.indexOf("Wait until the J-Link firmware update has finished.") >= 0);
+        AppViewModel.openSettings("");
+        verify(!AppViewModel.tabs.settingsOpen);
+        compare(AppViewModel.globalPage, "");
+        AppViewModel.showPage("flash"); // the rail does not replace it either
+        compare(AppViewModel.overlayView, "probeFirmware");
+        verify(!find("probeChip").enabled); // the device bar waits: its probe is reserved
         waitIdle();
+        AppViewModel.showPage("console");
         // ADR-0256: the tab connects again.
         tryVerify(() => tab().state === DeviceTabViewModel.Connected
                   || tab().state === DeviceTabViewModel.Connecting, 10000);
@@ -195,8 +205,8 @@ TestCase {
             const cancel = find("probeFirmwareCancel");
             const confirm = find("probeFirmwareConfirm");
             tryVerify(() => cancel.width > 0 && confirm.width > 0);
-            // Geometry only after the enter transition (it scales the dialog) and the layout.
-            tryVerify(() => findChild(window, "probeFirmwareDialog").opened);
+            // Geometry only after the layout.
+            tryVerify(() => find("probeFirmwareDialog") !== null);
             verify(waitForPolish(window));
             checkInside(find("probeFirmwareTitle"));
             checkInside(cancel);

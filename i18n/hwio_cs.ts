@@ -327,100 +327,100 @@
         <translation>Připojit se k relaci podpory…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="134"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="130"/>
         <source>No J-Link probe found</source>
         <translation>Nenalezen žádný programátor J-Link</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="135"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="131"/>
         <source>Connect the J-Link to USB and to the device.</source>
         <translation>Připojte J-Link do USB a k zařízení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="136"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="273"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="132"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="269"/>
         <source>Refresh</source>
         <translation>Obnovit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="152"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="148"/>
         <source>J-Link Software found (%1)</source>
         <translation>Software J-Link nalezen (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="153"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="149"/>
         <source>J-Link Software not found</source>
         <translation>Software J-Link nenalezen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="168"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="164"/>
         <source>Is the USB cable connected?</source>
         <translation>Je připojen USB kabel?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="184"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="180"/>
         <source>Help me fix this</source>
         <translation>Pomozte mi to vyřešit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="185"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="194"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="181"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="190"/>
         <source>Coming soon</source>
         <translation>Připravujeme</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="222"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="218"/>
         <source>Choose a device to connect</source>
         <translation>Vyberte zařízení k připojení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="230"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="226"/>
         <source>J-Link probes connected to this computer. The list refreshes automatically.</source>
         <translation>Programátory J-Link připojené k tomuto počítači. Seznam se obnovuje automaticky.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="265"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="261"/>
         <source>Probe</source>
         <translation>Programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="289"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="285"/>
         <source>Looking for J-Link probes…</source>
         <translation>Hledání programátorů J-Link…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="395"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="391"/>
         <source>FW %1</source>
         <translation>FW %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="411"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="407"/>
         <source>Updating firmware…</source>
         <translation>Aktualizuje se firmware…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="412"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="408"/>
         <source>In use by another program (%1)</source>
         <translation>Používá jiný program (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="413"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="409"/>
         <source>In use (tab %1)</source>
         <translation>Používá se (karta %1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="451"/>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="470"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="447"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="466"/>
         <source>Device</source>
         <translation>Zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="497"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="493"/>
         <source>Choose a free probe in the list above.</source>
         <translation>Vyberte v seznamu výše volný programátor.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="510"/>
+        <location filename="../app/gui/qml/pages/ChooseDevicePage.qml" line="506"/>
         <source>Connect</source>
         <translation>Připojit</translation>
     </message>
@@ -459,27 +459,32 @@
         <translation>HARDWARIO Monitor — povolit AI asistentovi?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="146"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="168"/>
         <source>Show device ↗</source>
         <translation>Zobrazit zařízení ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="150"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="172"/>
         <source>Show device</source>
         <translation>Zobrazit zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="172"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="197"/>
         <source>Deny</source>
         <translation>Zamítnout</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="182"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="210"/>
         <source>Allow once</source>
         <translation>Povolit jednou</translation>
     </message>
+    <message>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="225"/>
+        <source>Until you remove it in Settings › AI assistants (MCP).</source>
+        <translation>Dokud to neodeberete v Nastavení › AI asistenti (MCP).</translation>
+    </message>
     <message numerus="yes">
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="211"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="259"/>
         <source>%n more request(s) waiting.</source>
         <translation>
             <numerusform>Čeká ještě %n požadavek.</numerusform>
@@ -573,124 +578,124 @@
         <translation>Sdílet s podporou…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="283"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="277"/>
         <source>Reconnect</source>
         <translation>Znovu připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="293"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="287"/>
         <source>Batch…</source>
         <translation>Dávka…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="305"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="299"/>
         <source>Batch files — documentation</source>
         <translation>Dávkové soubory — dokumentace</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="315"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="309"/>
         <source>Clear</source>
         <translation>Vymazat</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="318"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="312"/>
         <source>Opens the clear menu</source>
         <translation>Otevře nabídku mazání</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="325"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="615"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="319"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="609"/>
         <source>Shell</source>
         <translation>Shell</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="330"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="673"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="324"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="667"/>
         <source>Log</source>
         <translation>Log</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="335"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="329"/>
         <source>Both</source>
         <translation>Obojí</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="344"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="338"/>
         <source>Save view…</source>
         <translation>Uložit výpis…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="367"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="361"/>
         <source>Batch %1 / %2</source>
         <translation>Dávka %1 / %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="375"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="369"/>
         <source>Stop the batch</source>
         <translation>Zastavit dávku</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="389"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="383"/>
         <source>Follow</source>
         <translation>Sledovat</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="401"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="395"/>
         <source>Pause</source>
         <translation>Pozastavit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="415"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="409"/>
         <source>More</source>
         <translation>Další</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="423"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="417"/>
         <source>Open log file</source>
         <translation>Otevřít soubor s logem</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="428"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="422"/>
         <source>Open log folder</source>
         <translation>Otevřít složku s logy</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="435"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="429"/>
         <source>Show timestamps</source>
         <translation>Zobrazit časové značky</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="442"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="436"/>
         <source>Wrap lines</source>
         <translation>Zalamovat řádky</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="449"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="443"/>
         <source>Swap panes</source>
         <translation>Prohodit panely</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="456"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="450"/>
         <source>Stacked layout</source>
         <translation>Panely pod sebou</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="502"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="496"/>
         <source>Not connected</source>
         <translation>Nepřipojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="503"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="497"/>
         <source>Connect to see the device console.</source>
         <translation>Připojte se a uvidíte konzoli zařízení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="504"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="498"/>
         <source>Connect</source>
         <translation>Připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="555"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="549"/>
         <source>Resize the shell and the log</source>
         <translation>Změnit velikost shellu a logu</translation>
     </message>
@@ -698,53 +703,53 @@
 <context>
     <name>ConsoleSearchBar</name>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="36"/>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="246"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="38"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="252"/>
         <source>Search in shell</source>
         <translation>Hledat v shellu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="36"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="38"/>
         <source>Search and filter the log</source>
         <translation>Hledat a filtrovat log</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="190"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="193"/>
         <source>Search</source>
         <translation>Hledat</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="197"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="200"/>
         <source>Filter</source>
         <translation>Filtr</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="247"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="253"/>
         <source>Search in log (Ctrl+F)</source>
         <translation>Hledat v logu (Ctrl+F)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="248"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="254"/>
         <source>Filter log lines (Ctrl+L)</source>
         <translation>Filtrovat řádky logu (Ctrl+L)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="279"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="349"/>
         <source>Match case</source>
         <translation>Rozlišovat velikost písmen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="292"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="362"/>
         <source>Regular expression</source>
         <translation>Regulární výraz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="317"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="288"/>
         <source>%1 / %2</source>
         <translation>%1 / %2</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="318"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="289"/>
         <source>%Ln matches</source>
         <translation>
             <numerusform>%Ln shoda</numerusform>
@@ -753,63 +758,57 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="327"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="383"/>
         <source>Previous match</source>
         <translation>Předchozí shoda</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="338"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="394"/>
         <source>Next match</source>
         <translation>Další shoda</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="349"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="405"/>
         <source>Clear the search</source>
         <translation>Zrušit hledání</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="363"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="329"/>
         <source>Filter: %1</source>
         <translation>Filtr: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="363"/>
-        <source>Filter: levels</source>
-        <translation>Filtr: úrovně</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="364"/>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="391"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="466"/>
         <source>Clear filter</source>
         <translation>Zrušit filtr</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="381"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="330"/>
         <source>Showing %1 of %2 lines</source>
         <translation>Zobrazeno %1 z %2 řádků</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="402"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="302"/>
         <source>Invalid regular expression: %1</source>
         <translation>Neplatný regulární výraz: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="412"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="416"/>
         <source>Log levels</source>
         <translation>Úrovně logu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="420"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="423"/>
         <source>Debug</source>
         <translation>Ladění</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="429"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="431"/>
         <source>Info</source>
         <translation>Informace</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="438"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="439"/>
         <source>Warning</source>
         <translation>Varování</translation>
     </message>
@@ -819,7 +818,7 @@
         <translation>Chyba</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="457"/>
+        <location filename="../app/gui/qml/console/ConsoleSearchBar.qml" line="456"/>
         <source>Show hexdump lines</source>
         <translation>Zobrazit řádky hexdumpu</translation>
     </message>
@@ -942,58 +941,58 @@
 <context>
     <name>DeviceBar</name>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="39"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="42"/>
         <source>Choose device</source>
         <translation>Vyberte zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="55"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="58"/>
         <source>Bluetooth device %1</source>
         <translation>Zařízení Bluetooth %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="56"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="59"/>
         <source>Probe %1</source>
         <translation>Programátor %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="68"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="71"/>
         <source>Probe</source>
         <translation>Programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="144"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="147"/>
         <source>Choose another probe</source>
         <translation>Vybrat jiný programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="144"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="147"/>
         <source>Choose another device</source>
         <translation>Vybrat jiné zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="163"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="166"/>
         <source>Connect</source>
         <translation>Připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="153"/>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="164"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="156"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="167"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="164"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="167"/>
         <source>Disconnect</source>
         <translation>Odpojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="154"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="157"/>
         <source>Cancel the AI operation</source>
         <translation>Zrušit operaci AI</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="175"/>
+        <location filename="../app/gui/qml/shell/DeviceBar.qml" line="178"/>
         <source>Advanced</source>
         <translation>Pokročilé</translation>
     </message>
@@ -1001,32 +1000,37 @@
 <context>
     <name>DeviceTabBar</name>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="18"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="19"/>
         <source>Device tabs</source>
         <translation>Karty zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="179"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="203"/>
         <source>Close tab</source>
         <translation>Zavřít kartu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="153"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="177"/>
         <source>AI</source>
         <translation>AI</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="166"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="50"/>
+        <source>Wizard: %1</source>
+        <translation>Průvodce: %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="190"/>
         <source>Opened by %1</source>
         <translation>Otevřel(a) %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="202"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="226"/>
         <source>New device</source>
         <translation>Nové zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="218"/>
+        <location filename="../app/gui/qml/shell/DeviceTabBar.qml" line="242"/>
         <source>At most %1 devices can be open.</source>
         <translation>Otevřít lze nejvýše %1 zařízení.</translation>
     </message>
@@ -1034,87 +1038,97 @@
 <context>
     <name>ErrorPanel</name>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="31"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="38"/>
         <source>Reconnect</source>
         <translation>Znovu připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="31"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="38"/>
         <source>Choose another file</source>
         <translation>Vybrat jiný soubor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="32"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="39"/>
         <source>Open Settings</source>
         <translation>Otevřít nastavení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="32"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="39"/>
         <source>Retry</source>
         <translation>Zkusit znovu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="32"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="39"/>
         <source>Dismiss</source>
         <translation>Zavřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="102"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="119"/>
         <source>Show less</source>
         <translation>Zobrazit méně</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="102"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="119"/>
         <source>Show more</source>
         <translation>Zobrazit více</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="113"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="130"/>
         <source>Probably: %1</source>
         <translation>Pravděpodobně: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="123"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="140"/>
         <source>What to do: %1</source>
         <translation>Co dělat: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="135"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="152"/>
         <source>Learn more ↗</source>
         <translation>Další informace ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="136"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="152"/>
+        <source>Troubleshooting ↗</source>
+        <translation>Řešení potíží ↗</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="153"/>
+        <source>Troubleshooting for this error (opens browser)</source>
+        <translation>Řešení potíží s touto chybou (otevře prohlížeč)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="154"/>
         <source>Learn more about this error (opens browser)</source>
         <translation>Další informace o této chybě (otevře prohlížeč)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="174"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="194"/>
         <source>Help me fix this</source>
         <translation>Pomozte mi to vyřešit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="181"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="201"/>
         <source>Details</source>
         <translation>Podrobnosti</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="203"/>
         <source>Expanded</source>
         <translation>Rozbaleno</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="183"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="203"/>
         <source>Collapsed</source>
         <translation>Sbaleno</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="213"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="233"/>
         <source>Error details</source>
         <translation>Podrobnosti chyby</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="219"/>
+        <location filename="../app/gui/qml/components/ErrorPanel.qml" line="239"/>
         <source>Copy</source>
         <translation>Kopírovat</translation>
     </message>
@@ -1149,27 +1163,27 @@
 <context>
     <name>FlashPage</name>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="125"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="128"/>
         <source>Guide me</source>
         <translation>Provést mě</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="174"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="177"/>
         <source>LTE firmware update</source>
         <translation>Aktualizace firmwaru LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="179"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="182"/>
         <source>Updating the LTE MCU needs the J-Link moved between the APP and LTE connectors. The guide stops the application, updates the LTE MCU and puts the application back.</source>
         <translation>Aktualizace LTE MCU vyžaduje přepojit J-Link mezi konektory APP a LTE. Průvodce zastaví aplikaci, aktualizuje LTE MCU a vrátí aplikaci zpět.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="187"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="190"/>
         <source>Update LTE firmware…</source>
         <translation>Aktualizovat firmware LTE…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/FlashPage.qml" line="232"/>
+        <location filename="../app/gui/qml/pages/FlashPage.qml" line="235"/>
         <source>Choose a firmware file</source>
         <translation>Vyberte soubor s firmwarem</translation>
     </message>
@@ -1350,39 +1364,39 @@
     </message>
 </context>
 <context>
-    <name>JoinDialog</name>
+    <name>JoinView</name>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="25"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="22"/>
         <source>Join a support session</source>
         <translation>Připojit se k relaci podpory</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="53"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="39"/>
         <source>Type the session code the customer reads to you, or paste the link.</source>
         <translation>Napište kód relace, který vám zákazník přečte, nebo vložte odkaz.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="63"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="49"/>
         <source>482 913</source>
         <translation>482 913</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="65"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="51"/>
         <source>Session code or link</source>
         <translation>Kód relace nebo odkaz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="88"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="71"/>
         <source>This link uses another server: %1. Join on it anyway</source>
         <translation>Tento odkaz používá jiný server: %1. Přesto se připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="101"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="82"/>
         <source>Join</source>
         <translation>Připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/JoinDialog.qml" line="107"/>
+        <location filename="../app/gui/qml/remote/JoinView.qml" line="89"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
@@ -1413,32 +1427,32 @@
 <context>
     <name>LteUpdateStep</name>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="79"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="82"/>
         <source>Set path in Settings</source>
         <translation>Nastavit cestu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="88"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="91"/>
         <source>Download nRF Util ↗</source>
         <translation>Stáhnout nRF Util ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="95"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="98"/>
         <source>How to install ↗</source>
         <translation>Jak nainstalovat ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="147"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="150"/>
         <source>The application that was in the device</source>
         <translation>Aplikace, která byla v zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="167"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="170"/>
         <source>Firmware from the catalog or a file</source>
         <translation>Firmware z katalogu nebo ze souboru</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="190"/>
+        <location filename="../app/gui/qml/flash/LteUpdateStep.qml" line="207"/>
         <source>Choose a firmware file</source>
         <translation>Vyberte soubor s firmwarem</translation>
     </message>
@@ -1451,28 +1465,28 @@
         <translation>HARDWARIO Monitor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="202"/>
+        <location filename="../app/gui/qml/Main.qml" line="195"/>
         <source>Close the tab?</source>
         <translation>Zavřít kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="203"/>
+        <location filename="../app/gui/qml/Main.qml" line="196"/>
         <source>Cancel and close</source>
         <translation>Zrušit a zavřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="204"/>
-        <location filename="../app/gui/qml/Main.qml" line="214"/>
+        <location filename="../app/gui/qml/Main.qml" line="197"/>
+        <location filename="../app/gui/qml/Main.qml" line="207"/>
         <source>Keep running</source>
         <translation>Pokračovat</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="212"/>
+        <location filename="../app/gui/qml/Main.qml" line="205"/>
         <source>Quit HARDWARIO Monitor?</source>
         <translation>Ukončit HARDWARIO Monitor?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/Main.qml" line="213"/>
+        <location filename="../app/gui/qml/Main.qml" line="206"/>
         <source>Cancel and quit</source>
         <translation>Zrušit a ukončit</translation>
     </message>
@@ -1541,196 +1555,218 @@
 <context>
     <name>McpSection</name>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="37"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="47"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="38"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="48"/>
         <source>Allow AI assistants to use HARDWARIO Monitor</source>
         <translation>Povolit AI asistentům používat HARDWARIO Monitor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="38"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="39"/>
         <source>AI tools such as Claude Code can read the console, send commands and, with your permission, flash devices.</source>
         <translation>AI nástroje, jako je Claude Code, mohou číst konzoli, posílat příkazy a s vaším svolením nahrávat firmware do zařízení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="71"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="72"/>
         <source>Retry</source>
         <translation>Zkusit znovu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="81"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="82"/>
         <source>Regenerate token</source>
         <translation>Vygenerovat nový token</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="88"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="89"/>
         <source>Address</source>
         <translation>Adresa</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="89"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="90"/>
         <source>After a port change, AI clients have to be configured again.</source>
         <translation>Po změně portu je třeba AI klienty znovu nastavit.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="111"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="112"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="124"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="161"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="205"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="386"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="125"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="162"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="206"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="440"/>
         <source>Copy</source>
         <translation>Kopírovat</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="125"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="126"/>
         <source>Copied.</source>
         <translation>Zkopírováno.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="132"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="149"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="133"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="150"/>
         <source>Token</source>
         <translation>Token</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="133"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="134"/>
         <source>AI clients send it with every request. Keep it private.</source>
         <translation>AI klienti ho posílají s každým požadavkem. Nikomu ho nesdělujte.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="145"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="146"/>
         <source>Created when the server starts</source>
         <translation>Vytvoří se při spuštění serveru</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="149"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="150"/>
         <source>Token, hidden</source>
         <translation>Token, skrytý</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="154"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="155"/>
         <source>Hide</source>
         <translation>Skrýt</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="154"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="155"/>
         <source>Show</source>
         <translation>Zobrazit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="168"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="169"/>
         <source>Regenerate…</source>
         <translation>Vygenerovat nový…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="176"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="177"/>
         <source>Connect a client</source>
         <translation>Připojení klienta</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="206"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="207"/>
         <source>Copy %1</source>
         <translation>Kopírovat %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="246"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="247"/>
         <source>Permissions</source>
         <translation>Oprávnění</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="247"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="248"/>
         <source>What an AI assistant may do without asking you first.</source>
         <translation>Co smí AI asistent udělat, aniž by se vás nejdřív zeptal.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="260"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="261"/>
         <source>Ask</source>
         <translation>Zeptat se</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="268"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="269"/>
         <source>Always allow</source>
         <translation>Vždy povolit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="316"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="287"/>
+        <source>All</source>
+        <translation>Vše</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="299"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="370"/>
         <source>%1: ask</source>
         <translation>%1: zeptat se</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="327"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="309"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="381"/>
         <source>%1: always allow</source>
         <translation>%1: vždy povolit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="339"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="393"/>
         <source>No answers are remembered for a client.</source>
         <translation>Pro žádného klienta nejsou zapamatované odpovědi.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="368"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="422"/>
         <source>Revoke</source>
         <translation>Odvolat</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="369"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="423"/>
         <source>Revoke the permissions of %1</source>
         <translation>Odvolat oprávnění klienta %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="378"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="421"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="432"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="475"/>
         <source>Activity</source>
         <translation>Aktivita</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="379"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="433"/>
         <source>The last %1 calls, kept until the application quits.</source>
         <translation>Posledních %1 volání, uchovaných do ukončení aplikace.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="393"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="447"/>
         <source>Clear</source>
         <translation>Vymazat</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="404"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="458"/>
         <source>No calls yet.</source>
         <translation>Zatím žádná volání.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="522"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="577"/>
+        <source>Always allow everything?</source>
+        <translation>Vždy povolit vše?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="578"/>
+        <source>An AI assistant will be able to flash, erase and write the memory of your devices without asking you.</source>
+        <translation>AI asistent bude moci nahrávat firmware do vašich zařízení, mazat je a zapisovat do jejich paměti, aniž by se vás zeptal.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="579"/>
+        <source>Always allow everything</source>
+        <translation>Vždy povolit vše</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="587"/>
         <source>Regenerate the token?</source>
         <translation>Vygenerovat nový token?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="523"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="588"/>
         <source>Connected AI clients stop working until you update their configuration.</source>
         <translation>Připojení AI klienti přestanou fungovat, dokud neaktualizujete jejich nastavení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="524"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="589"/>
         <source>Regenerate</source>
         <translation>Vygenerovat</translation>
     </message>
 </context>
 <context>
-    <name>ModeChoiceDialog</name>
+    <name>ModeChoiceView</name>
     <message>
-        <location filename="../app/gui/qml/shell/ModeChoiceDialog.qml" line="21"/>
+        <location filename="../app/gui/qml/shell/ModeChoiceView.qml" line="24"/>
         <source>How do you want to use HARDWARIO Monitor?</source>
         <translation>Jak chcete HARDWARIO Monitor používat?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/ModeChoiceDialog.qml" line="112"/>
+        <location filename="../app/gui/qml/shell/ModeChoiceView.qml" line="92"/>
         <source>You can change it at any time in Settings › General.</source>
         <translation>Kdykoli to můžete změnit v Nastavení › Obecné.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/ModeChoiceDialog.qml" line="130"/>
+        <location filename="../app/gui/qml/shell/ModeChoiceView.qml" line="108"/>
         <source>Continue</source>
         <translation>Pokračovat</translation>
     </message>
@@ -1738,17 +1774,22 @@
 <context>
     <name>NavRail</name>
     <message>
-        <location filename="../app/gui/qml/shell/NavRail.qml" line="23"/>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="26"/>
         <source>Pages</source>
         <translation>Stránky</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/NavRail.qml" line="50"/>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="55"/>
         <source>Busy</source>
         <translation>Probíhá operace</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/NavRail.qml" line="166"/>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="124"/>
+        <source>Wizard</source>
+        <translation>Průvodce</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/shell/NavRail.qml" line="186"/>
         <source>Help</source>
         <translation>Nápověda</translation>
     </message>
@@ -1838,22 +1879,22 @@
 <context>
     <name>PageHost</name>
     <message>
-        <location filename="../app/gui/qml/shell/PageHost.qml" line="61"/>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="90"/>
         <source>Update LTE firmware…</source>
         <translation>Aktualizovat firmware LTE…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/PageHost.qml" line="68"/>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="97"/>
         <source>Retry</source>
         <translation>Zkusit znovu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/PageHost.qml" line="120"/>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="149"/>
         <source>Disconnect and update…</source>
         <translation>Odpojit a aktualizovat…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/shell/PageHost.qml" line="138"/>
+        <location filename="../app/gui/qml/shell/PageHost.qml" line="167"/>
         <source>Not now</source>
         <translation>Teď ne</translation>
     </message>
@@ -1979,75 +2020,76 @@
     </message>
 </context>
 <context>
-    <name>ProbeFirmwareDialog</name>
+    <name>ProbeFirmwareView</name>
     <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="33"/>
-        <source>Update J-Link firmware?</source>
-        <translation>Aktualizovat firmware J-Linku?</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="33"/>
-        <source>J-Link firmware update</source>
-        <translation>Aktualizace firmwaru J-Linku</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="70"/>
-        <source>%1 · SN %2</source>
-        <translation>%1 · SN %2</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="71"/>
-        <source>SN %1</source>
-        <translation>SN %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="90"/>
-        <source>Updating J-Link firmware…</source>
-        <translation>Aktualizuje se firmware J-Linku…</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="91"/>
-        <source>Reading the J-Link…</source>
-        <translation>Čte se J-Link…</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="109"/>
-        <source>Current:</source>
-        <translation>Současný:</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="125"/>
-        <source>New:</source>
-        <translation>Nový:</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="146"/>
-        <source>The J-Link firmware status could not be determined. Update anyway?</source>
-        <translation>Stav firmwaru J-Linku se nepodařilo zjistit. Přesto aktualizovat?</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="156"/>
-        <source>Do not unplug the J-Link during the update (about 10–30 s).</source>
-        <translation>Během aktualizace J-Link neodpojujte (asi 10–30 s).</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="167"/>
-        <source>HARDWARIO Monitor quits when the update has finished.</source>
-        <translation>HARDWARIO Monitor se ukončí po dokončení aktualizace.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="178"/>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="179"/>
-        <source>Close</source>
-        <translation>Zavřít</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="201"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="31"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="194"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ProbeFirmwareDialog.qml" line="210"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="33"/>
+        <source>Update J-Link firmware?</source>
+        <translation>Aktualizovat firmware J-Linku?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="33"/>
+        <source>J-Link firmware update</source>
+        <translation>Aktualizace firmwaru J-Linku</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="60"/>
+        <source>%1 · SN %2</source>
+        <translation>%1 · SN %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="61"/>
+        <source>SN %1</source>
+        <translation>SN %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="80"/>
+        <source>Updating J-Link firmware…</source>
+        <translation>Aktualizuje se firmware J-Linku…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="81"/>
+        <source>Reading the J-Link…</source>
+        <translation>Čte se J-Link…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="99"/>
+        <source>Current:</source>
+        <translation>Současný:</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="115"/>
+        <source>New:</source>
+        <translation>Nový:</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="136"/>
+        <source>The J-Link firmware status could not be determined. Update anyway?</source>
+        <translation>Stav firmwaru J-Linku se nepodařilo zjistit. Přesto aktualizovat?</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="146"/>
+        <source>Do not unplug the J-Link during the update (about 10–30 s).</source>
+        <translation>Během aktualizace J-Link neodpojujte (asi 10–30 s).</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="157"/>
+        <source>HARDWARIO Monitor quits when the update has finished.</source>
+        <translation>HARDWARIO Monitor se ukončí po dokončení aktualizace.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="168"/>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="169"/>
+        <source>Close</source>
+        <translation>Zavřít</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ProbeFirmwareView.qml" line="202"/>
         <source>Update</source>
         <translation>Aktualizovat</translation>
     </message>
@@ -2246,69 +2288,71 @@
     </message>
 </context>
 <context>
-    <name>ReportDialog</name>
+    <name>ReportView</name>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="27"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="24"/>
         <source>Create diagnostic report</source>
         <translation>Vytvořit diagnostickou zprávu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="61"/>
-        <source>Collecting information…</source>
-        <translation>Shromažďování informací…</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="89"/>
-        <source>Report summary</source>
-        <translation>Shrnutí zprávy</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="102"/>
-        <source>The report contains this summary, the recent application logs and the settings file. Your user name and home folder are replaced. The report stays on your computer — attach it to your support request.</source>
-        <translation>Zpráva obsahuje toto shrnutí, poslední protokoly aplikace a soubor s nastavením. Vaše uživatelské jméno a domovská složka jsou nahrazeny. Zpráva zůstane ve vašem počítači — přiložte ji ke svému požadavku na podporu.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="113"/>
-        <source>The logs may contain device output. Values that look like passwords, tokens or keys are replaced by &lt;redacted&gt;; check the report before sending it.</source>
-        <translation>Protokoly mohou obsahovat výstup zařízení. Hodnoty, které vypadají jako hesla, tokeny nebo klíče, jsou nahrazeny textem &lt;redacted&gt;; před odesláním zprávu zkontrolujte.</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="132"/>
-        <source>Saved to %1</source>
-        <translation>Uloženo do %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="148"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="25"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="125"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="148"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="25"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="125"/>
         <source>Close</source>
         <translation>Zavřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="155"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="41"/>
+        <source>Collecting information…</source>
+        <translation>Shromažďování informací…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="70"/>
+        <source>Report summary</source>
+        <translation>Shrnutí zprávy</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="83"/>
+        <source>The report contains this summary, the recent application logs and the settings file. Your user name and home folder are replaced. The report stays on your computer — attach it to your support request.</source>
+        <translation>Zpráva obsahuje toto shrnutí, poslední protokoly aplikace a soubor s nastavením. Vaše uživatelské jméno a domovská složka jsou nahrazeny. Zpráva zůstane ve vašem počítači — přiložte ji ke svému požadavku na podporu.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="94"/>
+        <source>The logs may contain device output. Values that look like passwords, tokens or keys are replaced by &lt;redacted&gt;; check the report before sending it.</source>
+        <translation>Protokoly mohou obsahovat výstup zařízení. Hodnoty, které vypadají jako hesla, tokeny nebo klíče, jsou nahrazeny textem &lt;redacted&gt;; před odesláním zprávu zkontrolujte.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="113"/>
+        <source>Saved to %1</source>
+        <translation>Uloženo do %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="132"/>
         <source>Copy summary</source>
         <translation>Kopírovat shrnutí</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="162"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="139"/>
         <source>Show in folder</source>
         <translation>Zobrazit ve složce</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="171"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="148"/>
         <source>Save report…</source>
         <translation>Uložit zprávu…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="179"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="156"/>
         <source>Save diagnostic report</source>
         <translation>Uložit diagnostickou zprávu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/dialogs/ReportDialog.qml" line="181"/>
+        <location filename="../app/gui/qml/dialogs/ReportView.qml" line="158"/>
         <source>Zip archives (*.zip)</source>
         <translation>Archivy zip (*.zip)</translation>
     </message>
@@ -2363,24 +2407,24 @@
     </message>
 </context>
 <context>
-    <name>ShareDialog</name>
+    <name>ShareView</name>
     <message>
-        <location filename="../app/gui/qml/remote/ShareDialog.qml" line="17"/>
+        <location filename="../app/gui/qml/remote/ShareView.qml" line="22"/>
         <source>Share this console with HARDWARIO Support</source>
         <translation>Sdílet tuto konzoli s podporou HARDWARIO</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/ShareDialog.qml" line="19"/>
+        <location filename="../app/gui/qml/remote/ShareView.qml" line="39"/>
         <source>Read the code only to HARDWARIO Support.</source>
         <translation>Kód čtěte jen podpoře HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/ShareDialog.qml" line="20"/>
+        <location filename="../app/gui/qml/remote/ShareView.qml" line="53"/>
         <source>Start sharing</source>
         <translation>Zahájit sdílení</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/ShareDialog.qml" line="21"/>
+        <location filename="../app/gui/qml/remote/ShareView.qml" line="66"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
@@ -2388,81 +2432,68 @@
 <context>
     <name>ShellInput</name>
     <message>
-        <location filename="../app/gui/qml/console/ShellInput.qml" line="142"/>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="143"/>
         <source>Command</source>
         <translation>Příkaz</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ShellInput.qml" line="153"/>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="154"/>
         <source>Type a command, Enter to send · ↑↓ history · Ctrl+R search</source>
         <translation>Napište příkaz, Enter odešle · ↑↓ historie · Ctrl+R hledat</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ShellInput.qml" line="152"/>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="153"/>
         <source>AI is running a command…</source>
         <translation>AI provádí příkaz…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/console/ShellInput.qml" line="248"/>
+        <location filename="../app/gui/qml/console/ShellInput.qml" line="249"/>
         <source>Send</source>
         <translation>Odeslat</translation>
     </message>
 </context>
 <context>
-    <name>ShortcutOverlay</name>
-    <message>
-        <location filename="../app/gui/qml/components/ShortcutOverlay.qml" line="19"/>
-        <source>Keyboard shortcuts</source>
-        <translation>Klávesové zkratky</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/components/ShortcutOverlay.qml" line="108"/>
-        <source>Close</source>
-        <translation>Zavřít</translation>
-    </message>
-</context>
-<context>
     <name>Shortcuts</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="442"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="470"/>
         <source>New device tab</source>
         <translation>Nová karta zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="445"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="473"/>
         <source>Close the device tab</source>
         <translation>Zavřít kartu zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="448"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="451"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="476"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="479"/>
         <source>Next tab</source>
         <translation>Další karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="454"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="457"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="482"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="485"/>
         <source>Previous tab</source>
         <translation>Předchozí karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="460"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="488"/>
         <source>Settings</source>
         <translation>Nastavení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="463"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="491"/>
         <source>Connect or disconnect</source>
         <translation>Připojit nebo odpojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="466"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="494"/>
         <source>Reconnect</source>
         <translation>Znovu připojit</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="469"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="472"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="497"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="500"/>
         <source>Keyboard shortcuts</source>
         <translation>Klávesové zkratky</translation>
     </message>
@@ -2560,6 +2591,19 @@
     </message>
 </context>
 <context>
+    <name>ShortcutsView</name>
+    <message>
+        <location filename="../app/gui/qml/components/ShortcutsView.qml" line="17"/>
+        <source>Keyboard shortcuts</source>
+        <translation>Klávesové zkratky</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/components/ShortcutsView.qml" line="81"/>
+        <source>Close</source>
+        <translation>Zavřít</translation>
+    </message>
+</context>
+<context>
     <name>SourceCard</name>
     <message>
         <location filename="../app/gui/qml/flash/SourceCard.qml" line="36"/>
@@ -2572,74 +2616,84 @@
         <translation>Aplikace LTE a firmware modemu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="133"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="134"/>
         <source>Use your own file…</source>
         <translation>Použít vlastní soubor…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="170"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="171"/>
         <source>Browse…</source>
         <translation>Procházet…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="171"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="172"/>
         <source>Choose a firmware file (%1)</source>
         <translation>Vybrat soubor s firmwarem (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="190"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="191"/>
         <source>or firmware ID from the catalog</source>
         <translation>nebo ID firmwaru z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="201"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="202"/>
         <source>e.g. %1</source>
         <translation>např. %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="203"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="204"/>
         <source>Firmware ID from the catalog</source>
         <translation>ID firmwaru z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="398"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="400"/>
         <source>Updating the modem takes 1–3 minutes. The console is disconnected meanwhile.</source>
         <translation>Aktualizace modemu trvá 1–3 minuty. Konzole je mezitím odpojena.</translation>
     </message>
     <message>
         <location filename="../app/gui/qml/flash/SourceCard.qml" line="115"/>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="210"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="211"/>
         <source>Download</source>
         <translation>Stáhnout</translation>
     </message>
     <message>
         <location filename="../app/gui/qml/flash/SourceCard.qml" line="107"/>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="297"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="298"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="218"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="219"/>
         <source>Find firmware IDs ↗</source>
         <translation>Najít ID firmwaru ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="327"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="328"/>
         <source>Remove the file</source>
         <translation>Odebrat soubor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="366"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="367"/>
         <source>Switch</source>
         <translation>Přepnout</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="412"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="432"/>
+        <source>All application copies</source>
+        <translation>Všechny kopie aplikace</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="461"/>
+        <source>Open backups folder</source>
+        <translation>Otevřít složku záloh</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="477"/>
         <source>Recent</source>
         <translation>Nedávné</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/flash/SourceCard.qml" line="469"/>
+        <location filename="../app/gui/qml/flash/SourceCard.qml" line="534"/>
         <source>Remove from the recent list</source>
         <translation>Odebrat ze seznamu nedávných</translation>
     </message>
@@ -2678,6 +2732,14 @@
         <location filename="../app/gui/qml/shell/UpdateBanner.qml" line="72"/>
         <source>Later</source>
         <translation>Později</translation>
+    </message>
+</context>
+<context>
+    <name>ViewFrame</name>
+    <message>
+        <location filename="../app/gui/qml/components/ViewFrame.qml" line="23"/>
+        <source>Close</source>
+        <translation>Zavřít</translation>
     </message>
 </context>
 <context>
@@ -2734,35 +2796,35 @@
     </message>
 </context>
 <context>
-    <name>WizardDialog</name>
+    <name>WizardView</name>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="88"/>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="331"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="29"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="280"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="296"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="249"/>
         <source>Back</source>
         <translation>Zpět</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="331"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="280"/>
         <source>Close</source>
         <translation>Zavřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="341"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="293"/>
         <source>Cancel the wizard?</source>
         <translation>Zrušit průvodce?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="343"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="295"/>
         <source>Cancel and close</source>
         <translation>Zrušit a zavřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/components/WizardDialog.qml" line="344"/>
+        <location filename="../app/gui/qml/components/WizardView.qml" line="296"/>
         <source>Keep going</source>
         <translation>Pokračovat</translation>
     </message>
@@ -2770,22 +2832,22 @@
 <context>
     <name>hwio::ble</name>
     <message>
-        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="117"/>
+        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="120"/>
         <source>The device refused to start the console: it may still be connected (to this or another computer) or the pairing was not completed.</source>
         <translation>Zařízení odmítlo spustit konzoli: může být stále připojené (k tomuto nebo jinému počítači), nebo párování nebylo dokončeno.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="123"/>
+        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="125"/>
         <source>Wait a few seconds and try again. If it repeats, disconnect the device in the system Bluetooth settings or restart it.</source>
         <translation>Počkejte několik sekund a zkuste to znovu. Pokud se to opakuje, odpojte zařízení v systémovém nastavení Bluetooth nebo ho restartujte.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="137"/>
+        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="139"/>
         <source>No passkey dialog appeared (no pairing agent is running), or the passkey was wrong, or one side still has an old bond.</source>
         <translation>Neobjevil se dialog pro přístupový klíč (neběží žádný párovací agent), nebo byl přístupový klíč chybný, nebo má jedna strana ještě staré spárování.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="142"/>
+        <location filename="../libs/hw/ble/src/qt_ble_api.cpp" line="144"/>
         <source>Pair from the system Bluetooth settings, or with bluetoothctl (scan le, pair &lt;id&gt;). If a dialog appeared, check the passkey, remove the device in the system Bluetooth settings and pair again.</source>
         <translation>Spárujte zařízení v systémovém nastavení Bluetooth, nebo pomocí bluetoothctl (scan le, pair &lt;id&gt;). Pokud se dialog objevil, zkontrolujte přístupový klíč, odeberte zařízení v systémovém nastavení Bluetooth a spárujte ho znovu.</translation>
     </message>
@@ -2793,1792 +2855,1816 @@
 <context>
     <name>hwio::core</name>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="196"/>
+        <location filename="../libs/core/src/error.cpp" line="198"/>
         <source>An unexpected internal error occurred.</source>
         <comment>internal.unexpected message</comment>
         <translation>Došlo k neočekávané vnitřní chybě.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="198"/>
+        <location filename="../libs/core/src/error.cpp" line="200"/>
         <source>This is a bug in HARDWARIO Monitor.</source>
         <comment>internal.unexpected cause</comment>
         <translation>Jde o chybu v aplikaci HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="201"/>
+        <location filename="../libs/core/src/error.cpp" line="203"/>
         <source>Please report it with the log file (see Details).</source>
         <comment>internal.unexpected suggestion</comment>
         <translation>Nahlaste ji prosím a přiložte soubor protokolu (viz Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="206"/>
+        <location filename="../libs/core/src/error.cpp" line="208"/>
         <source>An internal buffer is full.</source>
         <comment>internal.queue_full message</comment>
         <translation>Vnitřní vyrovnávací paměť je plná.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="208"/>
+        <location filename="../libs/core/src/error.cpp" line="210"/>
         <source>This is a bug in HARDWARIO Monitor or the computer is overloaded.</source>
         <comment>internal.queue_full cause</comment>
         <translation>Jde o chybu v aplikaci HARDWARIO Monitor nebo je počítač přetížený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="212"/>
+        <location filename="../libs/core/src/error.cpp" line="214"/>
         <source>Please report it with the log file (see Details).</source>
         <comment>internal.queue_full suggestion</comment>
         <translation>Nahlaste ji prosím a přiložte soubor protokolu (viz Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="217"/>
+        <location filename="../libs/core/src/error.cpp" line="219"/>
         <source>An argument or option is invalid.</source>
         <comment>usage.invalid_argument message</comment>
         <translation>Argument nebo volba je neplatná.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="220"/>
+        <location filename="../libs/core/src/error.cpp" line="222"/>
         <source>The request contains a value that is not supported.</source>
         <comment>usage.invalid_argument cause</comment>
         <translation>Požadavek obsahuje nepodporovanou hodnotu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="222"/>
+        <location filename="../libs/core/src/error.cpp" line="224"/>
         <source>Check the arguments and try again.</source>
         <comment>usage.invalid_argument suggestion</comment>
         <translation>Zkontrolujte argumenty a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="227"/>
+        <location filename="../libs/core/src/error.cpp" line="229"/>
         <source>The file was not found.</source>
         <comment>io.file_not_found message</comment>
         <translation>Soubor nebyl nalezen.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="230"/>
+        <location filename="../libs/core/src/error.cpp" line="232"/>
         <source>The path is wrong or the file was moved or deleted.</source>
         <comment>io.file_not_found cause</comment>
         <translation>Cesta je chybná nebo byl soubor přesunut či smazán.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="232"/>
+        <location filename="../libs/core/src/error.cpp" line="234"/>
         <source>Check the file path (see Details).</source>
         <comment>io.file_not_found suggestion</comment>
         <translation>Zkontrolujte cestu k souboru (viz Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="237"/>
+        <location filename="../libs/core/src/error.cpp" line="239"/>
         <source>The file could not be read.</source>
         <comment>io.read_failed message</comment>
         <translation>Soubor nelze přečíst.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="239"/>
+        <location filename="../libs/core/src/error.cpp" line="241"/>
         <source>You do not have permission to read it or the disk reported an error.</source>
         <comment>io.read_failed cause</comment>
         <translation>Nemáte oprávnění ke čtení nebo disk ohlásil chybu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="242"/>
+        <location filename="../libs/core/src/error.cpp" line="244"/>
         <source>Check the file path and its permissions (see Details).</source>
         <comment>io.read_failed suggestion</comment>
         <translation>Zkontrolujte cestu k souboru a jeho oprávnění (viz Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="248"/>
+        <location filename="../libs/core/src/error.cpp" line="250"/>
         <source>The file could not be written.</source>
         <comment>io.write_failed message</comment>
         <translation>Soubor nelze zapsat.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="250"/>
+        <location filename="../libs/core/src/error.cpp" line="252"/>
         <source>The disk is full or read-only, or you do not have permission to write.</source>
         <comment>io.write_failed cause</comment>
         <translation>Disk je plný nebo jen pro čtení, nebo nemáte oprávnění k zápisu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="253"/>
+        <location filename="../libs/core/src/error.cpp" line="255"/>
         <source>Check the path, the free disk space and the permissions (see Details).</source>
         <comment>io.write_failed suggestion</comment>
         <translation>Zkontrolujte cestu, volné místo na disku a oprávnění (viz Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="259"/>
+        <location filename="../libs/core/src/error.cpp" line="261"/>
         <source>Settings were written by a newer version and are opened read-only.</source>
         <comment>settings.newer_schema message</comment>
         <translation>Nastavení bylo uloženo novější verzí a je otevřeno jen pro čtení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="262"/>
+        <location filename="../libs/core/src/error.cpp" line="264"/>
         <source>An older version of HARDWARIO Monitor is running now.</source>
         <comment>settings.newer_schema cause</comment>
         <translation>Nyní běží starší verze aplikace HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="266"/>
+        <location filename="../libs/core/src/error.cpp" line="268"/>
         <source>Changes will not be saved; update HARDWARIO Monitor.</source>
         <comment>settings.newer_schema suggestion</comment>
         <translation>Změny nebudou uloženy; aktualizujte HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="271"/>
+        <location filename="../libs/core/src/error.cpp" line="273"/>
         <source>The operation timed out.</source>
         <comment>timeout message</comment>
         <translation>Vypršel časový limit operace.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="272"/>
+        <location filename="../libs/core/src/error.cpp" line="274"/>
         <source>The other side did not respond in time.</source>
         <comment>timeout cause</comment>
         <translation>Druhá strana neodpověděla včas.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="274"/>
+        <location filename="../libs/core/src/error.cpp" line="276"/>
         <source>Try it again.</source>
         <comment>timeout suggestion</comment>
         <translation>Zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="278"/>
+        <location filename="../libs/core/src/error.cpp" line="280"/>
         <source>Cancelled by user.</source>
         <comment>cancelled message</comment>
         <translation>Zrušeno uživatelem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="279"/>
+        <location filename="../libs/core/src/error.cpp" line="281"/>
         <source>The operation was stopped before it finished.</source>
         <comment>cancelled cause</comment>
         <translation>Operace byla zastavena před dokončením.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="281"/>
+        <location filename="../libs/core/src/error.cpp" line="283"/>
         <source>Run the operation again if needed.</source>
         <comment>cancelled suggestion</comment>
         <translation>V případě potřeby operaci spusťte znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="286"/>
+        <location filename="../libs/core/src/error.cpp" line="288"/>
         <source>SEGGER J-Link Software was not found.</source>
         <comment>dependency.jlink_not_found message</comment>
         <translation>Software SEGGER J-Link nebyl nalezen.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="288"/>
+        <location filename="../libs/core/src/error.cpp" line="290"/>
         <source>It is not installed, or it is installed in a non-standard location.</source>
         <comment>dependency.jlink_not_found cause</comment>
         <translation>Není nainstalován, nebo je nainstalován v nestandardním umístění.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="291"/>
+        <location filename="../libs/core/src/error.cpp" line="293"/>
         <source>Install J-Link Software 8.00 or newer, or set its path with --jlink-library.</source>
         <comment>dependency.jlink_not_found suggestion</comment>
         <translation>Nainstalujte J-Link Software 8.00 nebo novější, nebo zadejte jeho cestu volbou --jlink-library.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="299"/>
+        <location filename="../libs/core/src/error.cpp" line="301"/>
         <source>The J-Link library could not be loaded.</source>
         <comment>dependency.jlink_load_failed message</comment>
         <translation>Knihovnu J-Link se nepodařilo načíst.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="301"/>
+        <location filename="../libs/core/src/error.cpp" line="303"/>
         <source>The installation is damaged, is for another processor architecture, or lacks a required function.</source>
         <comment>dependency.jlink_load_failed cause</comment>
         <translation>Instalace je poškozená, je určena pro jinou architekturu procesoru, nebo v ní chybí potřebná funkce.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="305"/>
+        <location filename="../libs/core/src/error.cpp" line="307"/>
         <source>Reinstall J-Link Software.</source>
         <comment>dependency.jlink_load_failed suggestion</comment>
         <translation>Přeinstalujte J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="311"/>
+        <location filename="../libs/core/src/error.cpp" line="313"/>
         <source>The J-Link Software is too old.</source>
         <comment>dependency.jlink_too_old message</comment>
         <translation>J-Link Software je příliš starý.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="313"/>
+        <location filename="../libs/core/src/error.cpp" line="315"/>
         <source>HARDWARIO Monitor needs J-Link Software 8.00 or newer.</source>
         <comment>dependency.jlink_too_old cause</comment>
         <translation>HARDWARIO Monitor potřebuje J-Link Software 8.00 nebo novější.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="316"/>
+        <location filename="../libs/core/src/error.cpp" line="318"/>
         <source>Install the current J-Link Software.</source>
         <comment>dependency.jlink_too_old suggestion</comment>
         <translation>Nainstalujte aktuální J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="323"/>
+        <location filename="../libs/core/src/error.cpp" line="325"/>
         <source>No J-Link probe found.</source>
         <comment>probe.not_found message</comment>
         <translation>Nebyla nalezena žádná sonda J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="324"/>
+        <location filename="../libs/core/src/error.cpp" line="326"/>
         <source>The USB cable is disconnected or the J-Link is not powered.</source>
         <comment>probe.not_found cause</comment>
         <translation>Kabel USB je odpojený nebo J-Link není napájený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="327"/>
+        <location filename="../libs/core/src/error.cpp" line="329"/>
         <source>Check the USB cable between the J-Link and the computer.</source>
         <comment>probe.not_found suggestion</comment>
         <translation>Zkontrolujte kabel USB mezi J-Linkem a počítačem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="334"/>
+        <location filename="../libs/core/src/error.cpp" line="336"/>
         <source>The J-Link is used by another program.</source>
         <comment>probe.in_use_by_other_process message</comment>
         <translation>J-Link používá jiný program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="336"/>
+        <location filename="../libs/core/src/error.cpp" line="338"/>
         <source>Another HARDWARIO Monitor window or hwio command is using it.</source>
         <comment>probe.in_use_by_other_process cause</comment>
         <translation>Používá ho jiné okno aplikace HARDWARIO Monitor nebo příkaz hwio.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="340"/>
+        <location filename="../libs/core/src/error.cpp" line="342"/>
         <source>Close the other program, or choose another J-Link.</source>
         <comment>probe.in_use_by_other_process suggestion</comment>
         <translation>Ukončete druhý program, nebo zvolte jiný J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="346"/>
+        <location filename="../libs/core/src/error.cpp" line="348"/>
         <source>The J-Link probe could not be opened.</source>
         <comment>probe.open_failed message</comment>
         <translation>Sondu J-Link se nepodařilo otevřít.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="348"/>
+        <location filename="../libs/core/src/error.cpp" line="350"/>
         <source>It is used by another program or session, or the USB permissions are missing (Linux udev rules).</source>
         <comment>probe.open_failed cause</comment>
         <translation>Používá ji jiný program nebo relace, nebo chybí oprávnění k USB (pravidla udev v Linuxu).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="353"/>
+        <location filename="../libs/core/src/error.cpp" line="355"/>
         <source>Close other programs using the J-Link and try again.</source>
         <comment>probe.open_failed suggestion</comment>
         <translation>Ukončete ostatní programy, které J-Link používají, a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="359"/>
+        <location filename="../libs/core/src/error.cpp" line="361"/>
         <source>The J-Link firmware is outdated.</source>
         <comment>probe.firmware_outdated message</comment>
         <translation>Firmware J-Linku je zastaralý.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="361"/>
+        <location filename="../libs/core/src/error.cpp" line="363"/>
         <source>The J-Link firmware differs from the firmware bundled with the J-Link Software.</source>
         <comment>probe.firmware_outdated cause</comment>
         <translation>Firmware J-Linku se liší od firmwaru dodávaného s J-Link Software.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="365"/>
+        <location filename="../libs/core/src/error.cpp" line="367"/>
         <source>Run `hwio jlink update-firmware`.</source>
         <comment>probe.firmware_outdated suggestion</comment>
         <translation>Spusťte `hwio jlink update-firmware`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="372"/>
+        <location filename="../libs/core/src/error.cpp" line="374"/>
         <source>The device has no power.</source>
         <comment>target.no_power message</comment>
         <translation>Zařízení nemá napájení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="373"/>
+        <location filename="../libs/core/src/error.cpp" line="375"/>
         <source>The device is not powered or the flat cable is disconnected.</source>
         <comment>target.no_power cause</comment>
         <translation>Zařízení není napájené nebo je odpojený plochý kabel.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="376"/>
+        <location filename="../libs/core/src/error.cpp" line="378"/>
         <source>Power the device and check the flat cable.</source>
         <comment>target.no_power suggestion</comment>
         <translation>Zapněte napájení zařízení a zkontrolujte plochý kabel.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="382"/>
+        <location filename="../libs/core/src/error.cpp" line="384"/>
         <source>Could not connect to the device.</source>
         <comment>target.connect_failed message</comment>
         <translation>K zařízení se nepodařilo připojit.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="384"/>
+        <location filename="../libs/core/src/error.cpp" line="386"/>
         <source>The flat cable is disconnected or in the wrong connector, or the MCU is in a low-power or protected state.</source>
         <comment>target.connect_failed cause</comment>
         <translation>Plochý kabel je odpojený nebo zapojený do nesprávného konektoru, nebo je MCU v úsporném či chráněném režimu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="388"/>
+        <location filename="../libs/core/src/error.cpp" line="390"/>
         <source>Check the flat cable between the J-Link and the device.</source>
         <comment>target.connect_failed suggestion</comment>
         <translation>Zkontrolujte plochý kabel mezi J-Linkem a zařízením.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="395"/>
+        <location filename="../libs/core/src/error.cpp" line="397"/>
         <source>The device&apos;s console (RTT) was not found.</source>
         <comment>target.rtt_not_found message</comment>
         <translation>Konzole zařízení (RTT) nebyla nalezena.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="397"/>
+        <location filename="../libs/core/src/error.cpp" line="399"/>
         <source>The firmware has no RTT console, is still booting, or the CPU is halted.</source>
         <comment>target.rtt_not_found cause</comment>
         <translation>Firmware nemá konzoli RTT, ještě startuje, nebo je procesor zastavený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="401"/>
+        <location filename="../libs/core/src/error.cpp" line="403"/>
         <source>Reset the device or flash firmware with RTT console support.</source>
         <comment>target.rtt_not_found suggestion</comment>
         <translation>Resetujte zařízení, nebo nahrajte firmware s podporou konzole RTT.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="408"/>
+        <location filename="../libs/core/src/error.cpp" line="410"/>
         <source>An RTT buffer was not found.</source>
         <comment>target.rtt_buffer_not_found message</comment>
         <translation>Vyrovnávací paměť RTT nebyla nalezena.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="410"/>
+        <location filename="../libs/core/src/error.cpp" line="412"/>
         <source>The firmware is older or different.</source>
         <comment>target.rtt_buffer_not_found cause</comment>
         <translation>Firmware je starší nebo jiný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="412"/>
+        <location filename="../libs/core/src/error.cpp" line="414"/>
         <source>Use firmware with the CHESTER shell.</source>
         <comment>target.rtt_buffer_not_found suggestion</comment>
         <translation>Použijte firmware s shellem CHESTER.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="418"/>
+        <location filename="../libs/core/src/error.cpp" line="420"/>
         <source>The device is not reading commands.</source>
         <comment>target.rtt_write_timeout message</comment>
         <translation>Zařízení nečte příkazy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="420"/>
+        <location filename="../libs/core/src/error.cpp" line="422"/>
         <source>The firmware is hung or its shell is disabled.</source>
         <comment>target.rtt_write_timeout cause</comment>
         <translation>Firmware se zasekl nebo má vypnutý shell.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="422"/>
+        <location filename="../libs/core/src/error.cpp" line="424"/>
         <source>Reset the device.</source>
         <comment>target.rtt_write_timeout suggestion</comment>
         <translation>Resetujte zařízení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="428"/>
+        <location filename="../libs/core/src/error.cpp" line="430"/>
         <source>Reading from the device failed.</source>
         <comment>target.rtt_read_failed message</comment>
         <translation>Čtení ze zařízení selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="431"/>
+        <location filename="../libs/core/src/error.cpp" line="433"/>
         <source>A cable was disconnected or the device was reset.</source>
         <comment>target.rtt_read_failed cause</comment>
         <translation>Byl odpojen kabel nebo bylo zařízení resetováno.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="433"/>
+        <location filename="../libs/core/src/error.cpp" line="435"/>
         <source>Check the cables; the console reconnects automatically if enabled.</source>
         <comment>target.rtt_read_failed suggestion</comment>
         <translation>Zkontrolujte kabely; je-li to zapnuté, konzole se znovu připojí automaticky.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="440"/>
+        <location filename="../libs/core/src/error.cpp" line="442"/>
         <source>Too many devices are open (max 8).</source>
         <comment>internal.session_limit message</comment>
         <translation>Je otevřeno příliš mnoho zařízení (nejvýše 8).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="442"/>
+        <location filename="../libs/core/src/error.cpp" line="444"/>
         <source>HARDWARIO Monitor works with at most 8 devices at the same time.</source>
         <comment>internal.session_limit cause</comment>
         <translation>HARDWARIO Monitor pracuje nejvýše s 8 zařízeními současně.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="445"/>
+        <location filename="../libs/core/src/error.cpp" line="447"/>
         <source>Close a device first.</source>
         <comment>internal.session_limit suggestion</comment>
         <translation>Nejprve zavřete některé zařízení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="450"/>
+        <location filename="../libs/core/src/error.cpp" line="452"/>
         <source>This operation needs confirmation.</source>
         <comment>usage.confirmation_required message</comment>
         <translation>Tato operace vyžaduje potvrzení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="452"/>
+        <location filename="../libs/core/src/error.cpp" line="454"/>
         <source>The command runs non-interactively, so it cannot ask.</source>
         <comment>usage.confirmation_required cause</comment>
         <translation>Příkaz běží neinteraktivně, takže se nemůže zeptat.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="455"/>
+        <location filename="../libs/core/src/error.cpp" line="457"/>
         <source>Re-run with --yes.</source>
         <comment>usage.confirmation_required suggestion</comment>
         <translation>Spusťte ho znovu s volbou --yes.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="460"/>
+        <location filename="../libs/core/src/error.cpp" line="462"/>
         <source>Writing to the device failed.</source>
         <comment>target.rtt_write_failed message</comment>
         <translation>Zápis do zařízení selhal.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="463"/>
+        <location filename="../libs/core/src/error.cpp" line="465"/>
         <source>A cable was disconnected or the device was reset.</source>
         <comment>target.rtt_write_failed cause</comment>
         <translation>Byl odpojen kabel nebo bylo zařízení resetováno.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="465"/>
+        <location filename="../libs/core/src/error.cpp" line="467"/>
         <source>Check the cables; the console reconnects automatically if enabled.</source>
         <comment>target.rtt_write_failed suggestion</comment>
         <translation>Zkontrolujte kabely; je-li to zapnuté, konzole se znovu připojí automaticky.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="472"/>
+        <location filename="../libs/core/src/error.cpp" line="474"/>
         <source>The J-Link firmware could not be updated.</source>
         <comment>probe.firmware_update_failed message</comment>
         <translation>Firmware J-Linku se nepodařilo aktualizovat.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="474"/>
+        <location filename="../libs/core/src/error.cpp" line="476"/>
         <source>The update failed or the probe still reports a firmware different from the library&apos;s.</source>
         <comment>probe.firmware_update_failed cause</comment>
         <translation>Aktualizace selhala, nebo sonda stále hlásí jiný firmware, než obsahuje knihovna.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="478"/>
+        <location filename="../libs/core/src/error.cpp" line="480"/>
         <source>Disconnect and reconnect the J-Link, then run `hwio jlink update-firmware` again.</source>
         <comment>probe.firmware_update_failed suggestion</comment>
         <translation>Odpojte a znovu připojte J-Link a pak znovu spusťte `hwio jlink update-firmware`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="486"/>
+        <location filename="../libs/core/src/error.cpp" line="488"/>
         <source>The device is not connected.</source>
         <comment>target.not_connected message</comment>
         <translation>Zařízení není připojené.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="489"/>
+        <location filename="../libs/core/src/error.cpp" line="491"/>
         <source>The console is disconnected or still reconnecting.</source>
         <comment>target.not_connected cause</comment>
         <translation>Konzole je odpojená, nebo se teprve znovu připojuje.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="491"/>
+        <location filename="../libs/core/src/error.cpp" line="493"/>
         <source>Reconnect the console (F4).</source>
         <comment>target.not_connected suggestion</comment>
         <translation>Připojte konzoli znovu (F4).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="498"/>
+        <location filename="../libs/core/src/error.cpp" line="500"/>
         <source>The firmware file is not a valid HEX file.</source>
         <comment>firmware.hex_parse_error message</comment>
         <translation>Soubor s firmwarem není platný soubor HEX.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="500"/>
+        <location filename="../libs/core/src/error.cpp" line="502"/>
         <source>The file is damaged or it is not a HEX file.</source>
         <comment>firmware.hex_parse_error cause</comment>
         <translation>Soubor je poškozený nebo to není soubor HEX.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="502"/>
+        <location filename="../libs/core/src/error.cpp" line="504"/>
         <source>Use the .hex file produced by the build or download it again.</source>
         <comment>firmware.hex_parse_error suggestion</comment>
         <translation>Použijte soubor .hex vytvořený sestavením nebo jej stáhněte znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="509"/>
+        <location filename="../libs/core/src/error.cpp" line="511"/>
         <source>The file is not a supported firmware file.</source>
         <comment>firmware.invalid_image message</comment>
         <translation>Soubor není podporovaný soubor s firmwarem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="511"/>
+        <location filename="../libs/core/src/error.cpp" line="513"/>
         <source>It is not a CHESTER LTE bundle, a modem firmware zip or a HEX file, or the zip exceeds the safety limits.</source>
         <comment>firmware.invalid_image cause</comment>
         <translation>Nejde o balíček CHESTER LTE, zip s firmwarem modemu ani soubor HEX, nebo zip překračuje bezpečnostní limity.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="516"/>
+        <location filename="../libs/core/src/error.cpp" line="518"/>
         <source>Use a CHESTER .hex file or LTE bundle (.zip).</source>
         <comment>firmware.invalid_image suggestion</comment>
         <translation>Použijte soubor .hex pro CHESTER nebo balíček LTE (.zip).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="522"/>
+        <location filename="../libs/core/src/error.cpp" line="524"/>
         <source>The firmware does not fit the MCU.</source>
         <comment>firmware.out_of_range message</comment>
         <translation>Firmware neodpovídá MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="524"/>
+        <location filename="../libs/core/src/error.cpp" line="526"/>
         <source>The image was built for another MCU.</source>
         <comment>firmware.out_of_range cause</comment>
         <translation>Obraz byl sestaven pro jiný MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="526"/>
+        <location filename="../libs/core/src/error.cpp" line="528"/>
         <source>Check that the firmware is for this MCU.</source>
         <comment>firmware.out_of_range suggestion</comment>
         <translation>Zkontrolujte, že je firmware určen pro tento MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="532"/>
+        <location filename="../libs/core/src/error.cpp" line="534"/>
         <source>The firmware also writes the UICR configuration area.</source>
         <comment>firmware.uicr_in_image message</comment>
         <translation>Firmware zapisuje také do konfigurační oblasti UICR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="535"/>
+        <location filename="../libs/core/src/error.cpp" line="537"/>
         <source>The build includes UICR settings.</source>
         <comment>firmware.uicr_in_image cause</comment>
         <translation>Sestavení obsahuje nastavení UICR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="537"/>
+        <location filename="../libs/core/src/error.cpp" line="539"/>
         <source>Re-run with --allow-uicr if this is intended; the Product Information Block is kept.</source>
         <comment>firmware.uicr_in_image suggestion</comment>
         <translation>Pokud je to záměr, spusťte příkaz znovu s --allow-uicr; blok informací o produktu (PIB) zůstane zachován.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="544"/>
+        <location filename="../libs/core/src/error.cpp" line="546"/>
         <source>Verification of the written firmware failed.</source>
         <comment>firmware.verify_failed message</comment>
         <translation>Ověření zapsaného firmwaru selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="546"/>
+        <location filename="../libs/core/src/error.cpp" line="548"/>
         <source>The connection is unstable, or the flash is protected or faulty.</source>
         <comment>firmware.verify_failed cause</comment>
         <translation>Spojení je nestabilní nebo je paměť flash chráněná či vadná.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="549"/>
+        <location filename="../libs/core/src/error.cpp" line="551"/>
         <source>Flash again; if it repeats, lower the J-Link speed or check the cables.</source>
         <comment>firmware.verify_failed suggestion</comment>
         <translation>Nahrajte firmware znovu; pokud se chyba opakuje, snižte rychlost J-Linku nebo zkontrolujte kabely.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="556"/>
+        <location filename="../libs/core/src/error.cpp" line="558"/>
         <source>The firmware was not found in the catalog.</source>
         <comment>firmware.not_found_in_catalog message</comment>
         <translation>Firmware nebyl v katalogu nalezen.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="558"/>
+        <location filename="../libs/core/src/error.cpp" line="560"/>
         <source>The firmware ID is wrong or it was deleted.</source>
         <comment>firmware.not_found_in_catalog cause</comment>
         <translation>ID firmwaru je chybné nebo byl firmware smazán.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="560"/>
+        <location filename="../libs/core/src/error.cpp" line="562"/>
         <source>Check the firmware ID.</source>
         <comment>firmware.not_found_in_catalog suggestion</comment>
         <translation>Zkontrolujte ID firmwaru.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="566"/>
+        <location filename="../libs/core/src/error.cpp" line="568"/>
         <source>The modem firmware update failed.</source>
         <comment>firmware.modem_update_failed message</comment>
         <translation>Aktualizace firmwaru modemu selhala.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="568"/>
+        <location filename="../libs/core/src/error.cpp" line="570"/>
         <source>The modem firmware zip is wrong, the connection was lost, or nRF Util reported an error (see Details).</source>
         <comment>firmware.modem_update_failed cause</comment>
         <translation>Zip s firmwarem modemu je chybný, spojení bylo přerušeno nebo nRF Util ohlásil chybu (viz Podrobnosti).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="572"/>
+        <location filename="../libs/core/src/error.cpp" line="574"/>
         <source>Check the cable and power, then flash the modem firmware again.</source>
         <comment>firmware.modem_update_failed suggestion</comment>
         <translation>Zkontrolujte kabel a napájení a nahrajte firmware modemu znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="579"/>
+        <location filename="../libs/core/src/error.cpp" line="581"/>
         <source>Downloading the firmware failed.</source>
         <comment>network.download_failed message</comment>
         <translation>Stažení firmwaru selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="581"/>
+        <location filename="../libs/core/src/error.cpp" line="583"/>
         <source>There is no internet connection, a proxy blocks it, or the server failed.</source>
         <comment>network.download_failed cause</comment>
         <translation>Není připojení k internetu, blokuje jej proxy nebo selhal server.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="586"/>
+        <location filename="../libs/core/src/error.cpp" line="588"/>
         <source>Check the internet connection and try again.</source>
         <comment>network.download_failed suggestion</comment>
         <translation>Zkontrolujte připojení k internetu a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="591"/>
+        <location filename="../libs/core/src/error.cpp" line="593"/>
         <source>The J-Link is connected to another MCU.</source>
         <comment>target.wrong_family message</comment>
         <translation>J-Link je připojen k jinému MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="593"/>
+        <location filename="../libs/core/src/error.cpp" line="595"/>
         <source>The J-Link is connected to the other connector of the device.</source>
         <comment>target.wrong_family cause</comment>
         <translation>J-Link je připojen k druhému konektoru zařízení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="596"/>
+        <location filename="../libs/core/src/error.cpp" line="598"/>
         <source>Connect the J-Link to the connector of the MCU you want to program.</source>
         <comment>target.wrong_family suggestion</comment>
         <translation>Připojte J-Link ke konektoru MCU, který chcete programovat.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="603"/>
+        <location filename="../libs/core/src/error.cpp" line="605"/>
         <source>The MCU is read-back protected.</source>
         <comment>target.protected message</comment>
         <translation>MCU je chráněn proti čtení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="605"/>
+        <location filename="../libs/core/src/error.cpp" line="607"/>
         <source>Access port protection (APPROTECT) is enabled.</source>
         <comment>target.protected cause</comment>
         <translation>Je zapnutá ochrana přístupového portu (APPROTECT).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="607"/>
+        <location filename="../libs/core/src/error.cpp" line="609"/>
         <source>Recover the MCU (this erases it), then flash it again.</source>
         <comment>target.protected suggestion</comment>
         <translation>Obnovte MCU (tím se vymaže) a pak do něj nahrajte firmware znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="614"/>
+        <location filename="../libs/core/src/error.cpp" line="616"/>
         <source>Programming the MCU failed.</source>
         <comment>target.program_failed message</comment>
         <translation>Programování MCU selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="616"/>
+        <location filename="../libs/core/src/error.cpp" line="618"/>
         <source>The connection was lost, the power is low or the MCU is protected.</source>
         <comment>target.program_failed cause</comment>
         <translation>Spojení bylo přerušeno, napájení je nízké nebo je MCU chráněn.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="620"/>
+        <location filename="../libs/core/src/error.cpp" line="622"/>
         <source>Check the cables and power, then try again.</source>
         <comment>target.program_failed suggestion</comment>
         <translation>Zkontrolujte kabely a napájení a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="626"/>
+        <location filename="../libs/core/src/error.cpp" line="628"/>
         <source>Erasing the MCU failed.</source>
         <comment>target.erase_failed message</comment>
         <translation>Mazání MCU selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="628"/>
+        <location filename="../libs/core/src/error.cpp" line="630"/>
         <source>The connection was lost, the power is low or the MCU is protected.</source>
         <comment>target.erase_failed cause</comment>
         <translation>Spojení bylo přerušeno, napájení je nízké nebo je MCU chráněn.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="632"/>
+        <location filename="../libs/core/src/error.cpp" line="634"/>
         <source>Check the cables and power, then try again.</source>
         <comment>target.erase_failed suggestion</comment>
         <translation>Zkontrolujte kabely a napájení a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="638"/>
+        <location filename="../libs/core/src/error.cpp" line="640"/>
         <source>Recovering the MCU failed.</source>
         <comment>target.recover_failed message</comment>
         <translation>Obnovení MCU selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="640"/>
+        <location filename="../libs/core/src/error.cpp" line="642"/>
         <source>The device has no power or its control access port does not answer.</source>
         <comment>target.recover_failed cause</comment>
         <translation>Zařízení nemá napájení nebo jeho řídicí přístupový port neodpovídá.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="644"/>
+        <location filename="../libs/core/src/error.cpp" line="646"/>
         <source>Power-cycle the device and try again.</source>
         <comment>target.recover_failed suggestion</comment>
         <translation>Odpojte a znovu připojte napájení zařízení a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="651"/>
+        <location filename="../libs/core/src/error.cpp" line="653"/>
         <source>The Product Information Block is missing or damaged.</source>
         <comment>pib.invalid message</comment>
         <translation>Blok informací o produktu (PIB) chybí nebo je poškozený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="653"/>
+        <location filename="../libs/core/src/error.cpp" line="655"/>
         <source>It was never written, or it was erased by a full erase or a recover.</source>
         <comment>pib.invalid cause</comment>
         <translation>Nebyl nikdy zapsán, nebo byl vymazán úplným smazáním či obnovením.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="657"/>
+        <location filename="../libs/core/src/error.cpp" line="659"/>
         <source>Contact HARDWARIO support to restore it.</source>
         <comment>pib.invalid suggestion</comment>
         <translation>Pro jeho obnovení kontaktujte podporu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="662"/>
+        <location filename="../libs/core/src/error.cpp" line="664"/>
         <source>nRF Util was not found.</source>
         <comment>dependency.nrfutil_not_found message</comment>
         <translation>nRF Util nebyl nalezen.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="664"/>
+        <location filename="../libs/core/src/error.cpp" line="666"/>
         <source>It is not installed; it is needed only for the modem firmware.</source>
         <comment>dependency.nrfutil_not_found cause</comment>
         <translation>Není nainstalován; je potřeba jen pro firmware modemu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="667"/>
+        <location filename="../libs/core/src/error.cpp" line="669"/>
         <source>Install nRF Util and its device command, or set its path with --nrfutil.</source>
         <comment>dependency.nrfutil_not_found suggestion</comment>
         <translation>Nainstalujte nRF Util a jeho příkaz device, nebo zadejte jeho cestu volbou --nrfutil.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="675"/>
+        <location filename="../libs/core/src/error.cpp" line="677"/>
         <source>The nRF Util device command is not installed.</source>
         <comment>dependency.nrfutil_device_missing message</comment>
         <translation>Příkaz device programu nRF Util není nainstalován.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="678"/>
+        <location filename="../libs/core/src/error.cpp" line="680"/>
         <source>nRF Util is installed without its device command.</source>
         <comment>dependency.nrfutil_device_missing cause</comment>
         <translation>nRF Util je nainstalován bez příkazu device.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="680"/>
+        <location filename="../libs/core/src/error.cpp" line="682"/>
         <source>Run `nrfutil install device`.</source>
         <comment>dependency.nrfutil_device_missing suggestion</comment>
         <translation>Spusťte `nrfutil install device`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="686"/>
+        <location filename="../libs/core/src/error.cpp" line="688"/>
         <source>nRF Util is too old.</source>
         <comment>dependency.nrfutil_too_old message</comment>
         <translation>nRF Util je příliš starý.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="688"/>
+        <location filename="../libs/core/src/error.cpp" line="690"/>
         <source>HARDWARIO Monitor needs a newer nRF Util or device command.</source>
         <comment>dependency.nrfutil_too_old cause</comment>
         <translation>HARDWARIO Monitor potřebuje novější nRF Util nebo příkaz device.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="691"/>
+        <location filename="../libs/core/src/error.cpp" line="693"/>
         <source>Run `nrfutil self-upgrade` and `nrfutil upgrade device`.</source>
         <comment>dependency.nrfutil_too_old suggestion</comment>
         <translation>Spusťte `nrfutil self-upgrade` a `nrfutil upgrade device`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="698"/>
+        <location filename="../libs/core/src/error.cpp" line="700"/>
         <source>Another operation is running on this device.</source>
         <comment>internal.busy message</comment>
         <translation>Na tomto zařízení probíhá jiná operace.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="700"/>
+        <location filename="../libs/core/src/error.cpp" line="702"/>
         <source>Only one operation can run at a time.</source>
         <comment>internal.busy cause</comment>
         <translation>Najednou může probíhat jen jedna operace.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="702"/>
+        <location filename="../libs/core/src/error.cpp" line="704"/>
         <source>Wait for it to finish or cancel it.</source>
         <comment>internal.busy suggestion</comment>
         <translation>Počkejte na její dokončení nebo ji zrušte.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="707"/>
+        <location filename="../libs/core/src/error.cpp" line="709"/>
         <source>Communication with the J-Link failed.</source>
         <comment>probe.io_failed message</comment>
         <translation>Komunikace s J-Linkem selhala.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="709"/>
+        <location filename="../libs/core/src/error.cpp" line="711"/>
         <source>The J-Link did not answer: a USB glitch, or the USB cable was disconnected.</source>
         <comment>probe.io_failed cause</comment>
         <translation>J-Link neodpověděl: krátký výpadek USB, nebo byl odpojen kabel USB.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="713"/>
+        <location filename="../libs/core/src/error.cpp" line="715"/>
         <source>Check the USB cable between the J-Link and the computer; the console reconnects automatically if enabled.</source>
         <comment>probe.io_failed suggestion</comment>
         <translation>Zkontrolujte kabel USB mezi J-Linkem a počítačem; je-li to zapnuté, konzole se znovu připojí automaticky.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="723"/>
+        <location filename="../libs/core/src/error.cpp" line="725"/>
         <source>This computer does not allow access to the J-Link (USB permissions).</source>
         <comment>usb.access_denied message</comment>
         <translation>Tento počítač nepovoluje přístup k J-Linku (oprávnění USB).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="726"/>
+        <location filename="../libs/core/src/error.cpp" line="728"/>
         <source>The udev rule for SEGGER devices is missing.</source>
         <comment>usb.access_denied cause</comment>
         <translation>Chybí pravidlo udev pro zařízení SEGGER.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="728"/>
+        <location filename="../libs/core/src/error.cpp" line="730"/>
         <source>Install the udev rule shown in the setup wizard, then reconnect the J-Link. The rule gives access only to the user logged in at this computer; users connected only over SSH need their own udev rule.</source>
         <comment>usb.access_denied suggestion</comment>
         <translation>Nainstalujte pravidlo udev zobrazené v průvodci nastavením a potom J-Link znovu připojte. Pravidlo dává přístup jen uživateli přihlášenému přímo u tohoto počítače; uživatelé připojení jen přes SSH potřebují vlastní pravidlo udev.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="738"/>
+        <location filename="../libs/core/src/error.cpp" line="740"/>
         <source>Another program is running and may be using the J-Link.</source>
         <comment>probe.held_by_program message</comment>
         <translation>Běží jiný program, který může J-Link používat.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="741"/>
+        <location filename="../libs/core/src/error.cpp" line="743"/>
         <source>Another debugging or programming tool keeps the probe open.</source>
         <comment>probe.held_by_program cause</comment>
         <translation>Jiný ladicí nebo programovací nástroj drží J-Link otevřený.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="744"/>
+        <location filename="../libs/core/src/error.cpp" line="746"/>
         <source>Close the other program and try again.</source>
         <comment>probe.held_by_program suggestion</comment>
         <translation>Zavřete druhý program a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="750"/>
+        <location filename="../libs/core/src/error.cpp" line="752"/>
         <source>The diagnostic report could not be saved.</source>
         <comment>diag.report_write_failed message</comment>
         <translation>Diagnostickou zprávu se nepodařilo uložit.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="752"/>
+        <location filename="../libs/core/src/error.cpp" line="754"/>
         <source>The folder is not writable or the disk is full.</source>
         <comment>diag.report_write_failed cause</comment>
         <translation>Do složky nelze zapisovat nebo je disk plný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="754"/>
+        <location filename="../libs/core/src/error.cpp" line="756"/>
         <source>Choose another folder.</source>
         <comment>diag.report_write_failed suggestion</comment>
         <translation>Zvolte jinou složku.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="759"/>
+        <location filename="../libs/core/src/error.cpp" line="761"/>
         <source>A check did not finish in time.</source>
         <comment>diag.check_timeout message</comment>
         <translation>Kontrola nebyla dokončena včas.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="761"/>
+        <location filename="../libs/core/src/error.cpp" line="763"/>
         <source>The system is slow or a tool does not answer.</source>
         <comment>diag.check_timeout cause</comment>
         <translation>Systém je pomalý nebo některý nástroj neodpovídá.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="763"/>
+        <location filename="../libs/core/src/error.cpp" line="765"/>
         <source>Run the checks again.</source>
         <comment>diag.check_timeout suggestion</comment>
         <translation>Spusťte kontroly znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="769"/>
+        <location filename="../libs/core/src/error.cpp" line="771"/>
         <source>No Bluetooth adapter was found.</source>
         <comment>ble.adapter_not_found message</comment>
         <translation>Nebyl nalezen žádný adaptér Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="771"/>
+        <location filename="../libs/core/src/error.cpp" line="773"/>
         <source>The computer has no Bluetooth or it is disabled in the system.</source>
         <comment>ble.adapter_not_found cause</comment>
         <translation>Počítač nemá Bluetooth nebo je v systému zakázané.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="775"/>
+        <location filename="../libs/core/src/error.cpp" line="777"/>
         <source>Enable Bluetooth or connect a USB Bluetooth adapter.</source>
         <comment>ble.adapter_not_found suggestion</comment>
         <translation>Povolte Bluetooth nebo připojte USB adaptér Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="782"/>
+        <location filename="../libs/core/src/error.cpp" line="784"/>
         <source>Bluetooth is turned off.</source>
         <comment>ble.adapter_off message</comment>
         <translation>Bluetooth je vypnuté.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="783"/>
+        <location filename="../libs/core/src/error.cpp" line="785"/>
         <source>Bluetooth is turned off in the system settings or with a hardware switch.</source>
         <comment>ble.adapter_off cause</comment>
         <translation>Bluetooth je vypnuté v nastavení systému nebo hardwarovým vypínačem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="787"/>
+        <location filename="../libs/core/src/error.cpp" line="789"/>
         <source>Turn Bluetooth on in the system settings.</source>
         <comment>ble.adapter_off suggestion</comment>
         <translation>Zapněte Bluetooth v nastavení systému.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="794"/>
+        <location filename="../libs/core/src/error.cpp" line="796"/>
         <source>HARDWARIO Monitor is not allowed to use Bluetooth.</source>
         <comment>ble.permission_denied message</comment>
         <translation>HARDWARIO Monitor nemá povoleno používat Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="797"/>
+        <location filename="../libs/core/src/error.cpp" line="799"/>
         <source>Bluetooth access was denied in the privacy settings.</source>
         <comment>ble.permission_denied cause</comment>
         <translation>Přístup k Bluetooth byl zamítnut v nastavení soukromí.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="799"/>
+        <location filename="../libs/core/src/error.cpp" line="801"/>
         <source>Allow Bluetooth for HARDWARIO Monitor (or your terminal) in System Settings → Privacy &amp; Security → Bluetooth.</source>
         <comment>ble.permission_denied suggestion</comment>
         <translation>Povolte Bluetooth pro HARDWARIO Monitor (nebo pro svůj terminál) v Nastavení systému → Soukromí a zabezpečení → Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="807"/>
+        <location filename="../libs/core/src/error.cpp" line="809"/>
         <source>The Bluetooth service of the system is not available.</source>
         <comment>ble.stack_unavailable message</comment>
         <translation>Systémová služba Bluetooth není dostupná.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="810"/>
+        <location filename="../libs/core/src/error.cpp" line="812"/>
         <source>The Bluetooth service of the system (BlueZ on Linux) is not running.</source>
         <comment>ble.stack_unavailable cause</comment>
         <translation>Systémová služba Bluetooth (v Linuxu BlueZ) neběží.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="813"/>
+        <location filename="../libs/core/src/error.cpp" line="815"/>
         <source>Start the Bluetooth service: `sudo systemctl start bluetooth`.</source>
         <comment>ble.stack_unavailable suggestion</comment>
         <translation>Spusťte službu Bluetooth: `sudo systemctl start bluetooth`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="820"/>
+        <location filename="../libs/core/src/error.cpp" line="822"/>
         <source>The Bluetooth device was not found.</source>
         <comment>ble.device_not_found message</comment>
         <translation>Zařízení Bluetooth nebylo nalezeno.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="822"/>
+        <location filename="../libs/core/src/error.cpp" line="824"/>
         <source>The device is out of range, turned off or its Bluetooth is disabled.</source>
         <comment>ble.device_not_found cause</comment>
         <translation>Zařízení je mimo dosah, vypnuté nebo má vypnuté Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="825"/>
+        <location filename="../libs/core/src/error.cpp" line="827"/>
         <source>Bring the device closer and make sure its Bluetooth is on.</source>
         <comment>ble.device_not_found suggestion</comment>
         <translation>Přibližte zařízení a ověřte, že má zapnuté Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="833"/>
+        <location filename="../libs/core/src/error.cpp" line="835"/>
         <source>Could not connect to the device over Bluetooth.</source>
         <comment>ble.connect_failed message</comment>
         <translation>K zařízení se nepodařilo připojit přes Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="835"/>
+        <location filename="../libs/core/src/error.cpp" line="837"/>
         <source>The signal is weak or the device is busy with another connection.</source>
         <comment>ble.connect_failed cause</comment>
         <translation>Signál je slabý nebo je zařízení zaneprázdněné jiným připojením.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="838"/>
+        <location filename="../libs/core/src/error.cpp" line="840"/>
         <source>Move closer, disconnect other phones or computers from the device and try again.</source>
         <comment>ble.connect_failed suggestion</comment>
         <translation>Přibližte se, odpojte od zařízení jiné telefony nebo počítače a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="847"/>
+        <location filename="../libs/core/src/error.cpp" line="849"/>
         <source>The device does not offer the console service (NUS).</source>
         <comment>ble.service_not_found message</comment>
         <translation>Zařízení nenabízí službu konzole (NUS).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="849"/>
+        <location filename="../libs/core/src/error.cpp" line="851"/>
         <source>The firmware has no Bluetooth shell.</source>
         <comment>ble.service_not_found cause</comment>
         <translation>Firmware nemá shell přes Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="852"/>
+        <location filename="../libs/core/src/error.cpp" line="854"/>
         <source>Use firmware with the Bluetooth console enabled.</source>
         <comment>ble.service_not_found suggestion</comment>
         <translation>Použijte firmware se zapnutou konzolí přes Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="858"/>
+        <location filename="../libs/core/src/error.cpp" line="860"/>
         <source>The device is not paired with this computer.</source>
         <comment>ble.not_paired message</comment>
         <translation>Zařízení není spárované s tímto počítačem.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="860"/>
+        <location filename="../libs/core/src/error.cpp" line="862"/>
         <source>Pairing was cancelled, failed or was removed on one side.</source>
         <comment>ble.not_paired cause</comment>
         <translation>Párování bylo zrušeno, selhalo nebo bylo na jedné straně odstraněno.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="863"/>
+        <location filename="../libs/core/src/error.cpp" line="865"/>
         <source>Pair the device: enter its passkey when the system asks.</source>
         <comment>ble.not_paired suggestion</comment>
         <translation>Spárujte zařízení: zadejte jeho přístupový klíč, až se systém zeptá.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="870"/>
+        <location filename="../libs/core/src/error.cpp" line="872"/>
         <source>Pairing with the device failed.</source>
         <comment>ble.pairing_failed message</comment>
         <translation>Párování se zařízením selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="872"/>
+        <location filename="../libs/core/src/error.cpp" line="874"/>
         <source>A wrong passkey, a timeout or a stale bond on one side.</source>
         <comment>ble.pairing_failed cause</comment>
         <translation>Chybný přístupový klíč, vypršení času nebo zastaralé spárování na jedné straně.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="875"/>
+        <location filename="../libs/core/src/error.cpp" line="877"/>
         <source>Remove the device in the system Bluetooth settings and pair again.</source>
         <comment>ble.pairing_failed suggestion</comment>
         <translation>Odeberte zařízení v systémovém nastavení Bluetooth a spárujte ho znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="882"/>
+        <location filename="../libs/core/src/error.cpp" line="884"/>
         <source>This system pairs Bluetooth devices only when connecting.</source>
         <comment>ble.pairing_not_supported message</comment>
         <translation>Tento systém páruje zařízení Bluetooth jen při připojení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="886"/>
+        <location filename="../libs/core/src/error.cpp" line="888"/>
         <source>macOS pairs a device automatically when it connects.</source>
         <comment>ble.pairing_not_supported cause</comment>
         <translation>macOS zařízení spáruje automaticky při připojení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="889"/>
+        <location filename="../libs/core/src/error.cpp" line="891"/>
         <source>Connect to the device; macOS asks for the passkey.</source>
         <comment>ble.pairing_not_supported suggestion</comment>
         <translation>Připojte se k zařízení; macOS se zeptá na přístupový klíč.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="894"/>
+        <location filename="../libs/core/src/error.cpp" line="896"/>
         <source>Sending to the device over Bluetooth failed.</source>
         <comment>ble.write_failed message</comment>
         <translation>Odeslání do zařízení přes Bluetooth selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="896"/>
+        <location filename="../libs/core/src/error.cpp" line="898"/>
         <source>The link was lost during the write.</source>
         <comment>ble.write_failed cause</comment>
         <translation>Spojení bylo během zápisu ztraceno.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="898"/>
+        <location filename="../libs/core/src/error.cpp" line="900"/>
         <source>Reconnect.</source>
         <comment>ble.write_failed suggestion</comment>
         <translation>Připojte se znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="903"/>
+        <location filename="../libs/core/src/error.cpp" line="905"/>
         <source>The device is not reading commands.</source>
         <comment>ble.write_timeout message</comment>
         <translation>Zařízení nečte příkazy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="905"/>
+        <location filename="../libs/core/src/error.cpp" line="907"/>
         <source>The firmware is busy or the link is stalled.</source>
         <comment>ble.write_timeout cause</comment>
         <translation>Firmware je zaneprázdněný nebo spojení vázne.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="908"/>
+        <location filename="../libs/core/src/error.cpp" line="910"/>
         <source>Reconnect; if it repeats, restart the device.</source>
         <comment>ble.write_timeout suggestion</comment>
         <translation>Připojte se znovu; pokud se to opakuje, restartujte zařízení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="915"/>
+        <location filename="../libs/core/src/error.cpp" line="917"/>
         <source>The Bluetooth connection to the device was lost.</source>
         <comment>ble.disconnected message</comment>
         <translation>Spojení Bluetooth se zařízením bylo ztraceno.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="917"/>
+        <location filename="../libs/core/src/error.cpp" line="919"/>
         <source>The device is out of range, was restarted or turned off.</source>
         <comment>ble.disconnected cause</comment>
         <translation>Zařízení je mimo dosah, bylo restartováno nebo vypnuto.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="920"/>
+        <location filename="../libs/core/src/error.cpp" line="922"/>
         <source>Bring the device closer; the console reconnects automatically if enabled.</source>
         <comment>ble.disconnected suggestion</comment>
         <translation>Přibližte zařízení; konzole se znovu připojí automaticky, pokud je to zapnuté.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="928"/>
+        <location filename="../libs/core/src/error.cpp" line="930"/>
         <source>The device is used by another program.</source>
         <comment>ble.in_use_by_other_process message</comment>
         <translation>Zařízení používá jiný program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="930"/>
+        <location filename="../libs/core/src/error.cpp" line="932"/>
         <source>Another HARDWARIO Monitor window or `hwio` command is connected to it.</source>
         <comment>ble.in_use_by_other_process cause</comment>
         <translation>Je k němu připojené jiné okno HARDWARIO Monitor nebo příkaz `hwio`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="933"/>
+        <location filename="../libs/core/src/error.cpp" line="935"/>
         <source>Close the other program.</source>
         <comment>ble.in_use_by_other_process suggestion</comment>
         <translation>Zavřete druhý program.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="938"/>
+        <location filename="../libs/core/src/error.cpp" line="940"/>
         <source>No program is ready to ask for the Bluetooth passkey.</source>
         <comment>ble.no_pairing_agent message</comment>
         <translation>Žádný program není připraven vyžádat si přístupový klíč Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="941"/>
+        <location filename="../libs/core/src/error.cpp" line="943"/>
         <source>No pairing agent is running (on GNOME the agent may only be active in Settings → Bluetooth).</source>
         <comment>ble.no_pairing_agent cause</comment>
         <translation>Neběží žádný párovací agent (v prostředí GNOME může být agent aktivní jen v Nastavení → Bluetooth).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="946"/>
+        <location filename="../libs/core/src/error.cpp" line="948"/>
         <source>Pair the device from the system Bluetooth settings, or with bluetoothctl: `agent KeyboardOnly`, `default-agent`, `pair &lt;id&gt;`.</source>
         <comment>ble.no_pairing_agent suggestion</comment>
         <translation>Spárujte zařízení v systémovém nastavení Bluetooth, nebo pomocí bluetoothctl: `agent KeyboardOnly`, `default-agent`, `pair &lt;id&gt;`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="955"/>
+        <location filename="../libs/core/src/error.cpp" line="957"/>
         <source>The MCP port is already in use.</source>
         <comment>mcp.port_in_use message</comment>
         <translation>Port MCP je již používán.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="957"/>
+        <location filename="../libs/core/src/error.cpp" line="959"/>
         <source>Another HARDWARIO Monitor, `hwio mcp --http` or another MCP server (for example rttt) is listening on it.</source>
         <comment>mcp.port_in_use cause</comment>
         <translation>Naslouchá na něm jiný HARDWARIO Monitor, `hwio mcp --http` nebo jiný server MCP (například rttt).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="961"/>
+        <location filename="../libs/core/src/error.cpp" line="963"/>
         <source>Stop the other server or choose another port with --port.</source>
         <comment>mcp.port_in_use suggestion</comment>
         <translation>Ukončete druhý server nebo zvolte jiný port pomocí --port.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="967"/>
+        <location filename="../libs/core/src/error.cpp" line="969"/>
         <source>The MCP server could not start.</source>
         <comment>mcp.listen_failed message</comment>
         <translation>Server MCP se nepodařilo spustit.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="969"/>
+        <location filename="../libs/core/src/error.cpp" line="971"/>
         <source>The operating system refused to open the listening socket on 127.0.0.1.</source>
         <comment>mcp.listen_failed cause</comment>
         <translation>Operační systém odmítl otevřít naslouchající socket na 127.0.0.1.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="972"/>
+        <location filename="../libs/core/src/error.cpp" line="974"/>
         <source>Choose another port with --port.</source>
         <comment>mcp.listen_failed suggestion</comment>
         <translation>Zvolte jiný port pomocí --port.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="977"/>
+        <location filename="../libs/core/src/error.cpp" line="979"/>
         <source>The MCP token file cannot be read or created.</source>
         <comment>mcp.token_file message</comment>
         <translation>Soubor s tokenem MCP nelze přečíst ani vytvořit.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="979"/>
+        <location filename="../libs/core/src/error.cpp" line="981"/>
         <source>The file or its folder has the wrong permissions, or the file does not contain a valid token.</source>
         <comment>mcp.token_file cause</comment>
         <translation>Soubor nebo jeho složka mají nesprávná oprávnění, nebo soubor neobsahuje platný token.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="983"/>
+        <location filename="../libs/core/src/error.cpp" line="985"/>
         <source>Check the file permissions, or delete the file to create a new token.</source>
         <comment>mcp.token_file suggestion</comment>
         <translation>Zkontrolujte oprávnění souboru, nebo soubor smažte, aby se vytvořil nový token.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="989"/>
+        <location filename="../libs/core/src/error.cpp" line="991"/>
         <source>This MCP tool is not allowed by the server.</source>
         <comment>mcp.tool_not_allowed message</comment>
         <translation>Tento nástroj MCP server nepovoluje.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="991"/>
+        <location filename="../libs/core/src/error.cpp" line="993"/>
         <source>Destructive tools must be allowed when the server starts.</source>
         <comment>mcp.tool_not_allowed cause</comment>
         <translation>Destruktivní nástroje je nutné povolit při spuštění serveru.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="994"/>
+        <location filename="../libs/core/src/error.cpp" line="996"/>
         <source>Start the server with --allow and the tool&apos;s category, or with --allow all.</source>
         <comment>mcp.tool_not_allowed suggestion</comment>
         <translation>Spusťte server s --allow a kategorií nástroje, nebo s --allow all.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1001"/>
+        <location filename="../libs/core/src/error.cpp" line="1003"/>
         <source>The user did not allow this action.</source>
         <comment>mcp.consent_denied message</comment>
         <translation>Uživatel tuto akci nepovolil.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1003"/>
+        <location filename="../libs/core/src/error.cpp" line="1005"/>
         <source>The user declined the permission request in HARDWARIO Monitor.</source>
         <comment>mcp.consent_denied cause</comment>
         <translation>Uživatel v HARDWARIO Monitor odmítl žádost o povolení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1007"/>
+        <location filename="../libs/core/src/error.cpp" line="1009"/>
         <source>Ask the user to allow it in HARDWARIO Monitor.</source>
         <comment>mcp.consent_denied suggestion</comment>
         <translation>Požádejte uživatele, aby akci povolil v HARDWARIO Monitor.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1012"/>
+        <location filename="../libs/core/src/error.cpp" line="1014"/>
         <source>Nobody answered the permission request.</source>
         <comment>mcp.consent_timeout message</comment>
         <translation>Na žádost o povolení nikdo neodpověděl.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1014"/>
+        <location filename="../libs/core/src/error.cpp" line="1016"/>
         <source>The permission request in HARDWARIO Monitor was not answered within 2 minutes.</source>
         <comment>mcp.consent_timeout cause</comment>
         <translation>Na žádost o povolení v HARDWARIO Monitor nikdo neodpověděl do 2 minut.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1018"/>
+        <location filename="../libs/core/src/error.cpp" line="1020"/>
         <source>Ask the user to watch HARDWARIO Monitor and try again.</source>
         <comment>mcp.consent_timeout suggestion</comment>
         <translation>Požádejte uživatele, aby sledoval HARDWARIO Monitor, a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1024"/>
+        <location filename="../libs/core/src/error.cpp" line="1026"/>
         <source>Several devices are connected and the tool does not know which one to use.</source>
         <comment>mcp.device_ambiguous message</comment>
         <translation>Je připojeno více zařízení a nástroj neví, které použít.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1028"/>
+        <location filename="../libs/core/src/error.cpp" line="1030"/>
         <source>The device argument was left out while more than one device is open.</source>
         <comment>mcp.device_ambiguous cause</comment>
         <translation>Argument device chybí, ale otevřeno je více zařízení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1031"/>
+        <location filename="../libs/core/src/error.cpp" line="1033"/>
         <source>Pass the device argument; list_devices shows the ids.</source>
         <comment>mcp.device_ambiguous suggestion</comment>
         <translation>Zadejte argument device; identifikátory ukáže list_devices.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1037"/>
+        <location filename="../libs/core/src/error.cpp" line="1039"/>
         <source>The device is not connected.</source>
         <comment>mcp.device_not_open message</comment>
         <translation>Zařízení není připojené.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1039"/>
+        <location filename="../libs/core/src/error.cpp" line="1041"/>
         <source>It was never connected, it was disconnected, or its tab was closed.</source>
         <comment>mcp.device_not_open cause</comment>
         <translation>Nebylo nikdy připojeno, bylo odpojeno, nebo byla zavřena jeho karta.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1042"/>
+        <location filename="../libs/core/src/error.cpp" line="1044"/>
         <source>Call connect first.</source>
         <comment>mcp.device_not_open suggestion</comment>
         <translation>Nejprve zavolejte connect.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1047"/>
+        <location filename="../libs/core/src/error.cpp" line="1049"/>
         <source>This tool needs a J-Link connection.</source>
         <comment>mcp.capability_missing message</comment>
         <translation>Tento nástroj potřebuje připojení přes J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1049"/>
+        <location filename="../libs/core/src/error.cpp" line="1051"/>
         <source>The device is connected over Bluetooth, which provides only the console.</source>
         <comment>mcp.capability_missing cause</comment>
         <translation>Zařízení je připojené přes Bluetooth, které poskytuje jen konzoli.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1053"/>
+        <location filename="../libs/core/src/error.cpp" line="1055"/>
         <source>Connect the device with a J-Link probe.</source>
         <comment>mcp.capability_missing suggestion</comment>
         <translation>Připojte zařízení pomocí sondy J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1058"/>
+        <location filename="../libs/core/src/error.cpp" line="1060"/>
         <source>Too many MCP requests are running.</source>
         <comment>mcp.too_many_requests message</comment>
         <translation>Běží příliš mnoho požadavků MCP.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1060"/>
+        <location filename="../libs/core/src/error.cpp" line="1062"/>
         <source>The server runs at most 32 tool calls at the same time.</source>
         <comment>mcp.too_many_requests cause</comment>
         <translation>Server spouští nejvýše 32 volání nástrojů současně.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1064"/>
+        <location filename="../libs/core/src/error.cpp" line="1066"/>
         <source>Wait for running calls to finish and try again.</source>
         <comment>mcp.too_many_requests suggestion</comment>
         <translation>Počkejte, až běžící volání skončí, a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1070"/>
+        <location filename="../libs/core/src/error.cpp" line="1072"/>
         <source>The CPU is running.</source>
         <comment>target.not_halted message</comment>
         <translation>Procesor běží.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1072"/>
+        <location filename="../libs/core/src/error.cpp" line="1074"/>
         <source>Registers can be read only while the core is halted.</source>
         <comment>target.not_halted cause</comment>
         <translation>Registry lze číst jen při zastaveném jádru.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1074"/>
+        <location filename="../libs/core/src/error.cpp" line="1076"/>
         <source>Halt the core first.</source>
         <comment>target.not_halted suggestion</comment>
         <translation>Nejprve zastavte jádro.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1080"/>
+        <location filename="../libs/core/src/error.cpp" line="1082"/>
         <source>The address range is not allowed for this operation.</source>
         <comment>target.address_out_of_range message</comment>
         <translation>Rozsah adres není pro tuto operaci povolen.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1082"/>
+        <location filename="../libs/core/src/error.cpp" line="1084"/>
         <source>Memory writes are allowed only in the RAM and peripheral ranges of the target.</source>
         <comment>target.address_out_of_range cause</comment>
         <translation>Zápis do paměti je povolen jen v rozsazích RAM a periferií cílového MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1086"/>
+        <location filename="../libs/core/src/error.cpp" line="1088"/>
         <source>Use an address inside the RAM or peripheral ranges of the target.</source>
         <comment>target.address_out_of_range suggestion</comment>
         <translation>Použijte adresu uvnitř rozsahů RAM nebo periferií cílového MCU.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1092"/>
+        <location filename="../libs/core/src/error.cpp" line="1094"/>
         <source>Reading or writing target memory failed.</source>
         <comment>target.memory_access_failed message</comment>
         <translation>Čtení nebo zápis paměti cílového MCU selhal.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1094"/>
+        <location filename="../libs/core/src/error.cpp" line="1096"/>
         <source>The address is not mapped, or the core is in a fault state.</source>
         <comment>target.memory_access_failed cause</comment>
         <translation>Adresa není namapovaná, nebo je jádro ve stavu chyby.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1098"/>
+        <location filename="../libs/core/src/error.cpp" line="1100"/>
         <source>Check the address and try again after a reset.</source>
         <comment>target.memory_access_failed suggestion</comment>
         <translation>Zkontrolujte adresu a zkuste to znovu po resetu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1103"/>
+        <location filename="../libs/core/src/error.cpp" line="1105"/>
         <source>The output file already exists.</source>
         <comment>io.file_exists message</comment>
         <translation>Výstupní soubor již existuje.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1105"/>
+        <location filename="../libs/core/src/error.cpp" line="1107"/>
         <source>Existing files are never overwritten by this command.</source>
         <comment>io.file_exists cause</comment>
         <translation>Tento příkaz nikdy nepřepisuje existující soubory.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1109"/>
+        <location filename="../libs/core/src/error.cpp" line="1111"/>
         <source>Choose a new file name or delete the file first.</source>
         <comment>io.file_exists suggestion</comment>
         <translation>Zvolte nový název souboru, nebo soubor nejprve smažte.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1114"/>
+        <location filename="../libs/core/src/error.cpp" line="1116"/>
         <source>The installed J-Link software does not provide a function this operation needs.</source>
         <comment>dependency.jlink_function_missing message</comment>
         <translation>Nainstalovaný software J-Link neposkytuje funkci, kterou tato operace potřebuje.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1118"/>
+        <location filename="../libs/core/src/error.cpp" line="1120"/>
         <source>The J-Link library is older than, or different from, the versions HARDWARIO Monitor was tested with.</source>
         <comment>dependency.jlink_function_missing cause</comment>
         <translation>Knihovna J-Link je starší než verze, se kterými byl HARDWARIO Monitor testován, nebo se od nich liší.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1122"/>
+        <location filename="../libs/core/src/error.cpp" line="1124"/>
         <source>Install the latest J-Link Software and Documentation Pack.</source>
         <comment>dependency.jlink_function_missing suggestion</comment>
         <translation>Nainstalujte nejnovější J-Link Software and Documentation Pack.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1128"/>
+        <location filename="../libs/core/src/error.cpp" line="1130"/>
         <source>The downloaded firmware is damaged (checksum mismatch).</source>
         <comment>firmware.checksum_mismatch message</comment>
         <translation>Stažený firmware je poškozený (nesouhlasí kontrolní součet).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1132"/>
+        <location filename="../libs/core/src/error.cpp" line="1134"/>
         <source>The file was changed or damaged during the download.</source>
         <comment>firmware.checksum_mismatch cause</comment>
         <translation>Soubor byl během stahování změněn nebo poškozen.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1135"/>
+        <location filename="../libs/core/src/error.cpp" line="1137"/>
         <source>Try again; if it repeats, report it to HARDWARIO.</source>
         <comment>firmware.checksum_mismatch suggestion</comment>
         <translation>Zkuste to znovu; pokud se to opakuje, nahlaste to společnosti HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1142"/>
+        <location filename="../libs/core/src/error.cpp" line="1144"/>
         <source>Could not reach GitHub to check for updates.</source>
         <comment>update.network message</comment>
         <translation>Nepodařilo se spojit s GitHubem a zjistit dostupnost aktualizací.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1144"/>
+        <location filename="../libs/core/src/error.cpp" line="1146"/>
         <source>There is no internet connection, or a firewall or proxy blocks GitHub.</source>
         <comment>update.network cause</comment>
         <translation>Není k dispozici připojení k internetu, nebo GitHub blokuje firewall či proxy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1147"/>
+        <location filename="../libs/core/src/error.cpp" line="1149"/>
         <source>Check your connection or try again later.</source>
         <comment>update.network suggestion</comment>
         <translation>Zkontrolujte připojení nebo to zkuste později.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1153"/>
+        <location filename="../libs/core/src/error.cpp" line="1155"/>
         <source>GitHub temporarily refused the update check.</source>
         <comment>update.rate_limited message</comment>
         <translation>GitHub dočasně odmítl kontrolu aktualizací.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1155"/>
+        <location filename="../libs/core/src/error.cpp" line="1157"/>
         <source>GitHub limits how often a network address may ask; other computers on the same network may have used up the limit.</source>
         <comment>update.rate_limited cause</comment>
         <translation>GitHub omezuje, jak často se smí z jedné síťové adresy ptát; limit mohly vyčerpat jiné počítače ve stejné síti.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1160"/>
+        <location filename="../libs/core/src/error.cpp" line="1162"/>
         <source>Try again in an hour.</source>
         <comment>update.rate_limited suggestion</comment>
         <translation>Zkuste to znovu za hodinu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1166"/>
-        <location filename="../libs/core/src/error.cpp" line="1183"/>
+        <location filename="../libs/core/src/error.cpp" line="1168"/>
+        <location filename="../libs/core/src/error.cpp" line="1185"/>
         <source>The update information from GitHub could not be read.</source>
         <comment>update.bad_response message</comment>
         <translation>Informace o aktualizacích z GitHubu se nepodařilo přečíst.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1169"/>
-        <location filename="../libs/core/src/error.cpp" line="1186"/>
+        <location filename="../libs/core/src/error.cpp" line="1171"/>
+        <location filename="../libs/core/src/error.cpp" line="1188"/>
         <source>GitHub sent an unexpected answer, or a proxy changed it.</source>
         <comment>update.bad_response cause</comment>
         <translation>GitHub poslal neočekávanou odpověď, nebo ji změnila proxy.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1173"/>
-        <location filename="../libs/core/src/error.cpp" line="1190"/>
+        <location filename="../libs/core/src/error.cpp" line="1175"/>
+        <location filename="../libs/core/src/error.cpp" line="1192"/>
         <source>Try again later; if it persists, check the releases page: https://github.com/hardwario/monitor/releases</source>
         <comment>update.bad_response suggestion</comment>
         <translation>Zkuste to později; pokud problém trvá, podívejte se na stránku vydání: https://github.com/hardwario/monitor/releases</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1200"/>
+        <location filename="../libs/core/src/error.cpp" line="1202"/>
         <source>The file name must be a plain name.</source>
         <comment>mcp.to_file_not_allowed message</comment>
         <translation>Název souboru musí být prostý název.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1202"/>
+        <location filename="../libs/core/src/error.cpp" line="1204"/>
         <source>Memory dumps are written only into the server&apos;s dump folder.</source>
         <comment>mcp.to_file_not_allowed cause</comment>
         <translation>Výpisy paměti se zapisují jen do složky výpisů serveru.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1205"/>
+        <location filename="../libs/core/src/error.cpp" line="1207"/>
         <source>Use a plain file name such as flash.bin, or start the server with --dump-dir DIR.</source>
         <comment>mcp.to_file_not_allowed suggestion</comment>
         <translation>Použijte prostý název souboru, například flash.bin, nebo spusťte server s volbou --dump-dir DIR.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1213"/>
+        <location filename="../libs/core/src/error.cpp" line="1215"/>
         <source>The output file is a symbolic link.</source>
         <comment>cli.file_is_symlink message</comment>
         <translation>Výstupní soubor je symbolický odkaz.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1215"/>
+        <location filename="../libs/core/src/error.cpp" line="1217"/>
         <source>Symbolic links are never followed or replaced, even with --force.</source>
         <comment>cli.file_is_symlink cause</comment>
         <translation>Symbolické odkazy se nikdy nenásledují ani nenahrazují, ani s volbou --force.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1219"/>
+        <location filename="../libs/core/src/error.cpp" line="1221"/>
         <source>Choose another file name or remove the link first.</source>
         <comment>cli.file_is_symlink suggestion</comment>
         <translation>Zvolte jiný název souboru, nebo nejprve odkaz odstraňte.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1226"/>
+        <location filename="../libs/core/src/error.cpp" line="1228"/>
         <source>Every user account on this computer can use the J-Link (USB permissions).</source>
         <comment>usb.world_accessible message</comment>
         <translation>J-Link může používat každý uživatelský účet na tomto počítači (oprávnění USB).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1230"/>
+        <location filename="../libs/core/src/error.cpp" line="1232"/>
         <source>A udev rule, usually /etc/udev/rules.d/99-jlink.rules from the SEGGER J-Link Software, makes the probe accessible to all accounts.</source>
         <comment>usb.world_accessible cause</comment>
         <translation>Pravidlo udev, obvykle /etc/udev/rules.d/99-jlink.rules ze SEGGER J-Link Software, zpřístupňuje programátor všem účtům.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1235"/>
+        <location filename="../libs/core/src/error.cpp" line="1237"/>
         <source>Remove that rule (or its MODE=&quot;0666&quot;), install the rule shown in the setup wizard, then reconnect the J-Link. A J-Link Software update may install the rule again.</source>
         <comment>usb.world_accessible suggestion</comment>
         <translation>Odstraňte toto pravidlo (nebo jeho MODE=&quot;0666&quot;), nainstalujte pravidlo zobrazené v průvodci nastavením a potom J-Link znovu připojte. Aktualizace J-Link Software může pravidlo nainstalovat znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1246"/>
+        <location filename="../libs/core/src/error.cpp" line="1248"/>
         <source>The J-Link is connected to another MCU of the device.</source>
         <comment>target.other_connector message</comment>
         <translation>J-Link je připojen k jinému MCU zařízení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1249"/>
+        <location filename="../libs/core/src/error.cpp" line="1251"/>
         <source>The console runs on another MCU; the J-Link cable is on the other connector.</source>
         <comment>target.other_connector cause</comment>
         <translation>Konzole běží na jiném MCU; kabel J-Linku je na druhém konektoru.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1253"/>
+        <location filename="../libs/core/src/error.cpp" line="1255"/>
         <source>Move the J-Link cable to the connector of the console&apos;s MCU, or update the LTE firmware.</source>
         <comment>target.other_connector suggestion</comment>
         <translation>Přepojte kabel J-Linku ke konektoru MCU konzole, nebo aktualizujte firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1265"/>
+        <location filename="../libs/core/src/error.cpp" line="1267"/>
         <source>The LTE MCU was reset during the update.</source>
         <comment>target.reset_during_update message</comment>
         <translation>MCU LTE byl během aktualizace resetován.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1267"/>
+        <location filename="../libs/core/src/error.cpp" line="1269"/>
         <source>The application firmware on the application MCU reset the LTE MCU through its reset pin while the LTE MCU was being updated.</source>
         <comment>target.reset_during_update cause</comment>
         <translation>Aplikační firmware na aplikačním MCU resetoval MCU LTE přes jeho resetovací pin, zatímco se MCU LTE aktualizoval.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1272"/>
+        <location filename="../libs/core/src/error.cpp" line="1274"/>
         <source>Use the guided update, which stops the application first: Flash › Update LTE firmware… in the desktop app, or `hwio chester lte flash --guided`.</source>
         <comment>target.reset_during_update suggestion</comment>
         <translation>Použijte průvodce aktualizací, který nejdřív zastaví aplikaci: Nahrát FW › Aktualizovat firmware LTE… v desktopové aplikaci, nebo `hwio chester lte flash --guided`.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1281"/>
+        <location filename="../libs/core/src/error.cpp" line="1283"/>
         <source>Cannot reach the support server.</source>
         <comment>remote.relay_unreachable message</comment>
         <translation>Server podpory není dostupný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1283"/>
+        <location filename="../libs/core/src/error.cpp" line="1285"/>
         <source>The network, a proxy or a firewall blocks the connection to the support server (wss://terminal.hardwario.com).</source>
         <comment>remote.relay_unreachable cause</comment>
         <translation>Síť, proxy nebo firewall blokuje spojení se serverem podpory (wss://terminal.hardwario.com).</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1287"/>
+        <location filename="../libs/core/src/error.cpp" line="1289"/>
         <source>Check the internet connection or try another network.</source>
         <comment>remote.relay_unreachable suggestion</comment>
         <translation>Zkontrolujte připojení k internetu nebo zkuste jinou síť.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1293"/>
+        <location filename="../libs/core/src/error.cpp" line="1295"/>
         <source>The session code is not valid.</source>
         <comment>remote.code_invalid message</comment>
         <translation>Kód relace není platný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1295"/>
+        <location filename="../libs/core/src/error.cpp" line="1297"/>
         <source>The session code must be a number: 6 digits from HARDWARIO Monitor, up to 6 digits from the web Terminal.</source>
         <comment>remote.code_invalid cause</comment>
         <translation>Kód relace musí být číslo: 6 číslic z HARDWARIO Monitoru, nejvýše 6 číslic z webového Terminalu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1299"/>
+        <location filename="../libs/core/src/error.cpp" line="1301"/>
         <source>Check the code and type it again.</source>
         <comment>remote.code_invalid suggestion</comment>
         <translation>Zkontrolujte kód a napište ho znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1304"/>
+        <location filename="../libs/core/src/error.cpp" line="1306"/>
         <source>Another device is using this session code.</source>
         <comment>remote.code_collision message</comment>
         <translation>Tento kód relace používá jiné zařízení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1306"/>
+        <location filename="../libs/core/src/error.cpp" line="1308"/>
         <source>Someone else shares a console under the same session code. The session was ended for safety.</source>
         <comment>remote.code_collision cause</comment>
         <translation>Někdo jiný sdílí konzoli pod stejným kódem relace. Relace byla z bezpečnostních důvodů ukončena.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1310"/>
+        <location filename="../libs/core/src/error.cpp" line="1312"/>
         <source>Start sharing again to get a new code.</source>
         <comment>remote.code_collision suggestion</comment>
         <translation>Zahajte sdílení znovu, abyste dostali nový kód.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1315"/>
+        <location filename="../libs/core/src/error.cpp" line="1317"/>
         <source>The customer did not allow you to join.</source>
         <comment>remote.join_not_allowed message</comment>
         <translation>Zákazník vám nepovolil připojení.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1317"/>
+        <location filename="../libs/core/src/error.cpp" line="1319"/>
         <source>The customer ended the session instead of allowing you, or did not answer within 2 minutes.</source>
         <comment>remote.join_not_allowed cause</comment>
         <translation>Zákazník místo povolení relaci ukončil, nebo neodpověděl do 2 minut.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1321"/>
+        <location filename="../libs/core/src/error.cpp" line="1323"/>
         <source>Ask the customer to share the console again and to allow you when you join.</source>
         <comment>remote.join_not_allowed suggestion</comment>
         <translation>Požádejte zákazníka, aby konzoli sdílel znovu a po vašem připojení vám to povolil.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1328"/>
+        <location filename="../libs/core/src/error.cpp" line="1330"/>
         <source>The remote session ended.</source>
         <comment>remote.host_ended message</comment>
         <translation>Vzdálená relace skončila.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1330"/>
+        <location filename="../libs/core/src/error.cpp" line="1332"/>
         <source>The customer ended sharing, or their device or HARDWARIO Monitor disconnected.</source>
         <comment>remote.host_ended cause</comment>
         <translation>Zákazník ukončil sdílení, nebo se jeho zařízení či HARDWARIO Monitor odpojil.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1334"/>
+        <location filename="../libs/core/src/error.cpp" line="1336"/>
         <source>Ask the customer to share the console again if you need more time.</source>
         <comment>remote.host_ended suggestion</comment>
         <translation>Pokud potřebujete více času, požádejte zákazníka, aby konzoli sdílel znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1340"/>
+        <location filename="../libs/core/src/error.cpp" line="1342"/>
         <source>The customer denied the request.</source>
         <comment>remote.operation_denied message</comment>
         <translation>Zákazník žádost zamítl.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1342"/>
+        <location filename="../libs/core/src/error.cpp" line="1344"/>
         <source>The customer denied the operation, or did not answer within 60 seconds.</source>
         <comment>remote.operation_denied cause</comment>
         <translation>Zákazník operaci zamítl, nebo neodpověděl do 60 sekund.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1345"/>
+        <location filename="../libs/core/src/error.cpp" line="1347"/>
         <source>Ask the customer to allow the operation and try again.</source>
         <comment>remote.operation_denied suggestion</comment>
         <translation>Požádejte zákazníka, aby operaci povolil, a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1351"/>
+        <location filename="../libs/core/src/error.cpp" line="1353"/>
         <source>The customer&apos;s application supports only the console.</source>
         <comment>remote.operation_unsupported_peer message</comment>
         <translation>Aplikace zákazníka podporuje jen konzoli.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1354"/>
+        <location filename="../libs/core/src/error.cpp" line="1356"/>
         <source>The customer uses the web Terminal, which cannot flash, erase, recover or reset the device remotely.</source>
         <comment>remote.operation_unsupported_peer cause</comment>
         <translation>Zákazník používá webový Terminal, který neumí zařízení vzdáleně nahrát firmware, smazat, obnovit ani resetovat.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1358"/>
+        <location filename="../libs/core/src/error.cpp" line="1360"/>
         <source>Ask the customer to share the console from HARDWARIO Monitor.</source>
         <comment>remote.operation_unsupported_peer suggestion</comment>
         <translation>Požádejte zákazníka, aby konzoli sdílel z HARDWARIO Monitoru.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1365"/>
+        <location filename="../libs/core/src/error.cpp" line="1367"/>
         <source>This firmware is not in the HARDWARIO catalog.</source>
         <comment>remote.firmware_not_in_catalog message</comment>
         <translation>Tento firmware není v katalogu HARDWARIO.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1367"/>
+        <location filename="../libs/core/src/error.cpp" line="1369"/>
         <source>Remote flashing accepts only firmware from the HARDWARIO firmware catalog, identified by its ID.</source>
         <comment>remote.firmware_not_in_catalog cause</comment>
         <translation>Vzdálené nahrávání přijímá jen firmware z katalogu firmwarů HARDWARIO, určený jeho ID.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1371"/>
+        <location filename="../libs/core/src/error.cpp" line="1373"/>
         <source>Check the firmware ID, or ask the customer to flash a file locally.</source>
         <comment>remote.firmware_not_in_catalog suggestion</comment>
         <translation>Zkontrolujte ID firmwaru, nebo požádejte zákazníka, aby nahrál soubor lokálně.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1377"/>
+        <location filename="../libs/core/src/error.cpp" line="1379"/>
         <source>Unexpected data in the remote session.</source>
         <comment>remote.protocol_error message</comment>
         <translation>Neočekávaná data ve vzdálené relaci.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1379"/>
+        <location filename="../libs/core/src/error.cpp" line="1381"/>
         <source>The support server or the other participant sent data that HARDWARIO Monitor does not understand. It was ignored, or the session was ended for safety.</source>
         <comment>remote.protocol_error cause</comment>
         <translation>Server podpory nebo druhý účastník poslal data, kterým HARDWARIO Monitor nerozumí. Byla ignorována, nebo byla relace z bezpečnostních důvodů ukončena.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1384"/>
+        <location filename="../libs/core/src/error.cpp" line="1386"/>
         <source>Report the issue with a diagnostic report.</source>
         <comment>remote.protocol_error suggestion</comment>
         <translation>Nahlaste problém s diagnostickou zprávou.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1389"/>
+        <location filename="../libs/core/src/error.cpp" line="1391"/>
         <source>The LTE firmware was updated, but the application was not written back.</source>
         <comment>remote.application_not_restored message</comment>
         <translation>Firmware LTE byl aktualizován, ale aplikace nebyla zapsána zpět.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1392"/>
+        <location filename="../libs/core/src/error.cpp" line="1394"/>
         <source>The guided LTE update ended before the application was written back, or no copy of the application could be saved. The application MCU is empty.</source>
         <comment>remote.application_not_restored cause</comment>
         <translation>Řízená aktualizace LTE skončila dříve, než byla aplikace zapsána zpět, nebo se nepodařilo uložit kopii aplikace. MCU aplikace je prázdný.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1397"/>
+        <location filename="../libs/core/src/error.cpp" line="1399"/>
         <source>Flash an application: ask the customer to flash it, or ask to flash catalog firmware.</source>
         <comment>remote.application_not_restored suggestion</comment>
         <translation>Nahrajte aplikaci: požádejte zákazníka, aby ji nahrál, nebo požádejte o nahrání firmwaru z katalogu.</translation>
     </message>
     <message>
-        <location filename="../libs/core/src/error.cpp" line="1443"/>
+        <location filename="../libs/core/src/error.cpp" line="1408"/>
+        <source>The LTE MCU reports too low supply voltage.</source>
+        <comment>target.low_voltage message</comment>
+        <translation>MCU LTE hlásí příliš nízké napájecí napětí.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1410"/>
+        <source>The CHESTER is not powered enough (battery, power supply) or the J-Link cable does not connect the supply reference.</source>
+        <comment>target.low_voltage cause</comment>
+        <translation>Zařízení CHESTER nemá dostatečné napájení (baterie, zdroj) nebo kabel J-Linku nepropojuje referenci napájení.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1414"/>
+        <source>Check the power supply or batteries of the CHESTER and the J-Link cable on the connector, then try again.</source>
+        <comment>target.low_voltage suggestion</comment>
+        <translation>Zkontrolujte napájení nebo baterie zařízení CHESTER a kabel J-Linku na konektoru a potom to zkuste znovu.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1466"/>
+        <source>Check the power supply of the CHESTER and the J-Link cable on the LTE connector, then click Try again.</source>
+        <comment>suggestion of an LTE update failure in the guided update (ADR-0383)</comment>
+        <translation>Zkontrolujte napájení zařízení CHESTER a kabel J-Linku na konektoru LTE a potom klikněte na Zkusit znovu.</translation>
+    </message>
+    <message>
+        <location filename="../libs/core/src/error.cpp" line="1478"/>
         <source>The output was closed.</source>
         <comment>cancelled message when the stdout was closed</comment>
         <translation>Výstup byl uzavřen.</translation>
@@ -4587,12 +4673,12 @@
 <context>
     <name>hwio::device</name>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="313"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="315"/>
         <source>The Bluetooth connection to %1 was lost.</source>
         <translation>Spojení Bluetooth s %1 bylo ztraceno.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="318"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="319"/>
         <source>Could not connect to %1 over Bluetooth.</source>
         <translation>K %1 se nepodařilo připojit přes Bluetooth.</translation>
     </message>
@@ -4602,250 +4688,250 @@
         <translation>Párování s %1 selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="379"/>
-        <location filename="../libs/device/src/device_session.cpp" line="80"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="378"/>
+        <location filename="../libs/device/src/device_session.cpp" line="83"/>
         <source>No device profile was given.</source>
         <translation>Nebyl zadán profil zařízení.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="383"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="385"/>
         <source>The device %1 has no Bluetooth console.</source>
         <translation>Zařízení %1 nemá konzoli přes Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="391"/>
-        <location filename="../libs/device/src/device_session.cpp" line="85"/>
-        <location filename="../libs/device/src/device_session.cpp" line="485"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="395"/>
+        <location filename="../libs/device/src/device_session.cpp" line="90"/>
+        <location filename="../libs/device/src/device_session.cpp" line="494"/>
         <source>The device %1 has no target &quot;%2&quot;.</source>
         <translation>Zařízení %1 nemá cíl &quot;%2&quot;.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="399"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="404"/>
         <source>No Bluetooth device was given.</source>
         <translation>Nebylo zadáno žádné zařízení Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="532"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="539"/>
         <source>A command line must not be longer than %1 bytes.</source>
         <translation>Řádek příkazu nesmí být delší než %1 bajtů.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="91"/>
-        <location filename="../libs/device/src/device_session.cpp" line="740"/>
+        <location filename="../libs/device/src/device_session.cpp" line="97"/>
+        <location filename="../libs/device/src/device_session.cpp" line="768"/>
         <source>The %1 target of %2 has no console.</source>
         <translation>Cíl %1 zařízení %2 nemá konzoli.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="97"/>
+        <location filename="../libs/device/src/device_session.cpp" line="104"/>
         <source>The J-Link speed must be between %1 and %2 kHz.</source>
         <translation>Rychlost J-Linku musí být mezi %1 a %2 kHz.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="105"/>
+        <location filename="../libs/device/src/device_session.cpp" line="113"/>
         <source>The latency must be between %1 and %2 ms.</source>
         <translation>Latence musí být mezi %1 a %2 ms.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="522"/>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="165"/>
+        <location filename="../libs/device/src/device_session.cpp" line="532"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="161"/>
         <source>The firmware image is empty.</source>
         <translation>Obraz firmwaru je prázdný.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="536"/>
+        <location filename="../libs/device/src/device_session.cpp" line="548"/>
         <source>The LTE bundle is incomplete.</source>
         <translation>Balíček LTE je neúplný.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="564"/>
+        <location filename="../libs/device/src/device_session.cpp" line="579"/>
         <source>No modem firmware file was given.</source>
         <translation>Nebyl zadán soubor s firmwarem modemu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="590"/>
+        <location filename="../libs/device/src/device_session.cpp" line="608"/>
         <source>A %1 must be between 1 and %2 bytes.</source>
         <translation>%1 musí mít 1 až %2 bajtů.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="596"/>
+        <location filename="../libs/device/src/device_session.cpp" line="616"/>
         <source>With %1-bit units the address and the length must be multiples of %2.</source>
         <translation>U %1bitových jednotek musí být adresa i délka násobkem %2.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="611"/>
+        <location filename="../libs/device/src/device_session.cpp" line="633"/>
         <source>A memory read must be between 1 and %1 bytes.</source>
         <translation>Čtení paměti musí mít 1 až %1 bajtů.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="617"/>
+        <location filename="../libs/device/src/device_session.cpp" line="639"/>
         <source>memory read</source>
         <translation>Čtení paměti</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="660"/>
+        <location filename="../libs/device/src/device_session.cpp" line="683"/>
         <source>memory write</source>
         <translation>Zápis do paměti</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="694"/>
+        <location filename="../libs/device/src/device_session.cpp" line="718"/>
         <source>A flash write must be between 1 and %1 bytes.</source>
         <translation>Zápis do flash musí mít 1 až %1 bajtů.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="734"/>
+        <location filename="../libs/device/src/device_session.cpp" line="760"/>
         <source>Only a session with an open probe can be connected.</source>
         <translation>Připojit lze jen relaci s otevřeným J-Linkem.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="761"/>
+        <location filename="../libs/device/src/device_session.cpp" line="789"/>
         <source>Operation %1 is not running.</source>
         <translation>Operace %1 neprobíhá.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/device_session.cpp" line="119"/>
+        <location filename="../libs/device/src/device_session.cpp" line="126"/>
         <source>At this J-Link speed the console may not be found within %1 s. Use auto or %2 kHz or more.</source>
         <translation>Při této rychlosti J-Linku nemusí být konzole nalezena do %1 s. Použijte auto nebo alespoň %2 kHz.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/console_session.cpp" line="200"/>
+        <location filename="../libs/device/src/console_session.cpp" line="202"/>
         <source>The device did not connect in time.</source>
         <translation>Zařízení se nepřipojilo včas.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/probe_lock.cpp" line="63"/>
+        <location filename="../libs/device/src/probe_lock.cpp" line="67"/>
         <source>The J-Link %1 is used by another program (%2, PID %3).</source>
         <translation>J-Link %1 používá jiný program (%2, PID %3).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_lock.cpp" line="40"/>
+        <location filename="../libs/device/src/ble_lock.cpp" line="44"/>
         <source>The device %1 is used by another program (%2, PID %3).</source>
         <translation>Zařízení %1 používá jiný program (%2, PID %3).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_lock.cpp" line="47"/>
+        <location filename="../libs/device/src/ble_lock.cpp" line="48"/>
         <location filename="../libs/device/src/probe_lock.cpp" line="74"/>
         <source>If no other HARDWARIO program is running, delete %1.</source>
         <translation>Pokud neběží žádný jiný program HARDWARIO, smažte %1.</translation>
     </message>
     <message>
         <location filename="../libs/device/src/ble_lock.cpp" line="81"/>
-        <location filename="../libs/device/src/session_registry.cpp" line="123"/>
+        <location filename="../libs/device/src/session_registry.cpp" line="127"/>
         <source>The device %1 is already used by this application.</source>
         <translation>Zařízení %1 už tato aplikace používá.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/probe_lock.cpp" line="104"/>
-        <location filename="../libs/device/src/session_registry.cpp" line="148"/>
+        <location filename="../libs/device/src/probe_lock.cpp" line="103"/>
+        <location filename="../libs/device/src/session_registry.cpp" line="152"/>
         <source>The J-Link %1 is already used by this application.</source>
         <translation>J-Link %1 už tato aplikace používá.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="364"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1558"/>
-        <location filename="../libs/diag/src/environment.cpp" line="298"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="367"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1576"/>
+        <location filename="../libs/diag/src/environment.cpp" line="297"/>
         <source>The J-Link firmware is newer than the J-Link library.</source>
         <translation>Firmware J-Linku je novější než knihovna J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="414"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1842"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="417"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1860"/>
         <source>RTT buffer &quot;%1&quot; not found; the device log is not shown.</source>
         <translation>Vyrovnávací paměť RTT &quot;%1&quot; nebyla nalezena; log zařízení se nezobrazí.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="677"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1578"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="678"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1595"/>
         <source>The device has no power (%1 mV).</source>
         <translation>Zařízení nemá napájení (%1 mV).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/ble_session.cpp" line="298"/>
+        <location filename="../libs/device/src/ble_session.cpp" line="300"/>
         <location filename="../libs/device/src/session_worker.cpp" line="695"/>
         <source>Wait for the console to reconnect.</source>
         <translation>Počkejte, až se konzole znovu připojí.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1456"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1536"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1639"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1643"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1737"/>
-        <location filename="../libs/device/src/session_worker.cpp" line="1808"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1475"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1554"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1655"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1659"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1754"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1825"/>
         <source>Cancelled</source>
         <translation>Zrušeno</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1461"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1480"/>
         <source>Not checked</source>
         <translation>Nezkontrolováno</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1474"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1493"/>
         <source>Not checked: the time for the checks ran out</source>
         <translation>Nezkontrolováno: čas na kontroly vypršel</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1633"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1649"/>
         <source>Not measured by this J-Link</source>
         <translation>Tento J-Link napětí neměří</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1660"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1676"/>
         <source>Only the debug port answers</source>
         <translation>Odpovídá jen ladicí port</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1671"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1687"/>
         <source>Connected (SWD %1 kHz)</source>
         <translation>Připojeno (SWD %1 kHz)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1673"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1689"/>
         <source>Connected (SWD, automatic speed)</source>
         <translation>Připojeno (SWD, automatická rychlost)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1751"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1768"/>
         <source>%1, not protected</source>
         <translation>%1, nechráněno</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1773"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1790"/>
         <source>This MCU has no console</source>
         <translation>Tento MCU nemá konzoli</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1777"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1794"/>
         <source>Not checked: the MCU is protected</source>
         <translation>Nezkontrolováno: MCU je chráněn</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1824"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1841"/>
         <source>Found</source>
         <translation>Nalezeno</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="2100"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="2119"/>
         <source>Another program opened the J-Link after it was released.</source>
         <translation>Po uvolnění J-Linku jej otevřel jiný program.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="2104"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="2122"/>
         <source>Close the other program, then reacquire the J-Link.</source>
         <translation>Zavřete druhý program a pak J-Link znovu převezměte.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="47"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="49"/>
         <source>an unknown MCU (part %1)</source>
         <translation>neznámý MCU (součástka %1)</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="130"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="132"/>
         <source>Programming the %1 MCU failed.</source>
         <translation>Programování MCU %1 selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="135"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="136"/>
         <source>Erasing the %1 MCU failed.</source>
         <translation>Mazání MCU %1 selhalo.</translation>
     </message>
@@ -4855,87 +4941,87 @@
         <translation>Obnovení MCU %1 selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="146"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="144"/>
         <source>The %1 MCU is read-back protected.</source>
         <translation>MCU %1 je chráněn proti čtení.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="149"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="146"/>
         <source>Run `hwio %1 %2 recover` (erases the MCU).</source>
         <translation>Spusťte `hwio %1 %2 recover` (vymaže MCU).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="239"/>
+        <location filename="../libs/device/src/profile.cpp" line="248"/>
         <source>The range runs past the end of the address space.</source>
         <translation>Rozsah přesahuje konec adresního prostoru.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="243"/>
+        <location filename="../libs/device/src/profile.cpp" line="250"/>
         <source>Use a shorter range or a lower address.</source>
         <translation>Použijte kratší rozsah nebo nižší adresu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="259"/>
+        <location filename="../libs/device/src/profile.cpp" line="266"/>
         <source>The range overlaps system or debug registers of the CPU, through which a write could make the device run arbitrary code.</source>
         <translation>Rozsah zasahuje do systémových nebo ladicích registrů procesoru, přes které by zápis mohl přimět zařízení spustit libovolný kód.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="264"/>
+        <location filename="../libs/device/src/profile.cpp" line="270"/>
         <source>The range overlaps the flash controller registers, whose tasks erase flash, UICR and the product information.</source>
         <translation>Rozsah zasahuje do registrů řadiče flash, jejichž úlohy mažou flash, UICR a informace o produktu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="297"/>
+        <location filename="../libs/device/src/profile.cpp" line="302"/>
         <source>The firmware writes into the Product Information Block (address %1).</source>
         <translation>Firmware zapisuje do bloku informací o produktu (PIB) (adresa %1).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="312"/>
+        <location filename="../libs/device/src/profile.cpp" line="318"/>
         <source>The firmware does not fit the %1 MCU (address %2).</source>
         <translation>Firmware neodpovídá MCU %1 (adresa %2).</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profile.cpp" line="316"/>
+        <location filename="../libs/device/src/profile.cpp" line="321"/>
         <source>Check that the firmware is for the %1 MCU.</source>
         <translation>Zkontrolujte, že je firmware určen pro MCU %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="207"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="202"/>
         <source>Expected the %1 MCU (%2) but found %3.</source>
         <translation>Očekáván MCU %1 (%2), ale nalezen %3.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="211"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="205"/>
         <source>Connect the J-Link to the %1 connector.</source>
         <translation>Připojte J-Link ke konektoru %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="225"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="218"/>
         <source>an %1 MCU</source>
         <translation>MCU %1</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="242"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="235"/>
         <source>The type of the %1 MCU could not be read.</source>
         <translation>Typ MCU %1 nelze přečíst.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="267"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="259"/>
         <source>The J-Link is connected to the %1 MCU.</source>
         <translation>J-Link je připojen k MCU %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="270"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="262"/>
         <source>The console runs on the %1 MCU; the J-Link cable is on the other connector.</source>
         <translation>Konzole běží na MCU %1; kabel J-Linku je na druhém konektoru.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="276"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="269"/>
         <source>Move the J-Link cable to the %1 connector, or update the LTE firmware.</source>
         <translation>Přepojte kabel J-Linku ke konektoru %1, nebo aktualizujte firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/flash_workflows.cpp" line="408"/>
+        <location filename="../libs/device/src/flash_workflows.cpp" line="409"/>
         <source>The Product Information Block of the %1 MCU could not be checked after the erase.</source>
         <translation>Blok informací o produktu (PIB) MCU %1 nelze po smazání zkontrolovat.</translation>
     </message>
@@ -4955,7 +5041,7 @@
         <translation>Nemažte znovu; nahlaste to podpoře HARDWARIO a přiložte soubor protokolu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/pib.cpp" line="73"/>
+        <location filename="../libs/device/src/pib.cpp" line="76"/>
         <source>The Product Information Block is missing or damaged (%1).</source>
         <translation>Blok informací o produktu (PIB) chybí nebo je poškozený (%1).</translation>
     </message>
@@ -5046,7 +5132,7 @@
         <translation>Kanály konzole</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/session_registry.cpp" line="138"/>
+        <location filename="../libs/device/src/session_registry.cpp" line="142"/>
         <source>The firmware of the J-Link %1 is being updated.</source>
         <translation>Firmware J-Linku %1 se právě aktualizuje.</translation>
     </message>
@@ -5054,67 +5140,82 @@
 <context>
     <name>hwio::device::LteUpdateProcedure</name>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="663"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="696"/>
+        <source>The application MCU is erased. Write the application back first?</source>
+        <translation>Aplikační MCU je smazaný. Zapsat nejdřív aplikaci zpět?</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="722"/>
         <source>This is the %1 connector. Move the cable to the %2 connector.</source>
         <translation>Toto je konektor %1. Přepojte kabel ke konektoru %2.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="665"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="724"/>
         <source>Connect the J-Link cable to the %1 connector.</source>
         <translation>Připojte kabel J-Linku ke konektoru %1.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="668"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="727"/>
         <source>The application on this CHESTER will be erased. Then you move the J-Link cable to the %1 connector, and at the end back to %2; the application is written back.</source>
         <translation>Aplikace v tomto zařízení CHESTER bude smazána. Potom přepojíte kabel J-Link na konektor %1 a na konci zpět na %2; aplikace se zapíše zpět.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="673"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="732"/>
         <source>Saving a copy of the application…</source>
         <translation>Ukládání kopie aplikace…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="675"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="734"/>
         <source>A copy of the application could not be saved. Without it you will have to flash an application yourself at the end.</source>
         <translation>Kopii aplikace se nepodařilo uložit. Bez ní budete muset na konci nahrát aplikaci sami.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="678"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="737"/>
         <source>Erasing the application…</source>
         <translation>Mazání aplikace…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="680"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="739"/>
         <source>Updating the LTE MCU…</source>
         <translation>Aktualizace LTE MCU…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="682"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="741"/>
         <source>Write back the application that was in the device.</source>
         <translation>Zapsat zpět aplikaci, která byla v zařízení.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="683"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="742"/>
         <source>Choose the application firmware to flash.</source>
         <translation>Vyberte firmware aplikace, který se nahraje.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="685"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="744"/>
         <source>Writing the application…</source>
         <translation>Zápis aplikace…</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="687"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="746"/>
         <source>The LTE firmware was updated and the application is running again.</source>
         <translation>Firmware LTE je aktualizován a aplikace znovu běží.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="691"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="754"/>
+        <source>The LTE firmware was updated. The application was written back.</source>
+        <translation>Firmware LTE byl aktualizován. Aplikace byla zapsána zpět.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="755"/>
+        <source>LTE firmware not updated. The application was written back.</source>
+        <translation>Firmware LTE nebyl aktualizován. Aplikace byla zapsána zpět.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="757"/>
         <source>The application MCU is erased. The device will not run until you flash an application.</source>
         <translation>MCU aplikace je smazaný. Zařízení nepoběží, dokud nenahrajete aplikaci.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/lte_update_procedure.cpp" line="693"/>
+        <location filename="../libs/device/src/lte_update_procedure.cpp" line="759"/>
         <source>The LTE firmware update was cancelled.</source>
         <translation>Aktualizace firmwaru LTE byla zrušena.</translation>
     </message>
@@ -5122,91 +5223,91 @@
 <context>
     <name>hwio::diag</name>
     <message>
-        <location filename="../libs/device/src/session_worker.cpp" line="1498"/>
-        <location filename="../libs/diag/src/check.cpp" line="233"/>
-        <location filename="../libs/diag/src/environment.cpp" line="203"/>
+        <location filename="../libs/device/src/session_worker.cpp" line="1517"/>
+        <location filename="../libs/diag/src/check.cpp" line="236"/>
+        <location filename="../libs/diag/src/environment.cpp" line="204"/>
         <source>The check &quot;%1&quot; did not finish in time.</source>
         <translation>Kontrola „%1“ nebyla dokončena včas.</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="59"/>
+        <location filename="../libs/diag/src/environment.cpp" line="60"/>
         <source>J-Link Software</source>
         <translation>J-Link Software</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="60"/>
+        <location filename="../libs/diag/src/environment.cpp" line="61"/>
         <source>nRF Util</source>
         <translation>nRF Util</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="61"/>
+        <location filename="../libs/diag/src/environment.cpp" line="62"/>
         <source>USB access to J-Link</source>
         <translation>Přístup k J-Linku přes USB</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="62"/>
+        <location filename="../libs/diag/src/environment.cpp" line="63"/>
         <source>Other programs using J-Link</source>
         <translation>Jiné programy používající J-Link</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="63"/>
+        <location filename="../libs/diag/src/environment.cpp" line="64"/>
         <source>J-Link probes</source>
         <translation>J-Linky</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="64"/>
+        <location filename="../libs/diag/src/environment.cpp" line="65"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="68"/>
+        <location filename="../libs/diag/src/environment.cpp" line="69"/>
         <source>J-Link firmware</source>
         <translation>Firmware J-Linku</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="69"/>
+        <location filename="../libs/diag/src/environment.cpp" line="70"/>
         <source>Settings and log folders</source>
         <translation>Složky nastavení a protokolů</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="125"/>
+        <location filename="../libs/diag/src/environment.cpp" line="126"/>
         <source>%1 — needed only for LTE modem firmware</source>
         <translation>%1 — potřeba jen pro firmware LTE modemu</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="134"/>
+        <location filename="../libs/diag/src/environment.cpp" line="135"/>
         <source>Not found — needed only for LTE modem firmware</source>
         <translation>Nenalezeno — potřeba jen pro firmware LTE modemu</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="148"/>
+        <location filename="../libs/diag/src/environment.cpp" line="149"/>
         <source>%1, device %2</source>
         <translation>%1, device %2</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="161"/>
+        <location filename="../libs/diag/src/environment.cpp" line="162"/>
         <source>Not needed on this system</source>
         <translation>V tomto systému není potřeba</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="168"/>
-        <location filename="../libs/diag/src/environment.cpp" line="199"/>
+        <location filename="../libs/diag/src/environment.cpp" line="169"/>
+        <location filename="../libs/diag/src/environment.cpp" line="200"/>
         <source>Could not be checked</source>
         <translation>Nelze zkontrolovat</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="172"/>
-        <location filename="../libs/diag/src/environment.cpp" line="321"/>
+        <location filename="../libs/diag/src/environment.cpp" line="173"/>
+        <location filename="../libs/diag/src/environment.cpp" line="319"/>
         <source>No J-Link connected</source>
         <translation>Žádný J-Link není připojen</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="181"/>
+        <location filename="../libs/diag/src/environment.cpp" line="182"/>
         <source>Accessible to every account</source>
         <translation>Přístupné všem účtům</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="184"/>
+        <location filename="../libs/diag/src/environment.cpp" line="185"/>
         <source>Access granted</source>
         <translation>Přístup povolen</translation>
     </message>
@@ -5217,7 +5318,7 @@
     </message>
     <message>
         <location filename="../libs/diag/src/environment.cpp" line="211"/>
-        <location filename="../libs/diag/src/environment.cpp" line="255"/>
+        <location filename="../libs/diag/src/environment.cpp" line="253"/>
         <source>None found</source>
         <translation>Nic nenalezeno</translation>
     </message>
@@ -5227,70 +5328,70 @@
         <translation>%1 (PID %2) je spuštěn</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="224"/>
+        <location filename="../libs/diag/src/environment.cpp" line="225"/>
         <source>%1 (PID %2) is running and may be using the J-Link.</source>
         <translation>%1 (PID %2) je spuštěn a může používat J-Link.</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="229"/>
+        <location filename="../libs/diag/src/environment.cpp" line="228"/>
         <source>Close %1 and try again.</source>
         <translation>Zavřete %1 a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="433"/>
+        <location filename="../libs/diag/src/environment.cpp" line="431"/>
         <source>Permission will be asked on first use</source>
         <translation>Oprávnění bude vyžádáno při prvním použití</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="441"/>
+        <location filename="../libs/diag/src/environment.cpp" line="439"/>
         <source>Adapter ready</source>
         <translation>Adaptér připraven</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/check.cpp" line="189"/>
-        <location filename="../libs/diag/src/check.cpp" line="241"/>
+        <location filename="../libs/diag/src/check.cpp" line="191"/>
+        <location filename="../libs/diag/src/check.cpp" line="243"/>
         <source>Cancelled</source>
         <translation>Zrušeno</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/check.cpp" line="202"/>
-        <location filename="../libs/diag/src/environment.cpp" line="244"/>
-        <location filename="../libs/diag/src/environment.cpp" line="309"/>
+        <location filename="../libs/diag/src/check.cpp" line="204"/>
+        <location filename="../libs/diag/src/environment.cpp" line="242"/>
+        <location filename="../libs/diag/src/environment.cpp" line="307"/>
         <source>Skipped: an earlier check did not pass</source>
         <translation>Přeskočeno: předchozí kontrola neprošla</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="270"/>
+        <location filename="../libs/diag/src/environment.cpp" line="268"/>
         <source>%1 found: %2</source>
         <translation>Nalezeno %1: %2</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="365"/>
+        <location filename="../libs/diag/src/environment.cpp" line="363"/>
         <source>Could not be checked: %1</source>
         <translation>Nelze zkontrolovat: %1</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="372"/>
+        <location filename="../libs/diag/src/environment.cpp" line="370"/>
         <source>Not checked: the J-Link is in use</source>
         <translation>Nezkontrolováno: J-Link se používá</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="377"/>
+        <location filename="../libs/diag/src/environment.cpp" line="375"/>
         <source>Not known</source>
         <translation>Neznámý</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="380"/>
+        <location filename="../libs/diag/src/environment.cpp" line="378"/>
         <source>Current (a J-Link in use was not checked)</source>
         <translation>Aktuální (používaný J-Link nebyl zkontrolován)</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="384"/>
+        <location filename="../libs/diag/src/environment.cpp" line="382"/>
         <source>Current</source>
         <translation>Aktuální</translation>
     </message>
     <message>
-        <location filename="../libs/diag/src/environment.cpp" line="414"/>
+        <location filename="../libs/diag/src/environment.cpp" line="412"/>
         <source>Writable</source>
         <translation>Zapisovatelné</translation>
     </message>
@@ -5298,37 +5399,37 @@
 <context>
     <name>hwio::firmware</name>
     <message>
-        <location filename="../libs/firmware/src/firmware_cache.cpp" line="73"/>
+        <location filename="../libs/firmware/src/firmware_cache.cpp" line="76"/>
         <source>A firmware ID has exactly 32 hexadecimal digits.</source>
         <translation>ID firmwaru má přesně 32 šestnáctkových číslic.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="56"/>
+        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="59"/>
         <source>Downloading firmware %1 failed.</source>
         <translation>Stažení firmwaru %1 selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="65"/>
+        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="67"/>
         <source>Firmware %1 was not found in the catalog.</source>
         <translation>Firmware %1 nebyl v katalogu nalezen.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="250"/>
+        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="251"/>
         <source>The downloaded file is not %1.</source>
         <translation>Stažený soubor není %1.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="265"/>
+        <location filename="../libs/firmware/src/firmware_catalog.cpp" line="266"/>
         <source>Downloading %1 failed.</source>
         <translation>Stažení %1 selhalo.</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/intel_hex.cpp" line="44"/>
+        <location filename="../libs/firmware/src/intel_hex.cpp" line="48"/>
         <source>The firmware file is not a valid HEX file (line %1).</source>
         <translation>Soubor s firmwarem není platný soubor HEX (řádek %1).</translation>
     </message>
     <message>
-        <location filename="../libs/firmware/src/lte_input.cpp" line="44"/>
+        <location filename="../libs/firmware/src/lte_input.cpp" line="46"/>
         <source>The file is not a CHESTER LTE bundle, modem firmware or HEX file.</source>
         <translation>Soubor není balíček CHESTER LTE, firmware modemu ani soubor HEX.</translation>
     </message>
@@ -5344,12 +5445,17 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="719"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="682"/>
+        <source>Wait until the J-Link firmware update has finished.</source>
+        <translation>Počkejte na dokončení aktualizace firmwaru J-Linku.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="904"/>
         <source>Close a tab first: at most %1 device tabs can be open.</source>
         <translation>Nejprve zavřete kartu: otevřených může být nejvýše %1 karet zařízení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1257"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1478"/>
         <source>Copied to clipboard.</source>
         <translation>Zkopírováno do schránky.</translation>
     </message>
@@ -5357,52 +5463,52 @@
 <context>
     <name>hwio::gui::BatchRunner</name>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="50"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="55"/>
         <source>The batch file could not be read.</source>
         <translation>Dávkový soubor se nepodařilo přečíst.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="51"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="58"/>
         <source>the file is missing or you do not have permission to read it.</source>
         <translation>soubor neexistuje nebo nemáte oprávnění ho číst.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="52"/>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="105"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="61"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="149"/>
         <source>Choose another file.</source>
         <translation>Vyberte jiný soubor.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="61"/>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="74"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="72"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="91"/>
         <source>The batch file is too large (max. %1 MiB).</source>
         <translation>Dávkový soubor je příliš velký (max. %1 MiB).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="62"/>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="75"/>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="90"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="78"/>
         <location filename="../app/gui/src/workers/batch_runner.cpp" line="97"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="120"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="134"/>
         <source>Split it into smaller files.</source>
         <translation>Rozdělte ho na menší soubory.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="88"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="113"/>
         <source>The batch file is too large (max. %1 commands).</source>
         <translation>Dávkový soubor je příliš velký (max. %1 příkazů).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="95"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="128"/>
         <source>The batch file contains a command longer than %1 bytes.</source>
         <translation>Dávkový soubor obsahuje příkaz delší než %1 bajtů.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="104"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="143"/>
         <source>The batch file contains no commands.</source>
         <translation>Dávkový soubor neobsahuje žádné příkazy.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/workers/batch_runner.cpp" line="105"/>
+        <location filename="../app/gui/src/workers/batch_runner.cpp" line="146"/>
         <source>every line is empty or a comment (#).</source>
         <translation>všechny řádky jsou prázdné nebo jsou to komentáře (#).</translation>
     </message>
@@ -5427,172 +5533,172 @@
 <context>
     <name>hwio::gui::ConnectionViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="294"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="310"/>
         <source>Disconnected — %1</source>
         <translation>Odpojeno — %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="292"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="294"/>
         <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="310"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="312"/>
         <source>Disconnected</source>
         <translation>Odpojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="296"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="298"/>
         <source>Connecting…</source>
         <translation>Připojování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="298"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="300"/>
         <source>J-Link open, device not connected</source>
         <translation>J-Link otevřen, zařízení nepřipojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="301"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="291"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="303"/>
         <source>Connected</source>
         <translation>Připojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="120"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="122"/>
         <source>%1 · %2 dBm</source>
         <translation>%1 · %2 dBm</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="162"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="164"/>
         <source>Click Pair and enter the passkey in the system dialog.</source>
         <translation>Klikněte na Spárovat a zadejte přístupový klíč v dialogu systému.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="163"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="165"/>
         <source>Click Connect and enter the passkey when macOS asks for it.</source>
         <translation>Klikněte na Připojit a zadejte přístupový klíč, až si o něj macOS řekne.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="166"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="168"/>
         <source>Already paired but it does not work? Remove the device in the system Bluetooth settings and pair it again.</source>
         <translation>Zařízení je spárované, ale nefunguje? Odeberte ho v systémovém nastavení Bluetooth a spárujte ho znovu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="197"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="199"/>
         <source>Pair</source>
         <translation>Spárovat</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="204"/>
         <source>Choose another device</source>
         <translation>Vybrat jiné zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="202"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="204"/>
         <source>Choose another probe</source>
         <translation>Vybrat jiný programátor</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="205"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="207"/>
         <source>Open Bluetooth settings</source>
         <translation>Otevřít nastavení Bluetooth</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="209"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="211"/>
         <source>Open Privacy settings</source>
         <translation>Otevřít nastavení soukromí</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="281"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="283"/>
         <source>Pairing — confirm the passkey in the system dialog…</source>
         <translation>Párování — potvrďte přístupový klíč v dialogu systému…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="285"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="287"/>
         <source>Waiting for pairing — enter the passkey in the system dialog</source>
         <translation>Čeká se na spárování — zadejte přístupový klíč v dialogu systému</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="289"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="291"/>
         <source>Connected · MTU %1</source>
         <translation>Připojeno · MTU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="302"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="304"/>
         <source>Connected · %1 V</source>
         <translation>Připojeno · %1 V</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="305"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="307"/>
         <source>Reconnecting… (%1)</source>
         <translation>Opětovné připojování… (%1)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="306"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="308"/>
         <source>Reconnecting…</source>
         <translation>Opětovné připojování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="531"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="533"/>
         <source>The J-Link firmware is outdated (%1, available: %2).</source>
         <translation>Firmware J-Linku je zastaralý (%1, k dispozici: %2).</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="807"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="810"/>
         <source>The console log file could not be written; logging to file is off for this session.</source>
         <translation>Soubor s výpisem konzole nelze zapsat; ukládání do souboru je pro tuto relaci vypnuté.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="825"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="830"/>
         <source>target not powered</source>
         <translation>zařízení není napájené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="827"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="833"/>
         <source>J-Link not found</source>
         <translation>J-Link nenalezen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="829"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="835"/>
         <source>J-Link used by another program</source>
         <translation>J-Link používá jiný program</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="831"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="838"/>
         <source>J-Link could not be opened</source>
         <translation>J-Link nelze otevřít</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="833"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="841"/>
         <source>target does not respond</source>
         <translation>zařízení neodpovídá</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="836"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="846"/>
         <source>no RTT console found</source>
         <translation>konzole RTT nenalezena</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="840"/>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="844"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="851"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="857"/>
         <source>connection lost</source>
         <translation>spojení ztraceno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="842"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="854"/>
         <source>out of range</source>
         <translation>mimo dosah</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="847"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="861"/>
         <source>not paired</source>
         <translation>nespárováno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="849"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="864"/>
         <source>Bluetooth is off</source>
         <translation>Bluetooth je vypnuté</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="853"/>
+        <location filename="../app/gui/src/viewmodels/connection_view_model.cpp" line="868"/>
         <source>J-Link Software missing</source>
         <translation>chybí software J-Link</translation>
     </message>
@@ -5600,153 +5706,178 @@
 <context>
     <name>hwio::gui::ConsentViewModel</name>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="49"/>
-        <source>Allow these for %1</source>
-        <translation>Povolit tyto akce pro %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="52"/>
-        <source>Allow flashing for %1</source>
-        <translation>Povolit nahrávání firmwaru pro %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="55"/>
-        <source>Allow erasing for %1</source>
-        <translation>Povolit mazání pro %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="58"/>
-        <source>Allow memory writes for %1</source>
-        <translation>Povolit zápis do paměti pro %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="61"/>
-        <source>Allow UICR writes for %1</source>
-        <translation>Povolit zápis do UICR pro %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="63"/>
-        <source>Allow connecting devices for %1</source>
-        <translation>Povolit připojování zařízení pro %1</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="116"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="266"/>
         <source>An AI assistant</source>
         <translation>AI asistent</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="127"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="277"/>
         <source>%1 wants to flash firmware</source>
         <translation>%1 chce nahrát firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="130"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="280"/>
         <source>%1 wants to update the LTE modem firmware</source>
         <translation>%1 chce aktualizovat firmware LTE modemu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="133"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="283"/>
         <source>%1 wants to write to the flash memory</source>
         <translation>%1 chce zapisovat do paměti flash</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="136"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="286"/>
         <source>%1 wants to erase the device</source>
         <translation>%1 chce vymazat zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="139"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="289"/>
         <source>%1 wants to recover the device (erases everything)</source>
         <translation>%1 chce obnovit zařízení (vymaže vše)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="142"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="292"/>
         <source>%1 wants to write to the memory</source>
         <translation>%1 chce zapisovat do paměti</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="145"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="295"/>
         <source>%1 wants to connect a device</source>
         <translation>%1 chce připojit zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="147"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="297"/>
         <source>%1 wants to run %2</source>
         <translation>%1 chce spustit %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="160"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="183"/>
+        <source>MCU</source>
+        <translation>MCU</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="315"/>
         <source>Client</source>
         <translation>Klient</translation>
     </message>
     <message>
         <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="167"/>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="171"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="172"/>
         <source>Device</source>
         <translation>Zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="168"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="97"/>
+        <source>Application MCU</source>
+        <translation>Aplikační MCU</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="100"/>
+        <source>LTE MCU</source>
+        <translation>LTE MCU</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="112"/>
+        <source>Always allow these for %1</source>
+        <translation>Vždy povolit tyto akce pro %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="115"/>
+        <source>Always allow flashing for %1</source>
+        <translation>Vždy povolit nahrávání firmwaru pro %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="118"/>
+        <source>Always allow erasing for %1</source>
+        <translation>Vždy povolit mazání pro %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="121"/>
+        <source>Always allow memory writes for %1</source>
+        <translation>Vždy povolit zápis do paměti pro %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="124"/>
+        <source>Always allow UICR writes for %1</source>
+        <translation>Vždy povolit zápis do UICR pro %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="126"/>
+        <source>Always allow connecting devices for %1</source>
+        <translation>Vždy povolit připojování zařízení pro %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="157"/>
+        <source>Firmware</source>
+        <translation>Firmware</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="159"/>
+        <source>Catalog ID %1</source>
+        <translation>ID v katalogu %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="169"/>
         <source>Open a new tab for %1</source>
         <translation>Otevřít novou kartu pro %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="169"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="168"/>
         <source>Connect the tab %1</source>
         <translation>Připojit kartu %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="177"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="141"/>
         <source>File</source>
         <translation>Soubor</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="181"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="146"/>
         <source>Size</source>
         <translation>Velikost</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="185"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="154"/>
         <source>Catalog ID</source>
         <translation>ID v katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="189"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="179"/>
         <source>Profile</source>
         <translation>Profil</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="193"/>
-        <source>Target</source>
-        <translation>Cíl</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="196"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="186"/>
         <source>Scope</source>
         <translation>Rozsah</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="199"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="189"/>
         <source>Address range</source>
         <translation>Rozsah adres</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="206"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="316"/>
+        <source>%1, version %2</source>
+        <translation>%1, verze %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="200"/>
         <source>The PIB (serial number, keys) is lost.</source>
         <translation>PIB (sériové číslo, klíče) se ztratí.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="210"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="205"/>
         <source>Contains UICR data: factory data of the device may be overwritten.</source>
         <translation>Obsahuje data UICR: tovární data zařízení mohou být přepsána.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="216"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="212"/>
         <source>Writing memory can make the device run arbitrary code.</source>
         <translation>Zápis do paměti může zařízení přimět ke spuštění libovolného kódu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="245"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="346"/>
         <source>Denied automatically in %1 if not answered.</source>
         <translation>Bez odpovědi bude za %1 automaticky zamítnuto.</translation>
     </message>
@@ -5754,92 +5885,92 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="169"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="173"/>
         <source>another operation started on the device.</source>
         <translation>na zařízení byla spuštěna jiná operace.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="170"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="176"/>
         <source>Run the batch file again when it has finished.</source>
         <translation>Po jejím dokončení spusťte dávkový soubor znovu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="247"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="258"/>
         <source>the device disconnected.</source>
         <translation>zařízení se odpojilo.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="248"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="260"/>
         <source>Reconnect and run the batch file again.</source>
         <translation>Znovu se připojte a spusťte dávkový soubor znovu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="262"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="277"/>
         <source>The batch stopped after %1 of %2 commands.</source>
         <translation>Dávka se zastavila po %1 z %2 příkazů.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="275"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="292"/>
         <source>The device was reset and halted.</source>
         <translation>Zařízení bylo resetováno a zastaveno.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="276"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="293"/>
         <source>The device was reset.</source>
         <translation>Zařízení bylo resetováno.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="358"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="375"/>
         <source>%1 — the console resumes automatically</source>
         <translation>%1 — konzole se obnoví automaticky</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="361"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="378"/>
         <source>This target has no console</source>
         <translation>Tento cíl nemá konzoli</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="364"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="381"/>
         <source>Waiting for pairing…</source>
         <translation>Čeká se na spárování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="365"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="382"/>
         <source>Connecting…</source>
         <translation>Připojování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="367"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="384"/>
         <source>Not connected</source>
         <translation>Nepřipojeno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="737"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="758"/>
         <source>The file could not be saved.</source>
         <translation>Soubor se nepodařilo uložit.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="738"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="760"/>
         <source>the folder is not writable or the disk is full.</source>
         <translation>do složky nelze zapisovat nebo je disk plný.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="739"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="764"/>
         <source>Choose another folder.</source>
         <translation>Vyberte jinou složku.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="759"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="785"/>
         <source>The view was saved to %1.</source>
         <translation>Výpis byl uložen do %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="788"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="814"/>
         <source>Sends each line of a UTF-8 text file to the device as a shell command, one line every %1 ms. Empty lines and lines starting with # are skipped. At most %2 commands, %3 MiB per file and %4 bytes per line.</source>
         <translation>Odešle každý řádek textového souboru v UTF-8 do zařízení jako příkaz shellu, jeden řádek každých %1 ms. Prázdné řádky a řádky začínající znakem # se přeskočí. Nejvýše %2 příkazů, %3 MiB na soubor a %4 bajtů na řádek.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="816"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="842"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Do schránky byl zkopírován první %n řádek (limit kopírování).</numerusform>
@@ -5848,7 +5979,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="831"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="857"/>
         <source>There is no console log file for this device yet.</source>
         <translation>Pro toto zařízení zatím neexistuje soubor s logem konzole.</translation>
     </message>
@@ -5884,54 +6015,54 @@
 <context>
     <name>hwio::gui::DeviceTabViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="186"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="207"/>
         <source>New device</source>
         <translation>Nové zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="218"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="239"/>
         <source>Flashing needs a J-Link. Open a J-Link tab to flash this device.</source>
         <translation>Nahrávání firmwaru vyžaduje J-Link. Pro nahrání do tohoto zařízení otevřete kartu s J-Linkem.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="639"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="712"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="686"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="762"/>
         <source>— disconnected: %1 —</source>
         <translation>— odpojeno: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="653"/>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="713"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="702"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="765"/>
         <source>— disconnected —</source>
         <translation>— odpojeno —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="702"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="753"/>
         <source>— connected (remote) —</source>
         <translation>— připojeno (vzdáleně) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="704"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="756"/>
         <source>— connected —</source>
         <translation>— připojeno —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="700"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="750"/>
         <source>— connected (Bluetooth) —</source>
         <translation>— připojeno (Bluetooth) —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="178"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="199"/>
         <source>Session %1</source>
         <translation>Relace %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="834"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="894"/>
         <source>— paused: %1 —</source>
         <translation>— pozastaveno: %1 —</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="847"/>
+        <location filename="../app/gui/src/viewmodels/device_tab_view_model.cpp" line="908"/>
         <source>— resumed —</source>
         <translation>— obnoveno —</translation>
     </message>
@@ -5939,17 +6070,17 @@
 <context>
     <name>hwio::gui::FileErrors</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="71"/>
+        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="75"/>
         <source>The file could not be saved.</source>
         <translation>Soubor se nepodařilo uložit.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="73"/>
+        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="78"/>
         <source>Only folders on this computer can be used.</source>
         <translation>Lze použít jen složky na tomto počítači.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="77"/>
+        <location filename="../app/gui/src/viewmodels/error_info.cpp" line="80"/>
         <source>Choose a folder on this computer.</source>
         <translation>Vyberte složku na tomto počítači.</translation>
     </message>
@@ -5957,131 +6088,141 @@
 <context>
     <name>hwio::gui::FirmwareSourceViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="182"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="200"/>
         <source>%1 · LTE bundle (application + modem firmware)</source>
         <translation>%1 · LTE balíček (aplikace + firmware modemu)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="186"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="204"/>
         <source>Loading %1…</source>
         <translation>Načítání %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="189"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="207"/>
         <source>Downloading %1…</source>
         <translation>Stahování %1…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="205"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="223"/>
         <source>%1 · LTE application · %2 · %3</source>
         <translation>%1 · aplikace LTE · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="208"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="226"/>
         <source>%1 · Intel HEX · %2 · %3</source>
         <translation>%1 · Intel HEX · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="211"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="229"/>
         <source>%1 · LTE bundle (application + modem firmware) · %2</source>
         <translation>%1 · LTE balíček (aplikace + firmware modemu) · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="215"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="233"/>
         <source>%1 · Modem firmware (modem only) · %2</source>
         <translation>%1 · firmware modemu (jen modem) · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="217"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="235"/>
         <source>%1 · Modem firmware %2 (modem only) · %3</source>
         <translation>%1 · firmware modemu %2 (jen modem) · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="266"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="284"/>
         <source>This is LTE firmware — switch to LTE firmware?</source>
         <translation>Toto je firmware LTE — přepnout na firmware LTE?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="316"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="334"/>
         <source>Drop a .hex file, an LTE bundle .zip or a modem firmware .zip here</source>
         <translation>Sem přetáhněte soubor .hex, LTE balíček .zip nebo firmware modemu .zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="344"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="362"/>
         <source>%1 %2 (recommended)</source>
         <translation>%1 %2 (doporučeno)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="352"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="370"/>
         <source>Downloading… %1 / %2 MB</source>
         <translation>Stahování… %1 / %2 MB</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="354"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="372"/>
         <source>Downloading…</source>
         <translation>Stahování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="356"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="374"/>
         <source>Ready</source>
         <translation>Připraveno</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="438"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="457"/>
         <source>The downloaded file is damaged. Try again.</source>
         <translation>Stažený soubor je poškozený. Zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="440"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="460"/>
         <source>You can also choose your own file.</source>
         <translation>Můžete také vybrat vlastní soubor.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="479"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="499"/>
         <source>Looking up the firmware…</source>
         <translation>Vyhledávání firmwaru…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="482"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="502"/>
         <source>Unknown firmware — it can still be flashed.</source>
         <translation>Neznámý firmware — přesto ho lze nahrát.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="489"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="509"/>
         <source>%1 · uploaded %2</source>
         <translation>%1 · nahráno %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="307"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="785"/>
+        <source>Application copy of %1 from %2</source>
+        <translation>Kopie aplikace zařízení %1 z %2</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="786"/>
+        <source>Application copy from %1</source>
+        <translation>Kopie aplikace z %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="325"/>
         <source>Intel HEX files (*.hex)</source>
         <translation>Soubory Intel HEX (*.hex)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="307"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="309"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="325"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="327"/>
         <source>All files (*)</source>
         <translation>Všechny soubory (*)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="309"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="327"/>
         <source>LTE firmware (*.hex *.zip)</source>
         <translation>LTE firmware (*.hex *.zip)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="314"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="332"/>
         <source>Drop a .hex file here</source>
         <translation>Přetáhněte sem soubor .hex</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="582"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="601"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="815"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="605"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="624"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="976"/>
         <source>The ID has 32 characters 0–9 a–f.</source>
         <translation>ID má 32 znaků 0–9 a–f.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="617"/>
-        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="806"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="640"/>
+        <location filename="../app/gui/src/viewmodels/firmware_source_view_model.cpp" line="967"/>
         <source>Catalog ID %1</source>
         <translation>ID z katalogu %1</translation>
     </message>
@@ -6089,402 +6230,402 @@
 <context>
     <name>hwio::gui::FlashViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="198"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="201"/>
         <source>Application firmware</source>
         <translation>Aplikační firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="199"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="202"/>
         <source>Application MCU</source>
         <translation>Aplikační MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="200"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="203"/>
         <source>.hex file or catalog ID</source>
         <translation>soubor .hex nebo ID z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="204"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="207"/>
         <source>LTE firmware</source>
         <translation>LTE firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="205"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="208"/>
         <source>LTE MCU</source>
         <translation>LTE MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="205"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="208"/>
         <source>%1 + modem</source>
         <translation>%1 + modem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="206"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="209"/>
         <source>The HARDWARIO LTE firmware or your own .hex / .zip</source>
         <translation>Firmware HARDWARIO LTE nebo vlastní .hex / .zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="243"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="246"/>
         <source>nRF Util was not found. It is needed for LTE firmware.</source>
         <translation>nRF Util nebyl nalezen. Je potřeba pro firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="265"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="268"/>
         <source>Choose a device first</source>
         <translation>Nejdříve vyberte zařízení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="269"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="272"/>
         <source>Use Update LTE firmware… above: the J-Link has to be moved between the connectors.</source>
         <translation>Použijte Aktualizovat firmware LTE… výše: J-Link je potřeba přepojit mezi konektory.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="273"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="276"/>
         <source>Another operation is running</source>
         <translation>Probíhá jiná operace</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="278"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="281"/>
         <source>The LTE firmware is not downloaded yet</source>
         <translation>Firmware LTE ještě není stažený</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="281"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="284"/>
         <source>Choose a firmware file</source>
         <translation>Vyberte soubor s firmwarem</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="283"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="286"/>
         <source>Choose a firmware file or enter a catalog ID</source>
         <translation>Vyberte soubor s firmwarem nebo zadejte ID z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="285"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="288"/>
         <source>Loading the firmware file…</source>
         <translation>Načítání souboru s firmwarem…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="287"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="290"/>
         <source>Downloading the firmware…</source>
         <translation>Stahování firmwaru…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="290"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="293"/>
         <source>The LTE firmware could not be downloaded</source>
         <translation>Firmware LTE se nepodařilo stáhnout</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="292"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="295"/>
         <source>The file does not match the chosen kind</source>
         <translation>Soubor neodpovídá zvolenému druhu firmwaru</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="293"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="296"/>
         <source>The firmware cannot be used</source>
         <translation>Firmware nelze použít</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="300"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="303"/>
         <source>nRF Util was not found</source>
         <translation>nRF Util nebyl nalezen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="305"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="308"/>
         <source>The firmware writes the UICR: allow it in Options</source>
         <translation>Firmware zapisuje UICR: povolte to v Možnostech</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="462"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="466"/>
         <source>%1 MCU</source>
         <translation>MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="553"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="557"/>
         <source>Flashing is in progress. Cancel it and close the tab?</source>
         <translation>Probíhá nahrávání. Zrušit ho a zavřít kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="554"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="558"/>
         <source>An operation is running on this device. Cancel it and close the tab?</source>
         <translation>Na zařízení probíhá operace. Zrušit ji a zavřít kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="696"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="704"/>
         <source>In the device: %1</source>
         <translation>V zařízení: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="701"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="709"/>
         <source>Now in the device: %1</source>
         <translation>Nyní v zařízení: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="776"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="789"/>
         <source>Flashing…</source>
         <translation>Nahrávání…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="778"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="791"/>
         <source>Updating the modem…</source>
         <translation>Aktualizace modemu…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="781"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="794"/>
         <source>Erasing…</source>
         <translation>Mazání…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="783"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="796"/>
         <source>Recovering…</source>
         <translation>Obnovování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="785"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="798"/>
         <source>Resetting…</source>
         <translation>Resetování…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="798"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="811"/>
         <source>Working…</source>
         <translation>Probíhá…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="806"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="819"/>
         <source>Flashing %1 to the %2 MCU</source>
         <translation>Nahrávání %1 do MCU %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="808"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="821"/>
         <source>Flashing the LTE bundle %1</source>
         <translation>Nahrávání LTE balíčku %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="810"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="823"/>
         <source>Updating the modem firmware with %1</source>
         <translation>Aktualizace firmwaru modemu z %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="812"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="825"/>
         <source>Erasing the application firmware of the %1 MCU</source>
         <translation>Mazání aplikačního firmwaru MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="814"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="827"/>
         <source>Erasing everything on the %1 MCU</source>
         <translation>Mazání všeho v MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="816"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="829"/>
         <source>Recovering the %1 MCU</source>
         <translation>Obnovování MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="818"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="831"/>
         <source>Resetting the %1 MCU</source>
         <translation>Resetování MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="837"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="850"/>
         <source>Connecting</source>
         <translation>Připojování</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="839"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="852"/>
         <source>Switching MCU</source>
         <translation>Přepnutí MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="841"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="854"/>
         <source>Erasing</source>
         <translation>Mazání</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="843"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="856"/>
         <source>Programming</source>
         <translation>Programování</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="845"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="858"/>
         <source>Verifying</source>
         <translation>Ověřování</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="847"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="860"/>
         <source>Updating the modem</source>
         <translation>Aktualizace modemu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="849"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="862"/>
         <source>Recovering</source>
         <translation>Obnovení</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="851"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="864"/>
         <source>Resetting</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="853"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="866"/>
         <source>Restoring console</source>
         <translation>Obnovení konzole</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="875"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="888"/>
         <source>Step %1 of %2</source>
         <translation>Krok %1 z %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="914"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="927"/>
         <source>The console is disconnected during the modem update and resumes automatically afterwards.</source>
         <translation>Konzole je během aktualizace modemu odpojená a poté se automaticky obnoví.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="918"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="931"/>
         <source>The console is paused. The erased MCU stays halted: reconnect after flashing.</source>
         <translation>Konzole je pozastavená. Smazaný MCU zůstane zastavený: po nahrání se znovu připojte.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="920"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="933"/>
         <source>The console is paused. The CPU stays halted after flashing.</source>
         <translation>Konzole je pozastavená. Procesor po nahrání zůstane zastavený.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="921"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="934"/>
         <source>The console is paused and resumes automatically after flashing.</source>
         <translation>Konzole je pozastavená a po nahrání se automaticky obnoví.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="936"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="949"/>
         <source>The console is paused and resumes automatically afterwards.</source>
         <translation>Konzole je pozastavená a poté se automaticky obnoví.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="946"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="959"/>
         <source>Firmware flashed and verified in %1 s.</source>
         <translation>Firmware nahrán a ověřen za %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="948"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="961"/>
         <source>LTE modem firmware and LTE firmware flashed in %1 s.</source>
         <translation>Firmware LTE modemu a LTE firmware nahrány za %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="951"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="964"/>
         <source>Modem firmware updated in %1 s.</source>
         <translation>Firmware modemu aktualizován za %1 s.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="953"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="966"/>
         <source>The application firmware of the %1 MCU was erased.</source>
         <translation>Aplikační firmware MCU %1 byl smazán.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="955"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="968"/>
         <source>Everything on the %1 MCU was erased.</source>
         <translation>Vše v MCU %1 bylo smazáno.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="957"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="970"/>
         <source>The %1 MCU was recovered.</source>
         <translation>MCU %1 byl obnoven.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="959"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="972"/>
         <source>The %1 MCU was reset and halted.</source>
         <translation>MCU %1 byl resetován a zastaven.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="960"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="973"/>
         <source>The %1 MCU was reset.</source>
         <translation>MCU %1 byl resetován.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="976"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="989"/>
         <source>The modem update was cancelled. Flash the modem firmware again before you use LTE.</source>
         <translation>Aktualizace modemu byla zrušena. Než začnete používat LTE, nahrajte firmware modemu znovu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="980"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="993"/>
         <source>Flashing was cancelled. The device may not start until you flash it again.</source>
         <translation>Nahrávání bylo zrušeno. Zařízení se nemusí spustit, dokud firmware znovu nenahrajete.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="982"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="995"/>
         <source>The operation was cancelled.</source>
         <translation>Operace byla zrušena.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="986"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="999"/>
         <source>Flashing was interrupted. The firmware may be partly written: flash it again.</source>
         <translation>Nahrávání bylo přerušeno. Firmware může být zapsán jen zčásti: nahrajte ho znovu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1002"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1015"/>
         <source>Chip: %1</source>
         <translation>Čip: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1021"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1034"/>
         <source>Maintenance — %1 MCU</source>
         <translation>Údržba — MCU %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1022"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1035"/>
         <source>Maintenance</source>
         <translation>Údržba</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1031"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1044"/>
         <source>Firmware (flash)</source>
         <translation>Firmware (flash)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1031"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1044"/>
         <source>UICR configuration</source>
         <translation>Konfigurace UICR</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1032"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1045"/>
         <source>Product Information Block (serial number, hardware version, …)</source>
         <translation>Blok informací o produktu (sériové číslo, verze hardwaru, …)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1033"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1046"/>
         <source>This erases:</source>
         <translation>Bude smazáno:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1036"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1049"/>
         <source>Recover removes the read-out protection by erasing the %1 MCU completely, then programs a small image that keeps it debuggable. This erases:</source>
         <translation>Obnovení (recover) odstraní ochranu proti čtení úplným smazáním MCU %1 a pak nahraje malý obraz, díky kterému zůstane MCU laditelný. Bude smazáno:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1039"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1052"/>
         <source>Recover removes the read-out protection by erasing the %1 MCU completely. This erases:</source>
         <translation>Obnovení (recover) odstraní ochranu proti čtení úplným smazáním MCU %1. Bude smazáno:</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1044"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1057"/>
         <source>Recover the %1 MCU?</source>
         <translation>Obnovit MCU %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1045"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1058"/>
         <source>Erase everything on the %1 MCU?</source>
         <translation>Smazat vše v MCU %1?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1048"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1061"/>
         <source>This cannot be undone.</source>
         <translation>Tuto akci nelze vrátit.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1049"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1062"/>
         <source>Recover</source>
         <translation>Obnovit</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1049"/>
+        <location filename="../app/gui/src/viewmodels/flash_view_model.cpp" line="1062"/>
         <source>Erase everything</source>
         <translation>Smazat vše</translation>
     </message>
@@ -6492,7 +6633,7 @@
 <context>
     <name>hwio::gui::GuiDeviceProvider</name>
     <message>
-        <location filename="../app/gui/src/mcp/gui_device_provider.cpp" line="528"/>
+        <location filename="../app/gui/src/mcp/gui_device_provider.cpp" line="537"/>
         <source>An AI assistant is running an operation on this device. Cancel it and close the tab?</source>
         <translation>AI asistent na tomto zařízení provádí operaci. Zrušit ji a zavřít kartu?</translation>
     </message>
@@ -6513,198 +6654,215 @@
 <context>
     <name>hwio::gui::LteUpdateWizard</name>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="100"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="99"/>
         <source>Update the LTE firmware</source>
         <translation>Aktualizace firmwaru LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="175"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="177"/>
         <source>Firmware</source>
         <translation>Firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="175"/>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="176"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="177"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="178"/>
         <source>APP connector</source>
         <translation>Konektor APP</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="175"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="177"/>
         <source>Stop the application</source>
         <translation>Zastavení aplikace</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="176"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="178"/>
         <source>LTE connector</source>
         <translation>Konektor LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="176"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="178"/>
         <source>Update</source>
         <translation>Aktualizace</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="177"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="179"/>
         <source>Application</source>
         <translation>Aplikace</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="177"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="179"/>
         <source>Done</source>
         <translation>Hotovo</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="268"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="274"/>
         <source>LTE firmware updated</source>
         <translation>Firmware LTE je aktualizován</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="269"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="275"/>
         <source>The LTE MCU has its new firmware and the application runs again. The console reconnects.</source>
         <translation>LTE MCU má nový firmware a aplikace znovu běží. Konzole se znovu připojí.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="273"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="279"/>
         <source>Open console</source>
         <translation>Otevřít konzoli</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="281"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="285"/>
+        <source>LTE firmware update cancelled</source>
+        <translation>Aktualizace firmwaru LTE zrušena</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="294"/>
         <source>Choose the LTE firmware</source>
         <translation>Vyberte firmware LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="282"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="295"/>
         <source>Next</source>
         <translation>Další</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="286"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="299"/>
         <source>Connect the J-Link to the LTE connector</source>
         <translation>Připojte J-Link ke konektoru LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="287"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="300"/>
         <source>Connect the J-Link to the APP connector</source>
         <translation>Připojte J-Link ke konektoru APP</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="290"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="303"/>
         <source>Ready to update the LTE MCU</source>
         <translation>Připraveno k aktualizaci LTE MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="292"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="305"/>
         <source>Continue</source>
         <translation>Pokračovat</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="298"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="311"/>
         <source>Stopping the application</source>
         <translation>Zastavení aplikace</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="301"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="314"/>
         <source>Updating the LTE MCU</source>
         <translation>Aktualizace LTE MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="304"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="317"/>
         <source>Writing the application</source>
         <translation>Zápis aplikace</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="309"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="322"/>
         <source>No copy of the application</source>
         <translation>Bez kopie aplikace</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="310"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="323"/>
         <source>Continue without a copy</source>
         <translation>Pokračovat bez kopie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="313"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="326"/>
         <source>Put the application back</source>
         <translation>Vrácení aplikace</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="314"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="327"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="589"/>
         <source>Write back</source>
         <translation>Zapsat zpět</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="314"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="327"/>
         <source>Flash</source>
         <translation>Nahrát</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="317"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="330"/>
         <source>The LTE firmware update failed</source>
         <translation>Aktualizace firmwaru LTE se nezdařila</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="318"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="331"/>
         <source>Try again</source>
         <translation>Zkusit znovu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="346"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="359"/>
         <source>nRF Util was not found. It is needed for LTE firmware.</source>
         <translation>nRF Util nebyl nalezen. Je potřeba pro firmware LTE.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="469"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="483"/>
         <source>Paused for the LTE firmware update</source>
         <translation>Pozastaveno kvůli aktualizaci firmwaru LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="470"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="484"/>
         <source>The LTE firmware update is in progress. Cancel it and close the tab?</source>
         <translation>Probíhá aktualizace firmwaru LTE. Zrušit ji a zavřít kartu?</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="528"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="571"/>
+        <source>The application MCU is erased. Cancelling writes the application back first: connect the J-Link to the APP connector when asked.</source>
+        <translation>Aplikační MCU je smazaný. Zrušení nejdřív zapíše aplikaci zpět: až budete vyzváni, připojte J-Link ke konektoru APP.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="574"/>
         <source>The application MCU is erased. The device will not run until you flash an application.</source>
         <translation>MCU aplikace je smazaný. Zařízení nepoběží, dokud nenahrajete aplikaci.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="531"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="525"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="577"/>
         <source>The copy of the application stays in %1.</source>
         <translation>Kopie aplikace zůstává v %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="538"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="585"/>
         <source>Cancel anyway</source>
         <translation>Přesto zrušit</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="540"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="585"/>
+        <source>Leave it erased</source>
+        <translation>Nechat smazané</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="602"/>
         <source>Back</source>
         <translation>Zpět</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="567"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="632"/>
         <source>Updating the LTE MCU needs the J-Link moved between the APP and LTE connectors. The guide stops the application, updates the LTE MCU and puts the application back.</source>
         <translation>Aktualizace LTE MCU vyžaduje přepojit J-Link mezi konektory APP a LTE. Průvodce zastaví aplikaci, aktualizuje LTE MCU a vrátí aplikaci zpět.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="575"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="640"/>
         <source>HARDWARIO Support confirms the update. Keep the J-Link cable on the APP connector for now.</source>
         <translation>Aktualizaci potvrdí podpora HARDWARIO. Kabel J-Link zatím nechte na konektoru APP.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="579"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="644"/>
         <source>HARDWARIO Support decides whether to continue without a copy.</source>
         <translation>Podpora HARDWARIO rozhodne, zda pokračovat bez kopie.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="633"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="698"/>
         <source>Step %1 of %2</source>
         <translation>Krok %1 z %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="661"/>
+        <location filename="../app/gui/src/wizard/lte_update_wizard.cpp" line="726"/>
         <source>Copy: %1</source>
         <translation>Kopie: %1</translation>
     </message>
@@ -6712,98 +6870,98 @@
 <context>
     <name>hwio::gui::McpController</name>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="69"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="70"/>
         <source>Flash firmware (flash, LTE, raw flash)</source>
         <translation>Nahrávání firmwaru (flash, LTE, přímý zápis do flash)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="71"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="72"/>
         <source>Erase and recover</source>
         <translation>Mazání a obnova</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="73"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="74"/>
         <source>Write memory</source>
         <translation>Zápis do paměti</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="75"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="76"/>
         <source>Write UICR / factory data</source>
         <translation>Zápis do UICR / továrních dat</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="77"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="78"/>
         <source>Connect devices (opens a tab)</source>
         <translation>Připojování zařízení (otevře kartu)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="153"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="170"/>
         <source>The AI assistant cancelled the request</source>
         <translation>AI asistent požadavek zrušil</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="260"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="86"/>
         <source>Writing memory can make the device run arbitrary code.</source>
         <translation>Zápis do paměti může zařízení přimět ke spuštění libovolného kódu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="277"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="305"/>
         <source>An AI assistant</source>
         <translation>AI asistent</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="285"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="313"/>
         <source>Allowed until disconnect: %1 — %2</source>
         <translation>Povoleno do odpojení: %1 — %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="317"/>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="379"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="345"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="407"/>
         <source>Copied.</source>
         <translation>Zkopírováno.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="354"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="382"/>
         <source>Claude Code (HTTP)</source>
         <translation>Claude Code (HTTP)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="357"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="385"/>
         <source>Claude Code (.mcp.json, token from HWIO_MCP_TOKEN)</source>
         <translation>Claude Code (.mcp.json, token z HWIO_MCP_TOKEN)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="360"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="388"/>
         <source>Claude Desktop (runs the hwio command separately)</source>
         <translation>Claude Desktop (spouští příkaz hwio samostatně)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="361"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="389"/>
         <source>Runs separately from this window and cannot use a probe that is open here.</source>
         <translation>Běží odděleně od tohoto okna a nemůže použít sondu, která je otevřená zde.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="378"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="406"/>
         <source>Copied. Run it in a terminal.</source>
         <translation>Zkopírováno. Spusťte to v terminálu.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="387"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="415"/>
         <source>Off</source>
         <translation>Vypnuto</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="389"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="417"/>
         <source>Starting…</source>
         <translation>Spouští se…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="391"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="419"/>
         <source>Listening</source>
         <translation>Naslouchá</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="392"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="420"/>
         <source>Listening · %n client(s)</source>
         <translation>
             <numerusform>Naslouchá · %n klient</numerusform>
@@ -6812,22 +6970,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="394"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="422"/>
         <source>Stopping…</source>
         <translation>Zastavuje se…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="397"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="425"/>
         <source>Port %1 is in use by another program — choose another port</source>
         <translation>Port %1 používá jiný program — zvolte jiný port</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="408"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="436"/>
         <source>AI assistants: listening on port %1</source>
         <translation>AI asistenti: naslouchá na portu %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="409"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="437"/>
         <source>AI assistants: listening on port %1, %n client(s)</source>
         <translation>
             <numerusform>AI asistenti: naslouchá na portu %1, %n klient</numerusform>
@@ -6836,12 +6994,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="417"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="445"/>
         <source>AI assistants: %1</source>
         <translation>AI asistenti: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="626"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="654"/>
         <source>%1 (tab %2)</source>
         <translation>%1 (karta %2)</translation>
     </message>
@@ -6911,22 +7069,23 @@
 <context>
     <name>hwio::gui::RecentSourcesModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="57"/>
+        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="63"/>
+        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="66"/>
         <source>Catalog ID %1</source>
         <translation>ID z katalogu %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="63"/>
+        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="70"/>
         <source>Catalog ID</source>
         <translation>ID z katalogu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="66"/>
+        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="73"/>
         <source>Zip archive</source>
         <translation>Archiv zip</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="67"/>
+        <location filename="../app/gui/src/viewmodels/recent_sources_model.cpp" line="74"/>
         <source>HEX file</source>
         <translation>Soubor HEX</translation>
     </message>
@@ -7181,12 +7340,12 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
 <context>
     <name>hwio::jlink</name>
     <message>
-        <location filename="../libs/hw/jlink/src/jlink_library.cpp" line="373"/>
+        <location filename="../libs/hw/jlink/src/jlink_library.cpp" line="376"/>
         <source>J-Link Software %1 is too old.</source>
         <translation>J-Link Software %1 je příliš starý.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="103"/>
+        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="105"/>
         <source>The J-Link %1 is a network J-Link; network J-Links are not supported for sessions yet.</source>
         <translation>J-Link %1 je síťový J-Link; síťové J-Linky zatím nejsou pro relace podporované.</translation>
     </message>
@@ -7197,37 +7356,37 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         <translation>Sonda J-Link se sériovým číslem %1 nebyla nalezena.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="276"/>
+        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="274"/>
         <source>The device has no power (%1 mV).</source>
         <translation>Zařízení nemá napájení (%1 mV).</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="286"/>
+        <location filename="../libs/hw/jlink/src/jlink_probe.cpp" line="283"/>
         <source>Could not connect to the device&apos;s %1 MCU.</source>
         <translation>K MCU %1 zařízení se nepodařilo připojit.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/rtt_channel.cpp" line="58"/>
+        <location filename="../libs/hw/jlink/src/rtt_channel.cpp" line="61"/>
         <source>RTT buffer &quot;%1&quot; not found.</source>
         <translation>Vyrovnávací paměť RTT &quot;%1&quot; nebyla nalezena.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="158"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="166"/>
         <source>The MCU type could not be read (FICR).</source>
         <translation>Typ MCU nelze přečíst (FICR).</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="173"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="215"/>
         <source>Programming was interrupted; the firmware may be partly written.</source>
         <translation>Programování bylo přerušeno; firmware může být zapsán jen zčásti.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="177"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="218"/>
         <source>Check the cables and power, then flash the firmware again.</source>
         <translation>Zkontrolujte kabely a napájení a potom firmware nahrajte znovu.</translation>
     </message>
     <message>
-        <location filename="../libs/hw/jlink/src/programmer.cpp" line="290"/>
+        <location filename="../libs/hw/jlink/src/programmer.cpp" line="348"/>
         <source>Verification failed at address %1.</source>
         <translation>Ověření selhalo na adrese %1.</translation>
     </message>
@@ -7235,52 +7394,52 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
 <context>
     <name>hwio::mcp</name>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="496"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="533"/>
         <source>— AI (%1): %2 —</source>
         <translation>— AI (%1): %2 —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="500"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="537"/>
         <source>— AI: %1 done in %2 s —</source>
         <translation>— AI: %1 hotovo za %2 s —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="505"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="542"/>
         <source>— AI: %1 failed: %2 —</source>
         <translation>— AI: %1 selhalo: %2 —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="510"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="547"/>
         <source>— AI: %1 cancelled —</source>
         <translation>— AI: %1 zrušeno —</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="515"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="552"/>
         <source>AI: Flashing…</source>
         <translation>AI: Nahrávání…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="518"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="555"/>
         <source>AI: Erasing…</source>
         <translation>AI: Mazání…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="521"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="558"/>
         <source>AI: Recovering…</source>
         <translation>AI: Obnova…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="524"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="561"/>
         <source>AI: Writing memory…</source>
         <translation>AI: Zápis do paměti…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="527"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="564"/>
         <source>AI: Resetting…</source>
         <translation>AI: Reset…</translation>
     </message>
     <message>
-        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="529"/>
+        <location filename="../libs/mcp_tools/src/tool_support.cpp" line="566"/>
         <source>AI: %1…</source>
         <translation>AI: %1…</translation>
     </message>
@@ -7288,7 +7447,7 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
 <context>
     <name>hwio::nrfutil</name>
     <message>
-        <location filename="../libs/hw/nrfutil/src/nrfutil.cpp" line="304"/>
+        <location filename="../libs/hw/nrfutil/src/nrfutil.cpp" line="307"/>
         <source>nRF Util %1 is too old.</source>
         <translation>nRF Util %1 je příliš starý.</translation>
     </message>
@@ -7555,22 +7714,22 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_operation_client.cpp" line="32"/>
+        <location filename="../libs/remote/src/remote_operation_client.cpp" line="34"/>
         <source>Reported by the customer&apos;s Monitor: %1</source>
         <translation>Hlášeno Monitorem zákazníka: %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_operation_client.cpp" line="47"/>
+        <location filename="../libs/remote/src/remote_operation_client.cpp" line="50"/>
         <source>The customer&apos;s Monitor did not answer in time.</source>
         <translation>Monitor zákazníka neodpověděl včas.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/session_code.cpp" line="40"/>
+        <location filename="../libs/remote/src/session_code.cpp" line="42"/>
         <source>The support server address is not valid.</source>
         <translation>Adresa serveru podpory není platná.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/session_code.cpp" line="43"/>
+        <location filename="../libs/remote/src/session_code.cpp" line="44"/>
         <source>The address must start with https:// and name a server, for example https://terminal.hardwario.com.</source>
         <translation>Adresa musí začínat https:// a uvádět server, například https://terminal.hardwario.com.</translation>
     </message>
@@ -7580,37 +7739,37 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         <translation>Opravte adresu serveru podpory, nebo ji vymažte, aby se použil výchozí server.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="77"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="79"/>
         <source>— Connection restored; waiting for the customer to allow you again —</source>
         <translation>— Spojení obnoveno; čeká se, až vás zákazník znovu povolí —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="126"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="129"/>
         <source>A command line must not be longer than %1 bytes.</source>
         <translation>Řádek příkazu nesmí být delší než %1 bajtů.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="189"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="190"/>
         <source>Session %1</source>
         <translation>Relace %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="196"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="197"/>
         <source>%1 — remote</source>
         <translation>%1 — vzdáleně</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="200"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="201"/>
         <source>%1 — web Terminal</source>
         <translation>%1 — web Terminal</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="278"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="279"/>
         <source>— Connected to HARDWARIO Monitor %1 of the customer —</source>
         <translation>— Připojeno k HARDWARIO Monitor %1 zákazníka —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="329"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="331"/>
         <source>The customer&apos;s device is disconnected.</source>
         <translation>Zařízení zákazníka je odpojeno.</translation>
     </message>
@@ -7625,65 +7784,65 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         <translation>— Starší historie relace byla vynechána —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="117"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="119"/>
         <source>Sharing started, session %1 (%2).</source>
         <translation>Sdílení zahájeno, relace %1 (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="126"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="128"/>
         <source>The join question was not answered within 2 minutes.</source>
         <translation>Na dotaz na připojení nikdo neodpověděl do 2 minut.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="140"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="142"/>
         <source>%1: denied (no answer within 60 s).</source>
         <translation>%1: zamítnuto (žádná odpověď do 60 s).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="150"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="153"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="152"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="156"/>
         <source>Sharing ended after 30 minutes without activity.</source>
         <translation>Sdílení skončilo po 30 minutách bez aktivity.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="158"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="172"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="159"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="171"/>
         <source>Start sharing again if support still needs the console.</source>
         <translation>Pokud podpora konzoli stále potřebuje, spusťte sdílení znovu.</translation>
     </message>
     <message>
         <location filename="../libs/remote/src/remote_host.cpp" line="165"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="167"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="168"/>
         <source>Sharing ended after the maximum of 8 hours.</source>
         <translation>Sdílení skončilo po maximální době 8 hodin.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="180"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="178"/>
         <source>Participant app: web Terminal or unknown.</source>
         <translation>Aplikace účastníka: web Terminal nebo neznámá.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="240"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="238"/>
         <source>Connection to the support server restored.</source>
         <translation>Spojení se serverem podpory obnoveno.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="265"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="263"/>
         <source>Another device uses this session code; the session was ended for safety.</source>
         <translation>Tento kód relace používá jiné zařízení; relace byla z bezpečnostních důvodů ukončena.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="280"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="278"/>
         <source>Someone joined the session.</source>
         <translation>Někdo se připojil k relaci.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="299"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="297"/>
         <source>%1: denied (someone joined).</source>
         <translation>%1: zamítnuto (někdo se připojil).</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="323"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="321"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n vzdálený příkaz byl zahozen během čekání na vaši odpověď.</numerusform>
@@ -7692,119 +7851,119 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="329"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="327"/>
         <source>You ended the session instead of allowing the participant.</source>
         <translation>Místo povolení účastníka jste relaci ukončili.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="336"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="334"/>
         <source>Participant allowed.</source>
         <translation>Účastník povolen.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="337"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="335"/>
         <source>Participant allowed (%1).</source>
         <translation>Účastník povolen (%1).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="426"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="424"/>
         <source>A remote command was dropped (too long or with control characters).</source>
         <translation>Vzdálený příkaz byl zahozen (příliš dlouhý nebo s řídicími znaky).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="438"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="436"/>
         <source>Remote commands dropped: more than %1 per second.</source>
         <translation>Vzdálené příkazy zahozeny: více než %1 za sekundu.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="448"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="446"/>
         <source>command %1</source>
         <translation>příkaz %1</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="466"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="464"/>
         <source>An operation request was refused: the participant is not allowed.</source>
         <translation>Požadavek na operaci byl odmítnut: účastník není povolen.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="485"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="483"/>
         <source>Participant app: %1.</source>
         <translation>Aplikace účastníka: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="578"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="576"/>
         <source>Support asks: %1.</source>
         <translation>Podpora žádá: %1.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="581"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="579"/>
         <source>%1: refused (this console has no operations).</source>
         <translation>%1: odmítnuto (tato konzole nemá žádné operace).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="589"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="587"/>
         <source>%1: refused (not available on this console).</source>
         <translation>%1: odmítnuto (na této konzoli není k dispozici).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="596"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="594"/>
         <source>%1: refused (another request or operation is in progress).</source>
         <translation>%1: odmítnuto (probíhá jiný požadavek nebo operace).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="604"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="628"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="602"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="626"/>
         <source>%1: refused (%2).</source>
         <translation>%1: odmítnuto (%2).</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="656"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="654"/>
         <source>%1: denied by you.</source>
         <translation>%1: zamítli jste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="675"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="673"/>
         <source>%1: allowed by you.</source>
         <translation>%1: povolili jste.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="739"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="737"/>
         <source>%1: waiting for support&apos;s answer: %2</source>
         <translation>%1: čeká se na odpověď podpory: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="773"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="771"/>
         <source>Support answered: continue.</source>
         <translation>Podpora odpověděla: pokračovat.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="791"/>
-        <location filename="../libs/remote/src/remote_host.cpp" line="794"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="789"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="792"/>
         <source>%1: done.</source>
         <translation>%1: hotovo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="797"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="795"/>
         <source>%1: failed: %2</source>
         <translation>%1: selhalo: %2</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="851"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="849"/>
         <source>— Remote: %1 —</source>
         <translation>— Vzdáleně: %1 —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="884"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="882"/>
         <source>You ended sharing.</source>
         <translation>Ukončili jste sdílení.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="902"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="900"/>
         <source>Support did not answer before the session ended.</source>
         <translation>Podpora neodpověděla před ukončením relace.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../libs/remote/src/remote_host.cpp" line="929"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="927"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Nápověda %n příkazu přečtena pro doplňování podpory.</numerusform>
@@ -7813,12 +7972,12 @@ Sdílení skončí po 30 minutách bez aktivity nebo po 8 hodinách.</translatio
         </translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="936"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="934"/>
         <source>Sharing ended.</source>
         <translation>Sdílení skončilo.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_host.cpp" line="937"/>
+        <location filename="../libs/remote/src/remote_host.cpp" line="935"/>
         <source>Sharing ended: %1</source>
         <translation>Sdílení skončilo: %1</translation>
     </message>

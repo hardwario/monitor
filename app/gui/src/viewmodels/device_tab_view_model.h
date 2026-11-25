@@ -34,8 +34,15 @@
 // Every tab has a RemoteShareViewModel (sharing its J-Link or BLE console) and a
 // RemoteJoinViewModel (the joiner state of a remote tab).
 //
+// Plan 0052 (ADR-0386): every tab owns its WizardViewModel (one wizard per tab; a child). While a
+// wizard is open the page id "wizard" (wizardPageId()) can be current: the wizard view replaces the
+// page area; when the wizard closes the page shown before it comes back (unless a hand-off chose
+// another page meanwhile). "wizard" is not a registered page (no shortcut, no page view model) and
+// is never saved. shutdown() closes the wizard first, while the session still exists (review V2).
+//
 // Ownership: child of DeviceTabListModel (Qt parent). GUI thread only.
 
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_info.h"
 #include "hwio/device/device_info_watcher.h"
@@ -47,6 +54,7 @@
 #include "viewmodels/probe_picker_view_model.h"
 #include "viewmodels/remote_join_view_model.h"
 #include "viewmodels/remote_share_view_model.h"
+#include "wizard/wizard_view_model.h"
 
 #include <QObject>
 #include <QString>
@@ -93,6 +101,7 @@ class PageRegistry;
 class ProbeFirmwareViewModel;
 class ProbeScanner;
 class SettingsStore;
+class WizardRegistry;
 
 // What a tab needs from the application (AppViewModel; tests build their own).
 struct TabContext {
@@ -116,6 +125,9 @@ struct TabContext {
     // M4 (plan/features/0007): opens a wizard for this tab (AppViewModel's WizardLauncher); may be
     // empty.
     std::function<void(const QString& wizardId, DeviceTabViewModel* tab)> openWizard;
+    // Plan 0052: the registered wizards (embedded step controls) for the tab's WizardViewModel;
+    // may be null (an empty registry).
+    const WizardRegistry* wizards = nullptr; // outlives the tabs
     // Plan 0012: opens a system URL (Bluetooth / privacy settings); empty: QDesktopServices.
     std::function<void(const QUrl& url)> openUrl;
     // Plan 0036: the J-Link firmware update (AppViewModel's); may be null (no banner action).
@@ -154,6 +166,8 @@ class DeviceTabViewModel : public QObject {
     // Plan 0044: sharing this console with support / the joiner state of a remote tab.
     Q_PROPERTY(hwio::gui::RemoteShareViewModel* remoteShare READ remoteShare CONSTANT)
     Q_PROPERTY(hwio::gui::RemoteJoinViewModel* remoteJoin READ remoteJoin CONSTANT)
+    // Plan 0052 (ADR-0386): the wizard of this tab (at most one open).
+    Q_PROPERTY(hwio::gui::WizardViewModel* wizard READ wizard CONSTANT)
 
 public:
     // Unscoped: QML compares DeviceTabViewModel.Connected etc. with the int property.
@@ -196,7 +210,11 @@ public:
     [[nodiscard]] QObjectList pageViewModels() const { return m_pageViewModels; }
     [[nodiscard]] QString currentPage() const { return m_currentPage; }
     // ADR-0369: a status line in the console ("— text —", a marker kept in the log and its file).
-    void addStatusLine(const QString& text) { addMarker(QStringLiteral("— %1 —").arg(text)); }
+    void addStatusLine(const QString& text) {
+        const QString line = QStringLiteral("— %1 —").arg(text);
+        addMarker(LocalizedText{.translated = line, .english = line}); // remote: non-goal of 0050
+    }
+    // A registered page the tab can use, or wizardPageId() while the wizard is open.
     void setCurrentPage(const QString& pageId);
     [[nodiscard]] QString busyPage() const;
     [[nodiscard]] QString busyText() const;
@@ -214,6 +232,9 @@ public:
     [[nodiscard]] remote::RemoteConsoleSession* remoteSession() const;
     [[nodiscard]] RemoteShareViewModel* remoteShare() const { return m_remoteShare; }
     [[nodiscard]] RemoteJoinViewModel* remoteJoin() const { return m_remoteJoin; }
+    [[nodiscard]] WizardViewModel* wizard() const { return m_wizard; }
+    // Plan 0052: the page id of the open wizard's view.
+    [[nodiscard]] static QString wizardPageId() { return QStringLiteral("wizard"); }
     [[nodiscard]] firmware::FirmwareCache* firmwareCache() const { return m_context.firmwareCache; }
     [[nodiscard]] SettingsStore* settingsStore() const { return m_context.settings; }
     // Opens the tab's session when none exists: always on the console target, with RTT when the
@@ -348,6 +369,7 @@ private:
     [[nodiscard]] Status openBleSession();
     [[nodiscard]] Status openRemoteSession(); // plan 0044
     void createBlePicker();
+    void createWizard(); // plan 0052
     // Connects the signals of a new session (either transport) and publishes it.
     void adoptSession(device::ConsoleSession& session);
     [[nodiscard]] Status promoteSession();
@@ -355,9 +377,15 @@ private:
     [[nodiscard]] bool sessionFailed() const;
     void releaseSession();
     void onConnectionChanged(const device::ConnectionEvent& event);
-    void addMarker(const QString& text);
+    // A marker in both channels: the translated text for the GUI and console files, the English
+    // one for MCP (ConsoleLine::textEn, ADR-0374).
+    void addMarker(const LocalizedText& text);
+    // localizedText() in this class's tr() context.
+    [[nodiscard]] static LocalizedText markerText(const char* source,
+                                                  std::initializer_list<TextArg> args = {});
     void updateState();
     void resetInfoWatcher();
+    void onWizardOpenChanged(); // plan 0052
 
     TabContext m_context;
     ProbePickerViewModel* m_picker = nullptr;         // child
@@ -383,6 +411,8 @@ private:
     QUrl m_remoteRelay;
     RemoteShareViewModel* m_remoteShare = nullptr; // child (plan 0044)
     RemoteJoinViewModel* m_remoteJoin = nullptr;   // child (plan 0044)
+    WizardViewModel* m_wizard = nullptr;           // child (plan 0052)
+    QString m_pageBeforeWizard;                    // plan 0052: shown again when it closes
     // Closed sessions, deleted on the next event-loop turn (a session is never deleted inside one
     // of its own signals).
     std::vector<std::unique_ptr<device::ConsoleSession>> m_retiredSessions;

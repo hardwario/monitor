@@ -142,6 +142,8 @@ enum class ErrorCode : std::uint8_t {
     RemoteProtocolError,
     // ADR-0363: a remote LTE update that updated the LTE MCU but did not write the application back
     RemoteApplicationNotRestored,
+    // rc.4 issue #9 (plan/features/0051-rc4-issues-5-11.md, ADR-0383): nRF Util LOW_VOLTAGE
+    TargetLowVoltage,
 };
 
 // Wizards the UI can offer to fix an error (M4). Serialized as kebab-case ids.
@@ -452,6 +454,9 @@ inline constexpr std::array errorTable{
     ErrorInfo{.code = ErrorCode::RemoteApplicationNotRestored,
               .id = "remote.application_not_restored",
               .category = ErrorCategory::Cancelled},
+    ErrorInfo{.code = ErrorCode::TargetLowVoltage,
+              .id = "target.low_voltage",
+              .category = ErrorCategory::Target},
 };
 
 // Compile-time checks of errorTable (ids unique and well-formed, index == enum value, every
@@ -476,7 +481,13 @@ struct Error {
     std::string message;    // what happened (translated, UTF-8)
     std::string cause;      // why it probably happened (translated, UTF-8)
     std::string suggestion; // what the user should do (translated, UTF-8)
-    std::string detail;     // technical detail: codes, paths, versions (not translated)
+    // Plan 0050 (ADR-0374): the same three texts in English (the source text with the same
+    // arguments), sent over MCP (ADR-0103). Set together with the translated text by makeError()
+    // and hwio::setText() (localized_text.h); never set only one of a pair.
+    std::string messageEn;
+    std::string causeEn;
+    std::string suggestionEn;
+    std::string detail; // technical detail: codes, paths, versions (not translated)
     std::optional<WizardId> wizard;
 
     // ADR-0177: hwio::Error is the error type of every meta-registered Result<T> (signal
@@ -485,9 +496,16 @@ struct Error {
 };
 
 // Error with the default texts of `code`, translated into the current process language
-// (context "hwio::core", ADR-0027). The texts have no placeholders; values such as paths go into
-// `detail`. Call sites that know more use the full hwio::fail(code, message, cause, ...).
+// (context "hwio::core", ADR-0027), and their English source (messageEn, ..., ADR-0374). The texts
+// have no placeholders; values such as paths go into `detail`. Call sites that know more replace
+// a text with hwio::setText() (localized_text.h), which sets both languages.
 [[nodiscard]] Error makeError(ErrorCode code, std::string detail = {});
+
+// ADR-0383: the suggestion of an LTE update failure inside the guided update (GUI wizard,
+// `--guided`, remote): firmware.modem_update_failed and target.low_voltage get "Check the power
+// supply of the CHESTER and the J-Link cable on the LTE connector, then click Try again." (never
+// "use the guided update"); every other error is returned unchanged.
+[[nodiscard]] Error withGuidedLteSuggestion(Error error);
 
 // `cancelled` because the reader of the result stream went away (e.g. `hwio ... --json | head`, a
 // closed stdout; review R32, R44): the default cause and suggestion of `cancelled` with the message

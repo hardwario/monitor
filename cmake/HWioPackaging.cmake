@@ -246,8 +246,8 @@ function(_hwio_add_installed_tree_tests)
             -P "${PROJECT_SOURCE_DIR}/cmake/HWioInstalledTreeTest.cmake")
     set_tests_properties(Packaging.InstalledTreeSelfTest PROPERTIES
         LABELS "package"
-        # Deploy + self-test of the bundle: 260 s on main and 286 s with Qt WebSockets on the
-        # slow macOS CI runners (one run hit the old 300 s limit).
+        # 600 s: the macos-asan runner needed 221 s on a good run and timed out at 300 s on a
+        # slower one (2026-11-24).
         TIMEOUT 600
         RUN_SERIAL TRUE)
     if(APPLE)

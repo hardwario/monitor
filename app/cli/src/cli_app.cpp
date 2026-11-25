@@ -6,6 +6,7 @@
 #include "diag_commands.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/version.h"
@@ -47,9 +48,9 @@ const std::map<std::string, log::Level>& logLevels() {
 
 Error usageError(std::string message) {
     Error error = makeError(ErrorCode::UsageInvalidArgument);
-    error.message = std::move(message);
-    error.cause.clear(); // CLI11's message already says what is wrong
-    error.suggestion = "Run `hwio --help`.";
+    setUntranslatedText(error, ErrorText::Message, std::move(message));
+    clearText(error, ErrorText::Cause); // CLI11's message already says what is wrong
+    setUntranslatedText(error, ErrorText::Suggestion, "Run `hwio --help`.");
     return error;
 }
 

@@ -16,12 +16,15 @@
 #include <QString>
 #include <QStringLiteral>
 #include <QtCore/qtmetamacros.h>
+#include <QtTypes>
 
+#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <functional>
 #include <memory>
 #include <optional>
+#include <string_view>
 #include <utility>
 
 namespace hwio::mcp {
@@ -44,11 +47,14 @@ ToolResult toolResult(const QJsonObject& structured) {
 
 ToolResult toolErrorResult(const hwio::Error& error) {
     QJsonObject structured;
-    structured.insert(QStringLiteral("error"), hwio::toJson(error));
-    QString text =
-        QLatin1StringView(idOf(error.code)) + QStringLiteral(": ") + toQString(error.message);
-    if (!error.suggestion.empty()) {
-        text += QStringLiteral(" — ") + toQString(error.suggestion);
+    // ADR-0374: MCP results are English in every UI language (ADR-0103).
+    const QJsonObject json = hwio::toJson(error, hwio::ErrorLanguage::English);
+    structured.insert(QStringLiteral("error"), json);
+    QString text = QLatin1StringView(idOf(error.code)) + QStringLiteral(": ") +
+                   json.value(QStringLiteral("message")).toString();
+    if (const QString suggestion = json.value(QStringLiteral("suggestion")).toString();
+        !suggestion.isEmpty()) {
+        text += QStringLiteral(" — ") + suggestion;
     }
     return ToolResult{.structured = structured, .text = text, .isError = true};
 }
@@ -114,6 +120,21 @@ void ToolCall::reportProgress(double done, std::optional<double> total, const QS
     emit progress(done, total, message);
 }
 
+QJsonObject ToolCall::consentJson() const {
+    QJsonObject json;
+    for (std::size_t bit = 0; bit < m_grants.size(); ++bit) {
+        if (const std::optional<ConsentGrant>& grant = m_grants.at(bit)) {
+            const std::string_view category =
+                consentCategoryId(static_cast<ConsentCategory>(1U << bit));
+            const std::string_view id = consentGrantId(*grant);
+            json.insert(
+                QString::fromLatin1(category.data(), static_cast<qsizetype>(category.size())),
+                QString::fromLatin1(id.data(), static_cast<qsizetype>(id.size())));
+        }
+    }
+    return json;
+}
+
 void ToolCall::requestConsent(IConsentBroker& broker, ConsentRequest request,
                               std::function<void(ConsentDecision)> done) {
     if (isFinished() || m_cancelled) {
@@ -141,6 +162,11 @@ void ToolCall::requestConsent(IConsentBroker& broker, ConsentRequest request,
             }
             if (decision) {
                 self->m_granted |= categories;
+                for (std::size_t bit = 0; bit < self->m_grants.size(); ++bit) {
+                    if (categories.testFlag(static_cast<ConsentCategory>(1U << bit))) {
+                        self->m_grants.at(bit) = *decision;
+                    }
+                }
             }
             done(std::move(decision));
         });

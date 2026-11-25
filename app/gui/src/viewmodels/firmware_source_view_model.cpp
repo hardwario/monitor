@@ -3,7 +3,9 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
+#include "hwio/device/application_backup.h"
 #include "hwio/device/profile.h"
 #include "hwio/firmware/designated_firmware.h"
 #include "hwio/firmware/firmware_cache.h"
@@ -14,6 +16,9 @@
 #include "viewmodels/recent_sources_model.h"
 #include "workers/firmware_loader.h"
 
+#include <QDateTime>
+#include <QDesktopServices>
+#include <QDir>
 #include <QFileInfo>
 #include <QLocale>
 #include <QLoggingCategory>
@@ -23,11 +28,17 @@
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
+#include <QTimeZone>
 #include <QUrl>
+#include <QVariantList>
 #include <QVariantMap>
 #include <QtContainerFwd>
+#include <QtTranslation>
 #include <QtTypes>
 
+#include <algorithm>
+#include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <functional>
@@ -35,6 +46,7 @@
 #include <optional>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace hwio::gui {
 
@@ -94,6 +106,11 @@ FirmwareSourceViewModel::~FirmwareSourceViewModel() {
         m_lookup->disconnect(this);
         m_lookup.reset();
     }
+    if (m_nameLookup) {
+        m_nameLookup->disconnect(this);
+        m_nameLookup->cancel();
+        m_nameLookup.reset();
+    }
 }
 
 QString FirmwareSourceViewModel::targetIdFor(Kind kind) {
@@ -110,6 +127,7 @@ void FirmwareSourceViewModel::setKind(Kind kind) {
     }
     m_kind = kind;
     m_recent->setKind(kindId(kind));
+    refreshBackups(); // ADR-0381: application kind only
     if (m_kind != AppFirmware) {
         // 0021 (ADR-0174): no catalog ID on the LTE card.
         cancelDownload();
@@ -435,7 +453,9 @@ void FirmwareSourceViewModel::onDesignatedFinished() {
             qCInfo(lcGui).noquote()
                 << "Designated firmware:" << toQString(idOf(error.code)) << toQString(error.detail);
             if (error.code == ErrorCode::FirmwareChecksumMismatch) {
-                error.message = tr("The downloaded file is damaged. Try again.").toStdString();
+                setText(error, ErrorText::Message, "hwio::gui::FirmwareSourceViewModel",
+                        QT_TRANSLATE_NOOP("hwio::gui::FirmwareSourceViewModel",
+                                          "The downloaded file is damaged. Try again."));
             } else if (error.code == ErrorCode::NetworkDownloadFailed) {
                 error.suggestion += " " + tr("You can also choose your own file.").toStdString();
             }
@@ -520,6 +540,9 @@ void FirmwareSourceViewModel::onLookupFinished() {
     if (result) {
         m_info = std::make_unique<firmware::CatalogInfo>(*result);
         m_lookupState = QStringLiteral("found");
+        // ADR-0385: a Recent entry of this ID gets its name.
+        m_recent->setName(RecentSourcesModel::catalogPrefix + m_lookupId, toQString(m_info->name),
+                          toQString(m_info->version));
     } else if (result.error().code == ErrorCode::Cancelled) {
         m_lookupState = QStringLiteral("none");
     } else {
@@ -705,8 +728,146 @@ void FirmwareSourceViewModel::setLoaded(LoadedSource loaded, QString recentSourc
     const bool fits = !mismatch();
     setState(fits ? Ready : Invalid);
     if (fits) {
-        m_recent->add(kindId(m_kind), m_recentSource);
+        // ADR-0385: a catalog entry with the name and version of its page.
+        const bool named =
+            m_info && m_recentSource == RecentSourcesModel::catalogPrefix + m_lookupId;
+        m_recent->add(kindId(m_kind), m_recentSource, named ? toQString(m_info->name) : QString(),
+                      named ? toQString(m_info->version) : QString());
     }
+}
+
+// ---- plan 0051 (ADR-0381): the application copies ----------------------------------------------
+
+void FirmwareSourceViewModel::setDeviceSerial(const QString& serial) {
+    if (serial == m_deviceSerial) {
+        return;
+    }
+    m_deviceSerial = serial;
+    refreshBackups();
+}
+
+void FirmwareSourceViewModel::setBackupDirectory(const std::filesystem::path& directory) {
+    m_backupDirectory = directory;
+    refreshBackups();
+}
+
+void FirmwareSourceViewModel::refreshBackups() {
+    std::vector<device::ApplicationBackup::Entry> found;
+    if (m_kind == AppFirmware) {
+        const std::filesystem::path directory = m_backupDirectory.empty()
+                                                    ? device::ApplicationBackup::defaultDirectory()
+                                                    : m_backupDirectory;
+        found = device::ApplicationBackup::list(
+            directory, m_deviceSerial.isEmpty()
+                           ? std::nullopt
+                           : std::optional<std::string>(toStdString(m_deviceSerial)));
+    }
+    const bool same = std::ranges::equal(found, m_backups, [](const auto& a, const auto& b) {
+        return a.path == b.path && a.time == b.time;
+    });
+    m_backups = std::move(found);
+    if (!same) {
+        backupsChanged(); // signal
+    }
+}
+
+QVariantList FirmwareSourceViewModel::backups() const {
+    QVariantList list;
+    for (const device::ApplicationBackup::Entry& entry : m_backups) {
+        const QDateTime time = QDateTime::fromMSecsSinceEpoch(
+            std::chrono::duration_cast<std::chrono::milliseconds>(entry.time.time_since_epoch())
+                .count(),
+            QTimeZone::UTC);
+        const QString when = QLocale().toString(time.toLocalTime(), QLocale::ShortFormat);
+        list.append(QVariantMap{
+            {QStringLiteral("text"),
+             m_deviceSerial.isEmpty()
+                 ? tr("Application copy of %1 from %2").arg(toQString(entry.serial), when)
+                 : tr("Application copy from %1").arg(when)},
+            {QStringLiteral("path"),
+             QDir::toNativeSeparators(QString::fromStdU16String(entry.path.u16string()))}});
+    }
+    return list;
+}
+
+QUrl FirmwareSourceViewModel::backupsFolder() const {
+    if (m_backups.empty()) {
+        return {};
+    }
+    return QUrl::fromLocalFile(
+        QString::fromStdU16String(m_backups.front().path.parent_path().u16string()));
+}
+
+void FirmwareSourceViewModel::loadBackup(int index) {
+    if (index < 0 || std::cmp_greater_equal(index, m_backups.size())) {
+        return;
+    }
+    loadPath(
+        QString::fromStdU16String(m_backups.at(static_cast<std::size_t>(index)).path.u16string()));
+}
+
+void FirmwareSourceViewModel::openBackupsFolder() {
+    const std::filesystem::path directory = m_backupDirectory.empty()
+                                                ? device::ApplicationBackup::defaultDirectory()
+                                                : m_backupDirectory;
+    const QString path = QString::fromStdU16String(directory.u16string());
+    if (!QDir().mkpath(path)) {
+        qCWarning(lcGui).noquote() << "Backups folder not created:" << path;
+    }
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(path))) {
+        qCWarning(lcGui).noquote() << "Backups folder not opened:" << path;
+    }
+}
+
+void FirmwareSourceViewModel::resolveRecentNames() {
+    if (!m_nameLookup) {
+        lookUpNextRecentName();
+    }
+}
+
+void FirmwareSourceViewModel::lookUpNextRecentName() {
+    if (m_namesTried.size() >= maxNameLookups) {
+        return;
+    }
+    const device::DeviceProfile* profile = m_profile ? m_profile() : nullptr;
+    firmware::FirmwareCatalog* catalog =
+        profile != nullptr ? m_services.catalog(*profile) : nullptr;
+    if (catalog == nullptr) {
+        return;
+    }
+    for (const QString& id : m_recent->unnamedCatalogIds()) {
+        if (m_namesTried.contains(id)) {
+            continue;
+        }
+        m_namesTried.append(id);
+        auto parsed = firmware::FirmwareId::parse(toStdString(id));
+        if (!parsed) {
+            continue;
+        }
+        m_nameLookupId = id;
+        m_nameLookup = catalog->lookup(*parsed);
+        connect(m_nameLookup.get(), &firmware::LookupOperation::finished, this,
+                &FirmwareSourceViewModel::onRecentNameFinished);
+        return;
+    }
+}
+
+void FirmwareSourceViewModel::onRecentNameFinished() {
+    if (!m_nameLookup || !m_nameLookup->result()) {
+        return;
+    }
+    const Result<firmware::CatalogInfo> result = *m_nameLookup->result();
+    m_nameLookup.release()->deleteLater(); // NOLINT(bugprone-unused-return-value)
+    if (result) {
+        m_recent->setName(RecentSourcesModel::catalogPrefix + m_nameLookupId,
+                          toQString(result->name), toQString(result->version));
+    } else {
+        // "Catalog ID %1" stays (not an error).
+        qCInfo(lcGui).noquote() << "Recent name of" << m_nameLookupId
+                                << "not found:" << toQString(idOf(result.error().code));
+    }
+    m_nameLookupId.clear();
+    lookUpNextRecentName();
 }
 
 void FirmwareSourceViewModel::setError(Error error) {

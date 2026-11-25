@@ -30,8 +30,9 @@ struct TargetProfile;
 using firmware::ProgramPhase;
 using jlink::AccessWidth; // M6: Bits8 / Bits16 / Bits32 (defined with jlink::IProgrammer)
 using jlink::ChipInfo;
-using jlink::MemoryZone;    // M6: {name, description, virtualAddress}
-using jlink::RegisterValue; // M6: {name, value}
+using jlink::DownloadReport; // plan 0050: {affectedBytes, unchanged} of a flash download
+using jlink::MemoryZone;     // M6: {name, description, virtualAddress}
+using jlink::RegisterValue;  // M6: {name, value}
 using jlink::ResetMode;
 
 // Unique per session (counts from 1).
@@ -134,11 +135,19 @@ struct OperationResult {
     std::vector<MemoryZone> zones;
     // Plan 0033: Identify only.
     std::optional<ChipFamilyMatch> familyMatch = std::nullopt;
+    // Plan 0050 (ADR-0376): what the flash loader reported for the download of Flash, WriteFlash,
+    // LteBundle (the application step) and EraseCode; nullopt for other kinds. Its fields are
+    // empty when the library's wording was not recognised.
+    std::optional<DownloadReport> download = std::nullopt;
 };
 
 struct FlashOptions {
     bool halt = false;      // leave the CPU halted after programming
     bool allowUicr = false; // ADR-0036: program the image's UICR records (the PIB is kept)
+    // ADR-0383: started by the guided LTE update (LteUpdateProcedure; the application MCU is
+    // erased): a failure keeps its own error, the reset reason of the target is only logged (no
+    // target.reset_during_update).
+    bool guided = false;
 };
 
 // Largest readMemory() (64 KiB).

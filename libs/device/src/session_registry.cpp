@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/ble_lock.h"
 #include "hwio/device/console_file_sink.h"
@@ -18,6 +19,7 @@
 #include "session_internal.h"
 
 #include <QCoreApplication>
+#include <QtTranslation>
 
 #include <algorithm>
 #include <cstdint>
@@ -120,10 +122,10 @@ Status SessionRegistry::checkAvailable(const std::optional<SessionKey>& key) con
         const ble::BleDeviceId& id = std::get<BleKey>(*key).id;
         Error error = makeError(ErrorCode::BleInUseByOtherProcess,
                                 "the device is used by another session of this process");
-        error.message = QCoreApplication::translate(
-                            "hwio::device", "The device %1 is already used by this application.")
-                            .arg(toQString(id))
-                            .toStdString();
+        setText(
+            error, ErrorText::Message, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device", "The device %1 is already used by this application."),
+            {toQString(id)});
         return std::unexpected(std::move(error));
     }
     const std::optional<std::uint32_t> serialNumber =
@@ -135,20 +137,20 @@ Status SessionRegistry::checkAvailable(const std::optional<SessionKey>& key) con
             makeError(ErrorCode::ProbeOpenFailed,
                       std::format("J-Link {} is reserved for a firmware update by this process",
                                   *serialNumber));
-        error.message = QCoreApplication::translate(
-                            "hwio::device", "The firmware of the J-Link %1 is being updated.")
-                            .arg(*serialNumber)
-                            .toStdString();
+        setText(
+            error, ErrorText::Message, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device", "The firmware of the J-Link %1 is being updated."),
+            {*serialNumber});
         return std::unexpected(std::move(error));
     }
     if (serialNumber && sessionForProbe(*serialNumber) != nullptr) {
         Error error = makeError(
             ErrorCode::ProbeOpenFailed,
             std::format("J-Link {} is used by another session of this process", *serialNumber));
-        error.message = QCoreApplication::translate(
-                            "hwio::device", "The J-Link %1 is already used by this application.")
-                            .arg(*serialNumber)
-                            .toStdString();
+        setText(
+            error, ErrorText::Message, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device", "The J-Link %1 is already used by this application."),
+            {*serialNumber});
         return std::unexpected(std::move(error));
     }
     return {};

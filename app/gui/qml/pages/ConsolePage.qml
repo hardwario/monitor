@@ -268,13 +268,7 @@ Item {
                             compact: page.compact
                             visible: page.tab.transport !== "remote"
                             enabled: page.tab.remoteShare.available && !page.tab.remoteShare.sharing
-                            onClicked: shareDialog.open()
-
-                            ShareDialog {
-                                id: shareDialog
-
-                                share: page.tab.remoteShare
-                            }
+                            onClicked: AppViewModel.openView("share") // plan 0052: a view of the page area
                         }
 
                         HToolButton {

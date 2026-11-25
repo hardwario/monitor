@@ -1,8 +1,18 @@
 #include "hwio/core/error.h"
+#include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
+
+#include <QCoreApplication>
+#include <QJsonObject>
+#include <QString>
+#include <QStringLiteral>
+#include <QTranslator>
+#include <QtTranslation>
 
 #include <gtest/gtest.h>
 
+#include <cstdint>
 #include <optional>
 #include <set>
 #include <string>
@@ -378,6 +388,32 @@ TEST(MakeError, OutputClosedIsCancelledWithItsOwnMessage) {
     EXPECT_EQ(error.detail, "the standard output was closed");
 }
 
+// Plan 0051 (ADR-0383): target.low_voltage and the guided suggestion of the LTE update.
+TEST(MakeError, LowVoltageAndGuidedSuggestion) {
+    EXPECT_EQ(hwio::idOf(ErrorCode::TargetLowVoltage), "target.low_voltage");
+    EXPECT_EQ(hwio::categoryOf(ErrorCode::TargetLowVoltage), ErrorCategory::Target);
+    const hwio::Error low = hwio::makeError(ErrorCode::TargetLowVoltage, "LOW_VOLTAGE");
+    EXPECT_EQ(low.message, "The LTE MCU reports too low supply voltage.");
+    EXPECT_EQ(low.cause, "The CHESTER is not powered enough (battery, power supply) or the J-Link "
+                         "cable does not connect the supply reference.");
+    EXPECT_EQ(low.suggestion, "Check the power supply or batteries of the CHESTER and the J-Link "
+                              "cable on the connector, then try again.");
+    const std::string guided = "Check the power supply of the CHESTER and the J-Link cable on the "
+                               "LTE connector, then click Try again.";
+    for (const ErrorCode code :
+         {ErrorCode::TargetLowVoltage, ErrorCode::FirmwareModemUpdateFailed}) {
+        const hwio::Error plain = hwio::makeError(code, "detail");
+        const hwio::Error error = hwio::withGuidedLteSuggestion(plain);
+        EXPECT_EQ(error.suggestion, guided);
+        EXPECT_EQ(error.message, plain.message);
+        EXPECT_EQ(error.cause, plain.cause);
+        EXPECT_EQ(error.detail, "detail");
+        EXPECT_EQ(error.suggestion.find("guided"), std::string::npos);
+    }
+    const hwio::Error other = hwio::makeError(ErrorCode::TargetProgramFailed);
+    EXPECT_EQ(hwio::withGuidedLteSuggestion(other), other);
+}
+
 TEST(Fail, FullFormKeepsAllTexts) {
     const hwio::Status status =
         hwio::fail(ErrorCode::IoReadFailed, "message", "cause", "suggestion", "detail");
@@ -395,6 +431,114 @@ TEST(Fail, DefaultTextsForm) {
     EXPECT_EQ(result.error().code, ErrorCode::Timeout);
     EXPECT_EQ(result.error().message, hwio::makeError(ErrorCode::Timeout).message);
     EXPECT_TRUE(result.error().detail.empty());
+}
+
+} // namespace
+
+// ---- English texts (plan 0050, ADR-0374)
+// ---------------------------------------------------------
+
+namespace {
+
+// A pseudo-translation: "[xx] <source>" for every text.
+class PseudoTranslator final : public QTranslator {
+public:
+    [[nodiscard]] QString translate(const char* /*context*/, const char* sourceText,
+                                    const char* /*disambiguation*/ = nullptr,
+                                    int /*n*/ = -1) const override {
+        return QStringLiteral("[xx] ") + QString::fromUtf8(sourceText);
+    }
+    [[nodiscard]] bool isEmpty() const override { return false; }
+};
+
+class ScopedPseudoTranslator {
+public:
+    ScopedPseudoTranslator() : m_installed(QCoreApplication::installTranslator(&m_translator)) {}
+    ~ScopedPseudoTranslator() {
+        if (m_installed) {
+            QCoreApplication::removeTranslator(&m_translator);
+        }
+    }
+    ScopedPseudoTranslator(const ScopedPseudoTranslator&) = delete;
+    ScopedPseudoTranslator& operator=(const ScopedPseudoTranslator&) = delete;
+    ScopedPseudoTranslator(ScopedPseudoTranslator&&) = delete;
+    ScopedPseudoTranslator& operator=(ScopedPseudoTranslator&&) = delete;
+
+    [[nodiscard]] bool ok() const { return m_installed; }
+
+private:
+    PseudoTranslator m_translator;
+    bool m_installed = false;
+};
+
+// Every default error has its English texts, equal to the translation without a translator and
+// different from it with one.
+TEST(ErrorEnglish, MakeErrorFillsTheEnglishTexts) {
+    for (const hwio::ErrorInfo& info : hwio::errorTable) {
+        const hwio::Error english = hwio::makeError(info.code);
+        EXPECT_FALSE(english.messageEn.empty()) << info.id;
+        EXPECT_FALSE(english.causeEn.empty()) << info.id;
+        EXPECT_FALSE(english.suggestionEn.empty()) << info.id;
+        EXPECT_EQ(english.message, english.messageEn) << info.id;
+        EXPECT_EQ(english.cause, english.causeEn) << info.id;
+        EXPECT_EQ(english.suggestion, english.suggestionEn) << info.id;
+    }
+    const ScopedPseudoTranslator translator;
+    ASSERT_TRUE(translator.ok());
+    for (const hwio::ErrorInfo& info : hwio::errorTable) {
+        const hwio::Error error = hwio::makeError(info.code);
+        EXPECT_EQ(error.message, "[xx] " + error.messageEn) << info.id;
+        EXPECT_EQ(error.cause, "[xx] " + error.causeEn) << info.id;
+        EXPECT_EQ(error.suggestion, "[xx] " + error.suggestionEn) << info.id;
+    }
+    const hwio::Error closed = hwio::outputClosedError("stdout");
+    EXPECT_EQ(closed.messageEn, "The output was closed.");
+    EXPECT_EQ(closed.message, "[xx] The output was closed.");
+}
+
+TEST(ErrorEnglish, SetTextKeepsBothLanguagesWithTheSameArguments) {
+    const ScopedPseudoTranslator translator;
+    ASSERT_TRUE(translator.ok());
+    hwio::Error error = hwio::makeError(ErrorCode::TargetRttBufferNotFound);
+    hwio::setText(error, hwio::ErrorText::Message, "hwio::test",
+                  QT_TRANSLATE_NOOP("hwio::test", "RTT buffer \"%1\" not found (%2 of %3)."),
+                  {QStringLiteral("Terminal"), 2, std::uint64_t{3}});
+    EXPECT_EQ(error.message, "[xx] RTT buffer \"Terminal\" not found (2 of 3).");
+    EXPECT_EQ(error.messageEn, "RTT buffer \"Terminal\" not found (2 of 3).");
+    // A translated argument: its English counterpart in the English text.
+    hwio::setText(error, hwio::ErrorText::Cause, "hwio::test",
+                  QT_TRANSLATE_NOOP("hwio::test", "Reported: %1"),
+                  {hwio::textOf(error, hwio::ErrorText::Message)});
+    EXPECT_EQ(error.cause, "[xx] Reported: [xx] RTT buffer \"Terminal\" not found (2 of 3).");
+    EXPECT_EQ(error.causeEn, "Reported: RTT buffer \"Terminal\" not found (2 of 3).");
+    // One pass: a value that contains "%2" is not expanded again (review R13).
+    hwio::setText(error, hwio::ErrorText::Suggestion, "hwio::test",
+                  QT_TRANSLATE_NOOP("hwio::test", "%1 and %2"),
+                  {QStringLiteral("100%2"), QStringLiteral("x")});
+    EXPECT_EQ(error.suggestionEn, "100%2 and x");
+    hwio::clearText(error, hwio::ErrorText::Suggestion);
+    EXPECT_TRUE(error.suggestion.empty());
+    EXPECT_TRUE(error.suggestionEn.empty());
+    hwio::setUntranslatedText(error, hwio::ErrorText::Suggestion, "Plain English.");
+    EXPECT_EQ(error.suggestion, "Plain English.");
+    EXPECT_EQ(error.suggestionEn, "Plain English.");
+}
+
+TEST(ErrorEnglish, JsonInEnglish) {
+    const ScopedPseudoTranslator translator;
+    ASSERT_TRUE(translator.ok());
+    const hwio::Error error = hwio::makeError(ErrorCode::TargetNotHalted);
+    const QJsonObject english = hwio::toJson(error, hwio::ErrorLanguage::English);
+    EXPECT_EQ(english.value(QStringLiteral("message")).toString().toStdString(), error.messageEn);
+    EXPECT_EQ(hwio::toJson(error).value(QStringLiteral("message")).toString().toStdString(),
+              error.message);
+    // An error without English texts (aggregate-initialized) falls back to the translated ones.
+    hwio::Error bare;
+    bare.message = "only";
+    EXPECT_EQ(hwio::toJson(bare, hwio::ErrorLanguage::English)
+                  .value(QStringLiteral("message"))
+                  .toString(),
+              QStringLiteral("only"));
 }
 
 } // namespace

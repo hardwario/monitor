@@ -1,6 +1,7 @@
 // Session control tools (plan/features/0013 C1, ADR-0099; rttt reconnect / stop / start /
 // jlink_close / jlink_open): reconnect, stop, start, release_probe, reacquire_probe. They queue a
-// command for the session and return at once; wait_for_connection waits for the outcome.
+// command for the session and return at once (reacquire_probe waits for the console, ADR-0375);
+// wait_for_connection waits for the outcome.
 
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
@@ -16,10 +17,13 @@
 #include "tool_support.h"
 #include "tools/tools.h"
 
+#include <QElapsedTimer>
 #include <QJsonObject>
 #include <QString>
 #include <QStringLiteral>
+#include <QTimer>
 
+#include <chrono>
 #include <cstdint>
 #include <expected>
 #include <functional>
@@ -59,9 +63,11 @@ constexpr const char* releaseProbeDescription =
 
 constexpr const char* reacquireProbeDescription =
     "Take the J-Link probe back after release_probe and start reading RTT again (rttt: "
-    "jlink_open). Fails (connection.state stopped, probe.in_use_by_other_process) while another "
-    "program still holds the probe. Returns at once; call wait_for_connection to wait. J-Link "
-    "only.";
+    "jlink_open). Waits up to 10 s until the console is connected or the attempt stopped, and "
+    "returns `connection` and `waited` (seconds). connection.state stopped with "
+    "probe.in_use_by_other_process: another program still holds the probe. A state other than "
+    "connected or stopped after the wait is not an error: call wait_for_connection to wait "
+    "longer. J-Link only.";
 
 QJsonObject connectionResult(const DeviceRef& ref) {
     QJsonObject result;
@@ -90,6 +96,92 @@ hwio::mcp::ToolStart controlStart(ToolsContext& context, const char* tool, bool 
         return call;
     };
 }
+
+// reacquire_probe (ADR-0375): queues the reacquire, then waits (owner thread not blocked) until
+// the console is connected or the attempt stopped, at most ToolLimits::reacquireWait. A timeout is
+// not an error (the current state is returned). Cancelling stops the wait; the reacquire stays.
+class ReacquireProbeCall final : public DeviceCall {
+public:
+    ReacquireProbeCall(ToolsContext& tools, const hwio::mcp::RequestContext& context,
+                       hwio::mcp::ToolEnv& env, ResolvedDevice device)
+        : DeviceCall(tools, context, env, std::move(device)) {
+        m_elapsed.start();
+        connect(ref().console.data(), &hwio::device::ConsoleSession::connectionChanged, this,
+                [this](const hwio::device::ConnectionEvent& event) {
+                    switch (event.state) {
+                    case hwio::device::ConnectionState::Connecting:
+                        m_attempting = true;
+                        break;
+                    case hwio::device::ConnectionState::Connected:
+                        finishNow();
+                        break;
+                    case hwio::device::ConnectionState::Stopped:
+                        // Only the Stopped of this attempt (it starts with Connecting), not a
+                        // late one of the release before it.
+                        if (m_attempting) {
+                            finishNow();
+                        }
+                        break;
+                    case hwio::device::ConnectionState::Disconnected:
+                    case hwio::device::ConnectionState::ProbeOpen:
+                        break;
+                    }
+                });
+        if (auto reacquired = ref().jlink->reacquireProbe(); !reacquired) {
+            completeError(std::move(reacquired).error());
+            return;
+        }
+        if (ref().console->connection().state == hwio::device::ConnectionState::Connected) {
+            finishNow(); // not released: nothing to wait for
+            return;
+        }
+        const std::chrono::milliseconds wait = limits().reacquireWait;
+        m_deadline.setSingleShot(true);
+        m_deadline.setInterval(wait);
+        connect(&m_deadline, &QTimer::timeout, this, [this] { finishNow(); });
+        m_progress.setInterval(std::chrono::seconds(1));
+        connect(&m_progress, &QTimer::timeout, this, [this, wait] {
+            reportProgress(seconds(std::chrono::milliseconds(m_elapsed.elapsed())), seconds(wait),
+                           QStringLiteral("waiting"));
+        });
+        m_deadline.start();
+        m_progress.start();
+    }
+
+protected:
+    void onCancel() override {
+        m_deadline.stop();
+        m_progress.stop();
+        ToolCall::onCancel();
+    }
+    void deviceGone() override {
+        m_deadline.stop();
+        m_progress.stop();
+    }
+
+private:
+    void finishNow() {
+        if (isFinished()) {
+            return;
+        }
+        m_deadline.stop();
+        m_progress.stop();
+        if (!alive()) {
+            completeError(deviceNotOpen(id()));
+            return;
+        }
+        QJsonObject result = connectionResult(ref());
+        // Seconds with 0.1 s resolution.
+        const auto tenths = (m_elapsed.elapsed() + 50) / 100;
+        result.insert(QStringLiteral("waited"), static_cast<double>(tenths) / 10.0);
+        complete(result);
+    }
+
+    QElapsedTimer m_elapsed;
+    QTimer m_deadline;
+    QTimer m_progress;
+    bool m_attempting = false;
+};
 
 QJsonObject deviceOnly() {
     return Schema::object().property(QStringLiteral("device"), deviceArgument()).json();
@@ -243,18 +335,22 @@ hwio::Status addReacquireProbe(hwio::mcp::Registry& registry, ToolsContext& cont
             .description = reacquireProbeDescription,
             .inputSchema = deviceOnly(),
             .outputSchema =
-                objectOf({{"connection", connectionSchema()}}, {QStringLiteral("connection")}),
+                objectOf({{"connection", connectionSchema()},
+                          {"waited", typed("number", "seconds waited for the console")}},
+                         {QStringLiteral("connection"), QStringLiteral("waited")}),
             .annotations = control,
             .consent = {},
             .marker = true,
-            .start = controlStart(
-                context, "reacquire_probe", true,
-                [](const ResolvedDevice& device, const QJsonObject&) -> hwio::Result<QJsonObject> {
-                    if (auto reacquired = device.ref.jlink->reacquireProbe(); !reacquired) {
-                        return std::unexpected(std::move(reacquired).error());
-                    }
-                    return connectionResult(device.ref);
-                }),
+            .start = [&context](const hwio::mcp::RequestContext& rc, const QJsonObject& args,
+                                hwio::mcp::ToolEnv& env) -> std::unique_ptr<hwio::mcp::ToolCall> {
+                auto device = resolveJLinkDevice(context.provider(), args);
+                if (!device) {
+                    return failed(std::move(device).error());
+                }
+                context.provider().marker(device->id,
+                                          markerStart(rc, QStringLiteral("reacquire_probe")));
+                return std::make_unique<ReacquireProbeCall>(context, rc, env, std::move(*device));
+            },
             .validate = {}});
 }
 

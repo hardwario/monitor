@@ -13,7 +13,7 @@ Andere Sprachen: [English](../en/remote-support.md) · [Čeština](../cs/remote-
 ## Die Konsole freigeben
 
 1. Verbinden Sie das Gerät (J-Link oder Bluetooth) und öffnen Sie die Seite **Konsole**.
-2. Klicken Sie auf **Mit dem Support teilen…**. Der Dialog erklärt, was der Support tun kann. Klicken Sie auf
+2. Klicken Sie auf **Mit dem Support teilen…**. Eine Seite erklärt, was der Support tun kann. Klicken Sie auf
    **Freigabe starten**.
 3. Ein Banner zeigt **Für den Support freigegeben — Code 482 913**. Lesen Sie den Code dem HARDWARIO-Support vor.
    **Link kopieren** kopiert einen Link mit dem Code.

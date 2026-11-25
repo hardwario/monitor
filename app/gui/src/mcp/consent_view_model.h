@@ -4,8 +4,10 @@
 // "Consent prompt window", ADR-0101, ADR-0108, ADR-0161, ADR-0164, ADR-0242).
 //
 // Formats GuiConsentBroker::current() in the GUI language: the title ("Claude Code wants to flash
-// firmware"), the detail rows (device and tab, file and size, catalog id, target, scope, address
-// range, warnings), the remember button ("Allow flashing for Claude Code") and the countdown
+// firmware"), the detail rows (plan 0054, ADR-0389: the firmware - file, or catalog name and
+// version with the full catalog ID as a note - and size, the device and tab with the Show device
+// link, profile, MCU, scope, address range, the client, warnings), the remember button ("Always
+// allow flashing for Claude Code") and the countdown
 // (updated once a second while a prompt is shown). The buttons call the broker. The window itself
 // (flags, no transient parent) is QML; placing it on the screen under the cursor and the taskbar /
 // dock alert of the main window are done here (QtGui, app/gui only).
@@ -42,7 +44,8 @@ class ConsentViewModel : public QObject {
     Q_PROPERTY(bool armed READ armed NOTIFY armedChanged)
     Q_PROPERTY(QString client READ client NOTIFY changed)
     Q_PROPERTY(QString title READ title NOTIFY changed)
-    // [{label, value, warning: bool}]
+    // [{label, value, warning: bool, note, action: bool}]: `note` is a small second line under the
+    // value ("" = none), `action` shows the "Show device" link in the row.
     Q_PROPERTY(QVariantList details READ details NOTIFY changed)
     Q_PROPERTY(QString rememberLabel READ rememberLabel NOTIFY changed)
     Q_PROPERTY(bool canShowDevice READ canShowDevice NOTIFY changed)

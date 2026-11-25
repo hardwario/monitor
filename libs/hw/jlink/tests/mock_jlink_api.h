@@ -75,6 +75,8 @@ public:
                 (override));
     MOCK_METHOD(int, coresightWrite, (std::uint8_t, bool, std::uint32_t), (override));
     MOCK_METHOD(void, flushMessages, (), (override));
+    MOCK_METHOD(std::vector<std::string>, flushMessagesContaining, (std::string_view, std::size_t),
+                (override));
     MOCK_METHOD(std::string, takeErrorText, (), (override));
 };
 
