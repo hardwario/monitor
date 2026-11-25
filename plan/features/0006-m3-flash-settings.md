@@ -167,7 +167,7 @@ Changes apply immediately (no OK/Cancel). Invalid input shows an inline error an
 
 | Section | Items | Owner |
 |---|---|---|
-| General | Language: System / English / Čeština (live) · Theme: System / Light / Dark (live) · Reopen tabs at start | 0006 |
+| General | Language: System / English / Čeština (live) · Theme: System / Light / Dark (live) · Reopen tabs at start (*removed by 0053, ADR-0388*) | 0006 |
 | Console | Font size (8–24) · Show timestamps · Wrap long lines · Save console to log files (default on) · Log folder [Open] · Retention info "Last 50 files, max. 200 MB" | 0005 (section component) |
 | J-Link | Library: Automatic (detected: `/opt/SEGGER/JLink/libjlinkarm.so` 8.10) / Custom path [Browse…] · Default speed (kHz) · RTT latency (ms) · Auto-reconnect · Reset on connect · link "Run the setup wizard" (*amended by 0008, 2026-10-16*) | 0006 |
 | nRF Util | Path: Automatic (detected 7.x / "not found — needed for LTE firmware", *amended by 0021*) / Custom [Browse…] · link "Run the setup wizard" (*amended by 0008, 2026-10-16*) | 0006 |

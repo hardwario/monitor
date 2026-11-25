@@ -1,5 +1,5 @@
 // Settings → General (0006): the user mode (plan 0045, ADR-0359: Basic / Advanced / Expert, first
-// row in every mode), language (live), theme (live), reopen tabs at start (ADR-0061).
+// row in every mode), language (live), theme (live). Tabs are not reopened at start (ADR-0388).
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -87,19 +87,6 @@ ColumnLayout {
             currentIndex: section.vm.themeIndex
             Accessible.name: qsTr("Theme")
             onActivated: index => section.vm.selectTheme(index)
-        }
-    }
-
-    SettingsRow {
-        Layout.fillWidth: true
-        label: qsTr("Reopen tabs at start")
-        description: qsTr("Tabs are restored disconnected.")
-
-        Switch {
-            objectName: "restoreTabsSwitch"
-            checked: section.vm.restoreTabs
-            Accessible.name: qsTr("Reopen tabs at start")
-            onToggled: section.vm.restoreTabs = checked
         }
     }
 }

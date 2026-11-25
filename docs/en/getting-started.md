@@ -65,7 +65,8 @@ Each device is a tab; up to 8 can be open. <kbd>Ctrl</kbd>+<kbd>T</kbd> or **+**
 The rail on the left switches the pages of the tab: **Console** (<kbd>Ctrl</kbd>+<kbd>1</kbd>) and **Flash**
 (<kbd>Ctrl</kbd>+<kbd>2</kbd>). **Settings** (<kbd>Ctrl</kbd>+<kbd>,</kbd>) opens as a tab of its own.
 
-At the next start the tabs come back, disconnected (**Settings → General → Reopen tabs at start**).
+The app always starts with one **New device** tab (**Choose a device to connect**); the tabs of the last session are
+not reopened.
 
 Only one window of the app runs at a time. Starting it again brings the open window to the front.
 
@@ -78,7 +79,7 @@ Only one window of the app runs at a time. Starting it again brings the open win
 
 | Section | What is there |
 |---|---|
-| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark), **Reopen tabs at start** |
+| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark) |
 | **Console** | font size, timestamps, line wrap, command suggestions, command history, console files and their folder |
 | **J-Link** | the J-Link library (**Automatic** or **Custom path**) and the default connection options |
 | **nRF Util** | the nRF Util program (**Automatic** or **Custom path**), needed only for the LTE modem firmware |
@@ -99,7 +100,7 @@ actions** on in an older version, **Expert** is. The selected mode is stored whe
 
 | Shown | Basic | Advanced | Expert |
 |---|---|---|---|
-| **General**: Mode, Language, Theme, Reopen tabs at start | ✓ | ✓ | ✓ |
+| **General**: Mode, Language, Theme | ✓ | ✓ | ✓ |
 | **Console**: font size, timestamps, line wrap, console files, log folder | ✓ | ✓ | ✓ |
 | **Console**: command suggestions, reading the command list, **Remember commands**, **Clear history** | | ✓ | ✓ |
 | **J-Link**: Library, Default speed, Auto-reconnect | | ✓ | ✓ |

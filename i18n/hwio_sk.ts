@@ -1220,17 +1220,6 @@
         <source>Theme</source>
         <translation>Vzhľad</translation>
     </message>
-    <message>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="95"/>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="101"/>
-        <source>Reopen tabs at start</source>
-        <translation>Pri spustení obnoviť karty</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="96"/>
-        <source>Tabs are restored disconnected.</source>
-        <translation>Karty sa obnovia odpojené.</translation>
-    </message>
 </context>
 <context>
     <name>HelpMenu</name>
@@ -2611,45 +2600,45 @@
         <translation>Vybrať súbor s firmvérom</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="479"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="471"/>
         <source>New device tab</source>
         <translation>Nová karta zariadenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="482"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="474"/>
         <source>Close the device tab</source>
         <translation>Zavrieť kartu zariadenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="485"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="488"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="477"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="480"/>
         <source>Next tab</source>
         <translation>Ďalšia karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="491"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="494"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="483"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="486"/>
         <source>Previous tab</source>
         <translation>Predchádzajúca karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="497"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="489"/>
         <source>Settings</source>
         <translation>Nastavenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="500"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="492"/>
         <source>Connect or disconnect</source>
         <translation>Pripojiť alebo odpojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="503"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="495"/>
         <source>Reconnect</source>
         <translation>Znova pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="506"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="509"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="498"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="501"/>
         <source>Keyboard shortcuts</source>
         <translation>Klávesové skratky</translation>
     </message>
@@ -6026,17 +6015,17 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="703"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="694"/>
         <source>Wait until the J-Link firmware update has finished.</source>
         <translation>Počkajte na dokončenie aktualizácie firmvéru J-Linku.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="921"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="911"/>
         <source>Close a tab first: at most %1 device tabs can be open.</source>
         <translation>Najprv zatvorte kartu: otvorených môže byť najviac %1 kariet zariadení.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1508"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1342"/>
         <source>Copied to clipboard.</source>
         <translation>Skopírované do schránky.</translation>
     </message>
@@ -8222,64 +8211,64 @@ Zdieľanie sa ukončí po 30 minútach bez aktivity alebo po 8 hodinách.</trans
 <context>
     <name>hwio::gui::SettingsViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="209"/>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="242"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="208"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="241"/>
         <source>System</source>
         <translation>Podľa systému</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="244"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="243"/>
         <source>Light</source>
         <translation>Svetlý</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="246"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="245"/>
         <source>Dark</source>
         <translation>Tmavý</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="476"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="464"/>
         <source>Detected: %1 · %2 · %3</source>
         <translation>Nájdené: %1 · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="479"/>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="498"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="467"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="486"/>
         <source>Checking…</source>
         <translation>Kontrola…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="496"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="484"/>
         <source>Detected: %1 · %2</source>
         <translation>Nájdené: %1 · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="501"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="489"/>
         <source>Not found — needed only for LTE modem firmware</source>
         <translation>Nenájdené — potrebné len pre firmvér LTE modemu</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="524"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="512"/>
         <source>checking…</source>
         <translation>kontrola…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="528"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="516"/>
         <source>not checked</source>
         <translation>neskontrolované</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="535"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="523"/>
         <source>Build: %1</source>
         <translation>Zostavenie: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="536"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="524"/>
         <source>J-Link Software: %1</source>
         <translation>J-Link Software: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="539"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="527"/>
         <source>nRF Util: %1</source>
         <translation>nRF Util: %1</translation>
     </message>

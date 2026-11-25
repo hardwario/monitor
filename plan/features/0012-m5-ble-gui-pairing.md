@@ -218,7 +218,7 @@ Q_INVOKABLE QString pageDisabledReason(const QString& pageId) const;  // "" = en
 | Key | Type | Default |
 |---|---|---|
 | `ui/lastTransport` | string `jlink`\|`ble` | `jlink` |
-| `ui/tabs` | (0004) entries gain `transport`; BLE entries `{transport, profile, id, name}` | — |
+| `ui/tabs` | (0004) entries gain `transport`; BLE entries `{transport, profile, id, name}` (*removed by 0053, ADR-0388*) | — |
 | `ble/autoReconnect` | bool | `false` |
 | `ble/<sanitised id>/autoReconnect`, `…/logToFile`; `ble/recent` | per device, LRU 32 | — |
 

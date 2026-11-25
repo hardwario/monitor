@@ -199,9 +199,6 @@ TEST_F(SettingsTest, SupportServerIsValidatedAndUsedByTheJoinDialog) {
 TEST_F(SettingsTest, GeneralItemsApplyImmediately) {
     settings().setTheme(QStringLiteral("dark"));
     EXPECT_EQ(app().theme(), QStringLiteral("dark")); // live
-    EXPECT_TRUE(settings().restoreTabs());
-    settings().setRestoreTabs(false);
-    EXPECT_FALSE(app().settingsStore()->value(QStringLiteral("ui/restoreTabs")).toBool());
     EXPECT_TRUE(settings().writeError().isEmpty());
     ASSERT_GE(settings().languages().size(), 3);
     EXPECT_EQ(settings().languages().at(0).toMap().value(QStringLiteral("name")).toString(),
@@ -316,9 +313,9 @@ TEST_F(SettingsTest, ReadOnlySettingsFile) {
         raw.sync();
     });
     EXPECT_TRUE(settings().readOnly());
-    settings().setRestoreTabs(false);
+    settings().setAutoReconnect(false);
     EXPECT_FALSE(settings().writeError().isEmpty());
-    EXPECT_TRUE(settings().restoreTabs());
+    EXPECT_TRUE(settings().autoReconnect());
     // Plan 0045: the mode applies for this run; the write error is shown.
     settings().selectMode(static_cast<int>(UiMode::Basic));
     EXPECT_EQ(settings().mode(), static_cast<int>(UiMode::Basic));

@@ -5,11 +5,11 @@
 //
 // Owns the GUI's application state: the SettingsStore, the PageRegistry (pages and settings
 // sections), the ShortcutRegistry, the SessionRegistry, the ProbeScanner worker, the device tabs
-// (≤ 8, restored Disconnected from ui/tabs, ADR-0061), the global page view models, the toasts
-// (≤ 3 visible) and the theme. Language switching is forwarded to the LanguageManager.
-// Amended by 0021 (ADR-0172): Settings opens as a tab after the device tabs (rail item, Ctrl+,,
-// "Open Settings" actions); currentTab may be its row; globalPage() is "settings" while it is
-// current.
+// (≤ 8; every start opens one Choose device tab, tabs are not saved: ADR-0388), the global page
+// view models, the toasts (≤ 3 visible) and the theme. Language switching is forwarded to the
+// LanguageManager. Amended by 0021 (ADR-0172): Settings opens as a tab after the device tabs (rail
+// item, Ctrl+,, "Open Settings" actions); currentTab may be its row; globalPage() is "settings"
+// while it is current.
 //
 // Ownership: created by main() (and the test runners) on the stack with the application object as
 // QObject parent, so that the QML singleton factory create() finds it as a direct child of the
@@ -274,8 +274,8 @@ public:
     Q_INVOKABLE void closeGlobalPage();
     // 0021 (ADR-0172): opens the Settings tab (or switches to it) and scrolls to `sectionId`
     // ("general", "console", "jlink", "nrfutil", "about"; "" = the top). The tab exists only while
-    // it is open: not counted in the tab limit, not stored in ui/tabs. Plan 0045 (ADR-0361): a
-    // section (or the row `rowId`) hidden by the user mode is shown until Settings is left.
+    // it is open: not counted in the tab limit. Plan 0045 (ADR-0361): a section (or the row
+    // `rowId`) hidden by the user mode is shown until Settings is left.
     Q_INVOKABLE void openSettings(const QString& sectionId = {}, const QString& rowId = {});
     Q_INVOKABLE void closeSettings();
     // The Settings page scrolled to settingsSection: the request is done (review F8).
@@ -291,7 +291,7 @@ public:
     Q_INVOKABLE bool canQuit();
     // [Cancel and quit]: cancels the operations; quitRequested when all pages have finished.
     Q_INVOKABLE void cancelOperationsAndQuit();
-    // Saves the tab list (ui/tabs) and the window geometry (ui/windowGeometry).
+    // Saves the window geometry (ui/windowGeometry); tabs are not saved (ADR-0388).
     Q_INVOKABLE void saveState();
 
     // --- misc ---
@@ -354,11 +354,9 @@ private:
 
     void registerShellShortcuts();
     void createGlobalPages();
-    void restoreTabs();
     [[nodiscard]] std::unique_ptr<DeviceTabViewModel> makeTab();
     DeviceTabViewModel* addTab(std::unique_ptr<DeviceTabViewModel> tab);
     void removeTab(int index);
-    void saveTabs();
     void saveGeometry();
     void retranslate();
     void onScan(const ProbeScan& scan);
@@ -427,7 +425,6 @@ private:
     bool m_overlayOnSettings = false;
     bool m_reducedMotion = false;
     bool m_quitPending = false;
-    bool m_restoring = false;
     std::vector<Toast> m_visibleToasts;
     std::vector<QString> m_queuedToasts;
     std::uint64_t m_nextToastId = 1;

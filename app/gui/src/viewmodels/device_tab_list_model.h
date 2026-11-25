@@ -4,8 +4,8 @@
 // ADR-0043): at most maxTabs (= SessionRegistry::maxSessions) DeviceTabViewModels.
 //
 // Amended by 0021 (ADR-0172): while Settings is open, one non-device row of kind "settings" follows
-// the device tabs (row settingsRow(); tab = null). It is not counted in count() / the limit and is
-// never stored in ui/tabs. at(i), indexOf() and take() address device tabs only.
+// the device tabs (row settingsRow(); tab = null). It is not counted in count() / the limit.
+// at(i), indexOf() and take() address device tabs only.
 //
 // Ownership: the tabs are Qt children of this model; take() hands a removed tab to the caller
 // (AppViewModel deletes it on the next event-loop turn, after QML has dropped its delegate).

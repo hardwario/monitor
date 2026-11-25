@@ -55,7 +55,7 @@ Changing the mode takes effect at once (sections appear / disappear, the Flash p
 
 | Section / row | Basic | Advanced | Expert |
 |---|---|---|---|
-| General: Mode, Language, Theme, Reopen tabs at start | ✓ | ✓ | ✓ |
+| General: Mode, Language, Theme (Reopen tabs at start: *removed by 0053, ADR-0388*) | ✓ | ✓ | ✓ |
 | Console: Font size, Show timestamps, Wrap long lines, Save console to log files, Log folder | ✓ | ✓ | ✓ |
 | Console: Suggest commands, Read the command list on connect, Remember commands + Clear history | | ✓ | ✓ |
 | J-Link: Library, Default speed, Auto-reconnect | | ✓ | ✓ |

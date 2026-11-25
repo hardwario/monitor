@@ -1220,17 +1220,6 @@
         <source>Theme</source>
         <translation>Motyw</translation>
     </message>
-    <message>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="95"/>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="101"/>
-        <source>Reopen tabs at start</source>
-        <translation>Przywracaj karty przy uruchomieniu</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/settings/GeneralSection.qml" line="96"/>
-        <source>Tabs are restored disconnected.</source>
-        <translation>Karty są przywracane jako rozłączone.</translation>
-    </message>
 </context>
 <context>
     <name>HelpMenu</name>
@@ -2611,45 +2600,45 @@
         <translation>Wybierz plik firmware</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="479"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="471"/>
         <source>New device tab</source>
         <translation>Nowa karta urządzenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="482"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="474"/>
         <source>Close the device tab</source>
         <translation>Zamknij kartę urządzenia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="485"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="488"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="477"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="480"/>
         <source>Next tab</source>
         <translation>Następna karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="491"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="494"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="483"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="486"/>
         <source>Previous tab</source>
         <translation>Poprzednia karta</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="497"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="489"/>
         <source>Settings</source>
         <translation>Ustawienia</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="500"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="492"/>
         <source>Connect or disconnect</source>
         <translation>Połącz lub rozłącz</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="503"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="495"/>
         <source>Reconnect</source>
         <translation>Połącz ponownie</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="506"/>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="509"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="498"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="501"/>
         <source>Keyboard shortcuts</source>
         <translation>Skróty klawiszowe</translation>
     </message>
@@ -6026,17 +6015,17 @@
 <context>
     <name>hwio::gui::AppViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="703"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="694"/>
         <source>Wait until the J-Link firmware update has finished.</source>
         <translation>Poczekaj na zakończenie aktualizacji firmware J-Linka.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="921"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="911"/>
         <source>Close a tab first: at most %1 device tabs can be open.</source>
         <translation>Najpierw zamknij kartę: otwartych może być najwyżej %1 kart urządzeń.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1508"/>
+        <location filename="../app/gui/src/viewmodels/app_view_model.cpp" line="1342"/>
         <source>Copied to clipboard.</source>
         <translation>Skopiowano do schowka.</translation>
     </message>
@@ -8222,64 +8211,64 @@ Udostępnianie kończy się po 30 minutach bezczynności lub po 8 godzinach.</tr
 <context>
     <name>hwio::gui::SettingsViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="209"/>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="242"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="208"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="241"/>
         <source>System</source>
         <translation>Systemowy</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="244"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="243"/>
         <source>Light</source>
         <translation>Jasny</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="246"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="245"/>
         <source>Dark</source>
         <translation>Ciemny</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="476"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="464"/>
         <source>Detected: %1 · %2 · %3</source>
         <translation>Wykryto: %1 · %2 · %3</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="479"/>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="498"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="467"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="486"/>
         <source>Checking…</source>
         <translation>Sprawdzanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="496"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="484"/>
         <source>Detected: %1 · %2</source>
         <translation>Wykryto: %1 · %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="501"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="489"/>
         <source>Not found — needed only for LTE modem firmware</source>
         <translation>Nie znaleziono — potrzebne tylko do firmware modemu LTE</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="524"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="512"/>
         <source>checking…</source>
         <translation>sprawdzanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="528"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="516"/>
         <source>not checked</source>
         <translation>nie sprawdzono</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="535"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="523"/>
         <source>Build: %1</source>
         <translation>Kompilacja: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="536"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="524"/>
         <source>J-Link Software: %1</source>
         <translation>J-Link Software: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="539"/>
+        <location filename="../app/gui/src/viewmodels/settings_view_model.cpp" line="527"/>
         <source>nRF Util: %1</source>
         <translation>nRF Util: %1</translation>
     </message>
