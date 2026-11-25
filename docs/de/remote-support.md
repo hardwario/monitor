@@ -61,6 +61,11 @@ Für die Autovervollständigung des Supports sendet Ihr HARDWARIO Monitor dem Su
 Gerätebefehle, und wenn der Support die Unterbefehle eines Befehls braucht, liest er dessen Hilfe selbst. Diese
 Hilfeabfragen erscheinen nicht in Ihrer Konsole; die Konsolendatei hält fest, wie viele es waren.
 
+Der HARDWARIO Support kann in der Sitzung einen KI-Assistenten verwenden. Dessen Befehle und Anfragen erreichen
+Sie als Befehle des Supports: dieselbe Zeile *— Remote: command … —*, dieselbe Frage vor jeder Aktion, dieselben
+Einträge in der Konsolendatei. Ihre Möglichkeiten bleiben dieselben: den Support zulassen, die Frage vor jeder Aktion
+und **Freigabe beenden**.
+
 <a id="join-a-session"></a>
 ## Einer Sitzung beitreten (Support)
 
@@ -100,6 +105,13 @@ Um die Sitzung zu verlassen, klicken Sie in der Geräteleiste auf **Sitzung verl
 Ctrl+Shift+D). Der Tab bleibt mit der Konsole offen, sodass Sie sie noch speichern können; die Konsole zeigt *— Sie haben
 die Sitzung verlassen —*. **Erneut beitreten** tritt mit demselben Code wieder bei, und der Kunde muss Sie erneut
 zulassen. Solange ein Vorgang läuft, den Sie angefordert haben, wartet die Schaltfläche, bis er beendet ist.
+
+**KI-Assistent.** Wenn **Einstellungen › KI-Assistenten (MCP) › KI-Clients dürfen Fernsupport-Sitzungen
+verwenden** eingeschaltet ist, kann ein KI-Client wie Claude Code im Remote-Tab arbeiten, sobald Sie es für die
+Sitzung erlauben: Er liest die Konsole mit verborgenen geheimen Werten, sendet Befehle und bittet wie Sie um das
+Flashen einer Katalog-Firmware, das LTE-Update oder einen Reset. Der Kunde sieht seine Befehle als Ihre. Das Banner
+zeigt *KI-Client aktiv: Claude Code* mit **KI stoppen**; eine Aktion, um die der KI-Client gebeten hat, zeigt die Seite
+**Flashen** mit *KI:* und **Nicht mehr warten**. Siehe [MCP-Server](../en/mcp.md#remote-support-sessions) (Englisch).
 
 Wenn der Kunde die Freigabe beendet, kann HARDWARIO Monitor das nicht immer erkennen: Der Server kündigt es nicht an.
 Nach 30 Minuten ohne jede Aktivität weist das Banner darauf hin und bietet **Tab schließen** an. Bis Sie ihn schließen,

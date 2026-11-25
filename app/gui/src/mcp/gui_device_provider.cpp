@@ -16,11 +16,13 @@
 #include "hwio/mcp/request_context.h"
 #include "hwio/mcp/tools/device_provider.h"
 #include "mcp/client_name.h"
+#include "mcp/gui_remote_device.h"
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/connection_view_model.h"
 #include "viewmodels/device_tab_list_model.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
+#include "viewmodels/remote_join_view_model.h"
 #include "workers/ble_service.h"
 #include "workers/probe_scanner.h"
 
@@ -36,6 +38,7 @@
 #include <QtCore/qtmetamacros.h>
 #include <QtTypes>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
@@ -57,6 +60,7 @@ using hwio::mcp::tools::DeviceRef;
 
 constexpr std::string_view jlinkPrefix = "jlink:";
 constexpr std::string_view blePrefix = "ble:";
+constexpr std::string_view remotePrefix = "remote:";
 constexpr std::string_view defaultProfileId = "chester";
 
 Error deviceNotOpen(std::string_view id) {
@@ -84,6 +88,44 @@ Error errorOf(const ErrorInfo& info) {
 
 bool ownProcess(const std::optional<device::ProbeLockOwner>& owner) {
     return owner && owner->pid == QCoreApplication::applicationPid();
+}
+
+// "1".."4294967295" without leading zeros.
+std::optional<std::uint32_t> decimal32(std::string_view digits) {
+    constexpr std::size_t maxDigits = 10; // 4294967295
+    if (digits.empty() || digits.front() == '0' || digits.size() > maxDigits) {
+        return std::nullopt;
+    }
+    std::uint64_t value = 0;
+    for (const char c : digits) {
+        if (c < '0' || c > '9') {
+            return std::nullopt;
+        }
+        value = (value * 10) + static_cast<std::uint64_t>(c - '0');
+    }
+    if (value > std::numeric_limits<std::uint32_t>::max()) {
+        return std::nullopt;
+    }
+    return static_cast<std::uint32_t>(value);
+}
+
+// ADR-0433: join and leave stay human (English call-site text, ADR-0103 / ADR-0240).
+Error remoteNotAllowed(std::string_view id) {
+    Error error = makeError(ErrorCode::McpToolNotAllowed, std::string(id));
+    setUntranslatedText(error, ErrorText::Message,
+                        std::format("{} is a customer's device in a remote support session: only "
+                                    "the support person can join or leave the session.",
+                                    id));
+    clearText(error, ErrorText::Suggestion);
+    return error;
+}
+
+// The tab's remote device while it is in a session (nullptr otherwise).
+GuiRemoteDevice* remoteDeviceOf(const DeviceTabViewModel& tab) {
+    const RemoteJoinViewModel* join = tab.remoteJoin();
+    return tab.isRemote() && tab.remoteSession() != nullptr && join != nullptr
+               ? join->remoteDevice()
+               : nullptr;
 }
 
 } // namespace
@@ -132,32 +174,84 @@ void GuiDeviceProvider::watchTab(DeviceTabViewModel* tab) {
         return;
     }
     // The tab's signals end with the tab; the notifier is the context (ends with the provider).
-    QObject::connect(tab, &DeviceTabViewModel::sessionChanged, &m_notifier,
-                     [this] { emit m_notifier.devicesChanged(); });
-    QObject::connect(tab, &DeviceTabViewModel::configurationChanged, &m_notifier,
-                     [this] { emit m_notifier.devicesChanged(); });
+    QObject::connect(tab, &DeviceTabViewModel::sessionChanged, &m_notifier, [this] {
+        numberRemoteTabs();
+        emit m_notifier.devicesChanged();
+    });
+    QObject::connect(tab, &DeviceTabViewModel::configurationChanged, &m_notifier, [this] {
+        numberRemoteTabs();
+        emit m_notifier.devicesChanged();
+    });
+}
+
+void GuiDeviceProvider::numberRemoteTabs() {
+    std::erase_if(m_remoteNumbers, [](const RemoteNumber& entry) {
+        return entry.tab.isNull() || !entry.tab->isRemote();
+    });
+    DeviceTabListModel* list = tabs();
+    if (list == nullptr) {
+        return;
+    }
+    for (int i = 0; i < list->count(); ++i) {
+        DeviceTabViewModel* tab = list->at(i);
+        if (tab == nullptr || !tab->isRemote() || tab->remoteSession() == nullptr ||
+            std::ranges::any_of(m_remoteNumbers,
+                                [tab](const RemoteNumber& entry) { return entry.tab == tab; })) {
+            continue;
+        }
+        // 32-bit: a wrap would need 4 billion joined tabs in one run (none is ever reused).
+        m_remoteNumbers.push_back(RemoteNumber{.tab = tab, .number = m_nextRemoteNumber++});
+    }
+}
+
+std::optional<std::uint32_t> GuiDeviceProvider::remoteNumberOf(std::string_view id) {
+    if (!id.starts_with(remotePrefix)) {
+        return std::nullopt;
+    }
+    return decimal32(id.substr(remotePrefix.size()));
+}
+
+void GuiDeviceProvider::setRemoteSessionsAllowed(bool allowed) {
+    if (allowed == m_remoteSessions) {
+        return;
+    }
+    if (!allowed) {
+        revokeRemoteAi({}); // ADR-0433: existing grants end with the setting
+    }
+    m_remoteSessions = allowed;
+    numberRemoteTabs();
+    emit m_notifier.devicesChanged();
+}
+
+std::string GuiDeviceProvider::remoteId(const DeviceTabViewModel& tab) const {
+    if (!m_remoteSessions || remoteDeviceOf(tab) == nullptr) {
+        return {};
+    }
+    const auto it = std::ranges::find_if(
+        m_remoteNumbers, [&tab](const RemoteNumber& entry) { return entry.tab == &tab; });
+    return it == m_remoteNumbers.end() ? std::string()
+                                       : std::format("{}{}", remotePrefix, it->number);
+}
+
+void GuiDeviceProvider::revokeRemoteAi(std::string_view clientKey) {
+    DeviceTabListModel* list = tabs();
+    if (list == nullptr) {
+        return;
+    }
+    for (int i = 0; i < list->count(); ++i) {
+        if (const DeviceTabViewModel* tab = list->at(i); tab != nullptr) {
+            if (GuiRemoteDevice* device = remoteDeviceOf(*tab); device != nullptr) {
+                device->revokeAi(clientKey);
+            }
+        }
+    }
 }
 
 std::optional<std::uint32_t> GuiDeviceProvider::probeSerialOf(std::string_view id) {
     if (!id.starts_with(jlinkPrefix)) {
         return std::nullopt;
     }
-    const std::string_view digits = id.substr(jlinkPrefix.size());
-    constexpr std::size_t maxDigits = 10; // 4294967295
-    if (digits.empty() || digits.front() == '0' || digits.size() > maxDigits) {
-        return std::nullopt;
-    }
-    std::uint64_t serial = 0;
-    for (const char c : digits) {
-        if (c < '0' || c > '9') {
-            return std::nullopt;
-        }
-        serial = (serial * 10) + static_cast<std::uint64_t>(c - '0');
-    }
-    if (serial > std::numeric_limits<std::uint32_t>::max()) {
-        return std::nullopt;
-    }
-    return static_cast<std::uint32_t>(serial);
+    return decimal32(id.substr(jlinkPrefix.size()));
 }
 
 std::string GuiDeviceProvider::bleIdOf(std::string_view id) {
@@ -200,6 +294,13 @@ DeviceTabViewModel* GuiDeviceProvider::tabFor(std::string_view id) const {
     if (list == nullptr) {
         return nullptr;
     }
+    if (const std::optional<std::uint32_t> number = remoteNumberOf(id); number) {
+        // Plan 0062: a remote tab exists for MCP only with the setting on.
+        const auto it = std::ranges::find_if(m_remoteNumbers, [number](const RemoteNumber& entry) {
+            return entry.number == *number && !entry.tab.isNull() && entry.tab->isRemote();
+        });
+        return m_remoteSessions && it != m_remoteNumbers.end() ? it->tab.data() : nullptr;
+    }
     const std::optional<std::uint32_t> serial = probeSerialOf(id);
     const std::string bleId = bleIdOf(id);
     for (int i = 0; i < list->count(); ++i) {
@@ -231,6 +332,21 @@ DeviceEntry tabEntry(const DeviceTabViewModel& tab, std::string id) {
         .owner = std::nullopt,
         .connection = session != nullptr ? std::optional(session->connection()) : std::nullopt,
         .openedByMcp = !tab.openedBy().isEmpty()};
+}
+
+// Plan 0062 (ADR-0434): never the tab title (it may carry the session code).
+DeviceEntry remoteEntry(const DeviceTabViewModel& tab, std::string id) {
+    const GuiRemoteDevice* device = remoteDeviceOf(tab);
+    const device::ConsoleSession* session = tab.consoleSession();
+    return DeviceEntry{
+        .id = std::move(id),
+        .kind = "remote",
+        .displayName = device != nullptr ? toStdString(device->displayName(true)) : std::string(),
+        .profileId = device != nullptr ? device->profileId() : std::string(),
+        .state = DeviceEntry::State::Open,
+        .owner = std::nullopt,
+        .connection = session != nullptr ? std::optional(session->connection()) : std::nullopt,
+        .openedByMcp = false};
 }
 
 DeviceEntry probeEntry(const ScannedProbe& probe, std::string id) {
@@ -270,10 +386,16 @@ std::vector<DeviceEntry> GuiDeviceProvider::list() {
     if (list == nullptr) {
         return entries;
     }
+    if (m_remoteSessions) {
+        numberRemoteTabs();
+    }
     for (int i = 0; i < list->count(); ++i) {
         const DeviceTabViewModel* tab = list->at(i);
         if (std::string id = tab != nullptr ? deviceId(*tab) : std::string(); !id.empty()) {
             entries.push_back(tabEntry(*tab, std::move(id)));
+        } else if (std::string remote = tab != nullptr ? remoteId(*tab) : std::string();
+                   !remote.empty()) {
+            entries.push_back(remoteEntry(*tab, std::move(remote)));
         }
     }
     // The probes of the last scan without a tab.
@@ -372,6 +494,14 @@ std::optional<DeviceRef> GuiDeviceProvider::find(std::string_view id) {
     if (tab == nullptr || tab->consoleSession() == nullptr) {
         return std::nullopt;
     }
+    if (tab->isRemote()) {
+        GuiRemoteDevice* device = remoteDeviceOf(*tab);
+        if (device == nullptr || !remoteNumberOf(id)) {
+            return std::nullopt;
+        }
+        return DeviceRef{
+            .console = tab->consoleSession(), .jlink = nullptr, .remote = device, .isRemote = true};
+    }
     return DeviceRef{.console = tab->consoleSession(), .jlink = tab->session()};
 }
 
@@ -422,6 +552,9 @@ QString GuiDeviceProvider::seenBleName(const std::string& bleId) const {
 Result<DeviceRef> GuiDeviceProvider::openDevice(const hwio::mcp::tools::OpenRequest& request) {
     if (m_app.isNull()) {
         return std::unexpected(deviceNotOpen(request.id));
+    }
+    if (request.id.starts_with(remotePrefix)) {
+        return std::unexpected(remoteNotAllowed(request.id)); // plan 0062 (ADR-0434)
     }
     const std::optional<std::uint32_t> serial = probeSerialOf(request.id);
     const std::string bleId = bleIdOf(request.id);
@@ -486,6 +619,9 @@ Result<DeviceRef> GuiDeviceProvider::openDevice(const hwio::mcp::tools::OpenRequ
 }
 
 Status GuiDeviceProvider::close(std::string_view id, const hwio::mcp::RequestContext& context) {
+    if (id.starts_with(remotePrefix)) {
+        return std::unexpected(remoteNotAllowed(id)); // plan 0062 (ADR-0434)
+    }
     DeviceTabViewModel* tab = tabFor(id);
     if (tab == nullptr || (tab->openedBy().isEmpty() && tab->consoleSession() == nullptr)) {
         return std::unexpected(deviceNotOpen(id));
@@ -527,6 +663,11 @@ Status GuiDeviceProvider::beginBusy(std::string_view id, QString text,
     if (tab == nullptr) {
         return std::unexpected(deviceNotOpen(id));
     }
+    if (tab->isRemote()) {
+        // Plan 0062 (D12): the Flash page's remote-operation state ("AI: …", Stop waiting); the
+        // tab itself is not paused (the customer's Monitor runs the operation).
+        return tab->remoteJoin()->beginAiBusy(std::move(text), std::move(cancel));
+    }
     if (tab->isBusy() && tab->busyPage() != busyPage()) {
         // Review M3: a user operation (Flash page, wizard) holds the tab.
         return std::unexpected(
@@ -543,6 +684,10 @@ Status GuiDeviceProvider::beginBusy(std::string_view id, QString text,
 
 void GuiDeviceProvider::endBusy(std::string_view id) {
     if (DeviceTabViewModel* tab = tabFor(id); tab != nullptr) {
+        if (tab->isRemote()) {
+            tab->remoteJoin()->endAiBusy();
+            return;
+        }
         tab->clearBusy(busyPage());
     }
 }

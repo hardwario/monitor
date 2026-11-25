@@ -1,6 +1,7 @@
 // Settings → AI assistants (MCP) (plan/features/0014, ADR-0101, ADR-0102, ADR-0105, ADR-0106,
 // ADR-0241, ADR-0244): enable with the server state, the port, the token (masked, Show, Copy,
-// Regenerate…), the client snippets, the consent rules per category with the All row (ADR-0390),
+// Regenerate…), the client snippets, the remote support sessions switch (plan 0062, ADR-0433),
+// the consent rules per category with the All row (ADR-0390),
 // the remembered grants and the activity list (the last 1000 calls, newest first). Presentation
 // only: McpController.
 pragma ComponentBehavior: Bound
@@ -239,6 +240,21 @@ ColumnLayout {
                     }
                 }
             }
+        }
+    }
+
+    // Plan 0062 (ADR-0433): off by default; a customer's console reaches the AI client only after
+    // support's prompt per session (ADR-0436).
+    SettingsRow {
+        Layout.fillWidth: true
+        label: qsTr("AI clients may use remote support sessions")
+        description: qsTr("The customer's console output is then sent to your AI client, with secret values hidden. You are asked once per session before an AI client can use it. The customer sees the AI client's commands as yours.")
+
+        Switch {
+            objectName: "mcpRemoteSessions"
+            checked: section.mcp.remoteSessions
+            Accessible.name: qsTr("AI clients may use remote support sessions")
+            onToggled: section.mcp.remoteSessions = checked
         }
     }
 

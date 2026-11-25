@@ -5,6 +5,7 @@
 #include "fake_relay.h"
 #include "hwio/core/error.h"
 #include "hwio/core/firmware_identity.h"
+#include "hwio/device/command_capture.h"
 #include "hwio/device/command_tree.h"
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
@@ -17,6 +18,7 @@
 #include "hwio/remote/session_code.h"
 #include "hwio/remote/tunnel.h"
 #include "remote_test_support.h"
+#include "test_profile.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -36,6 +38,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <format>
@@ -788,6 +791,108 @@ TEST(RemoteSession, LargeCommandTreeWithHelpTexts) {
     const std::vector<std::string> last{"command919"};
     ASSERT_NE(joiner.commandTree()->find(last), nullptr);
     EXPECT_EQ(joiner.commandTree()->find(last)->help, std::string(250, 'h'));
+}
+
+// Plan 0062 (A1): a line the host refuses (ADR-0416) gives the marker line and lineRefused with
+// the host's error id (the MCP send_command of an AI client ends with it).
+TEST(RemoteSession, LineRefusedSignalCarriesTheHostsCode) {
+    FakeRelay relay;
+    FakeConsole console;
+    console.profileOverride = &testing::testProfile;
+    ScriptedConsent consent;
+    RemoteHost host(console, consent, nullptr, hostFor(relay));
+    host.start();
+    ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
+    RemoteConsoleSession joiner(joinFor(relay));
+    ASSERT_TRUE(runUntil([&] {
+        return joiner.hostHello().has_value() && joiner.joinState() == JoinState::Allowed;
+    }));
+    ASSERT_TRUE(runUntil([&] { return !host.peerApp().empty(); }));
+    std::vector<QString> codes;
+    QObject::connect(&joiner, &RemoteConsoleSession::lineRefused,
+                     [&codes](const QString& code) { codes.push_back(code); });
+
+    ASSERT_TRUE(joiner.sendLine("settings  erase").has_value());
+    ASSERT_TRUE(runUntil([&] { return !codes.empty(); }));
+    EXPECT_EQ(codes, std::vector<QString>{QStringLiteral("remote.command_refused")});
+    EXPECT_TRUE(console.sent.empty());
+    // The marker line stays (ADR-0416).
+    EXPECT_TRUE(std::ranges::any_of(joiner.log().linesSince(0), [](const device::ConsoleLine& l) {
+        return l.dir == device::Direction::Marker &&
+               l.text.find("The customer's Monitor refused this command") != std::string::npos;
+    }));
+    // A line the host passes gives no signal.
+    ASSERT_TRUE(joiner.sendLine("config show").has_value());
+    ASSERT_TRUE(runUntil([&] { return console.sent.size() == 1; }));
+    runFor(100ms);
+    EXPECT_EQ(codes.size(), 1U);
+}
+
+// Plan 0062 (A1, ADR-0435): a line sent for an AI client (CommandCapture with the remote tab's
+// send hook and the forced silence rule, as the MCP send_command sends it) and a line a person
+// types (RemoteConsoleSession::sendLine from the console) are the same `write` event on the relay:
+// no tunnel object, no extra field, nothing else sent.
+TEST(RemoteSession, AnAiLineAndAPersonsLineAreTheSameBytesOnTheRelay) {
+    FakeRelay relay;
+    FakeConsole console;
+    ScriptedConsent consent;
+    RemoteHost host(console, consent, nullptr, hostFor(relay));
+    host.start();
+    ASSERT_TRUE(runUntil([&] { return host.state() == HostState::Sharing; }));
+    RemoteConsoleSession joiner(joinFor(relay));
+    ASSERT_TRUE(runUntil([&] {
+        return joiner.hostHello().has_value() && joiner.joinState() == JoinState::Allowed;
+    }));
+    ASSERT_TRUE(runUntil([&] { return !host.peerApp().empty(); }));
+    runFor(100ms);
+    // The events the joiner sent to the relay from now on (the host sends `at` and `sync`; the
+    // relay passes only at / sync / write and drops the rest, droppedEvents()).
+    const auto writesFrom = [&relay](std::size_t first) {
+        std::vector<QByteArray> out;
+        const auto& relayed = relay.relayed();
+        for (std::size_t i = first; i < relayed.size(); ++i) {
+            if (relayed.at(i).name != QStringLiteral("at") &&
+                relayed.at(i).name != QStringLiteral("sync")) {
+                out.push_back(relayed.at(i).name.toUtf8() + ' ' +
+                              QJsonDocument(QJsonArray{relayed.at(i).payload})
+                                  .toJson(QJsonDocument::Compact));
+            }
+        }
+        return out;
+    };
+
+    const std::size_t beforePerson = relay.relayed().size();
+    ASSERT_TRUE(joiner.sendLine("config show").has_value()); // a person types
+    ASSERT_TRUE(runUntil([&] { return console.sent.size() == 1; }));
+    runFor(100ms);
+    const std::vector<QByteArray> person = writesFrom(beforePerson);
+
+    const std::size_t beforeAi = relay.relayed().size();
+    auto capture = device::CommandCapture::start(
+        joiner, "config show",
+        device::CaptureOptions{.timeout = 2s,
+                               .silence = 100ms,
+                               .maxLines = 100,
+                               .maxBytes = 4096,
+                               .silent = false,
+                               .forceSilence = true},
+        device::CaptureHooks{
+            .send = [&joiner](std::string line) { return joiner.sendLine(std::move(line)); },
+            .view = [](const device::ConsoleLine& line) { return line; }});
+    ASSERT_TRUE(capture.has_value());
+    ASSERT_TRUE(runUntil([&] { return console.sent.size() == 2; }));
+    console.shell("output of config show");
+    ASSERT_TRUE(runUntil([&] { return (*capture)->isFinished(); }));
+    EXPECT_TRUE((*capture)->echoSeen());
+    runFor(100ms);
+    const std::vector<QByteArray> ai = writesFrom(beforeAi);
+
+    ASSERT_EQ(person.size(), 1U);
+    EXPECT_EQ(person.front(), QByteArray(R"(write ["config show"])"));
+    EXPECT_EQ(ai, person);
+    EXPECT_EQ(console.sentLines(), (std::vector<std::string>{"config show", "config show"}));
+    EXPECT_EQ(console.sent.at(0).source, console.sent.at(1).source);
+    EXPECT_TRUE(relay.droppedEvents().isEmpty());
 }
 
 } // namespace

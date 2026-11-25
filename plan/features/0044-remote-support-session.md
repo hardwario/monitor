@@ -64,6 +64,9 @@ join before that participant's commands reach the device. Each flash, erase, rec
 - Removing one participant from a session (the relay can't); refusing a join ends the whole session.
 - Arbitrary file transfer, uploading `.hex` over the relay (ADR-0323), UICR/PIB writes, nRF Util modem update remotely.
 - MCP over the relay; any MCP tool for remote sessions (ADR-0332).
+  *Note 2026-11-24:* amended by plan [0062](0062-mcp-remote-session.md) and ADR-0433, which supersedes ADR-0332: an
+  AI client on support's machine may use a joined remote tab (behind a setting, off by default). MCP over the relay
+  and an AI client creating, joining or leaving a session stay non-goals.
 - End-to-end encryption (impossible while compatible; ADR-0329, ADR-0334).
 - STICKER / NFC transport (0041–0043): possible later.
 

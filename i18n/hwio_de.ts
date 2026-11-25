@@ -452,37 +452,32 @@
 <context>
     <name>ConsentWindow</name>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="29"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="31"/>
         <source>HARDWARIO Monitor — Allow AI assistant?</source>
         <translation>HARDWARIO Monitor — KI-Assistent zulassen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="168"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="170"/>
         <source>Show device ↗</source>
         <translation>Gerät anzeigen ↗</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="172"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="174"/>
         <source>Show device</source>
         <translation>Gerät anzeigen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="197"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="199"/>
         <source>Deny</source>
         <translation>Ablehnen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="210"/>
-        <source>Allow once</source>
-        <translation>Einmal erlauben</translation>
-    </message>
-    <message>
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="225"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="230"/>
         <source>Until you remove it in Settings › AI assistants (MCP).</source>
         <translation>Bis Sie es unter Einstellungen › KI-Assistenten (MCP) entfernen.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="259"/>
+        <location filename="../app/gui/qml/mcp/ConsentWindow.qml" line="264"/>
         <source>%n more request(s) waiting.</source>
         <translation>
             <numerusform>%n weitere Anfrage wartet.</numerusform>
@@ -1559,200 +1554,211 @@
 <context>
     <name>McpSection</name>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="38"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="48"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="39"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="49"/>
         <source>Allow AI assistants to use HARDWARIO Monitor</source>
         <translation>KI-Assistenten die Nutzung von HARDWARIO Monitor erlauben</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="39"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="40"/>
         <source>AI tools such as Claude Code can read the console, send commands and, with your permission, flash devices.</source>
         <translation>KI-Werkzeuge wie Claude Code können die Konsole lesen, Befehle senden und mit Ihrer Erlaubnis Firmware auf Geräte aufspielen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="72"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="73"/>
         <source>Retry</source>
         <translation>Erneut versuchen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="82"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="83"/>
         <source>Regenerate token</source>
         <translation>Token neu erzeugen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="89"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="90"/>
         <source>Address</source>
         <translation>Adresse</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="90"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="91"/>
         <source>After a port change, AI clients have to be configured again.</source>
         <translation>Nach einer Portänderung müssen die KI-Clients neu eingerichtet werden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="112"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="113"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="125"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="162"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="206"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="440"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="126"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="163"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="207"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="456"/>
         <source>Copy</source>
         <translation>Kopieren</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="126"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="127"/>
         <source>Copied.</source>
         <translation>Kopiert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="133"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="150"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="134"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="151"/>
         <source>Token</source>
         <translation>Token</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="134"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="135"/>
         <source>AI clients send it with every request. Keep it private.</source>
         <translation>KI-Clients senden ihn mit jeder Anfrage. Halten Sie ihn geheim.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="146"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="147"/>
         <source>Created when the server starts</source>
         <translation>Wird beim Start des Servers erstellt</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="150"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="151"/>
         <source>Token, hidden</source>
         <translation>Token, verborgen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="155"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="156"/>
         <source>Hide</source>
         <translation>Verbergen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="155"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="156"/>
         <source>Show</source>
         <translation>Anzeigen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="169"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="170"/>
         <source>Regenerate…</source>
         <translation>Neu erzeugen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="177"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="178"/>
         <source>Connect a client</source>
         <translation>Client verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="207"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="208"/>
         <source>Copy %1</source>
         <translation>%1 kopieren</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="247"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="250"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="256"/>
+        <source>AI clients may use remote support sessions</source>
+        <translation>KI-Clients dürfen Fernsupport-Sitzungen verwenden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="251"/>
+        <source>The customer&apos;s console output is then sent to your AI client, with secret values hidden. You are asked once per session before an AI client can use it. The customer sees the AI client&apos;s commands as yours.</source>
+        <translation>Die Konsolenausgabe des Kunden wird dann an Ihren KI-Client gesendet, geheime Werte verborgen. Für jede Sitzung werden Sie zuerst gefragt, ob ein KI-Client sie verwenden darf. Der Kunde sieht die Befehle des KI-Clients als Ihre.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="263"/>
         <source>Permissions</source>
         <translation>Berechtigungen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="248"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="264"/>
         <source>What an AI assistant may do without asking you first.</source>
         <translation>Was ein KI-Assistent tun darf, ohne Sie vorher zu fragen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="261"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="277"/>
         <source>Ask</source>
         <translation>Fragen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="269"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="285"/>
         <source>Always allow</source>
         <translation>Immer erlauben</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="287"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="303"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="299"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="370"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="315"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="386"/>
         <source>%1: ask</source>
         <translation>%1: fragen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="309"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="381"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="325"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="397"/>
         <source>%1: always allow</source>
         <translation>%1: immer erlauben</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="393"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="409"/>
         <source>No answers are remembered for a client.</source>
         <translation>Für keinen Client sind Antworten gespeichert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="422"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="438"/>
         <source>Revoke</source>
         <translation>Widerrufen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="423"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="439"/>
         <source>Revoke the permissions of %1</source>
         <translation>Berechtigungen von %1 widerrufen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="432"/>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="475"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="448"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="491"/>
         <source>Activity</source>
         <translation>Aktivität</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="433"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="449"/>
         <source>The last %1 calls, kept until the application quits.</source>
         <translation>Die letzten %1 Aufrufe, gespeichert bis zum Beenden der Anwendung.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="447"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="463"/>
         <source>Clear</source>
         <translation>Leeren</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="458"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="474"/>
         <source>No calls yet.</source>
         <translation>Noch keine Aufrufe.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="577"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="593"/>
         <source>Always allow everything?</source>
         <translation>Immer alles erlauben?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="578"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="594"/>
         <source>An AI assistant will be able to flash, erase and write the memory of your devices without asking you.</source>
         <translation>Ein KI-Assistent kann dann ohne Rückfrage Firmware auf Ihre Geräte flashen, sie löschen und in ihren Speicher schreiben.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="579"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="595"/>
         <source>Always allow everything</source>
         <translation>Immer alles erlauben</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="587"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="603"/>
         <source>Regenerate the token?</source>
         <translation>Token neu erzeugen?</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="588"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="604"/>
         <source>Connected AI clients stop working until you update their configuration.</source>
         <translation>Verbundene KI-Clients funktionieren nicht mehr, bis Sie ihre Konfiguration aktualisieren.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/settings/McpSection.qml" line="589"/>
+        <location filename="../app/gui/qml/settings/McpSection.qml" line="605"/>
         <source>Regenerate</source>
         <translation>Neu erzeugen</translation>
     </message>
@@ -2109,135 +2115,155 @@
 <context>
     <name>RemoteBanner</name>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="58"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="60"/>
         <source>Connecting to the support server %1…</source>
         <translation>Verbindung zum Support-Server %1 wird hergestellt…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="60"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="62"/>
         <source>Shared with support — code %1. The connection to the support server was lost, reconnecting…</source>
         <translation>Für den Support freigegeben — Code %1. Die Verbindung zum Support-Server wurde unterbrochen, Verbindung wird wiederhergestellt…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="62"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="64"/>
         <source>Shared with support — code %1. %2</source>
         <translation>Für den Support freigegeben — Code %1. %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="64"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="66"/>
         <source>Shared with support — code %1. Support can send commands.</source>
         <translation>Für den Support freigegeben — Code %1. Der Support kann Befehle senden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="65"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="67"/>
         <source>Shared with support — code %1</source>
         <translation>Für den Support freigegeben — Code %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="76"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="78"/>
         <source>Session code %1</source>
         <translation>Sitzungscode %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="83"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="85"/>
         <source>Copy link</source>
         <translation>Link kopieren</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="90"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="92"/>
         <source>End sharing</source>
         <translation>Freigabe beenden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="102"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="104"/>
         <source>Sharing ends in 2 minutes because there was no activity.</source>
         <translation>Die Freigabe endet in 2 Minuten, weil keine Aktivität stattfand.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="103"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="105"/>
         <source>Keep sharing</source>
         <translation>Weiter freigeben</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="115"/>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="117"/>
         <source>Close tab</source>
         <translation>Tab schließen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="155"/>
+        <source>Stop AI</source>
+        <translation>KI stoppen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/remote/RemoteBanner.qml" line="156"/>
+        <source>Stop the AI client in this session</source>
+        <translation>Den KI-Client in dieser Sitzung stoppen</translation>
     </message>
 </context>
 <context>
     <name>RemoteFlashCard</name>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="42"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="44"/>
         <source>Remote operations</source>
         <translation>Remote-Operationen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="61"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="63"/>
         <source>The customer confirms every request in their HARDWARIO Monitor. Only firmware from the HARDWARIO catalog can be flashed remotely.</source>
         <translation>Der Kunde bestätigt jede Anfrage in seinem HARDWARIO Monitor. Aus der Ferne kann nur Firmware aus dem HARDWARIO-Katalog geflasht werden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="72"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="74"/>
         <source>Target:</source>
         <translation>Ziel:</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="102"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="104"/>
         <source>Catalog firmware ID (32 hexadecimal digits)</source>
         <translation>Firmware-ID aus dem Katalog (32 Hexadezimalziffern)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="104"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="106"/>
         <source>Catalog firmware ID</source>
         <translation>Firmware-ID aus dem Katalog</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="110"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="112"/>
         <source>Ask to flash</source>
         <translation>Flashen anfragen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="128"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="130"/>
         <source>The customer&apos;s HARDWARIO Monitor updates the LTE firmware to its recommended version. The customer moves the J-Link cable between the APP and LTE connectors when asked.</source>
         <translation>Der HARDWARIO Monitor des Kunden aktualisiert die LTE-Firmware auf seine empfohlene Version. Der Kunde steckt das J-Link-Kabel auf Aufforderung zwischen dem APP- und dem LTE-Anschluss um.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="129"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="131"/>
         <source>The customer&apos;s HARDWARIO Monitor cannot update the LTE firmware remotely.</source>
         <translation>Der HARDWARIO Monitor des Kunden kann die LTE-Firmware nicht aus der Ferne aktualisieren.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="137"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="139"/>
         <source>Ask to update LTE firmware</source>
         <translation>LTE-Firmware-Update anfragen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="150"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="152"/>
         <source>Ask to erase</source>
         <translation>Löschen anfragen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="157"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="159"/>
         <source>Ask to recover</source>
         <translation>Recover anfragen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="164"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="166"/>
         <source>Ask to reset</source>
         <translation>Reset anfragen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="204"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="184"/>
+        <source>Stop waiting</source>
+        <translation>Nicht mehr warten</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="185"/>
+        <source>Stop waiting for the AI client&apos;s operation</source>
+        <translation>Nicht mehr auf die Aktion des KI-Clients warten</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="215"/>
         <source>Continue</source>
         <translation>Fortfahren</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="210"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="221"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="239"/>
+        <location filename="../app/gui/qml/remote/RemoteFlashCard.qml" line="250"/>
         <source>Dismiss</source>
         <translation>Schließen</translation>
     </message>
@@ -5781,47 +5807,52 @@
 <context>
     <name>hwio::gui::ConsentViewModel</name>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="266"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="271"/>
         <source>An AI assistant</source>
         <translation>Ein KI-Assistent</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="277"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="282"/>
+        <source>%1 wants to work with a customer&apos;s device</source>
+        <translation>%1 möchte mit einem Gerät des Kunden arbeiten</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="286"/>
         <source>%1 wants to flash firmware</source>
         <translation>%1 möchte Firmware aufspielen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="280"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="289"/>
         <source>%1 wants to update the LTE modem firmware</source>
         <translation>%1 möchte die Firmware des LTE-Modems aktualisieren</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="283"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="292"/>
         <source>%1 wants to write to the flash memory</source>
         <translation>%1 möchte in den Flash-Speicher schreiben</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="286"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="295"/>
         <source>%1 wants to erase the device</source>
         <translation>%1 möchte das Gerät löschen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="289"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="298"/>
         <source>%1 wants to recover the device (erases everything)</source>
         <translation>%1 möchte das Gerät wiederherstellen (löscht alles)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="292"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="301"/>
         <source>%1 wants to write to the memory</source>
         <translation>%1 möchte in den Speicher schreiben</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="295"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="304"/>
         <source>%1 wants to connect a device</source>
         <translation>%1 möchte ein Gerät verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="297"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="306"/>
         <source>%1 wants to run %2</source>
         <translation>%1 möchte %2 ausführen</translation>
     </message>
@@ -5831,13 +5862,15 @@
         <translation>MCU</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="315"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="327"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="356"/>
         <source>Client</source>
         <translation>Client</translation>
     </message>
     <message>
         <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="167"/>
         <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="172"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="348"/>
         <source>Device</source>
         <translation>Gerät</translation>
     </message>
@@ -5883,6 +5916,8 @@
     </message>
     <message>
         <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="157"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="339"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="345"/>
         <source>Firmware</source>
         <translation>Firmware</translation>
     </message>
@@ -5932,7 +5967,18 @@
         <translation>Adressbereich</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="316"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="321"/>
+        <source>Session</source>
+        <translation>Sitzung</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="323"/>
+        <source>It will read the customer&apos;s console and may send commands to the customer&apos;s device. Secret values are hidden from it. The customer sees its commands as yours.</source>
+        <translation>Er liest die Konsole des Kunden und kann Befehle an das Gerät des Kunden senden. Geheime Werte bleiben vor ihm verborgen. Der Kunde sieht seine Befehle als Ihre.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="328"/>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="357"/>
         <source>%1, version %2</source>
         <translation>%1, Version %2</translation>
     </message>
@@ -5952,7 +5998,32 @@
         <translation>Speicherschreiben kann das Gerät beliebigen Code ausführen lassen.</translation>
     </message>
     <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="341"/>
+        <source>Prepared by the customer&apos;s HARDWARIO Monitor (%1)</source>
+        <translation>Vom HARDWARIO Monitor des Kunden vorbereitet (%1)</translation>
+    </message>
+    <message>
         <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="346"/>
+        <source>The recommended version of the customer&apos;s HARDWARIO Monitor</source>
+        <translation>Die empfohlene Version des HARDWARIO Monitor des Kunden</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="348"/>
+        <source>the customer&apos;s device (remote session)</source>
+        <translation>das Gerät des Kunden (Fernsupport-Sitzung)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="377"/>
+        <source>Allow for this session</source>
+        <translation>Für diese Sitzung erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="378"/>
+        <source>Allow once</source>
+        <translation>Einmal erlauben</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/consent_view_model.cpp" line="400"/>
         <source>Denied automatically in %1 if not answered.</source>
         <translation>Wird in %1 automatisch abgelehnt, wenn keine Antwort kommt.</translation>
     </message>
@@ -6712,9 +6783,22 @@
 <context>
     <name>hwio::gui::GuiDeviceProvider</name>
     <message>
-        <location filename="../app/gui/src/mcp/gui_device_provider.cpp" line="537"/>
+        <location filename="../app/gui/src/mcp/gui_device_provider.cpp" line="678"/>
         <source>An AI assistant is running an operation on this device. Cancel it and close the tab?</source>
         <translation>Ein KI-Assistent führt einen Vorgang auf diesem Gerät aus. Abbrechen und den Tab schließen?</translation>
+    </message>
+</context>
+<context>
+    <name>hwio::gui::GuiRemoteDevice</name>
+    <message>
+        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="243"/>
+        <source>An AI assistant</source>
+        <translation>Ein KI-Assistent</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="290"/>
+        <source>Remote session (web Terminal or mobile app)</source>
+        <translation>Fernsupport-Sitzung (Web-Terminal oder mobile App)</translation>
     </message>
 </context>
 <context>
@@ -6949,98 +7033,98 @@
 <context>
     <name>hwio::gui::McpController</name>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="70"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="72"/>
         <source>Flash firmware (flash, LTE, raw flash)</source>
         <translation>Firmware flashen (Flash, LTE, Raw-Flash)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="72"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="74"/>
         <source>Erase and recover</source>
         <translation>Löschen und Wiederherstellen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="74"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="76"/>
         <source>Write memory</source>
         <translation>Speicher schreiben</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="76"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="78"/>
         <source>Write UICR / factory data</source>
         <translation>UICR / Werksdaten schreiben</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="78"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="80"/>
         <source>Connect devices (opens a tab)</source>
         <translation>Geräte verbinden (öffnet einen Tab)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="172"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="178"/>
         <source>The AI assistant cancelled the request</source>
         <translation>Der KI-Assistent hat die Anfrage abgebrochen</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="88"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="90"/>
         <source>Writing memory can make the device run arbitrary code.</source>
         <translation>Speicherschreiben kann das Gerät beliebigen Code ausführen lassen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="307"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="343"/>
         <source>An AI assistant</source>
         <translation>Ein KI-Assistent</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="315"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="351"/>
         <source>Allowed until disconnect: %1 — %2</source>
         <translation>Erlaubt bis zur Trennung: %1 — %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="347"/>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="409"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="383"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="445"/>
         <source>Copied.</source>
         <translation>Kopiert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="384"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="420"/>
         <source>Claude Code (HTTP)</source>
         <translation>Claude Code (HTTP)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="387"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="423"/>
         <source>Claude Code (.mcp.json, token from HWIO_MCP_TOKEN)</source>
         <translation>Claude Code (.mcp.json, Token aus HWIO_MCP_TOKEN)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="390"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="426"/>
         <source>Claude Desktop (runs the hwio command separately)</source>
         <translation>Claude Desktop (führt den Befehl hwio separat aus)</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="391"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="427"/>
         <source>Runs separately from this window and cannot use a probe that is open here.</source>
         <translation>Läuft getrennt von diesem Fenster und kann keinen hier geöffneten Programmieradapter verwenden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="408"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="444"/>
         <source>Copied. Run it in a terminal.</source>
         <translation>Kopiert. Führen Sie es in einem Terminal aus.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="417"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="453"/>
         <source>Off</source>
         <translation>Aus</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="419"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="455"/>
         <source>Starting…</source>
         <translation>Wird gestartet…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="421"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="457"/>
         <source>Listening</source>
         <translation>Empfangsbereit</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="422"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="458"/>
         <source>Listening · %n client(s)</source>
         <translation>
             <numerusform>Empfangsbereit · %n Client</numerusform>
@@ -7048,22 +7132,22 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="424"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="460"/>
         <source>Stopping…</source>
         <translation>Wird beendet…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="427"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="463"/>
         <source>Port %1 is in use by another program — choose another port</source>
         <translation>Port %1 wird von einem anderen Programm verwendet — wählen Sie einen anderen Port</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="438"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="474"/>
         <source>AI assistants: listening on port %1</source>
         <translation>KI-Assistenten: empfangsbereit auf Port %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="439"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="475"/>
         <source>AI assistants: listening on port %1, %n client(s)</source>
         <translation>
             <numerusform>KI-Assistenten: empfangsbereit auf Port %1, %n Client</numerusform>
@@ -7071,12 +7155,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="447"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="483"/>
         <source>AI assistants: %1</source>
         <translation>KI-Assistenten: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="656"/>
+        <location filename="../app/gui/src/mcp/mcp_controller.cpp" line="702"/>
         <source>%1 (tab %2)</source>
         <translation>%1 (Tab %2)</translation>
     </message>
@@ -7170,72 +7254,78 @@
 <context>
     <name>hwio::gui::RemoteJoinViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="114"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="173"/>
         <source>The customer allowed it. Running on the customer&apos;s side…</source>
         <translation>Der Kunde hat es erlaubt. Wird beim Kunden ausgeführt…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="122"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="182"/>
         <source>Running on the customer&apos;s side: %1</source>
         <translation>Wird beim Kunden ausgeführt: %1</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="167"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="234"/>
         <source>Connecting to the support server…</source>
         <translation>Verbindung zum Support-Server wird hergestellt…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="170"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="237"/>
         <source>Waiting for the customer to allow you… The live output may already appear.</source>
         <translation>Warten, bis der Kunde Sie erlaubt… Die Live-Ausgabe kann bereits erscheinen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="173"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="240"/>
         <source>No activity from the customer for 30 min. The session may have ended.</source>
         <translation>Seit 30 min keine Aktivität des Kunden. Die Sitzung ist möglicherweise beendet.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="176"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="243"/>
         <source>You left the session. The console stays here so that you can save it.</source>
         <translation>Sie haben die Sitzung verlassen. Die Konsole bleibt hier, damit Sie sie speichern können.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="179"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="246"/>
         <source>The session ended. The console stays here so that you can save it.</source>
         <translation>Die Sitzung wurde beendet. Die Konsole bleibt hier, damit Sie sie speichern können.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="194"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="261"/>
         <source>Operations are available once the customer has allowed you.</source>
         <translation>Operationen sind verfügbar, sobald der Kunde Sie erlaubt hat.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="197"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="264"/>
         <source>The customer uses the web Terminal, which supports only the console. Ask them to use HARDWARIO Monitor for flashing.</source>
         <translation>Der Kunde verwendet das Web-Terminal, das nur die Konsole unterstützt. Bitten Sie ihn, zum Flashen HARDWARIO Monitor zu verwenden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="200"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="267"/>
         <source>The customer&apos;s console (Bluetooth) has no flashing.</source>
         <translation>Die Konsole des Kunden (Bluetooth) unterstützt kein Flashen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="287"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="361"/>
         <source>The firmware ID must be 32 hexadecimal digits from the HARDWARIO catalog.</source>
         <translation>Die Firmware-ID muss aus 32 Hexadezimalziffern aus dem HARDWARIO-Katalog bestehen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="298"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="372"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="413"/>
         <source>Waiting for the customer&apos;s confirmation…</source>
         <translation>Warten auf die Bestätigung des Kunden…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="219"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="470"/>
+        <source>AI client active: %1</source>
+        <translation>KI-Client aktiv: %1</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="286"/>
         <source>Application core</source>
         <translation>Applikationskern</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="222"/>
+        <location filename="../app/gui/src/viewmodels/remote_join_view_model.cpp" line="289"/>
         <source>LTE modem core</source>
         <translation>LTE-Modemkern</translation>
     </message>
@@ -7846,6 +7936,7 @@ Die Freigabe endet nach 30 Minuten ohne Aktivität oder nach 8 Stunden.</transla
     </message>
     <message>
         <location filename="../libs/remote/src/remote_console_session.cpp" line="298"/>
+        <location filename="../app/gui/src/mcp/gui_remote_device.cpp" line="285"/>
         <source>%1 — remote</source>
         <translation>%1 — remote</translation>
     </message>
@@ -7860,17 +7951,17 @@ Die Freigabe endet nach 30 Minuten ohne Aktivität oder nach 8 Stunden.</transla
         <translation>— Verbunden mit HARDWARIO Monitor %1 des Kunden —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="445"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="449"/>
         <source>The customer&apos;s device is disconnected.</source>
         <translation>Das Gerät des Kunden ist getrennt.</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="559"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="563"/>
         <source>— Session history from the customer —</source>
         <translation>— Sitzungsverlauf vom Kunden —</translation>
     </message>
     <message>
-        <location filename="../libs/remote/src/remote_console_session.cpp" line="562"/>
+        <location filename="../libs/remote/src/remote_console_session.cpp" line="566"/>
         <source>— Older history of the session was left out —</source>
         <translation>— Älterer Sitzungsverlauf wurde ausgelassen —</translation>
     </message>

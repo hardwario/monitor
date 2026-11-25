@@ -17,6 +17,12 @@ mit dem Internet, und alles, was es speichert, bleibt auf Ihrem Computer.
 Der MCP-Server (`hwio mcp --http`) lauscht nur auf diesem Computer (127.0.0.1) und ist aus dem Netzwerk nicht
 erreichbar. SEGGER J-Link Software und nRF Util sind eigenständige Programme mit eigenem Verhalten.
 
+In der Desktop-App kann der Support **KI-Clients dürfen Fernsupport-Sitzungen verwenden** einschalten
+(standardmäßig aus). Sobald der Support es für eine Sitzung erlaubt, geht der Konsolentext der Fernsupport-Sitzung
+eines Kunden an den KI-Client des Supports und über ihn an dessen Anbieter. Geheime Werte werden anhand ihrer Namen
+verborgen, wie in den Konsolendateien: Geheimnisse einer Firmware, die HARDWARIO Monitor nicht kennt, werden nicht
+erkannt. Siehe [MCP-Server](../en/mcp.md#remote-support-sessions).
+
 ## Update-Prüfung
 
 Die Desktop-App fragt GitHub 10 Sekunden nach dem Start nach der Liste der Versionen von HARDWARIO Monitor,

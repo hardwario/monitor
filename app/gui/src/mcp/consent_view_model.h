@@ -12,6 +12,13 @@
 // (flags, no transient parent) is QML; placing it on the screen under the cursor and the taskbar /
 // dock alert of the main window are done here (QtGui, app/gui only).
 //
+// Plan 0062 (ADR-0436): a request for a customer's device (ConsentRequest::remoteDevice) is never
+// remembered: no remember button (canRemember false). Support's session prompt (category
+// RemoteDevice) reads "<client> wants to work with a customer's device", the rows Session (the
+// remote tab's name, never the session code) and what the client may do; its allow button is
+// "Allow for this session". An operation on a customer's device shows its usual rows with the
+// device row "the customer's device (remote session)".
+//
 // Ownership: child of McpController (Qt parent). GUI thread only.
 
 #include <QObject>
@@ -48,6 +55,10 @@ class ConsentViewModel : public QObject {
     // value ("" = none), `action` shows the "Show device" link in the row.
     Q_PROPERTY(QVariantList details READ details NOTIFY changed)
     Q_PROPERTY(QString rememberLabel READ rememberLabel NOTIFY changed)
+    // Plan 0062: the remember button exists (false for a customer's device).
+    Q_PROPERTY(bool canRemember READ canRemember NOTIFY changed)
+    // "Allow once"; "Allow for this session" for support's session prompt (plan 0062).
+    Q_PROPERTY(QString allowLabel READ allowLabel NOTIFY changed)
     Q_PROPERTY(bool canShowDevice READ canShowDevice NOTIFY changed)
     Q_PROPERTY(int queued READ queued NOTIFY changed)
     Q_PROPERTY(int secondsLeft READ secondsLeft NOTIFY secondsLeftChanged)
@@ -73,13 +84,15 @@ public:
     [[nodiscard]] QString title() const;
     [[nodiscard]] QVariantList details() const;
     [[nodiscard]] QString rememberLabel() const;
+    [[nodiscard]] bool canRemember() const;
+    [[nodiscard]] QString allowLabel() const;
     [[nodiscard]] bool canShowDevice() const;
     [[nodiscard]] int queued() const;
     [[nodiscard]] int secondsLeft() const;
     [[nodiscard]] QString countdownText() const;
 
     // Answer the prompt `promptId` (ignored when another prompt is shown; the Allow answers also
-    // while not armed).
+    // while not armed). allowForClient() is ignored when !canRemember().
     Q_INVOKABLE void deny(qint64 promptId);
     Q_INVOKABLE void allowOnce(qint64 promptId);
     Q_INVOKABLE void allowForClient(qint64 promptId);

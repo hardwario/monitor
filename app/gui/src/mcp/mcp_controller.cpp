@@ -20,6 +20,7 @@
 #include "mcp/consent_view_model.h"
 #include "mcp/gui_consent_broker.h"
 #include "mcp/gui_device_provider.h"
+#include "mcp/gui_remote_device.h"
 #include "pages/firmware_services.h"
 #include "settings_store.h"
 #include "viewmodels/app_view_model.h"
@@ -27,6 +28,7 @@
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
 #include "viewmodels/probe_firmware_view_model.h"
+#include "viewmodels/remote_join_view_model.h"
 
 #include <QCoreApplication>
 #include <QJSEngine>
@@ -103,6 +105,10 @@ void McpController::registerKeys(SettingsStore& settings) {
                    .type = QMetaType::Int,
                    .defaultValue = defaultPort,
                    .validator = validators::intRange(minPortValue, maxPortValue)},
+        SettingKey{.path = remoteSessionsKey,
+                   .type = QMetaType::Bool,
+                   .defaultValue = false,
+                   .validator = {}},
     };
     settings.registerKeys(keys);
     GuiConsentBroker::registerKeys(settings);
@@ -172,7 +178,20 @@ McpController::McpController(AppViewModel& app, Options options)
             m_app->showToast(tr("The AI assistant cancelled the request"));
         }
     });
+    // Plan 0062 (ADR-0436): the session grants of remote tabs end with the client and with the
+    // remembered grants.
+    connect(m_consent.get(), &GuiConsentBroker::clientLeft, this, [this](const QString& clientKey) {
+        m_provider->revokeRemoteAi(toStdString(clientKey));
+    });
+    connect(m_consent.get(), &GuiConsentBroker::forgotAll, this,
+            [this] { m_provider->revokeRemoteAi({}); });
+    m_provider->setRemoteSessionsAllowed(remoteSessions());
     connect(m_settings, &SettingsStore::valueChanged, this, [this](const QString& key) {
+        if (key == remoteSessionsKey) {
+            m_provider->setRemoteSessionsAllowed(remoteSessions());
+            settingsChanged(); // signal
+            return;
+        }
         if (key == enabledKey || key == portKey) {
             settingsChanged(); // signal
             if (key == portKey) {
@@ -232,6 +251,23 @@ void McpController::setEnabled(bool enabled) {
         qCWarning(lcGui) << "MCP: mcp/enabled not stored:" << toQString(stored.error().detail);
         settingsChanged(); // signal: QML shows the stored value again
     }
+}
+
+bool McpController::remoteSessions() const {
+    return !m_settings.isNull() && m_settings->value(remoteSessionsKey).toBool();
+}
+
+void McpController::setRemoteSessions(bool allowed) {
+    if (m_settings.isNull() || allowed == remoteSessions()) {
+        return;
+    }
+    if (const Status stored = m_settings->setValue(remoteSessionsKey, allowed); !stored) {
+        qCWarning(lcGui) << "MCP: mcp/remoteSessions not stored:"
+                         << toQString(stored.error().detail);
+        settingsChanged(); // signal: QML shows the stored value again
+        return;
+    }
+    qCInfo(lcGui) << "MCP: AI clients may use remote support sessions:" << allowed;
 }
 
 int McpController::port() const {
@@ -610,6 +646,11 @@ void McpController::shutdown() {
 }
 
 void McpController::cancelOperation(DeviceTabViewModel* tab) {
+    if (tab != nullptr && tab->isRemote()) {
+        // Plan 0062 (D12): stop waiting; the customer's Monitor finishes the operation.
+        tab->remoteJoin()->stopWaiting();
+        return;
+    }
     if (tab != nullptr &&
         tab->busyPage() ==
             QLatin1StringView(GuiDeviceProvider::busyPageId.data(),
@@ -653,6 +694,11 @@ QString McpController::describeDevice(const std::string& id, int& tabIndex) cons
     tabIndex = -1;
     if (DeviceTabViewModel* tab = m_provider->tabFor(id); tab != nullptr && !m_app.isNull()) {
         tabIndex = m_app->tabs()->indexOf(tab);
+        if (tab->isRemote()) {
+            // Plan 0062 (ADR-0434): never the tab title (it may carry the session code).
+            const GuiRemoteDevice* device = tab->remoteJoin()->remoteDevice();
+            return device != nullptr ? device->displayName(false) : QString();
+        }
         return tr("%1 (tab %2)").arg(tab->title(), QString::number(tabIndex + 1));
     }
     for (const hwio::mcp::tools::DeviceEntry& entry : m_provider->list()) {

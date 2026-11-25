@@ -8,7 +8,9 @@
 // With a web Terminal host only the explanation is shown. Plan 0059 (ADR-0414, D-5): one target
 // button per target of the host's hello (RemoteJoinViewModel.targets, named in support's language;
 // an older host: Application core / LTE modem core as in 0044); the firmware ID field only for a
-// target that takes catalog firmware. Presentation only: RemoteJoinViewModel.
+// target that takes catalog firmware. Plan 0062 (D12): an operation an AI client requested shows
+// "AI: …" in its status and [Stop waiting] (the AI call ends; the operation continues and its
+// result appears here). Presentation only: RemoteJoinViewModel.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -173,6 +175,15 @@ ColumnLayout {
         visible: card.join !== null && card.join.operationPending
         indeterminate: card.join !== null && card.join.operationProgress < 0
         value: card.join !== null && card.join.operationProgress >= 0 ? card.join.operationProgress : 0
+    }
+
+    // Plan 0062 (D12): the AI client stops waiting; this card keeps following the operation.
+    HButton {
+        objectName: "remoteStopWaiting"
+        visible: card.join !== null && card.join.aiWaiting
+        text: qsTr("Stop waiting")
+        Accessible.name: qsTr("Stop waiting for the AI client's operation")
+        onClicked: card.join.stopWaiting()
     }
 
     // ADR-0368: the customer's Monitor asks support (Continue before the erase, Continue without a

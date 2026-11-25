@@ -56,6 +56,10 @@ For support's autocomplete, your HARDWARIO Monitor sends support the list of dev
 support needs the subcommands of a command, it reads that command's help itself. These help queries are not shown in
 your console; the console file records how many there were.
 
+HARDWARIO Support may use an AI assistant in the session. Its commands and requests reach you as support's: the
+same *— Remote: command … —* line, the same question before every operation, the same entries in the console file.
+Your controls stay the same: allowing support in, the question before each operation, and **End sharing**.
+
 <a id="join-a-session"></a>
 ## Join a session (support)
 
@@ -92,6 +96,13 @@ To leave the session, click **Leave session** in the device bar (or press Ctrl+S
 console, so you can still save it; the console shows *— you left the session —*. **Join again** joins the same code
 again, and the customer is asked to allow you again. While an operation you asked for runs, the button waits until it
 ends.
+
+**AI assistant.** With **Settings › AI assistants (MCP) › AI clients may use remote support sessions** on, an AI
+client such as Claude Code can work in the remote tab after you allow it for the session: it reads the console with
+secret values hidden, sends commands, and asks for a catalog flash, the LTE update or a reset as you would. The
+customer sees its commands as yours. The banner shows *AI client active: Claude Code* with **Stop AI**; an operation
+the AI client asked for shows *AI:* on the **Flash** page with **Stop waiting**. See
+[MCP server](mcp.md#remote-support-sessions).
 
 When the customer ends sharing, HARDWARIO Monitor cannot always tell: the server does not announce it. After 30 minutes
 without any activity the banner says so and offers **Close tab**. Until you close it, the tab stays open, so you can

@@ -236,6 +236,7 @@ void GuiConsentBroker::clientGone(std::string_view clientKey) {
     if (removed > 0) {
         grantsChanged(); // signal
     }
+    clientLeft(QString::fromStdString(std::string(clientKey))); // signal (plan 0062)
 }
 
 void GuiConsentBroker::revoke(std::size_t index) {
@@ -250,6 +251,7 @@ void GuiConsentBroker::forgetAll() {
         m_grants.clear();
         grantsChanged(); // signal
     }
+    forgotAll(); // signal (plan 0062)
 }
 
 void GuiConsentBroker::denyAll() {

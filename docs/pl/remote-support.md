@@ -59,6 +59,11 @@ Na potrzeby podpowiedzi wsparcia Twój HARDWARIO Monitor wysyła wsparciu poznan
 wsparcie potrzebuje podpoleceń jakiegoś polecenia, sam odczytuje jego pomoc. Te zapytania o pomoc nie pojawiają się w
 Twojej konsoli; plik konsoli zapisuje, ile ich było.
 
+Wsparcie HARDWARIO może w sesji korzystać z asystenta AI. Jego polecenia i prośby docierają do Ciebie jako
+polecenia wsparcia: ten sam wiersz *— Remote: command … —*, to samo pytanie przed każdą operacją, te same wpisy w pliku
+konsoli. Twoje możliwości pozostają te same: zezwolenie wsparciu, pytanie przed każdą operacją i **Zakończ
+udostępnianie**.
+
 <a id="join-a-session"></a>
 ## Dołączanie do sesji (wsparcie)
 
@@ -95,6 +100,14 @@ Aby opuścić sesję, kliknij **Opuść sesję** na pasku urządzenia (lub naci�
 razem z konsolą, więc nadal możesz ją zapisać; konsola pokazuje *— opuściłeś sesję —*. **Dołącz ponownie** dołącza do
 tego samego kodu, a klient musi Cię ponownie dopuścić. Dopóki trwa operacja, o którą poprosiłeś, przycisk czeka na jej
 zakończenie.
+
+**Asystent AI.** Gdy włączone jest **Ustawienia › Asystenci AI (MCP) › Klienci AI mogą korzystać z sesji
+zdalnego wsparcia**, klient AI, na przykład Claude Code, może pracować w karcie zdalnej, gdy zezwolisz mu na to dla
+danej sesji: czyta konsolę z ukrytymi wartościami tajnymi, wysyła polecenia i prosi o wgranie firmware z katalogu,
+aktualizację LTE lub reset tak jak Ty. Klient widzi jego polecenia jako Twoje. Baner pokazuje *Aktywny klient AI:
+Claude Code* z przyciskiem **Zatrzymaj AI**; operacja, o którą poprosił klient AI, jest na stronie **Wgrywanie**
+oznaczona *AI:* z przyciskiem **Przestań czekać**. Zobacz [Serwer MCP](../en/mcp.md#remote-support-sessions) (po
+angielsku).
 
 HARDWARIO Monitor nie zawsze rozpozna, że klient zakończył udostępnianie: serwer tego nie ogłasza. Po 30 minutach bez
 żadnej aktywności baner o tym informuje i oferuje **Zamknij kartę**. Dopóki jej nie zamkniesz, karta pozostaje otwarta,

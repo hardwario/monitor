@@ -17,6 +17,12 @@ všetko, čo ukladá, zostáva vo vašom počítači.
 MCP server (`hwio mcp --http`) počúva len na tomto počítači (127.0.0.1) a zo siete nie je dostupný. SEGGER J-Link
 Software a nRF Util sú samostatné programy s vlastným správaním.
 
+V desktopovej aplikácii môže podpora zapnúť **AI klienti smú používať relácie vzdialenej podpory** (predvolene
+vypnuté). Keď to podpora pre reláciu povolí, ide text konzoly vzdialenej relácie zákazníka AI klientovi, ktorého
+podpora používa, a cez neho jeho poskytovateľovi. Tajné hodnoty sa skrývajú podľa názvov, rovnako ako v súboroch
+konzoly: tajné hodnoty firmvéru, ktorý HARDWARIO Monitor nepozná, sa nerozpoznajú. Pozrite si
+[MCP server](../en/mcp.md#remote-support-sessions).
+
 ## Kontrola aktualizácií
 
 Desktopová aplikácia sa 10 sekúnd po spustení spýta GitHubu na zoznam vydaní HARDWARIO Monitor, najviac raz za

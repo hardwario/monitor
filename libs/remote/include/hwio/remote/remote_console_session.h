@@ -27,7 +27,8 @@
 //                           objects only after the host's hello)
 //   at {hwio: op-*}       → hostMessage() (RemoteOperationClient)
 //   at {hwio: line-refused} → a marker line (plan 0059, ADR-0416: the host refused a line of
-//                           this joiner's; the joiner hello lists the refused-lines cap)
+//                           this joiner's; the joiner hello lists the refused-lines cap) and
+//                           lineRefused(code) (plan 0062: the MCP send_command of an AI client)
 //   at {hwio: commands}   → commandTree(), commandTreeChanged() (ADR-0364: the host's learned
 //                           command tree, validated by TunnelCodec); requestLearn(path) asks the
 //                           host for a command's subcommands (tunnel `learn`, once per path, again
@@ -174,6 +175,10 @@ signals:
     void idleNotice();
     // ADR-0364: commandTree() changed.
     void commandTreeChanged();
+    // Plan 0062 (A1): the host refused one of this joiner's lines (tunnel line-refused, after its
+    // marker line); `code` is the host's hwio::Error id ("remote.command_refused"). The relay
+    // cannot tell whose line it was: any of this joiner's recent lines.
+    void lineRefused(const QString& code);
 
 protected:
     void closeSession() override;

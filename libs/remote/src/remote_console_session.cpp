@@ -398,7 +398,7 @@ void RemoteConsoleSession::onTunnelAt(const QJsonValue& payload) {
         emit commandTreeChanged();
         return;
     }
-    if (std::holds_alternative<tunnel::LineRefused>(*message)) {
+    if (const auto* refused = std::get_if<tunnel::LineRefused>(&*message)) {
         // Plan 0059 (ADR-0416): the customer's Monitor did not pass a line of support's.
         if (Status recorded = recordRemoteEvent(
                 trRemote(QT_TRANSLATE_NOOP("hwio::remote",
@@ -409,6 +409,10 @@ void RemoteConsoleSession::onTunnelAt(const QJsonValue& payload) {
             qCWarning(log::lcRemote).noquote()
                 << "Remote event not recorded:" << toQString(recorded.error().detail);
         }
+        // Plan 0062 (A1): for the MCP send_command of an AI client (an error with this id). A copy:
+        // a slot may end this session.
+        const QString code = toQString(refused->code);
+        emit lineRefused(code);
         return;
     }
     if (std::holds_alternative<tunnel::HostEnd>(*message)) {

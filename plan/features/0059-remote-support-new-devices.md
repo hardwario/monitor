@@ -222,6 +222,9 @@ refused this command: it changes the device's keys or identity."*
   new devices' remote tabs are remote tabs like any other, and their local wizards (0057 / 0058 connection guides,
   the ADR-0410 wake retry) run only on the customer's side. Nothing changes in ADR-0393.
 - MCP: a joiner's remote tab has no probe id and is not listed to AI tools (F43). This plan keeps it so (D-22).
+  *Note 2026-11-24:* D-22 is amended by plan [0062](0062-mcp-remote-session.md) and ADR-0433: a joined remote tab is
+  available to AI clients as `remote:<n>` when support turns on the setting "AI clients may use remote support
+  sessions".
 - A new host whose device an old joiner cannot handle sends `ops: false` (D-3). The old joiner's Flash card then
   shows its existing "only the console is available" state.
 
@@ -478,7 +481,7 @@ rate limit (20 lines/s) already bounds them. The `generic` console profile has n
 | D-19 | STM32 chip, CHESTER `lrw`, Bluetooth non-CHESTER | (a) out of scope (b) `lrw` reset / prepared flash now (c) STM32 chip as an operations-only share | (a). The STM32 chip has no console and no prepared firmware (only user files, which D-12 keeps local). `lrw` operations pause the shared `app` console during a cross-target flash (0040), and 0039 / 0040 are not merged (pull request #18). Bluetooth consoles exist only for CHESTER. The matrix leaves room for `lrw` later | **as recommended** (2026-11-24) | ADR-0421 |
 | D-20 | Remote tab pages | (a) Console + Flash (remote card built from `targets`); no STICKER / NFC pages (b) mirror the device's local pages | (a) | **as recommended** (2026-11-24) | — |
 | D-21 | CLI shape | (a) `hwio remote host --profile`, `join --target ID --flash-prepared` (b) per-device `remote-host` subcommands | (a) | **as recommended** (2026-11-24) | — |
-| D-22 | MCP | (a) unchanged: no remote tools; a joiner's remote tab stays invisible to AI tools (F43) (b) read-only status | (a). An AI client on support's machine cannot type into a customer's device today, and that should stay so | **as recommended** (2026-11-24) | — |
+| D-22 | MCP | (a) unchanged: no remote tools; a joiner's remote tab stays invisible to AI tools (F43) (b) read-only status | (a). An AI client on support's machine cannot type into a customer's device today, and that should stay so | **as recommended** (2026-11-24); *note 2026-11-24: amended by ADR-0433 (plan 0062): a joined remote tab is available to AI clients behind a setting* | — |
 | D-23 | Release order | (a) A1 (protocol base, on main now) → A2 per device as its console ships → B → (later plan) NFC (b) all at once | (a) | **as recommended** (2026-11-24) | — |
 
 ## Implementation steps

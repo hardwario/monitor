@@ -17,6 +17,11 @@ everything it stores stays on your computer.
 The MCP server (`hwio mcp --http`) listens only on this computer (127.0.0.1) and is not reachable from the network.
 SEGGER J-Link Software and nRF Util are separate programs with their own behaviour.
 
+In the desktop app, support can turn on **AI clients may use remote support sessions** (off by default). After
+support allows it for a session, the console text of a customer's remote session goes to the AI client support uses,
+and through it to the client's provider. Secret values are hidden by their names, as in the console files: secrets of
+firmware HARDWARIO Monitor does not know are not recognised. See [MCP server](mcp.md#remote-support-sessions).
+
 ## Update check
 
 The desktop app asks GitHub for the list of HARDWARIO Monitor releases 10 seconds after it starts, at most once in

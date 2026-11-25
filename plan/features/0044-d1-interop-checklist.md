@@ -93,3 +93,20 @@ frozen rc.4 codec (`rc4_tunnel.*`); these rows check the real packages and the r
       result); a 0059 joiner shows `target.low_voltage`.
 - [ ] Web Terminal joiner on a 0059 host and web Terminal host with a 0059 joiner: as rows 2.2 and 2.3 (no garbage
       from the new hello fields).
+
+## 7. Plan 0062: an AI client (MCP) on support's joined tab
+
+Support's Monitor 2.0.0-rc.5 with **Settings › AI assistants (MCP) › AI clients may use remote support sessions** on
+and a real AI client (for example Claude Code over HTTP). The customer's side needs nothing new (ADR-0435). In every
+row: `list_devices` shows `remote:<n>` without the session code; support's prompt *… wants to work with a customer's
+device* (Deny default, no "Always allow"); after **Allow for this session** `read_terminal` and `send_command`
+(`info show`, `config show`) return the output with `<redacted>` for secrets and `<session>` for the code; the
+customer sees the commands as support's ("— Remote: command … —"); **Stop AI** ends a running `wait_for_state` with
+`cancelled`; Leave session / Join again ask support again.
+
+| # | Host (customer) | Check |
+|---|---|---|
+| 7.1 | Monitor 2.0.0-rc.5 (J-Link CHESTER) | [ ] the rows above; `flash` (`catalog_id`) and `reset`: support's prompt every time (device row "the customer's device (remote session)"), the customer's question, the result in the tool call and on support's Flash card ("AI: …"); **Stop waiting** ends the call with `cancelled` and the card follows the operation to its result; `flash_lte`: support answers the LTE update's questions on the card, the AI client sees "waiting for support's answer" |
+| 7.2 | Monitor 2.0.0-rc.4 | [ ] the rows above; `lrw config appkey <value>` from the AI client is refused on support's side (`remote.command_refused`, nothing sent); `config show` output reaches the AI client with `<redacted>` although the rc.4 host passes the key; `flash` / `reset` as in 7.1 |
+| 7.3 | web Terminal | [ ] the rows above; display name "Remote session (web Terminal or mobile app)"; `flash`, `flash_lte`, `reset` answer `remote.target_unsupported` / nothing offered; `send_command` ends by silence (1 s) with the whole answer |
+| 7.4 | HARDWARIO mobile app (CHESTER over Bluetooth) | [ ] the rows above; `send_command` returns every line of a multi-line answer (`info show`) without blank lines or the prompt (plan 0061 stream mode); no operations offered |

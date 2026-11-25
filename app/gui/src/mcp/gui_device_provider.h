@@ -33,7 +33,21 @@
 // the tab's ConsoleLog (Shell channel); setAiCommandHint() -> DeviceTabViewModel::aiCommandActive.
 //
 // devicesChanged: a tab was added or removed, a tab's session or configuration changed, the probe
-// list of a scan or the Bluetooth device list changed (ids and states only).
+// list of a scan or the Bluetooth device list changed (ids and states only), the setting
+// "AI clients may use remote support sessions" changed.
+//
+// Plan 0062 (ADR-0433, ADR-0434): with that setting on (setRemoteSessionsAllowed, McpController's
+// mcp/remoteSessions), a remote tab with a session is a device "remote:<n>" of kind "remote": <n>
+// from a counter of this run, assigned once per remote tab (kept across Leave session / Join again,
+// a new number when the tab becomes a remote tab again after it was another kind of tab), never
+// reused and never the session code; the display name never carries the code
+// (GuiRemoteDevice::displayName). find() returns {console = the RemoteConsoleSession, jlink = null,
+// remote = the tab's GuiRemoteDevice, isRemote}; open() / close() of a remote id ->
+// mcp.tool_not_allowed (join and leave stay human); beginBusy / endBusy of a remote id ->
+// RemoteJoinViewModel::beginAiBusy / endAiBusy (the Flash page's remote-operation state with
+// Stop waiting, not the tab's busy state); marker() / setAiCommandHint() as for a local tab (the
+// tab's own log: never sent to the relay). With the setting off remote tabs do not exist for MCP
+// and every remote grant is revoked (revokeRemoteAi()).
 //
 // Lifetime: owned by McpController (a child of AppViewModel). The application is held by QPointer:
 // when the AppViewModel is being destroyed the provider no longer touches it (list() is empty and
@@ -109,6 +123,18 @@ public:
     [[nodiscard]] static std::optional<std::uint32_t> probeSerialOf(std::string_view id);
     // "ble:<id>" -> the canonical Bluetooth device id ("" otherwise).
     [[nodiscard]] static std::string bleIdOf(std::string_view id);
+    // "remote:<n>" -> n (1..4294967295, decimal without leading zeros).
+    [[nodiscard]] static std::optional<std::uint32_t> remoteNumberOf(std::string_view id);
+
+    // Plan 0062: the setting "AI clients may use remote support sessions" (McpController).
+    void setRemoteSessionsAllowed(bool allowed);
+    [[nodiscard]] bool remoteSessionsAllowed() const noexcept { return m_remoteSessions; }
+    // The device id of a remote tab with a session ("remote:<n>"; "" otherwise or while the
+    // setting is off).
+    [[nodiscard]] std::string remoteId(const DeviceTabViewModel& tab) const;
+    // Ends the AI grants of `clientKey` ("" = of every client) on every remote tab (ADR-0436: the
+    // client went away, grants forgotten, the setting turned off).
+    void revokeRemoteAi(std::string_view clientKey);
 
 private:
     [[nodiscard]] DeviceTabListModel* tabs() const;
@@ -123,6 +149,9 @@ private:
     // The advertised name of a Bluetooth device of the scan list ("" when not seen).
     [[nodiscard]] QString seenBleName(const std::string& bleId) const;
     void watchTab(DeviceTabViewModel* tab);
+    // Plan 0062: numbers the remote tabs that have none, forgets tabs that are gone or no longer
+    // remote.
+    void numberRemoteTabs();
     void onScanned(const ProbeScan& scan);
     void finishRefresh(const hwio::Status& outcome);
     // The number of waiting refreshes (tests).
@@ -139,6 +168,15 @@ private:
     std::vector<std::function<void(hwio::Status)>> m_refreshWaiters; // <= maxPendingRefreshes
     QTimer m_refreshTimer; // refreshTimeout while waiters exist
     std::string m_cacheSignature;
+    // Plan 0062: the numbers of remote tabs (at most one entry per tab of the tab list, which is
+    // bounded; dead entries are dropped by numberRemoteTabs()).
+    struct RemoteNumber {
+        QPointer<DeviceTabViewModel> tab;
+        std::uint32_t number = 0;
+    };
+    std::vector<RemoteNumber> m_remoteNumbers;
+    std::uint32_t m_nextRemoteNumber = 1; // never reused in this run
+    bool m_remoteSessions = false;
 };
 
 } // namespace hwio::gui

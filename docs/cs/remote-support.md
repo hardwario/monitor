@@ -57,6 +57,10 @@ Pro doplňování příkazů u podpory posílá váš HARDWARIO Monitor podpoře
 podpora potřebuje podpříkazy některého příkazu, přečte si jeho nápovědu sám. Tyto dotazy na nápovědu se ve vaší konzoli
 nezobrazují; konzolový soubor zaznamená, kolik jich bylo.
 
+Podpora HARDWARIO může v relaci používat AI asistenta. Jeho příkazy a žádosti k vám dorazí jako příkazy podpory:
+stejný řádek *— Remote: command … —*, stejná otázka před každou operací, stejné záznamy v souboru konzole. Vaše
+možnosti zůstávají stejné: povolení podpory, otázka před každou operací a **Ukončit sdílení**.
+
 <a id="join-a-session"></a>
 ## Připojení k relaci (podpora)
 
@@ -93,6 +97,13 @@ Relaci opustíte tlačítkem **Opustit relaci** na liště zařízení (nebo kl�
 i s konzolí, takže ji můžete ještě uložit; v konzoli je řádek *— opustili jste relaci —*. **Připojit se znovu** se
 připojí ke stejnému kódu a zákazník vás musí znovu povolit. Dokud běží operace, o kterou jste požádali, tlačítko čeká,
 až skončí.
+
+**AI asistent.** Když je zapnuté **Nastavení › AI asistenti (MCP) › AI klienti smí používat relace vzdálené
+podpory**, může AI klient, například Claude Code, pracovat ve vzdálené kartě, jakmile mu to pro relaci povolíte: čte
+konzoli se skrytými tajnými hodnotami, posílá příkazy a žádá o nahrání firmwaru z katalogu, aktualizaci LTE nebo
+reset stejně jako vy. Zákazník vidí jeho příkazy jako vaše. Banner ukazuje *Aktivní AI klient: Claude Code*
+s tlačítkem **Zastavit AI**; operace, o kterou AI klient požádal, je na stránce **Nahrát** označená *AI:* s tlačítkem
+**Přestat čekat**. Viz [Server MCP](../en/mcp.md#remote-support-sessions) (anglicky).
 
 Když zákazník ukončí sdílení, HARDWARIO Monitor to nemusí vždy poznat: server to neoznamuje. Po 30 minutách bez
 jakékoli aktivity to banner oznámí a nabídne **Zavřít kartu**. Dokud ji nezavřete, karta zůstane otevřená, takže konzoli

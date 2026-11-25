@@ -459,4 +459,65 @@ TestCase {
         tryVerify(() => findAll(window.contentItem, "shareButton").filter(effectivelyVisible).length === 0, 5000);
         verify(!tab().remoteShare.available);
     }
+
+    // Plan 0062 (ADR-0436): support's banner names the AI client support allowed for the session;
+    // Stop AI ends the grant.
+    function test_aiClientBannerAndStopAi() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(false);
+        tryVerify(() => tab().remoteJoin.state === "joined", 10000);
+        AppViewModel.showPage("console");
+        verify(shown("remoteAiBanner").length === 0);
+        verify(testSupport.remoteAllowAi(AppViewModel.currentTab, "Claude Code"));
+        tryVerify(() => shown("remoteAiBanner").length === 1, 5000);
+        compare(one("remoteAiText").text, "AI client active: Claude Code");
+        compare(one("remoteStopAi").text, "Stop AI");
+        tryVerify(() => one("remoteStopAi").width > 0 && one("remoteStopAi").height > 0, 5000);
+        waitForRendering(window.contentItem);
+        mouseClick(one("remoteStopAi"));
+        tryVerify(() => shown("remoteAiBanner").length === 0, 5000);
+        compare(tab().remoteJoin.aiClientText, "");
+    }
+
+    // Plan 0062 (D12, B3): an AI client's operation shows "AI: …" on the Flash card with Stop
+    // waiting; after it the card keeps following the operation and Leave session still waits.
+    function test_aiOperationStopWaiting() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(false);
+        tryVerify(() => tab().remoteJoin.operationsAvailable, 10000);
+        AppViewModel.showPage("flash");
+        tryVerify(() => shown("remoteFlashCard").length === 1, 5000);
+        const join = tab().remoteJoin;
+        verify(shown("remoteStopWaiting").length === 0);
+
+        verify(testSupport.remoteAiReset(AppViewModel.currentTab));
+        tryVerify(() => testSupport.remoteRequestedKind() === "reset", 10000);
+        tryVerify(() => shown("remoteStopWaiting").length === 1, 5000);
+        verify(join.aiWaiting);
+        verify(join.operationStatus.indexOf("AI: Resetting…") === 0, join.operationStatus);
+        compare(one("remoteOperationStatus").text, join.operationStatus);
+        verify(!one("remoteResetButton").enabled); // one operation at a time
+        compare(one("remoteStopWaiting").text, "Stop waiting");
+
+        mouseClick(one("remoteStopWaiting"));
+        tryVerify(() => testSupport.remoteAiOutcome() === "stopped", 5000);
+        verify(!join.aiWaiting);
+        verify(join.operationPending); // the tab follows the operation to its result
+        verify(join.operationStatus.indexOf("AI:") < 0, join.operationStatus);
+        compare(tab().connection.actionBlockedReason, "Wait until the running operation ends.");
+        verify(!testSupport.remoteAiReset(AppViewModel.currentTab)); // internal.busy
+
+        testSupport.remoteHostAccept();
+        testSupport.remoteHostResult("");
+        tryVerify(() => !join.operationPending, 5000);
+        verify(/^Customer's device reset \(\d\d:\d\d\)\.$/.test(join.operationStatus), join.operationStatus);
+        compare(testSupport.remoteAiOutcome(), "stopped"); // no result after Stop waiting
+        compare(tab().connection.actionBlockedReason, "");
+    }
 }
