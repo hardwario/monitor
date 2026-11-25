@@ -1,6 +1,6 @@
 # 0062 — AI clients (MCP) on a joined remote support session
 
-- **Status:** Approved (2026-11-24, Matej Strnad: D3 as option (b) in his own words, then "Approve the rest" — every other decision as recommended)
+- **Status:** In progress (implemented 2026-11-25, automated verification green; manual checks open) — approved (2026-11-24, Matej Strnad: D3 as option (b) in his own words, then "Approve the rest" — every other decision as recommended)
 - **Milestone:** 2.0.0-rc.5 (phase A and phase B; fallback in D15)
 - **Author:** Claude, for Matej Strnad
 - **Related ADRs:** ADR-0433 (AI clients may use a joined remote tab; supersedes ADR-0332, amends plan
@@ -270,29 +270,29 @@ tab; prompts through the existing queue (8 waiting); `<n>` is a 32-bit counter.
 
 Phase A — tab, reading, commands:
 
-- [ ] A1 `RemoteConsoleSession`: `lineRefused(code)` signal; `CommandCapture` option that forces the silence rule;
+- [x] A1 `RemoteConsoleSession`: `lineRefused(code)` signal; `CommandCapture` option that forces the silence rule;
       unit tests. No change of `tunnel` and `RemoteHost`; a test proves that an AI command and a person's command
       are the same bytes on the relay.
-- [ ] A4 New error ids with texts and troubleshooting anchors.
-- [ ] A5 `libs/mcp_tools`: `IRemoteDevice`, `DeviceEntry` remote block, `ConsentCategory::RemoteDevice`, tool
+- [x] A4 New error ids with texts and troubleshooting anchors.
+- [x] A5 `libs/mcp_tools`: `IRemoteDevice`, `DeviceEntry` remote block, `ConsentCategory::RemoteDevice`, tool
       matrix of D7, remote `send_command` (D9), redaction of every read path (D10); tool tests with a fake
       `IRemoteDevice`.
-- [ ] A6 GUI: setting; `GuiDeviceProvider` remote entries; `GuiRemoteDevice`; support's session prompt; banner
+- [x] A6 GUI: setting; `GuiDeviceProvider` remote entries; `GuiRemoteDevice`; support's session prompt; banner
       "AI client active" + Stop AI; Qt Quick tests.
-- [ ] A8 Translations (cs, de, pl, sk; 0 unfinished).
+- [x] A8 Translations (cs, de, pl, sk; 0 unfinished).
 
 Phase B — operations:
 
-- [ ] B2 `flash` (catalog, prepared), `flash_lte`, `reset` on a remote device; progress; stop waiting (D12);
+- [x] B2 `flash` (catalog, prepared), `flash_lte`, `reset` on a remote device; progress; stop waiting (D12);
       questions (D13); tool tests and an end-to-end test host ↔ joiner with the fake J-Link and a test catalog.
-- [ ] B3 GUI: busy text, Stop waiting, permission prompt rows; Qt Quick tests.
+- [x] B3 GUI: busy text, Stop waiting, permission prompt rows; Qt Quick tests.
 
 Phase C — documents:
 
-- [ ] C1 `docs/<lang>/mcp.md`, `remote-support.md`, `privacy.md` in en, cs, de, pl, sk; release notes
+- [x] C1 `docs/<lang>/mcp.md`, `remote-support.md`, `privacy.md` in en, cs, de, pl, sk; release notes
       `packaging/release-notes/v2.0.0-rc.5.md`; interop checklist rows (AI client with: rc.5 Monitor host,
       rc.4 Monitor host, web Terminal host, mobile app host).
-- [ ] C2 ADR-0332 marked superseded; notes in plans 0044 and 0059 (D16); `plan/0004-mcp.md` tool table.
+- [x] C2 ADR-0332 marked superseded; notes in plans 0044 and 0059 (D16); `plan/0004-mcp.md` tool table.
 
 ## Implementation notes (A4, A5; confirmed by the user 2026-11-24, "Accept both")
 
@@ -310,6 +310,24 @@ Phase C — documents:
   recognised.
 - New error ids: `remote.command_not_delivered` (category timeout, baseline `timeout`),
   `remote.waiting_for_customer` (category cancelled, baseline `remote.join_not_allowed`); neither is sent.
+
+## Implementation notes (A1, A6, B2, B3, C1; 2026-11-25, not yet confirmed by the user)
+
+- **B2 end-to-end test.** `app/gui/tests/viewmodels/mcp_remote_test.cpp` runs the MCP server against a joined tab
+  through `FakeRelay` and an in-process `RemoteHost` with the remote tests' fixtures (`FakeConsole`,
+  `ScriptedConsent`, `FakeOperations`), not with the fake J-Link library and a test catalog as the step says.
+- **A remote tab is not marked busy during an AI operation.** The state is in `RemoteJoinViewModel` and shows on
+  the Flash card ("AI: …", Stop waiting). There is no close-tab confirmation; closing the tab ends the call with
+  `mcp.device_not_open`.
+- **`docs/<lang>/mcp.md`.** The MCP reference page is English only (`docs/README.md`); the section is in
+  `docs/en/mcp.md` and the translated remote-support pages link to it.
+- The LTE update question path of an AI client (D13) is covered by the tool tests only, not by a GUI test.
+- Settings key `mcp/remoteSessions`. Several clients in the banner are joined with ", ". Results of remote
+  operations are rebuilt from the error id, so the host's own message text does not reach an AI client.
+- Verification 2026-11-25 (with plan 0061 Amendment 2 on top): `linux-debug` 1992 of 1992, `linux-asan` 1923 of
+  1923, `linux-tsan` 1991 of 1991, `linux-tidy` zero findings, QML lint, translations (0 unfinished), format,
+  includes, LFS. Not done: the manual checks (two Monitors over the production relay with a real AI client; an
+  rc.4 Monitor, the web Terminal and the mobile app as host).
 
 ## Tests and verification
 
