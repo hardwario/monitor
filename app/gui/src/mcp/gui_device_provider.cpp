@@ -453,7 +453,7 @@ Result<DeviceRef> GuiDeviceProvider::openDevice(const hwio::mcp::tools::OpenRequ
             }
         });
     };
-    // Before configure(): ui/tabs is saved on configurationChanged and skips AI tabs (ADR-0244).
+    // Before configure(): the tab is an AI tab from its first configurationChanged on (ADR-0244).
     // Review M4: the self-declared name is sanitised; ADR-0260: the key decides who may close it.
     QString client = clientDisplayText(request.context.client.name);
     if (client.isEmpty()) {

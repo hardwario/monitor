@@ -64,7 +64,8 @@ Pasek boczny po lewej stronie przełącza strony karty: **Console** (konsola, <k
 **Flash** (wgrywanie, <kbd>Ctrl</kbd>+<kbd>2</kbd>). **Settings** (ustawienia, <kbd>Ctrl</kbd>+<kbd>,</kbd>)
 otwiera się jako osobna karta.
 
-Przy następnym uruchomieniu karty zostają przywrócone, rozłączone (**Settings → General → Reopen tabs at start**).
+Aplikacja zawsze uruchamia się z jedną kartą **New device** (**Choose a device to connect**); karty z poprzedniej
+sesji nie są ponownie otwierane.
 
 Jednocześnie działa tylko jedno okno aplikacji. Ponowne uruchomienie aplikacji przenosi otwarte okno na wierzch.
 
@@ -77,7 +78,7 @@ Jednocześnie działa tylko jedno okno aplikacji. Ponowne uruchomienie aplikacji
 
 | Sekcja | Zawartość |
 |---|---|
-| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark), **Reopen tabs at start** |
+| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark) |
 | **Console** | rozmiar czcionki, znaczniki czasu, zawijanie wierszy, podpowiedzi poleceń, historia poleceń, pliki konsoli i ich folder |
 | **J-Link** | biblioteka J-Link (**Automatic** lub **Custom path**) i domyślne opcje połączenia |
 | **nRF Util** | program nRF Util (**Automatic** lub **Custom path**), potrzebny tylko do firmware modemu LTE |
@@ -98,7 +99,7 @@ actions**, jest to **Expert**. Zamknięcie pytania zachowuje wstępnie wybrany t
 
 | Wyświetlane | Basic | Advanced | Expert |
 |---|---|---|---|
-| **General**: Mode, Language, Theme, Reopen tabs at start | ✓ | ✓ | ✓ |
+| **General**: Mode, Language, Theme | ✓ | ✓ | ✓ |
 | **Console**: rozmiar czcionki, znaczniki czasu, zawijanie wierszy, pliki konsoli, folder dzienników | ✓ | ✓ | ✓ |
 | **Console**: podpowiedzi poleceń, odczyt listy poleceń, **Remember commands**, **Clear history** | | ✓ | ✓ |
 | **J-Link**: Library, Default speed, Auto-reconnect | | ✓ | ✓ |

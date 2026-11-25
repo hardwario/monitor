@@ -64,7 +64,8 @@ Lišta vľavo prepína stránky karty: **Console** (konzola, <kbd>Ctrl</kbd>+<kb
 firmvéru, <kbd>Ctrl</kbd>+<kbd>2</kbd>). **Settings** (nastavenia, <kbd>Ctrl</kbd>+<kbd>,</kbd>) sa otvorí ako samostatná
 karta.
 
-Pri ďalšom spustení sa karty vrátia, odpojené (**Settings → General → Reopen tabs at start**).
+Aplikácia sa vždy spustí s jednou kartou **New device** (**Choose a device to connect**); karty z minulého spustenia
+sa znova neotvárajú.
 
 Naraz beží len jedno okno aplikácie. Jej opätovné spustenie prenesie otvorené okno do popredia.
 
@@ -77,7 +78,7 @@ Naraz beží len jedno okno aplikácie. Jej opätovné spustenie prenesie otvore
 
 | Sekcia | Čo obsahuje |
 |---|---|
-| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark), **Reopen tabs at start** |
+| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark) |
 | **Console** | veľkosť písma, časové značky, zalamovanie riadkov, návrhy príkazov, história príkazov, súbory konzoly a ich priečinok |
 | **J-Link** | knižnica J-Link (**Automatic** alebo **Custom path**) a predvolené možnosti pripojenia |
 | **nRF Util** | program nRF Util (**Automatic** alebo **Custom path**), potrebný len pre firmvér LTE modemu |
@@ -98,7 +99,7 @@ General › Mode**.
 
 | Zobrazené | Basic | Advanced | Expert |
 |---|---|---|---|
-| **General**: Mode, Language, Theme, Reopen tabs at start | ✓ | ✓ | ✓ |
+| **General**: Mode, Language, Theme | ✓ | ✓ | ✓ |
 | **Console**: veľkosť písma, časové značky, zalamovanie riadkov, súbory konzoly, priečinok záznamov | ✓ | ✓ | ✓ |
 | **Console**: návrhy príkazov, načítanie zoznamu príkazov, **Remember commands**, **Clear history** | | ✓ | ✓ |
 | **J-Link**: Library, Default speed, Auto-reconnect | | ✓ | ✓ |

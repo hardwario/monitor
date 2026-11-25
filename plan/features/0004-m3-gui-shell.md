@@ -119,7 +119,8 @@ Screens are drawn in the mockups (`plan/gui/mockups/`, with light/dark and EN/CS
 - **First start** opens one tab in the *Choose device* state.
 - **Later starts** restore the tab list (profile, target, probe SN) **without connecting**. Each restored tab shows
   "Disconnected — Connect" (setting `ui/restoreTabs`, default on). A restored tab whose probe is missing offers
-  "Choose another probe" next to the error.
+  "Choose another probe" next to the error. *Superseded by 0053 (ADR-0388, 2026-11-19):* every start opens one tab in
+  the *Choose device* state; tabs are not saved or restored and the setting is removed.
 - **Tab bar:** a state dot plus the title `CHESTER app · 683012345`. "+" (Ctrl+T) opens a new tab. At 8 tabs "+" is
   disabled with the tooltip "At most 8 devices can be open."
 - **Closing a tab** (Ctrl+W, ×, middle-click) disconnects it.
@@ -435,8 +436,8 @@ Disconnect / Cancel and the ⋯ popover.
 |---|---|---|
 | `ui/theme` | string | `system` |
 | `ui/windowGeometry` | string (base64) | — |
-| `ui/restoreTabs` | bool | `true` |
-| `ui/tabs` | string (JSON `{current, tabs:[{profile,target,sn}]}`, max 8) | — |
+| `ui/restoreTabs` | bool | `true` (*removed by 0053, ADR-0388; old files keep it unread*) |
+| `ui/tabs` | string (JSON `{current, tabs:[{profile,target,sn}]}`, max 8) | — (*removed by 0053, ADR-0388; old files keep it unread*) |
 | `jlink/speedKhz`, `rtt/latencyMs`, `rtt/autoReconnect`, `rtt/resetOnOpen` | int/int/bool/bool | profile values (speed: 0 = automatic, ADR-0111) |
 | `probes/<sn>/{speedKhz,latencyMs,autoReconnect,resetOnOpen}` | per probe, LRU max 32 (speed: 0 = automatic) | — |
 
@@ -588,7 +589,8 @@ end need a decision by the user.
 - **Settings schema:** stays 1. The 0004 keys are new keys with defaults, so the "migration" is a no-op and no
   `schemaVersion` bump is needed (older builds ignore unknown keys); documented in `settings_store.h`.
   `ui/windowGeometry` is base64 of `{"v":1,"x","y","w","h","maximized"}`; it is applied only when it is at least
-  960 × 600 and visible on a connected screen. `ui/tabs` is saved on every tab change and on quit.
+  960 × 600 and visible on a connected screen. `ui/tabs` is saved on every tab change and on quit (*removed by 0053,
+  ADR-0388: tabs are not saved*).
 - **Lifetimes:** a closed session is deleted on the next event-loop turn (never inside its own signal); a closed tab
   is deleted with `deleteLater()` after its QML delegates (Qt parent = AppViewModel until then). Tab delegates keep
   their last tab while the model removes the row (`Binding` with `RestoreNone`).

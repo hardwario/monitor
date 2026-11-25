@@ -34,8 +34,8 @@ Karta działa jak karta J-Link: konsola z podpowiedziami, historią, wyszukiwani
   **Pair** (sparuj) (Linux, Windows). Zobacz [Parowanie](#parowanie).
 - Jeśli nie można znaleźć urządzenia, **Choose another device** (wybierz inne urządzenie) wraca do listy.
 
-Karty Bluetooth po ponownym uruchomieniu wracają rozłączone; naciśnij **Connect**. Aplikacja uruchamia Bluetooth
-dopiero przy pierwszym otwarciu widoku Bluetooth, więc w macOS prosi o dostęp do Bluetooth dopiero wtedy.
+Aplikacja uruchamia Bluetooth dopiero przy pierwszym otwarciu widoku Bluetooth, więc w macOS prosi o dostęp do
+Bluetooth dopiero wtedy.
 
 ## Wyszukiwanie urządzenia (wiersz poleceń)
 

@@ -1,6 +1,7 @@
 # ADR-0061 — Tab restore without connecting; responsive breakpoints
 
-- **Status:** Accepted (details of ADR-0043; tab entries gain `transport`, ADR-0083)
+- **Status:** Accepted (details of ADR-0043; tab entries gain `transport`, ADR-0083); the tab-restore part superseded
+  by ADR-0388 (2026-11-19: the app starts fresh), the responsive layout unchanged
 - **Date:** 2026-10-09
 - **Decided by:** Matej Strnad (M3 planning review)
 

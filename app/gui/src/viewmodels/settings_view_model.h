@@ -7,7 +7,7 @@
 // the SettingsStore (validated; an invalid value shows an inline error and is not saved). The page
 // hosts the sections of the PageRegistry (General, J-Link, nRF Util and About of this plan, the
 // Console section of 0005) in their order.
-//   - General: language (live), theme (live), reopen tabs at start (ui/restoreTabs).
+//   - General: language (live), theme (live). Plan 0053 (ADR-0388): no "reopen tabs at start".
 //   - J-Link: library Automatic / Custom path (jlink/libraryPath; a custom path is checked -
 //   located
 //     and loaded once - before it is saved), the defaults of the ⋯ Advanced popover for probes
@@ -64,7 +64,6 @@ class SettingsViewModel : public QObject {
     Q_PROPERTY(QString theme READ theme WRITE setTheme NOTIFY themeChanged)
     Q_PROPERTY(QVariantList themes READ themes NOTIFY languageChanged) // [{code, name}]
     Q_PROPERTY(int themeIndex READ themeIndex NOTIFY themeChanged)
-    Q_PROPERTY(bool restoreTabs READ restoreTabs WRITE setRestoreTabs NOTIFY valuesChanged)
 
     // J-Link
     Q_PROPERTY(QString jlinkLibraryMode READ jlinkLibraryMode WRITE setJlinkLibraryMode NOTIFY
@@ -150,8 +149,6 @@ public:
     [[nodiscard]] static QVariantList themes();
     [[nodiscard]] int themeIndex() const;
     void setTheme(const QString& theme);
-    [[nodiscard]] bool restoreTabs() const;
-    void setRestoreTabs(bool restore);
 
     [[nodiscard]] QString jlinkLibraryMode() const;
     void setJlinkLibraryMode(const QString& mode);

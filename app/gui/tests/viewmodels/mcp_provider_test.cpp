@@ -1,8 +1,8 @@
 // Plan 0014 A3 / D1: the GuiDeviceProvider over the device tabs of a real AppViewModel (fake J-Link
 // library): ids and the list from the tabs and the probe scanner, connect opens an AI tab with
-// openedBy (appended, the current tab unchanged, not in ui/tabs), connects a user's tab
-// (ADR-0242), the tab limit, disconnect of a user's tab, busy / markers / the command hint, a tab
-// closed while a call holds its session, and Bluetooth tabs (step D1). Integration with plan 0036:
+// openedBy (appended, the current tab unchanged), connects a user's tab (ADR-0242), the tab
+// limit, disconnect of a user's tab, busy / markers / the command hint, a tab closed while a call
+// holds its session, and Bluetooth tabs (step D1). Integration with plan 0036:
 // an AI operation blocks the J-Link firmware update; a probe reserved for it refuses connect.
 
 #include "gui_test_support.h"
@@ -130,13 +130,6 @@ TEST_F(McpProvider, ConnectOpensAnAiTabWithoutSwitching) {
     EXPECT_EQ(app().tabs()->indexOf(tab), 1);
     EXPECT_TRUE(waitFor([&] { return connected(*ref); }));
     EXPECT_TRUE(entry("jlink:801000002").openedByMcp);
-    // ADR-0244: not restored.
-    app().saveState();
-    EXPECT_FALSE(app()
-                     .settingsStore()
-                     ->value(QStringLiteral("ui/tabs"))
-                     .toString()
-                     .contains(QStringLiteral("801000002")));
     // The AI may close its own tab (queued).
     hwio::mcp::RequestContext owner;
     owner.clientKey = "Claude Code";
@@ -370,9 +363,6 @@ TEST_F(McpProvider, UserChangeHandsTheTabOver) {
     EXPECT_EQ(settings.value(QStringLiteral("probes/801000002/latencyMs")).toInt(), 25);
     EXPECT_EQ(settings.value(QStringLiteral("probes/801000002/speedKhz")).toInt(), 0); // not 1000
     EXPECT_EQ(tab->connection()->options().speedKhz, 1000); // the session keeps it
-    app().saveState();
-    EXPECT_TRUE(
-        settings.value(QStringLiteral("ui/tabs")).toString().contains(QStringLiteral("801000002")));
     hwio::mcp::RequestContext owner;
     owner.clientKey = "Claude Code";
     EXPECT_EQ(provider().close("jlink:801000002", owner).error().code,
