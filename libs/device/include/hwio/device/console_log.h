@@ -45,8 +45,9 @@ public:
 
     // Stores the line with the next sequence number and returns it (line.seq is overwritten).
     std::uint64_t append(ConsoleLine line);
-    // A Direction::Marker line with the current time (ADR-0063; added by the GUI).
-    std::uint64_t appendMarker(Channel channel, std::string text);
+    // A Direction::Marker line with the current time (ADR-0063; added by the GUI). `textEn`: the
+    // English text when `text` is translated (ConsoleLine::textEn, ADR-0374); empty = the same.
+    std::uint64_t appendMarker(Channel channel, std::string text, std::string textEn = {});
 
     // Stored lines with seq > cursor of the channels in `mask`, in seq order, at most maxLines
     // (the oldest ones first).

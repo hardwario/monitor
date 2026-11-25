@@ -39,7 +39,7 @@ QString linesText(const std::vector<hwio::device::ConsoleLine>& lines) {
         if (line.dir == hwio::device::Direction::In) {
             text += QStringLiteral("> ");
         }
-        text += qs(line.text);
+        text += qs(hwio::device::englishText(line)); // ADR-0374
     }
     return text;
 }
@@ -76,7 +76,8 @@ hwio::Status registerResources(hwio::mcp::Registry& registry, ToolsContext& cont
             .uri = "hwio://devices",
             .name = "devices",
             .title = "Devices",
-            .description = "The devices this server knows (same shape as list_devices).",
+            .description = "The devices this server knows (same shape as list_devices with its "
+                           "default all_ble=false).",
             .mimeType = "application/json",
             .read =
                 [&context](const hwio::mcp::RequestContext&, const QString& uri,

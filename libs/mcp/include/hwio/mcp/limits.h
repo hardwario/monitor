@@ -31,6 +31,8 @@ struct ToolLimits {
     std::size_t regexMaxLineBytes = std::size_t{4} * 1024;
     // wait_for_state / wait_for_connection
     std::chrono::milliseconds waitMaxTimeout = std::chrono::seconds{600};
+    // reacquire_probe waits at most this long for the console (plan 0050, ADR-0375).
+    std::chrono::milliseconds reacquireWait = std::chrono::seconds{10};
     std::size_t regexMaxChars = 512;
     // target and firmware tools
     std::size_t readMemoryInlineBytes = std::size_t{64} * 1024;

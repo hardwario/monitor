@@ -11,6 +11,7 @@
 #include "hwio/core/bounded_queue.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/core/version.h"
@@ -46,6 +47,7 @@
 #include <QStringLiteral>
 #include <QtContainerFwd>
 #include <QtLogging>
+#include <QtTranslation>
 
 #include <algorithm>
 #include <array>
@@ -360,10 +362,10 @@ private:
                     ErrorCode::ProbeFirmwareOutdated,
                     std::format("J-Link {} firmware: {}", info->serialNumber, info->firmware));
                 if (status == jlink::FirmwareStatus::Newer) {
-                    error.message =
-                        QCoreApplication::translate(
-                            "hwio::device", "The J-Link firmware is newer than the J-Link library.")
-                            .toStdString();
+                    setText(
+                        error, ErrorText::Message, "hwio::device",
+                        QT_TRANSLATE_NOOP("hwio::device",
+                                          "The J-Link firmware is newer than the J-Link library."));
                 }
                 // Plan 0036: the status and both firmware strings for the GUI's banner.
                 auto embedded = m_api->embeddedFirmwareString(jlink::firmwareId(info->firmware));
@@ -411,11 +413,10 @@ private:
         if (!layout->loggerUp && !names.logger.empty() && !m_loggerWarned) {
             m_loggerWarned = true;
             Error error = makeError(ErrorCode::TargetRttBufferNotFound, "continuing without logs");
-            error.message = QCoreApplication::translate("hwio::device",
-                                                        "RTT buffer \"%1\" not found; the device "
-                                                        "log is not shown.")
-                                .arg(toQString(names.logger))
-                                .toStdString();
+            setText(error, ErrorText::Message, "hwio::device",
+                    QT_TRANSLATE_NOOP("hwio::device", "RTT buffer \"%1\" not found; the device "
+                                                      "log is not shown."),
+                    {toQString(names.logger)});
             warn(std::move(error));
         }
         m_attached = true;
@@ -673,10 +674,9 @@ private:
             // reports 0 never trips this.
             Error error = makeError(ErrorCode::TargetNoPower,
                                     std::format("VTref {} mV", status->targetMillivolts));
-            error.message =
-                QCoreApplication::translate("hwio::device", "The device has no power (%1 mV).")
-                    .arg(status->targetMillivolts)
-                    .toStdString();
+            setText(error, ErrorText::Message, "hwio::device",
+                    QT_TRANSLATE_NOOP("hwio::device", "The device has no power (%1 mV)."),
+                    {status->targetMillivolts});
             report(ConnectionState::Disconnected, std::move(error));
         }
         return m_powered;
@@ -691,9 +691,8 @@ private:
         // Only when the session will really re-attach by itself (review R35); otherwise the
         // default suggestion "Reconnect the console (F4)." stays.
         if (m_config.autoReconnect && !m_halted && !m_suspended && !m_fatal) {
-            error.suggestion =
-                QCoreApplication::translate("hwio::device", "Wait for the console to reconnect.")
-                    .toStdString();
+            setText(error, ErrorText::Suggestion, "hwio::device",
+                    QT_TRANSLATE_NOOP("hwio::device", "Wait for the console to reconnect."));
         }
         return error;
     }
@@ -1100,6 +1099,16 @@ private:
         return {};
     }
 
+    // keepChip() and the download report of runFlash() / runErase() (plan 0050, ADR-0376).
+    template <class T>
+    static Status keepChipAndDownload(const Result<T>& chip, const WorkflowContext& context,
+                                      OperationResult& result) {
+        if (chip) {
+            result.download = context.download;
+        }
+        return keepChip(chip, result);
+    }
+
     // `armed`: the reset reason was cleared before an earlier step (LTE bundle); otherwise it is
     // cleared here for a target that has one (H5, ADR-0273).
     [[nodiscard]] Status runFlashStep(OperationRun& run, const firmware::FirmwareImage& image,
@@ -1114,7 +1123,8 @@ private:
             return prepared;
         }
         return explainFailure(run.target, armed, run.command.flash.guided,
-                              keepChip(runFlash(run.context, image, run.command.flash), result),
+                              keepChipAndDownload(runFlash(run.context, image, run.command.flash),
+                                                  run.context, result),
                               run.stop);
     }
 
@@ -1128,10 +1138,10 @@ private:
             if (Status prepared = prepareOperation(run, true); !prepared) {
                 return prepared;
             }
-            return keepChip(runErase(run.context, command.kind == OperationKind::EraseCode
-                                                      ? EraseScope::Code
-                                                      : EraseScope::All),
-                            result);
+            return keepChipAndDownload(
+                runErase(run.context, command.kind == OperationKind::EraseCode ? EraseScope::Code
+                                                                               : EraseScope::All),
+                run.context, result);
         }
         case OperationKind::Recover: {
             if (Status prepared = prepareOperation(run, false); !prepared) {
@@ -1273,8 +1283,9 @@ private:
             return {};
         }
         case OperationKind::WriteFlash:
-            return keepChip(runWriteFlash(run.context, *command.image, command.flash.allowUicr),
-                            result);
+            return keepChipAndDownload(
+                runWriteFlash(run.context, *command.image, command.flash.allowUicr), run.context,
+                result);
         default:
             break;
         }
@@ -1316,7 +1327,8 @@ private:
                                .targetStatus = std::nullopt,
                                .registers = {},
                                .zones = {},
-                               .familyMatch = std::nullopt};
+                               .familyMatch = std::nullopt,
+                               .download = std::nullopt};
         if (m_suspended) {
             result.status = std::unexpected(notConnected("operation not run (suspended)"));
             finishOperation(command, reporter, std::move(result));
@@ -1345,7 +1357,8 @@ private:
                 .log = [this](const std::string& text) { flashLog(text); },
                 .connectAs = {},
                 .connectedDevice = {},
-                .cpuHalted = false},
+                .cpuHalted = false,
+                .download = std::nullopt},
             .programmer = std::nullopt};
         Status outcome = executeOperation(run, result);
         // Cancelled while halted (e.g. during verify): let the CPU run again where possible -
@@ -1500,10 +1513,9 @@ private:
                                                  std::string detail) {
         Error error =
             makeError(ErrorCode::DiagCheckTimeout, std::format("{}: {}", id, std::move(detail)));
-        error.message =
-            QCoreApplication::translate("hwio::diag", "The check \"%1\" did not finish in time.")
-                .arg(toQString(stepTitle(target, id)))
-                .toStdString();
+        setText(error, ErrorText::Message, "hwio::diag",
+                QT_TRANSLATE_NOOP("hwio::diag", "The check \"%1\" did not finish in time."),
+                {toQString(stepTitle(target, id))});
         return error;
     }
 
@@ -1560,10 +1572,9 @@ private:
                 makeError(ErrorCode::ProbeFirmwareOutdated,
                           std::format("J-Link {} firmware: {}", info.serialNumber, info.firmware));
             if (firmware == jlink::FirmwareStatus::Newer) {
-                error.message =
-                    QCoreApplication::translate(
-                        "hwio::device", "The J-Link firmware is newer than the J-Link library.")
-                        .toStdString();
+                setText(error, ErrorText::Message, "hwio::device",
+                        QT_TRANSLATE_NOOP("hwio::device",
+                                          "The J-Link firmware is newer than the J-Link library."));
             }
             finishTimed(run,
                         problemStep("probe", diag::CheckStatus::Warning, std::move(error),
@@ -1580,10 +1591,9 @@ private:
 
     [[nodiscard]] static Error noPowerError(int millivolts) {
         Error error = makeError(ErrorCode::TargetNoPower, std::format("VTref {} mV", millivolts));
-        error.message =
-            QCoreApplication::translate("hwio::device", "The device has no power (%1 mV).")
-                .arg(millivolts)
-                .toStdString();
+        setText(error, ErrorText::Message, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device", "The device has no power (%1 mV)."),
+                {millivolts});
         return error;
     }
 
@@ -1708,7 +1718,8 @@ private:
                     return connectDevice(*run.target, device, run.stop, 1);
                 },
             .connectedDevice = m_connectedDevice,
-            .cpuHalted = false};
+            .cpuHalted = false,
+            .download = std::nullopt};
     }
 
     // Step 4: FICR part and family, protection. Returns true when the MCU is protected.
@@ -1844,11 +1855,11 @@ private:
             if (!layout.loggerUp) {
                 Error error = makeError(ErrorCode::TargetRttBufferNotFound,
                                         std::format("logger buffer \"{}\"", target.rttLogger));
-                error.message =
-                    QCoreApplication::translate(
-                        "hwio::device", "RTT buffer \"%1\" not found; the device log is not shown.")
-                        .arg(toQString(target.rttLogger))
-                        .toStdString();
+                setText(
+                    error, ErrorText::Message, "hwio::device",
+                    QT_TRANSLATE_NOOP("hwio::device",
+                                      "RTT buffer \"%1\" not found; the device log is not shown."),
+                    {toQString(target.rttLogger)});
                 finishStep(run,
                            problemStep("rtt-buffers", diag::CheckStatus::Warning, std::move(error),
                                        found.join(QStringLiteral(", ")).toStdString()));
@@ -1889,7 +1900,8 @@ private:
                                .targetStatus = std::nullopt,
                                .registers = {},
                                .zones = {},
-                               .familyMatch = std::nullopt};
+                               .familyMatch = std::nullopt,
+                               .download = std::nullopt};
         if (m_suspended) {
             result.status = std::unexpected(notConnected("diagnose not run (suspended)"));
             finishOperation(command, reporter, std::move(result));
@@ -2102,14 +2114,13 @@ private:
             if (error.code == ErrorCode::ProbeOpenFailed) {
                 Error taken =
                     makeError(ErrorCode::ProbeInUseByOtherProcess, std::move(error.detail));
-                taken.cause =
-                    QCoreApplication::translate(
-                        "hwio::device", "Another program opened the J-Link after it was released.")
-                        .toStdString();
-                taken.suggestion =
-                    QCoreApplication::translate(
-                        "hwio::device", "Close the other program, then reacquire the J-Link.")
-                        .toStdString();
+                setText(
+                    taken, ErrorText::Cause, "hwio::device",
+                    QT_TRANSLATE_NOOP("hwio::device",
+                                      "Another program opened the J-Link after it was released."));
+                setText(taken, ErrorText::Suggestion, "hwio::device",
+                        QT_TRANSLATE_NOOP("hwio::device",
+                                          "Close the other program, then reacquire the J-Link."));
                 error = std::move(taken);
             }
             report(ConnectionState::Stopped, std::move(error), true);

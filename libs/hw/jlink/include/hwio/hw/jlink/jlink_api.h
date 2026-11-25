@@ -226,6 +226,10 @@ public:
     // ---- library output (log / warning / error out handlers) --------------------------------
     // Logs the messages the library reported since the last call into the hwio.jlink category.
     virtual void flushMessages() = 0;
+    // flushMessages(), and returns the texts of the flushed messages that contain `marker` (the
+    // last `maxLines` of them; plan 0050: the "Flash download:" lines of a download).
+    [[nodiscard]] virtual std::vector<std::string>
+    flushMessagesContaining(std::string_view marker, std::size_t maxLines) = 0;
     // flushMessages(), then returns the library's error texts reported since the previous call
     // (newest last, "; "-separated, bounded) for the `detail` of the next hwio::Error.
     [[nodiscard]] virtual std::string takeErrorText() = 0;

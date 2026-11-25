@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/log.h"
 #include "hwio/core/result.h"
 #include "hwio/firmware/firmware_image.h"
@@ -14,9 +15,13 @@
 #include <QChar>
 #include <QCoreApplication>
 #include <QLoggingCategory>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include <QString>
 #include <QStringLiteral>
 #include <QtLogging>
+#include <QtTranslation>
+#include <QtTypes>
 
 #include <algorithm>
 #include <cctype>
@@ -36,6 +41,9 @@
 namespace hwio::jlink {
 
 namespace {
+
+// The library log lines of a download that parseDownloadMessages() reads (plan 0050).
+constexpr std::string_view downloadMessageMarker = "Flash download:";
 
 using firmware::FirmwareImage;
 using firmware::ProgramPhase;
@@ -154,10 +162,44 @@ Result<ChipInfo> JLinkProgrammer::identify() {
         }
     }
     Error error = makeError(ErrorCode::TargetConnectFailed, libraryDetail(tried));
-    error.message =
-        QCoreApplication::translate("hwio::jlink", "The MCU type could not be read (FICR).")
-            .toStdString();
+    setText(error, ErrorText::Message, "hwio::jlink",
+            QT_TRANSLATE_NOOP("hwio::jlink", "The MCU type could not be read (FICR)."));
     return std::unexpected(std::move(error));
+}
+
+DownloadReport parseDownloadMessages(std::span<const std::string> lines) {
+    // J-Link V9.84 wording of the flash loader's per-bank summary (plan 0050, ADR-0376); another
+    // wording leaves the report empty (never guessed).
+    static const QRegularExpression skipped(QStringLiteral(
+        R"(Flash download: Bank \d+ @ 0x[0-9A-Fa-f]+: Skipped\. Contents already match)"));
+    static const QRegularExpression affected(QStringLiteral(
+        R"(Flash download: Bank \d+ @ 0x[0-9A-Fa-f]+: \d+ ranges? affected \((\d+) bytes\))"));
+    DownloadReport report;
+    std::uint64_t bytes = 0;
+    bool anyChanged = false;
+    bool anyBank = false;
+    for (const std::string& line : lines) {
+        const QString text = QString::fromStdString(line);
+        if (skipped.match(text).hasMatch()) {
+            anyBank = true;
+            continue;
+        }
+        if (const QRegularExpressionMatch match = affected.match(text); match.hasMatch()) {
+            bool ok = false;
+            const qulonglong count = match.captured(1).toULongLong(&ok);
+            if (!ok) {
+                return {}; // a byte count we cannot read: say nothing
+            }
+            anyBank = true;
+            anyChanged = true;
+            bytes += count;
+        }
+    }
+    if (anyBank) {
+        report.unchanged = !anyChanged;
+        report.affectedBytes = bytes;
+    }
+    return report;
 }
 
 Error JLinkProgrammer::abandonDownload(std::string detail) {
@@ -169,20 +211,19 @@ Error JLinkProgrammer::abandonDownload(std::string detail) {
     m_probe.close();
     Error error =
         makeError(ErrorCode::TargetProgramFailed, "flash download abandoned: " + std::move(detail));
-    error.cause =
-        QCoreApplication::translate(
-            "hwio::jlink", "Programming was interrupted; the firmware may be partly written.")
-            .toStdString();
-    error.suggestion =
-        QCoreApplication::translate("hwio::jlink",
-                                    "Check the cables and power, then flash the firmware again.")
-            .toStdString();
+    setText(error, ErrorText::Cause, "hwio::jlink",
+            QT_TRANSLATE_NOOP("hwio::jlink",
+                              "Programming was interrupted; the firmware may be partly written."));
+    setText(error, ErrorText::Suggestion, "hwio::jlink",
+            QT_TRANSLATE_NOOP("hwio::jlink",
+                              "Check the cables and power, then flash the firmware again."));
     return error;
 }
 
-Status JLinkProgrammer::download(const std::vector<Segment>& segments, bool programsData,
-                                 ErrorCode failure, const ProgressFn& progress,
-                                 const std::stop_token& stop) {
+Result<DownloadReport> JLinkProgrammer::download(const std::vector<Segment>& segments,
+                                                 bool programsData, ErrorCode failure,
+                                                 const ProgressFn& progress,
+                                                 const std::stop_token& stop) {
     if (stop.stop_requested()) {
         return fail(ErrorCode::Cancelled);
     }
@@ -226,8 +267,12 @@ Status JLinkProgrammer::download(const std::vector<Segment>& segments, bool prog
         const auto clamped = static_cast<std::uint64_t>(std::clamp(percent, 0, 100));
         report(progress, current, total * clamped / 100, total);
     };
-    const int result = m_api.endDownload(loaderProgress);
+    // Plan 0050 (ADR-0376): only the messages of EndDownload are parsed (the queue is drained of
+    // the buffering's messages first, which also leaves room for the loader's lines).
     m_api.flushMessages();
+    const int result = m_api.endDownload(loaderProgress);
+    const std::vector<std::string> loaderLines =
+        m_api.flushMessagesContaining(downloadMessageMarker, maxDownloadMessages);
     if (result < 0) {
         return std::unexpected(makeError(
             failure, libraryDetail(std::format("JLINKARM_EndDownload returned {}", result))));
@@ -235,20 +280,33 @@ Status JLinkProgrammer::download(const std::vector<Segment>& segments, bool prog
     if (m_clock.now() > deadline) {
         return std::unexpected(timedOut("flash download exceeded the deadline"));
     }
-    return {};
+    return parseDownloadMessages(loaderLines);
 }
 
-Status JLinkProgrammer::program(const FirmwareImage& image, const ProgressFn& progress,
-                                std::stop_token stop) {
-    if (auto status =
-            download(image.segments(), true, ErrorCode::TargetProgramFailed, progress, stop);
-        !status) {
-        return status;
+Result<DownloadReport> JLinkProgrammer::program(const FirmwareImage& image,
+                                                const ProgressFn& progress, std::stop_token stop) {
+    auto downloaded =
+        download(image.segments(), true, ErrorCode::TargetProgramFailed, progress, stop);
+    if (!downloaded) {
+        return downloaded;
     }
     report(progress, ProgramPhase::Programming, image.totalBytes(), image.totalBytes());
-    qCInfo(log::lcFlash) << "Programmed" << image.totalBytes() << "bytes in"
-                         << image.segments().size() << "segment(s)";
-    return {};
+    if (downloaded->unchanged.value_or(false)) {
+        qCInfo(log::lcFlash).noquote()
+            << QStringLiteral("Flash contents already matched; nothing programmed (%1 bytes in %2 "
+                              "segment(s))")
+                   .arg(image.totalBytes())
+                   .arg(image.segments().size());
+    } else {
+        qCInfo(log::lcFlash).noquote()
+            << QStringLiteral("Programmed %1 bytes in %2 segment(s)%3")
+                   .arg(image.totalBytes())
+                   .arg(image.segments().size())
+                   .arg(downloaded->affectedBytes
+                            ? QStringLiteral(" (%1 bytes affected)").arg(*downloaded->affectedBytes)
+                            : QString());
+    }
+    return downloaded;
 }
 
 Status JLinkProgrammer::verify(const FirmwareImage& image, const ProgressFn& progress,
@@ -286,10 +344,9 @@ Status JLinkProgrammer::verify(const FirmwareImage& image, const ProgressFn& pro
                                         std::format("0x{:08X}: expected 0x{:02X}, read 0x{:02X}",
                                                     at, static_cast<unsigned>(*mismatch.in1),
                                                     static_cast<unsigned>(*mismatch.in2)));
-                error.message =
-                    QCoreApplication::translate("hwio::jlink", "Verification failed at address %1.")
-                        .arg(QStringLiteral("0x%1").arg(at, 8, 16, QLatin1Char('0')))
-                        .toStdString();
+                setText(error, ErrorText::Message, "hwio::jlink",
+                        QT_TRANSLATE_NOOP("hwio::jlink", "Verification failed at address %1."),
+                        {QStringLiteral("0x%1").arg(at, 8, 16, QLatin1Char('0'))});
                 return std::unexpected(std::move(error));
             }
             done += want.size();
@@ -300,8 +357,9 @@ Status JLinkProgrammer::verify(const FirmwareImage& image, const ProgressFn& pro
     return {};
 }
 
-Status JLinkProgrammer::eraseCode(firmware::AddressRange flash, const ProgressFn& progress,
-                                  std::stop_token stop) {
+Result<DownloadReport> JLinkProgrammer::eraseCode(firmware::AddressRange flash,
+                                                  const ProgressFn& progress,
+                                                  std::stop_token stop) {
     // To confirm in Phase 0 (plan 0003, 0.3): 0xFF over the whole range through the flash loader,
     // which erases every sector whose content differs; the UICR is outside the range.
     std::vector<Segment> segments;
@@ -311,15 +369,18 @@ Status JLinkProgrammer::eraseCode(firmware::AddressRange flash, const ProgressFn
         segments.push_back(Segment{.address = static_cast<std::uint32_t>(address),
                                    .data = std::vector<std::byte>(size, std::byte{0xFF})});
     }
-    if (auto status = download(segments, false, ErrorCode::TargetEraseFailed, progress, stop);
-        !status) {
-        return status;
+    auto downloaded = download(segments, false, ErrorCode::TargetEraseFailed, progress, stop);
+    if (!downloaded) {
+        return downloaded;
     }
     report(progress, ProgramPhase::Erasing, flash.size(), flash.size());
-    qCInfo(log::lcFlash).noquote() << QStringLiteral("Erased the code flash 0x%1-0x%2")
-                                          .arg(flash.start, 8, 16, QLatin1Char('0'))
-                                          .arg(flash.end, 8, 16, QLatin1Char('0'));
-    return {};
+    qCInfo(log::lcFlash).noquote()
+        << QStringLiteral("Erased the code flash 0x%1-0x%2%3")
+               .arg(flash.start, 8, 16, QLatin1Char('0'))
+               .arg(flash.end, 8, 16, QLatin1Char('0'))
+               .arg(downloaded->unchanged.value_or(false) ? QStringLiteral(" (already erased)")
+                                                          : QString());
+    return downloaded;
 }
 
 Status JLinkProgrammer::eraseAll() {

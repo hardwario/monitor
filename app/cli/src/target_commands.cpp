@@ -4,6 +4,7 @@
 #include "confirm.h"
 #include "hwio/core/error.h"
 #include "hwio/core/json.h"
+#include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
@@ -57,7 +58,7 @@ constexpr std::uint64_t addressSpace = 0x100000000ULL;
 
 Error usage(std::string message, std::string detail) {
     Error error = makeError(ErrorCode::UsageInvalidArgument, std::move(detail));
-    error.message = std::move(message);
+    setUntranslatedText(error, ErrorText::Message, std::move(message));
     return error;
 }
 
@@ -317,7 +318,8 @@ Result<CommandResult> memRead(const Context& context, const GlobalOptions& globa
     auto length = parseAddress(options.length);
     if (!length) {
         Error error = std::move(length).error();
-        error.message = "The length must be a decimal number or 0x followed by hex digits.";
+        setUntranslatedText(error, ErrorText::Message,
+                            "The length must be a decimal number or 0x followed by hex digits.");
         return std::unexpected(std::move(error));
     }
     const AccessWidth width = widthOf(options.width);

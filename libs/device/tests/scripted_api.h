@@ -760,6 +760,10 @@ public:
     }
 
     void flushMessages() override {}
+    std::vector<std::string> flushMessagesContaining(std::string_view /*marker*/,
+                                                     std::size_t /*maxLines*/) override {
+        return {};
+    }
     std::string takeErrorText() override { return {}; }
 
 private:

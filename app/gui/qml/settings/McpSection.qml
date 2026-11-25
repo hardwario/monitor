@@ -1,7 +1,8 @@
 // Settings → AI assistants (MCP) (plan/features/0014, ADR-0101, ADR-0102, ADR-0105, ADR-0106,
 // ADR-0241, ADR-0244): enable with the server state, the port, the token (masked, Show, Copy,
-// Regenerate…), the client snippets, the consent rules per category, the remembered grants and the
-// activity list (the last 1000 calls, newest first). Presentation only: McpController.
+// Regenerate…), the client snippets, the consent rules per category with the All row (ADR-0390),
+// the remembered grants and the activity list (the last 1000 calls, newest first). Presentation
+// only: McpController.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -271,15 +272,68 @@ ColumnLayout {
             }
         }
 
+        // ADR-0390: every category at once. Ask applies at once, Always allow asks first; a button
+        // is selected only when all categories agree.
+        RowLayout {
+            objectName: "mcpRuleAll"
+            Layout.fillWidth: true
+            spacing: Theme.spacingS
+
+            Label {
+                id: allLabel
+
+                textFormat: Text.PlainText
+                Layout.fillWidth: true
+                text: qsTr("All")
+                font: Theme.fontUiStrong
+                color: Theme.text
+                wrapMode: Text.Wrap
+            }
+
+            RadioButton {
+                objectName: "mcpAskAll"
+                Layout.preferredWidth: 90
+                checked: section.mcp.allRules === McpController.AllRulesAsk
+                // Display-only check state, as in the rows below.
+                checkable: false
+                Accessible.name: qsTr("%1: ask").arg(allLabel.text)
+                onClicked: section.mcp.setAllConsentRules(false)
+            }
+
+            RadioButton {
+                objectName: "mcpAllowAll"
+                Layout.preferredWidth: 110
+                checked: section.mcp.allRules === McpController.AllRulesAllow
+                // Display-only check state, as in the rows below.
+                checkable: false
+                Accessible.name: qsTr("%1: always allow").arg(allLabel.text)
+                onClicked: {
+                    if (section.mcp.allRules !== McpController.AllRulesAllow)
+                        allowAllDialog.open();
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 1
+            color: Theme.border
+        }
+
+        // ADR-0390: the rows come from a list model that reports only the changed row, so a click
+        // redraws one row and the focus stays on the clicked button.
         Repeater {
             model: section.mcp.rules
 
             delegate: RowLayout {
                 id: rule
 
-                required property var modelData
+                required property string ruleId
+                required property string title
+                required property string hint
+                required property bool allow
 
-                objectName: "mcpRule_" + rule.modelData.id
+                objectName: "mcpRule_" + rule.ruleId
                 Layout.fillWidth: true
                 spacing: Theme.spacingS
 
@@ -290,7 +344,7 @@ ColumnLayout {
                     Label {
                         textFormat: Text.PlainText
                         Layout.fillWidth: true
-                        text: rule.modelData.title
+                        text: rule.title
                         color: Theme.text
                         wrapMode: Text.Wrap
                     }
@@ -298,8 +352,8 @@ ColumnLayout {
                     Label {
                         textFormat: Text.PlainText
                         Layout.fillWidth: true
-                        visible: rule.modelData.hint !== ""
-                        text: rule.modelData.hint
+                        visible: rule.hint !== ""
+                        text: rule.hint
                         font: Theme.fontUiSmall
                         color: Theme.warning
                         wrapMode: Text.Wrap
@@ -307,25 +361,25 @@ ColumnLayout {
                 }
 
                 RadioButton {
-                    objectName: "mcpAsk_" + rule.modelData.id
+                    objectName: "mcpAsk_" + rule.ruleId
                     Layout.preferredWidth: 90
-                    checked: !rule.modelData.allow
+                    checked: !rule.allow
                     // Display-only check state: the rule from the backend drives `checked`; a click
                     // never toggles it locally, so clicking the selected option keeps it selected.
                     checkable: false
-                    Accessible.name: qsTr("%1: ask").arg(rule.modelData.title)
-                    onClicked: section.mcp.setConsentRule(rule.modelData.id, false)
+                    Accessible.name: qsTr("%1: ask").arg(rule.title)
+                    onClicked: section.mcp.setConsentRule(rule.ruleId, false)
                 }
 
                 RadioButton {
-                    objectName: "mcpAllow_" + rule.modelData.id
+                    objectName: "mcpAllow_" + rule.ruleId
                     Layout.preferredWidth: 110
-                    checked: rule.modelData.allow
+                    checked: rule.allow
                     // Display-only check state: the rule from the backend drives `checked`; a click
                     // never toggles it locally, so clicking the selected option keeps it selected.
                     checkable: false
-                    Accessible.name: qsTr("%1: always allow").arg(rule.modelData.title)
-                    onClicked: section.mcp.setConsentRule(rule.modelData.id, true)
+                    Accessible.name: qsTr("%1: always allow").arg(rule.title)
+                    onClicked: section.mcp.setConsentRule(rule.ruleId, true)
                 }
             }
         }
@@ -513,6 +567,17 @@ ColumnLayout {
                 }
             }
         }
+    }
+
+    // ADR-0390: Always allow for every category asks once; Cancel changes nothing.
+    ConfirmDialog {
+        id: allowAllDialog
+
+        objectName: "mcpAllowAllConfirm"
+        title: qsTr("Always allow everything?")
+        body: qsTr("An AI assistant will be able to flash, erase and write the memory of your devices without asking you.")
+        acceptText: qsTr("Always allow everything")
+        onAccepted: section.mcp.setAllConsentRules(true)
     }
 
     ConfirmDialog {

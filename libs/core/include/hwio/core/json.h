@@ -14,6 +14,7 @@
 #include <QJsonValue>
 #include <QString>
 
+#include <cstdint>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -21,8 +22,13 @@
 
 namespace hwio {
 
+// Which texts of an Error toJson() writes: the translated ones (CLI, diagnostic report) or the
+// English ones (MCP, ADR-0374 / ADR-0103; an empty English text falls back to the translated one).
+enum class ErrorLanguage : std::uint8_t { Translated, English };
+
 // Error as a JSON object. Empty strings are kept; "wizard" is null or a kebab-case id.
-[[nodiscard]] QJsonObject toJson(const Error& error);
+[[nodiscard]] QJsonObject toJson(const Error& error,
+                                 ErrorLanguage language = ErrorLanguage::Translated);
 
 [[nodiscard]] QJsonObject okEnvelope(const QJsonValue& data);
 [[nodiscard]] QJsonObject errorEnvelope(const Error& error);

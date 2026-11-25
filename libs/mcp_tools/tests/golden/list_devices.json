@@ -30,5 +30,6 @@
       "connection": null,
       "opened_by_mcp": false
     }
-  ]
+  ],
+  "ble_hidden": 0
 }

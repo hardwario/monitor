@@ -23,7 +23,7 @@
 <context>
     <name>ConsentWindow</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/qml/mcp/ConsentWindow.qml" line="211"/>
+        <location filename="../../../app/gui/qml/mcp/ConsentWindow.qml" line="259"/>
         <source>%n more request(s) waiting.</source>
         <translation>
             <numerusform>%n more request waiting.</numerusform>
@@ -75,7 +75,7 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="816"/>
+        <location filename="../../../app/gui/src/viewmodels/console_view_model.cpp" line="842"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Copied the first %n line to the clipboard (copy limit).</numerusform>
@@ -86,7 +86,7 @@
 <context>
     <name>hwio::gui::McpController</name>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/mcp/mcp_controller.cpp" line="392"/>
+        <location filename="../../../app/gui/src/mcp/mcp_controller.cpp" line="420"/>
         <source>Listening · %n client(s)</source>
         <translation>
             <numerusform>Listening · %n client</numerusform>
@@ -94,7 +94,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../app/gui/src/mcp/mcp_controller.cpp" line="409"/>
+        <location filename="../../../app/gui/src/mcp/mcp_controller.cpp" line="437"/>
         <source>AI assistants: listening on port %1, %n client(s)</source>
         <translation>
             <numerusform>AI assistants: listening on port %1, %n client</numerusform>
@@ -113,7 +113,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../libs/remote/src/remote_host.cpp" line="323"/>
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="321"/>
         <source>%n remote command(s) were dropped while waiting for your answer.</source>
         <translation>
             <numerusform>%n remote command was dropped while waiting for your answer.</numerusform>
@@ -121,7 +121,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../libs/remote/src/remote_host.cpp" line="929"/>
+        <location filename="../../../libs/remote/src/remote_host.cpp" line="927"/>
         <source>Help of %n command(s) read for support&apos;s autocomplete.</source>
         <translation>
             <numerusform>Help of %n command read for support&apos;s autocomplete.</numerusform>

@@ -123,6 +123,8 @@ public:
                                                                   bool ap) override;
     [[nodiscard]] int coresightWrite(std::uint8_t index, bool ap, std::uint32_t value) override;
     void flushMessages() override;
+    [[nodiscard]] std::vector<std::string> flushMessagesContaining(std::string_view marker,
+                                                                   std::size_t maxLines) override;
     [[nodiscard]] std::string takeErrorText() override;
 
 private:
