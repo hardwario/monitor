@@ -33,6 +33,7 @@
 #include "hwio/device/command_tree.h"
 #include "hwio/device/command_tree_cache.h"
 #include "hwio/device/command_tree_learner.h"
+#include "hwio/device/device_info_file.h"
 #include "hwio/device/operation.h"
 #include "viewmodels/console_line_model.h"
 #include "viewmodels/console_settings.h"
@@ -57,6 +58,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 
 namespace hwio::device {
 class ConsoleLog;
@@ -120,6 +122,15 @@ class ConsoleViewModel : public QObject {
     Q_PROPERTY(bool readingCommands READ readingCommands NOTIFY commandTreeChanged)
     // Plan 0028 (ADR-0203): the long tooltip of Batch… (plain text, numbers from BatchRunner).
     Q_PROPERTY(QString batchHelpText READ batchHelpText NOTIFY stateChanged)
+    // Plan 0063 (ADR-0440): "Save device information…" - enabled on a connected J-Link or
+    // Bluetooth console (never a remote tab) while idle; reading ("Reading device information…
+    // (2 of 4)" with Cancel), then ready to save (Include secrets, Save…, Discard), then the notice
+    // "Device information saved to <path>" with Show in folder.
+    Q_PROPERTY(bool canSaveDeviceInfo READ canSaveDeviceInfo NOTIFY stateChanged)
+    Q_PROPERTY(bool deviceInfoReading READ deviceInfoReading NOTIFY deviceInfoChanged)
+    Q_PROPERTY(QString deviceInfoProgress READ deviceInfoProgress NOTIFY deviceInfoChanged)
+    Q_PROPERTY(bool deviceInfoReady READ deviceInfoReady NOTIFY deviceInfoChanged)
+    Q_PROPERTY(QString deviceInfoNotice READ deviceInfoNotice NOTIFY deviceInfoChanged)
 
 public:
     static constexpr int stackBreakpoint = 1000; // ADR-0061
@@ -163,6 +174,11 @@ public:
     void setPageWidth(int width);
     [[nodiscard]] bool stackedLayout() const;
     [[nodiscard]] QString batchHelpText() const;
+    [[nodiscard]] bool canSaveDeviceInfo() const;
+    [[nodiscard]] bool deviceInfoReading() const;
+    [[nodiscard]] QString deviceInfoProgress() const;
+    [[nodiscard]] bool deviceInfoReady() const noexcept { return m_infoDocument.has_value(); }
+    [[nodiscard]] QString deviceInfoNotice() const { return m_infoNotice; }
 
     // Sends a command (Enter); adds it to the history. False when it was not sent (input disabled,
     // or the session refused it: the error is shown), so the input keeps the text (review K9).
@@ -206,6 +222,21 @@ public:
     Q_INVOKABLE void reset(bool halt);
     Q_INVOKABLE void reconnect();
     Q_INVOKABLE void connectDevice();
+    // Plan 0063 (ADR-0440): reads the profile's information commands as silent queries
+    // (device::DeviceInfoCollector); an earlier unsaved result is discarded.
+    Q_INVOKABLE void saveDeviceInfo();
+    // Stops reading, or discards the read information (nothing is written).
+    Q_INVOKABLE void cancelDeviceInfo();
+    // The save dialog's folder (console/deviceInfoFolder when it is an existing folder, else
+    // Documents/HARDWARIO Monitor, created when missing, else Documents) and the file name
+    // (device::deviceInfoFileName of the read information; "" while none is ready).
+    Q_INVOKABLE [[nodiscard]] QUrl deviceInfoFolder() const;
+    Q_INVOKABLE [[nodiscard]] QString deviceInfoFileName() const;
+    // Writes the read information to `file` (secrets hidden unless `withSecrets`), owner-only;
+    // then the notice. A non-local URL or a write failure: the error, the information is kept.
+    Q_INVOKABLE void writeDeviceInfo(const QUrl& file, bool withSecrets);
+    Q_INVOKABLE void showDeviceInfoFolder() const;
+    Q_INVOKABLE void dismissDeviceInfoNotice();
     Q_INVOKABLE void dismissDropped();
     Q_INVOKABLE void dismissError();
 
@@ -221,6 +252,11 @@ public:
     // The console file Open log file opens: the session's current one, or the last one of this
     // tab while no session is open (empty when none).
     [[nodiscard]] std::filesystem::path consoleFile() const;
+    // Plan 0063: the collector's options of the next saveDeviceInfo() (tests: a fixed clock, a
+    // short timeout).
+    void setDeviceInfoOptions(device::DeviceInfoCollectorOptions options) {
+        m_infoOptions = std::move(options);
+    }
 
 signals:
     void stateChanged();
@@ -231,6 +267,7 @@ signals:
     void pausedChanged();
     void layoutChanged();
     void commandTreeChanged();
+    void deviceInfoChanged();
     // Throttled (≤ 1 per 2 s) text for the screen reader: the newest shell output line.
     void announce(const QString& text);
 
@@ -253,6 +290,8 @@ private:
     [[nodiscard]] bool busy() const;
     [[nodiscard]] bool targetHasConsole() const;
     [[nodiscard]] ConsoleLineModel* model(int channel) const;
+    void onDeviceInfoFinished();
+    void stopDeviceInfo();
 
     DeviceTabViewModel* m_tab; // parent
     ConsoleContext m_context;
@@ -290,6 +329,13 @@ private:
     bool m_hasLines = false; // the log has lines (showConnectState)
     bool m_swapPanes = false;
     int m_pageWidth = 1280;
+    // Plan 0063: the running collection (Qt parent: this; deleted later when it ends), the read
+    // information until it is saved or discarded, the notice and the folder of the saved file.
+    QPointer<device::DeviceInfoCollector> m_infoCollector;
+    device::DeviceInfoCollectorOptions m_infoOptions;
+    std::optional<device::DeviceInfoDocument> m_infoDocument;
+    QString m_infoNotice;
+    QString m_infoSavedFolder;
 };
 
 } // namespace hwio::gui

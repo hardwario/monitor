@@ -1,6 +1,7 @@
 # 0063 — Save a device's information to a file named by its serial number
 
-- **Status:** Approved (2026-11-25, Matej Strnad: "Approve as recommended" — D1 to D8)
+- **Status:** In progress (approved 2026-11-25, Matej Strnad: "Approve as recommended" — D1 to D8; implemented,
+  the manual checks with real hardware are open)
 - **Milestone:** 2.0.0-rc.5 (decision D8)
 - **Author:** Claude, for Matej Strnad
 - **Related ADRs:** ADR-0440 (device information file: content, format, name, secrets). Existing: ADR-0166
@@ -90,12 +91,12 @@ Non-goals:
 
 ## Implementation steps
 
-- [ ] 1 Profile field `infoFileCommands`; `DeviceInfoCollector`, `formatDeviceInfo`, `deviceInfoFileName` with unit
+- [x] 1 Profile field `infoFileCommands`; `DeviceInfoCollector`, `formatDeviceInfo`, `deviceInfoFileName` with unit
       tests (scripted shell: answers, no answer, cut answer, disconnect, secrets hidden / included, no serial).
-- [ ] 2 CLI commands with end-to-end tests over the fake J-Link and the fake BLE scenario (human, `--json`, PATH
+- [x] 2 CLI commands with end-to-end tests over the fake J-Link and the fake BLE scenario (human, `--json`, PATH
       forms, exit codes).
-- [ ] 3 GUI: view-model action, progress, save dialog, notice; Qt Quick tests; disabled in a remote tab.
-- [ ] 4 Translations (cs, de, pl, sk), docs `console.md` and `cli.md`, release notes.
+- [x] 3 GUI: view-model action, progress, save dialog, notice; Qt Quick tests; disabled in a remote tab.
+- [x] 4 Translations (cs, de, pl, sk), docs `console.md` and `cli.md`, release notes.
 
 ## Tests and verification
 
@@ -109,3 +110,50 @@ file mode on Linux and macOS.
 1. `config show` of a large application can be long; the bounds above cut it with a visible marker.
 2. A firmware whose shell is busy (logging storm) may time out; the file then says "(no answer)".
 3. With D3 (a) and "Include secrets" the file is as sensitive as the device's keys; the docs say so.
+
+## Implementation notes
+
+Choices the plan left open, made during the implementation (2026-11-25):
+
+1. **"Include secrets" placement (UX gap of D3/D5).** The system save dialog cannot carry a checkbox, so reading
+   ends in an inline line under the console toolbar: "The device information was read. Save it to a file." with
+   **Include secrets** (off for every read, never remembered), **Save…** (opens the save dialog) and **Discard**.
+   This is one click more than "then the system save dialog" of the UX section. The same line shows the progress
+   with **Cancel** and, after saving, the notice with **Show in folder** and **Dismiss** (`DeviceInfoBar.qml`). The
+   toast cannot carry an action, hence the inline notice.
+2. **Menu position.** "Save view…" is a toolbar button, not a More menu item; "Save device information…" is the
+   first item of the More menu, followed by a separator.
+3. **Last folder.** A separate setting `console/deviceInfoFolder` (not shared with Save view); the first time
+   Documents/HARDWARIO Monitor, created when missing (Documents when it cannot be created).
+4. **Time.** Local time: the file name `YYYY-MM-DD_HHMMSS` and the header `Date: 2026-11-25 14:15:02 +01:00` (with
+   the UTC offset). The collector takes an injectable clock (`DeviceInfoCollectorOptions::clock`).
+5. **File content.** English only (one backend function for GUI and CLI). Header lines: `HARDWARIO Monitor - device
+   information`, `Device:` (the `info show` product name, else the profile's name), `Serial number:`, `Firmware:`,
+   `Date:`, `HARDWARIO Monitor:` (version); "unknown" for a missing value. The header fields come from the first
+   answers that have them (CHESTER: `info show`), so a new profile needs no code. A cut answer ends with
+   "(the answer was cut here: at most 2000 lines or 256 KiB per command)". An answer that ended at the prompt
+   without output counts as answered (empty section).
+6. **Bounds.** The 2000 lines / 256 KiB per command are ShellQuery's existing capture bounds; the 10 s per command
+   is a new optional timeout argument of `ShellQueryQueue::run` / `runAndWait` (default unchanged, 2 s).
+7. **No answer vs. disconnect.** A query that ends without output (timeout) or that the session refused while it
+   stays connected is "(no answer)". A console that leaves Connected (or comes back as another attach), or a
+   session its owner releases from the queue (the GUI's Disconnect), ends the collection with
+   `target.not_connected` "The device disconnected while its information was read." and nothing is written
+   (`ShellQueryQueue::session()` added for this check).
+8. **File name safety.** The serial number and the J-Link serial / Bluetooth address are device or system data:
+   bytes other than `[A-Za-z0-9._-]` become `-` (a Linux Bluetooth address `F1:22:…` becomes `F1-22-…`), at most
+   64 bytes, never a leading `.`.
+9. **Remote.** Refused in the backend too (`DeviceInfoCollector::start` returns `usage.invalid_argument` for a
+   session of transport Remote), not only by the disabled menu item.
+10. **CLI.** `hwio chester app info` keeps its behaviour; `info save` is its subcommand (probe options after `save`
+    win over those after `info`). `hwio ble info` is a group that needs `save` (a bare `ble info` is a usage error).
+    An existing file at PATH (or at the generated name) is never replaced: `io.file_exists`, a symlink
+    `cli.file_is_symlink` (both exit code 3), checked before the device is touched and again before writing. With
+    commands that did not answer the file is still written and the exit code is 0; human output names them. JSON
+    `serial` is `null` when the device reported none.
+11. **Write.** `device::writeDeviceInfoFile` (QSaveFile, binary mode for LF on every system, `restrictToOwner`
+    before the first byte) replaces an existing file; the GUI relies on the save dialog's overwrite question.
+12. **Tests.** `FakeSession` of the CommandCapture tests moved to `libs/device/tests/fake_console_session.h` (shared
+    with the new collector tests). The CLI end-to-end helper `CliProcess::run` got an optional working directory.
+    `tests/ble_scenarios/chester.json` answers `config show`.
+

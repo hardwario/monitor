@@ -80,3 +80,5 @@ change a term here should change it in the whole catalog.
 | AI client / AI assistant (MCP, plan 0062) | AI klient / AI asistent | KI-Client / KI-Assistent | klient AI / asystent AI (`klient` alone is the customer) | AI klient / AI asistent |
 | Stop AI (plan 0062) | Zastavit AI | KI stoppen | Zatrzymaj AI | Zastaviť AI |
 | Stop waiting (plan 0062) | Přestat čekat | Nicht mehr warten | Przestań czekać | Prestať čakať |
+| device information (file, plan 0063) | informace o zařízení | Geräteinformationen | informacje o urządzeniu | informácie o zariadení |
+| secrets (keys, passwords, claim token; plan 0063) | tajné údaje | Geheimnisse | dane poufne | tajné údaje |

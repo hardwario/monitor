@@ -38,7 +38,7 @@ panel przechowuje ostatnie 100 000 wierszy.
 | **Clear** | Czyści **Shell**, **Log** lub **Both** (oba) (<kbd>Ctrl</kbd>+<kbd>K</kbd> czyści panel z fokusem) |
 | **Save view…** | Zapisuje panel z fokusem do pliku tekstowego (<kbd>Ctrl</kbd>+<kbd>S</kbd>) |
 | **Follow**, **Pause** | Zobacz wyżej |
-| **More** | **Open log file**, **Open log folder** ([pliki konsoli](#pliki-konsoli)) i opcje układu |
+| **More** | **Save device information…** ([poniżej](#save-device-information)), **Open log file**, **Open log folder** ([pliki konsoli](#pliki-konsoli)) i opcje układu |
 
 ## Wysyłanie poleceń
 
@@ -97,6 +97,36 @@ Sekrety są zapisywane jako `<redacted>`, tak jak w [plikach konsoli](#pliki-kon
 `claim token: <redacted>`); na ekranie i przy **kopiowaniu** pozostają widoczne. W systemach Linux i macOS zapisany
 plik może odczytać tylko Twój użytkownik.
 
+<a id="save-device-information"></a>
+## Zapisywanie informacji o urządzeniu
+
+**More → Save device information…** (zapisz informacje o urządzeniu) zapisuje to, co urządzenie podaje o sobie, do
+jednego pliku tekstowego nazwanego jego numerem seryjnym, na przykład `2159018267_2026-11-25_141502.txt`. Działa na
+karcie J-Link lub Bluetooth, gdy urządzenie jest połączone; na karcie zdalnego wsparcia nie jest dostępne.
+
+1. Aplikacja wysyła do urządzenia `info show` i `config show`. Te polecenia nie pojawiają się w konsoli. Wiersz pod
+   paskiem narzędzi pokazuje **Reading device information… (1 of 2)** z przyciskiem **Cancel**.
+2. Po odczycie wiersz oferuje **Include secrets** (dołącz dane poufne, wyłączone) i **Save…**; **Discard** odrzuca
+   wynik.
+3. **Save…** otwiera okno zapisu z wstępnie wypełnioną nazwą w ostatnio używanym folderze (za pierwszym razem
+   Dokumenty/HARDWARIO Monitor).
+4. Zapis potwierdza **Device information saved to …** z przyciskiem **Show in folder**.
+
+Plik jest zwykłym tekstem: nagłówek z nazwą urządzenia, numerem seryjnym, firmware, datą i wersją HARDWARIO Monitor,
+a następnie dla każdego polecenia wiersz `### info show` i odpowiedź urządzenia w takiej postaci, w jakiej ją wypisało.
+Wynik `config show` pozostaje listą poleceń, więc możesz kopiować z niego wiersze do konsoli lub
+[pliku wsadowego](#pliki-wsadowe).
+
+- **Dane poufne** (claim token, klucz dostępu BLE, klucze LoRaWAN, hasła LTE) są zapisywane jako `<redacted>`, tak jak
+  w [plikach konsoli](#pliki-konsoli). Z opcją **Include secrets** są zapisywane tak, jak wypisuje je urządzenie: taki
+  plik jest tak samo poufny jak klucze urządzenia, więc przechowuj go bezpiecznie. W systemach Linux i macOS plik może
+  w obu przypadkach odczytać tylko Twój użytkownik.
+- Polecenie, na które urządzenie nie odpowie w ciągu 10 sekund, jest zapisywane jako `(no answer)`, a potwierdzenie
+  je wymienia. Odpowiedź dłuższa niż 2000 wierszy lub 256 KiB jest obcinana z wierszem informacyjnym.
+- Urządzenie bez numeru seryjnego dostaje nazwę `unknown-<numer seryjny J-Link lub adres Bluetooth>_…`.
+- Jeśli urządzenie rozłączy się podczas odczytu, nic nie jest zapisywane: *The device disconnected while its
+  information was read.*
+
 <a id="batch-files"></a>
 ## Pliki wsadowe
 
@@ -151,6 +181,7 @@ Ta sama konsola w terminalu:
 ```sh
 hwio chester app console                   # interactive: F4 reconnects, Ctrl+C on an empty line or Ctrl+D quits
 hwio chester app command "info show"       # one command, print the answer
+hwio chester app info save                 # the device information file (also: hwio ble info save -a ID)
 echo "app config show" | hwio chester app console
 ```
 

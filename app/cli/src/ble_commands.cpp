@@ -18,10 +18,12 @@
 #include "hwio/device/probe_lock.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_registry.h"
+#include "hwio/device/shell_query.h"
 #include "hwio/hw/ble/ble_host.h"
 #include "hwio/hw/ble/ble_scanner.h"
 #include "hwio/hw/ble/nus_link.h"
 #include "hwio/hw/ble/types.h"
+#include "info_file_commands.h"
 #include "output.h"
 #include "terminal.h"
 
@@ -585,6 +587,15 @@ Result<CommandResult> pair(const Context& context, const DeviceOptions& options)
                          .streamed = false};
 }
 
+// ---- info save (plan 0063, ADR-0440) ----------------------------------------------------------
+
+struct InfoSaveCommandOptions {
+    DeviceOptions device;
+    InfoSaveOptions save;
+};
+
+Result<CommandResult> infoSave(const Context& context, const InfoSaveCommandOptions& options);
+
 // -a/--address ID | --name N: exactly one of them.
 void addDeviceOptions(CLI::App& command, DeviceOptions& options) {
     CLI::Option_group* device = command.add_option_group("device", "The device (one of them)");
@@ -643,6 +654,38 @@ Result<OpenedBleSession> openBleSession(const Context& context, const BleDeviceS
                      });
     return opened;
 }
+
+namespace {
+
+Result<CommandResult> infoSave(const Context& context, const InfoSaveCommandOptions& options) {
+    if (const Status path = checkInfoSavePath(options.save); !path) {
+        return std::unexpected(path.error()); // before the device is touched
+    }
+    auto opened = openBleSession(context,
+                                 BleDeviceSelection{.address = options.device.address,
+                                                    .name = options.device.name,
+                                                    .profile = options.device.profile},
+                                 false, std::nullopt,
+                                 [](std::string_view text) { std::cerr << text << '\n'; });
+    if (!opened) {
+        return std::unexpected(std::move(opened).error());
+    }
+    device::BleSession& ble = *opened->session;
+    if (const Status connected =
+            device::waitUntilConnected(ble, connectSafetyTimeout, context.stop);
+        !connected) {
+        ble.close();
+        return std::unexpected(connected.error());
+    }
+    device::ShellQueryQueue queries;
+    queries.setSession(&ble);
+    auto saved = saveDeviceInfo(context, ble, queries, options.save);
+    queries.setSession(nullptr);
+    ble.close();
+    return saved;
+}
+
+} // namespace
 
 void registerBleCommands(CLI::App& app, CommandSlot& slot, const GlobalOptions& /*globals*/) {
     CLI::App* ble = app.add_subcommand("ble", "Bluetooth LE devices (console over NUS)");
@@ -716,6 +759,32 @@ void registerBleCommands(CLI::App& app, CommandSlot& slot, const GlobalOptions& 
         commandOptions->consoleFileGiven = commandConsoleFile->count() > 0;
         slot.command = [commandOptions](const Context& context) {
             return command(context, *commandOptions);
+        };
+    });
+
+    // Plan 0063 (ADR-0440, D7): info save [PATH].
+    CLI::App* info = ble->add_subcommand("info", "Device information over Bluetooth");
+    info->require_subcommand(1);
+    auto saveOptions = std::make_shared<InfoSaveCommandOptions>();
+    CLI::App* saveCommand = info->add_subcommand(
+        "save", "Save `info show` and `config show` to a file named by the serial number "
+                "(secrets hidden unless --with-secrets)");
+    addDeviceOptions(*saveCommand, saveOptions->device);
+    saveCommand->add_option("--profile", saveOptions->device.profile, "Device profile")
+        ->capture_default_str()
+        ->option_text("ID");
+    saveCommand
+        ->add_option("path", saveOptions->save.path,
+                     "File, or folder for <serial>_<date>_<time>.txt (default: the current "
+                     "folder)")
+        ->option_text("PATH");
+    saveCommand->add_flag(
+        "--with-secrets", saveOptions->save.withSecrets,
+        "Write the keys, passwords, claim token and passkey as the device "
+        "prints them (on Linux and macOS the file is readable by you only either way)");
+    saveCommand->callback([&slot, saveOptions] {
+        slot.command = [saveOptions](const Context& context) {
+            return infoSave(context, *saveOptions);
         };
     });
 

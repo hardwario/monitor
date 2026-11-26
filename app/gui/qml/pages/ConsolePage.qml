@@ -169,6 +169,32 @@ Item {
                 onAccepted: page.vm.saveView(saveDialog.channel, saveDialog.selectedFile)
             }
 
+            // Plan 0063 (ADR-0440, D5): the device information file, name and folder from the view
+            // model; "Include secrets" was chosen on the DeviceInfoBar.
+            FileDialog {
+                id: deviceInfoDialog
+
+                property bool withSecrets: false
+
+                function prepareFor(secrets: bool) {
+                    deviceInfoDialog.withSecrets = secrets;
+                    deviceInfoDialog.currentFolder = page.vm.deviceInfoFolder();
+                    deviceInfoDialog.selectedFile = page.vm.deviceInfoFolder() + "/" + page.vm.deviceInfoFileName();
+                }
+
+                function openFor(secrets: bool) {
+                    deviceInfoDialog.prepareFor(secrets);
+                    deviceInfoDialog.open();
+                }
+
+                objectName: "deviceInfoDialog"
+                title: qsTr("Save device information")
+                fileMode: FileDialog.SaveFile
+                defaultSuffix: "txt"
+                nameFilters: [qsTr("Text files (*.txt)"), qsTr("All files (*)")]
+                onAccepted: page.vm.writeDeviceInfo(deviceInfoDialog.selectedFile, deviceInfoDialog.withSecrets)
+            }
+
             FileDialog {
                 id: batchDialog
 
@@ -414,6 +440,15 @@ Item {
                                 id: moreMenu
 
                                 MenuItem {
+                                    objectName: "saveDeviceInfoItem"
+                                    text: qsTr("Save device information…")
+                                    enabled: page.vm.canSaveDeviceInfo
+                                    onTriggered: page.vm.saveDeviceInfo()
+                                }
+
+                                MenuSeparator {}
+
+                                MenuItem {
                                     text: qsTr("Open log file")
                                     onTriggered: page.vm.openLogFile()
                                 }
@@ -461,6 +496,12 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: false
                     viewModel: page.vm
+                }
+
+                DeviceInfoBar {
+                    Layout.fillWidth: true
+                    viewModel: page.vm
+                    onSaveRequested: withSecrets => deviceInfoDialog.openFor(withSecrets)
                 }
 
                 ErrorPanel {

@@ -22,6 +22,7 @@
 #include "hwio/device/session_registry.h"
 #include "hwio/device/shell_query.h"
 #include "hwio/hw/jlink/rtt_channel.h"
+#include "info_file_commands.h"
 #include "jlink_commands.h"
 #include "output.h"
 #include "probe_options.h"
@@ -339,6 +340,57 @@ Result<CommandResult> info(const Context& context, const GlobalOptions& globals,
     return CommandResult{.data = data, .humanText = std::move(human), .streamed = false};
 }
 
+// ---- info save (plan 0063, ADR-0440) ----------------------------------------------------------
+
+struct InfoSaveCommandOptions {
+    ProbeOptions probe;
+    InfoSaveOptions save;
+};
+
+// -n / --jlink-speed given after `save` win over those given after `info`.
+ProbeOptions mergedProbe(const ProbeOptions& info, const ProbeOptions& save) {
+    return ProbeOptions{.serialNumber = save.serialNumber ? save.serialNumber : info.serialNumber,
+                        .speed = save.speed ? save.speed : info.speed};
+}
+
+// The profile's information commands through silent queries, into one file (device_info_file.h).
+Result<CommandResult> infoSave(const Context& context, const GlobalOptions& globals,
+                               const ProbeOptions& group, const ProbeOptions& own,
+                               const InfoSaveOptions& options) {
+    if (const Status path = checkInfoSavePath(options); !path) {
+        return std::unexpected(path.error()); // before the device is touched
+    }
+    auto location = locateJLinkLibrary(globals);
+    if (!location) {
+        return std::unexpected(std::move(location).error());
+    }
+    device::SessionRegistry registry;
+    auto sessionOpts = appConsoleSessionOptions(group, own, chesterApp().defaultLatencyMs, false,
+                                                false, {}, false);
+    if (!sessionOpts) {
+        return std::unexpected(std::move(sessionOpts).error());
+    }
+    const std::optional<int> speed = sessionOpts->speedKhz;
+    warnAboutSlowSpeed(context, speed);
+    auto session = device::DeviceSession::open(registry, *location, std::move(*sessionOpts));
+    if (!session) {
+        return std::unexpected(std::move(session).error());
+    }
+    device::DeviceSession& device = **session;
+    if (const Status connected =
+            device::waitUntilConnected(device, device::connectTimeoutForSpeed(speed), context.stop);
+        !connected) {
+        device.close();
+        return std::unexpected(connected.error());
+    }
+    device::ShellQueryQueue queries;
+    queries.setSession(&device);
+    auto saved = saveDeviceInfo(context, device, queries, options);
+    queries.setSession(nullptr);
+    device.close();
+    return saved;
+}
+
 } // namespace
 
 Result<std::optional<int>> parseJLinkSpeed(std::string_view text) {
@@ -449,7 +501,31 @@ void registerChesterCommands(CLI::App& app, CommandSlot& slot, const GlobalOptio
     CLI::App* infoCommand = appGroup->add_subcommand(
         "info", "Show what the device reports with `info show` (firmware name and version, ...)");
     addProbeOptions(*infoCommand, infoOptions->probe);
-    infoCommand->callback([&slot, &globals, group, infoOptions] {
+    // Plan 0063 (ADR-0440, D7): `info save [PATH]`.
+    auto saveOptions = std::make_shared<InfoSaveCommandOptions>();
+    CLI::App* saveCommand = infoCommand->add_subcommand(
+        "save", "Save `info show` and `config show` to a file named by the serial number "
+                "(secrets hidden unless --with-secrets)");
+    saveCommand
+        ->add_option("path", saveOptions->save.path,
+                     "File, or folder for <serial>_<date>_<time>.txt (default: the current "
+                     "folder)")
+        ->option_text("PATH");
+    saveCommand->add_flag(
+        "--with-secrets", saveOptions->save.withSecrets,
+        "Write the keys, passwords, claim token and passkey as the device "
+        "prints them (on Linux and macOS the file is readable by you only either way)");
+    addProbeOptions(*saveCommand, saveOptions->probe);
+    saveCommand->callback([&slot, &globals, group, infoOptions, saveOptions] {
+        slot.command = [&globals, group, infoOptions, saveOptions](const Context& context) {
+            return infoSave(context, globals, *group,
+                            mergedProbe(infoOptions->probe, saveOptions->probe), saveOptions->save);
+        };
+    });
+    infoCommand->callback([&slot, &globals, group, infoOptions, saveCommand] {
+        if (saveCommand->parsed()) {
+            return; // `info save`: its own command (CLI11 runs this callback after save's)
+        }
         slot.command = [&globals, group, infoOptions](const Context& context) {
             return info(context, globals, *group, *infoOptions);
         };

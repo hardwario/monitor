@@ -522,6 +522,25 @@ TestCase {
         compare(tab().connection.actionBlockedReason, "");
     }
 
+    // Plan 0063 (ADR-0440, D6): no "Save device information…" in a remote tab, even with the input
+    // enabled: Monitor never sends a silent query to a customer's device.
+    function test_noDeviceInformationInARemoteTab() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        testSupport.remoteMonitorHost(false);
+        tryVerify(() => tab().remoteJoin.state === "joined", 10000);
+        AppViewModel.showPage("console");
+        const console = testSupport.consoleViewModel(AppViewModel.currentTab);
+        tryVerify(() => console.inputEnabled, 10000);
+        verify(!console.canSaveDeviceInfo);
+        console.saveDeviceInfo();
+        verify(!console.deviceInfoReading);
+        verify(!console.deviceInfoReady);
+        verify(testSupport.remoteRequestedKind() === ""); // nothing reached the host
+    }
+
     function test_shareNotOfferedInARemoteTab() {
         verify(AppViewModel.joinRemoteSession("482913", false));
         tryVerify(() => tab().transport === "remote", 5000);

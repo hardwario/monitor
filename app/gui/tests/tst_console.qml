@@ -854,6 +854,64 @@ TestCase {
         keyClick(Qt.Key_Escape);
     }
 
+    // Plan 0063 (ADR-0440): More › Save device information… reads `info show` and `config show`
+    // silently, the bar offers Include secrets and Save… (the dialog prefilled with the serial
+    // number name in the remembered folder), then the notice with Show in folder and Dismiss.
+    function test_saveDeviceInformation() {
+        verify(testSupport.useScenario(JSON.stringify({
+            libraryVersion: 81000,
+            probes: [{ serialNumber: 801000001, product: "Test Probe",
+                       rtt: { output: [{ atMs: 0, buffer: 0, text: "uart:~$ booted A\n" }],
+                              responses: {
+                                  "info show": "firmware name: CHESTER Test QML Info\nfirmware version: v0.0." + Date.now()
+                                               + "\nserial number: 2159018267\nclaim token: 0123456789abcdef\n",
+                                  "config show": "lrw config appkey 00112233445566778899aabbccddeeff\n" } } }]
+        })));
+        const marker = testSupport.writeText("device-info-folder.txt", "");
+        const folder = marker.substring(0, marker.lastIndexOf("/"));
+        verify(testSupport.setSetting("console/deviceInfoFolder", folder));
+        const console = vm();
+        verify(!console.canSaveDeviceInfo); // not connected
+        verify(shown("deviceInfoBar").length === 0);
+        AppViewModel.currentTabViewModel.connection.connectDevice();
+        tryCompare(AppViewModel.currentTabViewModel, "state", DeviceTabViewModel.Connected, 10000);
+        tryVerify(() => console.canSaveDeviceInfo, 10000);
+
+        mouseClick(one("consoleMore"));
+        const item = findChild(one("consoleMore"), "saveDeviceInfoItem");
+        verify(item !== null);
+        tryVerify(() => item.visible && item.width > 0 && effectivelyVisible(item), 5000);
+        verify(item.enabled);
+        compare(item.text, "Save device information…");
+        mouseClick(item);
+        tryVerify(() => shown("deviceInfoSave").length === 1, 10000);
+        verify(!console.deviceInfoReading);
+        compare(one("deviceInfoText").text, "The device information was read. Save it to a file.");
+        const secrets = one("deviceInfoSecrets");
+        verify(!secrets.checked); // never remembered
+        mouseClick(secrets);
+        verify(secrets.checked);
+
+        const dialog = findChild(one("consoleContent"), "deviceInfoDialog");
+        verify(dialog !== null);
+        dialog.prepareFor(secrets.checked); // openFor() = prepareFor() + open() (no native dialog here)
+        verify(dialog.withSecrets);
+        compare(dialog.currentFolder.toString(), console.deviceInfoFolder().toString());
+        verify(/\/2159018267_\d{4}-\d\d-\d\d_\d{6}\.txt$/.test(dialog.selectedFile.toString()),
+               dialog.selectedFile.toString());
+        console.writeDeviceInfo(dialog.selectedFile, dialog.withSecrets);
+        tryVerify(() => shown("deviceInfoShowFolder").length === 1, 5000);
+        verify(one("deviceInfoText").text.startsWith("Device information saved to "), one("deviceInfoText").text);
+        verify(shown("deviceInfoSave").length === 0);
+        testSupport.interceptConsoleUrls(0);
+        mouseClick(one("deviceInfoShowFolder"));
+        compare(testSupport.openedUrls().length, 1);
+        compare(testSupport.openedUrls()[0], console.deviceInfoFolder().toString());
+        mouseClick(one("deviceInfoDismiss"));
+        tryVerify(() => shown("deviceInfoBar").length === 0, 5000);
+        verify(testSupport.useScenario(""));
+    }
+
     // Plan 0028 (ADR-0201): Save view opens in the remembered folder (else Documents) with a
     // prefilled name; (ADR-0203) the Batch tooltip explains it within 360 px; the info button opens
     // the documentation.

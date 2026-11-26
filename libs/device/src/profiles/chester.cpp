@@ -156,6 +156,9 @@ constexpr std::array<std::string_view, 6> appSensitiveCommands{
 // `info claim-token`, `info ble-passkey`).
 constexpr std::array<std::string_view, 2> appSensitiveOutput{"claim token", "ble passkey"};
 
+// Plan 0063 (ADR-0440, D1): the commands of the device information file, in this order.
+constexpr std::array<std::string_view, 2> infoFileCommands{"info show", "config show"};
+
 constexpr std::array chesterTargets{
     // Application MCU: the RTT console of `hwio chester app console` / `command`.
     TargetProfile{.id = "app",
@@ -246,6 +249,7 @@ constinit const DeviceProfile chester{
                 "The passkey is 123456 unless it was changed when the device was configured."),
             .pairingGuide = blePairingGuide,
         },
-    .firmwareDocsUrl = firmwareDocs};
+    .firmwareDocsUrl = firmwareDocs,
+    .infoFileCommands = infoFileCommands};
 
 } // namespace hwio::device::profiles

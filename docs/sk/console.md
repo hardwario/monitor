@@ -37,7 +37,7 @@ zmrazí zobrazenie, zatiaľ čo riadky ďalej prichádzajú; **Resume** ich zobr
 | **Clear** | Vymaže **Shell**, **Log** alebo **Both** (oba; <kbd>Ctrl</kbd>+<kbd>K</kbd> vymaže panel s fokusom) |
 | **Save view…** | Uloží panel s fokusom do textového súboru (<kbd>Ctrl</kbd>+<kbd>S</kbd>) |
 | **Follow**, **Pause** | Pozrite vyššie |
-| **More** | **Open log file**, **Open log folder** ([súbory konzoly](#súbory-konzoly)) a možnosti rozloženia |
+| **More** | **Save device information…** ([nižšie](#save-device-information)), **Open log file**, **Open log folder** ([súbory konzoly](#súbory-konzoly)) a možnosti rozloženia |
 
 ## Odosielanie príkazov
 
@@ -92,6 +92,35 @@ ktorý ste použili naposledy (pri prvom použití Dokumenty). Tajné údaje sa 
 v [súboroch konzoly](#súbory-konzoly) (napríklad `claim token: <redacted>`); na obrazovke a pri **kopírovaní** zostanú
 viditeľné. V Linuxe a macOS môže uložený súbor čítať len váš používateľ.
 
+<a id="save-device-information"></a>
+## Uloženie informácií o zariadení
+
+**More → Save device information…** (uložiť informácie o zariadení) zapíše, čo zariadenie o sebe hlási, do jedného
+textového súboru pomenovaného podľa jeho sériového čísla, napríklad `2159018267_2026-11-25_141502.txt`. Funguje na
+karte J-Link alebo Bluetooth, keď je zariadenie pripojené; na karte vzdialenej podpory sa neponúka.
+
+1. Aplikácia sa opýta zariadenia príkazmi `info show` a `config show`. Tieto príkazy sa v konzole nezobrazia. Riadok
+   pod panelom nástrojov ukazuje **Reading device information… (1 of 2)** s tlačidlom **Cancel**.
+2. Po načítaní riadok ponúkne **Include secrets** (vrátane tajných údajov, vypnuté) a **Save…**; **Discard**
+   výsledok zahodí.
+3. **Save…** otvorí dialóg s predvyplneným názvom v priečinku, ktorý ste použili naposledy (prvýkrát
+   Dokumenty/HARDWARIO Monitor).
+4. Uloženie potvrdí **Device information saved to …** s tlačidlom **Show in folder**.
+
+Súbor je čistý text: hlavička s názvom zariadenia, sériovým číslom, firmvérom, dátumom a verziou HARDWARIO Monitor,
+potom pre každý príkaz riadok `### info show` a odpoveď zariadenia tak, ako ju vypísalo. Výstup `config show` zostáva
+zoznamom príkazov, takže z neho môžete riadky kopírovať do konzoly alebo do [dávkového súboru](#dávkové-súbory).
+
+- **Tajné údaje** (claim token, prístupový kľúč BLE, kľúče LoRaWAN, heslá LTE) sa zapíšu ako `<redacted>`, rovnako ako
+  v [súboroch konzoly](#súbory-konzoly). S voľbou **Include secrets** sa zapíšu tak, ako ich zariadenie vypíše: taký
+  súbor je rovnako citlivý ako kľúče zariadenia, preto ho dobre chráňte. V Linuxe a macOS môže súbor v oboch
+  prípadoch čítať len váš používateľ.
+- Príkaz, na ktorý zariadenie do 10 sekúnd neodpovie, sa zapíše ako `(no answer)` a potvrdenie ho uvedie. Odpoveď
+  dlhšia ako 2000 riadkov alebo 256 KiB sa skráti a označí riadkom s poznámkou.
+- Zariadenie, ktoré nehlási sériové číslo, dostane názov `unknown-<sériové číslo J-Linku alebo Bluetooth adresa>_…`.
+- Keď sa zariadenie počas načítania odpojí, nič sa nezapíše: *The device disconnected while its information was
+  read.*
+
 <a id="batch-files"></a>
 ## Dávkové súbory
 
@@ -143,6 +172,7 @@ Tá istá konzola v termináli:
 ```sh
 hwio chester app console                   # interactive: F4 reconnects, Ctrl+C on an empty line or Ctrl+D quits
 hwio chester app command "info show"       # one command, print the answer
+hwio chester app info save                 # the device information file (also: hwio ble info save -a ID)
 echo "app config show" | hwio chester app console
 ```
 

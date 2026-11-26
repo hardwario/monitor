@@ -40,11 +40,16 @@ protected:
         return env;
     }
 
-    // `input` is written to the child's stdin, which is then closed.
+    // `input` is written to the child's stdin, which is then closed. `workingDirectory`: of the
+    // child ("" = this process's).
     [[nodiscard]] static RunResult run(const QStringList& args, const QProcessEnvironment& env,
-                                       const QByteArray& input = {}) {
+                                       const QByteArray& input = {},
+                                       const QString& workingDirectory = {}) {
         QProcess process;
         process.setProcessEnvironment(env);
+        if (!workingDirectory.isEmpty()) {
+            process.setWorkingDirectory(workingDirectory);
+        }
         process.start(QStringLiteral(HWIO_CLI_EXECUTABLE), args);
         RunResult result;
         if (!process.waitForStarted(10000)) {

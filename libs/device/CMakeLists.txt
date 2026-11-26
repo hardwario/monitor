@@ -22,6 +22,7 @@ hwio_add_backend_library(hwio_device
     include/hwio/device/console_redaction.h
     include/hwio/device/console_session.h
     include/hwio/device/device_info.h
+    include/hwio/device/device_info_file.h
     include/hwio/device/device_session.h
     include/hwio/device/device_info_watcher.h
     include/hwio/device/firmware_identity.h
@@ -53,6 +54,7 @@ hwio_add_backend_library(hwio_device
     src/console_redaction.cpp
     src/console_session.cpp
     src/device_info.cpp
+    src/device_info_file.cpp
     src/device_session.cpp
     src/device_info_watcher.cpp
     src/firmware_identity.cpp
