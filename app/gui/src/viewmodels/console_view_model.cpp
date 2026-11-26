@@ -17,6 +17,7 @@
 #include "hwio/device/console_redaction.h"
 #include "hwio/device/console_session.h"
 #include "hwio/device/device_info.h"
+#include "hwio/device/device_info_file.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/firmware_identity.h"
 #include "hwio/device/operation.h"
@@ -190,6 +191,8 @@ ConsoleViewModel::ConsoleViewModel(DeviceTabViewModel* tab, ConsoleContext conte
     if (m_context.app != nullptr) {
         connect(m_context.app, &AppViewModel::languageChanged, this,
                 &ConsoleViewModel::stateChanged);
+        connect(m_context.app, &AppViewModel::languageChanged, this,
+                &ConsoleViewModel::deviceInfoChanged); // the progress text
     }
     attachSession();
     refresh();
@@ -214,7 +217,8 @@ void ConsoleViewModel::attachSession() {
         }
         m_session->disconnect(this);
     }
-    m_batch->stop(); // a new (or no) session: the batch belonged to the old one
+    m_batch->stop();  // a new (or no) session: the batch belonged to the old one
+    stopDeviceInfo(); // plan 0063: a collection belonged to the old session
     m_resetOperation.reset();
     m_learner->reset(); // learned again after the next attach's `info show`
     m_learningStarted = false;
@@ -875,6 +879,174 @@ void ConsoleViewModel::openLogFolder() const {
     if (m_context.settings != nullptr) {
         m_context.settings->openLogFolder();
     }
+}
+
+// ---- device information file (plan 0063, ADR-0440) ----------------------------------------------
+
+bool ConsoleViewModel::canSaveDeviceInfo() const {
+    // D6: J-Link and Bluetooth tabs only, never a remote support tab (plan 0044).
+    return inputEnabled() && !m_tab->isRemote() && !m_batch->running() && !deviceInfoReading() &&
+           !m_tab->profile().infoFileCommands.empty();
+}
+
+bool ConsoleViewModel::deviceInfoReading() const {
+    return !m_infoCollector.isNull() && m_infoCollector->running();
+}
+
+QString ConsoleViewModel::deviceInfoProgress() const {
+    if (!deviceInfoReading()) {
+        return {};
+    }
+    const auto total = static_cast<int>(m_infoCollector->total());
+    const int current = std::min(static_cast<int>(m_infoCollector->done()) + 1, total);
+    return tr("Reading device information… (%1 of %2)").arg(current).arg(total);
+}
+
+void ConsoleViewModel::saveDeviceInfo() {
+    if (!canSaveDeviceInfo() || m_session.isNull()) {
+        return;
+    }
+    m_infoDocument.reset(); // an earlier unsaved result
+    m_infoNotice.clear();
+    dismissError();
+    // Qt parent ownership: deleted later when it ends (stopDeviceInfo / onDeviceInfoFinished).
+    auto* collector = new device::DeviceInfoCollector( // NOLINT(cppcoreguidelines-owning-memory)
+        *m_session, m_tab->shellQueries(), m_infoOptions, this);
+    connect(collector, &device::DeviceInfoCollector::progressChanged, this,
+            &ConsoleViewModel::deviceInfoChanged);
+    connect(collector, &device::DeviceInfoCollector::finished, this,
+            &ConsoleViewModel::onDeviceInfoFinished);
+    m_infoCollector = collector;
+    if (const Status started = collector->start(); !started) {
+        m_infoCollector.clear();
+        collector->deleteLater();
+        setError(started.error());
+    }
+    deviceInfoChanged(); // signal
+    stateChanged();      // signal: canSaveDeviceInfo
+}
+
+void ConsoleViewModel::onDeviceInfoFinished() {
+    if (m_infoCollector.isNull() || !m_infoCollector->result()) {
+        return;
+    }
+    const Result<device::DeviceInfoDocument> result = *m_infoCollector->result();
+    m_infoCollector->disconnect(this);
+    m_infoCollector->deleteLater(); // this runs inside its finished()
+    m_infoCollector.clear();
+    if (result) {
+        m_infoDocument = *result;
+    } else {
+        setError(result.error()); // "The device disconnected while its information was read."
+    }
+    deviceInfoChanged(); // signal
+    stateChanged();      // signal
+}
+
+void ConsoleViewModel::stopDeviceInfo() {
+    if (m_infoCollector.isNull()) {
+        return;
+    }
+    m_infoCollector->disconnect(this);
+    m_infoCollector->cancel();
+    m_infoCollector->deleteLater();
+    m_infoCollector.clear();
+    deviceInfoChanged(); // signal
+    stateChanged();      // signal
+}
+
+void ConsoleViewModel::cancelDeviceInfo() {
+    stopDeviceInfo();
+    if (m_infoDocument) {
+        m_infoDocument.reset(); // the secrets read from the device are not kept
+        deviceInfoChanged();    // signal
+    }
+}
+
+QUrl ConsoleViewModel::deviceInfoFolder() const {
+    const QString folder =
+        m_context.settings != nullptr ? m_context.settings->deviceInfoFolder() : QString();
+    if (!folder.isEmpty() && QFileInfo(folder).isDir()) {
+        return QUrl::fromLocalFile(folder);
+    }
+    // D5: the first time Documents/HARDWARIO Monitor.
+    const QString documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    const QString monitor = documents + QStringLiteral("/HARDWARIO Monitor");
+    return QUrl::fromLocalFile(QDir().mkpath(monitor) ? monitor : documents);
+}
+
+QString ConsoleViewModel::deviceInfoFileName() const {
+    return m_infoDocument ? toQString(device::deviceInfoFileName(*m_infoDocument)) : QString();
+}
+
+void ConsoleViewModel::writeDeviceInfo(const QUrl& file, bool withSecrets) {
+    if (!m_infoDocument) {
+        return;
+    }
+    const device::DeviceInfoDocument& document = *m_infoDocument;
+    if (!file.isLocalFile()) {
+        setError(nonLocalFileError(file)); // plan 0028 D13: never a silent no-op
+        return;
+    }
+    const QString path = file.toLocalFile();
+    if (const Status written =
+            device::writeDeviceInfoFile(std::filesystem::path(path.toStdU16String()), document,
+                                        device::DeviceInfoFileOptions{.withSecrets = withSecrets});
+        !written) {
+        // The texts of "Save view…" (the same situation).
+        setError(guiError(
+            ErrorCode::IoWriteFailed,
+            localizedText(
+                "hwio::gui::ConsoleViewModel",
+                QT_TRANSLATE_NOOP("hwio::gui::ConsoleViewModel", "The file could not be saved.")),
+            localizedText("hwio::gui::ConsoleViewModel",
+                          QT_TRANSLATE_NOOP("hwio::gui::ConsoleViewModel",
+                                            "the folder is not writable or the disk is full.")),
+            localizedText(
+                "hwio::gui::ConsoleViewModel",
+                QT_TRANSLATE_NOOP("hwio::gui::ConsoleViewModel", "Choose another folder.")),
+            toQString(written.error().detail)));
+        return;
+    }
+    dismissError();
+    m_infoSavedFolder = QFileInfo(path).absolutePath();
+    if (m_context.settings != nullptr) {
+        m_context.settings->setDeviceInfoFolder(m_infoSavedFolder); // D5
+    }
+    QString notice = tr("Device information saved to %1.").arg(QDir::toNativeSeparators(path));
+    if (const std::vector<std::string> unanswered = document.unanswered(); !unanswered.empty()) {
+        QStringList commands;
+        for (const std::string& command : unanswered) {
+            commands.append(toQString(command));
+        }
+        notice += QLatin1Char(' ') +
+                  tr("The device did not answer: %1.").arg(commands.join(QStringLiteral(", ")));
+    }
+    if (document.serial.empty()) {
+        notice += QLatin1Char(' ') +
+                  (m_tab->isBle() ? tr("The device reported no serial number; the file name uses "
+                                       "its Bluetooth address.")
+                                  : tr("The device reported no serial number; the file name uses "
+                                       "the J-Link serial number."));
+    }
+    m_infoDocument.reset(); // the secrets read from the device are not kept
+    m_infoNotice = notice;
+    deviceInfoChanged(); // signal
+}
+
+void ConsoleViewModel::showDeviceInfoFolder() const {
+    if (m_infoSavedFolder.isEmpty() || m_context.settings == nullptr ||
+        !m_context.settings->openUrl(QUrl::fromLocalFile(m_infoSavedFolder))) {
+        qCWarning(lcGui) << "The folder could not be opened:" << m_infoSavedFolder;
+    }
+}
+
+void ConsoleViewModel::dismissDeviceInfoNotice() {
+    if (m_infoNotice.isEmpty()) {
+        return;
+    }
+    m_infoNotice.clear();
+    deviceInfoChanged(); // signal
 }
 
 // ---- device -------------------------------------------------------------------------------------

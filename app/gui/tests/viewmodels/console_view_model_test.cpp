@@ -24,6 +24,9 @@
 #include "workers/batch_runner.h"
 
 #include <QByteArray>
+#include <QDate>
+#include <QDateTime>
+#include <QDir>
 #include <QFile>
 #include <QIODevice>
 #include <QLockFile>
@@ -36,6 +39,8 @@
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
+#include <QTime>
+#include <QTimeZone>
 #include <QUrl>
 #include <QVariantList>
 #include <QVariantMap>
@@ -1059,6 +1064,165 @@ TEST_F(ConsoleViewModelTest, StackedBelow1000PxOrByChoice) {
     EXPECT_EQ(console().settings()->fontSize(), 24);
     console().settings()->resetFontSize();
     EXPECT_EQ(console().settings()->fontSize(), 10);
+}
+
+// Plan 0063 (ADR-0440): a CHESTER that answers `info show` (real keys, secrets) and `config show`
+// (a LoRaWAN key). The firmware name is unique to these tests (the command tree cache is shared).
+constexpr const char* infoFileScenario = R"({
+  "libraryVersion": 81000,
+  "probes": [
+    {"serialNumber": 801000001, "product": "Test Probe",
+     "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted A\n"}],
+             "responses": {
+               "info show": "vendor name: HARDWARIO a.s.\nproduct name: CHESTER-M\nfirmware name: CHESTER Test Info File\nfirmware version: v3.0.0\nserial number: 2159018247\nclaim token: 0123456789abcdef\nble passkey: 975310\n",
+               "config show": "app config interval-sample 60\nlrw config appkey 00112233445566778899aabbccddeeff\n"}}}
+  ]})";
+
+QDateTime infoFileTime() {
+    return {QDate(2026, 11, 25), QTime(14, 15, 2), QTimeZone::fromSecondsAheadOfUtc(3600)};
+}
+
+// Plan 0063 (ADR-0440): Save device information - enabled only when connected, reading with
+// progress, the prefilled name and folder, the file written with the secrets hidden, owner-only,
+// the notice with Show in folder, the folder remembered; the read information is not kept.
+TEST_F(ConsoleViewModelTest, SaveDeviceInformation) {
+    EXPECT_FALSE(console().canSaveDeviceInfo()); // not connected
+    console().saveDeviceInfo();
+    EXPECT_FALSE(console().deviceInfoReading());
+    useScenario(infoFileScenario);
+    ASSERT_TRUE(connectAndWait(tab()));
+    ASSERT_TRUE(
+        waitFor([&] { return tab().deviceInfo().value(QStringLiteral("valid")).toBool(); }));
+    ASSERT_TRUE(waitFor([&] { return console().canSaveDeviceInfo(); }));
+    console().setDeviceInfoOptions(
+        {.commandTimeout = std::chrono::milliseconds(3000), .clock = infoFileTime});
+    QSignalSpy changed(&console(), &ConsoleViewModel::deviceInfoChanged);
+    console().saveDeviceInfo();
+    EXPECT_TRUE(console().deviceInfoReading());
+    EXPECT_FALSE(console().canSaveDeviceInfo()); // one at a time
+    EXPECT_EQ(console().deviceInfoProgress(),
+              QStringLiteral("Reading device information… (1 of 2)"));
+    ASSERT_TRUE(waitFor([&] { return console().deviceInfoReady(); }));
+    EXPECT_FALSE(console().deviceInfoReading());
+    EXPECT_GE(changed.count(), 3);
+    EXPECT_EQ(sentLines(QStringLiteral("config show")), 0U); // silent: not in the console
+    EXPECT_EQ(console().deviceInfoFileName(), QStringLiteral("2159018247_2026-11-25_141502.txt"));
+
+    const std::filesystem::path folder = root() / "records";
+    std::filesystem::create_directories(folder);
+    console().settings()->setDeviceInfoFolder(hwio::toQString(hwio::toUtf8(folder)));
+    EXPECT_EQ(console().deviceInfoFolder(), url(folder));
+    const std::filesystem::path file = folder / "2159018247_2026-11-25_141502.txt";
+    console().writeDeviceInfo(url(file), false);
+    ASSERT_FALSE(console().error().valid()) << console().error().message().toStdString();
+    const QByteArray bytes = readSaved(file);
+    EXPECT_TRUE(bytes.startsWith("HARDWARIO Monitor - device information\nDevice: CHESTER-M\n"
+                                 "Serial number: 2159018247\n"
+                                 "Firmware: CHESTER Test Info File v3.0.0\n"
+                                 "Date: 2026-11-25 14:15:02 +01:00\n"))
+        << bytes.toStdString();
+    EXPECT_TRUE(bytes.contains("claim token: <redacted>\nble passkey: <redacted>\n"));
+    EXPECT_TRUE(bytes.contains("\n### config show\napp config interval-sample 60\n"
+                               "lrw config appkey <redacted>\n"))
+        << bytes.toStdString();
+    EXPECT_FALSE(bytes.contains("975310"));
+    EXPECT_FALSE(bytes.contains("00112233"));
+#ifndef _WIN32
+    EXPECT_EQ(std::filesystem::status(file).permissions(),
+              std::filesystem::perms::owner_read | std::filesystem::perms::owner_write);
+#endif
+    EXPECT_FALSE(console().deviceInfoReady()); // the secrets read are not kept
+    EXPECT_EQ(console().deviceInfoNotice(),
+              QStringLiteral("Device information saved to %1.")
+                  .arg(QDir::toNativeSeparators(hwio::toQString(hwio::toUtf8(file)))));
+    QUrl opened;
+    console().settings()->setUrlOpener([&](const QUrl& target) {
+        opened = target;
+        return true;
+    });
+    console().showDeviceInfoFolder();
+    EXPECT_EQ(opened, url(folder));
+    console().dismissDeviceInfoNotice();
+    EXPECT_TRUE(console().deviceInfoNotice().isEmpty());
+
+    // Include secrets: written as the device printed them.
+    console().saveDeviceInfo();
+    ASSERT_TRUE(waitFor([&] { return console().deviceInfoReady(); }));
+    const std::filesystem::path full = root() / "full.txt";
+    console().writeDeviceInfo(url(full), true);
+    ASSERT_FALSE(console().error().valid()) << console().error().message().toStdString();
+    EXPECT_TRUE(readSaved(full).contains("ble passkey: 975310\n"));
+    EXPECT_EQ(console().settings()->deviceInfoFolder(), hwio::toQString(hwio::toUtf8(root())));
+
+    // Discard and cancel keep nothing and write nothing; a non-local URL is refused.
+    console().saveDeviceInfo();
+    EXPECT_TRUE(console().deviceInfoReading());
+    console().cancelDeviceInfo();
+    EXPECT_FALSE(console().deviceInfoReading());
+    EXPECT_FALSE(console().deviceInfoReady());
+    ASSERT_TRUE(waitFor([&] { return console().canSaveDeviceInfo(); }));
+    console().saveDeviceInfo();
+    ASSERT_TRUE(waitFor([&] { return console().deviceInfoReady(); }));
+    console().writeDeviceInfo(QUrl(QStringLiteral("smb://server/share/a.txt")), false);
+    EXPECT_EQ(console().error().code(), QStringLiteral("io.write_failed"));
+    EXPECT_TRUE(console().deviceInfoReady()); // kept for another try
+    console().dismissError();
+    console().writeDeviceInfo(url(root() / "missing" / "a.txt"), false);
+    EXPECT_EQ(console().error().code(), QStringLiteral("io.write_failed"));
+    EXPECT_EQ(console().error().message(), QStringLiteral("The file could not be saved."));
+    console().dismissError();
+    console().cancelDeviceInfo(); // Discard
+    EXPECT_FALSE(console().deviceInfoReady());
+}
+
+// Plan 0063: a command without an answer and no serial number are said in the notice.
+TEST_F(ConsoleViewModelTest, SaveDeviceInformationWithoutAnAnswerOrSerial) {
+    useScenario(R"({"libraryVersion": 81000, "probes": [{"serialNumber": 801000001,
+        "product": "Test Probe", "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted A\n"}],
+        "responses": {"info show": "vendor name: HARDWARIO a.s.\nfirmware name: CHESTER Test Info File\nfirmware version: v3.0.0\n"}}}]})");
+    ASSERT_TRUE(connectAndWait(tab()));
+    ASSERT_TRUE(waitFor([&] { return console().canSaveDeviceInfo(); }));
+    console().setDeviceInfoOptions(
+        {.commandTimeout = std::chrono::milliseconds(500), .clock = infoFileTime});
+    console().saveDeviceInfo();
+    ASSERT_TRUE(waitFor([&] { return console().deviceInfoReady(); }));
+    EXPECT_EQ(console().deviceInfoFileName(),
+              QStringLiteral("unknown-801000001_2026-11-25_141502.txt"));
+    const std::filesystem::path file = root() / "a.txt";
+    console().writeDeviceInfo(url(file), false);
+    ASSERT_FALSE(console().error().valid()) << console().error().message().toStdString();
+    const QString notice = console().deviceInfoNotice();
+    EXPECT_TRUE(notice.contains(QStringLiteral(" The device did not answer: config show.")))
+        << notice.toStdString();
+    EXPECT_TRUE(notice.contains(QStringLiteral(
+        "The device reported no serial number; the file name uses the J-Link serial number.")))
+        << notice.toStdString();
+    EXPECT_TRUE(readSaved(file).endsWith("\n### config show\n(no answer)\n"));
+}
+
+// Plan 0063: a disconnect while reading writes nothing and says why.
+TEST_F(ConsoleViewModelTest, SaveDeviceInformationStopsOnDisconnect) {
+    useScenario(R"({"libraryVersion": 81000, "probes": [{"serialNumber": 801000001,
+        "product": "Test Probe", "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted A\n"}],
+        "responses": {"info show": "serial number: 2159018247\n"}}}]})");
+    ASSERT_TRUE(connectAndWait(tab()));
+    ASSERT_TRUE(waitFor([&] { return console().canSaveDeviceInfo(); }));
+    console().setDeviceInfoOptions(
+        {.commandTimeout = std::chrono::milliseconds(5000), .clock = infoFileTime});
+    console().saveDeviceInfo();
+    // `config show` gets no answer: disconnect while it waits.
+    ASSERT_TRUE(waitFor([&] {
+        return console().deviceInfoProgress() ==
+               QStringLiteral("Reading device information… (2 of 2)");
+    }));
+    tab().disconnectDevice();
+    ASSERT_TRUE(waitFor([&] { return !console().deviceInfoReading(); }));
+    EXPECT_FALSE(console().deviceInfoReady());
+    EXPECT_TRUE(console().deviceInfoNotice().isEmpty());
+    ASSERT_TRUE(console().error().valid());
+    EXPECT_EQ(console().error().code(), QStringLiteral("target.not_connected"));
+    EXPECT_EQ(console().error().message(),
+              QStringLiteral("The device disconnected while its information was read."));
 }
 
 } // namespace

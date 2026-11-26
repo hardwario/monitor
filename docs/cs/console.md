@@ -36,7 +36,7 @@ zmrazí výpis, zatímco řádky dál přicházejí; **Pokračovat** je zobrazí
 | **Vymazat** | Vymaže **Shell**, **Log** nebo **Obojí** (<kbd>Ctrl</kbd>+<kbd>K</kbd> vymaže panel, který má fokus) |
 | **Uložit výpis…** | Uloží panel, který má fokus, do textového souboru (<kbd>Ctrl</kbd>+<kbd>S</kbd>) |
 | **Sledovat**, **Pozastavit** | Viz výše |
-| **Další** | **Otevřít soubor s logem**, **Otevřít složku s logy** ([soubory konzole](#soubory-konzole)) a možnosti rozložení |
+| **Další** | **Uložit informace o zařízení…** ([níže](#save-device-information)), **Otevřít soubor s logem**, **Otevřít složku s logy** ([soubory konzole](#soubory-konzole)) a možnosti rozložení |
 
 ## Odesílání příkazů
 
@@ -92,6 +92,33 @@ složka je ta, kterou jste použili naposledy (poprvé Dokumenty). Tajné údaje
 v [souborech konzole](#soubory-konzole) (například `claim token: <redacted>`); na obrazovce a při **kopírování** zůstanou
 vidět. Na Linuxu a macOS může uložený soubor číst jen váš uživatel.
 
+<a id="save-device-information"></a>
+## Uložení informací o zařízení
+
+**Další → Uložit informace o zařízení…** zapíše, co zařízení o sobě hlásí, do jednoho textového souboru pojmenovaného
+podle jeho sériového čísla, například `2159018267_2026-11-25_141502.txt`. Funguje na kartě J-Link nebo Bluetooth,
+když je zařízení připojené; na kartě vzdálené podpory se nenabízí.
+
+1. Aplikace se zeptá zařízení příkazy `info show` a `config show`. Tyto příkazy se v konzoli neobjeví. Řádek pod
+   panelem nástrojů ukazuje **Načítání informací o zařízení… (1 z 2)** s tlačítkem **Zrušit**.
+2. Po načtení nabídne řádek volbu **Včetně tajných údajů** (vypnutou) a **Uložit…**; **Zahodit** výsledek zahodí.
+3. **Uložit…** otevře dialog s předvyplněným názvem ve složce, kterou jste použili naposledy (poprvé
+   Dokumenty/HARDWARIO Monitor).
+4. Uložení potvrdí **Informace o zařízení byly uloženy do …** s tlačítkem **Zobrazit ve složce**.
+
+Soubor je prostý text: hlavička s názvem zařízení, sériovým číslem, firmwarem, datem a verzí HARDWARIO Monitor, potom
+pro každý příkaz řádek `### info show` a odpověď zařízení tak, jak ji vypsalo. Výstup `config show` zůstává seznamem
+příkazů, takže z něj můžete řádky kopírovat do konzole nebo do [dávkového souboru](#dávkové-soubory).
+
+- **Tajné údaje** (claim token, přístupový klíč BLE, klíče LoRaWAN, hesla LTE) se zapíšou jako `<redacted>`, stejně
+  jako v [souborech konzole](#soubory-konzole). S volbou **Včetně tajných údajů** se zapíšou tak, jak je zařízení
+  vypíše: takový soubor je stejně citlivý jako klíče zařízení, proto ho dobře chraňte. Na Linuxu a macOS může soubor
+  v obou případech číst jen váš uživatel.
+- Příkaz, na který zařízení do 10 sekund neodpoví, se zapíše jako `(no answer)` a potvrzení ho uvede. Odpověď delší
+  než 2000 řádků nebo 256 KiB se zkrátí a označí řádkem s poznámkou.
+- Zařízení, které nehlásí sériové číslo, dostane název `unknown-<sériové číslo J-Linku nebo Bluetooth adresa>_…`.
+- Když se zařízení během načítání odpojí, nic se nezapíše: *Zařízení se odpojilo během načítání jeho informací.*
+
 <a id="batch-files"></a>
 ## Dávkové soubory
 
@@ -144,6 +171,7 @@ Stejná konzole v terminálu:
 ```sh
 hwio chester app console                   # interactive: F4 reconnects, Ctrl+C on an empty line or Ctrl+D quits
 hwio chester app command "info show"       # one command, print the answer
+hwio chester app info save                 # the device information file (also: hwio ble info save -a ID)
 echo "app config show" | hwio chester app console
 ```
 

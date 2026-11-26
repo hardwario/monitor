@@ -42,6 +42,8 @@ const QString stackedKey = QStringLiteral("console/stacked");
 const QString logToFileKey = QStringLiteral("console/logToFile");
 // Plan 0028 (ADR-0201): the folder "Save view…" saved to last ("" = Documents).
 const QString saveViewFolderKey = QStringLiteral("console/saveViewFolder");
+// Plan 0063 (ADR-0440, D5): the folder "Save device information…" saved to last ("" = none yet).
+const QString deviceInfoFolderKey = QStringLiteral("console/deviceInfoFolder");
 constexpr qsizetype maxFolderChars = 4096;
 // 0021 (ADR-0170): shared with the CLI console (device::suggestionsSetting, ...).
 const QString suggestionsKey = toQString(device::suggestionsSetting.path);
@@ -82,6 +84,10 @@ void ConsoleSettings::registerKeys(SettingsStore& store) {
         SettingKey{
             .path = logToFileKey, .type = QMetaType::Bool, .defaultValue = true, .validator = {}},
         SettingKey{.path = saveViewFolderKey,
+                   .type = QMetaType::QString,
+                   .defaultValue = QString(),
+                   .validator = validators::maxLength(maxFolderChars)},
+        SettingKey{.path = deviceInfoFolderKey,
                    .type = QMetaType::QString,
                    .defaultValue = QString(),
                    .validator = validators::maxLength(maxFolderChars)},
@@ -243,6 +249,16 @@ QString ConsoleSettings::saveViewFolder() const {
 void ConsoleSettings::setSaveViewFolder(const QString& folder) {
     if (folder != saveViewFolder()) {
         write(saveViewFolderKey, folder);
+    }
+}
+
+QString ConsoleSettings::deviceInfoFolder() const {
+    return read(deviceInfoFolderKey, QString()).toString();
+}
+
+void ConsoleSettings::setDeviceInfoFolder(const QString& folder) {
+    if (folder != deviceInfoFolder()) {
+        write(deviceInfoFolderKey, folder);
     }
 }
 

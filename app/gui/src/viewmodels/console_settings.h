@@ -71,7 +71,8 @@ public:
     ConsoleSettings(SettingsStore* store, std::filesystem::path logFolder, QObject* parent);
 
     // The console/* keys (fontSize, showTimestamps, wrapLines, splitRatio, stacked, logToFile;
-    // 0021: suggestions, readCommandsOnConnect; 0025: rememberCommands; 0028: saveViewFolder).
+    // 0021: suggestions, readCommandsOnConnect; 0025: rememberCommands; 0028: saveViewFolder;
+    // 0063: deviceInfoFolder).
     static void registerKeys(SettingsStore& store);
 
     // QML singleton factory: the instance created by registerConsolePage (a child of
@@ -99,6 +100,10 @@ public:
     // Plan 0028 (ADR-0201): the last folder a view was saved to ("" = none yet; <= 4096 chars).
     [[nodiscard]] QString saveViewFolder() const;
     void setSaveViewFolder(const QString& folder);
+    // Plan 0063 (ADR-0440, D5): the last folder a device information file was saved to ("" =
+    // none yet; <= 4096 chars).
+    [[nodiscard]] QString deviceInfoFolder() const;
+    void setDeviceInfoFolder(const QString& folder);
     [[nodiscard]] static int minFontSize() { return minFont; }
     [[nodiscard]] static int maxFontSize() { return maxFont; }
     [[nodiscard]] QString logFolder() const;
