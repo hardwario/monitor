@@ -5,6 +5,8 @@ import HardwarioMonitor
 
 Label {
     property QtObject vm: null
+    // Plan 0056 (embedded contract): the WizardViewModel showing this control (set by WizardView).
+    property WizardViewModel host: null
 
     objectName: "testEmbedded"
     text: vm ? vm.text : ""

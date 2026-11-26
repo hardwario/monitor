@@ -56,7 +56,7 @@ TEST(Settings, NewFileGetsCurrentSchemaAndDefaults) {
     EXPECT_EQ(settings->get(countKey), 7);
     EXPECT_EQ(settings->get(nameKey), "default");
     EXPECT_EQ(settings->get(pathKey), fs::path("none"));
-    EXPECT_NE(readFile(file).find("schemaVersion=2"), std::string::npos);
+    EXPECT_NE(readFile(file).find("schemaVersion=3"), std::string::npos);
 }
 
 TEST(Settings, ValuesPersistAcrossReopen) {
@@ -107,7 +107,7 @@ TEST(Settings, Schema2AddsRememberCommands) {
         writeRaw(file, QStringLiteral("meta/schemaVersion"), 1);
         auto settings = Settings::openFile(file);
         ASSERT_TRUE(settings.has_value());
-        EXPECT_EQ(settings->schemaVersion(), 2);
+        EXPECT_EQ(settings->schemaVersion(), hwio::currentSettingsSchema);
         EXPECT_TRUE(settings->get(remember)); // the written value, not this key's default
     }
     {
@@ -119,6 +119,25 @@ TEST(Settings, Schema2AddsRememberCommands) {
         ASSERT_TRUE(settings.has_value());
         EXPECT_FALSE(settings->get(remember));
     }
+}
+
+// Plan 0008 (0035 § B): schema 2 -> 3 is a no-op: nothing but the schema version is written, and
+// setup/completedVersion stays absent (the setup wizard opens once after the upgrade).
+TEST(Settings, Schema3IsANoOp) {
+    const QTemporaryDir dir;
+    const fs::path file = settingsFile(dir);
+    writeRaw(file, QStringLiteral("meta/schemaVersion"), 2);
+    writeRaw(file, QStringLiteral("console/rememberCommands"), false);
+    {
+        auto settings = Settings::openFile(file);
+        ASSERT_TRUE(settings.has_value());
+        EXPECT_EQ(settings->schemaVersion(), 3);
+        EXPECT_TRUE(settings->sync());
+    }
+    const std::string text = readFile(file);
+    EXPECT_NE(text.find("schemaVersion=3"), std::string::npos) << text;
+    EXPECT_EQ(text.find("setup"), std::string::npos) << text;
+    EXPECT_NE(text.find("rememberCommands=false"), std::string::npos) << text;
 }
 
 TEST(Settings, NewerSchemaIsReadOnlyAndNeverWritten) {
@@ -161,7 +180,7 @@ TEST(Settings, RemoveDeletesAGroupAndItsKeys) {
     const std::string text = readFile(file);
     EXPECT_EQ(text.find("801234567"), std::string::npos) << text;
     EXPECT_NE(text.find("801000002"), std::string::npos);
-    EXPECT_NE(text.find("schemaVersion=2"), std::string::npos);
+    EXPECT_NE(text.find("schemaVersion=3"), std::string::npos);
     auto reopened = Settings::openFile(file);
     ASSERT_TRUE(reopened.has_value());
     EXPECT_EQ(reopened->get(countKey), 3);

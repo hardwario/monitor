@@ -107,6 +107,11 @@ und **Freigabe beenden**.
    bricht das Update ab, bevor etwas geändert wird. Die Kopie wird automatisch zurückgeschrieben. Nach Ihrem Nein zeigt die Karte *LTE-Firmware-Update von Ihnen abgebrochen (14:02). Es wurde nichts geändert.* Ein Kunde mit einem
    älteren HARDWARIO Monitor beantwortet diese Fragen selbst.
 
+Der Verbindungs- und der Fehlerbehebungsassistent sowie das geführte Flashen arbeiten mit einem Gerät, das an Ihren
+eigenen Computer angeschlossen ist: Auf dem Tab einer Support-Sitzung öffnen sie sich nicht (*Dieser Assistent
+funktioniert nur mit einem Gerät, das an diesen Computer angeschlossen ist, nicht in einer Support-Sitzung.*), und die
+Sitzung läuft weiter.
+
 Um die Sitzung zu verlassen, klicken Sie in der Geräteleiste auf **Sitzung verlassen** (oder drücken Sie
 Ctrl+Shift+D). Der Tab bleibt mit der Konsole offen, sodass Sie sie noch speichern können; die Konsole zeigt *— Sie haben
 die Sitzung verlassen —*. **Erneut beitreten** tritt mit demselben Code wieder bei, und der Kunde muss Sie erneut

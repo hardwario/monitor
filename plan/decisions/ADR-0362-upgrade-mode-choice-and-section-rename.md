@@ -1,6 +1,6 @@
 # ADR-0362 — Upgrading users choose a mode too; the Settings section "Advanced" becomes "Expert"
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0392 (2026-11-23): upgrading users are asked on the setup wizard's Welcome step (Expert preselected as before))
 - **Date:** 2026-11-12
 - **Decided by:** Matej Strnad (plan [0045](../features/0045-user-modes.md), D-5, D-6)
 

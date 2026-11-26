@@ -15,6 +15,8 @@ ColumnLayout {
     id: step
 
     property LteUpdateWizard vm: null
+    // Plan 0056 (embedded contract): the WizardViewModel showing this control (set by WizardView).
+    property WizardViewModel host: null
     readonly property int stage: step.vm ? step.vm.stage : LteUpdateWizard.Firmware
 
     // ADR-0384: the wizard dialog scrolls `item` into view.

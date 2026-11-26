@@ -29,6 +29,7 @@
 #include "viewmodels/page_list_model.h"
 #include "viewmodels/page_registry.h"
 #include "viewmodels/probe_firmware_view_model.h"
+#include "viewmodels/probe_picker_view_model.h"
 #include "viewmodels/shortcut_registry.h"
 #include "viewmodels/ui_mode_controller.h"
 #include "viewmodels/update_view_model.h"
@@ -117,7 +118,7 @@ class AppViewModel : public QObject {
     Q_PROPERTY(bool shortcutOverlayVisible READ shortcutOverlayVisible WRITE
                    setShortcutOverlayVisible NOTIFY shortcutOverlayVisibleChanged)
     // Plan 0052 (ADR-0387): the content view shown over the page area of the current tab (or the
-    // Settings tab): "report", "probeFirmware", "join", "share", "modeChoice", "shortcuts", or ""
+    // Settings tab): "report", "probeFirmware", "join", "share", "shortcuts", or ""
     // (none, or the open one belongs to another tab).
     Q_PROPERTY(QString overlayView READ overlayView NOTIFY overlayViewChanged)
     Q_PROPERTY(hwio::gui::ShortcutRegistry* shortcuts READ shortcuts CONSTANT)
@@ -215,6 +216,8 @@ public:
     [[nodiscard]] QString jlinkLibraryPath() const { return m_jlinkLibraryPath; }
     [[nodiscard]] QString jlinkLibraryVersion() const { return m_jlinkLibraryVersion; }
     [[nodiscard]] WizardViewModel* globalWizard() const { return m_globalWizard; }
+    // Plan 0056: a wizard is open in the global instance or in any tab's (wizardsOpenChanged).
+    [[nodiscard]] bool anyWizardOpen() const;
     [[nodiscard]] WizardLauncher* launcher() const { return m_launcher; }
     [[nodiscard]] ReportViewModel* report() const { return m_report; }
     [[nodiscard]] QString documentationUrl() const;
@@ -234,6 +237,11 @@ public:
     [[nodiscard]] HistoryStore& historyStore() { return *m_history; }
     // Environment, the jlink/libraryPath setting and the search paths of this OS.
     [[nodiscard]] jlink::LocatorOptions locatorOptions() const;
+    // Plan 0035 (ADR-0252): the probe picker of a wizard's Embedded `probe-picker` step, in wizard
+    // mode, sharing the ProbeScanner, the "in use by tab N" lookup and the firmware-update
+    // reservation with the tabs' pickers. Qt parent ownership: `parent` (the wizard); one per open
+    // wizard: at most 9 (8 tabs + the global setup wizard, plan 0056).
+    [[nodiscard]] ProbePickerViewModel* makeProbePicker(QObject* parent);
 
     // --- tabs ---
     Q_INVOKABLE void newTab();
@@ -332,6 +340,11 @@ signals:
     void closeConfirmationNeeded(hwio::gui::DeviceTabViewModel* tab, const QString& text);
     void quitConfirmationNeeded(const QString& text);
     void quitRequested();
+    // Plan 0035: a tab changed its probe or closed, or a probe's firmware-update reservation
+    // changed; the wizards' pickers re-read the scanner (the tabs' pickers are updated directly).
+    void probeUsageChanged();
+    // Plan 0056: any wizard instance (global or a tab's) opened or closed.
+    void wizardsOpenChanged();
 
 private:
     struct Toast {
@@ -357,6 +370,11 @@ private:
     // A wizard's hand-off (plan/features/0007): "open-console", "open-flash-page",
     // "open-settings[:<section>]".
     void onHandOff(const QString& action, DeviceTabViewModel* tab);
+    void onHandOffError(const ErrorInfo& error, DeviceTabViewModel* tab); // ADR-0297
+    // ADR-0300: opens the per-tab wizard `wizardId` on `tab` after the handing-off one has
+    // closed (the wizards' session passes to it); a failed open releases the session.
+    void openChainedWizard(const QString& wizardId, DeviceTabViewModel* tab,
+                           const ErrorInfo& context);
     // Plan 0052: the open content view.
     [[nodiscard]] bool overlayBusy() const; // it runs an operation
     // The J-Link firmware update writes: tab changes are refused (with a toast, true).

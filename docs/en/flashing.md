@@ -9,6 +9,11 @@ firmware file or enter a catalog ID**.
 
 While a flash runs, the console of the tab is paused and resumes by itself afterwards.
 
+To be guided through a flash of application firmware (probe, cable check, file, confirmation), use **Help** ›
+**Flash firmware (guided)…**, **Guide me** on this page or **Flash firmware with a guide** on the Choose device page.
+The guide opens in the page area of the tab ([Guides and other views](getting-started.md#guides-and-views)); it is
+not available on a support session tab.
+
 ## 1. What do you want to flash?
 
 | Choice | MCU | Firmware |

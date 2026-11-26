@@ -298,6 +298,62 @@ TEST_F(Diagnose, AllGoodOnAProbeOnlySession) {
     EXPECT_EQ(events().count(ConnectionState::Connected), 0);
 }
 
+// ADR-0296 (plan 0010): a stop point ends Diagnose after that step; later steps are neither run
+// nor reported (the flash wizard's cable check never searches RTT).
+TEST_F(Diagnose, ALastStepNeverRunsTheLaterSteps) {
+    auto session = open(options(false), ConnectionState::ProbeOpen);
+    ASSERT_TRUE(session);
+    const auto id = session->diagnose("app", "identify");
+    const OperationResult* result = finish(id);
+    ASSERT_NE(result, nullptr);
+    ASSERT_TRUE(result->status);
+    EXPECT_EQ(statuses(*result),
+              (std::vector<std::string>{"probe:ok", "power:ok", "connect:ok", "identify:ok"}));
+    ASSERT_EQ(steps().size(), 4U);
+    EXPECT_EQ(steps().back().second.id, "identify");
+    EXPECT_EQ(target().get([](ScriptedTarget& t) { return t.rttStarts; }), 0); // no RTT search
+    expectNoWrites();
+    EXPECT_TRUE(events().reached(ConnectionState::ProbeOpen));
+
+    // "probe": the target is not touched at all.
+    const int connects = target().get([](ScriptedTarget& t) { return t.connectsStarted; });
+    const int hwStatus = target().get([](ScriptedTarget& t) { return t.hwStatusCalls; });
+    const OperationResult* probeOnly = finish(session->diagnose("app", "probe"));
+    ASSERT_NE(probeOnly, nullptr);
+    EXPECT_EQ(statuses(*probeOnly), std::vector<std::string>{"probe:ok"});
+    EXPECT_EQ(target().get([](ScriptedTarget& t) { return t.connectsStarted; }), connects);
+    EXPECT_EQ(target().get([](ScriptedTarget& t) { return t.hwStatusCalls; }), hwStatus);
+
+    // "rtt": the buffer names are not compared.
+    const OperationResult* rtt = finish(session->diagnose("app", "rtt"));
+    ASSERT_NE(rtt, nullptr);
+    EXPECT_EQ(statuses(*rtt), (std::vector<std::string>{"probe:ok", "power:ok", "connect:ok",
+                                                        "identify:ok", "rtt:ok"}));
+    EXPECT_EQ(target().get([](ScriptedTarget& t) { return t.rttStarts; }), 1);
+}
+
+TEST_F(Diagnose, ALastStepAfterAFailureReportsOnlyUpToIt) {
+    target().set([](ScriptedTarget& t) { t.app.protectedChip = true; });
+    auto session = open(options(false), ConnectionState::ProbeOpen);
+    ASSERT_TRUE(session);
+    const OperationResult* result = finish(session->diagnose("app", "identify"));
+    ASSERT_NE(result, nullptr);
+    ASSERT_EQ(result->checks.size(), 4U);
+    EXPECT_EQ(result->checks.back().id, "identify");
+    EXPECT_EQ(codeOf(result->checks.back()), ErrorCode::TargetProtected);
+    EXPECT_EQ(target().get([](ScriptedTarget& t) { return t.rttStarts; }), 0);
+}
+
+TEST_F(Diagnose, AnUnknownOrPowerLastStepIsRefused) {
+    auto session = open(options(false), ConnectionState::ProbeOpen);
+    ASSERT_TRUE(session);
+    for (const std::string_view last : {"power", "nope"}) {
+        const auto id = session->diagnose("app", last);
+        ASSERT_FALSE(id) << last;
+        EXPECT_EQ(id.error().code, ErrorCode::UsageInvalidArgument);
+    }
+}
+
 TEST_F(Diagnose, NoPowerSkipsTheRest) {
     target().set([](ScriptedTarget& t) { t.vtref = 500; });
     auto session = open(options(false), ConnectionState::ProbeOpen);

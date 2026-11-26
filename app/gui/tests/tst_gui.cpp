@@ -42,6 +42,7 @@
 #include "viewmodels/remote_join_view_model.h"
 #include "viewmodels/ui_mode_controller.h"
 #include "wizard/wizard_view_model.h"
+#include "workers/probe_scanner.h"
 #include "zip_builder.h"
 
 #include <QByteArray>
@@ -49,6 +50,7 @@
 #include <QCryptographicHash>
 #include <QDateTime>
 #include <QDir>
+#include <QEventLoop>
 #include <QFile>
 #include <QHostAddress>
 #include <QIODevice>
@@ -66,6 +68,7 @@
 #include <QStringLiteral>
 #include <QTcpServer>
 #include <QTemporaryDir>
+#include <QThread>
 #include <QUrl>
 #include <QVariant>
 #include <QVariantMap>
@@ -82,8 +85,11 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <filesystem>
+#include <iostream>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <thread>
@@ -92,6 +98,51 @@
 #include <vector>
 
 Q_IMPORT_QML_PLUGIN(HardwarioMonitorPlugin)
+
+namespace {
+
+// Review 0009 (TSan): Qt Test's message handler reads the current data row (its tag) for every
+// message, and Qt Test destroys that row's data on the GUI thread when the row ends. A message
+// from a worker thread (the probe scanner loading its library copy, a session worker) can arrive
+// exactly then: a data race inside the handler. Only GUI-thread messages go through Qt Test's
+// handler; the others are written to stderr directly (same format), so no worker thread ever
+// touches Qt Test's per-row state. Qt Test installs its handler when a TestCase starts
+// (QuickTestResult::startLogging, after the engine and the window exist), so a test file installs
+// ours on top of it in initTestCase() (testSupport.routeWorkerThreadMessages()); Qt Test restores
+// its predecessor when the TestCase ends.
+struct MessageRouting {
+    QtMessageHandler qtTestHandler = nullptr; // set and read on the GUI thread
+    std::mutex stderrMutex;                   // serialises the worker threads' lines
+};
+
+MessageRouting& routing() {
+    static MessageRouting instance;
+    return instance;
+}
+
+void threadAwareMessageHandler(QtMsgType type, const QMessageLogContext& context,
+                               const QString& message) {
+    const QCoreApplication* app = QCoreApplication::instance();
+    const bool guiThread = app == nullptr || QThread::currentThread() == app->thread();
+    if ((guiThread || type == QtFatalMsg) && routing().qtTestHandler != nullptr) {
+        routing().qtTestHandler(type, context, message);
+        return;
+    }
+    const QByteArray line = qFormatLogMessage(type, context, message).toLocal8Bit();
+    const std::scoped_lock lock(routing().stderrMutex);
+    std::cerr.write(line.constData(), line.size());
+    std::cerr << '\n';
+    std::cerr.flush();
+}
+
+void installThreadAwareMessageHandler() {
+    const QtMessageHandler previous = qInstallMessageHandler(&threadAwareMessageHandler);
+    if (previous != &threadAwareMessageHandler) {
+        routing().qtTestHandler = previous;
+    }
+}
+
+} // namespace
 
 // Test hooks for the QML tests (context property `testSupport`): things QML must not do in the
 // product (configure a tab without the picker, fabricate errors, reset the tabs).
@@ -108,15 +159,26 @@ class QmlTestSupport : public QObject {
 public:
     QmlTestSupport(hwio::gui::AppViewModel* app, QString directory)
         : m_app(app), m_dir(std::move(directory)) {}
+    // Review 0009 (TSan): from initTestCase(), after Qt Test has installed its message handler.
+    Q_INVOKABLE static void routeWorkerThreadMessages() { installThreadAwareMessageHandler(); }
     [[nodiscard]] static int perfSeconds() {
         return qEnvironmentVariableIntValue("HWIO_CONSOLE_PERF_SECONDS");
     }
 
     // Another fake J-Link scenario for the sessions opened from now on ("" = the default one).
+    // The probe scanner follows at once: a fake library copy reads the scenario only when it is
+    // loaded, and the scanner keeps its copy while any picker is visible (ADR-0093) - since plan
+    // 0053 the Choose device tab nearly always is, so a copy loaded under the previous scenario
+    // could serve scans for the rest of the file. Its last result, which every new picker shows
+    // (and preselects from) at once, could also be the previous scenario's. So the scanner drops
+    // its copy here and this returns only after a scan with a new copy has been delivered.
     Q_INVOKABLE [[nodiscard]] bool useScenario(const QString& json) const {
-        const QByteArray utf8 = json.toUtf8();
-        return hwio::gui::test::useFakeJLink(
-            m_dir, json.isEmpty() ? hwio::gui::test::twoProbesScenario : utf8.constData());
+        const QByteArray utf8 =
+            json.isEmpty() ? QByteArray(hwio::gui::test::twoProbesScenario) : json.toUtf8();
+        if (!hwio::gui::test::useFakeJLink(m_dir, utf8.constData())) {
+            return false;
+        }
+        return syncProbeScanner();
     }
 
     // VmRSS of this process in MiB (Linux; 0 elsewhere).
@@ -507,7 +569,7 @@ public:
     Q_INVOKABLE [[nodiscard]] bool setSetting(const QString& key, const QVariant& value) const {
         return static_cast<bool>(m_app->settingsStore()->setValue(key, value));
     }
-    // Plan 0045: as on the first start (ui/mode not stored; the first-start dialog opens).
+    // Plan 0045: as on the first start (ui/mode not stored; the setup wizard's Welcome asks it).
     Q_INVOKABLE [[nodiscard]] bool resetUiMode() const {
         if (!m_app->settingsStore()->removeGroup(QStringLiteral("ui/mode"))) {
             return false;
@@ -574,9 +636,9 @@ public:
         const auto* tab = m_app->tabs()->at(index);
         return tab != nullptr ? tab->wizard()->wizard() : nullptr;
     }
-    // Plan 0052: registers the global test wizard ("first-run-setup").
-    Q_INVOKABLE void registerGlobalTestWizard() const {
-        hwio::gui::test::registerGlobalTestWizard(*m_app);
+    // Plan 0056: the open wizard of the global instance (the setup wizard), or null.
+    Q_INVOKABLE [[nodiscard]] QObject* globalWizard() const {
+        return m_app->globalWizard()->wizard();
     }
 
     // ---- plan 0006 (Flash page) ----
@@ -924,6 +986,65 @@ private:
         return QUrl::fromLocalFile(path);
     }
 
+    // useScenario(): the probe scanner drops every library copy loaded before the new scenario
+    // was written and delivers a scan made with a fresh one (bounded: 20 s per wait). False when
+    // that did not happen in time. Decided by the scanner's scan counters, not by the probes the
+    // scan shows: a scenario may list no probes, the same probes as the previous one, or make the
+    // library fail.
+    [[nodiscard]] bool syncProbeScanner() const {
+        using Clock = std::chrono::steady_clock;
+        constexpr std::chrono::seconds timeout{20};
+        hwio::gui::ProbeScanner& scanner = m_app->probeScanner();
+        // The pickers' holds are given back for a moment (only the scanner's count: every picker
+        // keeps its own `active`), so that the worker drops its copy. No events run on the GUI
+        // thread meanwhile, so no picker takes or gives back a hold in between.
+        const int holds = scanner.activeCount();
+        for (int i = 0; i < holds; ++i) {
+            scanner.release();
+        }
+        // A copy from before the write lives on while a scan started before now runs (it may be
+        // loading the copy, so libraryLoaded() is still false) or while libraryLoaded() is true.
+        // With no picker the worker drops it after that scan or when it wakes.
+        const std::uint64_t startedBefore = scanner.scansStarted();
+        const Clock::time_point dropDeadline = Clock::now() + timeout;
+        while ((scanner.scansFinished() < startedBefore || scanner.libraryLoaded()) &&
+               Clock::now() < dropDeadline) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
+        const bool dropped = scanner.scansFinished() >= startedBefore && !scanner.libraryLoaded();
+        // Every scan started from now on loads a new copy, which reads the new scenario.
+        const std::uint64_t startedFresh = scanner.scansStarted();
+        for (int i = 0; i < holds; ++i) {
+            scanner.acquire(); // the first one scans at once
+        }
+        if (holds == 0) {
+            scanner.scanNow(); // with a copy loaded for this scan only
+        }
+        if (!dropped) {
+            qWarning() << "useScenario: the probe scanner kept its library copy";
+            return false;
+        }
+        if (scanner.suspended()) {
+            return true; // plan 0036: no scan now; the next one uses a new copy
+        }
+        // Scans run one at a time and the n-th started carries sequence n.
+        const Clock::time_point deadline = Clock::now() + timeout;
+        while (Clock::now() < deadline) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+            const std::optional<hwio::gui::ProbeScan>& last = scanner.last();
+            if (last && last->sequence > startedFresh) {
+                return true;
+            }
+            if (scanner.suspended()) {
+                return true; // suspended meanwhile: the copy was dropped, the next scan reloads
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
+        qWarning() << "useScenario: no probe scan of the new scenario within" << timeout.count()
+                   << "s";
+        return false;
+    }
+
     hwio::gui::AppViewModel* m_app;
     QString m_dir;
     std::unique_ptr<hwio::remote::testing::FakeRelay> m_relay;            // plan 0044
@@ -941,6 +1062,9 @@ class Setup : public QObject {
 
 public slots:
     void applicationAvailable() {
+        // Qt Test writes to stdout, which is fully buffered on a pipe (ctest): after an abnormal
+        // end the whole test log was lost (seen on the Windows CI runners). Unbuffered instead.
+        (void)std::setvbuf(stdout, nullptr, _IONBF, 0);
         QStandardPaths::setTestModeEnabled(true);
         hwio::initApplicationIdentity();
         QQuickStyle::setStyle(QStringLiteral("Material"));
@@ -990,6 +1114,16 @@ public slots:
     // One AppViewModel per test file (per QML engine): QML bindings of one engine never outlive it
     // on a shared C++ object (seen as leaked binding guards under LeakSanitizer otherwise).
     void createApp() {
+        // Plan 0009: tst_connect_wizard.qml runs against the real Connect wizard.
+        const bool realConnectWizard = QCoreApplication::arguments()
+                                           .join(QLatin1Char(' '))
+                                           .contains(QStringLiteral("tst_connect_wizard"));
+        // Plan 0056 (B8): tst_wizard.qml tests the global instance with the global test wizard
+        // ("first-run-setup", registered before the real SetupWizard: the first registration
+        // wins); the other files get the real setup wizard.
+        const bool globalTestWizard = QCoreApplication::arguments()
+                                          .join(QLatin1Char(' '))
+                                          .contains(QStringLiteral("/tst_wizard.qml"));
         const std::filesystem::path root(m_dir.path().toStdU16String());
         std::optional<hwio::Settings> settings;
         if (auto opened = hwio::Settings::openFile(root / "Monitor.ini"); opened) {
@@ -1006,15 +1140,23 @@ public slots:
                                                           .consoleDirectory = root / "console"},
                 .scanInterval = std::chrono::milliseconds(300),
                 .registerExtensions =
-                    [](hwio::gui::AppViewModel& app) {
+                    [realConnectWizard, globalTestWizard](hwio::gui::AppViewModel& app) {
+                        // M4 (plan/features/0007): the test wizard as "connect-device". It is
+                        // registered first, so it keeps that id and plan 0009's Connect wizard is
+                        // not added - except for tst_connect_wizard.qml (one process per test
+                        // file), which tests the real one.
+                        if (!realConnectWizard) {
+                            hwio::gui::test::registerTestWizard(
+                                app, QUrl::fromLocalFile(QStringLiteral(QUICK_TEST_SOURCE_DIR
+                                                                        "/qml/TestEmbedded.qml")));
+                        }
+                        if (globalTestWizard) {
+                            hwio::gui::test::registerGlobalTestWizard(app);
+                        }
                         hwio::gui::registerBuiltInPages(app);
                         hwio::gui::test::registerTestPage(
                             app, QUrl::fromLocalFile(
                                      QStringLiteral(QUICK_TEST_SOURCE_DIR "/qml/TestPage.qml")));
-                        // M4 (plan/features/0007): the test wizard as "connect-device".
-                        hwio::gui::test::registerTestWizard(
-                            app, QUrl::fromLocalFile(QStringLiteral(QUICK_TEST_SOURCE_DIR
-                                                                    "/qml/TestEmbedded.qml")));
                     },
                 // Plan 0015 B3: the crash notice reads the marker here (testSupport.simulateCrash).
                 .crashDirectory = root / "crashes"},
@@ -1025,7 +1167,7 @@ public slots:
         if (!m_languageManager->apply(QStringLiteral("en"))) {
             qFatal("tst_gui: English could not be selected");
         }
-        // Plan 0045: the tests start in the default mode, chosen (no first-start dialog);
+        // Plan 0045: the tests start in the default mode, chosen (no mode question);
         // tst_settings resets it for the dialog test.
         if (!m_app->settingsStore()->setValue(QStringLiteral("ui/mode"),
                                               QStringLiteral("advanced"))) {

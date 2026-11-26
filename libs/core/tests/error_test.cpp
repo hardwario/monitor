@@ -204,7 +204,7 @@ TEST(ErrorTable, BleCodes) {
              Row{.code = ErrorCode::BlePermissionDenied,
                  .id = "ble.permission_denied",
                  .category = ErrorCategory::Dependency,
-                 .wizard = WizardId::FirstRunSetup},
+                 .wizard = std::nullopt}, // ADR-0250: no wizard until plan 0032
              Row{.code = ErrorCode::BleStackUnavailable,
                  .id = "ble.stack_unavailable",
                  .category = ErrorCategory::Dependency,

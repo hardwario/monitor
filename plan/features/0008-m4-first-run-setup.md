@@ -1,14 +1,16 @@
 # 0008 — M4 first-run setup wizard
 
-- **Status:** Approved (re-approved with the [0035](0035-wizards-rebaseline-2-0-0.md) amendments, 2026-11-04). Previously: Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments)
+- **Status:** In progress (implemented 2026-11-06 on `strnad/impl-0008`; manual checks open). Re-approved with the [0035](0035-wizards-rebaseline-2-0-0.md) amendments, 2026-11-04. Previously: Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments)
 - **Milestone:** M4 (plan 2 of 4, ADR-0065)
 - **Author:** Matej Strnad (with Claude)
 - **Related ADRs:** ADR-0006, ADR-0016, ADR-0025, ADR-0027, ADR-0029, ADR-0042, ADR-0066, ADR-0067, ADR-0068,
-  ADR-0071, ADR-0072, ADR-0073
+  ADR-0071, ADR-0072, ADR-0073, ADR-0185, ADR-0250, ADR-0254, ADR-0255, ADR-0290, ADR-0291, ADR-0292
 - **Depends on:** [0007](0007-m4-wizard-framework-diagnostics.md) (wizard contract, `libs/diag`),
   [0006](0006-m3-flash-settings.md) (Settings page sections for J-Link / nRF Util paths)
 - **Can run in parallel with:** [0009](0009-m4-connect-and-troubleshooting.md), [0010](0010-m4-flash-wizard.md)
 - **Design system:** [plan/gui/design-system.md](../gui/design-system.md) · **Mockups:** [plan/gui/mockups/](../gui/mockups/index.html)
+
+> **Amendment (plan [0056](0056-wizards-as-views-rc5.md), 2026-11-23):** the setup wizard is a global view (`AppViewModel.globalWizard`, ADR-0391), not a modal dialog; its Welcome step asks the user mode while it is not chosen (ADR-0392); `StartupCheck` counts a missing mode as not completed and opens Welcome at once, without the J-Link check (ADR-0392). [Connect a device] opens the Connect wizard on the current device tab (from the Settings tab: the last device tab).
 
 > **Pending amendment from M5 ([0012](0012-m5-ble-gui-pairing.md), ADR-0088; applied when 0012 is approved — then
 > this plan needs re-approval):** optional **Bluetooth** step after nRF Util (adapter, macOS permission prompt);
@@ -211,12 +213,14 @@ The `schemaVersion` bump and its no-op migration are documented (0004 rule).
 
 ## Implementation steps
 
-- [ ] S0 Prerequisite check: 0007 phases A and C done; 0006 done (otherwise stop and report)
-- [ ] S1 `SetupWizard` steps, start-step mapping, platform variants + GTest
-- [ ] S2 Path selection and validation for J-Link / nRF Util; dependency-status invalidation
-- [ ] S3 Start-up check and trigger (ADR-0071) + settings keys + GTest (all trigger combinations)
-- [ ] S4 Register the wizard; Settings page links (0006 amendment); placeholder slot
-- [ ] S5 Accessibility, Czech translation, `.ts` fresh; screenshots of every step (light/dark, EN/CS, 960 × 600)
+- [x] S0 Prerequisite check: 0007 phases A and C done; 0006 done (otherwise stop and report)
+- [x] S1 `SetupWizard` steps, start-step mapping, platform variants + GTest
+- [x] S2 Path selection and validation for J-Link / nRF Util; dependency-status invalidation
+- [x] S3 Start-up check and trigger (ADR-0071) + settings keys + GTest (all trigger combinations)
+- [x] S4 Register the wizard; Settings page links (0006 amendment); placeholder slot
+- [x] S5 Accessibility, cs + de + sk + pl translation, `.ts` fresh; screenshots of every step (light/dark, EN/CS/DE,
+  960 × 600) taken offscreen by `tst_setup_wizard.qml` with `HWIO_SCREENSHOT_DIR` (not in the repository)
+- [ ] Manual checks (by the user, below)
 
 ## Tests and verification
 
@@ -238,3 +242,49 @@ The `schemaVersion` bump and its no-op migration are documented (0004 rule).
 - **J-Link installers on Linux** do not always install the udev rule (DEB does, tarball does not) — the USB step
   covers both.
 - **J-Link firmware update** is only hinted (open question 19).
+
+## Implementation notes (2026-11-06)
+
+Decisions of the implementation (Matej Strnad, 2026-11-06): the read-only probe step gets its flag through the new
+generic `WizardStep::embeddedOptions` (ADR-0290); the J-Link firmware actions of step 5 and the Done summary follow
+ADR-0291.
+
+- **Files:** `app/gui/src/wizard/setup_wizard.*`, `app/gui/qml/wizard/SetupStep.qml` (the control "setup-step"),
+  `app/gui/src/startup_check.*` (created in `main()` after the window, Qt child of `AppViewModel`),
+  `app/gui/assets/wizard/setup-welcome.svg` (placeholder), tests `app/gui/tests/wizard/setup_wizard_test.cpp`,
+  `app/gui/tests/wizard/wizard_coverage_test.cpp` (0035 § D, FirstRunSetup part), `app/gui/tests/tst_setup_wizard.qml`.
+- **Contract additions (plan 0007):** `embeddedOptions` (ADR-0290), the optional `enabled` key of
+  `WizardStep::actions` (ADR-0291) and an Embedded control on a step of any kind (ADR-0292). The setup wizard's control
+  `setup-step` shows what no standard kind renders: the language combo and "Don't show at start" on Welcome (kind Info),
+  the plain-text results with versions and paths, the commands, the file dialog and [Use automatic detection] on the
+  Checks steps, and the summary on Done. The step kinds stay those of this plan.
+- **Buttons:** step-specific navigation goes into the footer as `WizardStep::actions` ([Skip setup], [Continue anyway],
+  [Next] on a failed USB step, [Check again] where the default is Next / Skip, [Connect a device]); the path buttons
+  are in the control (the footer is too narrow in German at 960 × 600 for more).
+- **Step 3:** the commands are `diag::jlinkUdevCommands()` (three lines: the `uaccess` rule as
+  `60-hardwario-jlink.rules`, removal of an old `MODE="0666"` `99-jlink.rules`, udev reload; ADR-0185). Failed
+  (`usb.access_denied`) and Warning (`usb.world_accessible`) show them with their own body text; Skipped (no J-Link)
+  has [Next] as default and [Check again].
+- **Step 4:** not found / too old / device missing all have [Skip] as default and [Check again] as action; "minimum
+  versions" are `nrfutil::minimumCoreVersion` / `minimumDeviceVersion`. A chosen nrfutil is saved only when the check
+  is Ok (this plan's "only an Ok result is written"; the Settings page also saves an existing but too old nRF Util).
+  Plan 0038 D9 ([Install nRF Util…]) stays for its part B.
+- **Path validation:** the chosen file runs the step's check with the path as `LocatorOptions::option` (there is no
+  `overridePath`; `option` has the highest priority); only Ok saves it through `SettingsStore`, which makes
+  `DependencyStatus` re-check (it listens to `valueChanged`). With read-only settings the path buttons are hidden.
+- **Step 5:** checks `probes`, `probe-firmware`, `probe-holders` (as this plan; 0035 § A also names `usb-access`, which
+  step 3 covers). They run on entering the step, again when the set of probes in the picker changes and after a J-Link
+  firmware update has finished.
+- **Done:** heading "Setup finished" (the plan names none); [Close] is the dialog's Close button (no second default
+  button). `setup/completedVersion` (= `AppViewModel::version()`, the same value as
+  `QCoreApplication::applicationVersion()`) is written when Done is reached and by [Skip setup]; Back is not offered
+  on Done. Rows of steps that were not visited (started from an error) read "Not checked".
+- **Texts not given by the plan:** title "Setup"; body of the `usb.world_accessible` case; the read-only banner "Settings
+  were created by a newer version and are read-only. The setup cannot save anything."; summary results "Ready",
+  "Not ready", "Skipped", "Not checked"; file-dialog filters.
+- **Start-up:** `StartupCheck` does nothing with read-only settings or when the wizard is not registered; while another
+  wizard is open it decides once more when that one closes.
+- **Settings:** schema 3 with a no-op migration (`libs/core/src/settings.cpp`); keys registered by
+  `registerSetupWizard` (`setup/completedVersion` ≤ 64 characters, `setup/showAtStart` bool, default true).
+- **0035 B2:** `ble.permission_denied` names no wizard (ADR-0250); the "setup wizard is not available yet" sentences of
+  `docs/<lang>/troubleshooting.md` are replaced in all five languages.

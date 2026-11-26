@@ -1,6 +1,6 @@
 # ADR-0359 — User modes Basic, Advanced, Expert (Settings and expert actions), in 2.0.0-rc.4
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0392 (2026-11-23): the first-start mode question is the setup wizard's Welcome step; no separate mode view)
 - **Date:** 2026-11-12
 - **Decided by:** Matej Strnad (plan [0045](../features/0045-user-modes.md), D-1, D-2, D-2b, D-3, D-7)
 

@@ -17,6 +17,7 @@ QVariantMap WizardStep::toMap() const {
         {QStringLiteral("body"), body},
         {QStringLiteral("illustration"), illustration},
         {QStringLiteral("embedded"), embedded},
+        {QStringLiteral("embeddedOptions"), embeddedOptions},
         {QStringLiteral("commands"), commands},
         {QStringLiteral("choices"), choices},
         {QStringLiteral("primaryText"), primaryText},

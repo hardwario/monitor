@@ -9,6 +9,11 @@ Ta strona pomaga, gdy coś nie działa. Zaczyna się od najczęstszych problemó
 Każdy błąd ma krótki komunikat, prawdopodobną przyczynę i sugestię.
 
 - **Aplikacja desktopowa (`hwio-monitor`):** panel błędu pokazuje komunikat, **Probably:** (przyczynę) i **What to do:** (sugestię) oraz przycisk następnego kroku, na przykład **Reconnect**, **Open Settings** lub **Retry**. **Details** pokazuje kod błędu (na przykład `probe.not_found`) i szczegóły techniczne; **Copy** je kopiuje. **Learn more ↗** otwiera opis kodu błędu na tej stronie.
+- **Pomóż mi to rozwiązać** w panelu błędu otwiera kreator dla danego błędu: kreator połączenia, kreator konfiguracji,
+  wgrywanie z kreatorem lub temat rozwiązywania problemów dla danego błędu. **Pomoc** › **Rozwiązywanie problemów z
+  połączeniem…** wyświetla częste problemy. Kreatory otwierają się w obszarze strony karty ([Kreatory i inne
+  widoki](getting-started.md#guides-and-views)); na karcie sesji wsparcia kreator połączenia, kreator rozwiązywania
+  problemów i wgrywanie z kreatorem nie są dostępne.
 - **CLI (`hwio`):** błąd jest wypisywany na stderr:
 
   ```text
@@ -47,7 +52,7 @@ Kody błędów: [`dependency.jlink_not_found`](#dependency.jlink_not_found), [`d
 
 ### Uprawnienia USB w systemie Linux
 
-W systemie Linux Twoje konto użytkownika potrzebuje dostępu do J-Link przez USB. Pakiet `.deb` instaluje w tym celu regułę udev; w przypadku innych instalacji zainstaluj ją samodzielnie zgodnie z opisem w sekcji [Dostęp USB do J-Link](install.md#dostęp-usb-do-j-link). Następnie odłącz i ponownie podłącz J-Link i uruchom `hwio doctor`. Niektóre teksty błędów wspominają o kreatorze konfiguracji (setup wizard); nie jest on jeszcze dostępny, więc postępuj zgodnie ze stroną instalacji.
+W systemie Linux Twoje konto użytkownika potrzebuje dostępu do J-Link przez USB. Pakiet `.deb` instaluje w tym celu regułę udev; w przypadku innych instalacji zainstaluj ją samodzielnie zgodnie z opisem w sekcji [Dostęp USB do J-Link](install.md#dostęp-usb-do-j-link). Następnie odłącz i ponownie podłącz J-Link i uruchom `hwio doctor`. W aplikacji desktopowej **Pomoc** › **Kreator konfiguracji…** sprawdza dostęp USB i pokazuje polecenia dla reguły.
 
 Kody błędów: [`usb.access_denied`](#usb.access_denied), [`usb.world_accessible`](#usb.world_accessible).
 
@@ -346,7 +351,7 @@ Występuje, gdy połączenie USB z J-Link zostanie utracone podczas działania k
 - **Probably:** The udev rule for SEGGER devices is missing.
 - **What to do:** Install the udev rule shown in the setup wizard, then reconnect the J-Link. The rule gives access only to the user logged in at this computer; users connected only over SSH need their own udev rule.
 
-Tylko Linux. Kreator konfiguracji (setup wizard) wspomniany w tekście nie jest jeszcze dostępny: zainstaluj regułę udev zgodnie z opisem w sekcji [Dostęp USB do J-Link](install.md#dostęp-usb-do-j-link), a następnie uruchom `hwio doctor`, aby to sprawdzić.
+Tylko Linux. W aplikacji desktopowej **Pomóż mi to rozwiązać** lub **Pomoc** › **Kreator konfiguracji…** otwiera kreator konfiguracji w kroku Dostęp USB z poleceniami; bez aplikacji zainstaluj regułę udev zgodnie z opisem w sekcji [Dostęp USB do J-Link](install.md#dostęp-usb-do-j-link), a następnie uruchom `hwio doctor`, aby to sprawdzić.
 
 <a id="probe.held_by_program"></a>
 #### `probe.held_by_program`
@@ -376,7 +381,7 @@ Urządzenia Bluetooth są blokowane tak jak J-Link. Komunikat może podawać naz
 - **Probably:** A udev rule, usually /etc/udev/rules.d/99-jlink.rules from the SEGGER J-Link Software, makes the probe accessible to all accounts.
 - **What to do:** Remove that rule (or its MODE="0666"), install the rule shown in the setup wizard, then reconnect the J-Link. A J-Link Software update may install the rule again.
 
-Ostrzeżenie z `hwio doctor` w systemie Linux. Kreator konfiguracji (setup wizard) wspomniany w tekście nie jest jeszcze dostępny: zainstaluj regułę zgodnie z opisem w sekcji [Dostęp USB do J-Link](install.md#dostęp-usb-do-j-link).
+Ostrzeżenie z `hwio doctor` w systemie Linux. W aplikacji desktopowej **Pomoc** › **Kreator konfiguracji…** pokazuje polecenia w kroku Dostęp USB; bez aplikacji zainstaluj regułę zgodnie z opisem w sekcji [Dostęp USB do J-Link](install.md#dostęp-usb-do-j-link).
 
 <a id="category-target"></a>
 ### Cel (kod wyjścia 6)

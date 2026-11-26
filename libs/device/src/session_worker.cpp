@@ -59,6 +59,7 @@
 #include <filesystem>
 #include <format>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <optional>
 #include <span>
@@ -1422,16 +1423,29 @@ private:
         Clock::TimePoint deadline;
         std::chrono::milliseconds budget{0};
         bool timedOut = false;
+        // ADR-0296: the index (in diagnoseStepIds) of the last step that runs; later steps are
+        // neither run nor reported.
+        std::size_t lastStep = diagnoseStepIds.size() - 1;
+
+        [[nodiscard]] bool runs(std::string_view stepId) const {
+            // An iterator, not a pointer, in the MSVC STL.
+            // NOLINTNEXTLINE(readability-qualified-auto)
+            const auto it = std::ranges::find(diagnoseStepIds, stepId);
+            return std::cmp_less_equal(std::distance(diagnoseStepIds.begin(), it), lastStep);
+        }
     };
 
     // Reports one finished step (event + result list), in order.
     void finishStep(DiagnoseRun& run, DiagnoseStep step) {
+        if (!run.runs(step.id)) {
+            return; // after the stop point (ADR-0296): not reported
+        }
         if (step.status == diag::CheckStatus::Failed) {
             run.failed = true;
         }
+        const int steps = static_cast<int>(run.lastStep) + 1;
         const int index = static_cast<int>(run.result->checks.size()) + 1;
-        run.reporter->step(std::min(index + 1, static_cast<int>(diagnoseStepIds.size())),
-                           static_cast<int>(diagnoseStepIds.size()));
+        run.reporter->step(std::min(index + 1, steps), steps);
         flashLog(std::format("Diagnose {}: {} {}", step.id, diag::checkStatusId(step.status),
                              step.error ? step.error->detail : std::string()));
         if (run.result->checks.size() < maxDiagnoseSteps) {
@@ -1871,6 +1885,29 @@ private:
                     buffersStepBudget);
     }
 
+    // The steps of a Diagnose run in order. ADR-0296: a step group after the stop point never runs
+    // ("power" is not a stop point, so power and connect run together).
+    void runDiagnoseSteps(DiagnoseRun& run, bool keepRtt) {
+        m_diagnoseIdentity.reset();
+        diagnoseProbe(run);
+        if (run.runs("connect")) {
+            if (!run.failed && !run.cancelled) {
+                diagnosePowerAndConnect(run);
+            } else {
+                for (const std::string_view id : {"power", "connect"}) {
+                    (void)skipIfDone(run, id);
+                }
+            }
+        }
+        if (run.runs("identify")) {
+            const bool isProtected = diagnoseIdentify(run);
+            if (run.runs("rtt")) {
+                diagnoseRtt(run, isProtected, keepRtt);
+            }
+        }
+        m_diagnoseIdentity.reset();
+    }
+
     void runDiagnose(const OperationCommand& command, const std::stop_token& sessionStop) {
         std::stop_source operationStop;
         const std::stop_callback fromSession(sessionStop,
@@ -1889,7 +1926,6 @@ private:
                                    [this, id = command.id](const OperationProgress& progress) {
                                        emitProgress(id, progress);
                                    });
-        reporter.step(1, static_cast<int>(diagnoseStepIds.size()));
         flashLog(std::format("Operation diagnose on {} started", target.id));
         OperationResult result{.kind = command.kind,
                                .status = {},
@@ -1928,18 +1964,13 @@ private:
                         .reporter = &reporter,
                         .deadline = clock().now() + budget,
                         .budget = budget};
-        m_diagnoseIdentity.reset();
-        diagnoseProbe(run);
-        if (!run.failed && !run.cancelled) {
-            diagnosePowerAndConnect(run);
-        } else {
-            for (const std::string_view id : {"power", "connect"}) {
-                (void)skipIfDone(run, id);
-            }
+        if (!command.diagnoseLastStep.empty()) {
+            // NOLINTNEXTLINE(readability-qualified-auto)
+            const auto last = std::ranges::find(diagnoseStepIds, command.diagnoseLastStep);
+            run.lastStep = static_cast<std::size_t>(std::distance(diagnoseStepIds.begin(), last));
         }
-        const bool isProtected = diagnoseIdentify(run);
-        diagnoseRtt(run, isProtected, keepRtt);
-        m_diagnoseIdentity.reset();
+        reporter.step(1, static_cast<int>(run.lastStep) + 1);
+        runDiagnoseSteps(run, keepRtt);
         if (run.cancelled) {
             result.status = fail(ErrorCode::Cancelled);
         }

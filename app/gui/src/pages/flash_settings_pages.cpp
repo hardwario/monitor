@@ -15,6 +15,7 @@
 #include "viewmodels/shortcut_registry.h"
 #include "viewmodels/ui_mode.h"
 #include "viewmodels/ui_mode_controller.h"
+#include "wizard/flash_wizard.h"
 #include "wizard/lte_update_wizard.h"
 
 #include <QKeySequence>
@@ -71,6 +72,8 @@ void registerFlashAndSettingsPages(AppViewModel& app) {
                      &FirmwareServices::retranslate);
     // Plan 0033 (ADR-0234): the LTE firmware update wizard shares the firmware services.
     registerLteUpdateWizard(app, *services);
+    // Plan 0010 (0035): the guided flash of application firmware.
+    registerFlashWizard(app, *services);
 
     PageRegistry& pages = app.pageRegistry();
     pages.add(PageDescriptor{

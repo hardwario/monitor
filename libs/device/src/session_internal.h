@@ -96,7 +96,8 @@ struct OperationCommand {
     std::size_t size = 0;                   // ReadMemory
     AccessWidth width = AccessWidth::Bits8; // ReadMemory, WriteMemory (M6)
     std::vector<std::byte> data;            // WriteMemory (M6; WriteFlash uses `image`)
-    bool haltIfRunning = false;             // ReadRegisters (plan 0049, ADR-0372)
+    std::string diagnoseLastStep; // Diagnose: the last step that runs ("" = all, ADR-0296)
+    bool haltIfRunning = false;   // ReadRegisters (plan 0049, ADR-0372)
     std::stop_token stop;
 };
 

@@ -43,6 +43,7 @@
 #include <QtLogging>
 #include <QtTranslation>
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -743,9 +744,20 @@ Result<OperationId> DeviceSession::writeFlash(std::string_view targetId, std::ui
     return startOperation(std::move(command), targetId);
 }
 
-Result<OperationId> DeviceSession::diagnose(std::string_view targetId) {
+Result<OperationId> DeviceSession::diagnose(std::string_view targetId, std::string_view lastStep) {
+    // ADR-0296: the stop point is a step id after which nothing else runs; "power" cannot be one
+    // (a probe that cannot measure VTref is answered by the connect).
+    if (!lastStep.empty() && (lastStep == "power" || std::ranges::find(diagnoseStepIds, lastStep) ==
+                                                         diagnoseStepIds.end())) {
+        return std::unexpected(invalidOption(
+            localizedText("hwio::device",
+                          QT_TRANSLATE_NOOP("hwio::device", "Unknown last check \"%1\"."),
+                          {toQString(lastStep)}),
+            std::format("diagnose lastStep '{}'", lastStep)));
+    }
     detail::OperationCommand command;
     command.kind = OperationKind::Diagnose;
+    command.diagnoseLastStep = std::string(lastStep);
     return startOperation(std::move(command), targetId);
 }
 

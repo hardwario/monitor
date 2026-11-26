@@ -27,6 +27,7 @@ set(HWIO_GUI_QML_FILES
     qml/components/Icon.qml
     qml/components/Illustration.qml
     qml/components/PhaseStepper.qml
+    qml/components/ProbeList.qml
     qml/components/ShortcutsView.qml
     qml/components/StateDot.qml
     qml/components/StepSpinBox.qml
@@ -83,11 +84,17 @@ set(HWIO_GUI_QML_FILES
     qml/shell/DeviceBar.qml
     qml/shell/DeviceTabBar.qml
     qml/shell/HelpMenu.qml
-    qml/shell/ModeChoiceView.qml
+    qml/components/ModeCards.qml
     qml/shell/NavRail.qml
     qml/shell/PageHost.qml
     qml/settings/ConsoleSection.qml
-    qml/shell/TabView.qml)
+    qml/shell/TabView.qml
+    qml/wizard/FirmwareSourceStep.qml
+    qml/wizard/FlashSummaryStep.qml
+    qml/wizard/PhaseProgressStep.qml
+    qml/wizard/ProbePickerStep.qml
+    qml/wizard/SetupStep.qml
+    qml/wizard/WizardErrorStep.qml)
 set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 file(GLOB HWIO_GUI_ICONS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS
@@ -152,6 +159,8 @@ qt_add_qml_module(hwio_gui
         src/settings_store.h
         src/single_instance.cpp
         src/single_instance.h
+        src/startup_check.cpp
+        src/startup_check.h
         src/system_preferences.cpp
         src/system_preferences.h
         src/update_service.cpp
@@ -212,10 +221,24 @@ qt_add_qml_module(hwio_gui
         src/viewmodels/update_view_model.h
         src/wizard/check_list_model.cpp
         src/wizard/check_list_model.h
+        src/wizard/connect_wizard.cpp
+        src/wizard/connect_wizard.h
+        src/wizard/diagnose_runner.cpp
+        src/wizard/diagnose_runner.h
+        src/wizard/flash_wizard.cpp
+        src/wizard/flash_wizard.h
         src/wizard/lte_update_wizard.cpp
         src/wizard/lte_update_wizard.h
+        src/wizard/probe_picker_step.cpp
+        src/wizard/probe_picker_step.h
         src/wizard/report_view_model.cpp
         src/wizard/report_view_model.h
+        src/wizard/setup_wizard.cpp
+        src/wizard/setup_wizard.h
+        src/wizard/troubleshooting_topics.cpp
+        src/wizard/troubleshooting_topics.h
+        src/wizard/troubleshooting_wizard.cpp
+        src/wizard/troubleshooting_wizard.h
         src/wizard/wizard.cpp
         src/wizard/wizard.h
         src/wizard/wizard_launcher.cpp

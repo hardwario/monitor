@@ -8,6 +8,8 @@
   "Advanced" renamed "Expert")
 - **Depends on:** 0033 / ADR-0236 (expert maintenance actions), PageRegistry settings sections
 
+> **Amendment (plan [0056](0056-wizards-as-views-rc5.md), 2026-11-23):** the first-start mode question moved to the setup wizard's Welcome step (ADR-0392); `ModeChoiceView` and the `modeChoice` content view are removed; Settings › General › Mode is unchanged.
+
 ## Context
 
 Settings has grown to seven sections (General, Console, J-Link, nRF Util, AI assistants (MCP), Advanced, About) with

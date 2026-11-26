@@ -38,6 +38,10 @@ Ak sa nenájde žiadna sonda, stránka zobrazí **No J-Link probe found** a info
 Skontrolujte kábel USB a v Linuxe pravidlo udev ([Inštalácia](install.md#prístup-k-j-linku-cez-usb)). `hwio doctor`
 skontroluje všetko z toho.
 
+**Previesť ma** na tejto stránke alebo **Neviete, ako pripojiť? Previesť ma** pod zoznamom
+programátorov otvorí sprievodcu pripojením: pomôže vybrať programátor, pripojiť kábel a napájanie, skontroluje
+pripojenie a potom kartu pripojí.
+
 ### Možnosti pripojenia
 
 **⋯** (**Advanced**, rozšírené) v lište zariadenia obsahuje možnosti tejto sondy. HARDWARIO Monitor si ich pamätá podľa
@@ -92,10 +96,11 @@ Zmeny sa uplatnia okamžite. V slovenskom rozhraní sa režimy volajú **Základ
 ### Režimy
 
 **Mode** (režim) určuje, koľko toho nastavenia ukazujú. Pri prvom spustení (a raz po aktualizácii z verzie 2.0.0-rc.3
-alebo staršej) sa aplikácia opýta **How do you want to use HARDWARIO Monitor?**: vyberte režim a kliknite na
-**Continue**. Predvybraný je **Advanced**; ak ste v staršej verzii mali zapnutú voľbu **Show expert maintenance
-actions**, je to **Expert**. Zatvorením otázky zostane predvybraný režim. Zmeniť ho môžete kedykoľvek v **Settings ›
-General › Mode**.
+alebo staršej) sa v prvom kroku sprievodcu nastavením, **Vitajte**, aplikácia opýta **Ako chcete HARDWARIO Monitor
+používať?**: kliknite na režim alebo ho vyberte pomocou <kbd>↑</kbd> / <kbd>↓</kbd>. Predvybraný je **Advanced**; ak ste
+v staršej verzii mali zapnutú voľbu **Show expert maintenance actions**, je to **Expert**. Vybraný režim sa uloží, nech
+krok opustíte akokoľvek: **Ďalej**, **Preskočiť nastavenie**, **Zrušiť**, **×** alebo <kbd>Esc</kbd>. Zmeniť ho môžete
+kedykoľvek v **Settings › General › Mode**.
 
 | Zobrazené | Basic | Advanced | Expert |
 |---|---|---|---|
@@ -118,20 +123,37 @@ zobrazí sa počas tejto návštevy s poznámkou "Shown because it was needed.";
 **Help** (pomocník) v dolnej časti lišty:
 
 - **Keyboard shortcuts (F1)**: všetky klávesové skratky aplikácie (aj <kbd>Ctrl</kbd>+<kbd>/</kbd>).
+- **Sprievodca nastavením…**: skontroluje J-Link Software, prístup k USB (Linux), nRF Util a programátory.
+- **Pripojiť zariadenie…**: sprievodca pripojením (programátor, kábel, napájanie, živá kontrola, pripojenie).
+- **Riešiť problémy s pripojením…**: vyberte problém; sprievodca spustí kontroly a prevedie vás krok za krokom.
+- **Nahrať firmvér (so sprievodcom)…**: nahrá aplikačný firmvér krok za krokom ([Nahrávanie](flashing.md)).
+
+Tieto tri pracujú s aktuálnou kartou zariadenia (z karty nastavení: s naposledy zobrazenou kartou zariadenia). Pracujú
+so zariadením pripojeným k tomuto počítaču: na karte [relácie podpory](remote-support.md#join-a-session) sa neotvoria a
+oznámia to.
 - **Create diagnostic report…**: súbor zip pre podporu HARDWARIO ([Súkromie](privacy.md#diagnostická-správa)).
 - **Documentation ↗**: tieto stránky na GitHube, pre nainštalovanú verziu aplikácie a v jazyku aplikácie (anglicky,
   ak stránka nie je preložená).
 
+<a id="guides-and-views"></a>
 <a id="sprievodcovia-a-ďalšie-zobrazenia"></a>
 ### Sprievodcovia a ďalšie zobrazenia
 
-Sprievodcovia (napríklad **Update LTE firmware…**), diagnostická správa, klávesové skratky, aktualizácia firmvéru
-J-Linku, **Join support session…** a **Share with support…** sa otvoria v ploche stránky karty vedľa lišty; karty a
-lišta zostanú. **×** alebo <kbd>Esc</kbd> ich zatvorí a vráti sa predchádzajúca stránka. Prepnutie na inú kartu ich
-zatvorí tiež, okrem času, keď pracujú (zber diagnostickej správy, zápis firmvéru J-Linku).
+Sprievodcovia (sprievodca nastavením, sprievodca pripojením, sprievodca riešením problémov, nahrávanie so sprievodcom a
+**Update LTE firmware…**), diagnostická správa, klávesové skratky, aktualizácia firmvéru J-Linku, **Join support
+session…** a **Share with support…** sa otvoria v ploche stránky karty vedľa lišty; karty a lišta zostanú. **×** alebo
+<kbd>Esc</kbd> ich zatvorí a vráti sa predchádzajúca stránka. Prepnutie na inú kartu ich zatvorí tiež, okrem času, keď
+pracujú (zber diagnostickej správy, zápis firmvéru J-Linku).
 
 Kým sprievodca beží, môžete otvoriť ďalšie stránky karty, napríklad konzolu: **Wizard** (sprievodca) hore v lište (a
 malý odznak na karte zariadenia) vráti sprievodcu tam, kde bol. Každá karta zariadenia môže mať vlastného sprievodcu.
+Kým je otvorený sprievodca pripojením, sprievodca riešením problémov alebo nahrávanie so sprievodcom, **Vybrať iné
+zariadenie** tejto karty počká, kým ho nezatvoríte: zariadenie karty vyberá sprievodca. Pripojenie a odpojenie zostanú
+dostupné a sprievodca ich sleduje.
+
+Sprievodca nastavením, kým je otvorený, zakrýva plochu stránky všetkých kariet. Sprievodca, ktorý beží v karte,
+pokračuje pod ním (jeho odznak zostane) a znova sa ukáže, keď sa sprievodca nastavením zatvorí. Ostatní sprievodcovia sa
+spustia až po zatvorení sprievodcu nastavením (**Najprv dokončite alebo zatvorte sprievodcu nastavením.**).
 
 Keď niečo zlyhá, aplikácia ukáže, čo sa stalo, pravdepodobnú príčinu (**Probably:**) a čo robiť (**What to do:**).
 **Details** zobrazí kód chyby; [Riešenie problémov](troubleshooting.md) uvádza všetky kódy.

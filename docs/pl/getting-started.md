@@ -38,6 +38,10 @@ Jeśli nie znaleziono żadnej sondy, strona wyświetla **No J-Link probe found**
 Software. Sprawdź kabel USB, a w systemie Linux regułę udev ([Instalacja](install.md#dostęp-usb-do-j-link)).
 `hwio doctor` sprawdza to wszystko.
 
+**Poprowadź mnie** na tej stronie lub **Nie wiesz, jak połączyć? Poprowadź mnie** pod listą programatorów
+otwiera kreator połączenia: pomaga wybrać programator, podłączyć kabel i zasilanie, sprawdza połączenie, a potem łączy
+kartę.
+
 ### Opcje połączenia
 
 **⋯** (**Advanced**, zaawansowane) na pasku urządzenia zawiera opcje tej sondy. HARDWARIO Monitor zapamiętuje je
@@ -92,10 +96,11 @@ Zmiany obowiązują natychmiast. W polskim interfejsie tryby nazywają się **Po
 ### Tryby
 
 **Mode** (tryb) decyduje, ile pokazują ustawienia. Przy pierwszym uruchomieniu (i jeden raz po aktualizacji z wersji
-2.0.0-rc.3 lub starszej) aplikacja pyta **How do you want to use HARDWARIO Monitor?**: wybierz tryb i kliknij
-**Continue**. Wstępnie wybrany jest **Advanced**; jeśli w starszej wersji było włączone **Show expert maintenance
-actions**, jest to **Expert**. Zamknięcie pytania zachowuje wstępnie wybrany tryb. Zmienisz go w dowolnej chwili w
-**Settings › General › Mode**.
+2.0.0-rc.3 lub starszej) pierwszy krok kreatora konfiguracji, **Witaj**, pyta **Jak chcesz używać HARDWARIO Monitor?**:
+kliknij tryb lub wybierz go klawiszami <kbd>↑</kbd> / <kbd>↓</kbd>. Wstępnie wybrany jest **Advanced**; jeśli w starszej
+wersji było włączone **Show expert maintenance actions**, jest to **Expert**. Wybrany tryb zostaje zapisany niezależnie
+od tego, jak opuścisz ten krok: **Dalej**, **Pomiń konfigurację**, **Anuluj**, **×** lub <kbd>Esc</kbd>. Zmienisz go w
+dowolnej chwili w **Settings › General › Mode**.
 
 | Wyświetlane | Basic | Advanced | Expert |
 |---|---|---|---|
@@ -118,22 +123,40 @@ Settings**), jest ono wyświetlane podczas tej wizyty z uwagą „Shown because 
 **Help** (pomoc) na dole paska bocznego:
 
 - **Keyboard shortcuts (F1)**: wszystkie skróty klawiaturowe aplikacji (także <kbd>Ctrl</kbd>+<kbd>/</kbd>).
+- **Kreator konfiguracji…**: sprawdza J-Link Software, dostęp do USB (Linux), nRF Util i programatory.
+- **Połącz urządzenie…**: kreator połączenia (programator, kabel, zasilanie, sprawdzenie na żywo, połączenie).
+- **Rozwiązywanie problemów z połączeniem…**: wybierz problem; kreator uruchomi sprawdzenia i poprowadzi Cię krok
+  po kroku.
+- **Wgraj firmware (z kreatorem)…**: wgrywa firmware aplikacji krok po kroku ([Wgrywanie](flashing.md)).
+
+Te trzy działają na bieżącej karcie urządzenia (z karty ustawień: na ostatnio wyświetlonej karcie urządzenia). Działają
+z urządzeniem podłączonym do tego komputera: na karcie [sesji wsparcia](remote-support.md#join-a-session) się nie
+otwierają i informują o tym.
 - **Create diagnostic report…**: plik zip dla wsparcia technicznego HARDWARIO
   ([Prywatność](privacy.md#raport-diagnostyczny)).
 - **Documentation ↗**: te strony w serwisie GitHub, dla zainstalowanej wersji aplikacji i w języku aplikacji
   (po angielsku, jeśli strona nie jest przetłumaczona).
 
+<a id="guides-and-views"></a>
 <a id="kreatory-i-inne-widoki"></a>
 ### Kreatory i inne widoki
 
-Kreatory (na przykład **Update LTE firmware…**), raport diagnostyczny, skróty klawiaturowe, aktualizacja firmware
-J-Linka, **Join support session…** i **Share with support…** otwierają się w obszarze strony karty, obok paska
-bocznego; karty i pasek boczny pozostają. **×** lub <kbd>Esc</kbd> je zamyka i wraca poprzednia strona. Przełączenie
-na inną kartę również je zamyka, z wyjątkiem czasu, gdy pracują (zbieranie raportu, zapis firmware J-Linka).
+Kreatory (kreator konfiguracji, kreator połączenia, kreator rozwiązywania problemów, wgrywanie z kreatorem i **Update
+LTE firmware…**), raport diagnostyczny, skróty klawiaturowe, aktualizacja firmware J-Linka, **Join support session…** i
+**Share with support…** otwierają się w obszarze strony karty, obok paska bocznego; karty i pasek boczny pozostają.
+**×** lub <kbd>Esc</kbd> je zamyka i wraca poprzednia strona. Przełączenie na inną kartę również je zamyka, z wyjątkiem
+czasu, gdy pracują (zbieranie raportu, zapis firmware J-Linka).
 
 Podczas działania kreatora możesz otwierać inne strony karty, na przykład konsolę: **Wizard** (kreator) na górze paska
 bocznego (oraz mała plakietka na karcie urządzenia) przywraca kreator tam, gdzie był. Każda karta urządzenia może mieć
 własny kreator.
+Gdy otwarty jest kreator połączenia, kreator rozwiązywania problemów lub wgrywanie z kreatorem, **Wybierz inne
+urządzenie** tej karty czeka, aż go zamkniesz: urządzenie karty wybiera kreator. Połączenie i rozłączenie pozostają
+dostępne, a kreator za nimi podąża.
+
+Kreator konfiguracji, dopóki jest otwarty, zakrywa obszar strony wszystkich kart. Kreator działający w karcie pracuje
+dalej pod nim (jego plakietka pozostaje) i pojawia się ponownie po zamknięciu kreatora konfiguracji. Inne kreatory
+uruchamiają się dopiero po zamknięciu kreatora konfiguracji (**Najpierw zakończ lub zamknij kreator konfiguracji.**).
 
 Gdy coś się nie powiedzie, aplikacja pokazuje, co się stało, prawdopodobną przyczynę (**Probably:**) i co należy
 zrobić (**What to do:**). **Details** pokazuje kod błędu; [Rozwiązywanie problemów](troubleshooting.md) zawiera
