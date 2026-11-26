@@ -90,6 +90,14 @@ Error usage(const QString& message, std::string detail) {
     return error;
 }
 
+// ADR-0423: a given input path that does not exist is io.file_not_found (exit 3), not a usage
+// error; the message stays English (CLI, ADR-0027).
+Error fileNotFound(const QString& message, std::string detail) {
+    Error error = makeError(ErrorCode::IoFileNotFound, std::move(detail));
+    setUntranslatedText(error, ErrorText::Message, message.toStdString());
+    return error;
+}
+
 std::string kib(std::uint64_t bytes) { return std::format("{} KiB", (bytes + 1023) / 1024); }
 
 QJsonObject resultJson(std::string_view targetId, const OperationResult& result) {
@@ -298,9 +306,13 @@ Result<AppFlashOptions> resolveBackup(const Context& context, const GlobalOption
             copy = directory / copy; // a file name of the backups folder
         }
         if (!fs::is_regular_file(copy, ec)) {
-            return std::unexpected(usage(QStringLiteral("The application copy %1 does not exist.")
-                                             .arg(toQString(toUtf8(copy))),
-                                         "app flash --backup"));
+            const QString message = QStringLiteral("The application copy %1 does not exist.")
+                                        .arg(toQString(toUtf8(copy)));
+            // ADR-0423: a missing file is io (exit 3); a path that is there but not a file stays
+            // a usage error.
+            return std::unexpected(fs::exists(copy, ec)
+                                       ? usage(message, "app flash --backup")
+                                       : fileNotFound(message, "app flash --backup"));
         }
         // The serial of the file name ("<serial>-yyyyMMdd-HHmmss.hex").
         for (const auto& entry : device::ApplicationBackup::list(copy.parent_path())) {
@@ -713,8 +725,8 @@ Result<LteJob> prepareLte(const Context& context, const GlobalOptions& globals, 
         }
         std::error_code ec;
         if (!fs::exists(path, ec)) {
-            return std::unexpected(
-                usage(QStringLiteral("The file %1 does not exist.").arg(toQString(file)), file));
+            return std::unexpected(fileNotFound(
+                QStringLiteral("The file %1 does not exist.").arg(toQString(file)), file));
         }
         auto classified = firmware::classifyLteInput(path);
         if (!classified) {
@@ -975,7 +987,7 @@ Result<FlashInput> resolveFlashInput(const std::string& argument, const fs::path
         if (firmware::FirmwareId::looksLikeId(argument)) {
             return FlashCatalogId{.id = argument};
         }
-        return std::unexpected(usage(
+        return std::unexpected(fileNotFound(
             QStringLiteral("The path %1 does not exist (and it is not a 32-digit firmware ID).")
                 .arg(toQString(argument)),
             argument));

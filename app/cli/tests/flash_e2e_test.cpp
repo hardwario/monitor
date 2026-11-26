@@ -257,8 +257,8 @@ TEST_F(FlashCli, InputErrors) {
     const RunResult missing =
         hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
               QStringLiteral("flash"), path(QStringLiteral("missing.hex"))});
-    EXPECT_EQ(missing.exitCode, 2);
-    EXPECT_EQ(errorCode(missing), QStringLiteral("usage.invalid_argument"));
+    EXPECT_EQ(missing.exitCode, 3); // ADR-0423
+    EXPECT_EQ(errorCode(missing), QStringLiteral("io.file_not_found"));
 
     writeFile(QStringLiteral("bad.hex"), ":0100000001FF\n");
     const RunResult bad =
@@ -695,6 +695,13 @@ TEST_F(FlashCli, GuidedLteFlashCancelAfterTheEraseWritesBackAndListsTheCopy) {
                                  QStringLiteral("flash"), QStringLiteral("--backup"),
                                  QStringLiteral("latest"), path(QStringLiteral("lte.hex"))});
     EXPECT_NE(both.exitCode, 0);
+    // ADR-0423: a given copy that does not exist is io.file_not_found (exit 3).
+    const RunResult missing =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("flash"), QStringLiteral("--backup"),
+              path(QStringLiteral("missing-copy.hex"))});
+    EXPECT_EQ(missing.exitCode, 3) << missing.out << missing.err;
+    EXPECT_EQ(errorCode(missing), QStringLiteral("io.file_not_found"));
 }
 #endif
 

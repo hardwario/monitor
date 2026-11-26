@@ -194,7 +194,7 @@ Result<CommandResult> report(const Context& context, const GlobalOptions& global
     input.crashFiles = diag::recentCrashFiles(crash::defaultDirectory());
     input.settingsFile = Settings::defaultFilePath();
     input.createdUtc = QDateTime::currentDateTimeUtc().toString(Qt::ISODate).toStdString();
-    input.redaction = diag::currentRedaction();
+    input.redaction = diag::currentRedaction(*environmentContext.facts); // ADR-0427
     auto bytes = diag::ReportBuilder::writeZip(input, target, context.stop);
     if (!bytes) {
         return std::unexpected(std::move(bytes).error());

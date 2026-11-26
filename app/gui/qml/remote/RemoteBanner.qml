@@ -1,7 +1,10 @@
 // The remote support session banner of a device tab (plan/features/0044 § UX): the host's
 // "Shared with support — code 482 913" with [Copy link] [End sharing], the idle warning with
 // [Keep sharing], a remote operation in progress, and the joiner's "Waiting for the customer…" /
-// "The session ended." states. Presentation only: RemoteShareViewModel / RemoteJoinViewModel.
+// "The session ended." states; [Close tab] closes the tab (ADR-0429: leaving the session is the
+// device bar's Leave session). Plan 0062 (ADR-0436): on support's side "AI client active: <client>"
+// with [Stop AI] while support allowed an AI client for the session. Presentation only:
+// RemoteShareViewModel / RemoteJoinViewModel.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -111,8 +114,48 @@ ColumnLayout {
         Layout.fillWidth: true
         visible: banner.join !== null && banner.join.active && banner.join.bannerText !== ""
         text: banner.join ? banner.join.bannerText : ""
-        actionText: banner.join && (banner.join.state === "idle" || banner.join.state === "ended") ? qsTr("Leave") : ""
+        actionText: banner.join && (banner.join.state === "idle" || banner.join.state === "ended") ? qsTr("Close tab") : ""
         onActionTriggered: AppViewModel.closeTabObject(banner.tab, false)
         onDismissed: {}
+    }
+
+    Rectangle {
+        id: aiBanner
+
+        objectName: "remoteAiBanner"
+        Layout.fillWidth: true
+        visible: banner.join !== null && banner.join.active && banner.join.aiClientText !== ""
+        implicitHeight: aiRow.implicitHeight + 2 * Theme.spacingS
+        color: Theme.accentSoft
+        Accessible.role: Accessible.AlertMessage
+        Accessible.name: aiText.text
+
+        RowLayout {
+            id: aiRow
+
+            anchors.fill: parent
+            anchors.leftMargin: Theme.spacingM
+            anchors.rightMargin: Theme.spacingS
+            spacing: Theme.spacingS
+
+            Label {
+                id: aiText
+
+                objectName: "remoteAiText"
+                textFormat: Text.PlainText
+                Layout.fillWidth: true
+                wrapMode: Text.Wrap
+                color: Theme.text
+                text: banner.join ? banner.join.aiClientText : ""
+            }
+
+            HButton {
+                objectName: "remoteStopAi"
+                kind: "danger"
+                text: qsTr("Stop AI")
+                Accessible.name: qsTr("Stop the AI client in this session")
+                onClicked: banner.join.stopAi()
+            }
+        }
     }
 }

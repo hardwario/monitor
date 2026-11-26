@@ -1,5 +1,6 @@
 #include "hwio/remote/remote_console_session.h"
 
+#include "host_output_reader.h"
 #include "hwio/core/error.h"
 #include "hwio/core/firmware_identity.h"
 #include "hwio/core/json.h"
@@ -10,7 +11,6 @@
 #include "hwio/device/console_line.h"
 #include "hwio/device/console_log.h"
 #include "hwio/device/console_session.h"
-#include "hwio/device/line_assembler.h"
 #include "hwio/device/profile.h"
 #include "hwio/device/session_events.h"
 #include "hwio/remote/protocol.h"
@@ -19,6 +19,7 @@
 #include "hwio/remote/tunnel.h"
 
 #include <QCoreApplication>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QLatin1Char>
@@ -33,9 +34,12 @@
 #include <QtLogging>
 #include <QtTranslation>
 
+#include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <expected>
+#include <format>
 #include <map>
 #include <memory>
 #include <optional>
@@ -52,11 +56,96 @@ namespace {
 // Callers pass QT_TRANSLATE_NOOP / QT_TRANSLATE_N_NOOP literals so lupdate extracts them.
 QString trRemote(const char* text) { return QCoreApplication::translate("hwio::remote", text); }
 
+std::size_t utf8Size(const QString& text) { return static_cast<std::size_t>(text.toUtf8().size()); }
+
+// ADR-0430: what a received sync carried before sanitising (counts and lengths, never the text).
+struct RawSyncStats {
+    std::size_t entries = 0;
+    std::size_t outputs = 0;
+    std::size_t bytes = 0; // UTF-8 bytes of the commands and outputs as received
+    std::size_t lineFeeds = 0;
+};
+
+RawSyncStats rawSyncStats(const QJsonValue& commands) {
+    RawSyncStats stats;
+    const auto count = [&stats](const QString& text) {
+        stats.bytes += utf8Size(text);
+        stats.lineFeeds += static_cast<std::size_t>(text.count(QLatin1Char('\n')));
+    };
+    const QJsonArray array = commands.toArray();
+    for (const auto& value : array) {
+        const QJsonObject entry = value.toObject();
+        ++stats.entries;
+        count(entry.value(QStringLiteral("command")).toString());
+        const QJsonArray outputs = entry.value(QStringLiteral("response"))
+                                       .toObject()
+                                       .value(QStringLiteral("outputs"))
+                                       .toArray();
+        for (const auto& output : outputs) {
+            if (output.isString()) {
+                ++stats.outputs;
+                count(output.toString());
+            }
+        }
+    }
+    return stats;
+}
+
 } // namespace
+
+Status RemoteConsoleSession::hostOffers(const tunnel::HostHello& hello,
+                                        const tunnel::OpRequest& request) {
+    if (!hello.targets) {
+        // An older host (2.0.0-rc.4 / rc.5, ADR-0414): its ops / opKinds, the CHESTER targets
+        // app / lte, catalog firmware IDs only. Anything else would not decode there and get no
+        // answer at all.
+        if (!hello.ops) {
+            return std::unexpected(
+                makeError(ErrorCode::RemoteOperationUnsupportedPeer, "the host has no operations"));
+        }
+        if (!request.target.isChesterTarget() || request.prepared) {
+            return std::unexpected(makeError(ErrorCode::RemoteTargetUnsupported,
+                                             "the host offers the app and lte targets only"));
+        }
+        return {};
+    }
+    // A host that lists its targets: the target, its kind and its prepared firmware must be
+    // listed (the host validates again).
+    const tunnel::HostTarget* target = request.kind == tunnel::OpKind::LteUpdate
+                                           ? nullptr
+                                           : tunnel::findTarget(hello, request.target.id());
+    if (request.kind == tunnel::OpKind::LteUpdate) {
+        if (!tunnel::supports(hello, request.kind)) {
+            return std::unexpected(makeError(ErrorCode::RemoteOperationUnsupportedPeer,
+                                             "the host has no remote LTE update"));
+        }
+        return {};
+    }
+    if (target == nullptr ||
+        std::ranges::find(target->kinds, request.kind) == target->kinds.end()) {
+        return std::unexpected(
+            makeError(ErrorCode::RemoteTargetUnsupported,
+                      std::format("the host offers no {} on {}", tunnel::kindId(request.kind),
+                                  request.target.id())));
+    }
+    if (request.prepared &&
+        (!tunnel::hasCap(hello.caps, tunnel::cap::prepared) ||
+         std::ranges::find(target->prepared, *request.prepared, &tunnel::PreparedFirmware::id) ==
+             target->prepared.end())) {
+        return std::unexpected(makeError(ErrorCode::RemoteTargetUnsupported,
+                                         "the host has no such prepared firmware"));
+    }
+    if (request.firmwareId && !target->catalog) {
+        return std::unexpected(makeError(ErrorCode::RemoteFirmwareNotInCatalog,
+                                         "the target takes no catalog firmware"));
+    }
+    return {};
+}
 
 RemoteConsoleSession::RemoteConsoleSession(JoinOptions options)
     : m_options(std::move(options)),
-      m_log(m_options.consoleLog ? m_options.consoleLog : std::make_shared<device::ConsoleLog>()) {
+      m_log(m_options.consoleLog ? m_options.consoleLog : std::make_shared<device::ConsoleLog>()),
+      m_reader(std::make_unique<HostOutputReader>()) {
     m_connection.transport = device::Transport::Remote;
     m_idleTimer.setSingleShot(true);
     connect(&m_idleTimer, &QTimer::timeout, this, [this] {
@@ -109,6 +198,15 @@ RemoteConsoleSession::RemoteConsoleSession(JoinOptions options)
 RemoteConsoleSession::~RemoteConsoleSession() { closeSession(); }
 
 void RemoteConsoleSession::closeSession() {
+    // ADR-0439: Leave session, a closed tab and quitting tell a host that can read it (best
+    // effort, without waiting for an answer); stop() still sends what is queued before the socket
+    // closes. A lost connection sends nothing.
+    if (m_state != JoinState::Ended && m_relay && m_relay->isConnected() && m_hostHello &&
+        tunnel::hasCap(m_hostHello->caps, tunnel::cap::leave)) {
+        if (Status sent = sendTunnel(tunnel::Leave{}); !sent) {
+            qCInfo(log::lcRemote).noquote() << "Leave not sent:" << toQString(sent.error().detail);
+        }
+    }
     if (m_relay) {
         m_relay->stop();
     }
@@ -170,15 +268,27 @@ device::SessionIdentity RemoteConsoleSession::identity() const {
 
 device::Capabilities RemoteConsoleSession::capabilities() const {
     device::Capabilities capabilities;
-    if (m_hostHello && m_hostHello->ops) {
+    if (m_hostHello && tunnel::offersOperations(*m_hostHello)) { // plan 0059
         capabilities |= device::Capability::Operations;
     }
     return capabilities;
 }
 
+const device::DeviceProfile&
+RemoteConsoleSession::profileFor(const std::optional<tunnel::HostHello>& hello) {
+    // Plan 0059 (ADR-0415, D-6): the profile the host's hello names when this build knows it,
+    // else the neutral console profile. A host without `profile` in its hello (2.0.0-rc.4 /
+    // rc.5) and a host without a hello (the web Terminal: Bluetooth CHESTER) share CHESTERs only:
+    // their console keeps the CHESTER rules (see plan 0059 § Implementation notes, A2).
+    if (!hello || hello->profile.empty()) {
+        return *device::ProfileRegistry::find("chester");
+    }
+    const device::DeviceProfile* named = device::ProfileRegistry::find(hello->profile);
+    return named != nullptr ? *named : device::genericConsoleProfile();
+}
+
 const device::DeviceProfile& RemoteConsoleSession::profile() const {
-    // The remote device is a CHESTER (the only profile; its console rules apply to the view).
-    return *device::ProfileRegistry::find("chester");
+    return profileFor(m_hostHello);
 }
 
 Status RemoteConsoleSession::setFirmwareIdentity(std::optional<FirmwareIdentity> /*identity*/,
@@ -198,7 +308,9 @@ QString RemoteConsoleSession::title() const {
             .arg(device.isEmpty() ? session : device);
     }
     if (m_syncSeen) {
-        return trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1 — web Terminal")).arg(session);
+        // D12 (plan 0061): a host without a hello is the web Terminal or the mobile app.
+        return trRemote(QT_TRANSLATE_NOOP("hwio::remote", "%1 — web Terminal or mobile app"))
+            .arg(session);
     }
     return session;
 }
@@ -211,9 +323,16 @@ Status RemoteConsoleSession::sendTunnel(const tunnel::JoinerMessage& message) {
         return std::unexpected(
             makeError(ErrorCode::RemoteOperationUnsupportedPeer, "no host hello"));
     }
-    if (std::holds_alternative<tunnel::OpRequest>(message) && !m_hostHello->ops) {
+    if (const auto* request = std::get_if<tunnel::OpRequest>(&message)) {
+        if (Status offered = hostOffers(*m_hostHello, *request); !offered) {
+            return offered;
+        }
+    }
+    // ADR-0439: an older host rejects `leave` with a warning.
+    if (std::holds_alternative<tunnel::Leave>(message) &&
+        !tunnel::hasCap(m_hostHello->caps, tunnel::cap::leave)) {
         return std::unexpected(
-            makeError(ErrorCode::RemoteOperationUnsupportedPeer, "the host has no operations"));
+            makeError(ErrorCode::RemoteOperationUnsupportedPeer, "the host has no leave cap"));
     }
     m_relay->emitEvent(QStringLiteral("write"), tunnel::encodeJoiner(message), false);
     return {};
@@ -245,16 +364,7 @@ device::ConsoleLine RemoteConsoleSession::makeLine(device::Direction dir, const 
     line.text = sanitizeDeviceText(toStdString(text));
     // The device lines of the host (LineSource::Remote marks only this session's own markers).
     if (dir == device::Direction::Out) {
-        line.level = device::parseZephyrLevel(line.text);
-        const std::string_view shown = line.text;
-        if (line.level == device::LogLevel::None &&
-            device::isHexdumpLine(shown.starts_with('#') ? shown.substr(1) : shown)) {
-            // ADR-0171 (as BleConsoleHandler and the '#' rule of LineAssembler): the continuation
-            // lines of a log hexdump are log lines too, hidden by default like in a local tab.
-            line.level = device::LogLevel::Hexdump;
-        }
-        line.channel =
-            line.level != device::LogLevel::None ? device::Channel::Log : device::Channel::Shell;
+        classifyHostOutput(line);
     }
     return line;
 }
@@ -268,11 +378,17 @@ void RemoteConsoleSession::onTunnelAt(const QJsonValue& payload) {
     if (const auto* hello = std::get_if<tunnel::HostHello>(&*message)) {
         const bool first = !m_hostHello;
         m_hostHello = *hello;
+        m_reader->hostHello(); // ADR-0431: a Monitor host sends lines
         // ADR-0336: our tunnel objects only after the host's hello.
-        m_relay->emitEvent(QStringLiteral("write"),
-                           tunnel::encodeJoiner(tunnel::JoinerHello{
-                               .app = std::string(tunnel::appId), .version = m_options.appVersion}),
-                           false);
+        // Plan 0059 (ADR-0414): this joiner understands targets, detail codes and line-refused.
+        m_relay->emitEvent(
+            QStringLiteral("write"),
+            tunnel::encodeJoiner(tunnel::JoinerHello{
+                .app = std::string(tunnel::appId),
+                .version = m_options.appVersion,
+                .caps = {std::string(tunnel::cap::targets), std::string(tunnel::cap::detailCodes),
+                         std::string(tunnel::cap::refusedLines)}}),
+            false);
         if (first) {
             if (Status recorded = recordRemoteEvent(
                     trRemote(
@@ -295,6 +411,23 @@ void RemoteConsoleSession::onTunnelAt(const QJsonValue& payload) {
         // ADR-0364: validated by the codec (bounds, names, sanitised help).
         m_commandTree = commands->tree;
         emit commandTreeChanged();
+        return;
+    }
+    if (const auto* refused = std::get_if<tunnel::LineRefused>(&*message)) {
+        // Plan 0059 (ADR-0416): the customer's Monitor did not pass a line of support's.
+        if (Status recorded = recordRemoteEvent(
+                trRemote(QT_TRANSLATE_NOOP("hwio::remote",
+                                           "— The customer's Monitor refused this command: it "
+                                           "changes the device's keys or identity —"))
+                    .toStdString());
+            !recorded) {
+            qCWarning(log::lcRemote).noquote()
+                << "Remote event not recorded:" << toQString(recorded.error().detail);
+        }
+        // Plan 0062 (A1): for the MCP send_command of an AI client (an error with this id). A copy:
+        // a slot may end this session.
+        const QString code = toQString(refused->code);
+        emit lineRefused(code);
         return;
     }
     if (std::holds_alternative<tunnel::HostEnd>(*message)) {
@@ -333,16 +466,87 @@ void RemoteConsoleSession::onAt(const QJsonValue& payload) {
         }
         return;
     }
+    if (event == QStringLiteral("end") && !m_hostHello) {
+        // ADR-0431 (D11): the HARDWARIO mobile app's `at` {event: "end", data: null} when it stops
+        // sharing; like the tunnel `end` of a Monitor host (ADR-0354).
+        end(makeError(ErrorCode::RemoteHostEnded, "the host ended the session: at end"));
+        return;
+    }
     if (!data.isString()) {
         return; // the web Terminal ignores other events too
     }
-    if (event == QStringLiteral("write")) {
-        appendLines({makeLine(device::Direction::In, data.toString())});
-    } else if (event == QStringLiteral("read")) {
-        if (m_connection.state != device::ConnectionState::Connected) {
-            setConnection(device::ConnectionState::Connected); // output proves the link works
+    const bool write = event == QStringLiteral("write");
+    if (!write && event != QStringLiteral("read")) {
+        return;
+    }
+    if (!write && m_connection.state != device::ConnectionState::Connected) {
+        setConnection(device::ConnectionState::Connected); // output proves the link works
+    }
+    const QString text = data.toString();
+    QList<device::ConsoleLine> lines;
+    if (write) {
+        lines.append(makeLine(device::Direction::In, text));
+        m_reader->commandShown();
+    } else {
+        // ADR-0431: one line (a Monitor or web Terminal host) or a piece of the stream (the mobile
+        // app): the reader assembles the lines.
+        for (device::ConsoleLine& line : m_reader->read(text, std::chrono::system_clock::now())) {
+            lines.append(std::move(line));
         }
-        appendLines({makeLine(device::Direction::Out, data.toString())});
+    }
+    std::size_t bytesAfter = 0;
+    for (device::ConsoleLine& line : lines) {
+        hideSecrets(line);
+        bytesAfter += line.text.size();
+    }
+    // ADR-0430: counts and lengths of the event before and after sanitising, never the text.
+    qCDebug(log::lcRemote).noquote() << QString::fromStdString(std::format(
+        "Joiner {} received: {} bytes, {} line feeds; {} lines, {} bytes after sanitising{}",
+        write ? "write" : "read", utf8Size(text), text.count(QLatin1Char('\n')), lines.size(),
+        bytesAfter, m_reader->streamMode() ? " (stream)" : ""));
+    if (!lines.isEmpty()) {
+        appendLines(std::move(lines));
+    }
+}
+
+void RemoteConsoleSession::hideSecrets(device::ConsoleLine& line) const {
+    // ADR-0432 (D9): a host without a hello (web Terminal, mobile app) hides nothing; the console
+    // file's rules apply before a line enters the log (screen, Copy, Save view, the CLI). A Monitor
+    // host has hidden them already (ADR-0356, ADR-0432 D10).
+    if (m_hostHello) {
+        return;
+    }
+    if (auto redacted = m_redaction.redacted(line)) {
+        line.text = std::move(*redacted);
+    }
+}
+
+void RemoteConsoleSession::appendHistory(const Transcript& transcript,
+                                         QList<device::ConsoleLine>& lines) {
+    // ADR-0431: the log is replaced; a history in stream form (the mobile app) is read like the
+    // live output: no prompt lines, no empty line right after a command or a prompt.
+    m_reader->restart();
+    if (transcript.streamForm()) {
+        m_reader->streamSeen();
+    }
+    for (const TranscriptEntry& entry : transcript.entries()) {
+        if (entry.command != QString::fromLatin1(deviceOutputCommand) || entry.index != 0) {
+            lines.append(makeLine(device::Direction::In, entry.command));
+            m_reader->commandShown();
+        }
+        for (const QString& output : entry.outputs) {
+            device::ConsoleLine line = makeLine(device::Direction::Out, output);
+            if (m_reader->keepHistoryLine(line)) {
+                lines.append(std::move(line));
+            }
+        }
+    }
+    if (!transcript.unfinishedTail().isEmpty()) {
+        // The newest entry's unfinished line (usually the prompt) continues in the live output.
+        for (device::ConsoleLine& line :
+             m_reader->read(transcript.unfinishedTail(), std::chrono::system_clock::now())) {
+            lines.append(std::move(line));
+        }
     }
 }
 
@@ -358,6 +562,7 @@ void RemoteConsoleSession::onSync(const QJsonValue& payload) {
         emit warning(transcript.error());
         return;
     }
+    const RawSyncStats raw = rawSyncStats(sync.value(QStringLiteral("commands")));
     m_syncSeen = true;
     m_log->clear(device::ChannelMask::All);
     QList<device::ConsoleLine> lines;
@@ -375,19 +580,29 @@ void RemoteConsoleSession::onSync(const QJsonValue& payload) {
         lines.append(marker(trRemote(
             QT_TRANSLATE_NOOP("hwio::remote", "— Older history of the session was left out —"))));
     }
-    for (const TranscriptEntry& entry : transcript->entries()) {
-        if (entry.command != QString::fromLatin1(deviceOutputCommand) || entry.index != 0) {
-            lines.append(makeLine(device::Direction::In, entry.command));
-        }
-        for (const QString& output : entry.outputs) {
-            lines.append(makeLine(device::Direction::Out, output));
-        }
+    appendHistory(*transcript, lines);
+    for (device::ConsoleLine& line : lines) {
+        hideSecrets(line);
     }
     // The views reload the replaced log (transcriptReplaced); consumers that only follow
     // linesReceived (the CLI) get the history as new lines.
+    std::size_t shownLines = 0;
+    std::size_t shownBytes = 0;
+    std::size_t emptyLines = 0;
     for (device::ConsoleLine& line : lines) {
+        if (line.dir != device::Direction::Marker) {
+            ++shownLines;
+            shownBytes += line.text.size();
+            emptyLines += line.text.empty() ? 1 : 0;
+        }
         line.seq = m_log->append(line);
     }
+    // ADR-0430: one line per sync, counts and lengths only.
+    qCDebug(log::lcRemote).noquote() << QString::fromStdString(std::format(
+        "Joiner sync received: {} entries, {} output strings, {} bytes, {} line feeds; "
+        "kept {} entries, truncated: {}; {} lines, {} bytes after sanitising, {} empty",
+        raw.entries, raw.outputs, raw.bytes, raw.lineFeeds, transcript->entries().size(),
+        transcript->truncated() ? "yes" : "no", shownLines, shownBytes, emptyLines));
     emit linesReceived(lines);
     const QString state = sync.value(QStringLiteral("state")).toString();
     if (state == QStringLiteral("connected")) {

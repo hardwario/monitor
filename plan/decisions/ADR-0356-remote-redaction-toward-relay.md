@@ -1,6 +1,8 @@
 # ADR-0356 — Remote session: secrets are redacted in everything the host sends to the relay
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by [ADR-0432](ADR-0432-remote-secrets-both-directions.md), plan 0061: the host
+  uses the console file's redaction, also for a secret command in the output; the joiner hides secrets of a host
+  without a hello)
 - **Date:** 2026-11-10
 - **Decided by:** Matej Strnad (plan [0044](../features/0044-remote-support-session.md) implementation, asked by the
   implementing agent)

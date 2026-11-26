@@ -17,6 +17,11 @@ everything it stores stays on your computer.
 The MCP server (`hwio mcp --http`) listens only on this computer (127.0.0.1) and is not reachable from the network.
 SEGGER J-Link Software and nRF Util are separate programs with their own behaviour.
 
+In the desktop app, support can turn on **AI clients may use remote support sessions** (off by default). After
+support allows it for a session, the console text of a customer's remote session goes to the AI client support uses,
+and through it to the client's provider. Secret values are hidden by their names, as in the console files: secrets of
+firmware HARDWARIO Monitor does not know are not recognised. See [MCP server](mcp.md#remote-support-sessions).
+
 ## Update check
 
 The desktop app asks GitHub for the list of HARDWARIO Monitor releases 10 seconds after it starts, at most once in
@@ -46,7 +51,9 @@ app, or `hwio diag report` (`-o FILE`). It is a zip file with:
 - the latest crash reports, if there are any.
 
 Before it is written, your user name, home folder and computer name are replaced (`<user>`, `~`, `<host>`), and values
-that look like passwords, tokens or keys are replaced by `<redacted>`. Probe serial numbers stay in it. The logs may
+that look like passwords, tokens or keys are replaced by `<redacted>`. The address of your computer's Bluetooth
+adapter is replaced by `<adapter address>` (the app and `hwio doctor` still show it). Probe serial numbers and the
+addresses of your devices stay in it. The logs may
 contain output of your device, so look through the report before you send it. Console files and the command history
 are not part of the report.
 

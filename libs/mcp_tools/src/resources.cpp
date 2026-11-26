@@ -7,6 +7,7 @@
 #include "hwio/mcp/request_context.h"
 #include "hwio/mcp/tools/device_provider.h"
 #include "hwio/mcp/tools/tools_context.h"
+#include "remote_support.h"
 #include "tool_support.h"
 
 #include <QChar>
@@ -30,9 +31,11 @@ QString compact(const QJsonObject& json) {
 
 // One text line per console line: device output as it is, commands as "> <command>", markers as
 // they are.
-QString linesText(const std::vector<hwio::device::ConsoleLine>& lines) {
+// Plan 0062 (ADR-0437): the lines in the device's hidden view.
+QString linesText(const DeviceRef& ref, const std::vector<hwio::device::ConsoleLine>& lines) {
     QString text;
-    for (const hwio::device::ConsoleLine& line : lines) {
+    for (const hwio::device::ConsoleLine& stored : lines) {
+        const hwio::device::ConsoleLine line = visibleLine(ref, stored);
         if (!text.isEmpty()) {
             text += QLatin1Char('\n');
         }
@@ -45,7 +48,7 @@ QString linesText(const std::vector<hwio::device::ConsoleLine>& lines) {
 }
 
 hwio::mcp::ResourceReader linesReader(ToolsContext& context, hwio::device::Channel channel) {
-    return [&context, channel](const hwio::mcp::RequestContext&, const QString& uri,
+    return [&context, channel](const hwio::mcp::RequestContext& rc, const QString& uri,
                                const std::map<QString, QString>& variables) {
         const auto it = variables.find(QStringLiteral("id"));
         if (it == variables.end()) {
@@ -55,12 +58,55 @@ hwio::mcp::ResourceReader linesReader(ToolsContext& context, hwio::device::Chann
         if (!ref || !ref->alive()) {
             return hwio::mcp::ResourceReadResult::notFound();
         }
+        if (!visibleTo(*ref, rc.clientKey)) { // plan 0062 (ADR-0436)
+            return hwio::mcp::ResourceReadResult::failed(
+                remoteNotAllowedYet(it->second.toStdString()));
+        }
         const auto mask = channel == hwio::device::Channel::Shell ? hwio::device::ChannelMask::Shell
                                                                   : hwio::device::ChannelMask::Log;
         return hwio::mcp::ResourceReadResult::text(
             uri, QStringLiteral("text/plain"),
-            linesText(ref->console->log().last(resourceLines, mask)));
+            linesText(*ref, ref->console->log().last(resourceLines, mask)));
     };
+}
+
+// The open devices' resources for the client of `rc` (plan 0062: a remote device nameless before
+// support's Allow).
+std::vector<hwio::mcp::ResourceInfo> deviceResources(ToolsContext& context,
+                                                     const hwio::mcp::RequestContext& rc) {
+    std::vector<hwio::mcp::ResourceInfo> resources;
+    for (const DeviceEntry& entry : context.provider().list()) {
+        if (entry.state != DeviceEntry::State::Open) {
+            continue;
+        }
+        QString name = qs(entry.displayName.empty() ? entry.id : entry.displayName);
+        if (entry.kind == "remote") { // plan 0062: nameless before support's Allow
+            const auto ref = context.provider().find(entry.id);
+            if (!ref || !ref->alive()) {
+                continue;
+            }
+            name = visibleTo(*ref, rc.clientKey) ? visibleText(*ref, name) : qs(remoteNamelessName);
+        }
+        resources.push_back(
+            hwio::mcp::ResourceInfo{.uri = deviceUri(entry.id, QStringLiteral("status")),
+                                    .name = name + QStringLiteral(" status"),
+                                    .title = {},
+                                    .description = {},
+                                    .mimeType = QStringLiteral("application/json")});
+        resources.push_back(
+            hwio::mcp::ResourceInfo{.uri = deviceUri(entry.id, QStringLiteral("log")),
+                                    .name = name + QStringLiteral(" log"),
+                                    .title = {},
+                                    .description = {},
+                                    .mimeType = QStringLiteral("text/plain")});
+        resources.push_back(
+            hwio::mcp::ResourceInfo{.uri = deviceUri(entry.id, QStringLiteral("terminal")),
+                                    .name = name + QStringLiteral(" terminal"),
+                                    .title = {},
+                                    .description = {},
+                                    .mimeType = QStringLiteral("text/plain")});
+    }
+    return resources;
 }
 
 } // namespace
@@ -80,11 +126,11 @@ hwio::Status registerResources(hwio::mcp::Registry& registry, ToolsContext& cont
                            "default all_ble=false).",
             .mimeType = "application/json",
             .read =
-                [&context](const hwio::mcp::RequestContext&, const QString& uri,
+                [&context](const hwio::mcp::RequestContext& rc, const QString& uri,
                            const std::map<QString, QString>&) {
                     return hwio::mcp::ResourceReadResult::text(
                         uri, QStringLiteral("application/json"),
-                        compact(devicesJson(context.provider())));
+                        compact(devicesJson(context.provider(), rc.clientKey)));
                 }});
         !added) {
         return added;
@@ -97,7 +143,7 @@ hwio::Status registerResources(hwio::mcp::Registry& registry, ToolsContext& cont
                            "(same shape as one entry of the status tool).",
             .mimeType = "application/json",
             .read =
-                [&context](const hwio::mcp::RequestContext&, const QString& uri,
+                [&context](const hwio::mcp::RequestContext& rc, const QString& uri,
                            const std::map<QString, QString>& variables) {
                     const auto it = variables.find(QStringLiteral("id"));
                     if (it == variables.end()) {
@@ -107,6 +153,9 @@ hwio::Status registerResources(hwio::mcp::Registry& registry, ToolsContext& cont
                     const auto ref = context.provider().find(id);
                     if (!ref || !ref->alive()) {
                         return hwio::mcp::ResourceReadResult::notFound();
+                    }
+                    if (!visibleTo(*ref, rc.clientKey)) { // plan 0062 (ADR-0436)
+                        return hwio::mcp::ResourceReadResult::failed(remoteNotAllowedYet(id));
                     }
                     return hwio::mcp::ResourceReadResult::text(uri,
                                                                QStringLiteral("application/json"),
@@ -138,34 +187,8 @@ hwio::Status registerResources(hwio::mcp::Registry& registry, ToolsContext& cont
         !added) {
         return added;
     }
-    registry.setResourceLister([&context](const hwio::mcp::RequestContext&) {
-        std::vector<hwio::mcp::ResourceInfo> resources;
-        for (const DeviceEntry& entry : context.provider().list()) {
-            if (entry.state != DeviceEntry::State::Open) {
-                continue;
-            }
-            const QString name = qs(entry.displayName.empty() ? entry.id : entry.displayName);
-            resources.push_back(
-                hwio::mcp::ResourceInfo{.uri = deviceUri(entry.id, QStringLiteral("status")),
-                                        .name = name + QStringLiteral(" status"),
-                                        .title = {},
-                                        .description = {},
-                                        .mimeType = QStringLiteral("application/json")});
-            resources.push_back(
-                hwio::mcp::ResourceInfo{.uri = deviceUri(entry.id, QStringLiteral("log")),
-                                        .name = name + QStringLiteral(" log"),
-                                        .title = {},
-                                        .description = {},
-                                        .mimeType = QStringLiteral("text/plain")});
-            resources.push_back(
-                hwio::mcp::ResourceInfo{.uri = deviceUri(entry.id, QStringLiteral("terminal")),
-                                        .name = name + QStringLiteral(" terminal"),
-                                        .title = {},
-                                        .description = {},
-                                        .mimeType = QStringLiteral("text/plain")});
-        }
-        return resources;
-    });
+    registry.setResourceLister(
+        [&context](const hwio::mcp::RequestContext& rc) { return deviceResources(context, rc); });
     return {};
 }
 

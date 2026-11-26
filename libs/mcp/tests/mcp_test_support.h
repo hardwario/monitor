@@ -69,9 +69,10 @@ public:
     };
 
     Mode mode = Mode::Allow;
-    std::vector<ConsentRequest> requests;   // every request, in order
-    std::vector<std::string> gone;          // clientGone() keys
-    std::map<std::size_t, Pending> pending; // Manual mode, by request index
+    ConsentGrant allowedAs = ConsentGrant::Prompted; // how Mode::Allow allows (plan 0062 tests)
+    std::vector<ConsentRequest> requests;            // every request, in order
+    std::vector<std::string> gone;                   // clientGone() keys
+    std::map<std::size_t, Pending> pending;          // Manual mode, by request index
 
     std::function<void()> request(ConsentRequest request,
                                   std::function<void(ConsentDecision)> done) override {
@@ -79,7 +80,7 @@ public:
         requests.push_back(request);
         switch (mode) {
         case Mode::Allow:
-            done(ConsentGrant::Prompted);
+            done(allowedAs);
             return {};
         case Mode::Deny:
             done(std::unexpected(makeError(ErrorCode::McpToolNotAllowed)));

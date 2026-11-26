@@ -62,14 +62,19 @@ constexpr const char* flashDescription =
     "the user's permission (flash; uicr with allow_uicr). The console history is NOT cleared: "
     "read only the new firmware's output with read_log / read_terminal "
     "after_cursor=log_cursor_end of the result, and use wait_for_connection to wait for the "
-    "console. Common images: build/merged.hex, build/zephyr/merged.hex. J-Link only.";
+    "console. Common images: build/merged.hex, build/zephyr/merged.hex. J-Link only. On a "
+    "customer's device (remote:<n>) only `catalog_id` or `prepared_id` (a prepared "
+    "firmware the device's remote.operations list) works; the customer is asked first and the "
+    "call waits for the customer's Monitor.";
 
 constexpr const char* flashLteDescription =
     "Update the LTE modem MCU (CHESTER target \"lte\"): `path` is an absolute path to a Nordic "
     "modem firmware zip (mfw_nrf91x...zip), an LTE bundle zip (modem.zip + application.hex) or "
     "an application .hex for the LTE MCU. Modem firmware updates take several minutes (typically "
     "3-10 min) and need nRF Util; progress is reported. Needs the user's permission (flash). "
-    "Afterwards read new output with after_cursor=log_cursor_end of the result. J-Link only.";
+    "Afterwards read new output with after_cursor=log_cursor_end of the result. J-Link only. On "
+    "a customer's device (remote:<n>) leave `path` out: the customer's HARDWARIO Monitor uses its "
+    "recommended LTE firmware after the customer agreed.";
 
 constexpr const char* eraseDescription =
     "Erase the flash of a target MCU. scope \"code\" keeps the UICR and the Product Information "
@@ -421,6 +426,10 @@ hwio::Status addFlash(hwio::mcp::Registry& registry, ToolsContext& context) {
                     .property(QStringLiteral("catalog_id"),
                               Schema::string(QStringLiteral("32-digit HARDWARIO firmware id."))
                                   .pattern(QStringLiteral("^[0-9a-fA-F]{32}$")))
+                    .property(QStringLiteral("prepared_id"),
+                              Schema::string(QStringLiteral("A customer's device only: the id of "
+                                                            "a prepared firmware it lists."))
+                                  .pattern(QStringLiteral("^[a-z0-9-]{1,32}$")))
                     .property(QStringLiteral("target"), targetArgument())
                     .property(
                         QStringLiteral("allow_uicr"),
@@ -434,6 +443,12 @@ hwio::Status addFlash(hwio::mcp::Registry& registry, ToolsContext& context) {
             .marker = true,
             .start = [&context](const hwio::mcp::RequestContext& rc, const QJsonObject& args,
                                 hwio::mcp::ToolEnv& env) -> std::unique_ptr<hwio::mcp::ToolCall> {
+                if (args.contains(QStringLiteral("prepared_id"))) { // plan 0062
+                    return failed(invalidArgument(
+                        QStringLiteral("prepared_id works only on a customer's device "
+                                       "(remote:<n>); use path or catalog_id."),
+                        "prepared_id"));
+                }
                 auto device = resolveJLinkDevice(context.provider(), args);
                 if (!device) {
                     return failed(std::move(device).error());
@@ -449,10 +464,12 @@ hwio::Status addFlash(hwio::mcp::Registry& registry, ToolsContext& context) {
                            const hwio::mcp::Limits&) -> std::optional<hwio::mcp::ValidationError> {
                 const bool path = args.contains(QStringLiteral("path"));
                 const bool id = args.contains(QStringLiteral("catalog_id"));
-                if (path == id) {
+                const bool prepared = args.contains(QStringLiteral("prepared_id"));
+                if (static_cast<int>(path) + static_cast<int>(id) + static_cast<int>(prepared) !=
+                    1) {
                     return invalid(path ? QStringLiteral("catalog_id") : QStringLiteral("path"),
-                                   QStringLiteral("exactly one of path and catalog_id is "
-                                                  "required"));
+                                   QStringLiteral("exactly one of path, catalog_id and "
+                                                  "prepared_id is required"));
                 }
                 return std::nullopt;
             }});
@@ -470,11 +487,12 @@ hwio::Status addFlashLte(hwio::mcp::Registry& registry, ToolsContext& context) {
                     .property(QStringLiteral("device"), deviceArgument())
                     .property(
                         QStringLiteral("path"),
-                        Schema::string(QStringLiteral("Absolute path to a modem firmware zip, an "
-                                                      "LTE bundle zip or a .hex file."))
+                        Schema::string(
+                            QStringLiteral("Absolute path to a modem firmware zip, an "
+                                           "LTE bundle zip or a .hex file (required, except on a "
+                                           "customer's device)."))
                             .minLength(1)
-                            .maxLength(1024),
-                        hwio::mcp::Required::Yes)
+                            .maxLength(1024))
                     .json(),
             .outputSchema = operationOutputSchema(),
             .annotations = destructive,
@@ -485,6 +503,10 @@ hwio::Status addFlashLte(hwio::mcp::Registry& registry, ToolsContext& context) {
                 auto device = resolveJLinkDevice(context.provider(), args);
                 if (!device) {
                     return failed(std::move(device).error());
+                }
+                // Plan 0062: `path` is optional in the schema (a customer's device takes none).
+                if (!args.contains(QStringLiteral("path"))) {
+                    return failed(invalidArgument(QStringLiteral("path is required."), "path"));
                 }
                 QJsonObject targetArgs = args;
                 targetArgs.insert(QStringLiteral("target"), QStringLiteral("lte"));

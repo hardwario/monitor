@@ -8,6 +8,7 @@ add_executable(hwio_mcp_tools_tests
     console_tools_test.cpp
     discovery_tools_test.cpp
     main.cpp
+    remote_tools_test.cpp
     resources_test.cpp
     tools_test_support.h)
 # The fake J-Link and the fake BLE backend exist only with HWIO_TEST_OVERRIDES (ADR-0127).

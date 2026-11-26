@@ -5,17 +5,21 @@
 #include "hwio/core/error.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/session_events.h"
+#include "hwio/remote/remote_console_session.h"
+#include "hwio/remote/session_code.h"
 #include "settings_store.h"
 #include "viewmodels/app_view_model.h"
 #include "viewmodels/connection_view_model.h"
 #include "viewmodels/device_tab_view_model.h"
 #include "viewmodels/error_info.h"
+#include "viewmodels/remote_join_view_model.h"
 
 #include <QLocale>
 #include <QSettings>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
+#include <QUrl>
 #include <QVariantList>
 #include <QVariantMap>
 #include <QtContainerFwd>
@@ -347,6 +351,47 @@ TEST_F(ConnectionTest, AtMost32ProbesAreRemembered) {
     EXPECT_TRUE(connection().autoSpeed());
     ASSERT_TRUE(tab().configure(QStringLiteral("chester"), QStringLiteral("app"), 39));
     EXPECT_EQ(connection().speedKhz(), 1039);
+}
+
+// Plan 0061 (ADR-0429): a remote support tab's button is Leave session / Join again from the join
+// state (enabled without a probe); leaving keeps the tab with a marker and its own banner text.
+// The relay is a closed loopback port: nothing is reached, the checks run before the failure.
+TEST_F(ConnectionTest, RemoteTabLeavesAndJoinsAgain) {
+    ASSERT_TRUE(tab().configureRemote(QStringLiteral("482913"),
+                                      QUrl(QStringLiteral("https://127.0.0.1:1"))));
+    ConnectionViewModel& vm = connection();
+    hwio::gui::RemoteJoinViewModel& join = *tab().remoteJoin();
+    EXPECT_EQ(vm.action(), QStringLiteral("leave"));
+    EXPECT_TRUE(vm.actionEnabled());
+    EXPECT_TRUE(vm.actionBlockedReason().isEmpty());
+
+    vm.connectDevice();
+    ASSERT_NE(tab().remoteSession(), nullptr);
+    EXPECT_EQ(join.state(), QStringLiteral("connecting"));
+    EXPECT_EQ(vm.action(), QStringLiteral("leave"));
+    EXPECT_TRUE(vm.actionEnabled());
+
+    vm.triggerAction(); // Leave session
+    EXPECT_EQ(tab().remoteSession(), nullptr);
+    EXPECT_TRUE(tab().isRemote());
+    EXPECT_EQ(join.state(), QStringLiteral("ended"));
+    EXPECT_EQ(
+        join.bannerText(),
+        QStringLiteral("You left the session. The console stays here so that you can save it."));
+    EXPECT_EQ(vm.action(), QStringLiteral("join"));
+    EXPECT_TRUE(vm.actionEnabled());
+    bool marker = false;
+    for (const auto& line : tab().consoleLog()->linesSince(0)) {
+        marker = marker || line.text == "— you left the session —";
+    }
+    EXPECT_TRUE(marker);
+
+    vm.toggleConnection(); // Join again (the shortcut), the same code
+    ASSERT_NE(tab().remoteSession(), nullptr);
+    EXPECT_EQ(tab().remoteSession()->code().text(), "482913");
+    EXPECT_EQ(join.state(), QStringLiteral("connecting"));
+    EXPECT_EQ(join.bannerText(), QStringLiteral("Connecting to the support server…"));
+    EXPECT_EQ(vm.action(), QStringLiteral("leave"));
 }
 
 } // namespace

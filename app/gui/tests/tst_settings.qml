@@ -114,9 +114,9 @@ TestCase {
 
     // Plan 0045 (ADR-0359): for each mode exactly the rows of the plan's table are visible.
     function test_modeRows_data() {
-        const all = ["modeSelector", "languageSelector", "themeSelector", "restoreTabsSwitch",
-                     "consoleFontSize", "consoleTimestamps", "consoleWrap", "consoleLogToFile",
-                     "consoleLogFolder", "aboutText", "updateAutoCheck", "cliRow", "licenceFiles"];
+        const all = ["modeSelector", "languageSelector", "themeSelector", "consoleFontSize",
+                     "consoleTimestamps", "consoleWrap", "consoleLogToFile", "consoleLogFolder",
+                     "aboutText", "updateAutoCheck", "cliRow", "licenceFiles"];
         const advanced = ["consoleSuggestions", "consoleReadCommands", "consoleRememberCommands",
                           "consoleClearHistory", "section_jlink", "jlinkAuto", "defaultAutoSpeed",
                           "defaultAutoReconnect", "section_nrfutil", "nrfUtilAuto", "section_mcp",

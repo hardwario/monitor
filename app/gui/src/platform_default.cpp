@@ -7,4 +7,6 @@ namespace hwio::gui {
 
 void applyPlatformIdentity() {}
 
+void attachParentConsole() {}
+
 } // namespace hwio::gui

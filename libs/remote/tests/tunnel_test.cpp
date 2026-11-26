@@ -79,6 +79,27 @@ TEST(Tunnel, JoinerMessagesRoundTrip) {
     EXPECT_TRUE(std::holds_alternative<JoinerHello>(*hello));
 }
 
+// Plan 0061 Amendment 2 (ADR-0439): `leave` has no fields besides v and type.
+TEST(Tunnel, LeaveRoundTripAndBounds) {
+    const QJsonObject write = encodeJoiner(Leave{});
+    EXPECT_EQ(QJsonDocument(write).toJson(QJsonDocument::Compact),
+              QByteArray(R"({"hwio":{"type":"leave","v":1}})"));
+    auto decoded = decodeJoiner(write);
+    ASSERT_TRUE(decoded.has_value()) << decoded.error().detail;
+    EXPECT_TRUE(std::holds_alternative<Leave>(*decoded));
+    // Unknown fields are ignored (a later joiner); the version stays 1.
+    auto later = decodeJoiner(json(R"({"hwio":{"v":1,"type":"leave","reason":"x"}})"));
+    ASSERT_TRUE(later.has_value()) << later.error().detail;
+    EXPECT_TRUE(std::holds_alternative<Leave>(*later));
+    for (const char* text : {R"({"hwio":{"v":2,"type":"leave"}})", R"({"hwio":{"type":"leave"}})",
+                             R"({"hwio":{"v":1,"type":"Leave"}})"}) {
+        EXPECT_FALSE(decodeJoiner(json(text)).has_value()) << text;
+    }
+    EXPECT_FALSE(decodeJoiner(QJsonValue(QStringLiteral("leave"))).has_value());
+    EXPECT_EQ(cap::leave, "leave");
+    EXPECT_TRUE(validName(cap::leave));
+}
+
 TEST(Tunnel, StringsAreNeverTunnelMessages) {
     EXPECT_FALSE(decodeJoiner(QJsonValue(QStringLiteral("{\"hwio\":{\"v\":1}}"))).has_value());
     EXPECT_FALSE(isTunnelAt(QJsonValue(QStringLiteral("hwio"))));
@@ -94,7 +115,10 @@ TEST(Tunnel, RejectsInvalidJoinerMessages) {
             R"({"hwio":{"v":1,"type":"bye"}})",
             R"({"hwio":{"v":1,"type":"hello","app":"other","version":"1"}})",
             R"({"hwio":{"v":1,"type":"op-request","id":"a","kind":"format","target":"app"}})",
-            R"({"hwio":{"v":1,"type":"op-request","id":"a","kind":"reset","target":"uicr"}})",
+            // Plan 0059 (ADR-0414): any target id decodes ("uicr" too; the host denies it), but
+            // only [a-z0-9-] up to 32 bytes.
+            R"({"hwio":{"v":1,"type":"op-request","id":"a","kind":"reset","target":"UICR"}})",
+            R"({"hwio":{"v":1,"type":"op-request","id":"a","kind":"reset","target":"012345678901234567890123456789012"}})",
             R"({"hwio":{"v":1,"type":"op-request","id":"a b","kind":"reset","target":"app"}})",
             R"({"hwio":{"v":1,"type":"op-request","id":"","kind":"reset","target":"app"}})",
             R"({"hwio":{"v":1,"type":"op-request","id":"0123456789012345678901234567890123","kind":"reset","target":"app"}})",

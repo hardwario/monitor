@@ -29,10 +29,13 @@ ColumnLayout {
     // Plan 0044: the remote support session of this tab (on every page).
     RemoteBanner {
         Layout.fillWidth: true
-        visible: hostVisible || joinVisible
+        visible: hostVisible || joinVisible || aiVisible
         readonly property bool hostVisible: view.stableTab !== null && view.stableTab.remoteShare.sharing
         readonly property bool joinVisible: view.stableTab !== null && view.stableTab.remoteJoin.active
                                             && view.stableTab.remoteJoin.bannerText !== ""
+        // Plan 0062: "AI client active" with Stop AI.
+        readonly property bool aiVisible: view.stableTab !== null && view.stableTab.remoteJoin.active
+                                          && view.stableTab.remoteJoin.aiClientText !== ""
         tab: view.stableTab
     }
 

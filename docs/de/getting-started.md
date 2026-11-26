@@ -67,7 +67,8 @@ Die Leiste links wechselt die Seiten des Tabs: **Console** (Konsole, <kbd>Ctrl</
 (Flashen, <kbd>Ctrl</kbd>+<kbd>2</kbd>). **Settings** (Einstellungen, <kbd>Ctrl</kbd>+<kbd>,</kbd>) öffnet sich als
 eigener Tab.
 
-Beim nächsten Start kommen die Tabs zurück, getrennt (**Settings → General → Reopen tabs at start**).
+Die App startet immer mit einem Tab **New device** (**Choose a device to connect**); die Tabs der letzten Sitzung
+werden nicht wieder geöffnet.
 
 Es läuft jeweils nur ein Fenster der App. Ein erneuter Start holt das geöffnete Fenster in den Vordergrund.
 
@@ -80,7 +81,7 @@ Es läuft jeweils nur ein Fenster der App. Ein erneuter Start holt das geöffnet
 
 | Abschnitt | Inhalt |
 |---|---|
-| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark), **Reopen tabs at start** |
+| **General** | **Mode** (Basic, Advanced, Expert), **Language** (System, English, Čeština, Deutsch, Polski, Slovenčina), **Theme** (System, Light, Dark) |
 | **Console** | Schriftgröße, Zeitstempel, Zeilenumbruch, Befehlsvorschläge, Befehlsverlauf, Konsolendateien und ihr Ordner |
 | **J-Link** | die J-Link-Bibliothek (**Automatic** oder **Custom path**) und die Standard-Verbindungsoptionen |
 | **nRF Util** | das Programm nRF Util (**Automatic** oder **Custom path**), nur für die LTE-Modem-Firmware nötig |
@@ -101,7 +102,7 @@ Sie können ihn jederzeit unter **Settings › General › Mode** ändern.
 
 | Angezeigt | Basic | Advanced | Expert |
 |---|---|---|---|
-| **General**: Mode, Language, Theme, Reopen tabs at start | ✓ | ✓ | ✓ |
+| **General**: Mode, Language, Theme | ✓ | ✓ | ✓ |
 | **Console**: Schriftgröße, Zeitstempel, Zeilenumbruch, Konsolendateien, Log-Ordner | ✓ | ✓ | ✓ |
 | **Console**: Befehlsvorschläge, Einlesen der Befehlsliste, **Remember commands**, **Clear history** | | ✓ | ✓ |
 | **J-Link**: Library, Default speed, Auto-reconnect | | ✓ | ✓ |
@@ -155,3 +156,7 @@ hwio doctor                           # check the installation
 ```
 
 Siehe [Kommandozeile](../en/cli.md).
+
+`hwio-monitor --version` gibt die Version der Desktop-App aus und `hwio-monitor --help` ihre Optionen; beides öffnet
+kein Fenster. Unter Windows erscheint der Text im Fenster der Eingabeaufforderung oder von PowerShell, aus dem Sie sie
+gestartet haben.

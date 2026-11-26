@@ -135,6 +135,15 @@ QJsonObject ToolCall::consentJson() const {
     return json;
 }
 
+void ToolCall::adoptConsent(const ToolCall& other) {
+    m_granted |= other.m_granted;
+    for (std::size_t bit = 0; bit < m_grants.size(); ++bit) {
+        if (other.m_grants.at(bit)) {
+            m_grants.at(bit) = other.m_grants.at(bit);
+        }
+    }
+}
+
 void ToolCall::requestConsent(IConsentBroker& broker, ConsentRequest request,
                               std::function<void(ConsentDecision)> done) {
     if (isFinished() || m_cancelled) {

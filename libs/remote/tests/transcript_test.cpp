@@ -5,7 +5,9 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLatin1Char>
 #include <QString>
+#include <QStringList>
 #include <QStringLiteral>
 
 #include <gtest/gtest.h>
@@ -74,6 +76,55 @@ TEST(Transcript, ParsesAReceivedSyncWithLimits) {
     ASSERT_EQ(transcript->entries().back().outputs.size(), 1);
     EXPECT_FALSE(transcript->entries().back().outputs.front().contains(QChar(7)));
     EXPECT_FALSE(Transcript::fromJson(QJsonObject{}).has_value());
+}
+
+// Plan 0061 (ADR-0431): the mobile app puts the whole output of a command into one `outputs`
+// element; fromJson splits it into lines, and the newest entry's unfinished line (the prompt) is
+// handed on instead of being a line.
+TEST(Transcript, SplitsAnOutputInStreamForm) {
+    const auto entry = [](const QString& command, const QString& output) {
+        QJsonObject response;
+        response.insert(QStringLiteral("outputs"), QJsonArray{output});
+        QJsonObject object;
+        object.insert(QStringLiteral("command"), command);
+        object.insert(QStringLiteral("response"), response);
+        return object;
+    };
+    auto transcript = Transcript::fromJson(
+        QJsonArray{entry(QStringLiteral("info show"),
+                         QStringLiteral("\r\nVendor name: HARDWARIO\r\nSerial: 1\r\nbt_nus:~$ ")),
+                   entry(QStringLiteral("config show"),
+                         QStringLiteral("\r\nlrw config region eu868\r\nbt_nus:~$ "))});
+    ASSERT_TRUE(transcript.has_value());
+    EXPECT_TRUE(transcript->streamForm());
+    ASSERT_EQ(transcript->entries().size(), 2U);
+    EXPECT_EQ(transcript->entries().front().outputs,
+              (QStringList{QString(), QStringLiteral("Vendor name: HARDWARIO"),
+                           QStringLiteral("Serial: 1"), QStringLiteral("bt_nus:~$ ")}));
+    EXPECT_EQ(transcript->entries().back().outputs,
+              (QStringList{QString(), QStringLiteral("lrw config region eu868")}));
+    EXPECT_EQ(transcript->unfinishedTail(), QStringLiteral("bt_nus:~$ "));
+
+    // One line per element (Monitor, web Terminal): unchanged, no tail.
+    auto lines = Transcript::fromJson(QJsonArray{entry(QStringLiteral("x"), QStringLiteral("y"))});
+    ASSERT_TRUE(lines.has_value());
+    EXPECT_FALSE(lines->streamForm());
+    EXPECT_TRUE(lines->unfinishedTail().isEmpty());
+    EXPECT_EQ(lines->entries().front().outputs, QStringList{QStringLiteral("y")});
+
+    // The byte bound counts the split lines; the tail is bounded.
+    QString many;
+    for (int i = 0; i < 100; ++i) {
+        many += QStringLiteral("line %1\r\n").arg(i);
+    }
+    many += QString(Transcript::maxTailChars + 10, QLatin1Char('x'));
+    auto bounded = Transcript::fromJson(QJsonArray{entry(QStringLiteral("c"), many)},
+                                        TranscriptLimits{.maxEntries = 5, .maxBytes = 200});
+    ASSERT_TRUE(bounded.has_value());
+    EXPECT_TRUE(bounded->truncated());
+    EXPECT_LE(bounded->bytes(), 200U);
+    EXPECT_EQ(bounded->entries().back().outputs.back(), QStringLiteral("line 99"));
+    EXPECT_EQ(bounded->unfinishedTail().size(), Transcript::maxTailChars);
 }
 
 } // namespace

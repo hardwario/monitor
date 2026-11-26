@@ -88,7 +88,9 @@ are copied at once.
 
 **Save view…** (<kbd>Ctrl</kbd>+<kbd>S</kbd>) saves the focused pane as it is shown, with timestamps if they are
 on. The name is prefilled, for example `chester-app-clime-v3.2.0-20261103-101500-log.txt`, and the folder is the one
-you used last (Documents the first time).
+you used last (Documents the first time). Secrets are written as `<redacted>`, as in the
+[console files](#console-files) (for example `claim token: <redacted>`); the screen and **Copy** still show them. On
+Linux and macOS only your user can read the saved file.
 
 <a id="batch-files"></a>
 ## Batch files

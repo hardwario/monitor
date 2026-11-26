@@ -325,6 +325,57 @@ TestCase {
         tryVerify(() => !w.visible);
     }
 
+    // Plan 0062 (ADR-0436): support's prompt for a customer's device: its own title and rows,
+    // "Allow for this session", no "Always allow" button, Esc = Deny; an operation on a customer's
+    // device names it and has no "Always allow" either.
+    function test_remoteConsentWindow() {
+        const w = prompt();
+        verify(!w.visible);
+        testSupport.requestRemoteConsent("Claude Code", "read_terminal", ["remote-device"], "remote:1", { remote: true });
+        const index = testCase.consentRequests++;
+        tryVerify(() => w.visible);
+        compare(findInPrompt("consentTitle").text, "Claude Code wants to work with a customer's device");
+        compare(findInPrompt("consentAllowOnce").text, "Allow for this session");
+        compare(findInPrompt("consentAllowForClient"), null);
+        const values = () => findAll(w.contentItem, "consentDetailValue").filter(effectivelyVisible).map(item => item.text);
+        tryVerify(() => values().indexOf("It will read the customer's console and may send commands to the customer's device. Secret values are hidden from it. The customer sees its commands as yours.") >= 0);
+        verify(McpController.consent.details[0].label === "Session", McpController.consent.details[0].label);
+        w.escapeShortcut.activated();
+        tryVerify(() => testSupport.consentOutcome(index) === "mcp.consent_denied");
+        tryVerify(() => !w.visible);
+
+        testSupport.requestRemoteConsent("Claude Code", "flash", ["flash"], "remote:1",
+                                         { catalog_id: "59489e4e91d741da930ab15b1ab9e31f", target: "app", remote: true });
+        const flash = testCase.consentRequests++;
+        tryVerify(() => w.visible);
+        compare(findInPrompt("consentTitle").text, "Claude Code wants to flash firmware");
+        compare(findInPrompt("consentAllowOnce").text, "Allow once");
+        compare(findInPrompt("consentAllowForClient"), null);
+        tryVerify(() => values().indexOf("the customer's device (remote session)") >= 0);
+        tryVerify(() => McpController.consent.armed);
+        McpController.consent.allowForClient(McpController.consent.promptId); // ignored
+        verify(w.visible);
+        mouseClick(findInPrompt("consentAllowOnce"));
+        tryVerify(() => testSupport.consentOutcome(flash) === "allowed");
+        tryVerify(() => !w.visible);
+    }
+
+    // Plan 0062 (ADR-0433): the remote support sessions switch, off by default.
+    function test_remoteSessionsSwitch() {
+        openSection();
+        const toggle = find("mcpRemoteSessions");
+        verify(toggle !== null);
+        verify(!toggle.checked);
+        verify(!McpController.remoteSessions);
+        toggle.toggle();
+        toggle.toggled();
+        tryVerify(() => McpController.remoteSessions);
+        compare(testSupport.setting("mcp/remoteSessions"), "true");
+        toggle.toggle();
+        toggle.toggled();
+        tryVerify(() => !McpController.remoteSessions);
+    }
+
     // Plan 0054 (ADR-0389): catalog firmware by name with the full ID as a note, the Show device
     // link in the device row, the MCU title, the client last, "Always allow" with its tooltip -
     // and everything fits the fixed 480 px window in Czech.

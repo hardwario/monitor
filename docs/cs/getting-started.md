@@ -62,7 +62,8 @@ probíhá operace, zeptá se aplikace před zavřením.
 Lišta vlevo přepíná stránky karty: **Konzole** (<kbd>Ctrl</kbd>+<kbd>1</kbd>) a **Nahrát FW**
 (<kbd>Ctrl</kbd>+<kbd>2</kbd>). **Nastavení** (<kbd>Ctrl</kbd>+<kbd>,</kbd>) se otevře ve vlastní kartě.
 
-Při dalším spuštění se karty obnoví, odpojené (**Nastavení → Obecné → Při spuštění obnovit karty**).
+Aplikace se vždy spustí s jednou kartou **Nové zařízení** (**Vyberte zařízení k připojení**); karty z minulého
+spuštění se znovu neotevírají.
 
 Současně běží jen jedno okno aplikace. Když ji spustíte znovu, přenese se otevřené okno do popředí.
 
@@ -75,7 +76,7 @@ Současně běží jen jedno okno aplikace. Když ji spustíte znovu, přenese s
 
 | Oddíl | Co obsahuje |
 |---|---|
-| **Obecné** | **Režim** (Základní, Pokročilý, Expertní), **Jazyk** (Podle systému, English, Čeština, Deutsch, Polski, Slovenčina), **Vzhled** (Podle systému, Světlý, Tmavý), **Při spuštění obnovit karty** |
+| **Obecné** | **Režim** (Základní, Pokročilý, Expertní), **Jazyk** (Podle systému, English, Čeština, Deutsch, Polski, Slovenčina), **Vzhled** (Podle systému, Světlý, Tmavý) |
 | **Konzole** | velikost písma, časové značky, zalamování řádků, návrhy příkazů, historie příkazů, soubory konzole a jejich složka |
 | **J-Link** | knihovna J-Link (**Automaticky** nebo **Vlastní cesta**) a výchozí možnosti připojení |
 | **nRF Util** | program nRF Util (**Automaticky** nebo **Vlastní cesta**), potřebný jen pro firmware modemu LTE |
@@ -95,7 +96,7 @@ Předvybraný je **Pokročilý**; pokud jste ve starší verzi měli zapnutou vo
 
 | Zobrazeno | Základní | Pokročilý | Expertní |
 |---|---|---|---|
-| **Obecné**: Režim, Jazyk, Vzhled, Při spuštění obnovit karty | ✓ | ✓ | ✓ |
+| **Obecné**: Režim, Jazyk, Vzhled | ✓ | ✓ | ✓ |
 | **Konzole**: velikost písma, časové značky, zalamování řádků, soubory konzole, složka logů | ✓ | ✓ | ✓ |
 | **Konzole**: návrhy příkazů, načtení seznamu příkazů, **Pamatovat si příkazy**, **Vymazat historii** | | ✓ | ✓ |
 | **J-Link**: Knihovna, Výchozí rychlost, Automaticky znovu připojit | | ✓ | ✓ |
@@ -145,3 +146,6 @@ hwio doctor                           # check the installation
 ```
 
 Viz [Příkazová řádka](../en/cli.md).
+
+`hwio-monitor --version` vypíše verzi desktopové aplikace a `hwio-monitor --help` její volby; ani jedno neotevře
+okno. Ve Windows se text zobrazí v okně příkazového řádku nebo PowerShellu, ze kterého jste ji spustili.

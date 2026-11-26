@@ -14,6 +14,10 @@
 // broker live as long as the controller. Remembered grants are forgotten whenever the server stops
 // and when the token is regenerated (ADR-0241).
 //
+// Plan 0062: mcp/remoteSessions is passed to the provider (GuiDeviceProvider::
+// setRemoteSessionsAllowed); the broker's clientLeft / forgotAll end the grants of remote tabs
+// (GuiDeviceProvider::revokeRemoteAi). The prompt names a remote tab without the session code.
+//
 // Active clients: the client keys seen (activity entries, consent requests, at most
 // maxTrackedClients) within activeWindow, at least 1 while a call runs; re-evaluated every second
 // while listening.
@@ -73,6 +77,9 @@ class McpController : public QObject {
     QML_SINGLETON
 
     Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY settingsChanged)
+    // Plan 0062 (ADR-0433): "AI clients may use remote support sessions" (default off).
+    Q_PROPERTY(
+        bool remoteSessions READ remoteSessions WRITE setRemoteSessions NOTIFY settingsChanged)
     Q_PROPERTY(int port READ port WRITE setPort NOTIFY settingsChanged)
     Q_PROPERTY(State state READ state NOTIFY stateChanged)
     Q_PROPERTY(QString stateText READ stateText NOTIFY stateChanged)
@@ -125,6 +132,8 @@ public:
     static constexpr std::size_t maxTrackedClients = 64;    // oldest dropped
     static inline const QString enabledKey = QStringLiteral("mcp/enabled");
     static inline const QString portKey = QStringLiteral("mcp/port");
+    // Plan 0062 (ADR-0433): AI clients may use joined remote support tabs (bool, default false).
+    static inline const QString remoteSessionsKey = QStringLiteral("mcp/remoteSessions");
 
     struct Options {
         GuiConsentBroker::Options consent;
@@ -151,6 +160,9 @@ public:
     void setEnabled(bool enabled);
     [[nodiscard]] int port() const;
     void setPort(int port);
+    // Off: remote tabs do not exist for AI clients and every remote grant ends (GuiDeviceProvider).
+    [[nodiscard]] bool remoteSessions() const;
+    void setRemoteSessions(bool allowed);
     [[nodiscard]] State state() const noexcept { return m_state; }
     [[nodiscard]] QString stateText() const;
     [[nodiscard]] QString summary() const;
@@ -182,7 +194,8 @@ public:
     Q_INVOKABLE void setAllConsentRules(bool allow);
     Q_INVOKABLE void revokeGrant(int row);
     Q_INVOKABLE void copySnippet(int row);
-    // The device bar's Cancel of a running AI operation (ADR-0244).
+    // The device bar's Cancel of a running AI operation (ADR-0244). Plan 0062 (D12): on a remote
+    // tab, Stop waiting (RemoteJoinViewModel::stopWaiting).
     Q_INVOKABLE static void cancelOperation(hwio::gui::DeviceTabViewModel* tab);
 
     // Stops the server at once, denies pending prompts and forgets grants (quit). Idempotent.

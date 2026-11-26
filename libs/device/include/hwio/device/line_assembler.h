@@ -62,6 +62,11 @@ private:
 // prompt: ANSI CSI sequences and carriage-return redraws removed, it equals `prompt` (ADR-0082;
 // M6: also the RTT prompt, ADR-0104). An empty prompt or partial line is never a prompt.
 [[nodiscard]] bool isPrompt(std::string_view partial, std::string_view prompt);
+// Plan 0061 (ADR-0431): a generic Zephyr shell prompt "<name>:~$ " (the name without whitespace;
+// the trailing space optional; several in a row, as a redrawn line leaves them, count as one),
+// after ANSI CSI sequences and carriage-return redraws are removed. For a host whose prompt is
+// unknown (the HARDWARIO mobile app's NUS shell, "bt_nus:~$ "). Empty text is never a prompt.
+[[nodiscard]] bool isZephyrPrompt(std::string_view text);
 // ADR-0171: the Zephyr LOG_HEXDUMP continuation format - leading whitespace, 1-16 groups of two
 // hex digits each followed by a space (one extra space after the 8th group, padding spaces for a
 // short last line), then '|' and at most 17 printable ASCII characters (16 bytes as characters,

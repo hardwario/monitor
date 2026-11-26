@@ -14,6 +14,7 @@
 #include <QtCore/qtmetamacros.h>
 
 #include <expected>
+#include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -44,6 +45,23 @@ std::string_view shellPromptOf(const ConsoleSession& session) {
 
 Result<std::unique_ptr<CommandCapture>>
 CommandCapture::start(ConsoleSession& session, std::string command, CaptureOptions options) {
+    return startObserving(session, std::move(command), options, {});
+}
+
+Result<std::unique_ptr<CommandCapture>> CommandCapture::start(ConsoleSession& session,
+                                                              std::string command,
+                                                              CaptureOptions options,
+                                                              CaptureHooks hooks) {
+    if (options.silent || !hooks.send || !hooks.view) {
+        return std::unexpected(makeError(ErrorCode::InternalUnexpected, "capture hooks"));
+    }
+    return startObserving(session, std::move(command), options, std::move(hooks));
+}
+
+Result<std::unique_ptr<CommandCapture>> CommandCapture::startObserving(ConsoleSession& session,
+                                                                       std::string command,
+                                                                       CaptureOptions options,
+                                                                       CaptureHooks hooks) {
     if (options.silent && session.shellCaptureActive()) {
         return std::unexpected(makeError(ErrorCode::InternalBusy, "a shell query runs"));
     }
@@ -51,13 +69,24 @@ CommandCapture::start(ConsoleSession& session, std::string command, CaptureOptio
     // starts then (review P8).
     const bool held = !options.silent && session.shellCaptureActive();
     auto capture = std::make_unique<CommandCapture>(Passkey{}, session, command, options);
+    if (hooks.view) {
+        // Plan 0062: the echo is matched in the view (the command as a sent shell line).
+        ConsoleLine sent;
+        sent.channel = Channel::Shell;
+        sent.dir = Direction::In;
+        sent.text = command;
+        capture->m_command = hooks.view(sent).text;
+        capture->m_view = std::move(hooks.view);
+    }
     if (options.silent) {
         capture->m_origin = session.newCaptureOrigin();
         if (Status sent = session.sendCaptureLine(std::move(command), capture->m_origin); !sent) {
             capture->stop();
             return std::unexpected(std::move(sent).error());
         }
-    } else if (Status sent = session.sendLine(std::move(command)); !sent) {
+    } else if (Status sent = hooks.send ? hooks.send(std::move(command))
+                                        : session.sendLine(std::move(command));
+               !sent) {
         capture->stop();
         return std::unexpected(std::move(sent).error());
     }
@@ -75,7 +104,8 @@ CommandCapture::start(ConsoleSession& session, std::string command, CaptureOptio
 CommandCapture::CommandCapture(Passkey /*key*/, ConsoleSession& session, std::string command,
                                CaptureOptions options)
     : m_session(&session), m_command(std::move(command)), m_options(options),
-      m_promptMode(!shellPromptOf(session).empty()), m_startSeq(session.log().lastSeq()) {
+      m_promptMode(!options.forceSilence && !shellPromptOf(session).empty()),
+      m_startSeq(session.log().lastSeq()) {
     m_deadline.setSingleShot(true);
     m_deadline.setInterval(m_options.timeout);
     connect(&m_deadline, &QTimer::timeout, this, [this] { end(CaptureEnd::Timeout); });
@@ -101,20 +131,22 @@ CommandCapture::CommandCapture(Passkey /*key*/, ConsoleSession& session, std::st
         m_captureInstalled = true;
     } else {
         connect(&session, &ConsoleSession::linesReceived, this,
-                [this](const QList<ConsoleLine>& lines) {
-                    for (const ConsoleLine& line : lines) {
-                        if (m_stopped) {
-                            return;
-                        }
-                        if (line.seq > m_startSeq && line.channel == Channel::Shell) {
-                            (void)offer(line);
-                        }
-                    }
-                });
+                [this](const QList<ConsoleLine>& lines) { observe(lines); });
     }
 }
 
 CommandCapture::~CommandCapture() { stop(); }
+
+void CommandCapture::observe(const QList<ConsoleLine>& lines) {
+    for (const ConsoleLine& line : lines) {
+        if (m_stopped) {
+            return;
+        }
+        if (line.seq > m_startSeq && line.channel == Channel::Shell) {
+            (void)offer(m_view ? m_view(line) : line); // plan 0062: the caller's view
+        }
+    }
+}
 
 void CommandCapture::startDeadline() {
     if (!m_stopped) {

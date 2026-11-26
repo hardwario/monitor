@@ -21,6 +21,7 @@
 #include "hwio/mcp/tool_call.h"
 #include "hwio/mcp/tools/device_provider.h"
 #include "hwio/mcp/tools/tools_context.h"
+#include "remote_support.h"
 
 #include <QByteArray>
 #include <QCoreApplication>
@@ -145,7 +146,7 @@ QJsonObject deviceStatusJson(const std::string& id, const DeviceRef& ref) {
     }
     const hwio::device::ConsoleSession& session = *ref.console;
     const hwio::device::ConsoleLog& log = session.log();
-    json.insert(QStringLiteral("connection"), connectionJson(session.connection()));
+    json.insert(QStringLiteral("connection"), deviceConnectionJson(ref, session.connection()));
     json.insert(QStringLiteral("terminal_total"), seqJson(log.total(hwio::device::Channel::Shell)));
     json.insert(QStringLiteral("terminal_buffered"),
                 static_cast<qint64>(log.size(hwio::device::Channel::Shell)));
@@ -161,6 +162,121 @@ QJsonObject deviceStatusJson(const std::string& id, const DeviceRef& ref) {
                 kind ? QJsonValue(qs(hwio::device::operationKindId(*kind)))
                      : QJsonValue(QJsonValue::Null));
     json.insert(QStringLiteral("paused_by_operation"), pausedByOperation(ref));
+    if (ref.isRemote) {
+        json.insert(QStringLiteral("remote"), true);
+        json.insert(QStringLiteral("note"), qs(remoteNote));
+    }
+    return json;
+}
+
+bool visibleTo(const DeviceRef& ref, std::string_view clientKey) {
+    return !ref.isRemote || (!ref.remote.isNull() && ref.remote->aiAllowed(clientKey));
+}
+
+QJsonObject remoteEntryJson(const DeviceEntry& entry, const DeviceRef& ref, bool allowed) {
+    QJsonObject remote;
+    remote.insert(QStringLiteral("owner"), QStringLiteral("customer"));
+    QJsonObject json;
+    json.insert(QStringLiteral("id"), qs(entry.id));
+    json.insert(QStringLiteral("kind"), QStringLiteral("remote"));
+    json.insert(QStringLiteral("state"), QStringLiteral("open"));
+    json.insert(QStringLiteral("owner"), QJsonValue(QJsonValue::Null));
+    json.insert(QStringLiteral("opened_by_mcp"), false);
+    if (!allowed || ref.remote.isNull() || !ref.alive()) {
+        // ADR-0436: nothing of the customer's session before support's Allow.
+        json.insert(QStringLiteral("display_name"), qs(remoteNamelessName));
+        json.insert(QStringLiteral("profile"), QJsonValue(QJsonValue::Null));
+        json.insert(QStringLiteral("connection"), QJsonValue(QJsonValue::Null));
+    } else {
+        const RemoteInfo info = ref.remote->info();
+        json.insert(QStringLiteral("display_name"), visibleText(ref, qs(entry.displayName)));
+        json.insert(QStringLiteral("profile"), entry.profileId.empty()
+                                                   ? QJsonValue(QJsonValue::Null)
+                                                   : QJsonValue(qs(entry.profileId)));
+        json.insert(QStringLiteral("connection"),
+                    deviceConnectionJson(ref, ref.console->connection()));
+        remote.insert(QStringLiteral("host"), qs(remoteHostId(info.host)));
+        remote.insert(QStringLiteral("join"), qs(remoteJoinId(info.join)));
+        remote.insert(QStringLiteral("commands"), info.commands);
+        QJsonArray operations;
+        for (const RemoteTargetOffer& offer : info.operations) {
+            QJsonObject item;
+            if (!offer.target.empty()) {
+                item.insert(QStringLiteral("target"), qs(offer.target));
+            }
+            QJsonArray kinds;
+            for (const RemoteOperationKind kind : offer.kinds) {
+                kinds.append(qs(remoteOperationKindId(kind)));
+            }
+            item.insert(QStringLiteral("kinds"), kinds);
+            if (offer.catalog) {
+                item.insert(QStringLiteral("catalog"), true);
+            }
+            if (!offer.prepared.empty()) {
+                QJsonArray prepared;
+                for (const RemotePreparedFirmware& firmware : offer.prepared) {
+                    prepared.append(QJsonObject{{QStringLiteral("id"), qs(firmware.id)},
+                                                {QStringLiteral("name"), qs(firmware.name)},
+                                                {QStringLiteral("version"), qs(firmware.version)}});
+                }
+                item.insert(QStringLiteral("prepared"), prepared);
+            }
+            operations.append(item);
+        }
+        remote.insert(QStringLiteral("operations"), operations);
+    }
+    remote.insert(QStringLiteral("secrets"), QStringLiteral("hidden"));
+    remote.insert(QStringLiteral("note"), qs(remoteNote));
+    json.insert(QStringLiteral("remote"), remote);
+    return json;
+}
+
+hwio::device::ConsoleLine visibleLine(const DeviceRef& ref, const hwio::device::ConsoleLine& line) {
+    if (!ref.isRemote) {
+        return line;
+    }
+    hwio::device::ConsoleLine hidden = line;
+    hidden.text = ref.remote.isNull() ? std::string() : ref.remote->hiddenText(line);
+    hidden.textEn.clear();
+    return hidden;
+}
+
+QString visibleText(const DeviceRef& ref, const QString& text) {
+    if (!ref.isRemote) {
+        return text;
+    }
+    // A marker line: the redaction rules do not apply, the session code is replaced.
+    hwio::device::ConsoleLine line;
+    line.dir = hwio::device::Direction::Marker;
+    line.text = text.toStdString();
+    return qs(visibleLine(ref, line).text);
+}
+
+QString visibleCommand(const DeviceRef& ref, const std::string& command) {
+    if (!ref.isRemote) {
+        return qs(command);
+    }
+    hwio::device::ConsoleLine line;
+    line.channel = hwio::device::Channel::Shell;
+    line.dir = hwio::device::Direction::In;
+    line.text = command;
+    return qs(visibleLine(ref, line).text);
+}
+
+QJsonObject deviceConnectionJson(const DeviceRef& ref, const hwio::device::ConnectionEvent& event) {
+    QJsonObject json = connectionJson(event);
+    if (!ref.isRemote || !event.error) {
+        return json;
+    }
+    QJsonObject error = json.value(QStringLiteral("error")).toObject();
+    error.remove(QStringLiteral("detail"));
+    for (const char* key : {"message", "cause", "suggestion"}) {
+        const QString name = QString::fromLatin1(key);
+        if (error.contains(name)) {
+            error.insert(name, visibleText(ref, error.value(name).toString()));
+        }
+    }
+    json.insert(QStringLiteral("error"), error);
     return json;
 }
 
@@ -173,14 +289,23 @@ QJsonObject deviceStatusSchema() {
                      {"log_buffered", typed("integer")},
                      {"buffer_size", typed("integer")},
                      {"busy_operation", nullable("string")},
-                     {"paused_by_operation", typed("boolean")}},
+                     {"paused_by_operation", typed("boolean")},
+                     {"remote", typed("boolean")},
+                     {"note", typed("string")}},
                     {QStringLiteral("id")});
 }
 
-QJsonObject devicesJson(IDeviceProvider& provider, BleListing listing) {
+QJsonObject devicesJson(IDeviceProvider& provider, std::string_view clientKey, BleListing listing) {
     QJsonArray devices;
     qint64 hidden = 0;
     for (const DeviceEntry& entry : provider.list()) {
+        if (entry.kind == "remote") { // plan 0062
+            const auto ref = provider.find(entry.id);
+            if (ref && ref->isRemote && ref->alive()) {
+                devices.append(remoteEntryJson(entry, *ref, visibleTo(*ref, clientKey)));
+            }
+            continue;
+        }
         // ADR-0373: the same rule as `hwio ble scan` (the scanner's profile match); open devices
         // and J-Link probes are always listed.
         if (listing == BleListing::Profiled && entry.kind == "ble" && entry.profileId.empty() &&
@@ -204,7 +329,8 @@ QJsonObject deviceEntrySchema() {
                      {"state", typed("string")},
                      {"owner", nullable("object")},
                      {"connection", nullable("object")},
-                     {"opened_by_mcp", typed("boolean")}},
+                     {"opened_by_mcp", typed("boolean")},
+                     {"remote", typed("object", "a customer's device in a support session")}},
                     {QStringLiteral("id"), QStringLiteral("state")});
 }
 
@@ -379,8 +505,9 @@ QJsonObject withNumberEnum(QJsonObject schema, const QString& name, const QJsonA
 
 hwio::mcp::Schema deviceArgument() {
     return hwio::mcp::Schema::string(
-               QStringLiteral("Device id from list_devices (\"jlink:<serial>\" or \"ble:<id>\"). "
-                              "May be left out when exactly one device is connected."))
+               QStringLiteral("Device id from list_devices (\"jlink:<serial>\", \"ble:<id>\" or "
+                              "\"remote:<n>\"). May be left out when exactly one device is "
+                              "connected."))
         .minLength(1)
         .maxLength(160);
 }

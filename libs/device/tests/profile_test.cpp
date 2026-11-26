@@ -1,5 +1,7 @@
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
+#include "hwio/device/console_line.h"
+#include "hwio/device/console_redaction.h"
 #include "hwio/device/profile.h"
 #include "hwio/firmware/designated_firmware.h"
 #include "hwio/firmware/firmware_image.h"
@@ -10,9 +12,11 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <string>
 #include <string_view>
 
 namespace {
@@ -49,6 +53,112 @@ TEST(Profiles, ChesterSensitiveOutputKeys) {
     EXPECT_FALSE(hwio::device::matchSensitiveOutput("serial number: 1", keys));
     EXPECT_FALSE(hwio::device::matchSensitiveOutput("claim token", keys));
     EXPECT_TRUE(hwio::device::sensitiveOutputKeysOf("chester", "lte").empty());
+}
+
+// Plan 0059 (ADR-0416): secrets printed without a colon, and the remote refusal rules.
+TEST(Profiles, SensitiveOutputPrefixesAndRemoteRefusal) {
+    using hwio::device::matchSensitiveOutputPrefix;
+    constexpr std::array<std::string_view, 1> prefixes{"config secret-key"};
+    EXPECT_EQ(matchSensitiveOutputPrefix("config secret-key 00112233", prefixes).value_or(""),
+              "config secret-key");
+    EXPECT_TRUE(matchSensitiveOutputPrefix("\x1b[1;32mconfig  secret-key 00", prefixes));
+    EXPECT_FALSE(matchSensitiveOutputPrefix("config secret-keys 00", prefixes));
+    EXPECT_FALSE(matchSensitiveOutputPrefix("config serial-number 1", prefixes));
+    EXPECT_FALSE(matchSensitiveOutputPrefix("config secret-key 00", {}));
+
+    constexpr std::array<std::string_view, 1> sensitive{"config secret-key"};
+    constexpr std::array<std::string_view, 1> setters{"config serial-number"};
+    constexpr std::array<std::string_view, 1> refused{"settings erase"};
+    hwio::device::TargetProfile target =
+        *hwio::device::findTarget(hwio::device::genericConsoleProfile(), "app");
+    target.sensitiveCommandPrefixes = sensitive;
+    target.remoteRefusedSetters = setters;
+    target.remoteRefusedCommands = refused;
+    // Without refuseRemoteSensitive a sensitive command passes (CHESTER's behaviour).
+    EXPECT_FALSE(hwio::device::refusedFromRemote(target, "config secret-key 00"));
+    target.refuseRemoteSensitive = true;
+    EXPECT_TRUE(hwio::device::refusedFromRemote(target, "config secret-key 00"));
+    EXPECT_TRUE(hwio::device::refusedFromRemote(target, "  config\tsecret-key 00 11"));
+    EXPECT_FALSE(hwio::device::refusedFromRemote(target, "config secret-key")); // a read
+    EXPECT_FALSE(hwio::device::refusedFromRemote(target, "config secret-key   "));
+    EXPECT_TRUE(hwio::device::refusedFromRemote(target, "config serial-number 42"));
+    EXPECT_FALSE(hwio::device::refusedFromRemote(target, "config serial-number"));
+    EXPECT_TRUE(hwio::device::refusedFromRemote(target, "settings erase"));
+    EXPECT_TRUE(hwio::device::refusedFromRemote(target, "settings erase now"));
+    EXPECT_FALSE(hwio::device::refusedFromRemote(target, "settings show"));
+    EXPECT_FALSE(hwio::device::refusedFromRemote(target, "config show"));
+    // CHESTER refuses nothing (plan 0059 D-10: its behaviour is unchanged).
+    const auto* chesterApp = hwio::device::findTarget(*ProfileRegistry::find("chester"), "app");
+    ASSERT_NE(chesterApp, nullptr);
+    EXPECT_FALSE(hwio::device::refusedFromRemote(*chesterApp, "lte config password secret"));
+    EXPECT_TRUE(chesterApp->sensitiveOutputPrefixes.empty());
+}
+
+// Plan 0059 (ADR-0415): the neutral console profile of remote tabs is not a registered device.
+TEST(Profiles, GenericConsoleProfileIsNotRegistered) {
+    const hwio::device::DeviceProfile& generic = hwio::device::genericConsoleProfile();
+    EXPECT_EQ(generic.id, "generic");
+    EXPECT_EQ(ProfileRegistry::find("generic"), nullptr);
+    for (const hwio::device::DeviceProfile* profile : ProfileRegistry::all()) {
+        EXPECT_NE(profile, &generic);
+    }
+    EXPECT_EQ(hwio::device::consoleTargetId(generic), "app");
+    const auto* app = hwio::device::findTarget(generic, "app");
+    ASSERT_NE(app, nullptr);
+    EXPECT_FALSE(app->rttTerminal.empty()); // a console (input enabled)
+    EXPECT_TRUE(app->shellPrompt.empty());
+    EXPECT_FALSE(app->hashPrefixIsLog);
+    EXPECT_TRUE(app->sensitiveCommandPrefixes.empty());
+    EXPECT_TRUE(app->sensitiveOutputKeys.empty());
+    EXPECT_TRUE(generic.firmwareCatalogUrl.empty());
+    EXPECT_FALSE(generic.ble.has_value());
+}
+
+// Plan 0059 (ADR-0416) in ConsoleRedaction (console files, "Save view…"): an output line that
+// starts with a sensitive output prefix is written as "<prefix> <redacted>", after its prompt.
+TEST(Profiles, ConsoleRedactionSensitiveOutputPrefixes) {
+    using hwio::device::Channel;
+    using hwio::device::ConsoleLine;
+    using hwio::device::Direction;
+    constexpr std::array<std::string_view, 1> prefixes{"config secret-key"};
+    std::array<hwio::device::TargetProfile, 1> targets{
+        *hwio::device::findTarget(hwio::device::genericConsoleProfile(), "app")};
+    targets.front().sensitiveOutputPrefixes = prefixes;
+    hwio::device::DeviceProfile profile = hwio::device::genericConsoleProfile();
+    profile.targets = targets;
+    const hwio::device::ConsoleRedaction redaction(profile, "app");
+    const auto shellLine = [](Direction dir, std::string_view text) {
+        ConsoleLine line;
+        line.channel = Channel::Shell;
+        line.dir = dir;
+        line.text = std::string(text);
+        return line;
+    };
+    const auto redacted = [&](Direction dir, std::string_view text) {
+        return redaction.redacted(shellLine(dir, text)).value_or("-");
+    };
+    EXPECT_EQ(redacted(Direction::Out, "config secret-key 00112233"),
+              "config secret-key <redacted>");
+    EXPECT_EQ(redacted(Direction::Out, "uart:~$ config secret-key 00112233"),
+              "uart:~$ config secret-key <redacted>");
+    EXPECT_EQ(redacted(Direction::Out, "\x1b[1;32mconfig secret-key 00"),
+              "config secret-key <redacted>");
+    EXPECT_EQ(redacted(Direction::Out, "config serial-number 42"), "-");
+    EXPECT_EQ(redacted(Direction::In, "config secret-key 00"), "-"); // an output rule
+    // The same profile through the registry: not registered, nothing is redacted.
+    EXPECT_FALSE(hwio::device::ConsoleRedaction("generic", "app")
+                     .redacted(shellLine(Direction::Out, "config secret-key 00")));
+}
+
+// Plan 0062 (ADR-0437): a sensitive command with an argument sets a secret; without one it reads.
+TEST(Profiles, ConsoleRedactionSetsSecret) {
+    const hwio::device::ConsoleRedaction redaction("chester", "app");
+    EXPECT_TRUE(redaction.setsSecret("lrw config appkey 0011"));
+    EXPECT_TRUE(redaction.setsSecret("lte config password\tx"));
+    EXPECT_FALSE(redaction.setsSecret("lrw config appkey"));
+    EXPECT_FALSE(redaction.setsSecret("lrw config show"));
+    EXPECT_FALSE(
+        hwio::device::ConsoleRedaction("unknown", "app").setsSecret("lrw config appkey 1"));
 }
 
 TEST(Profiles, ChesterAppTarget) {

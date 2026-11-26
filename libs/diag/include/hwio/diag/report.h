@@ -3,8 +3,9 @@
 // The diagnostic report (ADR-0075, plan/features/0007): a zip with summary.txt, summary.json, the
 // recent application logs (logs/) and the settings file (settings.ini). Every text is redacted:
 // the home directory -> "~", the user name -> "<user>", the host name -> "<host>" (whole words;
-// case-insensitive on Windows). Probe serial numbers and firmware ids are kept. Nothing is sent
-// anywhere; the user attaches the file to a support request.
+// case-insensitive on Windows), the address of this computer's Bluetooth adapter -> "<adapter
+// address>" (ADR-0427). Probe serial numbers, firmware ids and device addresses are kept. Nothing
+// is sent anywhere; the user attaches the file to a support request.
 //
 // Bounds: each log file contributes its last maxLogBytes (cut at the next line start), at most
 // maxLogFiles files, the summary at most maxSummaryBytes, the whole zip at most maxReportBytes
@@ -18,6 +19,7 @@
 
 #include "hwio/core/result.h"
 #include "hwio/diag/check.h"
+#include "hwio/diag/environment.h"
 
 #include <QJsonArray>
 #include <QJsonObject>
@@ -41,11 +43,17 @@ struct RedactionContext {
     std::string user;             // "jane"
     std::string host;             // "jane-laptop"
     bool caseInsensitive = false; // Windows
+    // ADR-0427: this computer's Bluetooth adapter addresses ("00:11:22:33:44:55"; any case and
+    // separator, 12 hex digits; others are ignored). EnvironmentFacts::bluetoothAdapterAddresses.
+    std::vector<std::string> bluetoothAddresses;
 };
 
 // The context of this process (QDir::homePath, the user name from USER, else the account of the
 // effective uid on Unix, else USERNAME (Windows); the host name).
 [[nodiscard]] RedactionContext currentRedaction();
+// The same with what the checks found that must not leave the computer (plan 0060 A5: the
+// Bluetooth adapter address of `facts`). Both report builders (CLI, GUI) use this one.
+[[nodiscard]] RedactionContext currentRedaction(const EnvironmentFacts& facts);
 
 // Replaces the home path (also with the other separator on Windows) by "~" where it is the folder
 // itself (followed by a separator, another non-name character or the end; not by a letter, digit,
@@ -57,6 +65,8 @@ struct RedactionContext {
 // ("lrw config appkey 00ff" -> "lrw config appkey <redacted>", also inside JSON strings), then
 // values of names ending in password, passwd, token, secret, key or psk (any case): "name=value",
 // "name: value" and quoted values -> "name=<redacted>"; JSON "name":"value" -> "name":"<redacted>".
+// Then (ADR-0427) each of `bluetoothAddresses`, as "AA:BB:CC:DD:EE:FF" and as the bare 12 hex
+// digits, case-insensitively as a whole word, -> "<adapter address>".
 [[nodiscard]] std::string redact(std::string_view text, const RedactionContext& context);
 
 struct ReportInput {

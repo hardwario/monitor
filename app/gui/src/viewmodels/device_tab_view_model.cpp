@@ -127,6 +127,12 @@ DeviceTabViewModel::DeviceTabViewModel(TabContext context, QObject* parent)
     // Plan 0044: sharing this console / the joiner state (children, Qt parent ownership).
     m_remoteShare = new RemoteShareViewModel(this); // NOLINT(cppcoreguidelines-owning-memory)
     m_remoteJoin = new RemoteJoinViewModel(this);   // NOLINT(cppcoreguidelines-owning-memory)
+    // ADR-0429: the device bar's Leave session / Join again follows the join state and a running
+    // remote operation.
+    connect(m_remoteJoin, &RemoteJoinViewModel::changed, m_connection,
+            &ConnectionViewModel::stateChanged);
+    connect(m_remoteJoin, &RemoteJoinViewModel::operationChanged, m_connection,
+            &ConnectionViewModel::stateChanged);
     createWizard();
 
     if (m_context.pages != nullptr) {
@@ -330,9 +336,9 @@ bool DeviceTabViewModel::configure(const QString& profileId, const QString& requ
         qCWarning(lcGui) << "Tab: unknown configuration" << profileId << requestedTarget << serial;
         return false;
     }
-    // ADR-0233 (plan 0033): a J-Link tab always uses the profile's console target; a tab saved
-    // with another target (ui/tabs of rc.2) opens on it. Plan 0039 (ADR-0274): a profile without
-    // a console (STM32 chip) keeps the chosen chip.
+    // ADR-0233 (plan 0033): a J-Link tab always uses the profile's console target; a request for
+    // another target opens on it. Plan 0039 (ADR-0274): a profile without a console (STM32 chip)
+    // keeps the chosen chip.
     const QString targetId = toQString(device::tabTargetId(*profile, toStdString(requestedTarget)));
     if (targetId != requestedTarget) {
         qCInfo(lcGui) << "Tab: target" << requestedTarget << "->" << targetId << "(ADR-0233)";
@@ -429,6 +435,7 @@ bool DeviceTabViewModel::configureRemote(const QString& code, const QUrl& relay)
         return false;
     }
     releaseSession();
+    m_remoteJoin->setLeft(false); // ADR-0429: another session
     m_profile = profile;
     m_targetId = toQString(device::consoleTargetId(*profile));
     m_serial.reset();
@@ -447,7 +454,7 @@ bool DeviceTabViewModel::configureRemote(const QString& code, const QUrl& relay)
     m_picker->setActive(false);
     m_blePicker->setActive(false);
     titleChanged();         // signal
-    configurationChanged(); // signal (a remote tab is never saved in ui/tabs)
+    configurationChanged(); // signal
     updateState();
     return true;
 }
@@ -609,8 +616,16 @@ Status DeviceTabViewModel::openRemoteSession() {
                             .consoleLog = m_consoleLog});
     connect(m_remoteSession.get(), &remote::RemoteConsoleSession::transcriptReplaced, this,
             &DeviceTabViewModel::consoleReplaced);
-    connect(m_remoteSession.get(), &remote::RemoteConsoleSession::hostHelloReceived, this,
-            &DeviceTabViewModel::titleChanged);
+    connect(m_remoteSession.get(), &remote::RemoteConsoleSession::hostHelloReceived, this, [this] {
+        // Plan 0059 (ADR-0415): the console rules of the host's profile (CHESTER for an older
+        // host; the neutral console profile for one this build does not know).
+        if (m_remoteSession && &m_remoteSession->profile() != m_profile) {
+            m_profile = &m_remoteSession->profile();
+            m_targetId = toQString(device::consoleTargetId(*m_profile));
+            configurationChanged(); // signal
+        }
+        titleChanged(); // signal
+    });
     connect(m_remoteSession.get(), &remote::RemoteConsoleSession::joinStateChanged, this,
             &DeviceTabViewModel::titleChanged);
     adoptSession(*m_remoteSession);
@@ -716,9 +731,16 @@ void DeviceTabViewModel::disconnectDevice() {
         return;
     }
     const bool hadSession = consoleSession() != nullptr;
+    const bool leaving = hadSession && isRemote();
+    if (leaving) {
+        m_remoteJoin->setLeft(true); // ADR-0429: before releaseSession() re-attaches the view model
+    }
     releaseSession();
     m_connection->setOpenError(std::nullopt);
-    if (hadSession) {
+    if (leaving) {
+        addMarker(markerText(
+            QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel", "— you left the session —")));
+    } else if (hadSession) {
         addMarker(
             markerText(QT_TRANSLATE_NOOP("hwio::gui::DeviceTabViewModel", "— disconnected —")));
     }
@@ -970,7 +992,7 @@ void DeviceTabViewModel::handOverToUser() {
     m_openedBy.clear();
     m_openedByKey.clear();
     aiStateChanged();       // signal
-    configurationChanged(); // signal: ui/tabs is saved with this tab now
+    configurationChanged(); // signal
 }
 
 void DeviceTabViewModel::setAiCommandActive(bool active) {

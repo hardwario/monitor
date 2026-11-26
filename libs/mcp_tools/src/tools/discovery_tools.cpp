@@ -46,7 +46,10 @@ constexpr const char* listDevicesDescription =
     "enumerate the probes again (takes up to 2 s). Bluetooth devices are listed like `hwio ble "
     "scan`: only those with a known profile (e.g. CHESTER) and open ones; ble_hidden counts the "
     "nearby Bluetooth devices left out. Pass all_ble=true to list every nearby Bluetooth "
-    "advertiser (can be large). Use an id with connect.";
+    "advertiser (can be large). Use an id with connect. A customer's device in a remote support "
+    "session joined in HARDWARIO Monitor is listed as \"remote:<n>\" (kind \"remote\"): the first "
+    "tool call on it asks the support person, secret values are hidden, and only the console "
+    "tools, flash (catalog_id or prepared_id), flash_lte and reset work on it.";
 
 constexpr const char* connectDescription =
     "Connect a device by its id from list_devices (\"jlink:<serial>\" or \"ble:<id>\") and start "
@@ -76,8 +79,9 @@ constexpr const char* statusDescription =
 // plain list_devices (`reportErrors` false).
 class RefreshDevicesCall final : public hwio::mcp::ToolCall {
 public:
-    RefreshDevicesCall(IDeviceProvider& provider, bool reportErrors, BleListing listing)
-        : m_provider(&provider), m_listing(listing) {
+    RefreshDevicesCall(IDeviceProvider& provider, bool reportErrors, BleListing listing,
+                       std::string clientKey)
+        : m_provider(&provider), m_listing(listing), m_clientKey(std::move(clientKey)) {
         const QPointer<RefreshDevicesCall> self(this);
         provider.refresh([self, reportErrors](const hwio::Status& refreshed) {
             if (self.isNull() || self->isFinished()) {
@@ -87,13 +91,15 @@ public:
                 self->finish(std::unexpected(refreshed.error()));
                 return;
             }
-            self->finish(hwio::mcp::toolResult(devicesJson(*self->m_provider, self->m_listing)));
+            self->finish(hwio::mcp::toolResult(
+                devicesJson(*self->m_provider, self->m_clientKey, self->m_listing)));
         });
     }
 
 private:
     IDeviceProvider* m_provider; // non-owning, outlives the call (ToolsContext)
     BleListing m_listing;
+    std::string m_clientKey; // plan 0062: remote devices are listed for this client
 };
 
 // connect: open (after consent) and wait for the outcome of the first attempt (waitForFirstAttempt
@@ -112,7 +118,8 @@ public:
             QJsonObject result;
             result.insert(QStringLiteral("device"), qs(m_request.id));
             result.insert(QStringLiteral("already_open"), true);
-            result.insert(QStringLiteral("connection"), connectionJson(ref->console->connection()));
+            result.insert(QStringLiteral("connection"),
+                          deviceConnectionJson(*ref, ref->console->connection()));
             finish(hwio::mcp::toolResult(result));
             return;
         }
@@ -260,18 +267,20 @@ hwio::Status addListDevices(hwio::mcp::Registry& registry, ToolsContext& context
             .annotations = readOnly,
             .consent = {},
             .marker = false,
-            .start = [&context](const hwio::mcp::RequestContext&, const QJsonObject& args,
+            .start = [&context](const hwio::mcp::RequestContext& rc, const QJsonObject& args,
                                 hwio::mcp::ToolEnv&) -> std::unique_ptr<hwio::mcp::ToolCall> {
                 const BleListing listing = args.value(QStringLiteral("all_ble")).toBool()
                                                ? BleListing::All
                                                : BleListing::Profiled;
                 if (args.value(QStringLiteral("refresh")).toBool()) {
-                    return std::make_unique<RefreshDevicesCall>(context.provider(), true, listing);
+                    return std::make_unique<RefreshDevicesCall>(context.provider(), true, listing,
+                                                                rc.clientKey);
                 }
                 if (context.provider().firstScanPending()) { // review V1
-                    return std::make_unique<RefreshDevicesCall>(context.provider(), false, listing);
+                    return std::make_unique<RefreshDevicesCall>(context.provider(), false, listing,
+                                                                rc.clientKey);
                 }
-                return done(devicesJson(context.provider(), listing));
+                return done(devicesJson(context.provider(), rc.clientKey, listing));
             },
             .validate = {}});
 }
@@ -290,7 +299,7 @@ hwio::Status addConnect(hwio::mcp::Registry& registry, ToolsContext& context) {
                                                             "\"jlink:801000001\"."))
                                   .minLength(1)
                                   .maxLength(160)
-                                  .pattern(QStringLiteral("^(jlink|ble):\\S+$")),
+                                  .pattern(QStringLiteral("^(jlink|ble|remote):\\S+$")),
                               Required::Yes)
                     .property(
                         QStringLiteral("profile"),
@@ -400,7 +409,7 @@ hwio::Status addStatus(hwio::mcp::Registry& registry, ToolsContext& context) {
             .consent = {},
             .marker = false,
             .start =
-                [&context](const hwio::mcp::RequestContext&, const QJsonObject& args,
+                [&context](const hwio::mcp::RequestContext& rc, const QJsonObject& args,
                            hwio::mcp::ToolEnv&) {
                     QJsonArray devices;
                     if (args.contains(QStringLiteral("device"))) {
@@ -414,10 +423,17 @@ hwio::Status addStatus(hwio::mcp::Registry& registry, ToolsContext& context) {
                             if (entry.state != DeviceEntry::State::Open) {
                                 continue;
                             }
-                            if (const auto ref = context.provider().find(entry.id);
-                                ref && ref->alive()) {
-                                devices.append(deviceStatusJson(entry.id, *ref));
+                            const auto ref = context.provider().find(entry.id);
+                            if (!ref || !ref->alive()) {
+                                continue;
                             }
+                            if (!visibleTo(*ref, rc.clientKey)) {
+                                // Plan 0062 (ADR-0436): nothing before support's Allow.
+                                devices.append(QJsonObject{{QStringLiteral("id"), qs(entry.id)},
+                                                           {QStringLiteral("remote"), true}});
+                                continue;
+                            }
+                            devices.append(deviceStatusJson(entry.id, *ref));
                         }
                     }
                     QJsonObject result;

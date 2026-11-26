@@ -7,12 +7,15 @@
 #include "hwio/diag/check.h"
 #include "hwio/diag/environment.h"
 #include "hwio/diag/process_scan.h"
+#include "hwio/diag/report.h"
 #include "hwio/hw/ble/ble_api.h"
 #include "hwio/hw/ble/ble_host.h"
 #include "hwio/hw/ble/types.h"
 
+#include <QByteArray>
 #include <QFile>
 #include <QIODevice>
+#include <QJsonDocument>
 #include <QString>
 #include <QStringLiteral>
 #include <QTemporaryDir>
@@ -231,6 +234,28 @@ TEST_F(Environment, WorldAccessibleProbeIsAWarning) {
     }
 }
 #endif
+
+// Plan 0060 A5 (ADR-0427): the check keeps the adapter address on screen (and in `hwio doctor`)
+// and gives it to the report, whose summary hides it.
+TEST_F(Environment, BluetoothAdapterAddressIsHiddenInTheReport) {
+    const auto context = this->context();
+    const auto results = run(context);
+    EXPECT_EQ(find(results, "bluetooth").result, "Adapter ready (hci0, 00:11:22:33:44:55)");
+    EXPECT_EQ(context.facts->bluetoothAdapterAddresses,
+              std::vector<std::string>{"00:11:22:33:44:55"});
+    EXPECT_FALSE(
+        hwio::diag::toJson(*context.facts).contains(QStringLiteral("bluetoothAdapterAddresses")));
+    hwio::diag::ReportInput input;
+    input.doctor = results;
+    input.redaction = hwio::diag::currentRedaction(*context.facts);
+    const std::string summary = hwio::diag::ReportBuilder::summaryText(input);
+    EXPECT_NE(summary.find("Adapter ready (hci0, <adapter address>)"), std::string::npos)
+        << summary;
+    EXPECT_EQ(summary.find("00:11:22:33:44:55"), std::string::npos) << summary;
+    const QByteArray json =
+        QJsonDocument(hwio::diag::ReportBuilder::summaryJson(input)).toJson(QJsonDocument::Compact);
+    EXPECT_FALSE(json.contains("00:11:22:33:44:55")) << json.toStdString();
+}
 
 TEST_F(Environment, BluetoothStates) {
     for (const auto& [state, status, code] :

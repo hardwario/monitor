@@ -36,8 +36,8 @@ unterscheidet:
   (Koppeln; Linux, Windows). Siehe [Kopplung](#kopplung).
 - Wird das Gerät nicht gefunden, kehrt **Choose another device** (anderes Gerät wählen) zur Liste zurück.
 
-Bluetooth-Tabs kommen nach einem Neustart getrennt zurück; drücken Sie **Connect**. Die App startet Bluetooth erst,
-wenn Sie die Bluetooth-Ansicht zum ersten Mal öffnen, daher fragt macOS erst dann nach dem Bluetooth-Zugriff.
+Die App startet Bluetooth erst, wenn Sie die Bluetooth-Ansicht zum ersten Mal öffnen, daher fragt macOS erst dann
+nach dem Bluetooth-Zugriff.
 
 ## Gerät finden (Kommandozeile)
 

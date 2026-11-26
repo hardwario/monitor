@@ -42,7 +42,6 @@ namespace hwio::gui {
 
 namespace {
 
-const QString restoreTabsKey = QStringLiteral("ui/restoreTabs");
 const QString speedKey = QStringLiteral("jlink/speedKhz");
 const QString latencyKey = QStringLiteral("rtt/latencyMs");
 const QString autoReconnectKey = QStringLiteral("rtt/autoReconnect");
@@ -76,8 +75,8 @@ SettingsViewModel::SettingsViewModel(AppViewModel& app, FirmwareServices& servic
         if (key == speedKey) {
             loadSpeed();
             valuesChanged(); // signal
-        } else if (key == restoreTabsKey || key == latencyKey || key == autoReconnectKey ||
-                   key == resetOnOpenKey || key == toQString(remote::relayUrlSetting.path)) {
+        } else if (key == latencyKey || key == autoReconnectKey || key == resetOnOpenKey ||
+                   key == toQString(remote::relayUrlSetting.path)) {
             valuesChanged(); // signal
         } else if (key == FirmwareServices::jlinkPathKey) {
             jlinkLibraryChanged(); // signal
@@ -257,17 +256,6 @@ int SettingsViewModel::themeIndex() const {
 }
 
 void SettingsViewModel::setTheme(const QString& theme) { m_app.setTheme(theme); }
-
-bool SettingsViewModel::restoreTabs() const {
-    return m_app.settingsStore()->value(restoreTabsKey).toBool();
-}
-
-void SettingsViewModel::setRestoreTabs(bool restore) {
-    if (restore != restoreTabs()) {
-        write(restoreTabsKey, restore);
-    }
-    valuesChanged(); // signal
-}
 
 // ---- J-Link
 // ----------------------------------------------------------------------------------------

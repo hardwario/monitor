@@ -15,9 +15,9 @@ namespace hwio::mcp {
 
 namespace {
 
-constexpr std::array allCategories{ConsentCategory::Flash, ConsentCategory::Erase,
+constexpr std::array allCategories{ConsentCategory::Flash,       ConsentCategory::Erase,
                                    ConsentCategory::MemoryWrite, ConsentCategory::Uicr,
-                                   ConsentCategory::Connect};
+                                   ConsentCategory::Connect,     ConsentCategory::RemoteDevice};
 
 } // namespace
 
@@ -33,6 +33,8 @@ std::string_view consentCategoryId(ConsentCategory category) noexcept {
         return "uicr";
     case ConsentCategory::Connect:
         return "connect";
+    case ConsentCategory::RemoteDevice:
+        return "remote-device";
     }
     return "flash";
 }
@@ -75,7 +77,8 @@ ConsentRequest makeConsentRequest(const RequestContext& context, ConsentCategori
                           .tool = context.tool,
                           .deviceId = std::move(deviceId),
                           .categories = categories,
-                          .details = std::move(details)};
+                          .details = std::move(details),
+                          .remoteDevice = false};
 }
 
 } // namespace hwio::mcp

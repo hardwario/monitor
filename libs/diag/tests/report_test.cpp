@@ -3,6 +3,7 @@
 #include "hwio/core/crash_handler.h"
 #include "hwio/core/error.h"
 #include "hwio/diag/check.h"
+#include "hwio/diag/environment.h"
 #include "hwio/diag/report.h"
 
 #include <QByteArray>
@@ -38,10 +39,16 @@ using hwio::diag::CheckStatus;
 using hwio::diag::redact;
 using hwio::diag::RedactionContext;
 
-const RedactionContext posix{
-    .home = "/home/jdoe", .user = "jdoe", .host = "jdoe-box", .caseInsensitive = false};
-const RedactionContext windows{
-    .home = "C:\\Users\\JDoe", .user = "JDoe", .host = "JDOE-PC", .caseInsensitive = true};
+const RedactionContext posix{.home = "/home/jdoe",
+                             .user = "jdoe",
+                             .host = "jdoe-box",
+                             .caseInsensitive = false,
+                             .bluetoothAddresses = {}};
+const RedactionContext windows{.home = "C:\\Users\\JDoe",
+                               .user = "JDoe",
+                               .host = "JDOE-PC",
+                               .caseInsensitive = true,
+                               .bluetoothAddresses = {}};
 
 TEST(Redact, HomeUserAndHost) {
     EXPECT_EQ(redact("log /home/jdoe/.local/share/x.log", posix), "log ~/.local/share/x.log");
@@ -149,8 +156,11 @@ TEST(Redact, WindowsIsCaseInsensitiveAndKnowsBothSeparators) {
 // becomes "~"; a sibling folder is another folder. Its name follows the user-name rule: "jane" in
 // "jane_old" is part of another name and stays; "jane.bak" contains the whole word "jane".
 TEST(Redact, OnlyTheHomeFolderItselfIsTheHomePath) {
-    const RedactionContext jane{
-        .home = "/home/jane", .user = "jane", .host = "", .caseInsensitive = false};
+    const RedactionContext jane{.home = "/home/jane",
+                                .user = "jane",
+                                .host = "",
+                                .caseInsensitive = false,
+                                .bluetoothAddresses = {}};
     EXPECT_EQ(redact("/home/jane/x", jane), "~/x");
     EXPECT_EQ(redact("cd /home/jane", jane), "cd ~");
     EXPECT_EQ(redact("'/home/jane' and \"/home/jane\" or /home/jane: x", jane),
@@ -159,30 +169,65 @@ TEST(Redact, OnlyTheHomeFolderItselfIsTheHomePath) {
     EXPECT_EQ(redact("/home/jane-old/x", jane), "/home/jane-old/x");
     EXPECT_EQ(redact("/home/jane.bak/x", jane), "/home/<user>.bak/x");
     EXPECT_EQ(redact("/home/janet/x", jane), "/home/janet/x");
-    const RedactionContext windowsJane{
-        .home = "C:\\Users\\Jane", .user = "Jane", .host = "", .caseInsensitive = true};
+    const RedactionContext windowsJane{.home = "C:\\Users\\Jane",
+                                       .user = "Jane",
+                                       .host = "",
+                                       .caseInsensitive = true,
+                                       .bluetoothAddresses = {}};
     EXPECT_EQ(redact("C:\\Users\\Jane\\x and C:\\Users\\Jane_old\\x", windowsJane),
               "~\\x and C:\\Users\\Jane_old\\x");
 }
 
 // Review V13: macOS logs often show the host name without ".local".
 TEST(Redact, ShortHostNameIsReplacedToo) {
-    const RedactionContext mac{
-        .home = "/Users/jdoe", .user = "jdoe", .host = "Janes-MBP.local", .caseInsensitive = false};
+    const RedactionContext mac{.home = "/Users/jdoe",
+                               .user = "jdoe",
+                               .host = "Janes-MBP.local",
+                               .caseInsensitive = false,
+                               .bluetoothAddresses = {}};
     EXPECT_EQ(redact("on Janes-MBP.local and Janes-MBP, not Janes-MBPs", mac),
               "on <host> and <host>, not Janes-MBPs");
     // A short name of fewer than 3 characters would hit ordinary words: kept.
-    const RedactionContext shortHost{
-        .home = "/home/x1", .user = "x1", .host = "ab.example.org", .caseInsensitive = false};
+    const RedactionContext shortHost{.home = "/home/x1",
+                                     .user = "x1",
+                                     .host = "ab.example.org",
+                                     .caseInsensitive = false,
+                                     .bluetoothAddresses = {}};
     EXPECT_EQ(redact("ab.example.org ab", shortHost), "<host> ab");
-    const RedactionContext threeChars{
-        .home = "/home/x1", .user = "x1", .host = "pc1.lan", .caseInsensitive = false};
+    const RedactionContext threeChars{.home = "/home/x1",
+                                      .user = "x1",
+                                      .host = "pc1.lan",
+                                      .caseInsensitive = false,
+                                      .bluetoothAddresses = {}};
     EXPECT_EQ(redact("pc1.lan pc1 pc10", threeChars), "<host> <host> pc10");
 }
 
 TEST(Redact, ShortNamesAreNotReplaced) {
-    const RedactionContext tiny{.home = "/", .user = "a", .host = "", .caseInsensitive = false};
+    const RedactionContext tiny{
+        .home = "/", .user = "a", .host = "", .caseInsensitive = false, .bluetoothAddresses = {}};
     EXPECT_EQ(redact("a / b", tiny), "a / b");
+}
+
+// Plan 0060 A5 (ADR-0427): this computer's adapter address, colon-separated and bare, any case;
+// a device address and longer hex words stay; an invalid or empty address redacts nothing.
+TEST(Redact, BluetoothAdapterAddress) {
+    RedactionContext context = posix;
+    context.bluetoothAddresses = {"00:1A:7D:DA:71:13"};
+    EXPECT_EQ(redact("Adapter ready (hci0, 00:1A:7D:DA:71:13)", context),
+              "Adapter ready (hci0, <adapter address>)");
+    EXPECT_EQ(redact("adapter 00:1a:7d:da:71:13 up", context), "adapter <adapter address> up");
+    EXPECT_EQ(redact("adapter=001A7DDA7113;", context), "adapter=<adapter address>;");
+    EXPECT_EQ(redact("adapter 001a7dda7113", context), "adapter <adapter address>");
+    // A CHESTER's address stays (support needs it), and so does a longer word.
+    EXPECT_EQ(redact("device F1:22:33:44:55:66", context), "device F1:22:33:44:55:66");
+    EXPECT_EQ(redact("id 001A7DDA711300", context), "id 001A7DDA711300");
+    // The address given in the bare or dashed form is found in the colon form too.
+    context.bluetoothAddresses = {"00-1a-7d-da-71-13"};
+    EXPECT_EQ(redact("(hci0, 00:1A:7D:DA:71:13)", context), "(hci0, <adapter address>)");
+    for (const char* invalid : {"", "00:1A:7D", "not an address", "00:1A:7D:DA:71:13:00"}) {
+        context.bluetoothAddresses = {invalid};
+        EXPECT_EQ(redact("x 00:1A:7D:DA:71:13", context), "x 00:1A:7D:DA:71:13") << invalid;
+    }
 }
 
 TEST(Report, TailStartsAtALine) {
@@ -255,6 +300,43 @@ std::map<std::string, std::string> unzip(const fs::path& file) {
     }
     mz_zip_reader_end(&archive);
     return entries;
+}
+
+// Plan 0060 A5 (ADR-0427): the adapter address of the facts reaches every entry of the zip as
+// "<adapter address>" (the zip itself is compressed: the entries are searched).
+TEST(Report, BluetoothAdapterAddressIsRedacted) {
+    const QTemporaryDir dir;
+    const fs::path root(dir.path().toStdString());
+    auto input = sampleInput(root);
+    hwio::diag::EnvironmentFacts facts;
+    facts.bluetoothAdapterAddresses = {"00:1A:7D:DA:71:13"};
+    const RedactionContext current = hwio::diag::currentRedaction(facts);
+    EXPECT_EQ(current.bluetoothAddresses, facts.bluetoothAdapterAddresses);
+    input.redaction.bluetoothAddresses = current.bluetoothAddresses;
+    input.doctor.push_back(CheckResult{.id = "bluetooth",
+                                       .status = CheckStatus::Ok,
+                                       .title = "Bluetooth",
+                                       .result = "Adapter ready (hci0, 00:1A:7D:DA:71:13)",
+                                       .error = std::nullopt});
+    std::ofstream(root / "logs" / "cli-20261016-090100-2.log")
+        << "ble adapter 00:1a:7d:da:71:13 (001A7DDA7113) device F1:22:33:44:55:66\n";
+    std::ofstream(root / "Monitor.ini") << "[ble]\nadapter=00:1A:7D:DA:71:13\n";
+    const fs::path target = root / "report.zip";
+    ASSERT_TRUE(hwio::diag::ReportBuilder::writeZip(input, target, {}).has_value());
+    const auto entries = unzip(target);
+    ASSERT_TRUE(entries.contains("summary.txt"));
+    EXPECT_NE(entries.at("summary.txt").find("Adapter ready (hci0, <adapter address>)"),
+              std::string::npos)
+        << entries.at("summary.txt");
+    EXPECT_NE(entries.at("summary.json").find("<adapter address>"), std::string::npos);
+    EXPECT_NE(entries.at("settings.ini").find("adapter=<adapter address>"), std::string::npos);
+    const std::string& log = entries.at("logs/cli-20261016-090100-2.log");
+    EXPECT_NE(log.find("device F1:22:33:44:55:66"), std::string::npos) << log;
+    for (const auto& [name, data] : entries) {
+        for (const char* address : {"00:1A:7D:DA:71:13", "00:1a:7d:da:71:13", "001A7DDA7113"}) {
+            EXPECT_EQ(data.find(address), std::string::npos) << name << ": " << address;
+        }
+    }
 }
 
 TEST(Report, SummaryIsRedacted) {
