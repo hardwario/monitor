@@ -42,6 +42,7 @@
 #include "viewmodels/remote_join_view_model.h"
 #include "viewmodels/ui_mode_controller.h"
 #include "wizard/wizard_view_model.h"
+#include "workers/probe_scanner.h"
 #include "zip_builder.h"
 
 #include <QByteArray>
@@ -49,11 +50,14 @@
 #include <QCryptographicHash>
 #include <QDateTime>
 #include <QDir>
+#include <QEventLoop>
 #include <QFile>
 #include <QHostAddress>
 #include <QIODevice>
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonValue>
 #include <QLatin1Char>
 #include <QObject>
 #include <QPointer>
@@ -164,10 +168,19 @@ public:
     }
 
     // Another fake J-Link scenario for the sessions opened from now on ("" = the default one).
+    // The probe scanner follows at once: a fake library copy reads the scenario only when it is
+    // loaded, and the scanner keeps its copy while any picker is visible (ADR-0093) - since plan
+    // 0053 the Choose device tab nearly always is, so a copy loaded under the previous scenario
+    // could serve scans for the rest of the file. Its last result, which every new picker shows
+    // (and preselects from) at once, could also be the previous scenario's. So the scanner drops
+    // its copy here and this returns only after a scan of the new scenario has been delivered.
     Q_INVOKABLE [[nodiscard]] bool useScenario(const QString& json) const {
-        const QByteArray utf8 = json.toUtf8();
-        return hwio::gui::test::useFakeJLink(
-            m_dir, json.isEmpty() ? hwio::gui::test::twoProbesScenario : utf8.constData());
+        const QByteArray utf8 =
+            json.isEmpty() ? QByteArray(hwio::gui::test::twoProbesScenario) : json.toUtf8();
+        if (!hwio::gui::test::useFakeJLink(m_dir, utf8.constData())) {
+            return false;
+        }
+        return syncProbeScanner(utf8);
     }
 
     // VmRSS of this process in MiB (Linux; 0 elsewhere).
@@ -973,6 +986,72 @@ private:
         }
         file.write(bytes);
         return QUrl::fromLocalFile(path);
+    }
+
+    // The serial numbers of a scenario's probes, in order.
+    [[nodiscard]] static std::vector<std::uint32_t> scenarioSerials(const QByteArray& json) {
+        std::vector<std::uint32_t> serials;
+        const QJsonArray probes =
+            QJsonDocument::fromJson(json).object().value(QStringLiteral("probes")).toArray();
+        for (const QJsonValue probe : probes) {
+            serials.push_back(static_cast<std::uint32_t>(
+                probe.toObject().value(QStringLiteral("serialNumber")).toInteger()));
+        }
+        return serials;
+    }
+
+    // useScenario(): the probe scanner drops its library copy and delivers a scan made with a
+    // fresh one (bounded: 20 s per wait). False when that did not happen in time.
+    [[nodiscard]] bool syncProbeScanner(const QByteArray& json) const {
+        using Clock = std::chrono::steady_clock;
+        constexpr std::chrono::seconds timeout{20};
+        hwio::gui::ProbeScanner& scanner = m_app->probeScanner();
+        const std::uint64_t before = scanner.last() ? scanner.last()->sequence : 0;
+        // The pickers' holds are given back for a moment (only the scanner's count: every picker
+        // keeps its own `active`), so that the worker unloads its copy. No events run on the GUI
+        // thread meanwhile, so no picker takes or gives back a hold in between.
+        const int holds = scanner.activeCount();
+        for (int i = 0; i < holds; ++i) {
+            scanner.release();
+        }
+        const Clock::time_point unloadDeadline = Clock::now() + timeout;
+        while (scanner.libraryLoaded() && Clock::now() < unloadDeadline) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
+        const bool unloaded = !scanner.libraryLoaded();
+        for (int i = 0; i < holds; ++i) {
+            scanner.acquire(); // the first one scans at once, with a new copy
+        }
+        if (holds == 0) {
+            scanner.scanNow(); // with a copy loaded for this scan only
+        }
+        if (!unloaded) {
+            qWarning() << "useScenario: the probe scanner kept its library copy";
+            return false;
+        }
+        if (scanner.suspended()) {
+            return true; // plan 0036: no scan now; the next one uses a new copy
+        }
+        // A result of the old copy may still be on its way: wait for the new scenario's probes
+        // (or a library error, which only a new copy reports).
+        const std::vector<std::uint32_t> expected = scenarioSerials(json);
+        const Clock::time_point deadline = Clock::now() + timeout;
+        while (Clock::now() < deadline) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+            const std::optional<hwio::gui::ProbeScan>& last = scanner.last();
+            if (last && last->sequence > before &&
+                (last->libraryError ||
+                 std::ranges::equal(last->probes, expected,
+                                    [](const hwio::gui::ScannedProbe& probe, std::uint32_t serial) {
+                                        return probe.probe.serialNumber == serial;
+                                    }))) {
+                return true;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
+        qWarning() << "useScenario: no probe scan of the new scenario within" << timeout.count()
+                   << "s";
+        return false;
     }
 
     hwio::gui::AppViewModel* m_app;
