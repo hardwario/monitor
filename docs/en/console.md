@@ -36,7 +36,7 @@ keep arriving; **Resume** shows them. Each pane keeps the last 100 000 lines.
 | **Clear** | Clears the **Shell**, the **Log** or **Both** (<kbd>Ctrl</kbd>+<kbd>K</kbd> clears the focused pane) |
 | **Save view…** | Saves the focused pane to a text file (<kbd>Ctrl</kbd>+<kbd>S</kbd>) |
 | **Follow**, **Pause** | See above |
-| **More** | **Open log file**, **Open log folder** (the [console files](#console-files)) and the layout options |
+| **More** | **Save device information…** ([below](#save-device-information)), **Open log file**, **Open log folder** (the [console files](#console-files)) and the layout options |
 
 ## Sending commands
 
@@ -92,6 +92,37 @@ you used last (Documents the first time). Secrets are written as `<redacted>`, a
 [console files](#console-files) (for example `claim token: <redacted>`); the screen and **Copy** still show them. On
 Linux and macOS only your user can read the saved file.
 
+<a id="save-device-information"></a>
+## Save device information
+
+**More → Save device information…** writes what the device reports about itself into one text file named by its
+serial number, for example `2159018267_2026-11-25_141502.txt`. It works in a J-Link or Bluetooth tab while the
+device is connected; it is not offered in a remote support tab.
+
+1. The app asks the device `info show` and `config show`. These commands do not appear in the console. A line under
+   the toolbar shows **Reading device information… (1 of 2)** with **Cancel**.
+2. When both are read, the line offers **Include secrets** (off) and **Save…**; **Discard** throws the result away.
+3. **Save…** opens the save dialog with the name prefilled, in the folder you used last (the first time
+   Documents/HARDWARIO Monitor).
+4. **Device information saved to …** with **Show in folder** confirms it.
+
+The file is plain text: a header with the device name, serial number, firmware, date and the HARDWARIO Monitor
+version, then for each command a line `### info show` and the device's answer as it printed it. The output of
+`config show` stays a list of commands, so you can copy lines from it into a console or a [batch file](#batch-files).
+
+- **Secrets** (the claim token, the BLE passkey, LoRaWAN keys, LTE passwords) are written as `<redacted>`, as in the
+  [console files](#console-files). With **Include secrets** they are written as the device prints them: such a file
+  is as sensitive as the device's keys, so keep it safe. On Linux and macOS only your user can read the file either
+  way.
+- A command the device does not answer within 10 seconds is written as `(no answer)`, and the confirmation names
+  it. An answer longer than 2000 lines or 256 KiB is cut with a marker line.
+- A device that reports no serial number gets the name `unknown-<J-Link serial number or Bluetooth address>_…`.
+- If the device disconnects while it is read, nothing is written: *The device disconnected while its information was
+  read.*
+
+The command line does the same with `hwio chester app info save` and `hwio ble info save` (see
+[Command line](cli.md)).
+
 <a id="batch-files"></a>
 ## Batch files
 
@@ -141,6 +172,7 @@ The same console in a terminal:
 ```sh
 hwio chester app console                   # interactive: F4 reconnects, Ctrl+C on an empty line or Ctrl+D quits
 hwio chester app command "info show"       # one command, print the answer
+hwio chester app info save                 # the device information file (also: hwio ble info save -a ID)
 echo "app config show" | hwio chester app console
 ```
 

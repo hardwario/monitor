@@ -126,14 +126,15 @@ void ShellQueryQueue::setSession(ConsoleSession* session) {
     clear();
 }
 
-void ShellQueryQueue::run(std::string command, Callback done) {
+void ShellQueryQueue::run(std::string command, Callback done, std::chrono::milliseconds timeout) {
     if (m_clearing || m_pending.size() >= maxQueued) {
         if (done) {
             done(std::nullopt);
         }
         return;
     }
-    m_pending.push_back(Pending{.command = std::move(command), .done = std::move(done)});
+    m_pending.push_back(
+        Pending{.command = std::move(command), .done = std::move(done), .timeout = timeout});
     if (!m_query && !m_waiting) {
         next();
     }
@@ -202,7 +203,7 @@ void ShellQueryQueue::next() {
 
 bool ShellQueryQueue::startQuery(Pending& item) {
     auto query = ShellQuery::start(*m_session, item.command,
-                                   ShellQueryOptions{.timeout = ShellQuery::defaultTimeout,
+                                   ShellQueryOptions{.timeout = item.timeout,
                                                      .maxLines = ShellQuery::defaultMaxLines,
                                                      .busy = m_busy});
     if (!query) {
@@ -257,21 +258,25 @@ std::optional<ShellQueryResult> waitForQuery(ShellQuery& query) {
     return query.result();
 }
 
-std::optional<ShellQueryResult> runAndWait(ShellQueryQueue& queue, std::string command) {
+std::optional<ShellQueryResult> runAndWait(ShellQueryQueue& queue, std::string command,
+                                           std::chrono::milliseconds timeout) {
     std::optional<ShellQueryResult> answer;
     bool answered = false;
     QEventLoop loop;
-    queue.run(std::move(command), [&](const std::optional<ShellQueryResult>& result) {
-        answer = result;
-        answered = true;
-        loop.quit();
-    });
+    queue.run(
+        std::move(command),
+        [&](const std::optional<ShellQueryResult>& result) {
+            answer = result;
+            answered = true;
+            loop.quit();
+        },
+        timeout);
     if (!answered) {
         // Bounded by the queue: the idle wait, then the query's own timeout.
         QTimer guard;
         guard.setSingleShot(true);
         QObject::connect(&guard, &QTimer::timeout, &loop, &QEventLoop::quit);
-        guard.start(ShellQueryQueue::maxIdleWait + ShellQuery::defaultTimeout * 2);
+        guard.start(ShellQueryQueue::maxIdleWait + timeout * 2);
         loop.exec();
     }
     if (!answered) {

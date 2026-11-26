@@ -120,14 +120,20 @@ public:
 
     // nullptr = no session (every query answers nullopt).
     void setSession(ConsoleSession* session);
-    void run(std::string command, Callback done);
+    // `timeout`: of the query once it runs (plan 0063: 10 s for the device information file).
+    void run(std::string command, Callback done,
+             std::chrono::milliseconds timeout = ShellQuery::defaultTimeout);
     void clear();
     [[nodiscard]] bool running() const noexcept { return static_cast<bool>(m_query); }
+    // The session the queries run on (nullptr = none; set to nullptr before setSession() answers
+    // the pending queries, so their callbacks can tell a released session from a refusal).
+    [[nodiscard]] ConsoleSession* session() const noexcept { return m_session.data(); }
 
 private:
     struct Pending {
         std::string command;
         Callback done;
+        std::chrono::milliseconds timeout{ShellQuery::defaultTimeout};
     };
     enum class Turn : std::uint8_t { Ready, Wait, Expired };
     [[nodiscard]] Turn frontTurn();
@@ -152,8 +158,10 @@ private:
 // returns the result; nullopt when it did not finish.
 [[nodiscard]] std::optional<ShellQueryResult> waitForQuery(ShellQuery& query);
 
-// CLI helper: runs `command` through `queue` and a local event loop until it is answered.
-[[nodiscard]] std::optional<ShellQueryResult> runAndWait(ShellQueryQueue& queue,
-                                                         std::string command);
+// CLI helper: runs `command` through `queue` and a local event loop until it is answered
+// (`timeout`: of the query, as ShellQueryQueue::run).
+[[nodiscard]] std::optional<ShellQueryResult>
+runAndWait(ShellQueryQueue& queue, std::string command,
+           std::chrono::milliseconds timeout = ShellQuery::defaultTimeout);
 
 } // namespace hwio::device

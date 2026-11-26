@@ -510,200 +510,212 @@
     </message>
     <message>
         <location filename="../app/gui/qml/pages/ConsolePage.qml" line="168"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="177"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="194"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="203"/>
         <source>All files (*)</source>
         <translation>Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="175"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="201"/>
         <source>Run a batch file</source>
         <translation>Batch-Datei ausführen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="177"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="194"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="203"/>
         <source>Text files (*.txt)</source>
         <translation>Textdateien (*.txt)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="187"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="191"/>
+        <source>Save device information</source>
+        <translation>Geräteinformationen speichern</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="213"/>
         <source>Copy</source>
         <translation>Kopieren</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="192"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="218"/>
         <source>Select all</source>
         <translation>Alles auswählen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="199"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="225"/>
         <source>Clear the shell</source>
         <translation>Shell leeren</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="199"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="225"/>
         <source>Clear the log</source>
         <translation>Protokoll leeren</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="231"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="257"/>
         <source>Console actions</source>
         <translation>Konsolenaktionen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="238"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="251"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="264"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="277"/>
         <source>Reset</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="243"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="269"/>
         <source>Opens the reset menu</source>
         <translation>Öffnet das Reset-Menü</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="257"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="283"/>
         <source>Reset and halt</source>
         <translation>Reset und anhalten</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="267"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="293"/>
         <source>Sharing…</source>
         <translation>Freigabe…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="267"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="293"/>
         <source>Share with support…</source>
         <translation>Mit dem Support teilen…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="277"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="303"/>
         <source>Reconnect</source>
         <translation>Neu verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="287"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="313"/>
         <source>Batch…</source>
         <translation>Batch…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="299"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="325"/>
         <source>Batch files — documentation</source>
         <translation>Batch-Dateien — Dokumentation</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="309"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="335"/>
         <source>Clear</source>
         <translation>Leeren</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="312"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="338"/>
         <source>Opens the clear menu</source>
         <translation>Öffnet das Menü zum Leeren</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="319"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="619"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="345"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="660"/>
         <source>Shell</source>
         <translation>Shell</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="324"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="677"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="350"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="718"/>
         <source>Log</source>
         <translation>Protokoll</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="329"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="355"/>
         <source>Both</source>
         <translation>Beide</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="338"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="364"/>
         <source>Save view…</source>
         <translation>Ansicht speichern…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="361"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="387"/>
         <source>Batch %1 / %2</source>
         <translation>Batch %1 / %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="369"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="395"/>
         <source>Stop the batch</source>
         <translation>Batch stoppen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="383"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="409"/>
         <source>Follow</source>
         <translation>Folgen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="395"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="421"/>
         <source>Pause</source>
         <translation>Pausieren</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="409"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="435"/>
         <source>More</source>
         <translation>Mehr</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="417"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="444"/>
+        <source>Save device information…</source>
+        <translation>Geräteinformationen speichern…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="452"/>
         <source>Open log file</source>
         <translation>Protokolldatei öffnen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="422"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="457"/>
         <source>Open log folder</source>
         <translation>Protokollordner öffnen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="429"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="464"/>
         <source>Show timestamps</source>
         <translation>Zeitstempel anzeigen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="436"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="471"/>
         <source>Wrap lines</source>
         <translation>Zeilen umbrechen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="443"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="478"/>
         <source>Swap panes</source>
         <translation>Bereiche tauschen</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="450"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="485"/>
         <source>Stacked layout</source>
         <translation>Bereiche untereinander</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="506"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="547"/>
         <source>Not connected</source>
         <translation>Nicht verbunden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="507"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="548"/>
         <source>Connect to see the device console.</source>
         <translation>Verbinden Sie sich, um die Gerätekonsole zu sehen.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="508"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="549"/>
         <source>Connect</source>
         <translation>Verbinden</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="559"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="600"/>
         <source>Resize the shell and the log</source>
         <translation>Größe von Shell und Protokoll ändern</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="497"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="538"/>
         <source>No console</source>
         <translation>Keine Konsole</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="498"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="539"/>
         <source>This chip has no console in HARDWARIO Monitor. Use the Flash page to flash, erase, unlock or reset it.</source>
         <translation>Dieser Chip hat in HARDWARIO Monitor keine Konsole. Verwenden Sie die Seite Flashen, um ihn zu flashen, zu löschen, zu entsperren oder zurückzusetzen.</translation>
     </message>
@@ -1010,6 +1022,49 @@
         <location filename="../app/gui/qml/shell/DeviceBar.qml" line="201"/>
         <source>Advanced</source>
         <translation>Erweitert</translation>
+    </message>
+</context>
+<context>
+    <name>DeviceInfoBar</name>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="75"/>
+        <source>The device information was read. Save it to a file.</source>
+        <translation>Die Geräteinformationen wurden gelesen. Speichern Sie sie in einer Datei.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="88"/>
+        <source>Include secrets</source>
+        <translation>Geheimnisse einschließen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="92"/>
+        <source>Write the keys, passwords, claim token and passkey as the device prints them. Without this they are written as &lt;redacted&gt;. On Linux and macOS only your user can read the file either way.</source>
+        <translation>Schreibt die Schlüssel, Passwörter, das Claim-Token und den Passkey so, wie das Gerät sie ausgibt. Ohne diese Option werden sie als &lt;redacted&gt; geschrieben. Unter Linux und macOS kann die Datei in beiden Fällen nur Ihr Benutzer lesen.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="102"/>
+        <source>Save…</source>
+        <translation>Speichern…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="109"/>
+        <source>Show in folder</source>
+        <translation>Im Ordner anzeigen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="117"/>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="117"/>
+        <source>Discard</source>
+        <translation>Verwerfen</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="125"/>
+        <source>Dismiss</source>
+        <translation>Schließen</translation>
     </message>
 </context>
 <context>
@@ -5214,22 +5269,22 @@
         <translation>Wenn das System nach dem Passkey fragt, geben Sie ihn im Systemdialog ein.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="210"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="213"/>
         <source>application</source>
         <translation>Anwendung</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="244"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="247"/>
         <source>LTE</source>
         <translation>LTE</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="293"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="296"/>
         <source>Power CHESTER with batteries or the USB-C power input.</source>
         <translation>Versorgen Sie CHESTER über Batterien oder den USB-C-Stromeingang.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="302"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="305"/>
         <source>The passkey is 123456 unless it was changed when the device was configured.</source>
         <translation>Der Passkey ist 123456, sofern er bei der Konfiguration des Geräts nicht geändert wurde.</translation>
     </message>
@@ -5333,6 +5388,36 @@
         <translation>Gerät</translation>
     </message>
     <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="87"/>
+        <source>The device disconnected while its information was read.</source>
+        <translation>Das Gerät wurde getrennt, während seine Informationen gelesen wurden.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="90"/>
+        <source>Connect the device again and try once more.</source>
+        <translation>Verbinden Sie das Gerät erneut und versuchen Sie es noch einmal.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="217"/>
+        <source>The device information of a remote support session&apos;s device cannot be saved.</source>
+        <translation>Die Geräteinformationen des Geräts einer Fernsupport-Sitzung können nicht gespeichert werden.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="220"/>
+        <source>HARDWARIO Monitor never sends commands of its own to a customer&apos;s device.</source>
+        <translation>HARDWARIO Monitor sendet nie eigene Befehle an das Gerät eines Kunden.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="223"/>
+        <source>Ask the customer to save it.</source>
+        <translation>Bitten Sie den Kunden, sie zu speichern.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="232"/>
+        <source>This device has no device information to save.</source>
+        <translation>Für dieses Gerät gibt es keine Geräteinformationen zum Speichern.</translation>
+    </message>
+    <message>
         <location filename="../libs/device/src/flash_workflows.cpp" line="146"/>
         <source>The chip is read-out protected (RDP level 1). Unlocking erases the whole chip, including its data EEPROM.</source>
         <translation>Der Chip ist gegen Auslesen geschützt (RDP-Level 1). Das Entsperren löscht den ganzen Chip einschließlich seines Daten-EEPROMs.</translation>
@@ -5408,7 +5493,7 @@
         <translation>Verbinden Sie den J-Link mit dem Programmieranschluss des LoRaWAN-Moduls.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="277"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="280"/>
         <source>LoRaWAN module</source>
         <translation>LoRaWAN-Modul</translation>
     </message>
@@ -6389,87 +6474,90 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="175"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="176"/>
         <source>another operation started on the device.</source>
         <translation>auf dem Gerät wurde ein anderer Vorgang gestartet.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="178"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="179"/>
         <source>Run the batch file again when it has finished.</source>
         <translation>Führen Sie die Batch-Datei erneut aus, wenn er abgeschlossen ist.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="260"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="264"/>
         <source>the device disconnected.</source>
         <translation>das Gerät wurde getrennt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="262"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="266"/>
         <source>Reconnect and run the batch file again.</source>
         <translation>Verbinden Sie erneut und führen Sie die Batch-Datei noch einmal aus.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="279"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="283"/>
         <source>The batch stopped after %1 of %2 commands.</source>
         <translation>Der Batch wurde nach %1 von %2 Befehlen angehalten.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="294"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="298"/>
         <source>The device was reset and halted.</source>
         <translation>Das Gerät wurde zurückgesetzt und angehalten.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="295"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="299"/>
         <source>The device was reset.</source>
         <translation>Das Gerät wurde zurückgesetzt.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="377"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="381"/>
         <source>%1 — the console resumes automatically</source>
         <translation>%1 — die Konsole wird automatisch fortgesetzt</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="383"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="387"/>
         <source>Waiting for pairing…</source>
         <translation>Warten auf Kopplung…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="384"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="388"/>
         <source>Connecting…</source>
         <translation>Verbinden…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="386"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="390"/>
         <source>Not connected</source>
         <translation>Nicht verbunden</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="760"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="764"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1001"/>
         <source>The file could not be saved.</source>
         <translation>Die Datei konnte nicht gespeichert werden.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="762"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="766"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1003"/>
         <source>the folder is not writable or the disk is full.</source>
         <translation>der Ordner ist nicht beschreibbar oder der Datenträger ist voll.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="766"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="770"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1007"/>
         <source>Choose another folder.</source>
         <translation>Wählen Sie einen anderen Ordner.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="793"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="797"/>
         <source>The view was saved to %1.</source>
         <translation>Die Ansicht wurde in %1 gespeichert.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="822"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="826"/>
         <source>Sends each line of a UTF-8 text file to the device as a shell command, one line every %1 ms. Empty lines and lines starting with # are skipped. At most %2 commands, %3 MiB per file and %4 bytes per line.</source>
         <translation>Sendet jede Zeile einer UTF-8-Textdatei als Shell-Befehl an das Gerät, eine Zeile alle %1 ms. Leere Zeilen und Zeilen, die mit # beginnen, werden übersprungen. Höchstens %2 Befehle, %3 MiB pro Datei und %4 Bytes pro Zeile.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="850"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="854"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Die erste %n Zeile wurde in die Zwischenablage kopiert (Kopierlimit).</numerusform>
@@ -6477,12 +6565,37 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="865"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="869"/>
         <source>There is no console log file for this device yet.</source>
         <translation>Für dieses Gerät gibt es noch keine Konsolen-Protokolldatei.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="380"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="902"/>
+        <source>Reading device information… (%1 of %2)</source>
+        <translation>Geräteinformationen werden gelesen… (%1 von %2)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1016"/>
+        <source>Device information saved to %1.</source>
+        <translation>Die Geräteinformationen wurden in %1 gespeichert.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1023"/>
+        <source>The device did not answer: %1.</source>
+        <translation>Das Gerät hat nicht geantwortet auf: %1.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1027"/>
+        <source>The device reported no serial number; the file name uses its Bluetooth address.</source>
+        <translation>Das Gerät hat keine Seriennummer gemeldet; der Dateiname verwendet seine Bluetooth-Adresse.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1029"/>
+        <source>The device reported no serial number; the file name uses the J-Link serial number.</source>
+        <translation>Das Gerät hat keine Seriennummer gemeldet; der Dateiname verwendet die Seriennummer des J-Link.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="384"/>
         <source>This chip has no console in HARDWARIO Monitor.</source>
         <translation>Dieser Chip hat in HARDWARIO Monitor keine Konsole.</translation>
     </message>

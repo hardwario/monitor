@@ -335,6 +335,145 @@ TEST_F(FakeJLinkCli, ConsoleFileIsNamedAfterTheFirmware) {
     EXPECT_TRUE(explicitReported) << kept.out;
 }
 
+// Plan 0063 (ADR-0440): `info save [PATH]` - `info show` and `config show` in one file named by
+// the serial number, secrets hidden unless --with-secrets, owner-only, never over an existing file.
+constexpr const char* infoFileChester = R"({"probes": [{"serialNumber": 683012345, "rtt": {
+    "output": [{"atMs": 0, "buffer": 1, "text": "[00:00:00.001,000] <inf> app: Boot\n"}],
+    "responses": {"info show": "vendor name: HARDWARIO a.s.\nproduct name: CHESTER-M\nfirmware name: CHESTER Clime\nfirmware version: v3.0.0\nserial number: 2159018267\nclaim token: 0123456789abcdef0123456789abcdef\nble passkey: 123456\n",
+                  "config show": "app config interval-sample 60\nlrw config appkey 00112233445566778899aabbccddeeff\n"}}}]})";
+
+QByteArray fileBytes(const QString& path) {
+    QFile file(path);
+    return file.open(QIODevice::ReadOnly) ? file.readAll() : QByteArray();
+}
+
+void expectOwnerOnly(const QString& path) {
+#ifndef _WIN32
+    EXPECT_EQ(QFile::permissions(path) & ~(QFile::ReadUser | QFile::WriteUser),
+              QFile::ReadOwner | QFile::WriteOwner)
+        << path.toStdString();
+#else
+    (void)path; // Windows: the folder's ACL (owner_only.h)
+#endif
+}
+
+TEST_F(FakeJLinkCli, InfoSaveWritesTheFileByTheSerialNumber) {
+    useScenario(infoFileChester);
+    const QRegularExpression generated(
+        QStringLiteral(R"(^2159018267_\d{4}-\d\d-\d\d_\d{6}\.txt$)"));
+
+    // PATH omitted: the current directory, human output.
+    const QString cwd = home() + QStringLiteral("/here");
+    ASSERT_TRUE(QDir().mkpath(cwd));
+    const RunResult human = run({QStringLiteral("chester"), QStringLiteral("app"),
+                                 QStringLiteral("info"), QStringLiteral("save")},
+                                fakeEnvironment(), {}, cwd);
+    ASSERT_TRUE(human.normalExit);
+    ASSERT_EQ(human.exitCode, 0) << human.err;
+    const QStringList files = QDir(cwd).entryList(QDir::Files);
+    ASSERT_EQ(files.size(), 1) << human.out;
+    EXPECT_TRUE(generated.match(files.front()).hasMatch()) << files.front().toStdString();
+    EXPECT_NE(human.out.find("Device information saved to "), std::string::npos) << human.out;
+    EXPECT_NE(human.out.find(files.front().toStdString()), std::string::npos) << human.out;
+    EXPECT_EQ(human.out.find("No answer"), std::string::npos) << human.out;
+    const QByteArray hidden = fileBytes(QDir(cwd).filePath(files.front()));
+    EXPECT_TRUE(hidden.startsWith("HARDWARIO Monitor - device information\nDevice: CHESTER-M\n"
+                                  "Serial number: 2159018267\nFirmware: CHESTER Clime v3.0.0\n"))
+        << hidden.toStdString();
+    EXPECT_TRUE(hidden.contains("\n### info show\nvendor name: HARDWARIO a.s.\n"));
+    EXPECT_TRUE(hidden.contains("claim token: <redacted>\nble passkey: <redacted>\n"));
+    EXPECT_TRUE(hidden.contains(
+        "\n### config show\napp config interval-sample 60\nlrw config appkey <redacted>\n"));
+    EXPECT_FALSE(hidden.contains("0123456789abcdef")) << hidden.toStdString();
+    EXPECT_FALSE(hidden.contains("00112233")) << hidden.toStdString();
+    EXPECT_FALSE(hidden.contains('\r'));
+    expectOwnerOnly(QDir(cwd).filePath(files.front()));
+
+    // PATH a folder, --json.
+    const QString folder = home() + QStringLiteral("/records");
+    ASSERT_TRUE(QDir().mkpath(folder));
+    const RunResult json =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("info"), QStringLiteral("save"), folder});
+    ASSERT_EQ(json.exitCode, 0) << json.err;
+    const auto all = envelopes(json.out);
+    ASSERT_EQ(all.size(), 1U) << json.out;
+    const QJsonObject saved = data(all[0]);
+    const QFileInfo written(saved.value(QStringLiteral("path")).toString());
+    EXPECT_EQ(written.absolutePath(), QFileInfo(folder).absoluteFilePath());
+    EXPECT_TRUE(generated.match(written.fileName()).hasMatch()) << json.out;
+    EXPECT_EQ(saved.value(QStringLiteral("serial")).toString(), QStringLiteral("2159018267"));
+    const QJsonArray commands = saved.value(QStringLiteral("commands")).toArray();
+    ASSERT_EQ(commands.size(), 2);
+    EXPECT_EQ(commands[0].toObject().value(QStringLiteral("command")).toString(),
+              QStringLiteral("info show"));
+    EXPECT_TRUE(commands[0].toObject().value(QStringLiteral("answered")).toBool());
+    EXPECT_EQ(commands[0].toObject().value(QStringLiteral("lines")).toInt(), 7);
+    EXPECT_EQ(commands[1].toObject().value(QStringLiteral("command")).toString(),
+              QStringLiteral("config show"));
+    EXPECT_EQ(commands[1].toObject().value(QStringLiteral("lines")).toInt(), 2);
+
+    // PATH a file name, --with-secrets (-n after `save`).
+    const QString exact = home() + QStringLiteral("/mine.txt");
+    const RunResult secrets =
+        hwio({QStringLiteral("chester"), QStringLiteral("app"), QStringLiteral("info"),
+              QStringLiteral("save"), exact, QStringLiteral("--with-secrets"), QStringLiteral("-n"),
+              QStringLiteral("683012345")});
+    ASSERT_EQ(secrets.exitCode, 0) << secrets.err;
+    const QByteArray full = fileBytes(exact);
+    EXPECT_TRUE(full.contains("claim token: 0123456789abcdef0123456789abcdef\n"));
+    EXPECT_TRUE(full.contains("lrw config appkey 00112233445566778899aabbccddeeff\n"));
+    expectOwnerOnly(exact);
+
+    // An existing file is never replaced (exit 3), before the device is touched.
+    const RunResult exists =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("info"), QStringLiteral("save"), exact});
+    EXPECT_EQ(exists.exitCode, 3) << exists.out;
+    EXPECT_EQ(errorCode(exists), QStringLiteral("io.file_exists"));
+    EXPECT_EQ(fileBytes(exact), full);
+
+    // A folder that does not exist: the file cannot be written (exit 3).
+    const RunResult missing =
+        hwio({QStringLiteral("--json"), QStringLiteral("chester"), QStringLiteral("app"),
+              QStringLiteral("info"), QStringLiteral("save"),
+              home() + QStringLiteral("/missing/a.txt")});
+    EXPECT_EQ(missing.exitCode, 3) << missing.out;
+    EXPECT_EQ(errorCode(missing), QStringLiteral("io.write_failed"));
+
+    // `info` alone is still the parsed `info show`.
+    const RunResult info =
+        hwio({QStringLiteral("chester"), QStringLiteral("app"), QStringLiteral("info")});
+    EXPECT_EQ(info.exitCode, 0) << info.err;
+    EXPECT_NE(info.out.find("serial-number: 2159018267\n"), std::string::npos) << info.out;
+}
+
+// A command without an answer: the file is still written, the section says "(no answer)"; no
+// serial number: the name uses the J-Link serial number.
+TEST_F(FakeJLinkCli, InfoSaveWithoutAnAnswerOrSerial) {
+    useScenario(R"({"probes": [{"serialNumber": 801000001, "rtt": {"responses": {
+        "info show": "vendor name: HARDWARIO a.s.\nfirmware name: CHESTER Clime\nfirmware version: v3.0.0\n"}}}]})");
+    const RunResult human = run({QStringLiteral("chester"), QStringLiteral("app"),
+                                 QStringLiteral("info"), QStringLiteral("save")},
+                                fakeEnvironment(), {}, home());
+    ASSERT_EQ(human.exitCode, 0) << human.err;
+    EXPECT_NE(human.out.find("No answer from the device to: `config show`"), std::string::npos)
+        << human.out;
+    EXPECT_NE(human.out.find("The device reported no serial number; the file name uses 801000001"),
+              std::string::npos)
+        << human.out;
+    const QStringList files = QDir(home()).entryList({QStringLiteral("*.txt")}, QDir::Files);
+    ASSERT_EQ(files.size(), 1);
+    EXPECT_TRUE(
+        QRegularExpression(QStringLiteral(R"(^unknown-801000001_\d{4}-\d\d-\d\d_\d{6}\.txt$)"))
+            .match(files.front())
+            .hasMatch())
+        << files.front().toStdString();
+    const QByteArray bytes = fileBytes(QDir(home()).filePath(files.front()));
+    EXPECT_TRUE(bytes.contains("Serial number: unknown\n")) << bytes.toStdString();
+    EXPECT_TRUE(bytes.endsWith("\n### config show\n(no answer)\n")) << bytes.toStdString();
+}
+
 TEST_F(FakeJLinkCli, AppInfoWithoutAnAnswerIsATimeout) {
     useScenario(R"({"probes": [{"serialNumber": 801000001, "rtt": {"responses": {}}}]})");
     const RunResult result = hwio({QStringLiteral("--json"), QStringLiteral("chester"),

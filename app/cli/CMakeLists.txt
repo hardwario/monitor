@@ -39,6 +39,8 @@ add_library(hwio_cli_impl STATIC
     src/flash_commands.cpp
     src/guided_lte.h
     src/flash_commands.h
+    src/info_file_commands.cpp
+    src/info_file_commands.h
     src/jlink_commands.cpp
     src/jlink_commands.h
     src/lrw_commands.cpp

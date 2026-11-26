@@ -10,6 +10,8 @@ add_executable(hwio_device_tests
     completion_test.cpp
     console_file_sink_test.cpp
     console_log_test.cpp
+    fake_console_session.h
+    device_info_file_test.cpp
     device_session_test.cpp
     fake_library_test.cpp
     firmware_identity_test.cpp

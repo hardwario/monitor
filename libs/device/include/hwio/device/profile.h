@@ -212,6 +212,11 @@ struct DeviceProfile {
     // language; English first (the fallback). Empty = no link. firmwareCatalogUrl stays the
     // download base (ADR-0037).
     std::span<const LocalizedUrl> firmwareDocsUrl;
+    // Plan 0063 (ADR-0440): the read-only shell commands whose answers make the device information
+    // file (silent queries on the console target, in this order, at most
+    // DeviceInfoCollector::maxCommands). Empty = the device has no such file.
+    // NOLINTNEXTLINE(readability-redundant-member-init): keeps designated initializers optional
+    std::span<const std::string_view> infoFileCommands = {};
 };
 
 // Plan 0033 (ADR-0233): the target a J-Link console tab of `profile` always uses - the first

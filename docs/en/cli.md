@@ -21,6 +21,7 @@ hwio jlink list                              # the connected J-Link probes
 hwio chester app console                     # the console of the application MCU
 hwio chester app command "info show"         # one shell command, print the answer
 hwio chester app info                        # firmware name and version, serial number, ...
+hwio chester app info save                   # info show + config show into <serial>_<date>_<time>.txt
 hwio chester app flash firmware.hex          # flash the application firmware
 hwio chester lte flash                       # flash the HARDWARIO LTE firmware
 hwio chester lrw flash                       # flash lora-modem to the LoRaWAN module (guided)
@@ -111,10 +112,30 @@ after the command was echoed. Writes a console file per run unless `--console-fi
 | Command | Does |
 |---|---|
 | `hwio chester app info` | Shows what the device reports with `info show`: firmware name and version, product, hardware, serial number, … |
+| `hwio chester app info save [--with-secrets] [PATH]` | Saves the device information (`info show`, `config show`) to a text file, see below |
 | `hwio chester app pib read` | Reads the Product Information Block from the UICR |
 | `hwio chester app uicr read [--format hex\|bin] [--force] FILE` | Saves the UICR customer area (128 bytes) to FILE, or to stdout with `-` |
 | `hwio chester app catalog-info ID` | Shows the name, version, upload time and SHA-256 of a catalog firmware |
 | `hwio chester app check` | Checks the connection step by step: probe, power, connection, MCU type, console. Never writes to the device |
+
+<a id="device-information-file"></a>
+#### Device information file
+
+`hwio chester app info save` (and `hwio ble info save` over Bluetooth) asks the device `info show` and `config show`
+(not shown in a console) and writes the answers into one text file, the same file as **Save device information…** in
+the app ([Console](console.md#save-device-information)):
+
+- `PATH` omitted: the file `<serial number>_<YYYY-MM-DD_HHMMSS>.txt` in the current folder, for example
+  `2159018267_2026-11-25_141502.txt`; `PATH` a folder: that name in the folder; any other `PATH`: exactly that file.
+  An existing file is never replaced (`io.file_exists`, exit code 3).
+- Secrets (claim token, BLE passkey, LoRaWAN keys, LTE passwords) are written as `<redacted>`; `--with-secrets`
+  writes them as the device prints them. On Linux and macOS only your user can read the file either way.
+- A command without an answer within 10 s is written as `(no answer)`; the file is still written (exit code 0) and
+  the output names the command. A device without a serial number gets `unknown-<J-Link serial number or Bluetooth
+  address>_…`.
+- Output: the path written. With `--json`:
+  `{"path":"…/2159018267_2026-11-25_141502.txt","serial":"2159018267","commands":[{"command":"info show","answered":true,"lines":11},{"command":"config show","answered":true,"lines":24}]}`
+  (`serial` is `null` when the device reported none).
 
 ### Flashing
 
@@ -287,6 +308,7 @@ hwio stm32 unlock --chip stm32l0-cat5-192k --yes
 | `hwio ble scan [--timeout S] [--all] [--profile ID]` | Lists CHESTER devices nearby (5 s; `--all`: every device), strongest signal first. RSSI is the average over the scan; JSON also has `rssiLast`, the last measured value |
 | `hwio ble console (-a ID \| --name N) [--auto-reconnect] [--history-file PATH] [--console-file PATH]` | The console over Bluetooth |
 | `hwio ble command (-a ID \| --name N) [-t SECONDS] [--console-file PATH] COMMAND` | One command; ends at the prompt or after `-t` seconds (default 3) |
+| `hwio ble info save (-a ID \| --name N) [--with-secrets] [PATH]` | Saves the [device information file](#device-information-file) over Bluetooth |
 | `hwio ble pair (-a ID \| --name N)` | Asks the system to pair; it asks for the passkey (Linux, Windows) |
 
 `-a`/`--address ID` is the Bluetooth address (on macOS the device UUID shown by `hwio ble scan`); `--name N` is a part

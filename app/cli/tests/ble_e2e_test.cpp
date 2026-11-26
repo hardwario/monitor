@@ -7,6 +7,7 @@
 #include <QByteArray>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QIODevice>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -306,6 +307,38 @@ TEST_F(FakeBleCli, ConsoleWritesTheDefaultConsoleFile) {
     EXPECT_NE(result.err.find("Console file: "), std::string::npos) << result.err;
     EXPECT_NE(result.err.find(files.front().toStdString()), std::string::npos) << result.err;
 #endif
+}
+
+// Plan 0063 (ADR-0440): `ble info save` - the same file over Bluetooth, secrets hidden.
+TEST_F(FakeBleCli, InfoSaveOverBluetooth) {
+    const QString folder = home() + QStringLiteral("/records");
+    ASSERT_TRUE(QDir().mkpath(folder));
+    const RunResult json = hwio("chester.json", {QStringLiteral("--json"), QStringLiteral("ble"),
+                                                 QStringLiteral("info"), QStringLiteral("save"),
+                                                 folder, QStringLiteral("-a"), device});
+    ASSERT_EQ(json.exitCode, 0) << json.err;
+    const QJsonObject saved = data(envelopes(json.out).at(0));
+    EXPECT_EQ(saved.value(QStringLiteral("serial")).toString(), QStringLiteral("2159018247"));
+    const QString path = saved.value(QStringLiteral("path")).toString();
+    EXPECT_TRUE(QFileInfo(path).fileName().startsWith(QStringLiteral("2159018247_")))
+        << path.toStdString();
+    const QJsonArray commands = saved.value(QStringLiteral("commands")).toArray();
+    ASSERT_EQ(commands.size(), 2);
+    EXPECT_TRUE(commands[1].toObject().value(QStringLiteral("answered")).toBool());
+    QFile file(path);
+    ASSERT_TRUE(file.open(QIODevice::ReadOnly));
+    const QByteArray bytes = file.readAll();
+    EXPECT_TRUE(bytes.contains("Device: CHESTER-M\nSerial number: 2159018247\n"))
+        << bytes.toStdString();
+    EXPECT_TRUE(bytes.contains("\n### config show\napp config interval-sample 60\n"
+                               "lrw config appkey <redacted>\n"))
+        << bytes.toStdString();
+    EXPECT_FALSE(bytes.contains("00112233"));
+    EXPECT_FALSE(bytes.contains("bt_nus:~$")) << bytes.toStdString(); // no prompt, no echo
+
+    // `ble info` alone is a usage error (a group).
+    const RunResult group = hwio("chester.json", {QStringLiteral("ble"), QStringLiteral("info")});
+    EXPECT_EQ(group.exitCode, 2) << group.err;
 }
 
 TEST_F(FakeBleCli, PairOutcomes) {

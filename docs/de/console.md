@@ -40,7 +40,7 @@ Schaltfläche **▼ N new lines** (N neue Zeilen) bringt Sie zurück, ebenso <kb
 | **Clear** | Leert die **Shell**, das **Log** oder **Both** (beide) (<kbd>Ctrl</kbd>+<kbd>K</kbd> leert den fokussierten Bereich) |
 | **Save view…** | Speichert den fokussierten Bereich in eine Textdatei (<kbd>Ctrl</kbd>+<kbd>S</kbd>) |
 | **Follow**, **Pause** | Siehe oben |
-| **More** | **Open log file**, **Open log folder** (die [Konsolendateien](#konsolendateien)) und die Layout-Optionen |
+| **More** | **Save device information…** ([unten](#save-device-information)), **Open log file**, **Open log folder** (die [Konsolendateien](#konsolendateien)) und die Layout-Optionen |
 
 ## Befehle senden
 
@@ -101,6 +101,36 @@ Dokumente). Geheime Werte werden wie in den [Konsolendateien](#konsolendateien) 
 Beispiel `claim token: <redacted>`); auf dem Bildschirm und beim **Kopieren** bleiben sie sichtbar. Unter Linux und
 macOS kann nur Ihr Benutzer die gespeicherte Datei lesen.
 
+<a id="save-device-information"></a>
+## Geräteinformationen speichern
+
+**More → Save device information…** (Geräteinformationen speichern) schreibt, was das Gerät über sich meldet, in
+eine Textdatei, die nach seiner Seriennummer benannt ist, zum Beispiel `2159018267_2026-11-25_141502.txt`. Das geht in
+einem J-Link- oder Bluetooth-Tab, solange das Gerät verbunden ist; in einem Fernsupport-Tab wird es nicht angeboten.
+
+1. Die App fragt das Gerät mit `info show` und `config show`. Diese Befehle erscheinen nicht in der Konsole. Eine
+   Zeile unter der Werkzeugleiste zeigt **Reading device information… (1 of 2)** mit **Cancel**.
+2. Wenn beide gelesen sind, bietet die Zeile **Include secrets** (Geheimnisse einschließen, aus) und **Save…**;
+   **Discard** verwirft das Ergebnis.
+3. **Save…** öffnet den Speichern-Dialog mit vorausgefülltem Namen im zuletzt verwendeten Ordner (beim ersten Mal
+   Dokumente/HARDWARIO Monitor).
+4. **Device information saved to …** mit **Show in folder** bestätigt das Speichern.
+
+Die Datei ist reiner Text: ein Kopf mit Gerätename, Seriennummer, Firmware, Datum und der Version von HARDWARIO
+Monitor, dann für jeden Befehl eine Zeile `### info show` und die Antwort des Geräts, wie es sie ausgegeben hat. Die
+Ausgabe von `config show` bleibt eine Liste von Befehlen; Sie können Zeilen daraus in eine Konsole oder eine
+[Batch-Datei](#batch-dateien) kopieren.
+
+- **Geheimnisse** (Claim-Token, BLE-Passkey, LoRaWAN-Schlüssel, LTE-Passwörter) werden wie in den
+  [Konsolendateien](#konsolendateien) als `<redacted>` geschrieben. Mit **Include secrets** werden sie so geschrieben,
+  wie das Gerät sie ausgibt: Eine solche Datei ist so vertraulich wie die Schlüssel des Geräts, bewahren Sie sie
+  sicher auf. Unter Linux und macOS kann die Datei in beiden Fällen nur Ihr Benutzer lesen.
+- Ein Befehl, auf den das Gerät nicht innerhalb von 10 Sekunden antwortet, wird als `(no answer)` geschrieben, und die
+  Bestätigung nennt ihn. Eine Antwort mit mehr als 2000 Zeilen oder 256 KiB wird mit einer Hinweiszeile gekürzt.
+- Ein Gerät ohne Seriennummer bekommt den Namen `unknown-<J-Link-Seriennummer oder Bluetooth-Adresse>_…`.
+- Wird das Gerät während des Lesens getrennt, wird nichts geschrieben: *The device disconnected while its
+  information was read.*
+
 <a id="batch-files"></a>
 ## Batch-Dateien
 
@@ -154,6 +184,7 @@ Dieselbe Konsole in einem Terminal:
 ```sh
 hwio chester app console                   # interactive: F4 reconnects, Ctrl+C on an empty line or Ctrl+D quits
 hwio chester app command "info show"       # one command, print the answer
+hwio chester app info save                 # the device information file (also: hwio ble info save -a ID)
 echo "app config show" | hwio chester app console
 ```
 

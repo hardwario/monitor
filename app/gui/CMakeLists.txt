@@ -39,6 +39,7 @@ set(HWIO_GUI_QML_FILES
     qml/console/ConsoleRow.qml
     qml/console/ConsoleSearchBar.qml
     qml/console/ConsoleView.qml
+    qml/console/DeviceInfoBar.qml
     qml/console/HistoryPopup.qml
     qml/console/ShellInput.qml
     qml/console/SuggestionList.qml

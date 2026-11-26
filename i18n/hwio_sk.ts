@@ -513,200 +513,212 @@
     </message>
     <message>
         <location filename="../app/gui/qml/pages/ConsolePage.qml" line="168"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="177"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="194"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="203"/>
         <source>All files (*)</source>
         <translation>Všetky súbory (*)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="175"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="201"/>
         <source>Run a batch file</source>
         <translation>Spustiť dávkový súbor</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="177"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="194"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="203"/>
         <source>Text files (*.txt)</source>
         <translation>Textové súbory (*.txt)</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="187"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="191"/>
+        <source>Save device information</source>
+        <translation>Uložiť informácie o zariadení</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="213"/>
         <source>Copy</source>
         <translation>Kopírovať</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="192"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="218"/>
         <source>Select all</source>
         <translation>Vybrať všetko</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="199"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="225"/>
         <source>Clear the shell</source>
         <translation>Vymazať shell</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="199"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="225"/>
         <source>Clear the log</source>
         <translation>Vymazať záznam</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="231"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="257"/>
         <source>Console actions</source>
         <translation>Akcie konzoly</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="238"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="251"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="264"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="277"/>
         <source>Reset</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="243"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="269"/>
         <source>Opens the reset menu</source>
         <translation>Otvorí ponuku resetu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="257"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="283"/>
         <source>Reset and halt</source>
         <translation>Reset a zastaviť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="267"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="293"/>
         <source>Sharing…</source>
         <translation>Zdieľanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="267"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="293"/>
         <source>Share with support…</source>
         <translation>Zdieľať s podporou…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="277"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="303"/>
         <source>Reconnect</source>
         <translation>Znova pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="287"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="313"/>
         <source>Batch…</source>
         <translation>Dávka…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="299"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="325"/>
         <source>Batch files — documentation</source>
         <translation>Dávkové súbory — dokumentácia</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="309"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="335"/>
         <source>Clear</source>
         <translation>Vymazať</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="312"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="338"/>
         <source>Opens the clear menu</source>
         <translation>Otvorí ponuku mazania</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="319"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="619"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="345"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="660"/>
         <source>Shell</source>
         <translation>Shell</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="324"/>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="677"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="350"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="718"/>
         <source>Log</source>
         <translation>Záznam</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="329"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="355"/>
         <source>Both</source>
         <translation>Oboje</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="338"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="364"/>
         <source>Save view…</source>
         <translation>Uložiť výpis…</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="361"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="387"/>
         <source>Batch %1 / %2</source>
         <translation>Dávka %1 / %2</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="369"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="395"/>
         <source>Stop the batch</source>
         <translation>Zastaviť dávku</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="383"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="409"/>
         <source>Follow</source>
         <translation>Sledovať</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="395"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="421"/>
         <source>Pause</source>
         <translation>Pozastaviť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="409"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="435"/>
         <source>More</source>
         <translation>Ďalšie</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="417"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="444"/>
+        <source>Save device information…</source>
+        <translation>Uložiť informácie o zariadení…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="452"/>
         <source>Open log file</source>
         <translation>Otvoriť súbor so záznamom</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="422"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="457"/>
         <source>Open log folder</source>
         <translation>Otvoriť priečinok so záznamami</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="429"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="464"/>
         <source>Show timestamps</source>
         <translation>Zobraziť časové značky</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="436"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="471"/>
         <source>Wrap lines</source>
         <translation>Zalamovať riadky</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="443"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="478"/>
         <source>Swap panes</source>
         <translation>Vymeniť panely</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="450"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="485"/>
         <source>Stacked layout</source>
         <translation>Panely pod sebou</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="506"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="547"/>
         <source>Not connected</source>
         <translation>Nepripojené</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="507"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="548"/>
         <source>Connect to see the device console.</source>
         <translation>Pripojte sa a uvidíte konzolu zariadenia.</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="508"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="549"/>
         <source>Connect</source>
         <translation>Pripojiť</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="559"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="600"/>
         <source>Resize the shell and the log</source>
         <translation>Zmeniť veľkosť shellu a záznamu</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="497"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="538"/>
         <source>No console</source>
         <translation>Žiadna konzola</translation>
     </message>
     <message>
-        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="498"/>
+        <location filename="../app/gui/qml/pages/ConsolePage.qml" line="539"/>
         <source>This chip has no console in HARDWARIO Monitor. Use the Flash page to flash, erase, unlock or reset it.</source>
         <translation>Tento čip nemá v HARDWARIO Monitor konzolu. Na nahratie firmvéru, vymazanie, odomknutie alebo reset použite stránku Nahrať FW.</translation>
     </message>
@@ -1016,6 +1028,49 @@
         <location filename="../app/gui/qml/shell/DeviceBar.qml" line="201"/>
         <source>Advanced</source>
         <translation>Pokročilé</translation>
+    </message>
+</context>
+<context>
+    <name>DeviceInfoBar</name>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="75"/>
+        <source>The device information was read. Save it to a file.</source>
+        <translation>Informácie o zariadení boli načítané. Uložte ich do súboru.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="88"/>
+        <source>Include secrets</source>
+        <translation>Vrátane tajných údajov</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="92"/>
+        <source>Write the keys, passwords, claim token and passkey as the device prints them. Without this they are written as &lt;redacted&gt;. On Linux and macOS only your user can read the file either way.</source>
+        <translation>Zapíše kľúče, heslá, claim token a prístupový kľúč tak, ako ich zariadenie vypíše. Bez tejto voľby sa zapíšu ako &lt;redacted&gt;. V Linuxe a macOS môže súbor v oboch prípadoch čítať len váš používateľ.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="102"/>
+        <source>Save…</source>
+        <translation>Uložiť…</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="109"/>
+        <source>Show in folder</source>
+        <translation>Zobraziť v priečinku</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="117"/>
+        <source>Cancel</source>
+        <translation>Zrušiť</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="117"/>
+        <source>Discard</source>
+        <translation>Zahodiť</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/qml/console/DeviceInfoBar.qml" line="125"/>
+        <source>Dismiss</source>
+        <translation>Zavrieť</translation>
     </message>
 </context>
 <context>
@@ -5220,22 +5275,22 @@
         <translation>Keď si systém vyžiada prístupový kľúč, zadajte ho do systémového dialógu.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="210"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="213"/>
         <source>application</source>
         <translation>aplikácia</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="244"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="247"/>
         <source>LTE</source>
         <translation>LTE</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="293"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="296"/>
         <source>Power CHESTER with batteries or the USB-C power input.</source>
         <translation>Napájajte CHESTER z batérií alebo cez napájací vstup USB-C.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="302"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="305"/>
         <source>The passkey is 123456 unless it was changed when the device was configured.</source>
         <translation>Prístupový kľúč je 123456, ak nebol zmenený pri konfigurácii zariadenia.</translation>
     </message>
@@ -5339,6 +5394,36 @@
         <translation>zariadenie</translation>
     </message>
     <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="87"/>
+        <source>The device disconnected while its information was read.</source>
+        <translation>Zariadenie sa odpojilo počas načítania jeho informácií.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="90"/>
+        <source>Connect the device again and try once more.</source>
+        <translation>Znova zariadenie pripojte a skúste to ešte raz.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="217"/>
+        <source>The device information of a remote support session&apos;s device cannot be saved.</source>
+        <translation>Informácie o zariadení v relácii vzdialenej podpory nie je možné uložiť.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="220"/>
+        <source>HARDWARIO Monitor never sends commands of its own to a customer&apos;s device.</source>
+        <translation>HARDWARIO Monitor nikdy neposiela do zariadenia zákazníka vlastné príkazy.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="223"/>
+        <source>Ask the customer to save it.</source>
+        <translation>Požiadajte zákazníka, nech ich uloží.</translation>
+    </message>
+    <message>
+        <location filename="../libs/device/src/device_info_file.cpp" line="232"/>
+        <source>This device has no device information to save.</source>
+        <translation>Toto zariadenie nemá žiadne informácie na uloženie.</translation>
+    </message>
+    <message>
         <location filename="../libs/device/src/flash_workflows.cpp" line="146"/>
         <source>The chip is read-out protected (RDP level 1). Unlocking erases the whole chip, including its data EEPROM.</source>
         <translation>Čip je chránený proti čítaniu (RDP úroveň 1). Odomknutie vymaže celý čip vrátane jeho dátovej EEPROM.</translation>
@@ -5414,7 +5499,7 @@
         <translation>Pripojte J-Link k programovaciemu konektoru modulu LoRaWAN.</translation>
     </message>
     <message>
-        <location filename="../libs/device/src/profiles/chester.cpp" line="277"/>
+        <location filename="../libs/device/src/profiles/chester.cpp" line="280"/>
         <source>LoRaWAN module</source>
         <translation>Modul LoRaWAN</translation>
     </message>
@@ -6396,87 +6481,90 @@
 <context>
     <name>hwio::gui::ConsoleViewModel</name>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="175"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="176"/>
         <source>another operation started on the device.</source>
         <translation>na zariadení sa spustila iná operácia.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="178"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="179"/>
         <source>Run the batch file again when it has finished.</source>
         <translation>Po jej dokončení spustite dávkový súbor znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="260"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="264"/>
         <source>the device disconnected.</source>
         <translation>zariadenie sa odpojilo.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="262"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="266"/>
         <source>Reconnect and run the batch file again.</source>
         <translation>Znova sa pripojte a spustite dávkový súbor znova.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="279"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="283"/>
         <source>The batch stopped after %1 of %2 commands.</source>
         <translation>Dávka sa zastavila po %1 z %2 príkazov.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="294"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="298"/>
         <source>The device was reset and halted.</source>
         <translation>Zariadenie bolo resetované a zastavené.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="295"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="299"/>
         <source>The device was reset.</source>
         <translation>Zariadenie bolo resetované.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="377"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="381"/>
         <source>%1 — the console resumes automatically</source>
         <translation>%1 — konzola sa obnoví automaticky</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="383"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="387"/>
         <source>Waiting for pairing…</source>
         <translation>Čaká sa na spárovanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="384"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="388"/>
         <source>Connecting…</source>
         <translation>Pripájanie…</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="386"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="390"/>
         <source>Not connected</source>
         <translation>Nepripojené</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="760"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="764"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1001"/>
         <source>The file could not be saved.</source>
         <translation>Súbor sa nepodarilo uložiť.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="762"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="766"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1003"/>
         <source>the folder is not writable or the disk is full.</source>
         <translation>do priečinka sa nedá zapisovať alebo je disk plný.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="766"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="770"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1007"/>
         <source>Choose another folder.</source>
         <translation>Vyberte iný priečinok.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="793"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="797"/>
         <source>The view was saved to %1.</source>
         <translation>Výpis bol uložený do %1.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="822"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="826"/>
         <source>Sends each line of a UTF-8 text file to the device as a shell command, one line every %1 ms. Empty lines and lines starting with # are skipped. At most %2 commands, %3 MiB per file and %4 bytes per line.</source>
         <translation>Odošle každý riadok textového súboru v UTF-8 do zariadenia ako príkaz shellu, jeden riadok každých %1 ms. Prázdne riadky a riadky začínajúce znakom # sa preskočia. Najviac %2 príkazov, %3 MiB na súbor a %4 bajtov na riadok.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="850"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="854"/>
         <source>Copied the first %n lines to the clipboard (copy limit).</source>
         <translation>
             <numerusform>Do schránky bol skopírovaný prvý %n riadok (limit kopírovania).</numerusform>
@@ -6485,12 +6573,37 @@
         </translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="865"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="869"/>
         <source>There is no console log file for this device yet.</source>
         <translation>Pre toto zariadenie zatiaľ neexistuje súbor so záznamom konzoly.</translation>
     </message>
     <message>
-        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="380"/>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="902"/>
+        <source>Reading device information… (%1 of %2)</source>
+        <translation>Načítanie informácií o zariadení… (%1 z %2)</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1016"/>
+        <source>Device information saved to %1.</source>
+        <translation>Informácie o zariadení boli uložené do %1.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1023"/>
+        <source>The device did not answer: %1.</source>
+        <translation>Zariadenie neodpovedalo na: %1.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1027"/>
+        <source>The device reported no serial number; the file name uses its Bluetooth address.</source>
+        <translation>Zariadenie neuviedlo sériové číslo; názov súboru používa jeho Bluetooth adresu.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="1029"/>
+        <source>The device reported no serial number; the file name uses the J-Link serial number.</source>
+        <translation>Zariadenie neuviedlo sériové číslo; názov súboru používa sériové číslo J-Linku.</translation>
+    </message>
+    <message>
+        <location filename="../app/gui/src/viewmodels/console_view_model.cpp" line="384"/>
         <source>This chip has no console in HARDWARIO Monitor.</source>
         <translation>Tento čip nemá v HARDWARIO Monitor konzolu.</translation>
     </message>
