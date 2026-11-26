@@ -50,6 +50,7 @@
 #include <QCryptographicHash>
 #include <QDateTime>
 #include <QDir>
+#include <QEvent>
 #include <QEventLoop>
 #include <QFile>
 #include <QHostAddress>
@@ -1223,6 +1224,10 @@ public slots:
         m_support.reset();
         m_languageManager.reset();
         m_app.reset();
+        // Objects handed to deleteLater() while the application was destroyed (a shell query
+        // ended by its closing session): no event loop runs after the last test file, so they are
+        // deleted here (LeakSanitizer).
+        QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     }
 
     void qmlEngineAvailable(QQmlEngine* engine) {
