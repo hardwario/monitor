@@ -55,9 +55,7 @@
 #include <QHostAddress>
 #include <QIODevice>
 #include <QJsonArray>
-#include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonValue>
 #include <QLatin1Char>
 #include <QObject>
 #include <QPointer>
@@ -173,14 +171,14 @@ public:
     // 0053 the Choose device tab nearly always is, so a copy loaded under the previous scenario
     // could serve scans for the rest of the file. Its last result, which every new picker shows
     // (and preselects from) at once, could also be the previous scenario's. So the scanner drops
-    // its copy here and this returns only after a scan of the new scenario has been delivered.
+    // its copy here and this returns only after a scan with a new copy has been delivered.
     Q_INVOKABLE [[nodiscard]] bool useScenario(const QString& json) const {
         const QByteArray utf8 =
             json.isEmpty() ? QByteArray(hwio::gui::test::twoProbesScenario) : json.toUtf8();
         if (!hwio::gui::test::useFakeJLink(m_dir, utf8.constData())) {
             return false;
         }
-        return syncProbeScanner(utf8);
+        return syncProbeScanner();
     }
 
     // VmRSS of this process in MiB (Linux; 0 elsewhere).
@@ -988,64 +986,57 @@ private:
         return QUrl::fromLocalFile(path);
     }
 
-    // The serial numbers of a scenario's probes, in order.
-    [[nodiscard]] static std::vector<std::uint32_t> scenarioSerials(const QByteArray& json) {
-        std::vector<std::uint32_t> serials;
-        const QJsonArray probes =
-            QJsonDocument::fromJson(json).object().value(QStringLiteral("probes")).toArray();
-        for (const QJsonValue probe : probes) {
-            serials.push_back(static_cast<std::uint32_t>(
-                probe.toObject().value(QStringLiteral("serialNumber")).toInteger()));
-        }
-        return serials;
-    }
-
-    // useScenario(): the probe scanner drops its library copy and delivers a scan made with a
-    // fresh one (bounded: 20 s per wait). False when that did not happen in time.
-    [[nodiscard]] bool syncProbeScanner(const QByteArray& json) const {
+    // useScenario(): the probe scanner drops every library copy loaded before the new scenario
+    // was written and delivers a scan made with a fresh one (bounded: 20 s per wait). False when
+    // that did not happen in time. Decided by the scanner's scan counters, not by the probes the
+    // scan shows: a scenario may list no probes, the same probes as the previous one, or make the
+    // library fail.
+    [[nodiscard]] bool syncProbeScanner() const {
         using Clock = std::chrono::steady_clock;
         constexpr std::chrono::seconds timeout{20};
         hwio::gui::ProbeScanner& scanner = m_app->probeScanner();
-        const std::uint64_t before = scanner.last() ? scanner.last()->sequence : 0;
         // The pickers' holds are given back for a moment (only the scanner's count: every picker
-        // keeps its own `active`), so that the worker unloads its copy. No events run on the GUI
+        // keeps its own `active`), so that the worker drops its copy. No events run on the GUI
         // thread meanwhile, so no picker takes or gives back a hold in between.
         const int holds = scanner.activeCount();
         for (int i = 0; i < holds; ++i) {
             scanner.release();
         }
-        const Clock::time_point unloadDeadline = Clock::now() + timeout;
-        while (scanner.libraryLoaded() && Clock::now() < unloadDeadline) {
+        // A copy from before the write lives on while a scan started before now runs (it may be
+        // loading the copy, so libraryLoaded() is still false) or while libraryLoaded() is true.
+        // With no picker the worker drops it after that scan or when it wakes.
+        const std::uint64_t startedBefore = scanner.scansStarted();
+        const Clock::time_point dropDeadline = Clock::now() + timeout;
+        while ((scanner.scansFinished() < startedBefore || scanner.libraryLoaded()) &&
+               Clock::now() < dropDeadline) {
             std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
-        const bool unloaded = !scanner.libraryLoaded();
+        const bool dropped = scanner.scansFinished() >= startedBefore && !scanner.libraryLoaded();
+        // Every scan started from now on loads a new copy, which reads the new scenario.
+        const std::uint64_t startedFresh = scanner.scansStarted();
         for (int i = 0; i < holds; ++i) {
-            scanner.acquire(); // the first one scans at once, with a new copy
+            scanner.acquire(); // the first one scans at once
         }
         if (holds == 0) {
             scanner.scanNow(); // with a copy loaded for this scan only
         }
-        if (!unloaded) {
+        if (!dropped) {
             qWarning() << "useScenario: the probe scanner kept its library copy";
             return false;
         }
         if (scanner.suspended()) {
             return true; // plan 0036: no scan now; the next one uses a new copy
         }
-        // A result of the old copy may still be on its way: wait for the new scenario's probes
-        // (or a library error, which only a new copy reports).
-        const std::vector<std::uint32_t> expected = scenarioSerials(json);
+        // Scans run one at a time and the n-th started carries sequence n.
         const Clock::time_point deadline = Clock::now() + timeout;
         while (Clock::now() < deadline) {
             QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
             const std::optional<hwio::gui::ProbeScan>& last = scanner.last();
-            if (last && last->sequence > before &&
-                (last->libraryError ||
-                 std::ranges::equal(last->probes, expected,
-                                    [](const hwio::gui::ScannedProbe& probe, std::uint32_t serial) {
-                                        return probe.probe.serialNumber == serial;
-                                    }))) {
+            if (last && last->sequence > startedFresh) {
                 return true;
+            }
+            if (scanner.suspended()) {
+                return true; // suspended meanwhile: the copy was dropped, the next scan reloads
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
