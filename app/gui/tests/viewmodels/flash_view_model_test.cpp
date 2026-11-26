@@ -2150,6 +2150,42 @@ TEST_F(LrwFlashTest, AProtectedModuleAsksForTheUnlockInTheWizard) {
     ASSERT_TRUE(reachLrw(*wizard, LrwStep::Done));
 }
 
+// ADR-0421 (plan 0059 D-19): the host's real operations refuse the LoRaWAN module from a remote
+// session - every kind, although the profile has the target - and still accept the application.
+TEST_F(LrwFlashTest, TheModuleIsNotOperatedFromARemoteSession) {
+    namespace tunnel = hwio::remote::tunnel;
+    startLrwBoard();
+    ASSERT_TRUE(tab().ensureSession(false));
+    ASSERT_NE(tab().session(), nullptr);
+    const hwio::remote::DeviceSessionOperations operations(*tab().session(), {}, nullptr);
+    const tunnel::OpTarget lrw = tunnel::targetFromId("lrw").value_or(tunnel::OpTarget::App);
+    ASSERT_EQ(tunnel::targetId(lrw), "lrw");
+    for (const tunnel::OpKind kind : {tunnel::OpKind::Flash, tunnel::OpKind::Erase,
+                                      tunnel::OpKind::Recover, tunnel::OpKind::Reset}) {
+        tunnel::OpRequest request{.id = "1", .kind = kind, .target = lrw};
+        if (kind == tunnel::OpKind::Flash) {
+            request.firmwareId = randomId().toStdString();
+        }
+        const hwio::Status refused = operations.validate(request);
+        ASSERT_FALSE(refused.has_value()) << static_cast<int>(kind);
+        EXPECT_EQ(refused.error().code, hwio::ErrorCode::RemoteTargetUnsupported)
+            << static_cast<int>(kind);
+        EXPECT_EQ(refused.error().detail, "the lrw target is not offered remotely");
+    }
+    // A target the device does not have is the other refusal; the application is accepted.
+    const tunnel::OpTarget unknown = tunnel::targetFromId("nope").value_or(tunnel::OpTarget::App);
+    ASSERT_EQ(tunnel::targetId(unknown), "nope");
+    const hwio::Status missing =
+        operations.validate({.id = "2", .kind = tunnel::OpKind::Reset, .target = unknown});
+    ASSERT_FALSE(missing.has_value());
+    EXPECT_EQ(missing.error().code, hwio::ErrorCode::RemoteTargetUnsupported);
+    EXPECT_EQ(missing.error().detail, "the device has no nope target");
+    EXPECT_TRUE(
+        operations
+            .validate({.id = "3", .kind = tunnel::OpKind::Reset, .target = tunnel::OpTarget::App})
+            .has_value());
+}
+
 TEST_F(LrwFlashTest, MaintenanceOfTheModuleOpensTheGuidedWizard) {
     startLrwBoard();
     enableExpertActions();
