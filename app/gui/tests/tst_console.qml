@@ -870,6 +870,15 @@ TestCase {
         const marker = testSupport.writeText("device-info-folder.txt", "");
         const folder = marker.substring(0, marker.lastIndexOf("/"));
         verify(testSupport.setSetting("console/deviceInfoFolder", folder));
+        try {
+            saveDeviceInformationSteps();
+        } finally {
+            // A failure must not leave this scenario to the tests that follow.
+            testSupport.useScenario("");
+        }
+    }
+
+    function saveDeviceInformationSteps() {
         const console = vm();
         verify(!console.canSaveDeviceInfo); // not connected
         verify(shown("deviceInfoBar").length === 0);
@@ -889,8 +898,13 @@ TestCase {
         compare(one("deviceInfoText").text, "The device information was read. Save it to a file.");
         const secrets = one("deviceInfoSecrets");
         verify(!secrets.checked); // never remembered
+        // The check box appears where the menu item was. A click there within the double-click
+        // interval of the click on the menu item is a double click, which does not toggle it.
+        tryVerify(() => !item.menu.visible, 5000);
+        tryVerify(() => secrets.width > 0 && secrets.height > 0, 5000);
+        wait(Qt.styleHints.mouseDoubleClickInterval + 100);
         mouseClick(secrets);
-        verify(secrets.checked);
+        tryVerify(() => secrets.checked, 5000);
 
         const dialog = findChild(one("consoleContent"), "deviceInfoDialog");
         verify(dialog !== null);
@@ -909,7 +923,6 @@ TestCase {
         compare(testSupport.openedUrls()[0], console.deviceInfoFolder().toString());
         mouseClick(one("deviceInfoDismiss"));
         tryVerify(() => shown("deviceInfoBar").length === 0, 5000);
-        verify(testSupport.useScenario(""));
     }
 
     // Plan 0028 (ADR-0201): Save view opens in the remembered folder (else Documents) with a
