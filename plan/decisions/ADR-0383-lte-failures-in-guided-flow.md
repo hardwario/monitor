@@ -1,6 +1,6 @@
 # ADR-0383 — LTE update failures in the guided flow: no reset-pin rewrite, LOW_VOLTAGE classified, guided advice
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0391 (2026-11-23): `target.low_voltage` opens the troubleshooting wizard's no-power topic)
 - **Date:** 2026-11-17
 - **Decided by:** Matej Strnad (rc.4 issues, plan [0051](../features/0051-rc4-issues-5-11.md))
 

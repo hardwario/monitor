@@ -15,6 +15,7 @@
 #include "viewmodels/shortcut_registry.h"
 #include "viewmodels/ui_mode.h"
 #include "viewmodels/ui_mode_controller.h"
+#include "wizard/flash_wizard.h"
 #include "wizard/lrw_update_wizard.h"
 #include "wizard/lte_update_wizard.h"
 
@@ -74,6 +75,8 @@ void registerFlashAndSettingsPages(AppViewModel& app) {
     registerLteUpdateWizard(app, *services);
     // Plan 0040 (ADR-0352): the LoRaWAN module wizard, opened by the Flash page.
     registerLrwUpdateWizard(app, *services);
+    // Plan 0010 (0035): the guided flash of application firmware.
+    registerFlashWizard(app, *services);
 
     PageRegistry& pages = app.pageRegistry();
     pages.add(PageDescriptor{

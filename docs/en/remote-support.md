@@ -97,6 +97,10 @@ Your controls stay the same: allowing support in, the question before each opera
    changes. The copy is written back automatically. After your No the card says *LTE firmware update cancelled by you (14:02). Nothing was changed.* A customer with an older HARDWARIO Monitor answers these questions
    themselves.
 
+The Connect, Troubleshooting and guided flash wizards work with a device connected to your own computer: on a
+support session tab they do not open (*This wizard works only with a device connected to this computer, not in a
+support session.*), and the session goes on.
+
 To leave the session, click **Leave session** in the device bar (or press Ctrl+Shift+D). The tab stays open with the
 console, so you can still save it; the console shows *— you left the session —*. **Join again** joins the same code
 again, and the customer is asked to allow you again. While an operation you asked for runs, the button waits until it

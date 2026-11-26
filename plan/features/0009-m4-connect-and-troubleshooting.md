@@ -1,6 +1,6 @@
 # 0009 — M4 connect-device and troubleshooting wizards
 
-- **Status:** Approved (re-approved with the [0035](0035-wizards-rebaseline-2-0-0.md) amendments, 2026-11-04). Previously: Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments)
+- **Status:** In progress (implemented 2026-11-09 on `strnad/impl-0009`; HIL, manual checks, T6 content and the HARDWARIO review of the topic texts open). Re-approved with the [0035](0035-wizards-rebaseline-2-0-0.md) amendments, 2026-11-04. Previously: Approved (2026-10-16, by Matej Strnad; without the pending M5 amendments)
 - **Milestone:** M4 (plan 3 of 4, ADR-0065)
 - **Author:** Matej Strnad (with Claude)
 - **Related ADRs:** ADR-0032, ADR-0050, ADR-0053, ADR-0057, ADR-0058, ADR-0066, ADR-0067, ADR-0069, ADR-0072,
@@ -9,6 +9,8 @@
   [0004](0004-m3-gui-shell.md) (probe picker, device tabs)
 - **Can run in parallel with:** [0008](0008-m4-first-run-setup.md), [0010](0010-m4-flash-wizard.md)
 - **Design system:** [plan/gui/design-system.md](../gui/design-system.md) · **Mockups:** [plan/gui/mockups/](../gui/mockups/index.html)
+
+> **Amendment (plan [0056](0056-wizards-as-views-rc5.md), 2026-11-23):** both wizards are views of their device tab (ADR-0391, one per tab), refused on a remote-support tab (ADR-0393) and while the setup wizard is open; while one is open, the tab's "Choose another device" is refused with a toast (D-11); the ADR-0300 chain state is per tab; their checks use a DiagWorker requester token (ADR-0394).
 
 > **Pending amendment from M5 ([0012](0012-m5-ble-gui-pairing.md), ADR-0084; applied when 0012 is approved):** the
 > coverage test also accepts error codes whose wizard is BlePairing when the BlePairing wizard maps them to a start
@@ -241,12 +243,12 @@ runs), probe-only sessions per tab 1.
 
 ## Implementation steps
 
-- [ ] T0 Prerequisite check: 0007 done (Diagnose, `libs/diag`, wizard contract); 0004 done (otherwise stop)
+- [x] T0 Prerequisite check: 0007 done (Diagnose, `libs/diag`, wizard contract); 0004 done (otherwise stop)
 - [ ] T1 (moved to 0007 step A7: connection guide in the profile)
-- [ ] T2 `ConnectWizard` (steps, start step per error, skip rules, session promotion with kept lock) + GTest
-- [ ] T3 Topic table + `TroubleshootingWizard` + coverage test (every ConnectDevice/Troubleshooting code handled)
-- [ ] T4 Choose-device page "Guide me" (0004 amendment), registration, Help menu items
-- [ ] T5 Accessibility; Czech translation; `.ts` fresh; screenshots
+- [x] T2 `ConnectWizard` (steps, start step per error, skip rules, session promotion with kept lock) + GTest
+- [x] T3 Topic table + `TroubleshootingWizard` + coverage test (every ConnectDevice/Troubleshooting code handled)
+- [x] T4 Choose-device page "Guide me" (0004 amendment), registration, Help menu items
+- [x] T5 Accessibility; Czech translation; `.ts` fresh; screenshots
 - [ ] T6 Content: HARDWARIO supplies connector names, power wording and art (open question 22) — required for Done
 
 ## Tests and verification
@@ -270,3 +272,124 @@ runs), probe-only sessions per tab 1.
   from one connector, `target.wrong_family` is the expected result for the other target and the text must say
   "move the cable" rather than "switching".
 - **Speed change** affects only this probe (ADR-0052 per-probe memory); the toast says so.
+
+## Implementation notes (2026-11-09, `strnad/impl-0009`)
+
+Branch `strnad/impl-0009` = 0035 picker + 0008 + 0010 (merge f5116c1) + this plan. Decisions of the implementation
+(Matej Strnad, 2026-11-09): Q1 → ADR-0297 (`Wizard::handOffError`), Q2 → ADR-0298 ([Use 1000 kHz] applies at
+once), Q3 → ADR-0299 (troubleshooting on a tab without a probe), Q4 → the note below; choices 1–9 accepted as
+recorded here.
+
+**Files.** `app/gui/src/wizard/connect_wizard.*` (`ConnectWizard`), `troubleshooting_wizard.*`
+(`TroubleshootingWizard`, `registerConnectAndTroubleshootingWizards`, called from `registerBuiltInPages` after the
+setup wizard), `troubleshooting_topics.*` (the table of 0035 § C), `diagnose_runner.*` (`DiagnoseRunner`: Diagnose /
+[Reset] on the tab's or a probe-only session, the busy state, releasing the probe-only session; shared by both
+wizards), `app/gui/qml/wizard/WizardErrorStep.qml` (control `wizard-error`: an error's cause and suggestion as plain
+text, option `showMessage`). Tests: `app/gui/tests/wizard/connect_wizard_test.cpp`,
+`troubleshooting_wizard_test.cpp`, `wizard_coverage_test.cpp` (ConnectDevice + Troubleshooting cases, topic table
+bounds and list order), `app/gui/tests/tst_connect_wizard.qml` (tst_gui registers the real Connect wizard for this
+file only; the other QML tests keep the test wizard as `connect-device`).
+
+**Q4 (Diagnose stop point, ADR-0296).** A topic's automatic Diagnose step runs up to its last listed step; where that is
+`power` (not a stop point) it runs up to `connect`, and the step shows only the listed rows (`no-power`: "probe,
+power" and "power").
+
+**Accepted choices (1–9 of the question round):**
+1. Connect wizard start without an error: a connected tab is a pure check (Check, no Back); a tab with a probe starts
+   at Cable (ADR-0074, the wizard picker would show the tab's own probe as "In use (tab N)"); with `probe.not_found` the
+   tab returns to its picker (`chooseAnotherProbe`) and its serial is preselected; a tab without a probe always starts
+   at Probe. Back into Probe also returns the tab to its picker.
+2. Connect Done: "Connecting…" (Info) while the tab connects; "Connected to CHESTER app · <SN>." (Done) with
+   [Open console]; a failed connection shows "Could not connect" with the tab's error in `wizard-error` and
+   [Check again] → Check.
+3. [Create diagnostic report…] closes the wizard and opens the report dialog (`ReportViewModel::show`).
+4. Topic steps have short titles for the step list; the error introduction and the topic Choice are not listed; the
+   end step is titled "Support".
+5. The introduction: heading = the error's message (plain text), body "Let's find the cause.", the cause and the
+   suggestion in `wizard-error` with `{showMessage: false}` (ADR-0184, ADR-0290, ADR-0292).
+6. The test wizard keeps the id `connect-device` in the tests that use it by being registered before
+   `registerBuiltInPages` (the first registration wins); the "unregistered wizard" tests use `ble-pairing`
+   (ADR-0250); the setup-wizard tests use the real Connect wizard.
+7. `probe-firmware`: a Commands step with `hwio jlink update-firmware -n <SN>` per outdated probe (else without
+   `-n`) and one [Update J-Link firmware <SN>…] per outdated probe from the facts of the topic's `probe-firmware`
+   check (ADR-0291 pattern), disabled with `blockedReason` (e.g. "Disconnect tab 1 first.", ADR-0246).
+8. Plan 0036 P5: `ProbeFirmwareDialog.qml`'s failure panel offers "Help me fix this" instead of [Close] when the
+   error's wizard is registered and no wizard is open; it closes the dialog and then opens the wizard with the error
+   (new `ErrorPanel.showWizardButton` so the panel's own button is not shown twice).
+9. Plan 0035 D2 (docs) done on this branch in en, cs, de, sk, pl.
+
+**Further choices (not in the plan; please review):**
+- Consecutive automatic environment checks of 0035 § C are one Checks step (the table sketch's `checkIds` span), e.g.
+  `no-probe` step 1 = `probes`, `usb-access` (Linux), `probe-holders`. A manual instruction followed by a hand-off is one
+  step with the hand-off button (`other-connector`, `no-console` step 4, `protected`, `program-failed` step 4,
+  `recover-failed` step 3, `modem-failed` step 3). Every automatic step has [Check again]; [Next] is enabled when the
+  checks have finished (also after a failure).
+- A failed (or Warning) environment check whose error names the setup wizard offers [Setup wizard…], which hands the
+  error off (ADR-0297) — `usb-access` → USB step, `nrfutil` → nRF Util step (0035 § C "Failed → H setup step 3 / 4").
+- `no-probe` last step: when `probes` passes, the heading becomes "Found — connect now" with the button [Connect]
+  (`open-wizard:connect-device`).
+- Topic list entry "The device has no power or does not respond" opens `no-power`; `no-connect`, `console-stuck`,
+  `protected` and `recover-failed` are reached by their error codes only (their list titles exist for completeness).
+- Connect Check outcome order: wrong connector (`target.wrong_family` / `target.other_connector` on `connect` or
+  `identify`) → no power → connect failed → probe failed → protected → no console (`rtt` / `rtt-buffers` Failed) →
+  other failure → passed. Another failure whose error names a registered wizard other than this one gets
+  [Help me fix this] (ADR-0297; e.g. a probe held by another program → troubleshooting `probe-busy`). Protected and
+  no-console also offer [Check again].
+- The tab is busy (`setBusy(<wizard id>, "Checking the connection…", …)`) while Diagnose or [Reset] runs, in both
+  wizards; the Cancel confirmation asks only while one runs. [Reset] ends with the toast "The device was reset." or
+  the error's message.
+- Texts written for steps the plan does not word (headings, step titles, button texts, the probe-step body "The
+  checks need a J-Link. Choose the one connected to the device."), condensed from `docs/en/troubleshooting.md`
+  (ADR-0251; HARDWARIO review open).
+- Choose device: the empty state's [Guide me] is shown only while `connect-device` is registered (as the flash
+  link); the ghost link "Not sure how to connect? Guide me" is in the J-Link view above "Flash firmware with a
+  guide". The translations of "Guide me" reuse the Flash page's (cs "Provést mě", de "Anleitung", sk "Previesť ma",
+  pl "Poprowadź mnie").
+- Plan 0010's [Help me fix this] now hands the error off (ADR-0297): troubleshooting opens at the topic (test
+  `FlashWizardTest.HelpMeFixThisOpensTheMatchingTopic`).
+
+**Verification (2026-11-09, this machine):** linux-debug ctest 1783 tests (1769 passed, 14 HIL/corpus/load skipped),
+the new GTests (`ConnectWizardTest.*`, `TroubleshootingWizardTest.*`, `WizardCoverage.*`) passed 5× in a row and
+`tst_gui.tst_connect_wizard` 3×; full `linux-tidy` zero findings; `all_qmllint` clean; `check_translations` up to date
+with 0 unfinished cs/de/sk/pl; clang-format-21 clean; `tools/check-lfs.sh --untracked` passes. Not run: ASan/TSan
+builds. HIL with CHESTER and the manual checks (Linux, Windows, macOS; Czech at 960 × 600) are open. Screenshots (light/dark, EN/CS, 960 × 600) were generated with
+`HWIO_SCREENSHOT_DIR` and are not in the repository.
+
+
+## Review fixes (2026-11-09, independent review of `strnad/impl-0009`)
+
+Decisions by Matej Strnad (2026-11-09): **A** → ADR-0300 (the tab owns the wizards' probe-only session; it passes
+between wizards chained on the tab and is released when idle after the last one closes without a session-consuming
+hand-off); **B** → the Connect wizard opened from `probe.not_found` gives the tab its original probe back when it is
+closed without another probe chosen.
+
+| # | Finding | Fix | Tests |
+|---|---|---|---|
+| 1 | Flash wizard closed during the Cable-step Diagnose: Diagnose not cancelled, session leaked | The destructor cancels it; `busyCancelText` includes the Cable check (Cancel asks, then cancels); the tab releases the session when the operation has ended (ADR-0300) | `FlashWizardTest.ClosingDuringTheCableCheckCancelsIt` |
+| 2 | A session kept by a hand-off was never closed by the receiving wizard | ADR-0300 (`DeviceTabViewModel::ensureWizardSession`, `releaseWizardSessionWhenIdle`, `keepWizardSession`; `WizardViewModel::openedOnTab` / `closedOnTab`; `AppViewModel::openChainedWizard`) | `FlashWizardTest.HelpMeFixThisOpensTheMatchingTopic`, `.AHandOffToSettingsReleasesTheSession`, `ConnectWizardTest.AChainedWizardTakesOverTheSession`, `.AHandOffToTheSetupWizardReleasesTheSession`, `TroubleshootingWizardTest.ClosingTheLastChainedWizardReleasesTheSession` |
+| 3 | `DiagnoseRunner::keepSession` stayed set after a failed connect | The per-wizard flags are gone (ADR-0300) | `ConnectWizardTest.CheckAgainAfterAFailedConnectionLeavesNoSession` |
+| 4 | Troubleshooting: Next after Back entered the probe step again (own tab "In use") | `primary()` skips the probe step while the tab has a probe; dead `canBack` code removed | `TroubleshootingWizardTest.BackAndNextSkipTheProbeStep` |
+| 5 | A Diagnose step that is not shown failed and the shown row only said "Not checked" | `DiagnoseRunner`: the first shown row it kept from running gets its status, result and error | `TroubleshootingWizardTest.AHiddenFailedStepExplainsTheShownRow` |
+| 6 | `onHandOffError` fell back to the current tab when the source tab had closed | Nothing opens when the source tab is gone | `ConnectWizardTest.AHandOffToAClosedTabOpensNothing` |
+| 7 | `StartupCheck` never decided when a wizard's checks replaced its pending `DiagWorker` request | `DiagWorker::requestDropped(generation)` (queued); the start-up check and the wizards submit a dropped request again | `StartupCheckTest.AReplacedRequestRunsAgain` |
+| 8 | The Done heading used the raw target id | "Connected to CHESTER · Application MCU (nRF52840) · <SN>." (`ProbePickerViewModel::targetTitle`) | `ConnectWizardTest.FullFlowFromAnEmptyTab` |
+| B | — | `Wizard::aboutToClose()` (new, default nothing; not called when the tab closes); `ConnectWizard` reconfigures the tab with its original probe when it is still on its picker | `ConnectWizardTest.CancelRestoresTheTabsProbe` |
+
+Choices: decision B is applied whenever the Connect wizard returned a tab that had a probe at the start to its picker
+(also Back into the Probe step), restoring the probe the tab had when the wizard started. The release waits for the
+tab's busy state and the running operation, and covers a wizards' session in any state other than promoted.
+
+Verification of the review fixes (2026-11-09): linux-debug ctest 1794 tests (1780 passed, 14 skipped); wizard GTests
+4× in a row; `tst_gui.tst_connect_wizard` 3×; full `linux-tidy` zero findings; `all_qmllint` clean;
+`check_translations` 0 unfinished; clang-format clean; LFS check passes. linux-asan: GUI wizard/tab tests (125) and
+device-related unit tests (411) pass. linux-tsan: device-related unit tests (407) and the GUI wizard GTests pass;
+`tst_gui.tst_connect_wizard`, `tst_flash_wizard` and `tst_setup_wizard` report one data race at the end of a
+data-driven test row: the probe scanner thread logs through the Qt Test message handler while `QTestData` is
+destroyed (Qt Test + `ProbeScanner` logging, the same class as review 0005 round 1; `tst_flash_wizard` and
+`tst_setup_wizard` are unchanged by this branch). Fixed afterwards (2026-11-09): the race is in Qt Test's message
+handler, which reads the current row's tag for every message; on `main` the existing Qt Quick tests (`tst_wizard`,
+`tst_shell`, `tst_components`, `tst_probe_firmware`) do not show it under linux-tsan. `tst_gui` now routes messages
+of worker threads past Qt Test's handler (straight to stderr in Qt's format); GUI-thread messages still go through
+Qt Test. Qt Test installs its handler when a TestCase starts, so the data-driven wizard tests install the routing in
+`initTestCase()` (`testSupport.routeWorkerThreadMessages()`). No TSan suppression. The three tests passed 3× each
+under linux-tsan, all 23 Qt Quick tests once under linux-tsan, the full linux-debug ctest (1794) passed.

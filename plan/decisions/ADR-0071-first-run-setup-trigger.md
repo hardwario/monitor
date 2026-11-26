@@ -1,6 +1,6 @@
 # ADR-0071 — When the first-run setup wizard opens
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0392 (2026-11-23): setup without a chosen mode counts as not completed; when not completed the wizard opens at once, without the J-Link check)
 - **Date:** 2026-10-09
 - **Decided by:** Matej Strnad (M4 planning session)
 

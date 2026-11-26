@@ -13,6 +13,7 @@
 #include <QtCore/qnamespace.h>
 
 #include <chrono>
+#include <cstdint>
 #include <filesystem>
 #include <mutex>
 #include <optional>
@@ -66,6 +67,11 @@ void ProbeScanner::scanNow() {
         m_scanRequested = true;
     }
     m_wake.notify_all();
+}
+
+std::uint64_t ProbeScanner::scansFinished() const {
+    const std::scoped_lock lock(m_mutex);
+    return m_sequence;
 }
 
 ScanSuspension ProbeScanner::suspend() {
@@ -143,6 +149,7 @@ void ProbeScanner::run(const std::stop_token& stop) {
         if (suspended) {
             continue; // plan 0036: no scan; the copy is kept for the pickers
         }
+        m_scansStarted.fetch_add(1);
         ProbeScan result = scan(options, enumerator, requested);
         if (m_active.load() == 0) {
             enumerator.reset(); // a Refresh without a visible picker: no copy is kept

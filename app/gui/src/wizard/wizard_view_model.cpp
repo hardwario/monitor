@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QLoggingCategory>
 #include <QObject>
+#include <QPointer>
 #include <QString>
 #include <QStringList>
 #include <QStringLiteral>
@@ -57,6 +58,8 @@ bool WizardViewModel::start(Wizard* wizard, const ErrorInfo& context, DeviceTabV
     connect(wizard, &Wizard::finished, this, [this](bool completed) { close(completed); });
     connect(wizard, &Wizard::handOff, this,
             [this](const QString& action) { emit handOff(action, m_tab.data()); });
+    connect(wizard, &Wizard::handOffError, this,
+            [this](const ErrorInfo& error) { emit handOffError(error, m_tab.data()); });
     if (tab != nullptr) {
         // Fallback only: AppViewModel calls tabClosing() before the tab shuts down (review V2).
         // Here the tab is being destroyed already; the wizard's QPointer to it is null.
@@ -82,7 +85,9 @@ void WizardViewModel::tabClosing(const DeviceTabViewModel* tab) {
     }
     qCInfo(lcGui).noquote() << "Wizard" << m_wizard->id() << "closed with its tab";
     m_wizard->cancelOperation();
+    m_tabClosing = true;
     close(false); // also when the cancelled operation has not ended yet: the tab goes away
+    m_tabClosing = false;
 }
 
 QString WizardViewModel::wizardId() const {
@@ -221,9 +226,10 @@ QUrl WizardViewModel::embeddedSource() const {
         return {};
     }
     const WizardStep current = m_wizard->current();
-    if (current.kind != StepKind::Embedded) {
+    if (current.embedded.isEmpty()) {
         return {};
     }
+    // Plan 0008: also for steps of other kinds that name a control (shown below their content).
     return m_registry.embedded(current.embedded);
 }
 
@@ -273,6 +279,44 @@ void WizardViewModel::cancel(bool force) {
     emit changed();
 }
 
+void WizardViewModel::applyEmbeddedOptions(QObject* item) {
+    if (item == nullptr || m_wizard.isNull()) {
+        return;
+    }
+    if (m_optionsItem.data() != item) {
+        m_optionsItem = item; // a new control: its own values are remembered from now on
+        m_optionsDefaults.clear();
+    }
+    const QVariantMap options = m_wizard->current().embeddedOptions;
+    // Keys of an earlier step that this step leaves out: back to the control's own value.
+    for (auto it = m_optionsDefaults.begin(); it != m_optionsDefaults.end();) {
+        if (!options.contains(it.key())) {
+            item->setProperty(it.key().toUtf8().constData(), it.value());
+            it = m_optionsDefaults.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    for (auto it = options.cbegin(); it != options.cend(); ++it) {
+        const QByteArray name = it.key().toUtf8();
+        if (it.key() == QStringLiteral("vm") ||
+            item->metaObject()->indexOfProperty(name.constData()) < 0) {
+            qCWarning(lcGui).noquote()
+                << "Wizard" << m_wizard->id() << "step" << m_wizard->current().id
+                << ": embedded option" << it.key() << "ignored (no such property)";
+            continue;
+        }
+        if (!m_optionsDefaults.contains(it.key())) {
+            m_optionsDefaults.insert(it.key(), item->property(name.constData()));
+        }
+        if (item->property(name.constData()) != it.value() &&
+            !item->setProperty(name.constData(), it.value())) {
+            qCWarning(lcGui).noquote() << "Wizard" << m_wizard->id() << ": embedded option"
+                                       << it.key() << "could not be set";
+        }
+    }
+}
+
 void WizardViewModel::copyText(const QString& text) {
     if (m_copy) {
         m_copy(text); // clipboard + "Copied to clipboard." (ADR-0202)
@@ -305,7 +349,7 @@ QStringList WizardViewModel::illustrationSlots() {
     return {QStringLiteral("jlink-usb"),         QStringLiteral("chester-app-cable"),
             QStringLiteral("chester-lte-cable"), QStringLiteral("chester-lrw-cable"),
             QStringLiteral("chester-power"),     QStringLiteral("stm32-swd-cable"),
-            QStringLiteral("placeholder")};
+            QStringLiteral("setup-welcome"),     QStringLiteral("placeholder")};
 }
 
 bool WizardViewModel::hasIllustration(const QString& slot) {
@@ -326,7 +370,11 @@ void WizardViewModel::close(bool completed) {
     }
     qCInfo(lcGui).noquote() << "Wizard" << m_wizard->id() << (completed ? "completed" : "closed");
     Wizard* wizard = m_wizard.data();
+    if (!m_tabClosing) {
+        wizard->aboutToClose();
+    }
     wizard->disconnect(this);
+    QPointer<DeviceTabViewModel> tab = m_tab;
     if (!m_tab.isNull()) {
         m_tab->disconnect(this);
     }

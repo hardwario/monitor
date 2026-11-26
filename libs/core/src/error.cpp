@@ -810,7 +810,9 @@ constexpr std::array defaultTexts{
                                          "Allow Bluetooth for HARDWARIO Monitor (or your terminal) "
                                          "in System Settings → Privacy & Security → Bluetooth.",
                                          "ble.permission_denied suggestion"),
-        .wizard = WizardId::FirstRunSetup,
+        // ADR-0250: no wizard until the setup wizard's Bluetooth step (plan 0032) exists; 0032
+        // restores WizardId::FirstRunSetup.
+        .wizard = std::nullopt,
     },
     DefaultTexts{
         .code = ErrorCode::BleStackUnavailable,
@@ -1328,7 +1330,9 @@ constexpr std::array defaultTexts{
         .suggestion = QT_TRANSLATE_NOOP3(
             "hwio::core", "Power-cycle the board, check the connection and unlock again.",
             "target.unlock_failed suggestion"),
-        .wizard = WizardId::Troubleshooting,
+        // No wizard: the troubleshooting topics are about nRF Recover, not STM32 unlock (plan 0039
+        // names none for this code).
+        .wizard = std::nullopt,
     },
     // Plan 0039 (ADR-0280 D5): a .bin file has no addresses.
     DefaultTexts{

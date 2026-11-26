@@ -9,6 +9,11 @@ Diese Seite hilft Ihnen, wenn etwas nicht funktioniert. Sie beginnt mit den häu
 Jeder Fehler hat eine kurze Meldung, eine wahrscheinliche Ursache und einen Vorschlag.
 
 - **Desktop-App (`hwio-monitor`):** Der Fehlerbereich zeigt die Meldung, **Probably:** (die Ursache) und **What to do:** (den Vorschlag), mit einer Schaltfläche für den nächsten Schritt, etwa **Reconnect**, **Open Settings** oder **Retry**. **Details** zeigt den Fehlercode (zum Beispiel `probe.not_found`) und technische Details; **Copy** kopiert sie. **Learn more ↗** öffnet den Eintrag des Fehlercodes auf dieser Seite.
+- **Hilfe bei der Behebung** im Fehlerfeld öffnet den Assistenten für den Fehler: den Verbindungsassistenten, den
+  Einrichtungsassistenten, das geführte Flashen oder das Thema der Fehlerbehebung für den Fehler. **Hilfe** ›
+  **Verbindungsprobleme beheben…** listet die häufigen Probleme auf. Die Assistenten öffnen sich im Seitenbereich des
+  Tabs ([Assistenten und weitere Ansichten](getting-started.md#guides-and-views)); auf dem Tab einer Support-Sitzung
+  sind der Verbindungs- und der Fehlerbehebungsassistent sowie das geführte Flashen nicht verfügbar.
 - **CLI (`hwio`):** Der Fehler wird nach stderr geschrieben:
 
   ```text
@@ -47,7 +52,7 @@ Fehlercodes: [`dependency.jlink_not_found`](#dependency.jlink_not_found), [`depe
 
 ### USB-Berechtigungen unter Linux
 
-Unter Linux braucht Ihr Benutzerkonto Zugriff auf den J-Link über USB. Das `.deb`-Paket installiert dafür eine udev-Regel; bei anderen Installationen installieren Sie sie selbst, wie unter [USB-Zugriff auf den J-Link](install.md#usb-zugriff-auf-den-j-link) beschrieben. Ziehen Sie dann den J-Link ab, schließen Sie ihn wieder an und führen Sie `hwio doctor` aus. Manche Fehlertexte erwähnen einen Einrichtungsassistenten; er ist noch nicht verfügbar, folgen Sie daher stattdessen der Installationsseite.
+Unter Linux braucht Ihr Benutzerkonto Zugriff auf den J-Link über USB. Das `.deb`-Paket installiert dafür eine udev-Regel; bei anderen Installationen installieren Sie sie selbst, wie unter [USB-Zugriff auf den J-Link](install.md#usb-zugriff-auf-den-j-link) beschrieben. Ziehen Sie dann den J-Link ab, schließen Sie ihn wieder an und führen Sie `hwio doctor` aus. In der Desktop-App prüft **Hilfe** › **Einrichtungsassistent…** den USB-Zugriff und zeigt die Befehle für die Regel.
 
 Fehlercodes: [`usb.access_denied`](#usb.access_denied), [`usb.world_accessible`](#usb.world_accessible).
 
@@ -347,7 +352,7 @@ Tritt auf, wenn die USB-Verbindung zum J-Link verloren geht, während die Konsol
 - **Probably:** The udev rule for SEGGER devices is missing.
 - **What to do:** Install the udev rule shown in the setup wizard, then reconnect the J-Link. The rule gives access only to the user logged in at this computer; users connected only over SSH need their own udev rule.
 
-Nur Linux. Der im Text erwähnte Einrichtungsassistent ist noch nicht verfügbar: Installieren Sie die udev-Regel wie unter [USB-Zugriff auf den J-Link](install.md#usb-zugriff-auf-den-j-link) beschrieben, und führen Sie dann `hwio doctor` zur Prüfung aus.
+Nur Linux. In der Desktop-App öffnet **Hilfe bei der Behebung** oder **Hilfe** › **Einrichtungsassistent…** den Einrichtungsassistenten beim Schritt USB-Zugriff mit den Befehlen; ohne die App installieren Sie die udev-Regel wie unter [USB-Zugriff auf den J-Link](install.md#usb-zugriff-auf-den-j-link) beschrieben und führen dann `hwio doctor` zur Prüfung aus.
 
 <a id="probe.held_by_program"></a>
 #### `probe.held_by_program`
@@ -377,7 +382,7 @@ Bluetooth-Geräte werden wie J-Links gesperrt. Die Meldung kann das andere Progr
 - **Probably:** A udev rule, usually /etc/udev/rules.d/99-jlink.rules from the SEGGER J-Link Software, makes the probe accessible to all accounts.
 - **What to do:** Remove that rule (or its MODE="0666"), install the rule shown in the setup wizard, then reconnect the J-Link. A J-Link Software update may install the rule again.
 
-Eine Linux-Warnung von `hwio doctor`. Der im Text erwähnte Einrichtungsassistent ist noch nicht verfügbar: Installieren Sie die Regel wie unter [USB-Zugriff auf den J-Link](install.md#usb-zugriff-auf-den-j-link) beschrieben.
+Eine Linux-Warnung von `hwio doctor`. In der Desktop-App zeigt **Hilfe** › **Einrichtungsassistent…** die Befehle beim Schritt USB-Zugriff; ohne die App installieren Sie die Regel wie unter [USB-Zugriff auf den J-Link](install.md#usb-zugriff-auf-den-j-link) beschrieben.
 
 <a id="category-target"></a>
 ### Target (Exit-Code 6)

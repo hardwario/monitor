@@ -253,6 +253,32 @@ TestCase {
         tryVerify(() => !share.sharing, 5000);
     }
 
+    // Plan 0056 (U-2, D-7, ADR-0393): on a joined tab the troubleshooting and guided flash wizards
+    // refuse with a toast (the Help menu, "Help me fix this" and Flash "Guide me" all go through the
+    // launcher); nothing opens and the session goes on. The LTE guide's entry points (the
+    // other-connector banner, the local Flash page's LTE section) are not shown on a joined tab.
+    function test_joinerRefusesTheLocalDeviceWizards() {
+        verify(testSupport.remoteJoin("12345"));
+        verify(AppViewModel.joinRemoteSession("12345", false));
+        tryVerify(() => tab() !== null && tab().transport === "remote", 5000);
+        tryVerify(() => tab().remoteJoin.state === "waiting", 10000);
+        const text = "This wizard works only with a device connected to this computer, not in a support session.";
+        for (const id of ["troubleshooting", "flash-firmware"]) {
+            verify(!AppViewModel.launcher.canStart(id, -1), id);
+            verify(!AppViewModel.launcher.start(id, -1), id);
+            verify(!tab().wizard.open, id);
+        }
+        verify(!AppViewModel.launcher.open("troubleshooting", testSupport.defaultError("target.connect_failed"), -1));
+        verify(AppViewModel.toasts.indexOf(text) >= 0);
+        verify(!tab().wizard.open);
+        compare(tab().transport, "remote");
+        compare(tab().remoteJoin.state, "waiting"); // the session goes on
+        AppViewModel.showPage("flash");
+        wait(200);
+        compare(shown("guideMe").length, 0);
+        compare(shown("updateLteButton").length, 0);
+    }
+
     // ADR-0363: the joiner's Flash page offers the LTE update (no ID field) with the LTE core.
     function test_joinerAsksForAnLteUpdate() {
         verify(testSupport.remoteJoin("12345"));

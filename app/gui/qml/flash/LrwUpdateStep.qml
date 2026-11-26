@@ -13,6 +13,8 @@ ColumnLayout {
     id: step
 
     property LrwUpdateWizard vm: null
+    // Plan 0056 (embedded contract): the WizardViewModel showing this control (set by WizardView).
+    property WizardViewModel host: null
     readonly property int stage: step.vm ? step.vm.stage : LrwUpdateWizard.Connector
 
     objectName: "lrwUpdateStep"

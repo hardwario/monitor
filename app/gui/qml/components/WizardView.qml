@@ -208,15 +208,35 @@ ViewFrame {
 
         objectName: "wizardEmbedded"
         Layout.fillWidth: true
-        active: view.step.kind === StepKind.Embedded
+        // Plan 0008 (ADR-0292): a step of any kind may name a control (below its own content).
+        active: view.step.embedded !== undefined && view.step.embedded !== ""
         visible: embeddedLoader.active
         source: view.wizard ? view.wizard.embeddedSource : ""
+        // ADR-0290: the step's embeddedOptions (e.g. readOnly of the probe picker).
+        onLoaded: if (view.wizard) view.wizard.applyEmbeddedOptions(embeddedLoader.item)
 
         Binding {
             target: embeddedLoader.item
             property: "vm"
             value: view.wizard ? view.wizard.embedded : null
             when: embeddedLoader.status === Loader.Ready
+        }
+
+        // Plan 0056 (embedded contract): every registered control declares `host`.
+        Binding {
+            target: embeddedLoader.item
+            property: "host"
+            value: view.wizard
+            when: embeddedLoader.status === Loader.Ready
+        }
+
+        Connections {
+            target: view.wizard
+
+            function onChanged() {
+                if (embeddedLoader.status === Loader.Ready)
+                    view.wizard.applyEmbeddedOptions(embeddedLoader.item);
+            }
         }
 
         // ADR-0384: an embedded step may ask to scroll a part of it into view.
@@ -261,6 +281,8 @@ ViewFrame {
                 required property var modelData
 
                 objectName: "wizardAction"
+                // ADR-0291: an action may be shown disabled (its text says why).
+                enabled: modelData.enabled !== false
                 text: modelData.text
                 onClicked: view.wizard.action(modelData.id)
             }

@@ -1,6 +1,6 @@
 # ADR-0068 — Backend module `libs/diag` with CLI `doctor`, `diag report`, `chester … check`
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by ADR-0394 (2026-11-23): a pending request is replaced only by one of the same requester; queue limit 12)
 - **Date:** 2026-10-09
 - **Decided by:** Matej Strnad (M4 planning session)
 

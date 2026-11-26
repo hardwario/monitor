@@ -101,6 +101,10 @@ udostępnianie**.
    Kontynuować bez kopii?*. Nie lub brak odpowiedzi w ciągu 60 sekund anuluje aktualizację, zanim cokolwiek się zmieni.
    Kopia jest zapisywana z powrotem automatycznie. Po Twoim Nie karta pokaże *Aktualizacja firmware LTE anulowana przez Ciebie (14:02). Nic nie zostało zmienione.* Klient ze starszym HARDWARIO Monitor odpowiada na te pytania sam.
 
+Kreator połączenia, kreator rozwiązywania problemów i wgrywanie z kreatorem działają z urządzeniem podłączonym do
+Twojego komputera: na karcie sesji wsparcia się nie otwierają (*Ten kreator działa tylko z urządzeniem podłączonym do
+tego komputera, nie w sesji wsparcia.*), a sesja trwa dalej.
+
 Aby opuścić sesję, kliknij **Opuść sesję** na pasku urządzenia (lub naciśnij Ctrl+Shift+D). Karta pozostaje otwarta
 razem z konsolą, więc nadal możesz ją zapisać; konsola pokazuje *— opuściłeś sesję —*. **Dołącz ponownie** dołącza do
 tego samego kodu, a klient musi Cię ponownie dopuścić. Dopóki trwa operacja, o którą poprosiłeś, przycisk czeka na jej

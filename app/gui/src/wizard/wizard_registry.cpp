@@ -5,7 +5,10 @@
 #include "wizard.h"
 
 #include <QString>
+#include <QStringList>
 #include <QUrl>
+#include <QtContainerFwd>
+#include <QtTypes>
 
 #include <algorithm>
 #include <utility>
@@ -47,6 +50,15 @@ bool WizardRegistry::addEmbedded(const QString& name, QUrl qml) {
 QUrl WizardRegistry::embedded(const QString& name) const {
     const auto it = std::ranges::find(m_embedded, name, &std::pair<QString, QUrl>::first);
     return it == m_embedded.end() ? QUrl() : it->second;
+}
+
+QStringList WizardRegistry::embeddedNames() const {
+    QStringList names;
+    names.reserve(static_cast<qsizetype>(m_embedded.size()));
+    for (const auto& [name, url] : m_embedded) {
+        names.append(name);
+    }
+    return names;
 }
 
 } // namespace hwio::gui

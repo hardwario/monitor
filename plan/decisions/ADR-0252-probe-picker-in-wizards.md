@@ -1,6 +1,6 @@
 # ADR-0252 — Probe picker in wizard steps: shared list component, own view model per wizard; wizard order
 
-- **Status:** Accepted (plan 0035; amends the order part of ADR-0065)
+- **Status:** Accepted (plan 0035; amends the order part of ADR-0065; amended by ADR-0391 (2026-11-23): wizards are views (no modality); "In use (tab N)" rows stay not selectable in every wizard's picker)
 - **Date:** 2026-11-04
 - **Decided by:** Matej Strnad (2026-11-04, accepted the recommendation)
 

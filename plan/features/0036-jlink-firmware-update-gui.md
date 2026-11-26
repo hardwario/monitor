@@ -201,6 +201,11 @@ only in the message text (`session_worker.cpp`, connect path ~line 354); the ses
   they land, tracked in their checklists) — after 0035/0008/0009: the reusable action is
   `ProbeFirmwareViewModel::requestForSerial()` / `blockedReasonFor()` (`AppViewModel.probeFirmware`); the MCP
   "AI assistant" check plugs in through `ProbeFirmwareViewModel::setAiHoldsProbe()` (plan 0014).
+  - [x] Troubleshooting hook (plan 0009, 2026-11-09, `strnad/impl-0009`): topic `probe-firmware` step 2 has one
+    [Update J-Link firmware <SN>…] per outdated probe (`requestForSerial`, disabled with `blockedReason`) and the
+    `hwio jlink update-firmware -n <SN>` CommandBlock; `ProbeFirmwareDialog.qml`'s failure panel offers "Help me fix
+    this" instead of [Close] while the error's wizard is registered and no wizard is open (the dialog closes first).
+    GTest `TroubleshootingWizardTest.OutdatedJLinkFirmwareActions`.
   - [x] MCP hook (integration of 0014 + 0036, 2026-11-04): `McpController` installs
     `GuiDeviceProvider::aiOperationRuns(sn)` (a J-Link tab of the probe with busy page `"ai"`) — "Used by an AI
     assistant" while an AI operation runs, also on the banner's own tab; the `ProbeFirmwareViewModel` is now

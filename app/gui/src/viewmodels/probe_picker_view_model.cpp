@@ -75,7 +75,7 @@ QVariant ProbePickerViewModel::data(const QModelIndex& index, int role) const {
     case InUseOtherRole:
         return row.inUseOther;
     case SelectableRole:
-        return row.inUseOther.isEmpty() && !row.updating;
+        return selectable(row);
     case UpdatingFirmwareRole:
         return row.updating;
     default:
@@ -200,9 +200,8 @@ void ProbePickerViewModel::setSelectedRow(int row) {
     if (row < -1 || row >= count()) {
         return;
     }
-    if (row >= 0 && (!m_rows.at(static_cast<std::size_t>(row)).inUseOther.isEmpty() ||
-                     m_rows.at(static_cast<std::size_t>(row)).updating)) {
-        return; // used by another program or being updated: disabled
+    if (row >= 0 && !selectable(m_rows.at(static_cast<std::size_t>(row)))) {
+        return; // used by another program, being updated or (wizard mode) used by a tab: disabled
     }
     m_selectedSerial =
         row >= 0 ? std::optional(m_rows.at(static_cast<std::size_t>(row)).serial) : std::nullopt;
@@ -225,7 +224,7 @@ void ProbePickerViewModel::choose(int row) {
         return;
     }
     const Row& chosen = m_rows.at(static_cast<std::size_t>(row));
-    if (chosen.inUseTab >= 0) {
+    if (chosen.inUseTab >= 0 && !m_wizardMode) {
         tabActivationRequested(chosen.inUseTab); // signal
         return;
     }
@@ -239,11 +238,33 @@ void ProbePickerViewModel::refresh() {
 }
 
 void ProbePickerViewModel::connectSelected() {
-    if (!canConnect()) {
+    if (m_wizardMode || !canConnect()) {
         return;
     }
     const Row& row = m_rows.at(static_cast<std::size_t>(m_selectedRow));
     connectRequested(row.serial, row.product, m_profileId, targetId()); // signal
+}
+
+void ProbePickerViewModel::setWizardMode(bool wizardMode) {
+    if (wizardMode == m_wizardMode) {
+        return;
+    }
+    m_wizardMode = wizardMode;
+    if (count() > 0) {
+        dataChanged(index(0), index(count() - 1), {SelectableRole}); // signal
+    }
+    restoreSelection();
+}
+
+std::optional<std::uint32_t> ProbePickerViewModel::selectedSerial() const {
+    if (m_selectedRow < 0 || m_selectedRow >= count()) {
+        return std::nullopt;
+    }
+    return m_rows.at(static_cast<std::size_t>(m_selectedRow)).serial;
+}
+
+bool ProbePickerViewModel::selectable(const Row& row) const {
+    return row.inUseOther.isEmpty() && !row.updating && (!m_wizardMode || row.inUseTab < 0);
 }
 
 void ProbePickerViewModel::setReservedCheck(std::function<bool(std::uint32_t)> reserved) {
@@ -313,7 +334,7 @@ void ProbePickerViewModel::restoreSelection() {
         const std::uint32_t serial = *m_selectedSerial;
         const auto it =
             std::ranges::find_if(m_rows, [serial](const Row& row) { return row.serial == serial; });
-        if (it != m_rows.end() && it->inUseOther.isEmpty() && !it->updating) {
+        if (it != m_rows.end() && selectable(*it)) {
             selected = static_cast<int>(it - m_rows.begin());
         }
     }

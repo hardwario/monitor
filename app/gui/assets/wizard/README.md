@@ -23,6 +23,7 @@ HARDWARIO (ADR-0076, open question 22); they replace the files without code chan
 | `chester-lrw-cable` | J-Link cable to the programming connector of the CHESTER LoRaWAN module (plan 0040) | from the profile guide | `device` |
 | `stm32-swd-cable` | J-Link SWD wires (SWDIO, SWCLK, GND, VTref) to an STM32 chip (plan 0039) | from the profile guide | `device` |
 | `chester-power` | CHESTER with batteries / USB-C power | from the profile power hint (`DeviceProfile::powerHintSourceText`) | `flash` |
+| `setup-welcome` | CHESTER, a J-Link and a laptop (setup wizard Welcome, plan 0008) | — (decorative) | `placeholder` |
 | `placeholder` | neutral frame (fallback for an unknown slot) | — | `placeholder` |
 
 A Qt Quick Test (`tst_wizard.qml`) and a GTest (`WizardIllustrations`) check that every slot of this table and every

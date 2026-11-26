@@ -1,6 +1,6 @@
 # ADR-0386 — Wizards are views of the device tab, one per tab
 
-- **Status:** Accepted (supersedes ADR-0066)
+- **Status:** Accepted (supersedes ADR-0066; amended by ADR-0391 (2026-11-23): a per-tab wizard is refused while the global setup wizard is open (except support's remote LTE update request); connect / troubleshooting / flash own their tab's device choice)
 - **Date:** 2026-11-17
 - **Decided by:** Matej Strnad (plan [0052](../features/0052-views-instead-of-dialogs.md))
 

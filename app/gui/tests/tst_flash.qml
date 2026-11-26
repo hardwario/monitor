@@ -1,7 +1,7 @@
 // The Flash page (plan 0006): kind cards, loading a file, the Flash bar, a flash through the fake
 // J-Link library with the progress and result cards, the maintenance ConfirmDialog (ADR-0038:
-// Cancel is the default and Esc cancels), "Guide me" hidden while the flash wizard is not
-// registered, both themes, and the layout at 960 x 600 in Czech (geometry assertions).
+// Cancel is the default and Esc cancels), "Guide me" shown for application firmware only (plan
+// 0010), both themes, and the layout at 960 x 600 in Czech (geometry assertions).
 import QtQuick
 import QtQuick.Controls
 import QtTest
@@ -107,8 +107,8 @@ TestCase {
     function test_kindCardsAndSource() {
         const flash = vm();
         compare(flash.kind, FirmwareSourceViewModel.AppFirmware);
-        // "Guide me" is wired but hidden until the flash wizard (0010) registers.
-        verify(!find("guideMe"));
+        // Plan 0010 (0035): "Guide me" opens the flash wizard, only for application firmware.
+        verify(find("guideMe") !== null);
         compare(find("flashBarText").text, "Choose a firmware file or enter a catalog ID");
         verify(!find("flashButton").enabled);
 
@@ -116,6 +116,7 @@ TestCase {
         // firmware and options cards; the Flash button stays disabled.
         mouseClick(find("kindCard" + FirmwareSourceViewModel.LteFirmware));
         compare(flash.kind, FirmwareSourceViewModel.LteFirmware);
+        verify(!find("guideMe"));
         verify(!find("catalogIdField"));
         verify(!find("designatedRadio"));
         verify(find("lteUpdateCard") !== null);

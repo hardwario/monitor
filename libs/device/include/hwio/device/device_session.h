@@ -288,7 +288,12 @@ public:
     // an attached session the RTT steps check the running attachment; another target is switched
     // to and back (TargetSwitch). Total about diagnoseBudget (a blocking vendor call may exceed
     // it; the step is then a Warning diag.check_timeout).
-    [[nodiscard]] Result<OperationId> diagnose(std::string_view targetId);
+    // ADR-0296: `lastStep` (a diagnoseStepIds id, "" = all) is the last step that runs: later
+    // steps are neither run nor reported (`checks` and the diagnoseStep signals end with it).
+    // "power" is not a stop point (its reading may wait for the connect, plan 0007 notes): a
+    // usage.invalid_argument, like an unknown id.
+    [[nodiscard]] Result<OperationId> diagnose(std::string_view targetId,
+                                               std::string_view lastStep = {});
     // M4 (ADR-0069): promotes a probe-only session (state ProbeOpen) to a normal one: connects the
     // target, attaches RTT when `attachRtt`, then power polling and auto-reconnect per
     // SessionOptions. The probe and its ProbeLock stay held. A second call before the session has

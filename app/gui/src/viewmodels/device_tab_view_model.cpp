@@ -29,6 +29,7 @@
 #include "viewmodels/probe_picker_view_model.h"
 #include "viewmodels/remote_join_view_model.h"
 #include "viewmodels/remote_share_view_model.h"
+#include "wizard/wizard.h"
 #include "wizard/wizard_registry.h"
 #include "wizard/wizard_view_model.h"
 #include "workers/ble_service.h"
@@ -270,9 +271,19 @@ void DeviceTabViewModel::setCurrentPage(const QString& pageId) {
 
 void DeviceTabViewModel::onWizardOpenChanged() {
     if (m_wizard->isOpen()) {
+        keepWizardSession();            // ADR-0300: a wizard opened on the tab
         setCurrentPage(wizardPageId()); // the wizard view replaces the page area
         return;
     }
+    if (m_wizardChainPending || m_shuttingDown) {
+        // Plan 0056 (D-8): the next wizard of the chain opens on the next event-loop turn; the
+        // page stays on the wizard view (no flicker) and the wizards' session is kept.
+        return;
+    }
+    onWizardClosed();
+}
+
+void DeviceTabViewModel::onWizardClosed() {
     // Closed: the page shown before it, unless a hand-off chose another page meanwhile.
     if (m_currentPage == wizardPageId()) {
         QString page = m_pageBeforeWizard;
@@ -283,6 +294,19 @@ void DeviceTabViewModel::onWizardOpenChanged() {
         currentPageChanged(); // signal
     }
     m_pageBeforeWizard.clear();
+    // ADR-0300: the last wizard on the tab closed without a hand-off to another per-tab wizard:
+    // the wizards' probe-only session is released when idle (a promoted session is not theirs).
+    releaseWizardSessionWhenIdle();
+}
+
+void DeviceTabViewModel::setWizardChainPending(bool pending) {
+    if (m_wizardChainPending == pending) {
+        return;
+    }
+    m_wizardChainPending = pending;
+    if (!pending && !m_shuttingDown && !m_wizard->isOpen()) {
+        onWizardClosed(); // the chained open failed
+    }
 }
 
 QString DeviceTabViewModel::busyPage() const { return m_busy ? m_busy->pageId : QString(); }
@@ -495,12 +519,65 @@ Status DeviceTabViewModel::promoteSession() {
     const device::TargetProfile* target =
         m_profile != nullptr ? device::findTarget(*m_profile, toStdString(m_targetId)) : nullptr;
     const bool attachRtt = target != nullptr && !target->rttTerminal.empty();
-    return m_session->startConnection(attachRtt);
+    Status promoted = m_session->startConnection(attachRtt);
+    if (promoted) {
+        // ADR-0300: a promoted session is the tab's connection, no longer the wizards'.
+        m_wizardSession = false;
+        m_releaseWizardSession = false;
+    }
+    return promoted;
 }
 
-void DeviceTabViewModel::openWizard(const QString& wizardId) {
+Status DeviceTabViewModel::ensureWizardSession() {
+    const device::DeviceSession* before = m_session.get();
+    if (Status status = ensureSession(false); !status) {
+        return status;
+    }
+    if (m_session && m_session.get() != before) {
+        m_wizardSession = true; // opened probe-only for the wizards (ADR-0300)
+    }
+    return {};
+}
+
+void DeviceTabViewModel::keepWizardSession() {
+    m_releaseWizardSession = false;
+    disconnect(m_releaseWatch);
+}
+
+void DeviceTabViewModel::releaseWizardSessionWhenIdle() {
+    if (!m_wizardSession) {
+        return;
+    }
+    m_releaseWizardSession = true;
+    disconnect(m_releaseWatch);
+    if (m_session) {
+        // Queued: the operation has ended (runningOperation() is empty) when it is delivered.
+        m_releaseWatch = connect(
+            m_session.get(), &device::DeviceSession::operationFinished, this,
+            [this] { tryReleaseWizardSession(); }, Qt::QueuedConnection);
+    }
+    tryReleaseWizardSession();
+}
+
+void DeviceTabViewModel::tryReleaseWizardSession() {
+    if (!m_releaseWizardSession) {
+        return;
+    }
+    if (!m_wizardSession || !m_session) {
+        keepWizardSession(); // nothing (left) to release
+        return;
+    }
+    if (isBusy() || m_session->runningOperation().has_value()) {
+        return; // when idle (busyChanged / operationFinished call again)
+    }
+    keepWizardSession();
+    qCInfo(lcGui) << "Releasing the wizards' probe-only session";
+    disconnectDevice();
+}
+
+void DeviceTabViewModel::openWizard(const QString& wizardId, bool fromRemote) {
     if (m_context.openWizard) {
-        m_context.openWizard(wizardId, this);
+        m_context.openWizard(wizardId, this, fromRemote);
     }
 }
 
@@ -672,6 +749,8 @@ void DeviceTabViewModel::releaseSession() {
         return;
     }
     session->disconnect(this);
+    m_wizardSession = false; // ADR-0300
+    keepWizardSession();
     m_queries->setSession(nullptr);
     resetInfoWatcher();
     m_connection->setPairingPending(false);
@@ -762,7 +841,25 @@ void DeviceTabViewModel::reconnect() {
     connectDevice();
 }
 
+QString DeviceTabViewModel::wizardOwnsDeviceText() {
+    return tr("Close the wizard first: it works on this tab's device.");
+}
+
 void DeviceTabViewModel::chooseAnotherProbe() {
+    if (m_wizard->isOpen() && m_context.wizards != nullptr) {
+        const WizardDescriptor* open = m_context.wizards->find(m_wizard->wizardId());
+        if (open != nullptr && open->localDeviceOnly) {
+            // Plan 0056 (D-11): the wizard owns the tab's device choice.
+            if (m_context.showToast) {
+                m_context.showToast(wizardOwnsDeviceText());
+            }
+            return;
+        }
+    }
+    chooseAnotherProbeForWizard();
+}
+
+void DeviceTabViewModel::chooseAnotherProbeForWizard() {
     if (isBusy()) {
         return;
     }
@@ -953,6 +1050,7 @@ void DeviceTabViewModel::clearBusy(const QString& pageId) {
     busyChanged(); // signal
     m_connection->refresh();
     updateState();
+    tryReleaseWizardSession(); // ADR-0300: the wizards' session may be released now
     if (m_closePending) {
         // Queued: the page may call clearBusy() inside one of the session's signals.
         QMetaObject::invokeMethod(this, [this] { closeReady(); }, Qt::QueuedConnection);
@@ -1028,6 +1126,8 @@ void DeviceTabViewModel::copyToClipboard(const QString& text, const QString& toa
 void DeviceTabViewModel::shutdown() {
     // Plan 0052 (review V2): the tab's wizard closes first (its operation is cancelled) while the
     // session still exists.
+    m_shuttingDown = true;
+    m_wizardChainPending = false;
     if (m_wizard != nullptr) {
         m_wizard->tabClosing(this);
     }

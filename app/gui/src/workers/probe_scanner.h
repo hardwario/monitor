@@ -121,6 +121,11 @@ public:
     [[nodiscard]] int libraryLoads() const noexcept { return m_libraryLoads.load(); }
     // Load attempts, failed ones included.
     [[nodiscard]] int libraryLoadAttempts() const noexcept { return m_libraryLoadAttempts.load(); }
+    // Diagnostics and tests: scans started and finished so far. Scans run one at a time, so the
+    // n-th scan started is the one whose result carries `sequence` n; a result with a sequence
+    // above a scansStarted() value read at some moment comes from a scan started after it.
+    [[nodiscard]] std::uint64_t scansStarted() const noexcept { return m_scansStarted.load(); }
+    [[nodiscard]] std::uint64_t scansFinished() const;
 
     // Scans as soon as possible (Refresh), also when no picker is visible.
     void scanNow();
@@ -175,6 +180,7 @@ private:
     std::atomic<bool> m_libraryLoaded{false};
     std::atomic<int> m_libraryLoads{0};
     std::atomic<int> m_libraryLoadAttempts{0};
+    std::atomic<std::uint64_t> m_scansStarted{0};
     std::optional<FailedLibrary> m_failed; // worker thread only
 
     mutable std::mutex m_mutex; // guards the members below

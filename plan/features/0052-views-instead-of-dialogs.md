@@ -7,6 +7,8 @@
   are views of the page area); unchanged: ADR-0067 (wizard engine), ADR-0384 (scroll hints)
 - **Depends on:** plan 0051 (branch `strnad/rc4-issues`; this plan is stacked on it: branch `strnad/no-dialogs`)
 
+> **Erratum (plan [0056](0056-wizards-as-views-rc5.md), 2026-11-23):** "no registered wizard has its own probe picker" and "no production wizard uses the global instance" no longer hold after the merge with the wizards of plans 0008–0010: four wizards have their own picker and the setup wizard is the production global wizard. Plan 0056 (ADR-0391) adds the D-6 rule (a per-tab wizard is refused while the setup wizard is open) and D-11.
+
 ## Context
 
 The user asked (2026-11-17) to get rid of dialogs and use the app window instead. Today wizards run in a centred

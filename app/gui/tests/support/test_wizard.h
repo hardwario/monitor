@@ -4,7 +4,11 @@
 // (Info → Choice → Checks → Commands → Embedded → Done), an operation that keeps the tab busy
 // (busyCancelText / cancelOperation) and a hand-off. Registered by the GUI tests under the id
 // "connect-device" (the real Connect wizard is plan 0009). Tests only; texts are not translated.
+// Plan 0035 (A3): useProbePicker() turns the Embedded step into the `probe-picker` step with a
+// picker of AppViewModel::makeProbePicker (active while the step is current; [Flash] needs a
+// selected probe).
 
+#include "viewmodels/probe_picker_view_model.h"
 #include "wizard/check_list_model.h"
 #include "wizard/wizard.h"
 
@@ -37,13 +41,14 @@ class TestWizard : public Wizard {
     Q_PROPERTY(int cancelCalls READ cancelCalls NOTIFY changed)
     Q_PROPERTY(bool cancelFinishesImmediately READ cancelFinishesImmediately WRITE
                    setCancelFinishesImmediately NOTIFY changed)
+    Q_PROPERTY(QString selectedSerial READ selectedSerial NOTIFY changed)
 
 public:
     static inline const QString busyText =
         QStringLiteral("The operation is in progress. Cancel it and close the wizard?");
 
     // Plan 0052: `id` "first-run-setup" for the global test wizard.
-    explicit TestWizard(QObject* parent, QString id = QStringLiteral("connect-device"));
+    TestWizard(AppViewModel& app, QObject* parent, QString id = QStringLiteral("connect-device"));
 
     [[nodiscard]] QString id() const override { return m_id; }
     [[nodiscard]] QString title() const override { return QStringLiteral("Test wizard"); }
@@ -58,12 +63,15 @@ public:
     [[nodiscard]] QString busyCancelText() const override;
     void cancelOperation() override;
     [[nodiscard]] CheckListModel* checks() override { return m_checks; }
-    [[nodiscard]] QObject* embeddedViewModel() override { return m_embedded; }
+    [[nodiscard]] QObject* embeddedViewModel() override;
 
     // Test hooks.
     Q_INVOKABLE void startOperation(); // the tab becomes busy (page id = wizard id)
     Q_INVOKABLE void finishOperation();
     Q_INVOKABLE void goTo(int stepIndex);
+    Q_INVOKABLE void useProbePicker();            // plan 0035: the Embedded step is `probe-picker`
+    [[nodiscard]] QString selectedSerial() const; // of the probe picker, "" when none
+    [[nodiscard]] ProbePickerViewModel* picker() const { return m_picker; }
     [[nodiscard]] bool busy() const noexcept { return m_busy; }
     [[nodiscard]] int cancelCalls() const noexcept { return m_cancelCalls; }
     // At the last cancelOperation(): the tab was still there and had a session (review V2: the
@@ -78,9 +86,11 @@ public:
 private:
     void showResults();
 
+    AppViewModel* m_app; // non-owning; outlives the wizard
     QString m_id;
-    CheckListModel* m_checks;       // child
-    TestWizardEmbedded* m_embedded; // child
+    CheckListModel* m_checks;                 // child
+    TestWizardEmbedded* m_embedded;           // child
+    ProbePickerViewModel* m_picker = nullptr; // child (useProbePicker)
     // The wizard contract: the tab only as QPointer (it may close while the wizard is open).
     QPointer<DeviceTabViewModel> m_tab;
     ErrorInfo m_context;
@@ -95,7 +105,8 @@ private:
 // Registers the test wizard (id "connect-device", per tab) and its embedded control
 // "test-embedded" (`embeddedQml`).
 void registerTestWizard(AppViewModel& app, const QUrl& embeddedQml);
-// Plan 0052: the same wizard as a global wizard (id "first-run-setup", not per tab).
+// Plan 0052: the same wizard as a global wizard (id "first-run-setup", not per tab). Plan 0056:
+// both qFatal when the id is registered already (call them before registerBuiltInPages).
 void registerGlobalTestWizard(AppViewModel& app);
 
 } // namespace test

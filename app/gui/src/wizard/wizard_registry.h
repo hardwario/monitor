@@ -11,6 +11,7 @@
 #include "wizard/wizard.h"
 
 #include <QString>
+#include <QStringList>
 #include <QUrl>
 
 #include <cstddef>
@@ -33,6 +34,8 @@ public:
     // The QML component of an Embedded step ("probe-picker" -> qrc:/.../ProbePickerStep.qml).
     bool addEmbedded(const QString& name, QUrl qml);
     [[nodiscard]] QUrl embedded(const QString& name) const;
+    // The registered control names (≤ maxEmbedded; plan 0056: the embedded contract test).
+    [[nodiscard]] QStringList embeddedNames() const;
 
 private:
     std::vector<WizardDescriptor> m_wizards;

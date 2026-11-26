@@ -9,6 +9,11 @@ przyczynę, na przykład **Choose a firmware file or enter a catalog ID**.
 
 Podczas wgrywania konsola karty jest wstrzymana i po zakończeniu wznawia się samoczynnie.
 
+Aby wgrać firmware aplikacji z kreatorem (programator, sprawdzenie kabla, plik, potwierdzenie), użyj **Pomoc** › **Wgraj
+firmware (z kreatorem)…**, **Poprowadź mnie** na tej stronie lub **Wgraj firmware z kreatorem** na stronie wyboru
+urządzenia. Kreator otwiera się w obszarze strony karty ([Kreatory i inne widoki](getting-started.md#guides-and-views));
+na karcie sesji wsparcia nie jest dostępny.
+
 ## 1. Co chcesz wgrać?
 
 | Wybór | MCU | Firmware |

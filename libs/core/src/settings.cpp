@@ -44,9 +44,15 @@ Status migrateToSchema2(QSettings& settings) {
     return {};
 }
 
+// Schema 3 (plan/features/0008, 0035 § B): the setup wizard's keys setup/completedVersion and
+// setup/showAtStart. A no-op that writes nothing: existing users have no setup/completedVersion and
+// see the setup wizard once after the upgrade (0035 decision "Existing rc users").
+Status migrateToSchema3(QSettings& /*settings*/) { return {}; }
+
 // Built-in migrations, ordered by toVersion (schema 1 is the first schema).
-constexpr std::array<detail::SettingsMigration, 1> builtInMigrationList{
+constexpr std::array<detail::SettingsMigration, 2> builtInMigrationList{
     detail::SettingsMigration{.toVersion = 2, .apply = &migrateToSchema2},
+    detail::SettingsMigration{.toVersion = 3, .apply = &migrateToSchema3},
 };
 constexpr std::span<const detail::SettingsMigration> builtInMigrations{builtInMigrationList};
 

@@ -68,7 +68,9 @@ foreach(_test IN LISTS _hwio_gui_qml_tests)
         LABELS "qml"
         # No desktop input-method plugin (IBus over D-Bus) in tests: it starts uninstrumented Qt
         # threads that TSan reports. Older Qt reads QT_IM_MODULE, newer Qt QT_IM_MODULES.
-        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_IM_MODULE=none;QT_IM_MODULES=none;TSAN_OPTIONS=suppressions=${PROJECT_SOURCE_DIR}/tools/sanitizers/tsan-qml.supp:halt_on_error=1:second_deadlock_stack=1${_hwio_gui_test_ble}")
+        # QT_FORCE_STDERR_LOGGING: on Windows Qt Test's plain logger otherwise writes only to the
+        # debugger output (OutputDebugString), so a failing test showed no Qt Test log in ctest.
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;QT_IM_MODULE=none;QT_IM_MODULES=none;TSAN_OPTIONS=suppressions=${PROJECT_SOURCE_DIR}/tools/sanitizers/tsan-qml.supp:halt_on_error=1:second_deadlock_stack=1${_hwio_gui_test_ble}")
 endforeach()
 
 add_executable(hwio_gui_tests
@@ -100,6 +102,11 @@ add_executable(hwio_gui_tests
     viewmodels/ui_mode_controller_test.cpp
     viewmodels/update_service_test.cpp
     viewmodels/wizard_test.cpp
+    wizard/connect_wizard_test.cpp
+    wizard/flash_wizard_test.cpp
+    wizard/setup_wizard_test.cpp
+    wizard/troubleshooting_wizard_test.cpp
+    wizard/wizard_coverage_test.cpp
     ${HWIO_GUI_TEST_SUPPORT})
 hwio_apply_target_defaults(hwio_gui_tests)
 target_include_directories(hwio_gui_tests PRIVATE

@@ -99,6 +99,10 @@ možnosti zostávajú rovnaké: povolenie podpory, otázka pred každou operáci
    skopírovať. Pokračovať bez kópie?*. Nie alebo žiadna odpoveď do 60 sekúnd aktualizáciu zruší skôr, než sa čokoľvek
    zmení. Kópia sa zapíše späť automaticky. Po vašom Nie karta ukáže *Aktualizáciu firmvéru LTE ste zrušili (14:02). Nič sa nezmenilo.* Zákazník so starším HARDWARIO Monitorom odpovedá na tieto otázky sám.
 
+Sprievodca pripojením, sprievodca riešením problémov a nahrávanie so sprievodcom pracujú so zariadením pripojeným k
+vášmu vlastnému počítaču: na karte relácie podpory sa neotvoria (*Tento sprievodca funguje len so zariadením pripojeným
+k tomuto počítaču, nie v relácii podpory.*) a relácia pokračuje.
+
 Reláciu opustíte tlačidlom **Opustiť reláciu** na lište zariadenia (alebo klávesmi Ctrl+Shift+D). Karta zostane
 otvorená aj s konzolou, takže ju môžete stále uložiť; v konzole je riadok *— opustili ste reláciu —*. **Pripojiť sa
 znova** sa pripojí k rovnakému kódu a zákazník vás musí znova povoliť. Kým beží operácia, o ktorú ste požiadali,

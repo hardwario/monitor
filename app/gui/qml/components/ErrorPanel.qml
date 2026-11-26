@@ -25,6 +25,8 @@ Rectangle {
     // Plan 0012: replaces the primary action (customActionTriggered instead of actionTriggered).
     property string customActionText: ""
     property string note: ""
+    // Plan 0036 P5: a dialog that offers "Help me fix this" itself (it closes first) hides ours.
+    property bool showWizardButton: true
     property bool compact: false
     // The tab whose wizard "Help me fix this" opens (-1 = the current tab).
     property int tabIndex: -1
@@ -187,10 +189,11 @@ Rectangle {
                 }
 
                 // M4 (plan/features/0007): shown only when the error's wizard is registered.
+                // ADR-0382: not inside a wizard (a wizard offers its own hand-off instead); plan
+                // 0036 P5: not where the owner offers it itself (showWizardButton false).
                 HButton {
                     objectName: "errorWizard"
-                    // ADR-0382: not inside a wizard (one wizard at a time, ADR-0066).
-                    visible: !panel.inWizard && AppViewModel.launcher.canOpen(panel.error.wizard)
+                    visible: panel.showWizardButton && !panel.inWizard && AppViewModel.launcher.canOpen(panel.error.wizard)
                     text: qsTr("Help me fix this")
                     onClicked: AppViewModel.launcher.open(panel.error.wizard, panel.error, panel.tabIndex)
                 }
