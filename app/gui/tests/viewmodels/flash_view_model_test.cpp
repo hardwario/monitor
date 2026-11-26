@@ -63,6 +63,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -1834,8 +1835,15 @@ protected:
     // has them yet) and the test-only overrides that make `file` of `http` the designated firmware
     // of the next download (read when the download starts).
     [[nodiscard]] static QByteArray uniqueModuleHex() {
-        return QByteArray::fromStdString(hwio::firmware::test::toHex(
-            image(0x08000000, 1024, static_cast<std::uint8_t>(QUuid::createUuid().data1))));
+        // The whole UUID, not one byte of it: with 256 possible files a file of an earlier test
+        // was in the cache now and then (0 downloads instead of 1).
+        std::vector<std::byte> data(1024, std::byte{0x3C});
+        const QByteArray id = QUuid::createUuid().toRfc4122();
+        std::ranges::transform(id, data.begin(), [](char c) { return static_cast<std::byte>(c); });
+        std::vector<Segment> segments;
+        segments.push_back(Segment{.address = 0x08000000, .data = std::move(data)});
+        return QByteArray::fromStdString(
+            hwio::firmware::test::toHex(*FirmwareImage::fromSegments(std::move(segments))));
     }
     [[nodiscard]] static QByteArray uniqueLteBundle(std::size_t applicationBytes = 4096) {
         const QByteArray modem = hwio::firmware::test::zipBytes(
