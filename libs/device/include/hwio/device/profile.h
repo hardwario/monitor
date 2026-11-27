@@ -25,11 +25,35 @@
 
 namespace hwio::device {
 
-// A part number found in FICR INFO.PART and what it means for this target.
+// Who made the MCU of a target (plan/features/0039, ADR-0274): decides identification, protection
+// and the erase of the target.
+enum class ChipVendor : std::uint8_t {
+    Nordic, // FICR INFO.PART, CTRL-AP APPROTECT / recover, UICR and PIB
+    Stm32,  // DBGMCU_IDCODE + F_SIZE, RDP option byte / unlock, data EEPROM
+};
+
+// How an STM32 part identifies itself (plan/features/0039, ADR-0275). Parts of one category and
+// flash size share a DEV_ID and cannot be told apart; one part entry covers them (ADR-0279).
+struct Stm32Id {
+    std::uint16_t devId = 0;        // DBGMCU_IDCODE bits 11:0, e.g. 0x447
+    std::uint16_t flashSizeKib = 0; // expected F_SIZE; 0 = any
+};
+
+// A part a target accepts. Nordic: the part number in FICR INFO.PART. STM32: `stm32` is set and
+// `part` is 0.
 struct ChipPart {
     std::uint32_t part = 0;       // e.g. 0x52840
-    std::string_view displayName; // "nRF52840"
+    std::string_view displayName; // "nRF52840", "STM32L0 cat. 5, 192 KiB" (not translated)
     std::string_view jlinkDevice; // J-Link device name of exactly this part
+    std::optional<Stm32Id> stm32 = std::nullopt;
+    // STM32 parts (plan/features/0039): the curated part id (`hwio stm32 --chip`, lower case)
+    // and a hint naming the chips it covers and known HARDWARIO uses, English source text in
+    // context "hwio::device" (QT_TRANSLATE_NOOP, see partHint()).
+    std::string_view id;
+    const char* hintSourceText = "";
+    // Plan 0039 G6 (ADR-0278): firmware HARDWARIO supports for this part; overrides the target's
+    // designatedFirmware when set.
+    std::optional<firmware::DesignatedFirmware> designatedFirmware = std::nullopt;
 };
 
 // What `recover` does after the CTRL-AP erase-all (ADR-0039).
@@ -77,11 +101,13 @@ struct TargetProfile {
 
     // ---- flashing (M2) ----
     std::span<const ChipPart> parts; // accepted parts; the first one is the default
-    jlink::ChipFamily chipFamily;    // FICR and CTRL-AP of this MCU family
-    firmware::AddressRange flash;    // code flash
-    firmware::AddressRange uicr;     // UICR page
-    std::uint32_t pibOffset;         // Product Information Block: UICR + pibOffset, 128 B
-    bool pibErasableWithUicr;        // a UICR erase also erases the PIB (nRF52: yes)
+    // Nordic only: FICR and CTRL-AP of this MCU family. STM32 targets leave it empty (checked by
+    // the profile invariants test, plan 0039).
+    jlink::ChipFamily chipFamily;
+    firmware::AddressRange flash; // code flash
+    firmware::AddressRange uicr;  // UICR page
+    std::uint32_t pibOffset;      // Product Information Block: UICR + pibOffset, 128 B
+    bool pibErasableWithUicr;     // a UICR erase also erases the PIB (nRF52: yes)
     RecoverImage recoverImage;
     EraseScope defaultErase; // `erase` without --all (app: Code, lte: All)
 
@@ -123,6 +149,15 @@ struct TargetProfile {
     // bit is set afterwards, the failure becomes target.reset_during_update (another MCU of the
     // device reset this one). nullopt = not checked.
     std::optional<ResetReasonRegister> resetReason = std::nullopt;
+    // ---- plan 0039 (STM32, ADR-0274, ADR-0275) ----
+    // Nordic targets keep the defaults. An STM32 target has exactly one part, no chipFamily, uicr,
+    // pibOffset or recoverImage, and `defaultErase` All (JLINK_EraseChip: flash and data EEPROM).
+    ChipVendor vendor = ChipVendor::Nordic;
+    // The family's identification and flash-interface data (set for STM32 targets).
+    std::optional<jlink::Stm32Protection> stm32 = std::nullopt;
+    // STM32: the data EEPROM, written from an image only with allowEeprom (nullopt = images with
+    // EEPROM records are rejected, e.g. where the J-Link loader's EEPROM bank is unconfirmed).
+    std::optional<firmware::AddressRange> dataEeprom = std::nullopt;
     // ---- plan 0059 (ADR-0416) ----
     // Shell output lines whose first words are one of these (words as in sensitiveCommandPrefixes)
     // carry a secret without a "key:" (STICKER debug `config secret-key <hex>`). The console file,
@@ -188,6 +223,15 @@ struct DeviceProfile {
 // target with an RTT console (CHESTER: app), else the first target; "" for a profile without one.
 [[nodiscard]] std::string_view consoleTargetId(const DeviceProfile& profile) noexcept;
 
+// Plan 0039 (ADR-0274, amends ADR-0233): the target a J-Link tab of `profile` uses. A profile with
+// an RTT console uses its console target whatever was requested; a profile without any console
+// (the "STM32 chip" device: one target per chip) uses the requested target (the chosen chip), or
+// its first target when the request is unknown. "" for a profile without targets.
+[[nodiscard]] std::string_view tabTargetId(const DeviceProfile& profile,
+                                           std::string_view requested) noexcept;
+// The profile has a target with an RTT console.
+[[nodiscard]] bool hasConsole(const DeviceProfile& profile) noexcept;
+
 // Size of the Product Information Block.
 inline constexpr std::uint32_t pibSize = 128;
 
@@ -249,10 +293,35 @@ matchSensitiveOutputPrefix(std::string_view line, std::span<const std::string_vi
 // The part of `target` with this FICR part number, nullptr when it is not one of its parts.
 [[nodiscard]] const ChipPart* findPart(const TargetProfile& target, std::uint32_t part) noexcept;
 
+// Plan 0039: the STM32 part of `target` matching a DEV_ID and flash size (flashSizeKib 0 = not
+// read: the DEV_ID alone decides when the target has one part with that DEV_ID), nullptr when none.
+[[nodiscard]] const ChipPart* findStm32Part(const TargetProfile& target, std::uint16_t devId,
+                                            std::uint16_t flashSizeKib) noexcept;
+
+// Plan 0039 (ADR-0275): the curated STM32 parts (stm32_parts.cpp; at most maxStm32Parts), shared
+// by the `stm32` profile and CHESTER targets.
+inline constexpr std::size_t maxStm32Parts = 32;
+[[nodiscard]] std::span<const ChipPart> stm32Parts() noexcept;
+// The curated part with this id, nullptr when none.
+[[nodiscard]] const ChipPart* findStm32PartById(std::string_view id) noexcept;
+// The curated part with this DEV_ID and flash size (0 = unknown: the only part with that DEV_ID,
+// else nullptr), nullptr when none.
+[[nodiscard]] const ChipPart* findStm32PartByChip(std::uint16_t devId,
+                                                  std::uint16_t flashSizeKib) noexcept;
+// The translated hint of a part ("" for none).
+[[nodiscard]] QString partHint(const ChipPart& part);
+// The designated firmware of `target`: its (first) part's entry first, then the target's
+// (ADR-0278, plan 0039 G6); nullopt when none.
+[[nodiscard]] std::optional<firmware::DesignatedFirmware>
+designatedFirmwareOf(const TargetProfile& target) noexcept;
+
 // The translated display name of `target` (ADR-0027), e.g. "application".
 [[nodiscard]] QString targetDisplayName(const TargetProfile& target);
 // The same with its English source (an argument of hwio::setText(), ADR-0374).
 [[nodiscard]] LocalizedText targetDisplayNameText(const TargetProfile& target);
+// The display name of `profile` for the UI: product names stay as they are ("CHESTER"); a
+// generic device name is translated ("STM32 chip", context "hwio::device", plan 0039).
+[[nodiscard]] QString profileDisplayName(const DeviceProfile& profile);
 
 // The translated title / body of a connection guide step and the translated power hint of a
 // profile (ADR-0077).
@@ -285,6 +354,10 @@ matchSensitiveOutputPrefix(std::string_view line, std::span<const std::string_vi
 // `target.uicr`; bytes in the UICR need `allowUicr`. Errors: firmware.out_of_range (the PIB, or
 // outside flash and UICR), firmware.uicr_in_image (UICR bytes without allowUicr). The one copy of
 // these rules: planImage() and the CLI / MCP checks before the confirmation use it.
+// STM32 targets (plan 0039, ADR-0275): inside `flash`, or inside `dataEeprom` with `allowUicr`
+// (which then means "allow data EEPROM"); option bytes and system memory never
+// (firmware.out_of_range). Errors as above; EEPROM bytes without consent: firmware.out_of_range
+// naming the data EEPROM.
 [[nodiscard]] Status checkFlashWrite(const TargetProfile& target, std::uint32_t address,
                                      std::size_t size, bool allowUicr);
 

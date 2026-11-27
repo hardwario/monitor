@@ -26,6 +26,21 @@
 // upload date; "Unknown firmware" when unreadable) and its SHA-256 verifies the download. docsUrl
 // is the profile's documentation page of application firmware in the UI language.
 //
+// Plan 0040 (B1, ADR-0278, ADR-0352): the LoRaWAN module kind (LrwFirmware, target `lrw`) has the
+// same two sources as the LTE kind: the designated firmware of its target (lora-modem for CHESTER,
+// an Intel HEX: DesignatedDownload::image) or an own .hex / .bin (start address as on the STM32
+// card). The designated part (lteSource, designated*) follows the target of the current kind. Kind
+// hints by address range (ADR-0040 extended): an Intel HEX starting in the STM32 flash (0x08000000)
+// on the application or LTE card, or a .bin there, is LoRaWAN module firmware; an nRF image (below
+// 0x08000000) on the LoRaWAN card is suggested for the application card.
+//
+// Plan 0040 (B4): the designated state (state, running operation, progress, prepared source,
+// error) is kept per target (`lte`, `lrw`) in one map: switching the card neither forgets nor
+// cancels the other card's prepared firmware or running download; the designated* properties,
+// cancelDesignated() and retryDesignated() act on the entry of the current kind. Another device
+// profile of the owner's tab clears every entry. A verified cache file
+// (DesignatedOperation::fromCache()) is DesignatedLoading - no "Downloading…" status, no progress.
+//
 // Ownership: child of its owner (FlashViewModel, the flash wizard). The catalog operation it holds
 // never outlives FirmwareServices (see firmware_services.h). GUI thread only.
 
@@ -46,6 +61,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <functional>
+#include <map>
 #include <memory>
 #include <optional>
 
@@ -111,6 +127,13 @@ class FirmwareSourceViewModel : public QObject {
     Q_PROPERTY(QString designatedStatus READ designatedStatus NOTIFY designatedChanged)
     Q_PROPERTY(qreal designatedProgress READ designatedProgress NOTIFY designatedChanged)
     Q_PROPERTY(hwio::gui::ErrorInfo designatedError READ designatedError NOTIFY designatedChanged)
+    // Plan 0039 (ADR-0280 D5): the start address of a .bin file on the STM32 card ("0x08000000"
+    // by default: the chip's flash start), its validation text and whether the field is shown.
+    Q_PROPERTY(QString binAddress READ binAddress WRITE setBinAddress NOTIFY binAddressChanged)
+    Q_PROPERTY(QString binAddressError READ binAddressError NOTIFY binAddressChanged)
+    Q_PROPERTY(bool binAddressVisible READ binAddressVisible NOTIFY sourceChanged)
+    // The image (placed) has data EEPROM records of the STM32 chip.
+    Q_PROPERTY(bool hasEeprom READ hasEeprom NOTIFY sourceChanged)
 
 public:
     // Unscoped: QML compares FirmwareSourceViewModel.AppFirmware etc. with the int properties.
@@ -119,10 +142,15 @@ public:
         // LTE MCU (0021, ADR-0174): the designated LTE firmware, or an own .hex, LTE bundle .zip or
         // modem firmware mfw_nrf91*.zip (the modem through nRF Util)
         LteFirmware,
+        // Plan 0039 (ADR-0274): an STM32 chip (the generic "STM32 chip" device): .hex or .bin
+        Stm32Firmware,
+        // Plan 0040: the CHESTER LoRaWAN module (target lrw): the designated lora-modem firmware
+        // or an own .hex / .bin; flashed by the guided LoRaWAN module procedure
+        LrwFirmware,
     };
     Q_ENUM(Kind)
 
-    // 0021 (ADR-0165).
+    // 0021 (ADR-0165); plan 0040: the source of every kind with designated firmware (LTE, LoRaWAN).
     enum LteSource : quint8 { // NOLINT(cppcoreguidelines-use-enum-class)
         Designated,
         OwnFile,
@@ -134,6 +162,8 @@ public:
         DesignatedDownloading,
         DesignatedReady,
         DesignatedFailed,
+        // Plan 0040 (B4): a verified cache file is being handed over (no status text, no progress)
+        DesignatedLoading,
     };
     Q_ENUM(DesignatedState)
 
@@ -155,10 +185,24 @@ public:
     FirmwareSourceViewModel(FirmwareSourceViewModel&&) = delete;
     FirmwareSourceViewModel& operator=(FirmwareSourceViewModel&&) = delete;
 
-    // "app" for AppFirmware, "lte" for LteFirmware.
+    // "app" for AppFirmware, "lte" for LteFirmware, "lrw" for LrwFirmware; Stm32Firmware: "" (the
+    // tab's chip, see targetId()).
     [[nodiscard]] static QString targetIdFor(Kind kind);
-    // "app", "lte" (flash/recent; stored "modem" entries are read as "lte").
+    // "app", "lte", "stm32", "lrw" (flash/recent; stored "modem" entries are read as "lte").
     [[nodiscard]] static QString kindId(Kind kind);
+    // The target of the current kind (Stm32Firmware: the chip set by the owner).
+    [[nodiscard]] QString targetId() const;
+    // Plan 0039: the STM32 chip (target id) of the owner's tab; resets the .bin address to the
+    // chip's flash start.
+    void setStm32TargetId(const QString& targetId);
+    [[nodiscard]] QString binAddress() const { return m_binAddress; }
+    void setBinAddress(const QString& text);
+    [[nodiscard]] QString binAddressError() const;
+    [[nodiscard]] bool binAddressVisible() const;
+    [[nodiscard]] bool hasEeprom() const;
+    // The image to flash: the loaded one, a .bin placed at binAddress (nullptr while the address
+    // is invalid or nothing is ready).
+    [[nodiscard]] std::shared_ptr<const firmware::FirmwareImage> flashImage() const;
 
     [[nodiscard]] int kind() const noexcept { return m_kind; }
     // Set by the owner; filters loading, the recent list and the hint.
@@ -187,11 +231,12 @@ public:
     void setLteSource(int source);
     [[nodiscard]] bool designatedAvailable() const;
     [[nodiscard]] QString designatedTitle() const;
-    [[nodiscard]] int designatedState() const noexcept { return m_designatedState; }
+    [[nodiscard]] int designatedState() const;
     [[nodiscard]] QString designatedStatus() const;
     [[nodiscard]] qreal designatedProgress() const;
     [[nodiscard]] ErrorInfo designatedError() const;
-    // The LTE kind uses the designated firmware now (kind LTE, source Designated, available).
+    // The kind uses its target's designated firmware now (kind LTE or LoRaWAN, source Designated,
+    // available).
     [[nodiscard]] bool designatedActive() const;
 
     Q_INVOKABLE void loadFile(const QUrl& url);
@@ -246,6 +291,7 @@ signals:
     void catalogInfoChanged();
     void lteSourceChanged();
     void designatedChanged();
+    void binAddressChanged();
     void backupsChanged();
 
 private:
@@ -254,7 +300,7 @@ private:
     void onDownloadFinished();
     void startCatalogDownload();
     void startDesignated();
-    void onDesignatedFinished();
+    void onDesignatedFinished(const QString& key);
     void startLookup(const QString& id);
     void onLookupFinished();
     void cancelLookup();
@@ -267,8 +313,35 @@ private:
     void restoreState();
     // The kind the loaded file belongs to, when it does not fit m_kind.
     [[nodiscard]] std::optional<Kind> mismatch() const;
+    // Plan 0039: a .bin file outside the STM32 card (no kind to switch to).
+    [[nodiscard]] bool binaryElsewhere() const;
+    // The loaded file fits the kind (Ready).
+    [[nodiscard]] bool fits() const { return !mismatch() && !binaryElsewhere(); }
+    [[nodiscard]] std::optional<std::uint32_t> binStart() const;
     [[nodiscard]] const device::TargetProfile* target() const;
-    [[nodiscard]] const device::TargetProfile* lteTarget() const;
+    // The target whose designated firmware the kind offers (lte, lrw); nullptr for other kinds.
+    [[nodiscard]] const device::TargetProfile* designatedTarget() const;
+    // Plan 0040: the profile of the owner's tab has the LoRaWAN module target.
+    [[nodiscard]] bool lrwAvailable() const;
+    // The kind the image (Intel HEX) belongs to by its address range, when it is not m_kind.
+    [[nodiscard]] std::optional<Kind> hexMismatch() const;
+    // Plan 0040 (B4): the designated firmware of one target (the map below).
+    struct DesignatedEntry {
+        DesignatedState state = DesignatedIdle;
+        std::unique_ptr<firmware::DesignatedOperation> download; // running (Downloading, Loading)
+        std::uint64_t done = 0;
+        std::uint64_t total = 0;
+        std::optional<LoadedSource> loaded; // when DesignatedReady
+        std::optional<Error> error;
+    };
+    // The key of the current kind's entry: its target id (lte, lrw); "" for other kinds.
+    [[nodiscard]] QString designatedKey() const;
+    // The current kind's entry (nullptr while none, or the entries belong to another profile).
+    [[nodiscard]] const DesignatedEntry* currentDesignated() const;
+    [[nodiscard]] DesignatedState currentDesignatedState() const;
+    // Clears (and cancels) every entry when the owner's tab has another device profile now;
+    // true when an entry was cleared.
+    [[nodiscard]] bool forgetDesignatedOfAnotherProfile();
     [[nodiscard]] QString catalogInfoText() const;
     // "hio-chester-push-fm v4.0.1" when the page of `id` was read, else "Catalog ID <id>".
     [[nodiscard]] QString catalogName(const QString& id) const;
@@ -290,14 +363,17 @@ private:
     std::optional<Error> m_error;
     bool m_allowUicr = false;
     QString m_catalogIdError;
+    // Plan 0039: the STM32 chip of the tab and the .bin start address text.
+    QString m_stm32Target;
+    QString m_binAddress = QStringLiteral("0x08000000");
     // 0021: the designated LTE firmware.
     LteSource m_lteSource = Designated;
-    DesignatedState m_designatedState = DesignatedIdle;
-    std::unique_ptr<firmware::DesignatedOperation> m_designatedDownload;
-    std::uint64_t m_designatedDone = 0;
-    std::uint64_t m_designatedTotal = 0;
-    std::optional<LoadedSource> m_designated; // when DesignatedReady
-    std::optional<Error> m_designatedError;
+    // Plan 0040 (B4): the designated firmware per target id. Bounded: keys are only the targets of
+    // the kinds with designated firmware (targetIdFor(LteFirmware), targetIdFor(LrwFirmware)) that
+    // have designatedFirmware in the profile - at most 2 entries.
+    std::map<QString, DesignatedEntry> m_designated;
+    // The profile the entries belong to (non-owning; the static ProfileRegistry entry).
+    const device::DeviceProfile* m_designatedProfile = nullptr;
     // 0021: the catalog page of the ID in the field.
     std::unique_ptr<firmware::LookupOperation> m_lookup;
     // ADR-0385: the background name lookup of the Recent list (bounded: maxNameLookups).

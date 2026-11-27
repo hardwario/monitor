@@ -4,6 +4,7 @@
 # libs/device and CLI tests.
 
 add_executable(hwio_firmware_tests
+    binary_test.cpp
     catalog_test.cpp
     designated_test.cpp
     hex_builder.h
@@ -17,7 +18,8 @@ target_include_directories(hwio_firmware_tests PRIVATE "${CMAKE_CURRENT_SOURCE_D
 target_link_libraries(hwio_firmware_tests PRIVATE hwio::firmware hwio::miniz Qt6::Network GTest::gmock)
 # Plan 0021: the saved catalog page (data/catalog_page_<id>.html, fetched 2026-10-23).
 target_compile_definitions(hwio_firmware_tests PRIVATE
-    HWIO_FIRMWARE_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/data")
+    HWIO_FIRMWARE_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/data"
+    ${HWIO_TEST_OVERRIDES_DEFINE})
 
 # Under ThreadSanitizer the tests that use QNetworkAccessManager are left out: its HTTP thread lives
 # entirely inside the uninstrumented libQt6Network/libQt6Core, so TSan reports Qt's own posted

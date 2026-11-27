@@ -50,6 +50,7 @@
 #include <QCryptographicHash>
 #include <QDateTime>
 #include <QDir>
+#include <QEvent>
 #include <QEventLoop>
 #include <QFile>
 #include <QHostAddress>
@@ -231,6 +232,49 @@ public:
         hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);
         return tab != nullptr && tab->configure(QStringLiteral("chester"), target,
                                                 static_cast<std::uint32_t>(serial), product);
+    }
+
+    // Plan 0039: a tab of the STM32 chip device on `chip`.
+    Q_INVOKABLE bool configureStm32Tab(int index, const QString& chip, int serial,
+                                       const QString& product) {
+        hwio::gui::DeviceTabViewModel* tab = m_app->tabs()->at(index);
+        return tab != nullptr && tab->configure(QStringLiteral("stm32"), chip,
+                                                static_cast<std::uint32_t>(serial), product);
+    }
+
+    // Plan 0039: a raw binary of `size` bytes (0x5A).
+    Q_INVOKABLE [[nodiscard]] QUrl writeBin(const QString& name, int size) const {
+        return write(name, QByteArray(size, '\x5A'));
+    }
+
+    // Plan 0040: a CHESTER with the APP and the LoRaWAN connector (moveCable() moves the J-Link);
+    // the module (STM32L072CZ, RDP `rdp`) answers only while the application MCU is held.
+    Q_INVOKABLE [[nodiscard]] bool useLrwBoard(int rdp) const {
+        if (!moveCable(QStringLiteral("app"))) {
+            return false;
+        }
+        const QString json = QStringLiteral(
+                                 R"({"probes": [{"serialNumber": 801000001, "product": "Test Probe",
+                "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted\n"}]},
+                "connectors": {"file": "%1", "initial": "app", "chips": {"app": {},
+                "lrw": {"family": "stm32l0", "devId": 1095, "revId": 8200, "flashKib": 192,
+                        "eepromBytes": 6144, "needsHalted": "app", "rdp": %2}}}}]})")
+                                 .arg(m_dir + QStringLiteral("/connector"))
+                                 .arg(rdp);
+        return useScenario(json);
+    }
+    Q_INVOKABLE [[nodiscard]] bool moveCable(const QString& connector) const {
+        return write(QStringLiteral("connector"), connector.toUtf8()).isValid();
+    }
+    // Plan 0040: an Intel HEX for the LoRaWAN module (STM32 flash at 0x08000000).
+    Q_INVOKABLE [[nodiscard]] QUrl writeModuleHex(const QString& name, int size) const {
+        std::vector<hwio::firmware::Segment> segments;
+        segments.push_back(hwio::firmware::Segment{
+            .address = 0x08000000,
+            .data = std::vector<std::byte>(static_cast<std::size_t>(size), std::byte{0x3C})});
+        const auto image = hwio::firmware::FirmwareImage::fromSegments(std::move(segments));
+        return write(name, image ? QByteArray::fromStdString(hwio::firmware::test::toHex(*image))
+                                 : QByteArray());
     }
 
     // Plan 0012: a Bluetooth tab (as restored: Disconnected).
@@ -1180,6 +1224,10 @@ public slots:
         m_support.reset();
         m_languageManager.reset();
         m_app.reset();
+        // Objects handed to deleteLater() while the application was destroyed (a shell query
+        // ended by its closing session): no event loop runs after the last test file, so they are
+        // deleted here (LeakSanitizer).
+        QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     }
 
     void qmlEngineAvailable(QQmlEngine* engine) {

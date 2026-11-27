@@ -2,6 +2,7 @@
 
 #include "cli_app.h"
 #include "cli_log.h"
+#include "hwio/core/error.h"
 #include "hwio/core/result.h"
 #include "hwio/device/device_session.h"
 #include "hwio/device/operation.h"
@@ -46,14 +47,21 @@ OperationRunner::~OperationRunner() { close(); }
 Result<std::unique_ptr<OperationRunner>>
 OperationRunner::open(const Context& context, const GlobalOptions& globals,
                       const ProbeOptions& group, const ProbeOptions& own, std::string_view targetId,
-                      ProgressUi& ui, std::optional<std::filesystem::path> nrfUtil) {
+                      ProgressUi& ui, std::optional<std::filesystem::path> nrfUtil,
+                      const device::DeviceProfile* profile) {
     auto location = locateJLinkLibrary(globals);
     if (!location) {
         return std::unexpected(std::move(location).error());
     }
-    const device::TargetProfile& target = chesterTarget(targetId);
+    const device::DeviceProfile& deviceProfile = profile != nullptr ? *profile : chesterProfile();
+    const device::TargetProfile* found = device::findTarget(deviceProfile, targetId);
+    if (found == nullptr) {
+        return std::unexpected(
+            makeError(ErrorCode::UsageInvalidArgument, std::format("unknown target {}", targetId)));
+    }
+    const device::TargetProfile& target = *found;
     device::SessionOptions options;
-    options.profile = &chesterProfile();
+    options.profile = &deviceProfile;
     options.targetId = targetId;
     options.probeSn = serialNumberOf(group, own);
     auto speed = speedOf(group, own, target.defaultSpeedKhz);
@@ -125,7 +133,9 @@ void OperationRunner::close() {
 }
 
 void OperationRunner::showTarget(const device::OperationResult& result) {
-    if (result.chip && !result.chip->name.empty()) {
+    // An identify reports what it found, which may be another chip (plan 0039: `stm32 info`).
+    if (result.kind != device::OperationKind::Identify && result.chip &&
+        !result.chip->name.empty()) {
         m_ui->info(std::format("Target: {} ({})", result.chip->name, m_targetId));
     }
 }
@@ -134,9 +144,10 @@ Result<OperationOutcome> runOperation(const Context& context, const GlobalOption
                                       const ProbeOptions& group, const ProbeOptions& own,
                                       std::string_view targetId, ProgressUi& ui,
                                       const StartFn& start,
-                                      std::optional<std::filesystem::path> nrfUtil) {
-    auto runner =
-        OperationRunner::open(context, globals, group, own, targetId, ui, std::move(nrfUtil));
+                                      std::optional<std::filesystem::path> nrfUtil,
+                                      const device::DeviceProfile* profile) {
+    auto runner = OperationRunner::open(context, globals, group, own, targetId, ui,
+                                        std::move(nrfUtil), profile);
     if (!runner) {
         return std::unexpected(std::move(runner).error());
     }

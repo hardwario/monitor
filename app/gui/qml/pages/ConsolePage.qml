@@ -529,10 +529,20 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
+                    // Plan 0039 (ADR-0280 D8): a chip without a console (STM32).
+                    EmptyState {
+                        objectName: "noConsoleState"
+                        anchors.centerIn: parent
+                        visible: !page.vm.hasConsole
+                        iconName: "console"
+                        headline: qsTr("No console")
+                        text: qsTr("This chip has no console in HARDWARIO Monitor. Use the Flash page to flash, erase, unlock or reset it.")
+                    }
+
                     EmptyState {
                         objectName: "notConnectedState"
                         anchors.centerIn: parent
-                        visible: page.vm.showConnectState
+                        visible: page.vm.showConnectState && page.vm.hasConsole
                         iconName: "console"
                         headline: qsTr("Not connected")
                         text: qsTr("Connect to see the device console.")
@@ -555,7 +565,7 @@ Item {
 
                         objectName: "consoleSplit"
                         anchors.fill: parent
-                        visible: !page.vm.showConnectState
+                        visible: !page.vm.showConnectState && page.vm.hasConsole
                         onSingleChanged: if (split.single) page.focusedChannel = 0
                         Component.onCompleted: if (split.single) page.focusedChannel = 0
 

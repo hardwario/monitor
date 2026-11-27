@@ -20,11 +20,14 @@ na karcie sesji wsparcia nie jest dostępny.
 |---|---|---|
 | **Application firmware** | MCU aplikacji | plik `.hex` lub identyfikator firmware z katalogu |
 | **LTE firmware** | MCU LTE i jego modem | firmware LTE od HARDWARIO lub własny plik `.hex` / `.zip` |
+| **LoRaWAN module** | moduł Murata Type ABZ (CHESTER z LoRaWAN) | lora-modem dla CHESTER lub własny plik `.hex` / `.bin` |
 
 Karta pokazuje firmware, które jest obecnie w urządzeniu, o ile urządzenie je zgłasza.
 
 Karta zawsze pracuje z MCU aplikacji. **LTE firmware** nie jest wgrywane z tej strony: uruchamia prowadzoną
-[aktualizację firmware LTE](#aktualizacja-firmware-lte), która informuje, kiedy przełożyć kabel J-Link.
+[aktualizację firmware LTE](#aktualizacja-firmware-lte), która informuje, kiedy przełożyć kabel J-Link. **LoRaWAN
+module** działa tak samo: **Flash** otwiera kreator, który informuje, kiedy przełożyć kabel ([Moduł
+LoRaWAN](#lorawan-module)).
 
 ## 2. Firmware
 
@@ -154,6 +157,7 @@ Sekcja **Maintenance — application MCU** na dole strony jest domyślnie zwini�
 **Erase everything…**, **Recover…** i konserwacja **LTE MCU** (wybór **Application MCU | LTE MCU** nad przyciskami)
 pojawiają się tylko w [trybie](getting-started.md#modes) **Expert** (**Settings › General › Mode**), ponieważ mogą
 skasować numer seryjny i konfigurację urządzenia. W MCU LTE wymagają J-Link na złączu LTE.
+W CHESTER z LoRaWAN wybór zawiera też **LoRaWAN module** ([Moduł LoRaWAN](#lorawan-module)).
 
 <a id="recover"></a>
 ### Odzyskiwanie (Recover)
@@ -163,6 +167,115 @@ Gdy MCU ma ochronę przed odczytem (approtect), J-Link nie może go odczytać an
 UICR i PIB. W MCU LTE następnie wgrywa mały obraz, który utrzymuje możliwość debugowania MCU. Po recover wgraj
 firmware ponownie. Recover nigdy nie uruchamia się samoczynnie. Gdy przewodnik rozwiązywania problemów dla chronionego
 MCU kieruje na stronę **Flash**, **Recover…** jest tam wyświetlane jeden raz, w każdym trybie.
+
+<a id="lorawan-module"></a>
+## Moduł LoRaWAN
+
+CHESTER z LoRaWAN ma moduł Murata Type ABZ (STM32L072CZ z radiem LoRa) z własnym złączem programowania **LoRaWAN**.
+Moduł ma własny firmware, który HARDWARIO Monitor wgrywa przez J-Link. Moduł nie ma konsoli w HARDWARIO Monitor: jego
+ustawienia LoRaWAN (klucze, region, …) ustawia się poleceniami `lrw config …` w konsoli MCU aplikacji.
+
+**Firmware:** w kroku 1 wybierz **LoRaWAN module** (moduł LoRaWAN):
+
+- **lora-modem for CHESTER 1.4.1 (recommended)** (zalecane): otwarty firmware modemu LoRaWAN od HARDWARIO, projekt
+  [hardwario/lora-modem](https://github.com/hardwario/lora-modem), licencja BSD-3-Clause. Nie jest częścią HARDWARIO
+  Monitor: aplikacja przy pierwszym użyciu pobiera plik wydania z GitHub, sprawdza jego sumę kontrolną SHA-256 i
+  przechowuje go w pamięci podręcznej.
+- **Use your own file…** (użyj własnego pliku): plik `.hex` lub `.bin`; plik `.bin` wymaga podania **Start address**
+  (adres początkowy, domyślnie `0x08000000`).
+
+Opcje **Erase the whole chip first** i **Keep data EEPROM** działają jak w przypadku [układów STM32](#stm32-chips).
+Gdy na karcie **Application firmware** wybierzesz plik lora-modem, strona zaproponuje **This is LoRaWAN module
+firmware — switch?** (to jest firmware modułu LoRaWAN — przełączyć?).
+
+**Dlaczego trzeba przełożyć kabel:** MCU aplikacji steruje zasilaniem i resetem modułu, więc moduł odpowiada na swoim
+złączu tylko wtedy, gdy MCU aplikacji jest zatrzymany. Dlatego **Flash** otwiera kreator, podobnie jak aktualizacja
+firmware LTE:
+
+1. **APP connector** (złącze APP): podłącz J-Link do złącza APP.
+2. **Stop the application** (zatrzymanie aplikacji): MCU aplikacji zostaje zresetowany i pozostaje zatrzymany.
+3. **LoRaWAN connector** (złącze LoRaWAN): przełóż J-Link do złącza LoRaWAN. Kreator przechodzi dalej sam, gdy tylko
+   moduł odpowie.
+4. **Flash** (wgrywanie): firmware zostaje zapisany do modułu i zweryfikowany.
+5. **APP connector**: przełóż J-Link z powrotem; MCU aplikacji uruchamia się ponownie, a wraz z nim moduł.
+6. **Done** (gotowe): **LoRaWAN module flashed with lora-modem for CHESTER 1.4.1.**; konsola łączy się ponownie.
+
+Podczas działania kreatora konsola karty jest wstrzymana (**Paused for the LoRaWAN module**). Anulować można, dopóki
+kreator czeka na kabel. Po kroku 2 MCU aplikacji pozostaje zatrzymany do zresetowania CHESTER albo jego wyłączenia i
+ponownego włączenia.
+
+**Moduł fabryczny** ma oryginalny firmware Murata i ochronę przed odczytem (RDP poziom 1). W kroku 4 kreator najpierw
+pyta wtedy **Unlock the LoRaWAN module?** (odblokować moduł LoRaWAN?): **Unlock and erase** (odblokuj i wymaż) usuwa
+ochronę, a moduł wymazuje się całkowicie. Oryginalny firmware Murata w module zostaje usunięty; nie da się go
+wcześniej zarchiwizować, a HARDWARIO Monitor nie potrafi zapisać go z powrotem. Po odblokowaniu wgrywanie jest
+kontynuowane.
+
+**Konserwacja:** w [trybie](getting-started.md#modes) **Expert** wybór nad przyciskami
+konserwacji zawiera też **LoRaWAN module** z akcjami **Erase chip…** (wymaż układ: pamięć flash i EEPROM danych) i
+**Unlock (erase)…** (odblokuj i wymaż). Każda z nich uruchamia ten sam kreator z przekładaniem kabla (krok 4 to wtedy
+**Erase** lub **Unlock**) i najpierw pyta. Modułu nie resetuje się osobno (**Reset**): ostatni krok kreatora ponownie
+uruchamia MCU aplikacji, co restartuje także moduł.
+
+W wierszu poleceń: `hwio chester lrw` ([Wiersz poleceń](../en/cli.md#lrw)).
+
+<a id="stm32-chips"></a>
+## Wgrywanie firmware do układów STM32
+
+HARDWARIO Monitor wgrywa przez J-Link także firmware do układów STM32L0, na przykład do kontrolera płytki
+rozszerzeń CHESTER.
+
+**Podłączenie:** połącz piny SWD J-Link z układem: **SWDIO**, **SWCLK**, **GND** i **VTref** (napięcie zasilania
+układu, po którym J-Link rozpoznaje, że płytka jest zasilana). Płytka potrzebuje własnego zasilania. W karcie **New
+device** wybierz programator, następnie w sekcji **Device** wybierz **STM32 chip** (układ STM32), w sekcji **Chip**
+wybierz układ i naciśnij **Connect**.
+
+**Chip** zawiera obsługiwane układy STM32L0 według kategorii i rozmiaru pamięci flash, na przykład **STM32L0 cat. 3,
+64 KiB**; podpowiedź wymienia układy, które obejmuje pozycja. Układy jednej kategorii z tym samym rozmiarem pamięci
+flash mają ten sam identyfikator i aplikacja nie potrafi ich odróżnić, dlatego obejmuje je jedna pozycja. Seria
+STM32L010 (value line) nie jest obsługiwana. Listę wypisuje `hwio stm32 chips`.
+
+**Strona Flash:** krok 1 ma jedną kartę, **Firmware for &lt;chip&gt;** (firmware dla układu), która przyjmuje **.hex or
+.bin file** (plik `.hex` lub `.bin`). Plik `.bin` nie zawiera adresów: podaj jego **Start address** (adres
+początkowy; domyślnie `0x08000000`, początek pamięci flash). Opcje:
+
+- **Erase the whole chip first** (najpierw wymaż cały układ): przed zapisem wymazuje pamięć flash i EEPROM danych.
+  Domyślnie wyłączone; zwykłe wgrywanie wymazuje tylko zapisywane sektory.
+- **Keep data EEPROM** (zachowaj EEPROM danych, domyślnie włączone): rekordy EEPROM danych z pliku nie są zapisywane.
+  Wyłącz tę opcję, gdy firmware ma zmienić EEPROM danych.
+- **Halt the CPU after flashing**.
+
+Przed zapisem HARDWARIO Monitor odczytuje identyfikator układu i rozmiar pamięci flash. Gdy podłączony jest inny układ
+niż wybrany, wgrywanie kończy się błędem [target.wrong_chip](troubleshooting.md#target.wrong_chip); jeśli znaleziony
+układ jest na liście, przycisk **Use &lt;found chip&gt;** (użyj znalezionego układu) przełącza na niego kartę.
+
+**Ochrona przed odczytem (RDP):** na poziomie 1 J-Link nie może odczytać ani zapisać pamięci flash, a wgrywanie kończy
+się błędem [target.protected](troubleshooting.md#target.protected) z przyciskiem **Unlock…** (odblokuj). Odblokowanie
+usuwa ochronę, a układ następnie wymazuje się całkowicie, łącznie z EEPROM danych. Tego nie można cofnąć, a firmware
+chronionego układu nie da się wcześniej zarchiwizować. Po odblokowaniu uruchom wgrywanie ponownie. Poziom 2 jest
+trwały: układu nie można już przeprogramować
+([target.permanently_protected](troubleshooting.md#target.permanently_protected)).
+
+Sekcja **Maintenance — &lt;chip&gt;** zawiera **Reset**, **Reset and halt**, **Erase chip…** (wymaż układ: pamięć flash i
+EEPROM danych) i **Unlock (erase)…** (odblokuj i wymaż); dwie ostatnie akcje najpierw pytają. Strona **Console**
+karty informuje, że układ nie ma konsoli w HARDWARIO Monitor.
+
+### CHESTER-S1 (Clime IAQ)
+
+Kontrolerem drugiej płytki CHESTER Clime IAQ (CHESTER-S1) jest **STM32L0 cat. 3, 64 KiB**. HARDWARIO nie ma jeszcze
+dla niego przygotowanego firmware, a bez jego firmware czujniki nie działają: **zrób kopię zapasową przed wgraniem
+lub wymazaniem**. `hwio stm32 info --chip stm32l0-cat3-64k` pokazuje poziom ochrony przed odczytem; przy RDP 0 zapisz
+pamięć flash i EEPROM danych za pomocą J-Link Commander (`JLinkExe`, w Windows `JLink.exe`):
+
+```text
+JLinkExe -device STM32L053R8 -if SWD -speed 4000 -autoconnect 1
+J-Link> halt
+J-Link> savebin s1-flash.bin 0x08000000 0x10000
+J-Link> savebin s1-eeprom.bin 0x08080000 0x800
+J-Link> exit
+```
+
+Przywracanie: `hwio stm32 flash --chip stm32l0-cat3-64k s1-flash.bin`, a następnie
+`hwio stm32 flash --chip stm32l0-cat3-64k --address 0x08080000 --allow-eeprom s1-eeprom.bin`.
 
 ## Wiersz poleceń
 
@@ -175,6 +288,8 @@ hwio chester lte flash mfw_nrf91x1_2.0.2.zip              # a modem firmware zip
 hwio chester lte flash --guided                           # the guided LTE update (as in the app)
 hwio chester app erase --all
 hwio chester app recover
+hwio chester lrw flash                                    # lora-modem for CHESTER (the LoRaWAN module, guided)
+hwio stm32 flash --chip stm32l0-cat3-64k firmware.hex     # an STM32 chip (hwio stm32 chips)
 ```
 
 Zobacz [Wiersz poleceń](../en/cli.md#flashing).

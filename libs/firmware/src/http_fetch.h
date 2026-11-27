@@ -3,7 +3,7 @@
 // One bounded HTTP GET on the owner thread (ADR-0037), shared by the catalog download, the
 // designated firmware download and the catalog page lookup (plan/features/0021):
 //   - transfer timeout (no data for `timeout`), optional total time limit (`totalTimeout`),
-//     redirects followed only to https;
+//     redirects followed only to https (RedirectRule::Designated: designatedRedirectAllowed());
 //   - the body is capped at `maxBytes` (the transfer is aborted beyond it);
 //   - cancel() / a stop request abort the transfer;
 //   - finished() is emitted once; outcome() is set before it.
@@ -32,11 +32,18 @@ class QNetworkAccessManager;
 
 namespace hwio::firmware::detail {
 
+// Which redirects a fetch follows.
+enum class RedirectRule : std::uint8_t {
+    Https,      // to any https URL (review R8: catalog downloads and pages)
+    Designated, // designatedRedirectAllowed() (ADR-0281 D2: designated firmware)
+};
+
 struct FetchLimits {
     std::chrono::milliseconds timeout{60000}; // inactivity (no data for this long)
     std::uint64_t maxBytes = 32ULL * 1024 * 1024;
     // Review F9: the whole transfer at most this long (0 = no total limit).
     std::chrono::milliseconds totalTimeout{0};
+    RedirectRule redirects = RedirectRule::Https;
 };
 
 struct FetchOutcome {
@@ -48,7 +55,8 @@ struct FetchOutcome {
     bool cancelled = false;
     bool oversize = false;
     bool redirectRefused = false;
-    bool totalTimeout = false; // the FetchLimits::totalTimeout ran out
+    std::string redirectTarget; // the refused redirect's URL
+    bool totalTimeout = false;  // the FetchLimits::totalTimeout ran out
 };
 
 class HttpFetch : public QObject {
@@ -88,6 +96,8 @@ private:
     bool m_oversize = false;
     bool m_redirectRefused = false;
     bool m_totalTimeout = false;
+    std::string m_redirectTarget;
+    QUrl m_current; // the URL of the request now in flight (after the followed redirects)
     std::optional<FetchOutcome> m_outcome;
 };
 

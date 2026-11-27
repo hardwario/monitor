@@ -761,15 +761,21 @@ private:
 
     // The programmer for `target`: its own chip family first, the other targets' after (so that
     // identify() recognizes the other MCU for target.wrong_family).
+    // Plan 0039: an STM32 target gets its family data instead (no FICR families).
     [[nodiscard]] jlink::ProgrammerConfig programmerConfigFor(const TargetProfile& target) const {
         jlink::ProgrammerConfig config;
+        config.timing = m_config.timing.programmer;
+        if (target.vendor == ChipVendor::Stm32) {
+            config.stm32 = target.stm32;
+            return config;
+        }
         config.families.push_back(target.chipFamily);
         for (const TargetProfile& other : m_config.profile->targets) {
-            if (other.chipFamily.ficrPart != target.chipFamily.ficrPart) {
+            if (other.vendor == ChipVendor::Nordic &&
+                other.chipFamily.ficrPart != target.chipFamily.ficrPart) {
                 config.families.push_back(other.chipFamily);
             }
         }
-        config.timing = m_config.timing.programmer;
         return config;
     }
 
@@ -1060,6 +1066,30 @@ private:
         std::optional<jlink::JLinkProgrammer> programmer;
     };
 
+    // Plan 0039: after an STM32 option-byte reload the chip resets and - after a regression from
+    // RDP level 1 - mass-erases. The probe is opened and connected again until the chip's
+    // identification registers answer, retried until the recover deadline (60 s).
+    [[nodiscard]] Status reconnectAfterReload(OperationRun& run) {
+        const auto deadline = clock().now() + m_config.timing.programmer.recoverTimeout;
+        Status ready;
+        while (true) {
+            // HIL 2026-11-06: the library's connection is stale after the chip reset itself (reads
+            // return 0 until the probe is opened again, also on a "successful" JLINKARM_Connect).
+            m_probe->close();
+            m_probeTarget = nullptr;
+            ready = prepareProbe(run.target, true, run.stop);
+            if (ready && run.context.programmer != nullptr) {
+                if (auto chip = run.context.programmer->identify(); !chip) {
+                    ready = std::unexpected(std::move(chip).error());
+                }
+            }
+            if (ready || clock().now() >= deadline || run.stop.stop_requested()) {
+                return ready;
+            }
+            (void)clock().sleepFor(std::chrono::milliseconds(500), run.stop);
+        }
+    }
+
     // Connecting (after SwitchingTarget for another target): probe and target ready, programmer
     // created. A target that does not connect may be read-back protected: its CTRL-AP is asked.
     [[nodiscard]] Status prepareOperation(OperationRun& run, bool requireTarget) {
@@ -1160,6 +1190,15 @@ private:
                 return prepared;
             }
             return runReset(run.context, command.reset);
+        case OperationKind::Unlock: {
+            if (Status prepared = prepareOperation(run, true); !prepared) {
+                return prepared;
+            }
+            return keepChip(
+                runUnlock(run.context,
+                          [this, &run]() -> Status { return reconnectAfterReload(run); }),
+                result);
+        }
         case OperationKind::ReadMemory: {
             if (Status prepared = prepareOperation(run, true); !prepared) {
                 return prepared;
@@ -1232,7 +1271,10 @@ private:
                 match.foundTargetId = std::string(found->id);
             }
             match.protectedChip = chip->protectedChip;
-            if (chip->part != 0) {
+            if (chip->part != 0 || chip->devId != 0) { // plan 0039: STM32 chips report a DEV_ID
+                if (const ChipPart* part = curatedPartOf(*chip); part != nullptr) {
+                    chip->name = std::string(part->displayName);
+                }
                 result.chip = *chip;
             }
         } else if (chip.error().code == ErrorCode::Cancelled) {
@@ -1359,9 +1401,13 @@ private:
                 .connectAs = {},
                 .connectedDevice = {},
                 .cpuHalted = false,
+                .foundChip = std::nullopt,
                 .download = std::nullopt},
             .programmer = std::nullopt};
         Status outcome = executeOperation(run, result);
+        if (!outcome && run.context.foundChip) {
+            result.chip = run.context.foundChip; // plan 0039: target.wrong_chip names the chip
+        }
         // Cancelled while halted (e.g. during verify): let the CPU run again where possible -
         // also when the session is stopping (review R20).
         if (!outcome && outcome.error().code == ErrorCode::Cancelled && run.context.cpuHalted &&
@@ -1733,6 +1779,7 @@ private:
                 },
             .connectedDevice = m_connectedDevice,
             .cpuHalted = false,
+            .foundChip = std::nullopt,
             .download = std::nullopt};
     }
 

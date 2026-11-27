@@ -92,6 +92,14 @@ Status DeviceSessionOperations::validate(const tunnel::OpRequest& request) const
         return std::unexpected(makeError(ErrorCode::RemoteTargetUnsupported,
                                          std::format("the device has no {} target", target)));
     }
+    if (request.target != tunnel::OpTarget::App && request.target != tunnel::OpTarget::Lte) {
+        // ADR-0421 (plan 0059 D-19): CHESTER's LoRaWAN module (`lrw`, plan 0040) and other targets
+        // are not operated remotely until the operations matrix (plan 0059 phase B); this host
+        // offers the app and lte targets only.
+        return std::unexpected(
+            makeError(ErrorCode::RemoteTargetUnsupported,
+                      std::format("the {} target is not offered remotely", target)));
+    }
     if (request.prepared) {
         // ADR-0418: prepared firmware comes with plan 0059 phase B (this host offers none).
         return std::unexpected(

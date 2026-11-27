@@ -17,7 +17,7 @@ hwio::Status registerTools(hwio::mcp::Registry& registry, ToolsContext& context)
     hwio::mcp::Registry tools;
     for (const auto& add : {&detail::registerDiscoveryTools, &detail::registerConsoleTools,
                             &detail::registerSessionTools, &detail::registerTargetTools,
-                            &detail::registerFirmwareTools}) {
+                            &detail::registerFirmwareTools, &detail::registerStm32Tools}) {
         if (auto added = (*add)(tools, context); !added) {
             return added;
         }

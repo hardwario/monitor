@@ -9,12 +9,17 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <string>
 #include <vector>
 
 namespace hwio::firmware {
 
 // A half-open address range [start, end). end may be 2^32 (the 64-bit type allows it).
+// Plan 0039 (ADR-0280): the largest .bin input (the largest STM32 flash of a curated part is far
+// below; the target's flash range is checked by checkFlashWrite()).
+inline constexpr std::uint64_t maxBinaryBytes = 2ULL * 1024 * 1024;
+
 struct AddressRange {
     std::uint64_t start = 0;
     std::uint64_t end = 0;
@@ -55,6 +60,12 @@ public:
     // `detail`), usage.invalid_argument when a segment crosses the end of the 32-bit space.
     [[nodiscard]] static Result<FirmwareImage>
     fromSegments(std::vector<Segment> segments, std::optional<std::uint32_t> startAddress = {});
+
+    // Plan 0039 (ADR-0280 D5): the bytes of a raw binary (.bin) placed at `startAddress`.
+    // Errors: firmware.invalid_image (empty, or more than maxBinaryBytes), usage.invalid_argument
+    // (`startAddress` not 4-byte aligned, or the data runs past the end of the address space).
+    [[nodiscard]] static Result<FirmwareImage> fromBinary(std::span<const std::byte> bytes,
+                                                          std::uint32_t startAddress);
 
     [[nodiscard]] const std::vector<Segment>& segments() const noexcept { return m_segments; }
     // Data bytes (sum of the segment sizes).

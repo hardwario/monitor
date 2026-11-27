@@ -11,6 +11,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -27,7 +28,7 @@ TEST(Profiles, ChesterIsRegistered) {
     ASSERT_NE(chester, nullptr);
     EXPECT_EQ(chester->displayName, "CHESTER");
     EXPECT_EQ(ProfileRegistry::find("nope"), nullptr);
-    ASSERT_EQ(ProfileRegistry::all().size(), 1U);
+    ASSERT_EQ(ProfileRegistry::all().size(), 2U); // plan 0039: + stm32
     EXPECT_EQ(ProfileRegistry::all().front(), chester);
 }
 
@@ -234,7 +235,59 @@ TEST(Profiles, FlashLayoutIsConsistent) {
             EXPECT_EQ(target.parts.front().jlinkDevice, target.jlinkDevice) << target.id;
             EXPECT_FALSE(target.flash.empty()) << target.id;
             EXPECT_FALSE(target.uicr.overlaps(target.flash)) << target.id;
-            EXPECT_TRUE(target.uicr.contains(hwio::device::pibRange(target))) << target.id;
+            if (target.vendor == hwio::device::ChipVendor::Nordic) {
+                EXPECT_TRUE(target.uicr.contains(hwio::device::pibRange(target))) << target.id;
+            }
+        }
+    }
+}
+
+// Plan 0039 A1 (ADR-0274): the profile invariants of the two vendors.
+TEST(Profiles, VendorInvariants) {
+    for (const hwio::device::DeviceProfile* profile : ProfileRegistry::all()) {
+        for (const hwio::device::TargetProfile& target : profile->targets) {
+            if (target.vendor == hwio::device::ChipVendor::Nordic) {
+                EXPECT_FALSE(target.stm32.has_value()) << target.id;
+                EXPECT_FALSE(target.dataEeprom.has_value()) << target.id;
+                EXPECT_FALSE(target.chipFamily.name.empty()) << target.id;
+                for (const hwio::device::ChipPart& part : target.parts) {
+                    EXPECT_FALSE(part.stm32.has_value()) << target.id;
+                    EXPECT_NE(part.part, 0U) << target.id;
+                }
+                continue;
+            }
+            // STM32: no UICR / PIB / CTRL-AP data, one part with its STM32 id, mass erase.
+            ASSERT_TRUE(target.stm32.has_value()) << target.id;
+            EXPECT_TRUE(target.chipFamily.name.empty()) << target.id;
+            EXPECT_EQ(target.chipFamily.ficrPart, 0U) << target.id;
+            EXPECT_EQ(target.chipFamily.ctrlApIndex, 0U) << target.id;
+            EXPECT_TRUE(target.uicr.empty()) << target.id;
+            EXPECT_EQ(target.pibOffset, 0U) << target.id;
+            EXPECT_EQ(target.recoverImage, hwio::device::RecoverImage::None) << target.id;
+            EXPECT_EQ(target.defaultErase, hwio::device::EraseScope::All) << target.id;
+            EXPECT_TRUE(target.rttTerminal.empty()) << target.id;
+            ASSERT_EQ(target.parts.size(), 1U) << target.id;
+            const hwio::device::ChipPart& part = target.parts.front();
+            ASSERT_TRUE(part.stm32.has_value()) << target.id;
+            EXPECT_EQ(part.part, 0U) << target.id;
+            EXPECT_EQ(hwio::device::findStm32PartById(part.id), &part) << target.id;
+            // The flash, EEPROM and RAM do not overlap; memory writes never reach the flash
+            // interface (ADR-0160).
+            EXPECT_EQ(target.flash.start, 0x08000000U) << target.id;
+            EXPECT_EQ(target.flash.size(), std::uint64_t{part.stm32->flashSizeKib} * 1024)
+                << target.id;
+            if (target.dataEeprom) {
+                EXPECT_FALSE(target.dataEeprom->overlaps(target.flash)) << target.id;
+                EXPECT_TRUE(target.stm32->dataEepromArea.contains(*target.dataEeprom)) << target.id;
+            }
+            EXPECT_FALSE(target.ram.overlaps(target.flash)) << target.id;
+            const hwio::firmware::AddressRange flashInterface{
+                .start = target.stm32->flashInterface, .end = target.stm32->flashInterface + 4};
+            EXPECT_TRUE(std::ranges::any_of(target.writeDenied,
+                                            [&](const hwio::firmware::AddressRange& range) {
+                                                return range.contains(flashInterface);
+                                            }))
+                << target.id;
         }
     }
 }
@@ -426,9 +479,79 @@ TEST(Profiles, EveryDesignatedFirmwareIsHttps) {
                 EXPECT_TRUE(target.designatedFirmware->url.starts_with("https://")) << target.id;
                 EXPECT_FALSE(target.designatedFirmware->name.empty()) << target.id;
                 EXPECT_FALSE(target.designatedFirmware->version.empty()) << target.id;
+                const std::string_view tag = target.designatedFirmware->cacheTag;
+                EXPECT_TRUE(!tag.empty() && tag.size() <= 8 && std::ranges::all_of(tag, [](char c) {
+                    return c >= 'a' && c <= 'z';
+                })) << target.id;
             }
         }
     }
+}
+
+// Plan 0040 A1 (ADR-0278): the prepared LoRaWAN module firmware, lora-modem 1.4.1 for CHESTER.
+TEST(Profiles, ChesterLrwDesignatedFirmware) {
+    const auto& chester = *ProfileRegistry::find("chester");
+    const auto* lrw = hwio::device::findTarget(chester, "lrw");
+    ASSERT_NE(lrw, nullptr);
+    const auto designated = hwio::device::designatedFirmwareOf(*lrw);
+    ASSERT_TRUE(designated.has_value());
+    const hwio::firmware::DesignatedFirmware entry =
+        designated.value_or(hwio::firmware::DesignatedFirmware{});
+    EXPECT_EQ(entry.name, "lora-modem for CHESTER");
+    EXPECT_EQ(entry.version, "1.4.1");
+    EXPECT_EQ(entry.url, "https://github.com/hardwario/lora-modem/releases/download/v1.4.1/"
+                         "lora-modem-1.4.1.chester.hex");
+    EXPECT_EQ(hwio::firmware::toHex(entry.sha256),
+              "e9215b222b68092c33d9a31330bdec6ebea1afaf1cd1844f74cd8745c46ff2e6");
+    EXPECT_EQ(entry.kind, hwio::firmware::FirmwareKind::AppHex);
+    EXPECT_EQ(entry.cacheTag, "lrw");
+    EXPECT_EQ(lrw->designatedFirmware.value_or(hwio::firmware::DesignatedFirmware{}).cacheTag,
+              "lrw");
+    // The shared part has none: the generic STM32 chip of the same part offers no firmware.
+    EXPECT_FALSE(lrw->parts.front().designatedFirmware.has_value());
+    const auto* generic =
+        hwio::device::findTarget(*ProfileRegistry::find("stm32"), "stm32l0-cat5-192k");
+    ASSERT_NE(generic, nullptr);
+    EXPECT_FALSE(hwio::device::designatedFirmwareOf(*generic).has_value());
+    EXPECT_EQ(hwio::device::findTarget(chester, "lte")
+                  ->designatedFirmware.value_or(hwio::firmware::DesignatedFirmware{})
+                  .cacheTag,
+              "lte");
+}
+
+// Plan 0040 A2 (ADR-0274, ADR-0352): the LoRaWAN module target of CHESTER.
+TEST(Profiles, ChesterLrwTarget) {
+    const auto& chester = *ProfileRegistry::find("chester");
+    ASSERT_EQ(chester.targets.size(), 3U);
+    const auto* lrw = hwio::device::findTarget(chester, "lrw");
+    ASSERT_NE(lrw, nullptr);
+    EXPECT_EQ(hwio::device::targetDisplayName(*lrw), QStringLiteral("LoRaWAN module"));
+    EXPECT_EQ(lrw->vendor, hwio::device::ChipVendor::Stm32);
+    EXPECT_EQ(lrw->jlinkDevice, "STM32L072CZ");
+    ASSERT_EQ(lrw->parts.size(), 1U);
+    // The part is the shared curated entry (described once).
+    EXPECT_EQ(&lrw->parts.front(), hwio::device::findStm32PartById("stm32l0-cat5-192k"));
+    EXPECT_TRUE(lrw->rttTerminal.empty());
+    EXPECT_EQ(lrw->defaultErase, hwio::device::EraseScope::All);
+    EXPECT_EQ(lrw->flash, (hwio::firmware::AddressRange{.start = 0x08000000, .end = 0x08030000}));
+    EXPECT_EQ(lrw->ram, (hwio::firmware::AddressRange{.start = 0x20000000, .end = 0x20005000}));
+    ASSERT_EQ(lrw->connectionGuide.size(), 1U);
+    EXPECT_EQ(lrw->connectionGuide.front().illustrationSlot, "chester-lrw-cable");
+    EXPECT_EQ(
+        hwio::device::guideStepBody(lrw->connectionGuide.front()),
+        QStringLiteral("Connect the J-Link to the programming connector of the LoRaWAN module."));
+    // The memory-write ranges are those of the generic STM32L0 target.
+    const auto* generic =
+        hwio::device::findTarget(*ProfileRegistry::find("stm32"), "stm32l0-cat5-192k");
+    ASSERT_NE(generic, nullptr);
+    EXPECT_TRUE(std::ranges::equal(lrw->peripherals, generic->peripherals));
+    EXPECT_TRUE(std::ranges::equal(lrw->writeDenied, generic->writeDenied));
+    EXPECT_FALSE(hwio::device::checkMemoryWrite(*lrw, 0x40022004, 4));
+    EXPECT_TRUE(hwio::device::checkMemoryWrite(*lrw, 0x20000000, 4));
+    // The console target stays `app` (ADR-0233).
+    EXPECT_TRUE(hwio::device::hasConsole(chester));
+    ASSERT_TRUE(chester.ble.has_value());
+    EXPECT_EQ(chester.ble.value_or(hwio::device::BleProfile{}).consoleTargetId, "app");
 }
 
 TEST(Profiles, ChesterFirmwareDocsUrlPerLanguage) {

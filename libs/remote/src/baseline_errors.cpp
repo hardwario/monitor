@@ -126,6 +126,12 @@ constexpr std::array mappings{
     // Plan 0051: rc.4 reported nRF Util LOW_VOLTAGE as firmware.modem_update_failed; the category
     // rule (Target) gives target.no_power, whose text names the power supply as this one does.
     Mapping{.code = ErrorCode::TargetLowVoltage, .baseline = "target.no_power"},
+    // Plan 0039 (ADR-0275, ADR-0276, ADR-0280): STM32 flashing is not shared (ADR-0421); rows
+    // for completeness, the rc.4 id of the same category with the nearest meaning.
+    Mapping{.code = ErrorCode::TargetWrongChip, .baseline = "target.wrong_family"},
+    Mapping{.code = ErrorCode::TargetPermanentlyProtected, .baseline = "target.protected"},
+    Mapping{.code = ErrorCode::TargetUnlockFailed, .baseline = "target.recover_failed"},
+    Mapping{.code = ErrorCode::FirmwareBinAddressRequired, .baseline = "firmware.invalid_image"},
     // Plan 0059: an older joiner shows a refusal of the customer's Monitor.
     Mapping{.code = ErrorCode::RemoteTargetUnsupported, .baseline = "remote.operation_denied"},
     Mapping{.code = ErrorCode::RemoteCommandRefused, .baseline = "remote.operation_denied"},

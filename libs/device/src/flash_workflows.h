@@ -16,6 +16,14 @@
 // Erase (code only): the PIB is read before and after; a change fails with target.erase_failed
 //          (review R5).
 // Reset:   Connecting (identify, family check; protected allowed) -> Resetting.
+// STM32 targets (plan/features/0039, ADR-0275, ADR-0276): identify reads DBGMCU_IDCODE, F_SIZE
+//          and the RDP level; another chip -> target.wrong_chip (the found chip in
+//          WorkflowContext::foundChip), RDP 1 -> target.protected, RDP 2 ->
+//          target.permanently_protected (always). Flash, erase and unlock read F_SIZE again after
+//          the halt when the first (running) read failed (Phase 0 P0.3). Erase is always the
+//          mass erase (JLINK_EraseChip: flash and data EEPROM).
+// Unlock:  Connecting (identify; RDP 1 expected) -> Unlocking (RDP 0xAA, option reload, reconnect,
+//          re-identify: RDP 0; a non-canonical option word is rewritten once at level 0, ADR-0353).
 // ReadMemory: Connecting (identify, family check) -> read with the access width (review R7; M6).
 
 #include "hwio/core/error.h"
@@ -50,6 +58,9 @@ struct WorkflowContext {
     std::string connectedDevice;
     // Set by the workflows: the CPU is halted now (reset(Halt), erase); cleared by reset(Go).
     bool cpuHalted = false;
+    // Plan 0039: the chip found when an STM32 identify failed with target.wrong_chip (the GUI
+    // offers "Use <found>").
+    std::optional<jlink::ChipInfo> foundChip;
     // Plan 0050 (ADR-0376): set by runFlash() / runErase(Code) from the programmer's download.
     std::optional<jlink::DownloadReport> download;
 };
@@ -78,6 +89,15 @@ runFlash(WorkflowContext& context, const firmware::FirmwareImage& image, FlashOp
 [[nodiscard]] Result<std::optional<jlink::ChipInfo>>
 runRecover(WorkflowContext& context, const std::function<Status()>& reconnect);
 [[nodiscard]] Status runReset(WorkflowContext& context, ResetMode mode);
+// Plan 0039 (ADR-0276, ADR-0353). `reconnect` connects the target again after an option-byte
+// reload (it retries until its own deadline). Returns the chip after the unlock. Errors:
+// usage.invalid_argument (not an STM32 target), target.permanently_protected,
+// target.wrong_chip, target.unlock_failed, those of identify().
+[[nodiscard]] Result<jlink::ChipInfo> runUnlock(WorkflowContext& context,
+                                                const std::function<Status()>& reconnect);
+// Plan 0039: the curated part matching an STM32 chip (by DEV_ID and flash size), nullptr when
+// none.
+[[nodiscard]] const ChipPart* curatedPartOf(const jlink::ChipInfo& chip) noexcept;
 [[nodiscard]] Result<std::vector<std::byte>> runReadMemory(WorkflowContext& context,
                                                            std::uint32_t address, std::size_t size,
                                                            jlink::AccessWidth width);

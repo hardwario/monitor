@@ -33,6 +33,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 #include <QtContainerFwd>
+#include <QtCore/qnamespace.h>
 #include <QtTranslation>
 #include <QtTypes>
 
@@ -51,6 +52,19 @@
 namespace hwio::gui {
 
 namespace {
+
+// Plan 0040 (ADR-0040 extended): where STM32 flash starts; nRF images start below it.
+constexpr std::uint64_t stm32FlashStart = 0x08000000;
+constexpr std::uint64_t stm32SystemEnd = 0x10000000; // the nRF UICR (0x10001000) is above
+
+// The image starts in the STM32 flash / data EEPROM area (an nRF image starts at 0x0).
+bool stm32Image(const firmware::FirmwareImage& image) {
+    if (image.empty()) {
+        return false;
+    }
+    const std::uint64_t start = image.segments().front().address;
+    return start >= stm32FlashStart && start < stm32SystemEnd;
+}
 
 QString hexAddress(std::uint64_t address) {
     return QStringLiteral("0x") +
@@ -98,9 +112,11 @@ FirmwareSourceViewModel::~FirmwareSourceViewModel() {
         m_download->disconnect(this);
         m_download.reset();
     }
-    if (m_designatedDownload) {
-        m_designatedDownload->disconnect(this);
-        m_designatedDownload.reset();
+    for (auto& item : m_designated) {
+        if (item.second.download) {
+            item.second.download->disconnect(this);
+            item.second.download.reset();
+        }
     }
     if (m_lookup) {
         m_lookup->disconnect(this);
@@ -114,19 +130,125 @@ FirmwareSourceViewModel::~FirmwareSourceViewModel() {
 }
 
 QString FirmwareSourceViewModel::targetIdFor(Kind kind) {
-    return kind == AppFirmware ? QStringLiteral("app") : QStringLiteral("lte");
+    switch (kind) {
+    case AppFirmware:
+        return QStringLiteral("app");
+    case LteFirmware:
+        return QStringLiteral("lte");
+    case LrwFirmware:
+        return QStringLiteral("lrw");
+    case Stm32Firmware:
+        break;
+    }
+    return {};
 }
 
 QString FirmwareSourceViewModel::kindId(Kind kind) {
-    return kind == AppFirmware ? QStringLiteral("app") : QStringLiteral("lte");
+    switch (kind) {
+    case AppFirmware:
+        return QStringLiteral("app");
+    case LteFirmware:
+        return QStringLiteral("lte");
+    case Stm32Firmware:
+        return QStringLiteral("stm32");
+    case LrwFirmware:
+        return QStringLiteral("lrw");
+    }
+    return {};
+}
+
+QString FirmwareSourceViewModel::targetId() const {
+    return m_kind == Stm32Firmware ? m_stm32Target : targetIdFor(m_kind);
+}
+
+void FirmwareSourceViewModel::setStm32TargetId(const QString& targetId) {
+    if (targetId == m_stm32Target) {
+        return;
+    }
+    m_stm32Target = targetId;
+    const device::TargetProfile* chip = target();
+    m_binAddress = hexAddress(chip != nullptr && m_kind == Stm32Firmware
+                                  ? static_cast<std::uint32_t>(chip->flash.start)
+                                  : 0x08000000U);
+    binAddressChanged(); // signal
+    sourceChanged();     // signal
+}
+
+std::optional<std::uint32_t> FirmwareSourceViewModel::binStart() const {
+    bool ok = false;
+    const QString text = m_binAddress.trimmed();
+    const qulonglong value = text.startsWith(QStringLiteral("0x"), Qt::CaseInsensitive)
+                                 ? text.mid(2).toULongLong(&ok, 16)
+                                 : text.toULongLong(&ok, 10);
+    if (!ok || value > 0xFFFFFFFFULL || value % 4 != 0) {
+        return std::nullopt;
+    }
+    return static_cast<std::uint32_t>(value);
+}
+
+void FirmwareSourceViewModel::setBinAddress(const QString& text) {
+    if (text == m_binAddress) {
+        return;
+    }
+    m_binAddress = text;
+    binAddressChanged(); // signal
+    sourceChanged();     // signal: the summary shows the address
+}
+
+QString FirmwareSourceViewModel::binAddressError() const {
+    if (binStart()) {
+        return {};
+    }
+    return tr("Enter an address such as 0x08000000 (a multiple of 4).");
+}
+
+bool FirmwareSourceViewModel::binAddressVisible() const {
+    return (m_kind == Stm32Firmware || m_kind == LrwFirmware) && m_loaded &&
+           m_loaded->sourceClass == SourceClass::Binary;
+}
+
+std::shared_ptr<const firmware::FirmwareImage> FirmwareSourceViewModel::flashImage() const {
+    const LoadedSource* source = readySource();
+    if (source == nullptr || !source->image) {
+        return nullptr;
+    }
+    if (source->sourceClass != SourceClass::Binary) {
+        return source->image;
+    }
+    const std::optional<std::uint32_t> start = binStart();
+    if (!start || source->image->segments().empty()) {
+        return nullptr;
+    }
+    auto placed =
+        firmware::FirmwareImage::fromBinary(source->image->segments().front().data, *start);
+    return placed ? std::make_shared<const firmware::FirmwareImage>(std::move(*placed)) : nullptr;
+}
+
+bool FirmwareSourceViewModel::hasEeprom() const {
+    const device::TargetProfile* chip = target();
+    if ((m_kind != Stm32Firmware && m_kind != LrwFirmware) || chip == nullptr || !chip->stm32) {
+        return false;
+    }
+    const auto image = flashImage();
+    return image && image->intersects(chip->dataEeprom.value_or(chip->stm32->dataEepromArea));
+}
+
+bool FirmwareSourceViewModel::binaryElsewhere() const {
+    return m_loaded && m_loaded->sourceClass == SourceClass::Binary && m_kind != Stm32Firmware &&
+           m_kind != LrwFirmware;
 }
 
 void FirmwareSourceViewModel::setKind(Kind kind) {
     if (kind == m_kind) {
         return;
     }
+    const QString designatedBefore = designatedKey();
     m_kind = kind;
     m_recent->setKind(kindId(kind));
+    // Plan 0040 (B4): the other card's entry is kept (prepared firmware, running download).
+    if (forgetDesignatedOfAnotherProfile() || designatedKey() != designatedBefore) {
+        designatedChanged(); // signal: the entry of the new kind
+    }
     refreshBackups(); // ADR-0381: application kind only
     if (m_kind != AppFirmware) {
         // 0021 (ADR-0174): no catalog ID on the LTE card.
@@ -140,28 +262,38 @@ void FirmwareSourceViewModel::setKind(Kind kind) {
     kindChanged(); // signal
     if (m_loaded && (m_state == Ready || m_state == Invalid) && !m_error) {
         // Re-evaluated only: Recent gets an entry on an explicit load or download (review F7).
-        setState(mismatch() ? Invalid : Ready);
+        setState(fits() ? Ready : Invalid);
     }
     sourceChanged(); // signal: hint, UICR of the other target, modem note
 }
 
 const device::TargetProfile* FirmwareSourceViewModel::target() const {
     const device::DeviceProfile* profile = m_profile ? m_profile() : nullptr;
+    return profile != nullptr ? device::findTarget(*profile, toStdString(targetId())) : nullptr;
+}
+
+const device::TargetProfile* FirmwareSourceViewModel::designatedTarget() const {
+    if (m_kind != LteFirmware && m_kind != LrwFirmware) {
+        return nullptr;
+    }
+    const device::DeviceProfile* profile = m_profile ? m_profile() : nullptr;
     return profile != nullptr ? device::findTarget(*profile, toStdString(targetIdFor(m_kind)))
                               : nullptr;
 }
 
-const device::TargetProfile* FirmwareSourceViewModel::lteTarget() const {
+bool FirmwareSourceViewModel::lrwAvailable() const {
     const device::DeviceProfile* profile = m_profile ? m_profile() : nullptr;
-    return profile != nullptr ? device::findTarget(*profile, "lte") : nullptr;
+    return profile != nullptr && device::hasConsole(*profile) &&
+           device::findTarget(*profile, toStdString(targetIdFor(LrwFirmware))) != nullptr;
 }
 
 int FirmwareSourceViewModel::sourceState() const {
     if (!designatedActive()) {
         return m_state;
     }
-    switch (m_designatedState) {
+    switch (currentDesignatedState()) {
     case DesignatedIdle:
+    case DesignatedLoading: // plan 0040 (B4): "… is not downloaded yet" for that moment
         return None;
     case DesignatedDownloading:
         return Downloading;
@@ -175,10 +307,10 @@ int FirmwareSourceViewModel::sourceState() const {
 
 QString FirmwareSourceViewModel::sourceName() const {
     if (designatedActive()) {
-        const device::TargetProfile* lte = lteTarget();
-        return lte != nullptr && lte->designatedFirmware
-                   ? QStringLiteral("%1 %2").arg(toQString(lte->designatedFirmware->name),
-                                                 toQString(lte->designatedFirmware->version))
+        const device::TargetProfile* designated = designatedTarget();
+        return designated != nullptr && designated->designatedFirmware
+                   ? QStringLiteral("%1 %2").arg(toQString(designated->designatedFirmware->name),
+                                                 toQString(designated->designatedFirmware->version))
                    : QString();
     }
     switch (m_state) {
@@ -196,9 +328,12 @@ QString FirmwareSourceViewModel::sourceName() const {
 
 QString FirmwareSourceViewModel::sourceSummary() const {
     if (designatedActive()) {
-        return m_designatedState == DesignatedReady
-                   ? tr("%1 · LTE bundle (application + modem firmware)").arg(sourceName())
-                   : QString();
+        if (currentDesignatedState() != DesignatedReady) {
+            return {};
+        }
+        return m_kind == LrwFirmware
+                   ? tr("%1 · LoRaWAN module firmware").arg(sourceName())
+                   : tr("%1 · LTE bundle (application + modem firmware)").arg(sourceName());
     }
     if (m_state == Loading) {
         return tr("Loading %1…").arg(m_pendingName);
@@ -228,6 +363,13 @@ QString FirmwareSourceViewModel::sourceSummary() const {
     case SourceClass::LteBundle:
         return tr("%1 · LTE bundle (application + modem firmware) · %2")
             .arg(m_loadedName, sizeText(loaded.fileBytes));
+    case SourceClass::Binary: {
+        const std::uint64_t bytes =
+            loaded.image && !loaded.image->empty() ? loaded.image->totalBytes() : 0;
+        return binStart() ? tr("%1 · binary · %2 · from %3")
+                                .arg(m_loadedName, sizeText(bytes), hexAddress(*binStart()))
+                          : tr("%1 · binary · %2").arg(m_loadedName, sizeText(bytes));
+    }
     case SourceClass::ModemZip: {
         const QString version = modemVersion(m_loadedName);
         return version.isEmpty() ? tr("%1 · Modem firmware (modem only) · %2")
@@ -242,7 +384,9 @@ QString FirmwareSourceViewModel::sourceSummary() const {
 bool FirmwareSourceViewModel::hasUicr() const {
     const LoadedSource* source = readySource();
     const device::TargetProfile* targetProfile = target();
+    // STM32 chips have no UICR (their data EEPROM: hasEeprom()).
     return source != nullptr && source->image && targetProfile != nullptr &&
+           targetProfile->vendor == device::ChipVendor::Nordic &&
            source->image->intersects(targetProfile->uicr);
 }
 
@@ -259,11 +403,16 @@ std::optional<FirmwareSourceViewModel::Kind> FirmwareSourceViewModel::mismatch()
         return std::nullopt;
     }
     // 0021 (ADR-0174): every LTE input (HEX, bundle, modem zip) fits the LTE kind; an LTE bundle
-    // or modem zip on Application firmware is LTE firmware. A HEX file fits both kinds (ADR-0040
-    // cannot tell the MCU of a HEX file).
+    // or modem zip on Application firmware is LTE firmware. A HEX file fits both nRF kinds
+    // (ADR-0040 cannot tell the MCU of a HEX file); plan 0040: its address range tells an STM32
+    // image (the LoRaWAN module) from an nRF image.
     switch (m_loaded->sourceClass) {
     case SourceClass::IntelHex:
-        return std::nullopt;
+        return hexMismatch();
+    case SourceClass::Binary:
+        // binaryElsewhere(); plan 0040: on a CHESTER the LoRaWAN module takes it.
+        return binaryElsewhere() && lrwAvailable() ? std::optional<Kind>(LrwFirmware)
+                                                   : std::nullopt;
     case SourceClass::LteBundle:
     case SourceClass::ModemZip:
         return m_kind == LteFirmware ? std::nullopt : std::optional<Kind>(LteFirmware);
@@ -275,13 +424,37 @@ QString FirmwareSourceViewModel::kindHint() const {
     if (designatedActive() || m_state != Invalid || m_error || !m_loaded) {
         return {};
     }
+    if (binaryElsewhere()) {
+        return tr("A .bin file can only be flashed to an STM32 chip.");
+    }
     const std::optional<Kind> other = mismatch();
     if (!other) {
         return {};
     }
-    // Only towards LTE firmware: the ADR-0040 classification cannot tell the MCU of a HEX file, so
-    // a HEX fits both kinds (user decision 2026-10-23: no "application firmware" hint).
+    // Towards LTE firmware: the ADR-0040 classification cannot tell the nRF MCU of a HEX file, so
+    // an nRF HEX fits both nRF kinds (user decision 2026-10-23: no "application firmware" hint).
+    // Plan 0040: the address range tells the LoRaWAN module (STM32) from the nRF MCUs.
+    switch (*other) {
+    case LrwFirmware:
+        return tr("This is LoRaWAN module firmware — switch?");
+    case AppFirmware:
+        return tr("This is not LoRaWAN module firmware — switch to Application firmware?");
+    case LteFirmware:
+    case Stm32Firmware:
+        break;
+    }
     return tr("This is LTE firmware — switch to LTE firmware?");
+}
+
+std::optional<FirmwareSourceViewModel::Kind> FirmwareSourceViewModel::hexMismatch() const {
+    if (!m_loaded || !m_loaded->image || m_kind == Stm32Firmware) {
+        return std::nullopt;
+    }
+    const bool stm32 = stm32Image(*m_loaded->image);
+    if (m_kind == LrwFirmware) {
+        return stm32 ? std::nullopt : std::optional<Kind>(AppFirmware);
+    }
+    return stm32 && lrwAvailable() ? std::optional<Kind>(LrwFirmware) : std::nullopt;
 }
 
 int FirmwareSourceViewModel::suggestedKind() const {
@@ -321,6 +494,9 @@ bool FirmwareSourceViewModel::modemNoteVisible() const {
 }
 
 QStringList FirmwareSourceViewModel::nameFilters() const {
+    if (m_kind == Stm32Firmware || m_kind == LrwFirmware) {
+        return {tr("STM32 firmware (*.hex *.bin)"), tr("All files (*)")};
+    }
     if (m_kind == AppFirmware) {
         return {tr("Intel HEX files (*.hex)"), tr("All files (*)")};
     }
@@ -328,6 +504,9 @@ QStringList FirmwareSourceViewModel::nameFilters() const {
 }
 
 QString FirmwareSourceViewModel::dropText() const {
+    if (m_kind == Stm32Firmware || m_kind == LrwFirmware) {
+        return tr("Drop a .hex or .bin file here");
+    }
     if (m_kind == AppFirmware) {
         return tr("Drop a .hex file here");
     }
@@ -337,12 +516,53 @@ QString FirmwareSourceViewModel::dropText() const {
 // ---- 0021: the designated LTE firmware (ADR-0165) ----------------------------------------------
 
 bool FirmwareSourceViewModel::designatedAvailable() const {
-    const device::TargetProfile* lte = lteTarget();
-    return lte != nullptr && lte->designatedFirmware.has_value();
+    const device::TargetProfile* designated = designatedTarget();
+    return designated != nullptr && designated->designatedFirmware.has_value();
 }
 
 bool FirmwareSourceViewModel::designatedActive() const {
-    return m_kind == LteFirmware && m_lteSource == Designated && designatedAvailable();
+    return (m_kind == LteFirmware || m_kind == LrwFirmware) && m_lteSource == Designated &&
+           designatedAvailable();
+}
+
+QString FirmwareSourceViewModel::designatedKey() const {
+    return m_kind == LteFirmware || m_kind == LrwFirmware ? targetIdFor(m_kind) : QString();
+}
+
+const FirmwareSourceViewModel::DesignatedEntry* FirmwareSourceViewModel::currentDesignated() const {
+    const QString key = designatedKey();
+    const device::DeviceProfile* profile = m_profile ? m_profile() : nullptr;
+    if (key.isEmpty() || profile == nullptr || profile != m_designatedProfile) {
+        return nullptr;
+    }
+    const auto found = m_designated.find(key);
+    return found != m_designated.end() ? &found->second : nullptr;
+}
+
+FirmwareSourceViewModel::DesignatedState FirmwareSourceViewModel::currentDesignatedState() const {
+    const DesignatedEntry* entry = currentDesignated();
+    return entry != nullptr ? entry->state : DesignatedIdle;
+}
+
+int FirmwareSourceViewModel::designatedState() const { return currentDesignatedState(); }
+
+bool FirmwareSourceViewModel::forgetDesignatedOfAnotherProfile() {
+    const device::DeviceProfile* profile = m_profile ? m_profile() : nullptr;
+    if (profile == m_designatedProfile) {
+        return false;
+    }
+    m_designatedProfile = profile;
+    if (m_designated.empty()) {
+        return false;
+    }
+    for (auto& item : m_designated) {
+        if (item.second.download) {
+            item.second.download->disconnect(this);
+            item.second.download->cancel();
+        }
+    }
+    m_designated.clear();
+    return true;
 }
 
 void FirmwareSourceViewModel::setLteSource(int source) {
@@ -355,100 +575,139 @@ void FirmwareSourceViewModel::setLteSource(int source) {
 }
 
 QString FirmwareSourceViewModel::designatedTitle() const {
-    const device::TargetProfile* lte = lteTarget();
-    if (lte == nullptr || !lte->designatedFirmware) {
+    const device::TargetProfile* designated = designatedTarget();
+    if (designated == nullptr || !designated->designatedFirmware) {
         return {};
     }
     return tr("%1 %2 (recommended)")
-        .arg(toQString(lte->designatedFirmware->name), toQString(lte->designatedFirmware->version));
+        .arg(toQString(designated->designatedFirmware->name),
+             toQString(designated->designatedFirmware->version));
 }
 
 QString FirmwareSourceViewModel::designatedStatus() const {
-    switch (m_designatedState) {
+    const DesignatedEntry* entry = currentDesignated();
+    switch (currentDesignatedState()) {
     case DesignatedDownloading:
-        return m_designatedTotal > 0
+        return entry != nullptr && entry->total > 0
                    ? tr("Downloading… %1 / %2 MB")
-                         .arg(megabytes(m_designatedDone), megabytes(m_designatedTotal))
+                         .arg(megabytes(entry->done), megabytes(entry->total))
                    : tr("Downloading…");
     case DesignatedReady:
         return tr("Ready");
     case DesignatedIdle:
     case DesignatedFailed:
+    case DesignatedLoading: // plan 0040 (B4): a cache hit says nothing
         break;
     }
     return {};
 }
 
 qreal FirmwareSourceViewModel::designatedProgress() const {
-    return m_designatedTotal > 0
-               ? static_cast<qreal>(m_designatedDone) / static_cast<qreal>(m_designatedTotal)
+    const DesignatedEntry* entry = currentDesignated();
+    return entry != nullptr && entry->total > 0
+               ? static_cast<qreal>(entry->done) / static_cast<qreal>(entry->total)
                : -1;
 }
 
 ErrorInfo FirmwareSourceViewModel::designatedError() const {
-    return m_designatedError ? ErrorInfo(*m_designatedError) : ErrorInfo();
+    const DesignatedEntry* entry = currentDesignated();
+    return entry != nullptr && entry->error ? ErrorInfo(*entry->error) : ErrorInfo();
 }
 
 void FirmwareSourceViewModel::prepareDesignated() {
-    if (m_designatedState == DesignatedIdle && designatedAvailable()) {
+    if (forgetDesignatedOfAnotherProfile()) {
+        designatedChanged(); // signal
+        sourceChanged();     // signal
+    }
+    if (currentDesignatedState() == DesignatedIdle && designatedAvailable()) {
         startDesignated();
     }
 }
 
 void FirmwareSourceViewModel::retryDesignated() {
-    if (m_designatedState == DesignatedFailed || m_designatedState == DesignatedIdle) {
+    if (forgetDesignatedOfAnotherProfile()) {
+        designatedChanged(); // signal
+        sourceChanged();     // signal
+    }
+    if (const DesignatedState state = currentDesignatedState();
+        state == DesignatedFailed || state == DesignatedIdle) {
         startDesignated();
     }
 }
 
 void FirmwareSourceViewModel::cancelDesignated() {
-    if (!m_designatedDownload) {
+    const bool forgotten = forgetDesignatedOfAnotherProfile();
+    const auto found = m_designated.find(designatedKey());
+    if (found == m_designated.end() || !found->second.download) {
+        if (forgotten) {
+            designatedChanged(); // signal
+            sourceChanged();     // signal
+        }
         return;
     }
-    const std::unique_ptr<firmware::DesignatedOperation> download = std::move(m_designatedDownload);
+    DesignatedEntry& entry = found->second;
+    const std::unique_ptr<firmware::DesignatedOperation> download = std::move(entry.download);
     download->disconnect(this);
     download->cancel();
-    m_designatedState = DesignatedIdle;
+    entry.state = DesignatedIdle;
     designatedChanged(); // signal
     sourceChanged();     // signal
 }
 
 void FirmwareSourceViewModel::startDesignated() {
     const device::DeviceProfile* profile = m_profile ? m_profile() : nullptr;
-    const device::TargetProfile* lte = lteTarget();
+    const device::TargetProfile* designated = designatedTarget();
     firmware::FirmwareCatalog* catalog =
         profile != nullptr ? m_services.catalog(*profile) : nullptr;
-    if (lte == nullptr || !lte->designatedFirmware || catalog == nullptr) {
+    const QString key = designatedKey();
+    if (designated == nullptr || !designated->designatedFirmware || catalog == nullptr ||
+        key.isEmpty()) {
         return;
     }
-    m_designatedError.reset();
-    m_designated.reset();
-    m_designatedDone = 0;
-    m_designatedTotal = 0;
-    m_designatedDownload = catalog->downloadDesignated(
-        *lte->designatedFirmware, {}, [this](std::uint64_t done, std::uint64_t total) {
-            m_designatedDone = done;
-            m_designatedTotal = total;
-            designatedChanged(); // signal
+    // The callers (prepareDesignated, retryDesignated) dropped the entries of another profile.
+    // At most one entry per target with designated firmware (see m_designated).
+    DesignatedEntry& entry = m_designated[key];
+    entry.error.reset();
+    entry.loaded.reset();
+    entry.done = 0;
+    entry.total = 0;
+    entry.download = catalog->downloadDesignated(
+        *designated->designatedFirmware, {}, [this, key](std::uint64_t done, std::uint64_t total) {
+            const auto found = m_designated.find(key);
+            if (found == m_designated.end()) {
+                return;
+            }
+            found->second.done = done;
+            found->second.total = total;
+            if (key == designatedKey()) {
+                designatedChanged(); // signal
+            }
         });
-    connect(m_designatedDownload.get(), &firmware::DesignatedOperation::finished, this,
-            &FirmwareSourceViewModel::onDesignatedFinished);
-    m_designatedState = DesignatedDownloading;
+    connect(entry.download.get(), &firmware::DesignatedOperation::finished, this,
+            [this, key] { onDesignatedFinished(key); });
+    // Plan 0040 (B4): a verified cache file is only handed over - no "Downloading…".
+    entry.state = entry.download->fromCache() ? DesignatedLoading : DesignatedDownloading;
     designatedChanged(); // signal
     sourceChanged();     // signal
 }
 
-void FirmwareSourceViewModel::onDesignatedFinished() {
-    if (!m_designatedDownload || !m_designatedDownload->result()) {
+void FirmwareSourceViewModel::onDesignatedFinished(const QString& key) {
+    const auto found = m_designated.find(key);
+    if (found == m_designated.end()) {
         return;
     }
-    Result<firmware::DesignatedDownload> result = *m_designatedDownload->result();
+    DesignatedEntry& entry = found->second;
+    if (!entry.download || !entry.download->result()) {
+        return;
+    }
+    Result<firmware::DesignatedDownload> result = *entry.download->result();
     // Deleted later: this runs inside the operation's own signal (Qt takes over the ownership).
-    m_designatedDownload.release()->deleteLater(); // NOLINT(bugprone-unused-return-value)
+    entry.download.release()->deleteLater(); // NOLINT(bugprone-unused-return-value)
+    const bool current = key == designatedKey();
     if (!result) {
         Error error = std::move(result).error();
         if (error.code == ErrorCode::Cancelled) {
-            m_designatedState = DesignatedIdle;
+            entry.state = DesignatedIdle;
         } else {
             qCInfo(lcGui).noquote()
                 << "Designated firmware:" << toQString(idOf(error.code)) << toQString(error.detail);
@@ -459,26 +718,39 @@ void FirmwareSourceViewModel::onDesignatedFinished() {
             } else if (error.code == ErrorCode::NetworkDownloadFailed) {
                 error.suggestion += " " + tr("You can also choose your own file.").toStdString();
             }
-            m_designatedError = std::move(error);
-            m_designatedState = DesignatedFailed;
+            entry.error = std::move(error);
+            entry.state = DesignatedFailed;
         }
-        designatedChanged(); // signal
-        sourceChanged();     // signal
+        if (current) {
+            designatedChanged(); // signal
+            sourceChanged();     // signal
+        }
         return;
     }
     for (const Error& warning : result->warnings) {
         qCInfo(lcGui).noquote() << "Designated firmware:" << toQString(warning.message)
                                 << toQString(warning.detail);
     }
-    m_designated = LoadedSource{.sourceClass = SourceClass::LteBundle,
-                                .path = {},
-                                .fileBytes = result->fileBytes,
-                                .image = std::shared_ptr<const firmware::FirmwareImage>(
-                                    result->bundle, &result->bundle->application),
-                                .bundle = result->bundle};
-    m_designatedState = DesignatedReady;
-    designatedChanged(); // signal
-    sourceChanged();     // signal
+    if (result->bundle) {
+        entry.loaded = LoadedSource{.sourceClass = SourceClass::LteBundle,
+                                    .path = {},
+                                    .fileBytes = result->fileBytes,
+                                    .image = std::shared_ptr<const firmware::FirmwareImage>(
+                                        result->bundle, &result->bundle->application),
+                                    .bundle = result->bundle};
+    } else {
+        // Plan 0040: an Intel HEX (FirmwareKind::AppHex, the LoRaWAN module's lora-modem).
+        entry.loaded = LoadedSource{.sourceClass = SourceClass::IntelHex,
+                                    .path = {},
+                                    .fileBytes = result->fileBytes,
+                                    .image = result->image,
+                                    .bundle = nullptr};
+    }
+    entry.state = DesignatedReady;
+    if (current) {
+        designatedChanged(); // signal
+        sourceChanged();     // signal
+    }
 }
 
 // ---- 0021: the catalog page of an ID (ADR-0166) -----------------------------------------------
@@ -588,7 +860,7 @@ void FirmwareSourceViewModel::loadFile(const QUrl& url) {
 }
 
 void FirmwareSourceViewModel::loadPath(const QString& path) {
-    if (m_kind == LteFirmware) {
+    if (m_kind == LteFirmware || m_kind == LrwFirmware) {
         setLteSource(OwnFile); // 0021: a file (drop, Browse…, Recent) is the own-file source
     }
     cancelDownload();
@@ -725,9 +997,9 @@ void FirmwareSourceViewModel::setLoaded(LoadedSource loaded, QString recentSourc
     m_error.reset();
     m_allowUicr = false; // never carried over to another image (ADR-0036)
     allowUicrChanged();  // signal
-    const bool fits = !mismatch();
-    setState(fits ? Ready : Invalid);
-    if (fits) {
+    const bool fitting = fits();
+    setState(fitting ? Ready : Invalid);
+    if (fitting) {
         // ADR-0385: a catalog entry with the name and version of its page.
         const bool named =
             m_info && m_recentSource == RecentSourcesModel::catalogPrefix + m_lookupId;
@@ -883,7 +1155,7 @@ void FirmwareSourceViewModel::restoreState() {
     if (!m_loaded) {
         setState(None);
     } else {
-        setState(mismatch() ? Invalid : Ready);
+        setState(fits() ? Ready : Invalid);
     }
 }
 
@@ -938,8 +1210,8 @@ void FirmwareSourceViewModel::cancelDownload() {
 
 void FirmwareSourceViewModel::acceptSuggestedKind() {
     if (const int suggested = suggestedKind(); suggested >= 0) {
-        if (suggested == LteFirmware) {
-            setLteSource(OwnFile); // 0021: the file that caused the hint is the LTE card's file
+        if (suggested == LteFirmware || suggested == LrwFirmware) {
+            setLteSource(OwnFile); // 0021: the file that caused the hint is the new card's file
         }
         kindSuggestionAccepted(suggested); // signal
     }
@@ -947,14 +1219,18 @@ void FirmwareSourceViewModel::acceptSuggestedKind() {
 
 const LoadedSource* FirmwareSourceViewModel::readySource() const {
     if (designatedActive()) {
-        return m_designatedState == DesignatedReady && m_designated ? &*m_designated : nullptr;
+        const DesignatedEntry* entry = currentDesignated();
+        return entry != nullptr && entry->state == DesignatedReady && entry->loaded
+                   ? &*entry->loaded
+                   : nullptr;
     }
     return m_state == Ready && m_loaded ? &*m_loaded : nullptr;
 }
 
 const LoadedSource* FirmwareSourceViewModel::loadedSource() const {
     if (designatedActive()) {
-        return m_designated ? &*m_designated : nullptr;
+        const DesignatedEntry* entry = currentDesignated();
+        return entry != nullptr && entry->loaded ? &*entry->loaded : nullptr;
     }
     return m_loaded ? &*m_loaded : nullptr;
 }

@@ -24,6 +24,7 @@ hwio chester app info                        # firmware name and version, serial
 hwio chester app info save                   # info show + config show into <serial>_<date>_<time>.txt
 hwio chester app flash firmware.hex          # flash the application firmware
 hwio chester lte flash                       # flash the HARDWARIO LTE firmware
+hwio chester lrw flash                       # flash lora-modem to the LoRaWAN module (guided)
 hwio ble scan                                # CHESTER devices nearby
 hwio ble console -a F1:22:33:44:55:66        # the console over Bluetooth
 hwio --json chester app pib read | jq .data  # for scripts
@@ -213,6 +214,93 @@ application firmware can reset the LTE MCU during the update. When that happens 
 failed step keeps its own error (the reset reason is only logged); too low supply voltage reported by nRF Util is
 [`target.low_voltage`](troubleshooting.md#target.low_voltage).
 
+<a id="lrw"></a>
+## CHESTER: LoRaWAN module (`hwio chester lrw`)
+
+The Murata Type ABZ module of a CHESTER with LoRaWAN ([LoRaWAN module](flashing.md#lorawan-module)). It has its own
+LoRaWAN connector and answers there only while the application MCU is stopped. It has no console.
+
+| Command | Does | Asks first |
+|---|---|---|
+| `hwio chester lrw info` | Shows DEV_ID, flash size and the read-out protection level (`rdp`) of the module; read only | no |
+| `hwio chester lrw flash [--address ADDR] [--no-cache] [--direct [--halt]] [FILE]` | Flashes lora-modem for CHESTER 1.4.1 (downloaded from [hardwario/lora-modem](https://github.com/hardwario/lora-modem) and SHA-256 verified, then cached) when no FILE is given, or a `.hex` / `.bin` file, and verifies it | only to unlock a protected module (guided) |
+| `hwio chester lrw erase [--yes] [--direct]` | Erases the whole module (flash and data EEPROM) | yes |
+| `hwio chester lrw unlock [--yes] [--direct]` | Removes read-out protection level 1; the module erases its flash and data EEPROM, and the original Murata firmware is lost | yes |
+| `hwio chester lrw reset [--halt]` | Resets the module (`--halt`: and keeps its CPU halted) | no |
+
+| Option | Meaning |
+|---|---|
+| `--address ADDR` | Start address of a `.bin` file (default: the flash start, `0x08000000`) |
+| `--no-cache` | Download the prepared firmware even when it is cached (no effect with a FILE) |
+| `--direct` | No guidance, for scripts: the application MCU is already stopped and the J-Link is on the LoRaWAN connector |
+| `--halt` | `flash`: leave the module halted after flashing (needs `--direct`); `reset`: keep it halted |
+| `--yes` | Do not ask for confirmation |
+
+Without `--direct`, `flash`, `erase` and `unlock` guide you as the app does: start with the J-Link on the APP
+connector; the command stops the application MCU (reset and halt), asks you to move the J-Link to the LoRaWAN
+connector, runs the operation, asks you to move it back and starts the application MCU again. Each step continues by
+itself as soon as the J-Link reaches the right MCU. A module with read-out protection level 1 (a factory module with
+the Murata firmware) is unlocked first after a question (`flash`) or with the erase (`erase`). The guided commands
+need an interactive terminal (not `--json`); in a script they fail with a usage error that names `--direct`. Ctrl+C
+cancels while the command waits for a cable; the application MCU then stays stopped until CHESTER is reset.
+
+`--direct`, `info` and `reset` connect to the module right away. Before them, stop the application MCU and move the
+cable yourself; afterwards start it again:
+
+```sh
+hwio chester app reset --halt              # J-Link on the APP connector: stop the application MCU
+# move the J-Link cable to the LoRaWAN connector
+hwio chester lrw info
+hwio chester lrw unlock --direct --yes     # a factory module (RDP 1) only
+hwio chester lrw flash --direct            # lora-modem for CHESTER 1.4.1
+hwio chester lrw flash --direct lora-modem.bin --address 0x08000000
+# move the J-Link cable back to the APP connector
+hwio chester app reset                     # the application runs again
+```
+
+When the module does not answer ([`target.connect_failed`](troubleshooting.md#target.connect_failed)), the
+application MCU is probably running: the error suggests `hwio chester app reset --halt`. The probe options (`-n`,
+`--jlink-speed`) work as for the other CHESTER commands. The chip of the module is also `stm32l0-cat5-192k` for
+[`hwio stm32`](#stm32).
+
+<a id="stm32"></a>
+## STM32 chips (`hwio stm32`)
+
+Flashes, erases, unlocks and resets an STM32L0 chip on the J-Link's SWD pins ([Flashing STM32
+chips](flashing.md#stm32-chips)). Every command except `chips` needs `--chip ID`, the chip you expect; when the
+connected chip is another, the command fails with [`target.wrong_chip`](troubleshooting.md#target.wrong_chip) and
+names the chip it found.
+
+| Command | Does | Asks first |
+|---|---|---|
+| `hwio stm32 chips` | Lists the chips that can be chosen: chip ID, name, DEV_ID, data EEPROM size and the chips each entry covers | no |
+| `hwio stm32 info --chip ID` | Shows DEV_ID, REV_ID, flash size and the read-out protection level (`rdp`) of the connected chip; read only, works on a protected chip too | no |
+| `hwio stm32 flash --chip ID [--address ADDR] [--erase-all [--yes]] [--allow-eeprom] [--halt] FILE` | Flashes a `.hex` or `.bin` file and verifies it | with `--erase-all` |
+| `hwio stm32 erase --chip ID [--yes]` | Erases the whole chip (flash and data EEPROM) | yes |
+| `hwio stm32 unlock --chip ID [--yes]` | Removes read-out protection level 1; the chip erases its flash and data EEPROM | yes |
+| `hwio stm32 reset --chip ID [--halt]` | Resets the chip (`--halt`: and keeps the CPU halted) | no |
+
+| Option of `flash` | Meaning |
+|---|---|
+| `--address ADDR` | Start address of a `.bin` file (default: the flash start, `0x08000000`) |
+| `--erase-all` | Erase the whole chip (flash and data EEPROM) first; otherwise only the written sectors are erased |
+| `--allow-eeprom` | Also program the file's data EEPROM records; without it a file that writes the data EEPROM is refused ([`firmware.out_of_range`](troubleshooting.md#firmware.out_of_range)) |
+| `--halt` | Leave the CPU halted after flashing |
+
+Chip IDs are those of `hwio stm32 chips`, for example `stm32l0-cat3-64k` (STM32L0 cat. 3, 64 KiB: STM32L051 / L052 /
+L053 / L062 / L063, the CHESTER-S1 controller) or `stm32l0-cat5-192k` (Murata Type ABZ). On a chip with read-out
+protection level 1, `flash` and `erase` fail with [`target.protected`](troubleshooting.md#target.protected):
+run `hwio stm32 unlock` first. Level 2 ([`target.permanently_protected`](troubleshooting.md#target.permanently_protected))
+cannot be removed. The probe options (`-n`, `--jlink-speed`) work as for the CHESTER commands.
+
+```sh
+hwio stm32 chips
+hwio stm32 info --chip stm32l0-cat3-64k
+hwio stm32 flash --chip stm32l0-cat3-64k firmware.hex
+hwio stm32 flash --chip stm32l0-cat3-64k --address 0x08000000 firmware.bin
+hwio stm32 unlock --chip stm32l0-cat5-192k --yes
+```
+
 ## Bluetooth LE (`hwio ble`)
 
 | Command | Does |
@@ -292,10 +380,11 @@ that of the first failed check.
 
 ## Confirmations
 
-`erase --all`, `lte erase`, `recover`, `mem write`, `flash-write`, `jlink update-firmware` and
-`console history clear` ask `[y/N]` in a terminal. Without a terminal, or with `--json`, they do not ask: add
-`--yes`, otherwise they fail with [usage.confirmation_required](troubleshooting.md#usage.confirmation_required).
-`flash`, `erase` without `--all`, and `reset` never ask.
+`erase --all`, `lte erase`, `recover`, `stm32 erase`, `stm32 unlock`, `stm32 flash --erase-all`, `mem write`,
+`flash-write`, `jlink update-firmware` and `console history clear` ask `[y/N]` in a terminal. Without a terminal, or
+with `--json`, they do not ask: add `--yes`, otherwise they fail with
+[usage.confirmation_required](troubleshooting.md#usage.confirmation_required). `flash` (without `--erase-all`),
+`chester app erase` without `--all`, and `reset` never ask.
 
 <kbd>Ctrl</kbd>+<kbd>C</kbd> cancels a running command cleanly (exit code 130); the probe is released.
 

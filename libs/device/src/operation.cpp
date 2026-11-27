@@ -29,6 +29,7 @@ constexpr std::array bundlePhases{P::Modem,       P::Connecting, P::Erasing,
 constexpr std::array resetPhases{P::Connecting, P::Resetting};
 constexpr std::array readPhases{P::Connecting};
 constexpr std::array diagnosePhases{P::Connecting};
+constexpr std::array unlockPhases{P::Connecting, P::Unlocking};
 
 // Cross-target (ADR-0057): SwitchingTarget first, Restoring last.
 constexpr std::array flashCross{P::SwitchingTarget, P::Connecting, P::Erasing,  P::Programming,
@@ -45,6 +46,7 @@ constexpr std::array bundleCross{P::SwitchingTarget, P::Modem,     P::Connecting
 constexpr std::array resetCross{P::SwitchingTarget, P::Connecting, P::Resetting, P::Restoring};
 constexpr std::array readCross{P::SwitchingTarget, P::Connecting, P::Restoring};
 constexpr std::array diagnoseCross{P::SwitchingTarget, P::Connecting, P::Restoring};
+constexpr std::array unlockCross{P::SwitchingTarget, P::Connecting, P::Unlocking, P::Restoring};
 
 // The cross-target or the same-target phases.
 constexpr std::span<const P> pick(bool crossTarget, std::span<const P> cross,
@@ -77,6 +79,8 @@ std::span<const ProgramPhase> plannedPhases(OperationKind kind, bool crossTarget
         return pick(crossTarget, readCross, readPhases);
     case OperationKind::Diagnose:
         return pick(crossTarget, diagnoseCross, diagnosePhases);
+    case OperationKind::Unlock:
+        return pick(crossTarget, unlockCross, unlockPhases);
     case OperationKind::Halt:
     case OperationKind::Go:
     case OperationKind::TargetStatus:
@@ -165,6 +169,8 @@ std::string_view operationKindId(OperationKind kind) noexcept {
         return "writeFlash";
     case OperationKind::Identify:
         return "identify";
+    case OperationKind::Unlock:
+        return "unlock";
     }
     return "flash";
 }

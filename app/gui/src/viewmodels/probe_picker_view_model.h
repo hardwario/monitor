@@ -56,8 +56,12 @@ class ProbePickerViewModel : public QAbstractListModel {
     // the chosen one (shown as text otherwise).
     Q_PROPERTY(bool profileChoice READ profileChoice CONSTANT)
     Q_PROPERTY(QString profileName READ profileName NOTIFY profileIdChanged)
-    // ADR-0233: the console target of the chosen profile.
-    Q_PROPERTY(QString targetId READ targetId NOTIFY profileIdChanged)
+    // ADR-0233: the console target of the chosen profile. Plan 0039 (ADR-0274): a profile without
+    // a console (STM32 chip) has a target choice labelled "Chip" (targetChoice, targets
+    // [{id, title, hint}]); targetId is then the chosen chip (default: the first).
+    Q_PROPERTY(QString targetId READ targetId WRITE setTargetId NOTIFY profileIdChanged)
+    Q_PROPERTY(bool targetChoice READ targetChoice NOTIFY profileIdChanged)
+    Q_PROPERTY(QVariantList targets READ targets NOTIFY profileIdChanged)
     Q_PROPERTY(int selectedRow READ selectedRow WRITE setSelectedRow NOTIFY selectedRowChanged)
     Q_PROPERTY(bool canConnect READ canConnect NOTIFY selectedRowChanged)
     Q_PROPERTY(hwio::gui::ErrorInfo libraryError READ libraryError NOTIFY scanChanged)
@@ -97,6 +101,9 @@ public:
     void setProfileId(const QString& id);
     [[nodiscard]] static QVariantList profiles();
     [[nodiscard]] QString targetId() const;
+    void setTargetId(const QString& targetId);
+    [[nodiscard]] bool targetChoice() const;
+    [[nodiscard]] QVariantList targets() const;
     [[nodiscard]] static bool profileChoice();
     [[nodiscard]] QString profileName() const;
     [[nodiscard]] int selectedRow() const noexcept { return m_selectedRow; }
@@ -143,6 +150,7 @@ signals:
                           const QString& profileId, const QString& targetId);
 
 private:
+    QString m_chosenTarget; // plan 0039: the chip of a profile without a console
     struct Row {
         std::uint32_t serial = 0;
         QString product;

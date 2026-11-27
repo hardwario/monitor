@@ -28,6 +28,7 @@
 #include <cstdint>
 #include <expected>
 #include <filesystem>
+#include <format>
 #include <optional>
 #include <span>
 #include <string>
@@ -44,19 +45,31 @@ namespace fs = std::filesystem;
 
 constexpr std::size_t idLength = 32;
 constexpr std::string_view cacheSuffix = ".hex";
-constexpr std::string_view designatedPrefix = "lte-";
-constexpr std::string_view designatedSuffix = ".zip";
+constexpr std::string_view designatedZipSuffix = ".zip";
+constexpr std::size_t maxCacheTagLength = 8;
 
-// <id>.hex or lte-<sha256>.zip: the entries of this cache (QSaveFile temporaries and other files
-// are never touched).
+// A DesignatedFirmware::cacheTag: 1 to 8 lowercase ASCII letters.
+bool validCacheTag(std::string_view tag) {
+    return !tag.empty() && tag.size() <= maxCacheTagLength &&
+           std::ranges::all_of(tag, [](char c) { return c >= 'a' && c <= 'z'; });
+}
+
+// <tag>-<sha256>: the stem of a designated entry.
+bool isDesignatedStem(std::string_view stem) {
+    const std::size_t dash = stem.find('-');
+    return dash != std::string_view::npos && validCacheTag(stem.substr(0, dash)) &&
+           parseSha256(stem.substr(dash + 1)).has_value();
+}
+
+// <id>.hex, <tag>-<sha256>.zip or <tag>-<sha256>.hex: the entries of this cache (QSaveFile
+// temporaries and other files are never touched).
 bool isCacheEntry(const fs::path& path) {
     const std::string stem = toUtf8(path.stem());
     const std::string extension = toUtf8(path.extension());
-    if (extension == cacheSuffix) {
-        return FirmwareId::looksLikeId(stem);
+    if (extension == cacheSuffix && FirmwareId::looksLikeId(stem)) {
+        return true;
     }
-    return extension == designatedSuffix && stem.starts_with(designatedPrefix) &&
-           parseSha256(std::string_view(stem).substr(designatedPrefix.size())).has_value();
+    return (extension == cacheSuffix || extension == designatedZipSuffix) && isDesignatedStem(stem);
 }
 
 bool isHexDigit(char c) {
@@ -128,13 +141,20 @@ Status FirmwareCache::store(const FirmwareId& id, std::span<const std::byte> hex
     return {};
 }
 
-fs::path FirmwareCache::designatedFileFor(const Sha256& sha256) const {
-    return m_directory /
-           (std::string(designatedPrefix) + toHex(sha256) + std::string(designatedSuffix));
+fs::path FirmwareCache::designatedFileFor(const Sha256& sha256, std::string_view cacheTag,
+                                          FirmwareKind kind) const {
+    const std::string_view suffix =
+        kind == FirmwareKind::AppHex ? cacheSuffix : designatedZipSuffix;
+    return m_directory / (std::string(cacheTag) + "-" + toHex(sha256) + std::string(suffix));
 }
 
-std::optional<std::vector<std::byte>> FirmwareCache::lookupDesignated(const Sha256& sha256) const {
-    const fs::path file = designatedFileFor(sha256);
+std::optional<std::vector<std::byte>> FirmwareCache::lookupDesignated(const Sha256& sha256,
+                                                                      std::string_view cacheTag,
+                                                                      FirmwareKind kind) const {
+    if (!validCacheTag(cacheTag)) {
+        return std::nullopt;
+    }
+    const fs::path file = designatedFileFor(sha256, cacheTag, kind);
     std::error_code ec;
     if (!fs::is_regular_file(file, ec)) {
         return std::nullopt;
@@ -151,8 +171,13 @@ std::optional<std::vector<std::byte>> FirmwareCache::lookupDesignated(const Sha2
     return std::move(*bytes);
 }
 
-Status FirmwareCache::storeDesignated(const Sha256& sha256, std::span<const std::byte> bytes) {
-    const fs::path file = designatedFileFor(sha256);
+Status FirmwareCache::storeDesignated(const Sha256& sha256, std::span<const std::byte> bytes,
+                                      std::string_view cacheTag, FirmwareKind kind) {
+    if (!validCacheTag(cacheTag)) {
+        return std::unexpected(
+            makeError(ErrorCode::IoWriteFailed, std::format("invalid cache tag \"{}\"", cacheTag)));
+    }
+    const fs::path file = designatedFileFor(sha256, cacheTag, kind);
     if (Status stored = storeFile(file, bytes); !stored) {
         return stored;
     }

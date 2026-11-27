@@ -24,6 +24,7 @@
 #include <QtTypes>
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <chrono>
 #include <cstddef>
@@ -123,7 +124,66 @@ const ChipFamily* JLinkProgrammer::answeringFamily(std::string& detail) {
     return nullptr;
 }
 
+std::optional<std::uint32_t> JLinkProgrammer::readStm32Register(std::uint32_t address,
+                                                                std::string& tried) {
+    for (int attempt = 1; attempt <= stm32ReadAttempts; ++attempt) {
+        const auto value = m_api.readU32(address);
+        if (value && *value != 0) {
+            return *value;
+        }
+        tried +=
+            std::format("{}0x{:08X}#{}: {}", tried.empty() ? "" : "; ", address, attempt,
+                        value ? std::string("0") : std::format("read error {}", value.error()));
+    }
+    return std::nullopt;
+}
+
+Result<ChipInfo> JLinkProgrammer::identifyStm32(const Stm32Protection& stm32) {
+    std::string tried;
+    const auto idcode = readStm32Register(stm32.idcodeAddress, tried);
+    const auto optr = readStm32Register(stm32.flashInterface + stm32.optrOffset, tried);
+    if (!idcode || !optr) {
+        Error error = makeError(ErrorCode::TargetConnectFailed, libraryDetail(tried));
+        setText(error, ErrorText::Message, "hwio::jlink",
+                QT_TRANSLATE_NOOP("hwio::jlink", "The chip ID could not be read (DBGMCU_IDCODE)."));
+        return std::unexpected(std::move(error));
+    }
+    ChipInfo info;
+    info.family = stm32.family;
+    info.devId = static_cast<std::uint16_t>(*idcode & 0x0FFFU);
+    info.revId = static_cast<std::uint16_t>(*idcode >> 16U);
+    info.rdpLevel = stm32RdpLevelOf(static_cast<std::uint8_t>(*optr & 0xFFU));
+    info.protectedChip = info.rdpLevel >= 1;
+    // FLASH_SR and the stored option word are informational (unlock checks them); a failed read
+    // leaves them 0.
+    if (const auto sr = m_api.readU32(stm32.flashInterface + stm32.srOffset); sr) {
+        info.optionError = (*sr & stm32.optionErrorMask) != 0;
+    }
+    if (const auto word = m_api.readU32(stm32.optionBytes); word) {
+        info.optionWord = *word;
+    }
+    // F_SIZE may not be readable at RDP level 1 and reads 0 now and then while the CPU runs.
+    std::string sizeTried;
+    if (const auto size = readStm32Register(stm32.flashSizeAddress, sizeTried); size) {
+        info.flashSizeKib = static_cast<std::uint16_t>(*size & 0xFFFFU);
+    } else {
+        qCInfo(log::lcFlash).noquote() << "STM32 flash size not readable:" << toQString(sizeTried);
+    }
+    qCInfo(log::lcFlash).noquote()
+        << QStringLiteral("%1: DEV_ID 0x%2 REV_ID 0x%3, %4 KiB, RDP level %5 (OPTR 0x%6)")
+               .arg(toQString(stm32.family))
+               .arg(info.devId, 3, 16, QLatin1Char('0'))
+               .arg(info.revId, 4, 16, QLatin1Char('0'))
+               .arg(info.flashSizeKib)
+               .arg(info.rdpLevel)
+               .arg(*optr, 8, 16, QLatin1Char('0'));
+    return info;
+}
+
 Result<ChipInfo> JLinkProgrammer::identify() {
+    if (m_config.stm32) {
+        return identifyStm32(*m_config.stm32);
+    }
     std::string tried;
     for (const ChipFamily& family : m_config.families) {
         const auto part = m_api.readU32(family.ficrPart);
@@ -462,6 +522,108 @@ Status JLinkProgrammer::recover(std::stop_token stop) {
     m_api.flushMessages();
     qCInfo(log::lcFlash) << "Recover: ERASEALL done";
     return {};
+}
+
+Status JLinkProgrammer::programRdpLevel0(std::stop_token stop) {
+    if (!m_config.stm32) {
+        return std::unexpected(makeError(ErrorCode::UsageInvalidArgument, "not an STM32 target"));
+    }
+    if (stop.stop_requested()) {
+        return fail(ErrorCode::Cancelled);
+    }
+    if (Status available = require(OptionalFunction::WriteU32); !available) {
+        return available;
+    }
+    const Stm32Protection& stm32 = *m_config.stm32;
+    // The CPU is halted so that the firmware cannot touch the flash interface meanwhile.
+    if (const int halted = m_api.halt(); halted != 0) {
+        qCInfo(log::lcFlash) << "Unlock: halt returned" << halted << "(continuing)";
+    }
+    const auto optr = m_api.readU32(stm32.flashInterface + stm32.optrOffset);
+    if (!optr) {
+        return std::unexpected(
+            stm32UnlockFailed(std::format("FLASH_OPTR read returned {}", optr.error())));
+    }
+    if (Status unlocked = unlockStm32Flash(stm32); !unlocked) {
+        return unlocked;
+    }
+    const std::uint32_t word = stm32Level0OptionWord(*optr);
+    qCInfo(log::lcFlash).noquote()
+        << QStringLiteral("Unlock: writing the RDP option word 0x%1 (OPTR 0x%2)")
+               .arg(word, 8, 16, QLatin1Char('0'))
+               .arg(*optr, 8, 16, QLatin1Char('0'));
+    if (const int written = writeStm32(stm32.optionBytes, word); written != 0) {
+        return std::unexpected(
+            stm32UnlockFailed(std::format("option word write returned {}", written)));
+    }
+    // Never interrupted once written: BSY is awaited, then the reload is launched.
+    if (Status done = awaitStm32OptionWrite(stm32); !done) {
+        return done;
+    }
+    // The reload resets the chip at once, so the write itself may report an error.
+    const int launched = writeStm32(stm32.flashInterface + stm32.pecrOffset, stm32.oblLaunchMask);
+    m_api.flushMessages();
+    qCInfo(log::lcFlash) << "Unlock: option-byte reload launched (" << launched << ")";
+    return {};
+}
+
+int JLinkProgrammer::writeStm32(std::uint32_t address, std::uint32_t value) {
+    // ADR-0276: RDP level 2 is never programmed by any path (nor anything without an STM32).
+    if (!m_config.stm32 ||
+        (address == m_config.stm32->optionBytes && (value & 0xFFU) == stm32RdpLevel2)) {
+        return -1;
+    }
+    return m_api.writeU32(address, value);
+}
+
+Error JLinkProgrammer::stm32UnlockFailed(std::string detail) {
+    return makeError(ErrorCode::TargetUnlockFailed, libraryDetail(std::move(detail)));
+}
+
+Status JLinkProgrammer::unlockStm32Flash(const Stm32Protection& stm32) {
+    const std::uint32_t pecr = stm32.flashInterface + stm32.pecrOffset;
+    if (writeStm32(stm32.flashInterface + stm32.srOffset, stm32.errorMask) != 0) {
+        return std::unexpected(stm32UnlockFailed("clearing FLASH_SR failed"));
+    }
+    auto control = m_api.readU32(pecr);
+    if (!control) {
+        return std::unexpected(
+            stm32UnlockFailed(std::format("FLASH_PECR read returned {}", control.error())));
+    }
+    const auto writeKeys = [&](std::uint32_t offset, const std::array<std::uint32_t, 2>& keys) {
+        return writeStm32(stm32.flashInterface + offset, keys[0]) == 0 &&
+               writeStm32(stm32.flashInterface + offset, keys[1]) == 0;
+    };
+    if ((*control & stm32.peLockMask) != 0 && !writeKeys(stm32.peKeyOffset, stm32.peKeys)) {
+        return std::unexpected(stm32UnlockFailed("writing the PECR keys failed"));
+    }
+    if ((*control & stm32.optLockMask) != 0 && !writeKeys(stm32.optKeyOffset, stm32.optKeys)) {
+        return std::unexpected(stm32UnlockFailed("writing the option-byte keys failed"));
+    }
+    control = m_api.readU32(pecr);
+    if (!control || (*control & (stm32.peLockMask | stm32.optLockMask)) != 0) {
+        return std::unexpected(stm32UnlockFailed(
+            control ? std::format("FLASH_PECR still locked (0x{:08X})", *control)
+                    : std::format("FLASH_PECR read returned {}", control.error())));
+    }
+    return {};
+}
+
+Status JLinkProgrammer::awaitStm32OptionWrite(const Stm32Protection& stm32) {
+    const std::uint32_t sr = stm32.flashInterface + stm32.srOffset;
+    const auto deadline = m_clock.now() + m_config.timing.optionWriteTimeout;
+    while (true) {
+        const auto status = m_api.readU32(sr);
+        if (status && (*status & stm32.busyMask) == 0) {
+            return {};
+        }
+        if (m_clock.now() >= deadline) {
+            return std::unexpected(stm32UnlockFailed(
+                status ? std::format("FLASH_SR BSY still set (0x{:08X})", *status)
+                       : std::format("FLASH_SR read returned {}", status.error())));
+        }
+        (void)m_clock.sleepFor(m_config.timing.optionWritePoll, std::stop_token{});
+    }
 }
 
 Status JLinkProgrammer::require(OptionalFunction function) {

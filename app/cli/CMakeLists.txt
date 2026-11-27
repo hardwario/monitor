@@ -5,6 +5,8 @@
 
 add_library(hwio_cli_impl STATIC
     src/chester_commands.cpp
+    src/stm32_commands.cpp
+    src/stm32_commands.h
     src/chester_commands.h
     src/ble_commands.cpp
     src/ble_commands.h
@@ -41,6 +43,8 @@ add_library(hwio_cli_impl STATIC
     src/info_file_commands.h
     src/jlink_commands.cpp
     src/jlink_commands.h
+    src/lrw_commands.cpp
+    src/lrw_commands.h
     src/mcp_command.cpp
     src/mcp_command.h
     src/operation_runner.cpp

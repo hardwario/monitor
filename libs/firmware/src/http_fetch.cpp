@@ -2,6 +2,7 @@
 
 #include "hwio/core/error.h"
 #include "hwio/core/log.h"
+#include "hwio/firmware/firmware_catalog.h"
 
 #include <QByteArray>
 #include <QLoggingCategory>
@@ -65,15 +66,23 @@ HttpFetch::HttpFetch(QNetworkAccessManager& network, const QUrl& url, FetchLimit
                          QNetworkRequest::UserVerifiedRedirectPolicy);
     qCInfo(log::lcFirmware).noquote() << "Downloading" << url.toString();
     m_reply = network.get(request);
-    // Redirects are followed only to https (review R8), also from an http test base URL.
+    // Redirects are followed only to https (review R8), also from an http test base URL; a
+    // designated firmware download only within its host or to *.githubusercontent.com
+    // (ADR-0281 D2).
+    m_current = url;
     QObject::connect(m_reply, &QNetworkReply::redirected, this, [this](const QUrl& to) {
-        if (to.scheme() == QStringLiteral("https")) {
+        const bool allowed =
+            m_limits.redirects == RedirectRule::Designated
+                ? designatedRedirectAllowed(m_current, to, designatedRedirectTestHost())
+                : to.scheme() == QStringLiteral("https");
+        if (allowed) {
             qCInfo(log::lcFirmware).noquote() << "Redirected to" << to.toString();
+            m_current = to;
             emit m_reply->redirectAllowed();
         } else {
-            qCWarning(log::lcFirmware).noquote()
-                << "Redirect refused (not https):" << to.toString();
+            qCWarning(log::lcFirmware).noquote() << "Redirect refused:" << to.toString();
             m_redirectRefused = true;
+            m_redirectTarget = to.toString(QUrl::RemoveUserInfo).toStdString();
             m_reply->abort();
         }
     });
@@ -140,6 +149,7 @@ void HttpFetch::onFinished() {
     outcome.cancelled = m_cancelled;
     outcome.oversize = m_oversize;
     outcome.redirectRefused = m_redirectRefused;
+    outcome.redirectTarget = m_redirectTarget;
     outcome.totalTimeout = m_totalTimeout;
     outcome.body = std::exchange(m_body, {});
     m_stopPoll.stop();
@@ -165,7 +175,8 @@ std::optional<Error> fetchError(const FetchOutcome& outcome, std::uint64_t maxBy
         return notFound(outcome.url + ": HTTP 404");
     }
     if (outcome.redirectRefused) {
-        return failed(outcome.url + ": redirect to a non-https URL refused");
+        return failed(std::format("{}: redirect to {} refused (not allowed)", outcome.url,
+                                  outcome.redirectTarget));
     }
     if (outcome.networkError != QNetworkReply::NoError || outcome.status < 200 ||
         outcome.status >= 300) {

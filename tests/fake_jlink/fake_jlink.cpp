@@ -98,13 +98,36 @@
 //                                                   JLINKARM_Open and every other boot (a
 //                                                   JLINKARM_Reset always halts it)
 //       },
+//       STM32L0 (plan 0039): "family": "stm32l0" with
+//         "devId": 1047, "revId": 4152,             DBGMCU_IDCODE (default 0x417 / 0x1038)
+//         "flashKib": 64, "eepromBytes": 2048,      flash at 0x08000000 and data EEPROM at
+//                                                   0x08080000 (erased: 0x00)
+//         "rdp": 0 | 1 | 2,                         read-out protection (FLASH_OPTR / the RDP word)
+//         "flashSizeReadable": true,                F_SIZE (0x1FF8007C) reads 0 when false
+//         "regressionQuirk": true                   after RDP 1 -> 0 the stored word reads
+//                                                   0x015500AA (Phase 0), else canonical
+//       After OBL_LAUNCH every ReadMemU32 returns 0 until JLINKARM_Open (HIL: a stale connection).
+//       Like J-Link 9.84 on the CHESTER-S1 (Phase 0): Connect on an RDP 1 chip asks the unsecure
+//       hook; YES mass-erases and unlocks, NO connects anyway. IDCODE, F_SIZE and the FLASH
+//       registers stay readable, flash and EEPROM do not; EndDownload and EraseChip fail. The
+//       FLASH interface (0x40022000) takes the PEKEY / OPTKEY sequences, the RDP word write
+//       (0x1FF80000, only when unlocked) and OBL_LAUNCH (PECR bit 18: the option load, a
+//       regression to level 0 erases flash and EEPROM; the write itself fails like the reset).
+//       EraseChip erases flash and EEPROM.
 //       "connectors": {                             plan 0033: a board with two connectors
 //         "file": "/tmp/connector",                 its text (trimmed) names the connector the
 //                                                   cable is on now; missing / unknown = "initial"
 //         "initial": "app",
 //         "chips": {"app": {<chip>}, "lte": {<chip>}}   the chip behind each connector (each
 //                                                   keeps its own memory); "chip" is ignored
-//       } } ] }
+//       }                                           a chip in "chips" may have
+//         "needsHalted": "app"                      plan 0040: it answers (JLINKARM_Connect)
+//                                                   only while the chip of that connector is
+//                                                   held: halted by JLINKARM_Reset / Halt and
+//                                                   not started by JLINKARM_Go since (a new
+//                                                   library session does not start it; the
+//                                                   CHESTER LoRaWAN module, held by the app MCU)
+//       } ] }
 // A connector change (seen by the next library call) drops the target connection and RTT, like
 // moving the cable: the next JLINKARM_Connect reaches the other chip.
 // Memory: flash 0x0-0x100000 and the UICR page (nRF52: 0x10001000, nRF91: 0x00FF8000; 4 KiB) start
@@ -232,6 +255,19 @@ struct ZoneSpec {
 // Bound of the simulated RAM of one chip (scenario sizes beyond it are cut).
 constexpr std::size_t maxRamBytes = 16ULL * 1024 * 1024;
 
+// STM32L0 RDP option byte of a readout-protection level: 0xAA = level 0, 0xCC = level 2,
+// anything else = level 1.
+std::uint8_t rdpByteForLevel(int level) {
+    switch (level) {
+    case 0:
+        return 0xAA;
+    case 2:
+        return 0xCC;
+    default:
+        return 0xBB;
+    }
+}
+
 struct ChipScenario {
     bool nrf91 = false;
     std::uint32_t part = 0x52840;
@@ -254,8 +290,32 @@ struct ChipScenario {
     std::vector<ZoneSpec> zones;
     std::uint32_t coreId = 0x2BA01477U;
     bool startHalted = false; // "halted": the CPU state after a boot (review Q10)
+    // Plan 0040 ("needsHalted"): the connector whose chip must be held for this one to answer;
+    // `held`: this CPU was halted by JLINKARM_Reset / Halt and not started by JLINKARM_Go since
+    // (kept across JLINKARM_Open, unlike `halted` of the library state).
+    std::string needsHalted;
+    bool held = false;
     // The FICR page (read-only), filled from part / variant by fillFicr().
     std::vector<std::uint8_t> ficr = std::vector<std::uint8_t>(0x1000, 0xFF);
+    // ---- STM32L0 (plan 0039) ----
+    bool stm32 = false;
+    std::uint32_t idcode = 0x10386417;
+    std::uint16_t flashKib = 64;
+    bool flashSizeReadable = true;
+    bool regressionQuirk = true;
+    std::uint8_t rdpByte = 0xAA;
+    std::uint32_t optionWord = 0xFF5500AA;
+    std::uint32_t pecr = 0x7;
+    std::uint32_t sr = 0xC;
+    int peKeys = 0;  // PEKEY words written in order
+    int optKeys = 0; // OPTKEY words written in order
+    // HIL 2026-11-06: after the chip reset itself (OBL_LAUNCH) the library's connection is stale:
+    // every read returns 0 until the probe is opened again.
+    bool staleConnection = false;
+    std::vector<std::uint8_t> eeprom;
+    static constexpr std::uint32_t stm32Flash = 0x08000000;
+    static constexpr std::uint32_t stm32Eeprom = 0x08080000;
+    [[nodiscard]] bool stm32Protected() const { return stm32 && rdpByte != 0xAA; }
 
     [[nodiscard]] std::uint32_t uicrBase() const { return nrf91 ? 0x00FF8000U : 0x10001000U; }
     [[nodiscard]] std::uint32_t ficrPart() const { return nrf91 ? 0x00FF0140U : 0x10000100U; }
@@ -275,6 +335,9 @@ struct ChipScenario {
 
     // The FICR byte at `address`, or nullptr outside the FICR page.
     [[nodiscard]] std::uint8_t* ficrAt(std::uint64_t address) {
+        if (stm32) {
+            return nullptr;
+        }
         if (address >= ficrBase() && address < ficrBase() + ficr.size()) {
             return &ficr.at(static_cast<std::size_t>(address - ficrBase()));
         }
@@ -293,6 +356,9 @@ struct ChipScenario {
 
     // Any readable byte: flash, UICR, FICR or RAM; nullptr = unmapped.
     [[nodiscard]] std::uint8_t* readableAt(std::uint64_t address) {
+        if (stm32Protected() && at(address) != nullptr) {
+            return nullptr; // RDP 1 / 2: no debugger access to flash and EEPROM
+        }
         if (std::uint8_t* byte = at(address); byte != nullptr) {
             return byte;
         }
@@ -303,8 +369,17 @@ struct ChipScenario {
     }
     [[nodiscard]] std::uint32_t ctrlAp() const { return nrf91 ? 4U : 1U; }
 
-    // The byte at `address`, or nullopt outside flash and UICR.
+    // The byte at `address`, or nullopt outside flash and UICR (STM32: flash and data EEPROM).
     [[nodiscard]] std::uint8_t* at(std::uint64_t address) {
+        if (stm32) {
+            if (address >= stm32Flash && address < stm32Flash + flash.size()) {
+                return &flash.at(static_cast<std::size_t>(address - stm32Flash));
+            }
+            if (address >= stm32Eeprom && address < stm32Eeprom + eeprom.size()) {
+                return &eeprom.at(static_cast<std::size_t>(address - stm32Eeprom));
+            }
+            return nullptr;
+        }
         if (address < flash.size()) {
             return &flash.at(static_cast<std::size_t>(address));
         }
@@ -315,8 +390,126 @@ struct ChipScenario {
     }
 
     void eraseAll() {
+        if (stm32) {
+            std::ranges::fill(flash, std::uint8_t{0});
+            std::ranges::fill(eeprom, std::uint8_t{0});
+            return;
+        }
         std::ranges::fill(flash, std::uint8_t{0xFF});
         std::ranges::fill(uicr, std::uint8_t{0xFF});
+    }
+
+    // STM32 register reads (IDCODE, F_SIZE, FLASH interface, the RDP word); nullopt = none.
+    [[nodiscard]] std::optional<std::uint32_t> stm32Register(std::uint32_t address) const {
+        switch (address) {
+        case 0x40015800:
+            return idcode;
+        case 0x1FF8007C:
+            return flashSizeReadable ? (0x03920000U | flashKib) : 0U;
+        case 0x40022004:
+            return pecr;
+        case 0x40022018:
+            return sr;
+        case 0x4002201C:
+            return 0x80700000U | rdpByte;
+        case 0x1FF80000:
+            return optionWord;
+        default:
+            return std::nullopt;
+        }
+    }
+
+    // A little-endian word of readable memory (flash, UICR, RAM); nullopt = unmapped.
+    [[nodiscard]] std::optional<std::uint32_t> memoryWordAt(std::uint32_t address) {
+        std::uint32_t word = 0;
+        for (std::uint32_t b = 0; b < 4; ++b) {
+            const std::uint8_t* byte = readableAt(std::uint64_t{address} + b);
+            if (byte == nullptr) {
+                return std::nullopt;
+            }
+            word |= std::uint32_t{*byte} << (8U * b);
+        }
+        return word;
+    }
+
+    // A 32-bit read as JLINKARM_ReadMemU32 sees it; nullopt = unmapped (e.g. the FICR address
+    // of the other family).
+    [[nodiscard]] std::optional<std::uint32_t> wordAt(std::uint32_t address) {
+        if (stm32) {
+            if (staleConnection) {
+                return 0U;
+            }
+            if (const auto value = stm32Register(address)) {
+                return value;
+            }
+            return memoryWordAt(address);
+        }
+        if (address == ficrPart()) {
+            return part;
+        }
+        if (address == ficrPart() + 4) {
+            return variant;
+        }
+        // M6: memory units of flash, UICR and RAM; anything else is unmapped.
+        return memoryWordAt(address);
+    }
+
+    // A 32-bit write to the FLASH interface or the RDP word; nullopt = not an STM32 register.
+    [[nodiscard]] std::optional<int> stm32Write(std::uint32_t address, std::uint32_t value) {
+        switch (address) {
+        case 0x4002200C: { // PEKEYR
+            constexpr std::array keys{0x89ABCDEFU, 0x02030405U};
+            peKeys =
+                value == keys.at(static_cast<std::size_t>(std::min(peKeys, 1))) ? peKeys + 1 : 0;
+            if (peKeys == 2) {
+                pecr &= ~1U;
+            }
+            return 0;
+        }
+        case 0x40022014: { // OPTKEYR (after PEKEY)
+            constexpr std::array keys{0xFBEAD9C8U, 0x24252627U};
+            optKeys =
+                value == keys.at(static_cast<std::size_t>(std::min(optKeys, 1))) && (pecr & 1U) == 0
+                    ? optKeys + 1
+                    : 0;
+            if (optKeys == 2) {
+                pecr &= ~4U;
+            }
+            return 0;
+        }
+        case 0x40022018: // SR: write 1 to clear
+            sr &= ~(value & 0x00032F00U);
+            return 0;
+        case 0x1FF80000:
+            if ((pecr & 4U) != 0) {
+                sr |= 0x100U; // WRPERR
+                return 0;
+            }
+            optionWord = value;
+            return 0;
+        case 0x40022004: // PECR
+            if ((value & (1U << 18U)) != 0) {
+                // OBL_LAUNCH: load the option bytes (the chip resets: the write fails)
+                const auto loaded = static_cast<std::uint8_t>(optionWord & 0xFFU);
+                const bool regression = rdpByte != 0xAA && loaded == 0xAA;
+                if (regression) {
+                    eraseAll();
+                    if (regressionQuirk) {
+                        optionWord = 0x015500AAU;
+                    }
+                }
+                rdpByte = loaded;
+                staleConnection = true;
+                pecr = 0x7;
+                peKeys = 0;
+                optKeys = 0;
+                return -1;
+            }
+            pecr |= value & 0x7U; // writing a lock bit locks again
+            return 0;
+        default:
+            return std::nullopt;
+        }
     }
 };
 
@@ -473,7 +666,29 @@ ChipScenario readChip(const QJsonObject& object) {
     chip.coreId =
         static_cast<std::uint32_t>(object.value(QStringLiteral("coreId")).toInteger(chip.coreId));
     chip.startHalted = object.value(QStringLiteral("halted")).toBool();
+    chip.held = chip.startHalted;
+    chip.needsHalted = object.value(QStringLiteral("needsHalted")).toString().toStdString();
     chip.fillFicr();
+    if (object.value(QStringLiteral("family")).toString() == QStringLiteral("stm32l0")) {
+        chip.stm32 = true;
+        chip.idcode =
+            (static_cast<std::uint32_t>(object.value(QStringLiteral("revId")).toInteger(0x1038))
+             << 16U) |
+            static_cast<std::uint32_t>(object.value(QStringLiteral("devId")).toInteger(0x417));
+        chip.flashKib =
+            static_cast<std::uint16_t>(object.value(QStringLiteral("flashKib")).toInteger(64));
+        chip.flash = std::vector<std::uint8_t>(std::size_t{chip.flashKib} * 1024, 0);
+        chip.eeprom = std::vector<std::uint8_t>(
+            static_cast<std::size_t>(object.value(QStringLiteral("eepromBytes")).toInteger(2048)),
+            0);
+        chip.uicr.clear();
+        chip.flashSizeReadable = object.value(QStringLiteral("flashSizeReadable")).toBool(true);
+        chip.regressionQuirk = object.value(QStringLiteral("regressionQuirk")).toBool(true);
+        const int rdp = object.value(QStringLiteral("rdp")).toInt(0);
+        chip.rdpByte = rdpByteForLevel(rdp);
+        const std::uint32_t low = chip.rdpByte;
+        chip.optionWord = ((~low & 0xFFFFU) << 16U) | low;
+    }
     for (const QJsonValue item : object.value(QStringLiteral("memory")).toArray()) {
         const QJsonObject block = item.toObject();
         const auto address =
@@ -659,6 +874,15 @@ struct State {
         downloading = false;
         downloadData.clear();
         halted = p.chip.startHalted;
+    }
+
+    // Plan 0040: the chip behind the cable answers ("needsHalted": the other chip is held).
+    [[nodiscard]] static bool reachable(const ProbeScenario& p) {
+        if (p.chip.needsHalted.empty()) {
+            return true;
+        }
+        const auto holder = p.otherChips.find(p.chip.needsHalted);
+        return holder != p.otherChips.end() && holder->second.held;
     }
 
     [[nodiscard]] std::int64_t sinceOpen() const {
@@ -921,6 +1145,9 @@ HWIO_FAKE_JLINK_EXPORT const char* JLINKARM_Open() {
     }
     s.open = true;
     s.connected = false;
+    if (ProbeScenario* chipProbe = s.probe(); chipProbe != nullptr) {
+        chipProbe->chip.staleConnection = false; // a fresh connection
+    }
     if (!s.everOpened) {
         s.everOpened = true;
         s.openedAt = Clock::now();
@@ -985,7 +1212,24 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_Connect() {
         return -1;
     }
     ++s.connectCalls;
-    if (probe->chip.protectedChip && s.connectCalls > probe->connectFailures &&
+    const bool reachable = State::reachable(*probe);
+    if (reachable && probe->chip.stm32Protected() && probe->chip.rdpByte != 0xCC &&
+        s.connectCalls > probe->connectFailures && s.vtref() >= probe->connectMinMillivolts) {
+        // Phase 0 (J-Link 9.84): asked on connect; NO connects anyway.
+        const int answer = s.unsecureHook != nullptr
+                               ? s.unsecureHook("J-Link V9 (fake)",
+                                                "Active read and/or write protected STM32 device "
+                                                "detected. Unsecure?",
+                                                0x10000003U)
+                               : abi::dlgButtonYes;
+        if (answer == abi::dlgButtonYes) {
+            State::report(s.warnHandler, "Device unsecured (mass erase)");
+            probe->chip.eraseAll();
+            probe->chip.rdpByte = 0xAA;
+            probe->chip.optionWord = 0xFF5500AA;
+        }
+    }
+    if (reachable && probe->chip.protectedChip && s.connectCalls > probe->connectFailures &&
         s.vtref() >= probe->connectMinMillivolts) {
         const int answer = s.unsecureHook != nullptr
                                ? s.unsecureHook("J-Link V9 (fake)", "Unsecure the device?", 0x3U)
@@ -996,8 +1240,8 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_Connect() {
             probe->chip.protectedChip = false;
         }
     }
-    if (s.connectCalls <= probe->connectFailures || s.vtref() < probe->connectMinMillivolts ||
-        probe->chip.protectedChip) {
+    if (!reachable || s.connectCalls <= probe->connectFailures ||
+        s.vtref() < probe->connectMinMillivolts || probe->chip.protectedChip) {
         s.connected = false;
         State::report(s.errorHandler, "Could not connect to target.");
         return -1;
@@ -1090,6 +1334,9 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_Reset() {
     }
     s.boot();
     s.halted = true; // the IJLinkApi contract: halted after a reset
+    if (ProbeScenario* probe = s.probe()) {
+        probe->chip.held = true;
+    }
     return 0;
 }
 
@@ -1100,6 +1347,9 @@ HWIO_FAKE_JLINK_EXPORT char JLINKARM_Halt() {
         return 1;
     }
     s.halted = true;
+    if (ProbeScenario* probe = s.probe()) {
+        probe->chip.held = true;
+    }
     return 0;
 }
 
@@ -1107,6 +1357,9 @@ HWIO_FAKE_JLINK_EXPORT void JLINKARM_Go() {
     State& s = state();
     const std::scoped_lock lock(s.mutex);
     s.halted = false;
+    if (ProbeScenario* probe = s.probe(); probe != nullptr && s.connected) {
+        probe->chip.held = false;
+    }
 }
 
 HWIO_FAKE_JLINK_EXPORT void JLINKARM_EnableLog(abi::LogHandler handler) {
@@ -1314,6 +1567,11 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_EndDownload() {
         return -1;
     }
     ChipScenario& chip = probe->chip;
+    if (chip.stm32Protected()) {
+        State::report(s.errorHandler, "Flash download failed (read-out protected STM32)");
+        s.downloadData.clear();
+        return -5;
+    }
     // Every byte must lie in flash or UICR (the loader has no other flash bank).
     for (const auto& [address, bytes] : s.downloadData) {
         for (std::size_t i = 0; i < bytes.size(); ++i) {
@@ -1383,25 +1641,7 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_ReadMemU32(std::uint32_t address, std::uint3
     ChipScenario& chip = probe->chip;
     const auto out = std::span(data, count);
     for (std::uint32_t i = 0; i < count; ++i) {
-        const std::uint32_t at = address + (i * 4);
-        std::optional<std::uint32_t> value;
-        if (at == chip.ficrPart()) {
-            value = chip.part;
-        } else if (at == chip.ficrPart() + 4) {
-            value = chip.variant;
-        } else {
-            // M6: memory units (little-endian) of flash, UICR and RAM; anything else (e.g. the
-            // FICR of the other family) is unmapped.
-            std::uint32_t word = 0;
-            for (std::uint32_t b = 0; b < 4; ++b) {
-                const std::uint8_t* byte = chip.readableAt(std::uint64_t{at} + b);
-                if (byte == nullptr) {
-                    return -1;
-                }
-                word |= std::uint32_t{*byte} << (8U * b);
-            }
-            value = word;
-        }
+        const std::optional<std::uint32_t> value = chip.wordAt(address + (i * 4));
         if (!value) {
             return -1; // unmapped (e.g. the FICR address of the other family)
         }
@@ -1418,9 +1658,9 @@ HWIO_FAKE_JLINK_EXPORT int HWIO_JLINK_STDCALL JLINK_EraseChip() {
     const std::scoped_lock lock(s.mutex);
     ProbeScenario* probe = s.probe();
     if (!s.connected || probe == nullptr || probe->chip.eraseChipFails ||
-        probe->chip.protectedChip) {
+        probe->chip.protectedChip || probe->chip.stm32Protected()) {
         State::report(s.errorHandler, "Erase failed (simulated)");
-        return -1;
+        return probe != nullptr && probe->chip.stm32Protected() ? -5 : -1;
     }
     probe->chip.eraseAll();
     return 0;
@@ -1436,6 +1676,25 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_CORESIGHT_Configure(const char* /*config*/) 
     return 0;
 }
 
+namespace {
+
+// The selected AP is the chip's Nordic CTRL-AP. An STM32 has none (plan 0040: the APP-connector
+// check of the guided LoRaWAN flow must not pass while the cable is still on the module).
+bool selectsCtrlAp(const ChipScenario& chip, std::uint32_t apSelect) {
+    return !chip.stm32 && (apSelect >> 24U) == chip.ctrlAp();
+}
+
+// A read of an AP that is not modelled: 0 or an error (absentApsReadZero).
+int readAbsentAp(const ChipScenario& chip, std::uint32_t* data) {
+    if (chip.absentApsReadZero) {
+        *data = 0;
+        return 0;
+    }
+    return -1; // only the CTRL-AP is modelled
+}
+
+} // namespace
+
 HWIO_FAKE_JLINK_EXPORT int JLINKARM_CORESIGHT_ReadAPDPReg(std::uint8_t index, std::uint8_t ap,
                                                           std::uint32_t* data) {
     State& s = state();
@@ -1449,12 +1708,8 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_CORESIGHT_ReadAPDPReg(std::uint8_t index, st
         return 0;
     }
     ChipScenario& chip = probe->chip;
-    if ((s.apSelect >> 24U) != chip.ctrlAp()) {
-        if (chip.absentApsReadZero) {
-            *data = 0;
-            return 0;
-        }
-        return -1; // only the CTRL-AP is modelled
+    if (!selectsCtrlAp(chip, s.apSelect)) {
+        return readAbsentAp(chip, data);
     }
     switch (index) {
     case 0:
@@ -1504,7 +1759,7 @@ HWIO_FAKE_JLINK_EXPORT int JLINKARM_CORESIGHT_WriteAPDPReg(std::uint8_t index, s
         }
         return 0;
     }
-    if ((s.apSelect >> 24U) != probe->chip.ctrlAp()) {
+    if (probe->chip.stm32 || (s.apSelect >> 24U) != probe->chip.ctrlAp()) {
         return -1;
     }
     if (index == 1 && value == 1 && !s.eraseAllRunning) {
@@ -1550,6 +1805,11 @@ int writeUnit(std::uint32_t address, std::uint32_t value, std::uint32_t size) {
     ProbeScenario* probe = s.probe();
     if (!s.connected || probe == nullptr || address % size != 0) {
         return -1;
+    }
+    if (probe->chip.stm32 && size == 4) {
+        if (const auto written = probe->chip.stm32Write(address, value)) {
+            return *written;
+        }
     }
     for (std::uint32_t b = 0; b < size; ++b) {
         if (probe->chip.ramAt(std::uint64_t{address} + b) == nullptr) {

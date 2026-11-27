@@ -8,8 +8,9 @@
 // most maxFiles files and maxBytes bytes remain. Directory errors never fail a download: they are
 // returned as warnings (io.write_failed) and the download continues in memory.
 //
-// Plan 0021 (ADR-0165): designated firmware is cached as <directory>/lte-<sha256>.zip, written
-// only after its SHA-256 was verified; every hit is hashed again (a mismatch deletes the entry and
+// Plan 0021 (ADR-0165): designated firmware is cached as <directory>/<tag>-<sha256>.zip (plan 0040:
+// an Intel HEX as <tag>-<sha256>.hex; tags "lte", "lrw"), written only after its SHA-256 was
+// verified; every hit is hashed again (a mismatch deletes the entry and
 // counts as a miss). These entries count against the same limits (one LRU over both kinds).
 //
 // Thread safety: none; used on the owner thread (FirmwareCatalog).
@@ -82,14 +83,22 @@ public:
     std::size_t evict(const std::optional<FirmwareId>& keep = std::nullopt);
 
     // ---- designated firmware (plan 0021, ADR-0165) ----
-    [[nodiscard]] std::filesystem::path designatedFileFor(const Sha256& sha256) const;
+    // <cacheTag>-<sha256>.zip, or .hex for FirmwareKind::AppHex (plan 0040: lrw-<sha256>.hex).
+    [[nodiscard]] std::filesystem::path
+    designatedFileFor(const Sha256& sha256, std::string_view cacheTag = "lte",
+                      FirmwareKind kind = FirmwareKind::LteBundle) const;
     // The cached file's bytes when they still have `sha256` (touched); nullopt when missing or
-    // damaged (a damaged entry is deleted). The bytes are the verified ones (review F5).
+    // damaged (a damaged entry is deleted) or the tag is invalid. The bytes are the verified ones
+    // (review F5).
     [[nodiscard]] std::optional<std::vector<std::byte>>
-    lookupDesignated(const Sha256& sha256) const;
+    lookupDesignated(const Sha256& sha256, std::string_view cacheTag = "lte",
+                     FirmwareKind kind = FirmwareKind::LteBundle) const;
     // Stores verified bytes atomically, then enforces the limits (the new file is kept).
-    // The caller has checked sha256Of(bytes) == sha256. Errors: io.write_failed.
-    [[nodiscard]] Status storeDesignated(const Sha256& sha256, std::span<const std::byte> bytes);
+    // The caller has checked sha256Of(bytes) == sha256. Errors: io.write_failed (also an invalid
+    // cache tag: not 1 to 8 lowercase letters).
+    [[nodiscard]] Status storeDesignated(const Sha256& sha256, std::span<const std::byte> bytes,
+                                         std::string_view cacheTag = "lte",
+                                         FirmwareKind kind = FirmwareKind::LteBundle);
 
 private:
     std::size_t evictKeeping(const std::filesystem::path& kept);

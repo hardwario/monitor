@@ -381,7 +381,7 @@ QString ConsoleViewModel::inputDisabledReason() const {
         return tr("%1 — the console resumes automatically").arg(text);
     }
     if (!targetHasConsole()) {
-        return tr("This target has no console");
+        return tr("This chip has no console in HARDWARIO Monitor.");
     }
     if (m_tab->state() == DeviceTabViewModel::Connecting) {
         return m_tab->connection()->pairingPending() ? tr("Waiting for pairing…")

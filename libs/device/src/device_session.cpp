@@ -571,6 +571,12 @@ Result<OperationId> DeviceSession::recover(std::string_view targetId) {
     return startOperation(std::move(command), targetId);
 }
 
+Result<OperationId> DeviceSession::unlock(std::string_view targetId) {
+    detail::OperationCommand command;
+    command.kind = OperationKind::Unlock;
+    return startOperation(std::move(command), targetId);
+}
+
 Result<OperationId> DeviceSession::updateModem(std::string_view targetId,
                                                std::filesystem::path modemZip,
                                                FlashOptions options) {

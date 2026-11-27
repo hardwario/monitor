@@ -26,9 +26,16 @@
 // and the choice of the LTE MCU (cross-target, ADR-0057). revealRecover() (the troubleshooting
 // hand-off of target.protected) shows Recover for one MCU once, in every mode.
 //
+// Plan 0040 (B1, B2; ADR-0352): the LoRaWAN module kind (LrwFirmware, CHESTER target `lrw`) and the
+// `lrw` maintenance actions (Erase chip, Unlock) do not run on this page either: the module
+// answers only while the application MCU is held, so they open the LoRaWAN module wizard
+// ("lrw-update", LrwUpdateWizard) with a pending request (takeLrwRequest()) that drives
+// device::LrwUpdateProcedure. The LoRaWAN card shows the connection guide's cabling note.
+//
 // Ownership: child of its DeviceTabViewModel (Qt parent, created by the page registry). GUI thread
 // only.
 
+#include "hwio/device/lrw_update_procedure.h"
 #include "hwio/device/operation.h"
 #include "viewmodels/error_info.h"
 #include "viewmodels/firmware_source_view_model.h"
@@ -124,6 +131,26 @@ class FlashViewModel : public QObject {
     Q_PROPERTY(QString nrfUtilDownloadUrl READ nrfUtilDownloadUrl CONSTANT) // plan 0038 A0
     // The ConfirmDialog texts of the pending erase-all / recover (ADR-0038).
     Q_PROPERTY(QVariantMap confirmation READ confirmation NOTIFY confirmationRequested)
+    // ---- plan 0039 (STM32 chips, ADR-0274 ... ADR-0276) ----
+    // The kind's target is an STM32 chip: the Options show eraseChip and keepEeprom.
+    Q_PROPERTY(bool stm32 READ stm32 NOTIFY kindChanged)
+    // "Erase the whole chip first" (default off).
+    Q_PROPERTY(bool eraseChip READ eraseChip WRITE setEraseChip NOTIFY optionsChanged)
+    // "Keep data EEPROM" (default on; off and disabled while eraseChip).
+    Q_PROPERTY(bool keepEeprom READ keepEeprom WRITE setKeepEeprom NOTIFY optionsChanged)
+    // The texts of [Erase everything…] / [Recover…]: on an STM32 chip "Erase chip…" and
+    // "Unlock (erase)…".
+    Q_PROPERTY(QString eraseAllText READ eraseAllText NOTIFY maintenanceChanged)
+    Q_PROPERTY(QString recoverText READ recoverText NOTIFY maintenanceChanged)
+    // The result ErrorPanel's custom action: "Unlock…" (target.protected on an STM32 chip) or
+    // "Use <found chip>" (target.wrong_chip with a curated chip of the tab's device); "" = none.
+    Q_PROPERTY(QString errorCustomActionText READ errorCustomActionText NOTIFY stateChanged)
+    // ---- plan 0040 (the CHESTER LoRaWAN module, ADR-0352) ----
+    // The cabling note of the LoRaWAN card (the `lrw` connection guide, translated).
+    Q_PROPERTY(QString lrwCableText READ lrwCableText NOTIFY textsChanged)
+    // [Reset] and [Reset and halt] (not for the LoRaWAN module: the final reset of the
+    // application MCU in the guided flow restarts it; plan 0040 D9).
+    Q_PROPERTY(bool resetAvailable READ resetAvailable NOTIFY maintenanceChanged)
 
 public:
     // Unscoped: QML compares FlashViewModel.Running etc. with the int property.
@@ -188,7 +215,10 @@ public:
     // Another MCU than the console target only with the expert actions (ignored otherwise).
     void setMaintenanceTarget(const QString& targetId);
     [[nodiscard]] QVariantList maintenanceTargets() const;
-    [[nodiscard]] bool eraseAllAvailable() const { return expertActions(); }
+    // Plan 0039: [Erase chip…] of an STM32 chip is always offered (behind its confirmation).
+    [[nodiscard]] bool eraseAllAvailable() const {
+        return expertActions() || isStm32Target(m_maintenanceTarget);
+    }
     [[nodiscard]] bool recoverAvailable() const;
     [[nodiscard]] bool maintenanceExpanded() const noexcept { return m_maintenanceExpanded; }
     void setMaintenanceExpanded(bool expanded);
@@ -214,6 +244,22 @@ public:
     Q_INVOKABLE void requestConfirmation(bool recover);
     Q_INVOKABLE void confirm();
     [[nodiscard]] QVariantMap confirmation() const { return m_confirmation; }
+    [[nodiscard]] bool stm32() const;
+    [[nodiscard]] bool eraseChip() const noexcept { return m_eraseChip; }
+    void setEraseChip(bool erase);
+    [[nodiscard]] bool keepEeprom() const noexcept { return m_keepEeprom && !m_eraseChip; }
+    void setKeepEeprom(bool keep);
+    [[nodiscard]] QString eraseAllText() const;
+    [[nodiscard]] QString recoverText() const;
+    [[nodiscard]] QString errorCustomActionText() const;
+    // [Unlock…] opens the unlock confirmation for the failed operation's chip; [Use <found>]
+    // switches the tab to the found chip (DeviceTabViewModel::changeTarget, never silently).
+    Q_INVOKABLE void triggerCustomAction();
+    [[nodiscard]] QString lrwCableText() const;
+    [[nodiscard]] bool resetAvailable() const;
+    // Plan 0040: the request the LoRaWAN module wizard runs; set just before the page opens it
+    // (flash() of the LoRaWAN kind, the `lrw` maintenance actions) and taken once by the wizard.
+    [[nodiscard]] std::optional<device::LrwUpdateProcedure::Request> takeLrwRequest();
     // Back from the result card to the form (the source stays loaded).
     Q_INVOKABLE void dismissResult();
     // [Open console] of the success card.
@@ -239,6 +285,7 @@ signals:
     void settingsRequested(const QString& sectionId);
     void confirmationRequested();
     void maintenanceChanged();
+    void optionsChanged();
     // [Update LTE firmware…] (plan 0033): the tab opens the LTE update wizard.
     void lteUpdateRequested();
     // A text for screen readers (operation started / finished; design system § 6).
@@ -270,6 +317,18 @@ private:
     void runFlash(const FlashRequest& request);
     void runEraseAll(const QString& target);
     void runRecover(const QString& target);
+    void runUnlock(const QString& target);
+    [[nodiscard]] bool isStm32Target(const QString& targetId) const;
+    // Plan 0040: the CHESTER LoRaWAN module, reached only by the guided procedure (ADR-0352).
+    [[nodiscard]] bool isGuidedTarget(const QString& targetId) const;
+    void flashLrw();
+    // Opens the LoRaWAN module wizard with `request` (pending until the wizard takes it).
+    void openLrwWizard(device::LrwUpdateProcedure::Request request);
+    // Plan 0039: the curated chip of a target.wrong_chip result that the tab's device has.
+    [[nodiscard]] const device::TargetProfile* foundChipTarget() const;
+    [[nodiscard]] bool kindAllowed(FirmwareSourceViewModel::Kind kind) const;
+    // The reason of cannotFlashReason() that comes from the source ("" = ready).
+    [[nodiscard]] QString sourceProblem() const;
     void start(device::OperationKind kind, const QString& target,
                const std::function<Result<device::OperationId>(device::DeviceSession&)>& run);
     void onSessionChanged();
@@ -300,6 +359,8 @@ private:
     // only); until then it follows the tab's target.
     bool m_kindChosen = false;
     bool m_halt = false;
+    bool m_eraseChip = false;
+    bool m_keepEeprom = true;
     QString m_maintenanceTarget =
         QStringLiteral("app"); // the console target (set in the constructor)
     QString m_revealedRecover; // the MCU whose [Recover…] the hand-off revealed ("" = none)
@@ -327,6 +388,8 @@ private:
     bool m_resetHalt = false; // of the last reset (result text)
     QVariantMap m_confirmation;
     std::optional<PendingConfirmation> m_pending; // of the open confirmation
+    // Plan 0040: the request of the LoRaWAN module wizard while it opens.
+    std::optional<device::LrwUpdateProcedure::Request> m_lrwRequest;
     // 0021: the window after an application flash in which `info show` answers.
     QTimer m_deviceInfoDeadline;
     QTimer m_deviceInfoRetry;

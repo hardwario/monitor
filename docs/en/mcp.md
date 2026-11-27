@@ -87,8 +87,8 @@ which option is missing.
 
 | `--allow` | Tools |
 |---|---|
-| `flash` | `flash`, `flash_lte`, `write_flash` |
-| `erase` | `erase`, `recover` |
+| `flash` | `flash`, `flash_lte`, `write_flash`, `stm32_flash` |
+| `erase` | `erase`, `recover`, `stm32_erase`, `stm32_unlock`, `stm32_flash` with `erase_all` |
 | `memory-write` | `write_memory` |
 | `uicr` | additionally needed for anything that touches the UICR: `flash` or `write_flash` with `allow_uicr`, `erase` with `scope: "all"`, `recover` |
 | `all` | all of the above |
@@ -145,6 +145,15 @@ connected. `target` is `app` or `lte` (default: the console's target).
 | `flash_lte` | Flashes an LTE bundle, a modem firmware zip or a `.hex` to the LTE MCU; needs nRF Util; 3 to 10 minutes *(flash)* |
 | `erase` | Erases the firmware (`scope: "code"`) or everything (`"all"`) *(erase)* |
 | `recover` | Removes read-back protection by erasing everything *(erase, uicr)* |
+
+**STM32 chips** (the "STM32 chip" device, see [Flashing STM32 chips](flashing.md#stm32-chips))
+
+| Tool | Does |
+|---|---|
+| `stm32_info` | DEV_ID, flash size, read-out protection level and whether it is the selected chip |
+| `stm32_flash` | Flashes a `.hex` or `.bin` (`address`, default 0x08000000), verifies it; `erase_all`, `allow_eeprom` *(flash; erase with `erase_all`)* |
+| `stm32_erase` | Erases the whole chip, flash and data EEPROM *(erase)* |
+| `stm32_unlock` | Removes read-out protection level 1; the chip erases itself. Needs `confirm: true` *(erase)* |
 
 The server also offers the resources `hwio://devices` and `hwio://device/{id}/status`, `…/log` and `…/terminal`
 (the last 1000 lines), and the prompt `debug_device` with hints on how to debug a device with these tools.

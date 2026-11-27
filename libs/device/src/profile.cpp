@@ -4,6 +4,7 @@
 #include "hwio/core/localized_text.h"
 #include "hwio/core/result.h"
 #include "hwio/device/line_assembler.h"
+#include "hwio/firmware/designated_firmware.h"
 #include "hwio/firmware/firmware_image.h"
 #include "profiles/profiles.h"
 
@@ -29,8 +30,9 @@ namespace hwio::device {
 namespace {
 
 // Registration: one line per device profile (ADR-0032).
-constexpr std::array<const DeviceProfile*, 1> registeredProfiles{
+constexpr std::array<const DeviceProfile*, 2> registeredProfiles{
     &profiles::chester,
+    &profiles::stm32,
 };
 
 } // namespace
@@ -202,8 +204,68 @@ bool refusedFromRemote(const TargetProfile& target, std::string_view line) noexc
 }
 
 const ChipPart* findPart(const TargetProfile& target, std::uint32_t part) noexcept {
-    const auto it = std::ranges::find(target.parts, part, &ChipPart::part);
+    // STM32 parts have part 0 and never match a FICR part number.
+    const auto it = std::ranges::find_if(target.parts, [part](const ChipPart& candidate) {
+        return !candidate.stm32 && candidate.part == part;
+    });
     return it == target.parts.end() ? nullptr : &*it;
+}
+
+namespace {
+
+// The part of `parts` with this DEV_ID and flash size; with flashSizeKib 0 the only part with this
+// DEV_ID (nullptr when several share it).
+const ChipPart* matchStm32(std::span<const ChipPart> parts, std::uint16_t devId,
+                           std::uint16_t flashSizeKib) noexcept {
+    const ChipPart* found = nullptr;
+    for (const ChipPart& part : parts) {
+        if (!part.stm32 || part.stm32->devId != devId) {
+            continue;
+        }
+        if (flashSizeKib != 0) {
+            if (part.stm32->flashSizeKib == 0 || part.stm32->flashSizeKib == flashSizeKib) {
+                return &part;
+            }
+            continue;
+        }
+        if (found != nullptr) {
+            return nullptr; // ambiguous without the flash size
+        }
+        found = &part;
+    }
+    return found;
+}
+
+} // namespace
+
+const ChipPart* findStm32Part(const TargetProfile& target, std::uint16_t devId,
+                              std::uint16_t flashSizeKib) noexcept {
+    return matchStm32(target.parts, devId, flashSizeKib);
+}
+
+const ChipPart* findStm32PartById(std::string_view id) noexcept {
+    const auto parts = stm32Parts();
+    const auto it = std::ranges::find(parts, id, &ChipPart::id);
+    return it == parts.end() ? nullptr : &*it;
+}
+
+const ChipPart* findStm32PartByChip(std::uint16_t devId, std::uint16_t flashSizeKib) noexcept {
+    return matchStm32(stm32Parts(), devId, flashSizeKib);
+}
+
+QString partHint(const ChipPart& part) {
+    if (std::string_view(part.hintSourceText).empty()) {
+        return {};
+    }
+    return QCoreApplication::translate("hwio::device", part.hintSourceText);
+}
+
+std::optional<firmware::DesignatedFirmware>
+designatedFirmwareOf(const TargetProfile& target) noexcept {
+    if (!target.parts.empty() && target.parts.front().designatedFirmware) {
+        return target.parts.front().designatedFirmware;
+    }
+    return target.designatedFirmware;
 }
 
 QString targetDisplayName(const TargetProfile& target) {
@@ -215,6 +277,11 @@ LocalizedText targetDisplayNameText(const TargetProfile& target) {
     const std::string source(target.displayName.empty() ? target.id : target.displayName);
     return LocalizedText{.translated = targetDisplayName(target),
                          .english = QString::fromStdString(source)};
+}
+
+QString profileDisplayName(const DeviceProfile& profile) {
+    const std::string source(profile.displayName);
+    return QCoreApplication::translate("hwio::device", source.c_str());
 }
 
 QString guideStepTitle(const ConnectionGuideStep& step) {
@@ -327,9 +394,66 @@ Status checkMemoryWrite(const TargetProfile& target, std::uint32_t address, std:
                   std::format("requested {}; allowed {}", rangeText(requested), allowed)));
 }
 
+namespace {
+
+// Plan 0039 (ADR-0275): flash, or the data EEPROM with consent; nothing else.
+Status checkStm32FlashWrite(const TargetProfile& target, const firmware::AddressRange& range,
+                            bool allowEeprom) {
+    if (target.flash.contains(range)) {
+        return {};
+    }
+    const bool inEeprom = target.dataEeprom && target.dataEeprom->contains(range);
+    if (inEeprom && allowEeprom) {
+        return {};
+    }
+    std::string eepromText = "none";
+    if (target.dataEeprom) {
+        eepromText = rangeText(*target.dataEeprom);
+    }
+    Error error = makeError(ErrorCode::FirmwareOutOfRange,
+                            std::format("segment {}; flash {}, data EEPROM {}", rangeText(range),
+                                        rangeText(target.flash), eepromText));
+    if (inEeprom) {
+        setText(
+            error, ErrorText::Message, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device",
+                              "The firmware writes into the data EEPROM of the %1 (address %2)."),
+            {targetDisplayNameText(target), hexAddress(range.start)});
+        setText(error, ErrorText::Suggestion, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device",
+                                  "Allow writing the data EEPROM if the file is meant to "
+                                  "change it."));
+        return std::unexpected(std::move(error));
+    }
+    // The family's data EEPROM area (a part without a usable EEPROM range rejects it by name).
+    const bool eepromRecords =
+        !target.dataEeprom && target.stm32 && target.stm32->dataEepromArea.contains(range.start);
+    const std::uint64_t outside =
+        target.flash.contains(range.start) ? target.flash.end : range.start;
+    if (eepromRecords) {
+        setText(error, ErrorText::Message, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device",
+                                  "Data EEPROM is not supported for the %1 (address %2)."),
+                {targetDisplayNameText(target), hexAddress(range.start)});
+    } else {
+        setText(error, ErrorText::Message, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device", "The firmware does not fit the %1 (address %2)."),
+                {targetDisplayNameText(target), hexAddress(outside)});
+    }
+    setText(error, ErrorText::Suggestion, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device", "Check that the firmware is for the %1."),
+            {targetDisplayNameText(target)});
+    return std::unexpected(std::move(error));
+}
+
+} // namespace
+
 Status checkFlashWrite(const TargetProfile& target, std::uint32_t address, std::size_t size,
                        bool allowUicr) {
     const firmware::AddressRange range{.start = address, .end = std::uint64_t{address} + size};
+    if (target.vendor == ChipVendor::Stm32) {
+        return checkStm32FlashWrite(target, range, allowUicr);
+    }
     const firmware::AddressRange pib = pibRange(target);
     if (range.overlaps(pib)) {
         Error error = makeError(ErrorCode::FirmwareOutOfRange,
@@ -366,6 +490,18 @@ Status checkFlashWrite(const TargetProfile& target, std::uint32_t address, std::
                       std::format("UICR 0x{:08X}-0x{:08X}", target.uicr.start, target.uicr.end)));
     }
     return {};
+}
+
+bool hasConsole(const DeviceProfile& profile) noexcept {
+    return std::ranges::any_of(
+        profile.targets, [](const TargetProfile& target) { return !target.rttTerminal.empty(); });
+}
+
+std::string_view tabTargetId(const DeviceProfile& profile, std::string_view requested) noexcept {
+    if (!hasConsole(profile) && findTarget(profile, requested) != nullptr) {
+        return findTarget(profile, requested)->id;
+    }
+    return consoleTargetId(profile);
 }
 
 std::string_view consoleTargetId(const DeviceProfile& profile) noexcept {

@@ -6,6 +6,7 @@
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/hw/jlink/programmer.h"
 #include "profiles.h"
+#include "stm32_parts.h"
 
 #include <QtTranslation>
 
@@ -20,11 +21,29 @@ namespace {
 // FICR INFO.PART values and J-Link device names. The nRF9151 reports 0x9120 (py-hardwario maps
 // the nrfjprog name NRF9120_xxAA to the J-Link name NRF9151_XXCA).
 constexpr std::array appParts{
-    ChipPart{.part = 0x52840, .displayName = "nRF52840", .jlinkDevice = "NRF52840_xxAA"},
+    ChipPart{.part = 0x52840,
+             .displayName = "nRF52840",
+             .jlinkDevice = "NRF52840_xxAA",
+             .stm32 = std::nullopt,
+             .id = "",
+             .hintSourceText = "",
+             .designatedFirmware = std::nullopt},
 };
 constexpr std::array ltePartsList{
-    ChipPart{.part = 0x9120, .displayName = "nRF9151", .jlinkDevice = "NRF9151_XXCA"},
-    ChipPart{.part = 0x9160, .displayName = "nRF9160", .jlinkDevice = "NRF9160_xxAA"},
+    ChipPart{.part = 0x9120,
+             .displayName = "nRF9151",
+             .jlinkDevice = "NRF9151_XXCA",
+             .stm32 = std::nullopt,
+             .id = "",
+             .hintSourceText = "",
+             .designatedFirmware = std::nullopt},
+    ChipPart{.part = 0x9160,
+             .displayName = "nRF9160",
+             .jlinkDevice = "NRF9160_xxAA",
+             .stm32 = std::nullopt,
+             .id = "",
+             .hintSourceText = "",
+             .designatedFirmware = std::nullopt},
 };
 
 // FICR / CTRL-AP (nRF52840 and nRF91 product specifications; AP indexes and CTRL-AP IDR values to
@@ -104,6 +123,19 @@ constexpr std::array lteGuide{
     },
 };
 
+// Plan 0040 (ADR-0352): the LoRaWAN module (Murata Type ABZ) has its own SWD connector; it answers
+// only while the application MCU is held (reset + halt).
+constexpr std::array lrwGuide{
+    ConnectionGuideStep{
+        .id = "cable",
+        .illustrationSlot = "chester-lrw-cable",
+        .titleSourceText = QT_TRANSLATE_NOOP("hwio::device", "Cable"),
+        .bodySourceText = QT_TRANSLATE_NOOP(
+            "hwio::device",
+            "Connect the J-Link to the programming connector of the LoRaWAN module."),
+    },
+};
+
 // BLE (ADR-0089, plan 0011 decisions Q8): the Zephyr shell over the Nordic UART Service.
 constexpr std::array blePairingGuide{
     ConnectionGuideStep{
@@ -131,6 +163,22 @@ constexpr firmware::DesignatedFirmware lteFirmware{
     .sha256 =
         firmware::sha256FromHex("95d301a11738bcd9a9df4726159361d64fd8f681c3546f479d46b49f4bf0fe49"),
     .kind = firmware::FirmwareKind::LteBundle,
+    .cacheTag = "lte",
+};
+
+// ADR-0278: the prepared firmware of the LoRaWAN module - hardwario/lora-modem v1.4.1, the CHESTER
+// build (BSD-3-Clause; downloaded, not distributed). SHA-256 measured 2026-11-06 (310 263 B, Intel
+// HEX, flash records 0x08000000-0x0801AEC8). The GitHub asset URL redirects to
+// *.githubusercontent.com (ADR-0281 D2). Cached as lrw-<sha256>.hex.
+constexpr firmware::DesignatedFirmware loraModemFirmware{
+    .name = "lora-modem for CHESTER",
+    .version = "1.4.1",
+    .url = "https://github.com/hardwario/lora-modem/releases/download/v1.4.1/"
+           "lora-modem-1.4.1.chester.hex",
+    .sha256 =
+        firmware::sha256FromHex("e9215b222b68092c33d9a31330bdec6ebea1afaf1cd1844f74cd8745c46ff2e6"),
+    .kind = firmware::FirmwareKind::AppHex,
+    .cacheTag = "lrw",
 };
 
 // ADR-0167: the documentation list of application firmware, English first (the fallback).
@@ -188,7 +236,10 @@ constexpr std::array chesterTargets{
                   .designatedFirmware = std::nullopt,
                   .sensitiveCommandPrefixes = appSensitiveCommands,
                   .sensitiveOutputKeys = appSensitiveOutput,
-                  .resetReason = std::nullopt},
+                  .resetReason = std::nullopt,
+                  .vendor = ChipVendor::Nordic,
+                  .stm32 = std::nullopt,
+                  .dataEeprom = std::nullopt},
     // LTE modem MCU (nRF9151 or nRF9160). Programming only; no RTT console. Connected with the
     // first part's J-Link name, then with the exact part's name (to confirm in Phase 0). The PIB
     // lies in the UICR OTP area, which a UICR erase does not touch.
@@ -219,7 +270,14 @@ constexpr std::array chesterTargets{
                   .sensitiveOutputKeys = {},
                   // nRF9160 / nRF9151 POWER.RESETREAS (secure alias), bit 0 RESETPIN. HIL H5: the
                   // CHESTER application firmware pin-resets the LTE MCU when it does not answer.
-                  .resetReason = ResetReasonRegister{.address = 0x50005400, .pinMask = 0x1}},
+                  .resetReason = ResetReasonRegister{.address = 0x50005400, .pinMask = 0x1},
+                  .vendor = ChipVendor::Nordic,
+                  .stm32 = std::nullopt,
+                  .dataEeprom = std::nullopt},
+    // LoRaWAN module (plan 0040, ADR-0274, ADR-0352): Murata Type ABZ = STM32L072CZ, the shared
+    // curated part. Programming only; no RTT console (the console target stays `app`, ADR-0233).
+    stm32Target(stm32PartIndex("stm32l0-cat5-192k"), "lrw",
+                QT_TRANSLATE_NOOP("hwio::device", "LoRaWAN module"), lrwGuide, loraModemFirmware),
 };
 
 // Plan 0028 (ADR-0200): console file names are parsed back by splitting at '-' (the retention's

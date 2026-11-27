@@ -116,26 +116,58 @@ void ProbePickerViewModel::setProfileId(const QString& id) {
         return;
     }
     m_profileId = id;
+    m_chosenTarget.clear();
     profileIdChanged(); // signal
 }
 
 QString ProbePickerViewModel::targetId() const {
     const device::DeviceProfile* profile = device::ProfileRegistry::find(toStdString(m_profileId));
-    return profile != nullptr ? toQString(device::consoleTargetId(*profile)) : QString();
+    return profile != nullptr
+               ? toQString(device::tabTargetId(*profile, toStdString(m_chosenTarget)))
+               : QString();
+}
+
+void ProbePickerViewModel::setTargetId(const QString& targetId) {
+    if (targetId == m_chosenTarget || !targetChoice()) {
+        return;
+    }
+    m_chosenTarget = targetId;
+    profileIdChanged(); // signal: targetId
+}
+
+bool ProbePickerViewModel::targetChoice() const {
+    const device::DeviceProfile* profile = device::ProfileRegistry::find(toStdString(m_profileId));
+    return profile != nullptr && !device::hasConsole(*profile) && profile->targets.size() > 1;
+}
+
+QVariantList ProbePickerViewModel::targets() const {
+    QVariantList list;
+    const device::DeviceProfile* profile = device::ProfileRegistry::find(toStdString(m_profileId));
+    if (profile == nullptr || !targetChoice()) {
+        return list;
+    }
+    for (const device::TargetProfile& target : profile->targets) {
+        list.append(QVariantMap{
+            {QStringLiteral("id"), toQString(target.id)},
+            {QStringLiteral("title"), device::targetDisplayName(target)},
+            {QStringLiteral("hint"),
+             target.parts.empty() ? QString() : device::partHint(target.parts.front())}});
+    }
+    return list;
 }
 
 bool ProbePickerViewModel::profileChoice() { return device::ProfileRegistry::all().size() > 1; }
 
 QString ProbePickerViewModel::profileName() const {
     const device::DeviceProfile* profile = device::ProfileRegistry::find(toStdString(m_profileId));
-    return profile != nullptr ? toQString(profile->displayName) : QString();
+    return profile != nullptr ? device::profileDisplayName(*profile) : QString();
 }
 
 QVariantList ProbePickerViewModel::profiles() {
     QVariantList list;
     for (const device::DeviceProfile* profile : device::ProfileRegistry::all()) {
         list.append(QVariantMap{{QStringLiteral("id"), toQString(profile->id)},
-                                {QStringLiteral("name"), toQString(profile->displayName)}});
+                                {QStringLiteral("name"), device::profileDisplayName(*profile)}});
     }
     return list;
 }
@@ -157,6 +189,9 @@ QString ProbePickerViewModel::targetTitle(const QString& profileId, const QStrin
     }
     if (targetId == QStringLiteral("lte")) {
         return chipText.isEmpty() ? tr("LTE MCU") : tr("LTE MCU (%1)").arg(chipText);
+    }
+    if (target != nullptr && target->vendor == device::ChipVendor::Stm32) {
+        return device::targetDisplayName(*target); // plan 0039: "STM32L0 cat. 3, 64 KiB"
     }
     return targetId;
 }

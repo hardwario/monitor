@@ -142,18 +142,6 @@ QJsonObject imageJson(const firmware::FirmwareImage& image, std::string_view sou
     return json;
 }
 
-// The catalog of the CHESTER profile with the ADR-0037 limits (plan 0021: + the page lookup).
-std::unique_ptr<firmware::FirmwareCatalog> chesterCatalog(firmware::FirmwareCache* cache) {
-    return std::make_unique<firmware::FirmwareCatalog>(
-        firmware::CatalogOptions{.baseUrl =
-                                     firmware::catalogBaseUrl(chesterProfile().firmwareCatalogUrl),
-                                 .transferTimeout = std::chrono::seconds(60),
-                                 .maxBodyBytes = 32ULL * 1024 * 1024,
-                                 .lookupTimeout = std::chrono::seconds(15),
-                                 .maxPageBytes = 1024ULL * 1024},
-        cache);
-}
-
 // "hio-chester-push-fm v4.0.1 (uploaded 2026-09-07 12:13:53)"
 std::string catalogSummary(const firmware::CatalogInfo& info) {
     std::string text = std::format("{} {}", info.name, info.version);
@@ -854,15 +842,6 @@ Result<CommandResult> lteFlash(const Context& context, const GlobalOptions& glob
 // in a terminal (LteUpdateProcedure): copy and erase the application on the APP connector, update
 // the LTE MCU on the LTE connector, write the application back on the APP connector. Each
 // connector step waits until the J-Link reaches that MCU.
-bool interactiveTerminal() {
-#ifdef HWIO_TEST_OVERRIDES
-    // Test builds only (like HWIO_CATALOG_URL): the end-to-end test drives it through pipes.
-    if (qEnvironmentVariableIsSet("HWIO_TEST_INTERACTIVE")) {
-        return true;
-    }
-#endif
-    return stdinIsTerminal() && stderrIsTerminal();
-}
 
 // The command's result for the procedure's end.
 Result<CommandResult> guidedResult(const device::LteUpdateProcedure& procedure, bool noCopyEnd) {
@@ -954,6 +933,28 @@ Result<CommandResult> lteGuided(const Context& context, const GlobalOptions& glo
 }
 
 } // namespace
+
+// The catalog of the CHESTER profile with the ADR-0037 limits (plan 0021: + the page lookup).
+std::unique_ptr<firmware::FirmwareCatalog> chesterCatalog(firmware::FirmwareCache* cache) {
+    return std::make_unique<firmware::FirmwareCatalog>(
+        firmware::CatalogOptions{.baseUrl =
+                                     firmware::catalogBaseUrl(chesterProfile().firmwareCatalogUrl),
+                                 .transferTimeout = std::chrono::seconds(60),
+                                 .maxBodyBytes = 32ULL * 1024 * 1024,
+                                 .lookupTimeout = std::chrono::seconds(15),
+                                 .maxPageBytes = 1024ULL * 1024},
+        cache);
+}
+
+bool interactiveTerminal() {
+#ifdef HWIO_TEST_OVERRIDES
+    // Test builds only (like HWIO_CATALOG_URL): the end-to-end test drives it through pipes.
+    if (qEnvironmentVariableIsSet("HWIO_TEST_INTERACTIVE")) {
+        return true;
+    }
+#endif
+    return stdinIsTerminal() && stderrIsTerminal();
+}
 
 Result<device::LteUpdateProcedure::Source>
 designatedLteSource(const Context& context, const GlobalOptions& globals, ProgressUi& ui,

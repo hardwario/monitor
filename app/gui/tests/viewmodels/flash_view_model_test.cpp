@@ -12,6 +12,7 @@
 #include "hwio/core/result.h"
 #include "hwio/device/application_backup.h"
 #include "hwio/device/device_session.h"
+#include "hwio/device/lrw_update_procedure.h"
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/firmware/program_progress.h"
 #include "hwio/hw/nrfutil/nrfutil.h"
@@ -31,6 +32,7 @@
 #include "viewmodels/remote_share_view_model.h"
 #include "viewmodels/ui_mode.h"
 #include "viewmodels/ui_mode_controller.h"
+#include "wizard/lrw_update_wizard.h"
 #include "wizard/lte_update_wizard.h"
 #include "wizard/wizard.h"
 #include "wizard/wizard_view_model.h"
@@ -42,6 +44,7 @@
 #include <QDir>
 #include <QFile>
 #include <QIODevice>
+#include <QMetaObject>
 #include <QObject>
 #include <QPointer>
 #include <QSignalSpy>
@@ -60,11 +63,13 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <filesystem>
+#include <format>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -114,10 +119,13 @@ protected:
     }
 
     void start(const std::string& scenario, const QString& target = QStringLiteral("app")) {
+        startWith(scenario, QStringLiteral("chester"), target);
+    }
+    void startWith(const std::string& scenario, const QString& profile, const QString& target) {
         m_scenario = scenario;
         useScenario(m_scenario.c_str());
         m_app = makeApp();
-        tab().configure(QStringLiteral("chester"), target, 801000001, QStringLiteral("Test Probe"));
+        tab().configure(profile, target, 801000001, QStringLiteral("Test Probe"));
     }
 
     [[nodiscard]] AppViewModel& app() { return *m_app; }
@@ -159,6 +167,15 @@ protected:
         return *qobject_cast<FlashViewModel*>(tab().pageViewModel(FlashViewModel::pageId));
     }
     [[nodiscard]] FirmwareSourceViewModel& source() { return *flash().source(); }
+    // Plan 0040 (B4): the designated download of the current kind is neither running nor being
+    // handed over from the cache.
+    [[nodiscard]] bool designatedSettled() {
+        return waitFor([this] {
+            const int state = source().designatedState();
+            return state != FirmwareSourceViewModel::DesignatedDownloading &&
+                   state != FirmwareSourceViewModel::DesignatedLoading;
+        });
+    }
 
     [[nodiscard]] fs::path writeFile(const std::string& name, const QByteArray& bytes) const {
         const fs::path path = root() / name;
@@ -240,8 +257,8 @@ TEST_F(FlashTest, KindDefaultsToApplicationFirmware) {
     // Re-choosing the selected kind changes nothing.
     flash().setKind(Kind::AppFirmware);
     EXPECT_EQ(flash().kind(), Kind::AppFirmware);
-    // 0021 (ADR-0174): two kinds, the modem is part of LTE firmware.
-    ASSERT_EQ(flash().kinds().size(), 2);
+    // 0021 (ADR-0174): the modem is part of LTE firmware; plan 0040: the LoRaWAN module third.
+    ASSERT_EQ(flash().kinds().size(), 3);
     EXPECT_TRUE(flash()
                     .kinds()
                     .at(0)
@@ -954,9 +971,7 @@ TEST_F(FlashTest, DesignatedLteFirmware) {
     source().prepareDesignated();
     EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedDownloading);
     EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Downloading);
-    ASSERT_TRUE(waitFor([this] {
-        return source().designatedState() != FirmwareSourceViewModel::DesignatedDownloading;
-    }));
+    ASSERT_TRUE(designatedSettled());
     ASSERT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
         << source().designatedError().detail().toStdString();
     EXPECT_EQ(source().designatedStatus(), QStringLiteral("Ready"));
@@ -989,9 +1004,7 @@ TEST_F(FlashTest, DesignatedLteFirmware) {
     EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedFailed);
     qputenv("HWIO_DESIGNATED_SHA256", sha.toUtf8());
     source().retryDesignated();
-    ASSERT_TRUE(waitFor([this] {
-        return source().designatedState() != FirmwareSourceViewModel::DesignatedDownloading;
-    }));
+    ASSERT_TRUE(designatedSettled());
     EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady);
     EXPECT_FALSE(source().designatedError().valid());
 
@@ -1186,7 +1199,8 @@ TEST_F(FlashTest, ExpertActionsFollowTheMode) {
     EXPECT_GE(changed.count(), 1);
     EXPECT_TRUE(flash().eraseAllAvailable());
     EXPECT_TRUE(flash().recoverAvailable());
-    ASSERT_EQ(flash().maintenanceTargets().size(), 2);
+    // Plan 0040 B2: the LoRaWAN module (`lrw`) is the third (its actions open the guided wizard).
+    ASSERT_EQ(flash().maintenanceTargets().size(), 3);
     EXPECT_EQ(flash().maintenanceTargets().at(1).toMap().value(QStringLiteral("title")).toString(),
               QStringLiteral("LTE MCU"));
     flash().setMaintenanceTarget(QStringLiteral("lte"));
@@ -1275,19 +1289,26 @@ TEST_F(FlashTest, LteUpdateWizardRunsABundleThroughEveryStep) {
     EXPECT_EQ(wizard->cancelAlternativeText(), QStringLiteral("Write back"));
     EXPECT_EQ(wizard->cancelAcceptText(), QStringLiteral("Leave it erased"));
     EXPECT_EQ(wizard->cancelRejectText(), QStringLiteral("Back"));
-    moveCable("lte");
+    // Watched through the change signal: a fast run passes "Step 2 of 2" between two polls.
     bool sawSecondStep = false;
+    const QMetaObject::Connection watch = QObject::connect(
+        wizard, &hwio::gui::LteUpdateWizard::progressChanged, wizard, [&sawSecondStep, wizard] {
+            if (wizard->stage() == hwio::gui::LteUpdateWizard::Working) {
+                sawSecondStep =
+                    sawSecondStep || wizard->stepText() == QStringLiteral("Step 2 of 2");
+            }
+        });
+    moveCable("lte");
     ASSERT_TRUE(waitFor(
         [&] {
             if (wizard->stage() == hwio::gui::LteUpdateWizard::Working) {
                 EXPECT_FALSE(wizard->canCancel()); // not during a flash
-                sawSecondStep =
-                    sawSecondStep || wizard->stepText() == QStringLiteral("Step 2 of 2");
             }
             return wizard->procedure()->step() ==
                    hwio::device::LteUpdateProcedure::Step::ConnectAppAgain;
         },
         std::chrono::seconds(60)));
+    QObject::disconnect(watch);
     EXPECT_TRUE(sawSecondStep);
     moveCable("app");
     ASSERT_TRUE(reachStage(*wizard, hwio::gui::LteUpdateWizard::Application));
@@ -1621,6 +1642,614 @@ TEST_F(FlashTest, TheOtherConnectorBannerOpensTheLteUpdate) {
     ASSERT_TRUE(tab().wizard()->isOpen());
     EXPECT_EQ(tab().wizard()->wizardId(), QStringLiteral("lte-update"));
     tab().wizard()->cancel(false);
+}
+
+// ---- plan 0039: the STM32 chip device (ADR-0274 ... ADR-0276, ADR-0280) -------------------------
+
+std::string stm32Scenario(int rdp, int devId = 0x417, int flashKib = 64) {
+    return std::format(R"({{"probes": [{{"serialNumber": 801000001, "product": "Test Probe",
+        "chip": {{"family": "stm32l0", "devId": {}, "flashKib": {}, "eepromBytes": 2048,
+        "rdp": {}}}}}]}})",
+                       devId, flashKib, rdp);
+}
+
+class Stm32FlashTest : public FlashTest {
+protected:
+    void startChip(const std::string& scenario, const QString& chip) {
+        startWith(scenario, QStringLiteral("stm32"), chip);
+    }
+};
+
+TEST_F(Stm32FlashTest, OneCardForTheChipWithBinAndOptions) {
+    startChip(stm32Scenario(0), QStringLiteral("stm32l0-cat3-64k"));
+    EXPECT_EQ(tab().consoleTargetId(), QStringLiteral("stm32l0-cat3-64k")); // the chosen chip
+    EXPECT_EQ(flash().kind(), FirmwareSourceViewModel::Stm32Firmware);
+    ASSERT_EQ(flash().kinds().size(), 1);
+    EXPECT_EQ(flash().kinds().front().toMap().value(QStringLiteral("title")).toString(),
+              QStringLiteral("Firmware for STM32L0 cat. 3, 64 KiB"));
+    EXPECT_EQ(flash().targetId(), QStringLiteral("stm32l0-cat3-64k"));
+    EXPECT_TRUE(flash().stm32());
+    flash().setKind(FirmwareSourceViewModel::AppFirmware); // no Nordic cards on this device
+    EXPECT_EQ(flash().kind(), FirmwareSourceViewModel::Stm32Firmware);
+    EXPECT_FALSE(flash().eraseChip());
+    EXPECT_TRUE(flash().keepEeprom());
+    flash().setEraseChip(true);
+    EXPECT_FALSE(flash().keepEeprom()); // erasing the chip erases the EEPROM too
+    flash().setEraseChip(false);
+    // A .bin starts at the flash start; the address is validated.
+    ASSERT_TRUE(load(writeFile("fw.bin", QByteArray(1024, '\x5A'))));
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Ready);
+    EXPECT_TRUE(source().binAddressVisible());
+    EXPECT_EQ(source().binAddress(), QStringLiteral("0x08000000"));
+    EXPECT_TRUE(source().sourceSummary().contains(QStringLiteral("from 0x08000000")))
+        << source().sourceSummary().toStdString();
+    source().setBinAddress(QStringLiteral("0x08000002"));
+    EXPECT_FALSE(source().binAddressError().isEmpty()); // not a multiple of 4
+    source().setBinAddress(QStringLiteral("nope"));
+    EXPECT_FALSE(flash().canFlash());
+    source().setBinAddress(QStringLiteral("0x08000400"));
+    EXPECT_TRUE(flash().canFlash()) << flash().cannotFlashReason().toStdString();
+    flash().flash();
+    ASSERT_TRUE(finished());
+    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
+        << flash().error().detail().toStdString();
+    EXPECT_EQ(flash().chipText(), QStringLiteral("Chip: STM32L0 cat. 3, 64 KiB"));
+}
+
+TEST_F(Stm32FlashTest, EepromRecordsNeedKeepEepromOff) {
+    startChip(stm32Scenario(0), QStringLiteral("stm32l0-cat3-64k"));
+    ASSERT_TRUE(load(writeFile("ee.bin", QByteArray(16, '\x01'))));
+    source().setBinAddress(QStringLiteral("0x08080000"));
+    EXPECT_TRUE(source().hasEeprom());
+    EXPECT_FALSE(flash().canFlash());
+    flash().setKeepEeprom(false);
+    EXPECT_TRUE(flash().canFlash()) << flash().cannotFlashReason().toStdString();
+    flash().flash();
+    ASSERT_TRUE(finished());
+    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
+        << flash().error().detail().toStdString();
+}
+
+TEST_F(Stm32FlashTest, ABinOnTheChesterCardIsRefused) {
+    start(probeScenario());
+    ASSERT_TRUE(load(writeFile("fw.bin", QByteArray(64, '\x5A'))));
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Invalid);
+    EXPECT_EQ(source().kindHint(),
+              QStringLiteral("A .bin file can only be flashed to an STM32 chip."));
+    // Plan 0040: on a CHESTER the LoRaWAN module (an STM32) takes it.
+    EXPECT_EQ(source().suggestedKind(), Kind::LrwFirmware);
+}
+
+// ADR-0276: target.protected offers [Unlock…]; the confirmation names what is lost.
+TEST_F(Stm32FlashTest, ProtectedChipOffersUnlock) {
+    startChip(stm32Scenario(1), QStringLiteral("stm32l0-cat3-64k"));
+    ASSERT_TRUE(load(writeFile("fw.bin", QByteArray(64, '\x5A'))));
+    flash().flash();
+    ASSERT_TRUE(finished());
+    ASSERT_EQ(flash().opState(), FlashViewModel::Failed);
+    EXPECT_EQ(flash().error().code(), QStringLiteral("target.protected"));
+    EXPECT_EQ(flash().errorCustomActionText(), QStringLiteral("Unlock…"));
+    QSignalSpy requested(&flash(), &FlashViewModel::confirmationRequested);
+    flash().triggerCustomAction();
+    ASSERT_EQ(requested.count(), 1);
+    const QVariantMap confirmation = flash().confirmation();
+    EXPECT_EQ(confirmation.value(QStringLiteral("title")).toString(),
+              QStringLiteral("Unlock the STM32L0 cat. 3, 64 KiB?"));
+    EXPECT_EQ(confirmation.value(QStringLiteral("items")).toStringList(),
+              (QStringList{QStringLiteral("Firmware (flash)"), QStringLiteral("Data EEPROM")}));
+    EXPECT_EQ(confirmation.value(QStringLiteral("acceptText")).toString(),
+              QStringLiteral("Unlock and erase"));
+    flash().confirm();
+    ASSERT_TRUE(finished());
+    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
+        << flash().error().detail().toStdString();
+    EXPECT_EQ(flash().resultText(),
+              QStringLiteral("The STM32L0 cat. 3, 64 KiB was unlocked; it is now erased."));
+}
+
+// ADR-0275: another chip -> [Use <found>] switches the tab's chip (never silently).
+TEST_F(Stm32FlashTest, WrongChipOffersTheFoundChip) {
+    startChip(stm32Scenario(0, 0x447, 192), QStringLiteral("stm32l0-cat3-64k"));
+    ASSERT_TRUE(load(writeFile("fw.bin", QByteArray(64, '\x5A'))));
+    flash().flash();
+    ASSERT_TRUE(finished());
+    ASSERT_EQ(flash().opState(), FlashViewModel::Failed);
+    EXPECT_EQ(flash().error().code(), QStringLiteral("target.wrong_chip"));
+    EXPECT_EQ(tab().consoleTargetId(), QStringLiteral("stm32l0-cat3-64k"));
+    EXPECT_EQ(flash().errorCustomActionText(), QStringLiteral("Use STM32L0 cat. 5, 192 KiB"));
+    flash().triggerCustomAction();
+    EXPECT_EQ(tab().consoleTargetId(), QStringLiteral("stm32l0-cat5-192k"));
+    EXPECT_EQ(flash().targetId(), QStringLiteral("stm32l0-cat5-192k"));
+}
+
+TEST_F(Stm32FlashTest, MaintenanceErasesAndUnlocksTheChip) {
+    startChip(stm32Scenario(0), QStringLiteral("stm32l0-cat3-64k"));
+    EXPECT_FALSE(flash().eraseCodeAvailable());
+    EXPECT_TRUE(flash().eraseAllAvailable()); // without the expert setting
+    EXPECT_TRUE(flash().recoverAvailable());
+    EXPECT_EQ(flash().eraseAllText(), QStringLiteral("Erase chip…"));
+    EXPECT_EQ(flash().recoverText(), QStringLiteral("Unlock (erase)…"));
+    EXPECT_EQ(flash().maintenanceTitle(), QStringLiteral("Maintenance — STM32L0 cat. 3, 64 KiB"));
+    flash().requestConfirmation(false);
+    EXPECT_EQ(flash().confirmation().value(QStringLiteral("acceptText")).toString(),
+              QStringLiteral("Erase chip"));
+    flash().confirm();
+    ASSERT_TRUE(finished());
+    EXPECT_EQ(flash().opState(), FlashViewModel::Succeeded)
+        << flash().error().detail().toStdString();
+    EXPECT_EQ(flash().resultText(),
+              QStringLiteral("The STM32L0 cat. 3, 64 KiB was erased (flash and data EEPROM)."));
+}
+
+// ---- plan 0040: the CHESTER LoRaWAN module (ADR-0352)
+// --------------------------------------------
+
+using LrwStep = hwio::device::LrwUpdateProcedure::Step;
+using LrwAction = hwio::device::LrwUpdateProcedure::Action;
+using hwio::gui::LrwUpdateWizard;
+
+class LrwFlashTest : public FlashTest {
+protected:
+    // A CHESTER with the APP and the LoRaWAN connector; the module (STM32L072CZ) answers only
+    // while the application MCU is held (the fake's "needsHalted").
+    void startLrwBoard(int rdp = 0) {
+        moveCable("app");
+        start(std::string(R"({"libraryVersion": 81000, "probes": [{"serialNumber": 801000001,
+            "product": "Test Probe", "firmware": "J-Link V11 compiled Sep 21 2023 10:38:43",
+            "rtt": {"output": [{"atMs": 0, "buffer": 0, "text": "uart:~$ booted\n"}]},
+            "connectors": {"file": ")") +
+              (root() / "connector").generic_string() +
+              R"(", "initial": "app", "chips": {"app": {},
+              "lrw": {"family": "stm32l0", "devId": 1095, "revId": 8200, "flashKib": 192,
+                      "eepromBytes": 6144, "needsHalted": "app", "rdp": )" +
+              std::to_string(rdp) + "}}}}]}");
+    }
+    [[nodiscard]] LrwUpdateWizard* lrwWizard() {
+        return qobject_cast<LrwUpdateWizard*>(tab().wizard()->wizard());
+    }
+    static bool reachLrw(const LrwUpdateWizard& wizard, LrwStep step) {
+        return waitFor([&] { return wizard.procedure()->step() == step; },
+                       std::chrono::seconds(60));
+    }
+    // ConnectAppAgain or later: the fake's CTRL-AP answers behind any connector, so the check of
+    // the APP connector may pass before the cable is back (a fake limitation, not the product's).
+    static bool reachAppAgain(const LrwUpdateWizard& wizard) {
+        return waitFor(
+            [&] {
+                const LrwStep step = wizard.procedure()->step();
+                return step == LrwStep::ConnectAppAgain || step == LrwStep::ResetApp ||
+                       step == LrwStep::Done;
+            },
+            std::chrono::seconds(60));
+    }
+    // Moves the cable after the wizard's first check of the connector has ended (a move during
+    // an operation drops the fake's connection, as on hardware).
+    void moveCableLater(const std::string& connector) const {
+        hwio::gui::test::spin(std::chrono::milliseconds(300));
+        moveCable(connector);
+    }
+    [[nodiscard]] fs::path moduleHex(const std::string& name = "module.hex") const {
+        return hexFile(name, image(0x08000000, 1024, 0x3C));
+    }
+    // Plan 0040 (B4): unique designated files (the firmware cache of the test data directory never
+    // has them yet) and the test-only overrides that make `file` of `http` the designated firmware
+    // of the next download (read when the download starts).
+    [[nodiscard]] static QByteArray uniqueModuleHex() {
+        // The whole UUID, not one byte of it: with 256 possible files a file of an earlier test
+        // was in the cache now and then (0 downloads instead of 1).
+        std::vector<std::byte> data(1024, std::byte{0x3C});
+        const QByteArray id = QUuid::createUuid().toRfc4122();
+        std::ranges::transform(id, data.begin(), [](char c) { return static_cast<std::byte>(c); });
+        std::vector<Segment> segments;
+        segments.push_back(Segment{.address = 0x08000000, .data = std::move(data)});
+        return QByteArray::fromStdString(
+            hwio::firmware::test::toHex(*FirmwareImage::fromSegments(std::move(segments))));
+    }
+    [[nodiscard]] static QByteArray uniqueLteBundle(std::size_t applicationBytes = 4096) {
+        const QByteArray modem = hwio::firmware::test::zipBytes(
+            {{.name = "firmware.update.image.segments.0.hex", .data = ":00000001FF\n"},
+             {.name = "x" + randomId().toStdString() + ".txt", .data = "x"}});
+        return hwio::firmware::test::zipBytes(
+            {{.name = "modem.zip", .data = modem.toStdString()},
+             {.name = "application.hex",
+              .data = hwio::firmware::test::toHex(image(0x1000, applicationBytes))}});
+    }
+    static void designate(const hwio::firmware::test::HttpFixture& http, const QString& file,
+                          const QByteArray& bytes) {
+        qputenv("HWIO_DESIGNATED_URL", (http.baseUrl() + QStringLiteral("/") + file).toUtf8());
+        qputenv("HWIO_DESIGNATED_SHA256",
+                QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
+    }
+};
+
+TEST_F(LrwFlashTest, TheLoRaWanCardOffersTheDesignatedFirmwareAndTheCablingNote) {
+    startLrwBoard();
+    ASSERT_EQ(flash().kinds().size(), 3);
+    const QVariantMap card = flash().kinds().at(2).toMap();
+    EXPECT_EQ(card.value(QStringLiteral("kind")).toInt(), Kind::LrwFirmware);
+    EXPECT_EQ(card.value(QStringLiteral("title")).toString(), QStringLiteral("LoRaWAN module"));
+    EXPECT_EQ(card.value(QStringLiteral("mcu")).toString(),
+              QStringLiteral("Murata Type ABZ (STM32L072CZ)"));
+    flash().setKind(Kind::LrwFirmware);
+    EXPECT_EQ(flash().kind(), Kind::LrwFirmware);
+    EXPECT_EQ(flash().targetId(), QStringLiteral("lrw"));
+    EXPECT_TRUE(flash().stm32());
+    EXPECT_FALSE(flash().haltAvailable());
+    EXPECT_TRUE(flash().lrwCableText().startsWith(
+        QStringLiteral("Connect the J-Link to the programming connector of the LoRaWAN module. ")));
+    EXPECT_TRUE(source().designatedAvailable());
+    EXPECT_TRUE(source().designatedActive());
+    EXPECT_EQ(source().designatedTitle(),
+              QStringLiteral("lora-modem for CHESTER 1.4.1 (recommended)"));
+    EXPECT_EQ(source().sourceName(), QStringLiteral("lora-modem for CHESTER 1.4.1"));
+    EXPECT_FALSE(source().modemNoteVisible());
+    EXPECT_EQ(flash().cannotFlashReason(),
+              QStringLiteral("The LoRaWAN module firmware is not downloaded yet"));
+    // Own files: .hex and .bin (with its start address, as on the STM32 card).
+    EXPECT_EQ(source().nameFilters().front(), QStringLiteral("STM32 firmware (*.hex *.bin)"));
+    ASSERT_TRUE(load(writeFile("module.bin", QByteArray(256, '\x11'))));
+    EXPECT_EQ(source().lteSource(), FirmwareSourceViewModel::OwnFile);
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Ready);
+    EXPECT_TRUE(source().binAddressVisible());
+    EXPECT_EQ(source().binAddress(), QStringLiteral("0x08000000"));
+    EXPECT_TRUE(flash().canFlash()) << flash().cannotFlashReason().toStdString();
+    // The LTE card's designated firmware is another one.
+    flash().setKind(Kind::LteFirmware);
+    source().setLteSource(FirmwareSourceViewModel::Designated);
+    EXPECT_EQ(source().designatedTitle(),
+              QStringLiteral("HARDWARIO LTE firmware 1.7.0 (recommended)"));
+    // Not on a board without the module.
+    app().newTab();
+    ASSERT_TRUE(tab().configure(QStringLiteral("stm32"), QStringLiteral("stm32l0-cat5-192k"),
+                                801000001, QStringLiteral("Test Probe")));
+    flash().setKind(Kind::LrwFirmware);
+    EXPECT_EQ(flash().kind(), Kind::Stm32Firmware);
+}
+
+TEST_F(LrwFlashTest, KindHintsTellTheModuleFirmwareByItsAddressRange) {
+    startLrwBoard();
+    // A lora-modem file (STM32 flash at 0x08000000) on Application firmware.
+    ASSERT_TRUE(load(moduleHex()));
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Invalid);
+    EXPECT_EQ(source().suggestedKind(), Kind::LrwFirmware);
+    EXPECT_EQ(source().kindHint(), QStringLiteral("This is LoRaWAN module firmware — switch?"));
+    EXPECT_EQ(flash().cannotFlashReason(),
+              QStringLiteral("The file does not match the chosen kind"));
+    // ... also on the LTE card.
+    flash().setKind(Kind::LteFirmware);
+    source().setLteSource(FirmwareSourceViewModel::OwnFile);
+    EXPECT_EQ(source().suggestedKind(), Kind::LrwFirmware);
+    flash().setKind(Kind::AppFirmware);
+    source().acceptSuggestedKind();
+    EXPECT_EQ(flash().kind(), Kind::LrwFirmware);
+    EXPECT_EQ(source().lteSource(), FirmwareSourceViewModel::OwnFile);
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Ready);
+    EXPECT_TRUE(source().kindHint().isEmpty());
+    // An nRF image on the LoRaWAN card.
+    ASSERT_TRUE(load(hexFile()));
+    EXPECT_EQ(source().suggestedKind(), Kind::AppFirmware);
+    EXPECT_EQ(source().kindHint(),
+              QStringLiteral("This is not LoRaWAN module firmware — switch to Application "
+                             "firmware?"));
+    // A .bin on Application firmware belongs to the module.
+    flash().setKind(Kind::AppFirmware);
+    ASSERT_TRUE(load(writeFile("module.bin", QByteArray(256, '\x11'))));
+    EXPECT_EQ(source().suggestedKind(), Kind::LrwFirmware);
+    EXPECT_EQ(source().kindHint(),
+              QStringLiteral("A .bin file can only be flashed to an STM32 chip."));
+}
+
+// The designated lora-modem firmware (an Intel HEX): downloaded, then flashed by the wizard with
+// the cable moves (fixture through the test-only HWIO_DESIGNATED_URL / HWIO_DESIGNATED_SHA256).
+TEST_F(LrwFlashTest, FlashingTheDesignatedFirmwareRunsTheGuidedWizard) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (HWIO_DESIGNATED_URL)";
+#endif
+    hwio::firmware::test::HttpFixture http;
+    ASSERT_TRUE(http.listening());
+    // Unique content: the firmware cache of the test data directory never has it yet.
+    const QByteArray hex = QByteArray::fromStdString(hwio::firmware::test::toHex(
+        image(0x08000000, 1024, static_cast<std::uint8_t>(QUuid::createUuid().data1))));
+    const QString sha =
+        QString::fromLatin1(QCryptographicHash::hash(hex, QCryptographicHash::Sha256).toHex());
+    http.set(QStringLiteral("/chester/lrw.hex"),
+             hwio::firmware::test::HttpFixture::Response::ok(hex));
+    qputenv("HWIO_DESIGNATED_URL", (http.baseUrl() + QStringLiteral("/lrw.hex")).toUtf8());
+    qputenv("HWIO_DESIGNATED_SHA256", sha.toUtf8());
+    startLrwBoard();
+    flash().setKind(Kind::LrwFirmware);
+    source().prepareDesignated();
+    ASSERT_TRUE(designatedSettled());
+    ASSERT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
+        << source().designatedError().detail().toStdString();
+    EXPECT_EQ(source().sourceSummary(),
+              QStringLiteral("lora-modem for CHESTER 1.4.1 · LoRaWAN module firmware"));
+    ASSERT_TRUE(waitFor([this] { return flash().canFlash(); }))
+        << flash().cannotFlashReason().toStdString();
+    flash().flash();
+    EXPECT_EQ(flash().opState(), FlashViewModel::Idle); // not on this page
+    LrwUpdateWizard* wizard = lrwWizard();
+    ASSERT_NE(wizard, nullptr);
+    EXPECT_FALSE(flash().takeLrwRequest().has_value()); // taken by the wizard
+    EXPECT_EQ(wizard->title(), QStringLiteral("Flash the LoRaWAN module"));
+    EXPECT_EQ(wizard->plannedSteps().size(), 6U);
+    EXPECT_EQ(wizard->procedure()->request().action, LrwAction::Flash);
+    EXPECT_TRUE(tab().isBusy());
+    EXPECT_EQ(tab().busyText(), QStringLiteral("Paused for the LoRaWAN module"));
+    ASSERT_TRUE(reachLrw(*wizard, LrwStep::ConnectLrw));
+    EXPECT_EQ(wizard->stage(), LrwUpdateWizard::Connector);
+    EXPECT_EQ(wizard->illustration(), QStringLiteral("chester-lrw-cable"));
+    EXPECT_EQ(wizard->current().heading,
+              QStringLiteral("Connect the J-Link to the LoRaWAN connector"));
+    EXPECT_TRUE(
+        wizard->busyCancelText().startsWith(QStringLiteral("The application MCU is stopped.")));
+    // The cable is still on APP: the wizard waits.
+    EXPECT_FALSE(waitFor([&] { return wizard->procedure()->step() != LrwStep::ConnectLrw; },
+                         std::chrono::milliseconds(300)));
+    moveCableLater("lrw");
+    ASSERT_TRUE(reachAppAgain(*wizard));
+    if (wizard->procedure()->step() == LrwStep::ConnectAppAgain) {
+        EXPECT_EQ(wizard->illustration(), QStringLiteral("chester-app-cable"));
+    }
+    moveCableLater("app");
+    ASSERT_TRUE(waitFor([&] { return wizard->stage() == LrwUpdateWizard::Summary; },
+                        std::chrono::seconds(60)));
+    EXPECT_EQ(wizard->current().kind, hwio::gui::StepKind::Done);
+    EXPECT_EQ(wizard->current().heading,
+              QStringLiteral("LoRaWAN module flashed with lora-modem for CHESTER 1.4.1."));
+    EXPECT_FALSE(tab().isBusy());
+    tab().wizard()->action(QStringLiteral("open-console"));
+    EXPECT_FALSE(tab().wizard()->isOpen());
+}
+
+// Plan 0040 (B4): each card keeps its prepared firmware - switching LTE -> LoRaWAN -> LTE neither
+// loads it again nor asks the server again.
+TEST_F(LrwFlashTest, SwitchingTheCardKeepsThePreparedFirmware) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (HWIO_DESIGNATED_URL)";
+#endif
+    hwio::firmware::test::HttpFixture http;
+    ASSERT_TRUE(http.listening());
+    const QByteArray bundle = uniqueLteBundle();
+    const QByteArray hex = uniqueModuleHex();
+    http.set(QStringLiteral("/chester/lte.zip"),
+             hwio::firmware::test::HttpFixture::Response::ok(bundle));
+    http.set(QStringLiteral("/chester/lrw.hex"),
+             hwio::firmware::test::HttpFixture::Response::ok(hex));
+    qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
+    startLrwBoard();
+    flash().setKind(Kind::LteFirmware);
+    designate(http, QStringLiteral("lte.zip"), bundle);
+    source().prepareDesignated();
+    ASSERT_TRUE(designatedSettled());
+    ASSERT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
+        << source().designatedError().detail().toStdString();
+    flash().setKind(Kind::LrwFirmware);
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedIdle); // its own
+    designate(http, QStringLiteral("lrw.hex"), hex);
+    source().prepareDesignated();
+    ASSERT_TRUE(designatedSettled());
+    ASSERT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
+        << source().designatedError().detail().toStdString();
+
+    // Back to LTE: still prepared at once; showing the row again (prepareDesignated) changes
+    // nothing.
+    flash().setKind(Kind::LteFirmware);
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady);
+    EXPECT_EQ(source().designatedStatus(), QStringLiteral("Ready"));
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Ready);
+    EXPECT_EQ(source().sourceName(), QStringLiteral("HARDWARIO LTE firmware 1.7.0"));
+    source().prepareDesignated();
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady);
+    flash().setKind(Kind::LrwFirmware);
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady);
+    EXPECT_EQ(source().sourceName(), QStringLiteral("lora-modem for CHESTER 1.4.1"));
+    EXPECT_EQ(http.requests(QStringLiteral("/chester/lte.zip")), 1);
+    EXPECT_EQ(http.requests(QStringLiteral("/chester/lrw.hex")), 1);
+}
+
+// Plan 0040 (B4): a running download of the LTE card goes on while the LoRaWAN card is shown.
+TEST_F(LrwFlashTest, ARunningDownloadSurvivesACardSwitch) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (HWIO_DESIGNATED_URL)";
+#endif
+    hwio::firmware::test::HttpFixture http;
+    ASSERT_TRUE(http.listening());
+    const QByteArray bundle = uniqueLteBundle(16); // small: trickled
+    // A slow server: one byte every 2 ms.
+    http.set(QStringLiteral("/chester/lte.zip"),
+             hwio::firmware::test::HttpFixture::Response::trickling(bundle, 2));
+    qputenv("HWIO_NRFUTIL", QByteArray(HWIO_FAKE_NRFUTIL));
+    startLrwBoard();
+    flash().setKind(Kind::LteFirmware);
+    designate(http, QStringLiteral("lte.zip"), bundle);
+    source().prepareDesignated();
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedDownloading);
+    ASSERT_TRUE(
+        waitFor([&http] { return http.requests(QStringLiteral("/chester/lte.zip")) == 1; }));
+    flash().setKind(Kind::LrwFirmware);
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedIdle);
+    EXPECT_TRUE(source().designatedStatus().isEmpty());
+    flash().setKind(Kind::LteFirmware);
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedDownloading);
+    EXPECT_EQ(source().sourceState(), FirmwareSourceViewModel::Downloading);
+    ASSERT_TRUE(designatedSettled());
+    EXPECT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
+        << source().designatedError().detail().toStdString();
+    EXPECT_EQ(http.requests(QStringLiteral("/chester/lte.zip")), 1);
+}
+
+// Plan 0040 (B4): a verified cache file is handed over without a "Downloading…" status.
+TEST_F(LrwFlashTest, ACacheHitIsNotShownAsADownload) {
+#ifndef HWIO_TEST_OVERRIDES
+    GTEST_SKIP() << "needs HWIO_TEST_OVERRIDES (HWIO_DESIGNATED_URL)";
+#endif
+    hwio::firmware::test::HttpFixture http;
+    ASSERT_TRUE(http.listening());
+    const QByteArray hex = uniqueModuleHex();
+    http.set(QStringLiteral("/chester/lrw.hex"),
+             hwio::firmware::test::HttpFixture::Response::ok(hex));
+    designate(http, QStringLiteral("lrw.hex"), hex);
+    startLrwBoard();
+    flash().setKind(Kind::LrwFirmware);
+    source().prepareDesignated();
+    ASSERT_TRUE(designatedSettled());
+    ASSERT_EQ(source().designatedState(), FirmwareSourceViewModel::DesignatedReady)
+        << source().designatedError().detail().toStdString();
+
+    // Another tab: its own source, the file is in the cache now.
+    app().newTab();
+    ASSERT_TRUE(tab().configure(QStringLiteral("chester"), QStringLiteral("app"), 801000001,
+                                QStringLiteral("Test Probe")));
+    flash().setKind(Kind::LrwFirmware);
+    FirmwareSourceViewModel& second = source();
+    std::vector<int> states;
+    const QObject receiver; // destroyed before `states`: ends the connection
+    QObject::connect(&second, &FirmwareSourceViewModel::designatedChanged, &receiver,
+                     [&states, &second] { states.push_back(second.designatedState()); });
+    second.prepareDesignated();
+    EXPECT_EQ(second.designatedState(), FirmwareSourceViewModel::DesignatedLoading);
+    EXPECT_TRUE(second.designatedStatus().isEmpty());
+    EXPECT_LT(second.designatedProgress(), 0);
+    EXPECT_EQ(second.sourceState(), FirmwareSourceViewModel::None);
+    EXPECT_EQ(flash().cannotFlashReason(),
+              QStringLiteral("The LoRaWAN module firmware is not downloaded yet"));
+    ASSERT_TRUE(designatedSettled());
+    EXPECT_EQ(second.designatedState(), FirmwareSourceViewModel::DesignatedReady)
+        << second.designatedError().detail().toStdString();
+    EXPECT_EQ(second.sourceState(), FirmwareSourceViewModel::Ready);
+    EXPECT_EQ(http.requests(QStringLiteral("/chester/lrw.hex")), 1);
+    ASSERT_FALSE(states.empty());
+    for (const int state : states) {
+        EXPECT_NE(state, FirmwareSourceViewModel::DesignatedDownloading);
+    }
+}
+
+TEST_F(LrwFlashTest, AProtectedModuleAsksForTheUnlockInTheWizard) {
+    startLrwBoard(1);
+    flash().setKind(Kind::LrwFirmware);
+    ASSERT_TRUE(load(moduleHex()));
+    ASSERT_TRUE(waitFor([this] { return flash().canFlash(); }))
+        << flash().cannotFlashReason().toStdString();
+    flash().flash();
+    LrwUpdateWizard* wizard = lrwWizard();
+    ASSERT_NE(wizard, nullptr);
+    ASSERT_TRUE(reachLrw(*wizard, LrwStep::ConnectLrw));
+    moveCableLater("lrw");
+    ASSERT_TRUE(reachLrw(*wizard, LrwStep::NeedsUnlockConfirmation));
+    EXPECT_EQ(wizard->stage(), LrwUpdateWizard::UnlockConfirmation);
+    EXPECT_TRUE(wizard->promptText().endsWith(
+        QStringLiteral("the module's original Murata firmware is removed.")));
+    EXPECT_EQ(wizard->current().primaryText, QStringLiteral("Unlock and erase"));
+    EXPECT_TRUE(wizard->canPrimary());
+    EXPECT_TRUE(wizard->canCancel());
+    wizard->primary();
+    ASSERT_TRUE(reachAppAgain(*wizard));
+    EXPECT_TRUE(wizard->procedure()->unlocked());
+    moveCableLater("app");
+    ASSERT_TRUE(reachLrw(*wizard, LrwStep::Done));
+}
+
+// ADR-0421 (plan 0059 D-19): the host's real operations refuse the LoRaWAN module from a remote
+// session - every kind, although the profile has the target - and still accept the application.
+TEST_F(LrwFlashTest, TheModuleIsNotOperatedFromARemoteSession) {
+    namespace tunnel = hwio::remote::tunnel;
+    startLrwBoard();
+    ASSERT_TRUE(tab().ensureSession(false));
+    ASSERT_NE(tab().session(), nullptr);
+    const hwio::remote::DeviceSessionOperations operations(*tab().session(), {}, nullptr);
+    const tunnel::OpTarget lrw = tunnel::targetFromId("lrw").value_or(tunnel::OpTarget::App);
+    ASSERT_EQ(tunnel::targetId(lrw), "lrw");
+    for (const tunnel::OpKind kind : {tunnel::OpKind::Flash, tunnel::OpKind::Erase,
+                                      tunnel::OpKind::Recover, tunnel::OpKind::Reset}) {
+        tunnel::OpRequest request{.id = "1", .kind = kind, .target = lrw};
+        if (kind == tunnel::OpKind::Flash) {
+            request.firmwareId = randomId().toStdString();
+        }
+        const hwio::Status refused = operations.validate(request);
+        ASSERT_FALSE(refused.has_value()) << static_cast<int>(kind);
+        EXPECT_EQ(refused.error().code, hwio::ErrorCode::RemoteTargetUnsupported)
+            << static_cast<int>(kind);
+        EXPECT_EQ(refused.error().detail, "the lrw target is not offered remotely");
+    }
+    // A target the device does not have is the other refusal; the application is accepted.
+    const tunnel::OpTarget unknown = tunnel::targetFromId("nope").value_or(tunnel::OpTarget::App);
+    ASSERT_EQ(tunnel::targetId(unknown), "nope");
+    const hwio::Status missing =
+        operations.validate({.id = "2", .kind = tunnel::OpKind::Reset, .target = unknown});
+    ASSERT_FALSE(missing.has_value());
+    EXPECT_EQ(missing.error().code, hwio::ErrorCode::RemoteTargetUnsupported);
+    EXPECT_EQ(missing.error().detail, "the device has no nope target");
+    EXPECT_TRUE(
+        operations
+            .validate({.id = "3", .kind = tunnel::OpKind::Reset, .target = tunnel::OpTarget::App})
+            .has_value());
+}
+
+TEST_F(LrwFlashTest, MaintenanceOfTheModuleOpensTheGuidedWizard) {
+    startLrwBoard();
+    enableExpertActions();
+    const QVariantList targets = flash().maintenanceTargets();
+    ASSERT_EQ(targets.size(), 3);
+    EXPECT_EQ(targets.at(2).toMap().value(QStringLiteral("targetId")).toString(),
+              QStringLiteral("lrw"));
+    EXPECT_EQ(targets.at(2).toMap().value(QStringLiteral("title")).toString(),
+              QStringLiteral("LoRaWAN module"));
+    EXPECT_TRUE(flash().resetAvailable());
+    flash().setMaintenanceTarget(QStringLiteral("lrw"));
+    EXPECT_EQ(flash().maintenanceTitle(), QStringLiteral("Maintenance — LoRaWAN module"));
+    EXPECT_FALSE(flash().resetAvailable());
+    EXPECT_FALSE(flash().eraseCodeAvailable());
+    EXPECT_EQ(flash().eraseAllText(), QStringLiteral("Erase chip…"));
+    EXPECT_EQ(flash().recoverText(), QStringLiteral("Unlock (erase)…"));
+    // Plan 0040 D9: no [Reset] / [Reset and halt] for the module (the guided flow's final reset
+    // of the application MCU restarts it).
+    flash().reset(false);
+    flash().reset(true);
+    EXPECT_FALSE(tab().wizard()->isOpen());
+    EXPECT_EQ(flash().opState(), FlashViewModel::Idle);
+
+    // [Unlock (erase)…]: the confirmation names the Murata firmware; the wizard unlocks.
+    flash().requestConfirmation(true);
+    EXPECT_EQ(flash().confirmation().value(QStringLiteral("consequence")).toString(),
+              QStringLiteral("The module's original Murata firmware is removed. This cannot be "
+                             "undone."));
+    flash().confirm();
+    LrwUpdateWizard* wizard = lrwWizard();
+    ASSERT_NE(wizard, nullptr);
+    EXPECT_EQ(wizard->procedure()->request().action, LrwAction::Unlock);
+    EXPECT_EQ(wizard->title(), QStringLiteral("Unlock the LoRaWAN module"));
+    EXPECT_EQ(flash().opState(), FlashViewModel::Idle);
+    ASSERT_TRUE(reachLrw(*wizard, LrwStep::ConnectLrw));
+    // Cancel while waiting for the cable: the dialog closes, the tab is free again.
+    tab().wizard()->cancel(true);
+    ASSERT_TRUE(waitFor([this] { return !tab().wizard()->isOpen(); }));
+    EXPECT_FALSE(tab().isBusy());
+
+    // [Erase chip…]
+    moveCableLater("app");
+    ASSERT_TRUE(waitFor([this] { return flash().canRunMaintenance(); }));
+    flash().requestConfirmation(false);
+    EXPECT_EQ(flash().confirmation().value(QStringLiteral("consequence")).toString(),
+              QStringLiteral("This cannot be undone."));
+    flash().confirm();
+    wizard = lrwWizard();
+    ASSERT_NE(wizard, nullptr);
+    EXPECT_EQ(wizard->procedure()->request().action, LrwAction::Erase);
+    tab().wizard()->cancel(true);
+    ASSERT_TRUE(waitFor([this] { return !tab().wizard()->isOpen(); }));
+}
+
+TEST_F(LrwFlashTest, TheWizardWithoutARequestSaysWhereToStart) {
+    startLrwBoard();
+    tab().openWizard(QStringLiteral("lrw-update"));
+    LrwUpdateWizard* wizard = lrwWizard();
+    ASSERT_NE(wizard, nullptr);
+    EXPECT_EQ(wizard->stage(), LrwUpdateWizard::Failed);
+    EXPECT_EQ(wizard->error().message(),
+              QStringLiteral("Start the LoRaWAN module operations on the Flash page."));
+    EXPECT_FALSE(wizard->canPrimary());
+    EXPECT_FALSE(tab().isBusy());
 }
 
 } // namespace

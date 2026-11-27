@@ -291,6 +291,10 @@ public:
     // Leaves ChoosingDevice with this configuration (restore or the picker); never connects.
     // Returns false when the profile or target is unknown. ADR-0233: the tab always uses the
     // profile's console target, whatever target is requested (a tab saved with "lte").
+    // Plan 0039 (ADR-0275): [Use <found chip>] of target.wrong_chip - the tab of a profile without
+    // a console (STM32 chip) switches to another chip of its profile on the same probe (the
+    // session is released and opened again on the new chip). False when not possible.
+    Q_INVOKABLE bool changeTarget(const QString& targetId);
     bool configure(const QString& profileId, const QString& requestedTarget, std::uint32_t serial,
                    const QString& product = {});
     // Plan 0012: the Bluetooth variant (restore or the Bluetooth picker); never connects. Returns

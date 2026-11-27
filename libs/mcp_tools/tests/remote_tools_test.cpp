@@ -337,6 +337,11 @@ const std::map<QString, std::string>& matrix() {
         {QStringLiteral("read_uicr"), "mcp.capability_missing"},
         {QStringLiteral("write_memory"), "mcp.capability_missing"},
         {QStringLiteral("write_flash"), "mcp.capability_missing"},
+        // Plan 0039: the STM32 chip is not shared (ADR-0421).
+        {QStringLiteral("stm32_info"), "mcp.capability_missing"},
+        {QStringLiteral("stm32_flash"), "mcp.capability_missing"},
+        {QStringLiteral("stm32_erase"), "mcp.capability_missing"},
+        {QStringLiteral("stm32_unlock"), "mcp.capability_missing"},
     };
     return rows;
 }
@@ -349,7 +354,9 @@ TEST(RemoteTools, EveryToolHasItsRemoteAnswer) {
     ASSERT_FALSE(tools.isEmpty());
     // Arguments the schemas require besides `device`.
     const QJsonObject extra{{QStringLiteral("address"), QStringLiteral("0x20000000")},
-                            {QStringLiteral("data_hex"), QStringLiteral("00")}};
+                            {QStringLiteral("data_hex"), QStringLiteral("00")},
+                            // Plan 0039: stm32_unlock (never runs: refused first).
+                            {QStringLiteral("confirm"), true}};
     for (const auto& item : tools) {
         const QString name = item.toObject().value(QStringLiteral("name")).toString();
         const auto row = matrix().find(name);
@@ -367,6 +374,9 @@ TEST(RemoteTools, EveryToolHasItsRemoteAnswer) {
             if (properties.contains(it.key())) {
                 arguments.insert(it.key(), it.value());
             }
+        }
+        if (name == QStringLiteral("stm32_flash")) { // plan 0039: `path` is required there
+            arguments.insert(QStringLiteral("path"), QStringLiteral("/nonexistent.hex"));
         }
         arguments.insert(QStringLiteral("device"), remoteId);
         const PendingCall call = rig.harness.call(name, arguments, 2s);

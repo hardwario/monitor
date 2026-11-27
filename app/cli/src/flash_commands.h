@@ -13,6 +13,8 @@
 
 #include "cli_app.h"
 #include "hwio/core/result.h"
+#include "hwio/firmware/firmware_cache.h"
+#include "hwio/firmware/firmware_catalog.h"
 #include "probe_options.h"
 
 #include <CLI/App.hpp>
@@ -28,6 +30,14 @@ namespace hwio::cli {
 void registerAppFlashCommands(CLI::App& appGroup, const std::shared_ptr<ProbeOptions>& group,
                               CommandSlot& slot, const GlobalOptions& globals);
 void registerLteCommands(CLI::App& chester, CommandSlot& slot, const GlobalOptions& globals);
+
+// The catalog of the CHESTER profile with the ADR-0037 limits (also the designated downloads of
+// `chester lte flash` and `chester lrw flash`, plan 0040); `cache` may be nullptr.
+[[nodiscard]] std::unique_ptr<firmware::FirmwareCatalog>
+chesterCatalog(firmware::FirmwareCache* cache);
+// A guided command (`chester lte flash --guided`, `chester lrw flash|erase|unlock`) can wait for
+// the user: stdin and stderr are terminals (HWIO_TEST_INTERACTIVE in HWIO_TEST_OVERRIDES builds).
+[[nodiscard]] bool interactiveTerminal();
 
 // `chester app flash` argument rules (exposed for tests): an existing path is a file, 32 hex
 // digits a catalog ID, anything else usage.invalid_argument; no argument: the first non-empty of

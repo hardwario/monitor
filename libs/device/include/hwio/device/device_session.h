@@ -225,6 +225,10 @@ public:
                    FlashOptions options);
     [[nodiscard]] Result<OperationId> erase(std::string_view targetId, EraseScope scope);
     [[nodiscard]] Result<OperationId> recover(std::string_view targetId);
+    // Plan 0039 (ADR-0276): STM32 read-out protection level 1 -> 0; the chip mass-erases flash and
+    // data EEPROM. Only after the user's confirmation (ADR-0038). The worker fails a non-STM32
+    // target with usage.invalid_argument.
+    [[nodiscard]] Result<OperationId> unlock(std::string_view targetId);
     // `options`: only `guided` applies (ADR-0383).
     [[nodiscard]] Result<OperationId> updateModem(std::string_view targetId,
                                                   std::filesystem::path modemZip,

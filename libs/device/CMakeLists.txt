@@ -7,6 +7,7 @@
 hwio_add_backend_library(hwio_device
     include/hwio/device/application_backup.h
     include/hwio/device/ble_lock.h
+    include/hwio/device/lrw_update_procedure.h
     include/hwio/device/lte_update_procedure.h
     include/hwio/device/ble_session.h
     include/hwio/device/command_capture.h
@@ -38,6 +39,7 @@ hwio_add_backend_library(hwio_device
     include/hwio/device/shell_query.h
     src/application_backup.cpp
     src/ble_lock.cpp
+    src/lrw_update_procedure.cpp
     src/lte_update_procedure.cpp
     src/ble_session.cpp
     src/ble_session_internal.h
@@ -71,8 +73,10 @@ hwio_add_backend_library(hwio_device
     src/probe_tools.cpp
     src/profile.cpp
     src/profiles/chester.cpp
+    src/profiles/stm32.cpp
     src/profiles/generic.cpp
     src/profiles/profiles.h
+    src/profiles/stm32_parts.h
     src/session_internal.h
     src/session_registry.cpp
     src/session_worker.cpp

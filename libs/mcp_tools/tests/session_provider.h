@@ -144,6 +144,10 @@ public:
             options.profile = m_settings.profile;
             options.targetId = request.targetId.empty() ? std::string_view("app")
                                                         : std::string_view(request.targetId);
+            if (const auto* target = hwio::device::findTarget(*options.profile, options.targetId);
+                target != nullptr && target->rttTerminal.empty()) {
+                options.attachRtt = false; // plan 0039: STM32 chips have no console
+            }
             options.probeSn = static_cast<std::uint32_t>(std::stoul(request.id.substr(6)));
             options.speedKhz = request.speedKhz.value_or(2000);
             options.latencyMs = 5;

@@ -46,10 +46,12 @@ public:
     // Locates the J-Link library and opens the session on `targetId` (non-blocking, as
     // DeviceSession::open). `nrfUtil`: the nRF Util for modem updates. Errors: those of
     // locateJLinkLibrary, the speed option and DeviceSession::open.
+    // `profile`: nullptr = CHESTER (plan 0039: the `stm32` profile for `hwio stm32`).
     [[nodiscard]] static Result<std::unique_ptr<OperationRunner>>
     open(const Context& context, const GlobalOptions& globals, const ProbeOptions& group,
          const ProbeOptions& own, std::string_view targetId, ProgressUi& ui,
-         std::optional<std::filesystem::path> nrfUtil = std::nullopt);
+         std::optional<std::filesystem::path> nrfUtil = std::nullopt,
+         const device::DeviceProfile* profile = nullptr);
 
     OperationRunner(Passkey key, const Context& context, ProgressUi& ui, std::string_view targetId);
     ~OperationRunner();
@@ -94,6 +96,7 @@ private:
 [[nodiscard]] Result<OperationOutcome>
 runOperation(const Context& context, const GlobalOptions& globals, const ProbeOptions& group,
              const ProbeOptions& own, std::string_view targetId, ProgressUi& ui,
-             const StartFn& start, std::optional<std::filesystem::path> nrfUtil = std::nullopt);
+             const StartFn& start, std::optional<std::filesystem::path> nrfUtil = std::nullopt,
+             const device::DeviceProfile* profile = nullptr);
 
 } // namespace hwio::cli

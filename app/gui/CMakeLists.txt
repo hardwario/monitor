@@ -49,6 +49,7 @@ set(HWIO_GUI_QML_FILES
     qml/flash/FlashBar.qml
     qml/flash/FlashCard.qml
     qml/flash/KindCards.qml
+    qml/flash/LrwUpdateStep.qml
     qml/flash/LteUpdateStep.qml
     qml/flash/MaintenanceSection.qml
     qml/flash/OptionsCard.qml
@@ -227,6 +228,8 @@ qt_add_qml_module(hwio_gui
         src/wizard/diagnose_runner.h
         src/wizard/flash_wizard.cpp
         src/wizard/flash_wizard.h
+        src/wizard/lrw_update_wizard.cpp
+        src/wizard/lrw_update_wizard.h
         src/wizard/lte_update_wizard.cpp
         src/wizard/lte_update_wizard.h
         src/wizard/probe_picker_step.cpp

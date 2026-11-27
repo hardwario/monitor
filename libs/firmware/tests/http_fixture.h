@@ -76,7 +76,15 @@ public:
 
     HttpFixture() {
         m_server.listen(QHostAddress::LocalHost, 0);
-        QObject::connect(&m_server, &QTcpServer::newConnection, &m_server, [this] { accept(); });
+        QObject::connect(&m_server, &QTcpServer::newConnection, &m_server,
+                         [this] { accept(m_server); });
+        // "localhost" is ::1 first on macOS: the same port on the IPv6 loopback, where there is
+        // one.
+        if (m_server.isListening() &&
+            m_server6.listen(QHostAddress::LocalHostIPv6, m_server.serverPort())) {
+            QObject::connect(&m_server6, &QTcpServer::newConnection, &m_server6,
+                             [this] { accept(m_server6); });
+        }
     }
 
     [[nodiscard]] bool listening() const { return m_server.isListening(); }
@@ -91,8 +99,8 @@ public:
     [[nodiscard]] int requests(const QString& path) const { return m_requests.value(path); }
 
 private:
-    void accept() {
-        while (QTcpSocket* socket = m_server.nextPendingConnection()) {
+    void accept(QTcpServer& server) {
+        while (QTcpSocket* socket = server.nextPendingConnection()) {
             auto buffer = std::make_shared<QByteArray>();
             QObject::connect(socket, &QTcpSocket::readyRead, socket, [this, socket, buffer] {
                 buffer->append(socket->readAll());
@@ -143,7 +151,8 @@ private:
         }
     }
 
-    QTcpServer m_server; // owns the sockets (Qt parent ownership)
+    QTcpServer m_server;  // owns the sockets (Qt parent ownership)
+    QTcpServer m_server6; // the IPv6 loopback twin (not listening without IPv6)
     QMap<QString, Response> m_responses;
     QMap<QString, int> m_requests;
 };

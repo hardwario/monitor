@@ -675,14 +675,17 @@ QString markerCancelled(std::string_view tool) {
 }
 
 QString busyText(std::string_view tool) {
-    if (tool == "flash" || tool == "flash_lte" || tool == "write_flash") {
+    if (tool == "flash" || tool == "flash_lte" || tool == "write_flash" || tool == "stm32_flash") {
         return QCoreApplication::translate("hwio::mcp", "AI: Flashing…");
     }
-    if (tool == "erase") {
+    if (tool == "erase" || tool == "stm32_erase") {
         return QCoreApplication::translate("hwio::mcp", "AI: Erasing…");
     }
     if (tool == "recover") {
         return QCoreApplication::translate("hwio::mcp", "AI: Recovering…");
+    }
+    if (tool == "stm32_unlock") {
+        return QCoreApplication::translate("hwio::mcp", "AI: Unlocking…");
     }
     if (tool == "write_memory") {
         return QCoreApplication::translate("hwio::mcp", "AI: Writing memory…");

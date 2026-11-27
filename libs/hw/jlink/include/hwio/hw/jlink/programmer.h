@@ -23,7 +23,17 @@
 //            the function name).
 //   identify FICR INFO.PART / INFO.VARIANT; when FICR cannot be read, the CTRL-AP of the expected
 //            family (a Nordic CTRL-AP IDR at its AP index first, then APPROTECTSTATUS); a Nordic
-//            CTRL-AP at another family's AP index only names that family (never "protected")
+//            CTRL-AP at another family's AP index only names that family (never "protected").
+//            STM32 (plan/features/0039, ProgrammerConfig::stm32): DBGMCU_IDCODE, the RDP byte of
+//            FLASH_OPTR, FLASH_SR and the RDP option word, then F_SIZE; each read retried up to
+//            stm32ReadAttempts times while it fails or reads 0 (Phase 0 P0.3: a running STM32L0
+//            reads 0 now and then). Readable at RDP level 1 except F_SIZE may not be (0 =
+//            unknown). No halt, no write.
+//   programRdpLevel0 (STM32 only, ADR-0276, ADR-0353): clears the FLASH_SR error flags, unlocks
+//            PECR and the option bytes, writes the RDP option word with RDP 0xAA (byte 1 kept from
+//            FLASH_OPTR, complement in bits 31:16), waits for BSY and launches the option-byte
+//            reload (the chip resets; at RDP level 1 it mass-erases flash and data EEPROM). 0xCC is
+//            never written. The caller reconnects and identifies afterwards.
 //
 // Cancellation: `stop` is checked before a download starts and between verify chunks. The
 // buffering of one download, EndDownload, EraseChip and an ERASEALL are never interrupted (a
@@ -50,6 +60,7 @@
 #include "hwio/hw/jlink/jlink_probe.h"
 #include "hwio/hw/jlink/types.h"
 
+#include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -92,9 +103,62 @@ struct ChipInfo {
     bool protectedChip = false; // CTRL-AP reports APPROTECT enabled; FICR not readable
     std::string name;           // display name ("nRF52840"), filled by the device layer
     // The family that answered (ChipFamily::name, e.g. "nRF52"): from FICR, or - when FICR cannot
-    // be read (part = 0) - the family whose CTRL-AP index holds a Nordic CTRL-AP.
+    // be read (part = 0) - the family whose CTRL-AP index holds a Nordic CTRL-AP. STM32: the
+    // Stm32Protection::family ("STM32L0").
     std::string_view family;
+    // ---- STM32 (plan/features/0039): set by an STM32 identify(), 0 otherwise ----
+    std::uint16_t devId = 0;        // DBGMCU_IDCODE bits 11:0 (0x417 = STM32L0 cat. 3)
+    std::uint16_t revId = 0;        // DBGMCU_IDCODE bits 31:16
+    std::uint16_t flashSizeKib = 0; // F_SIZE; 0 = not readable
+    int rdpLevel = 0;               // 0, 1 or 2 (protectedChip = rdpLevel >= 1)
+    std::uint32_t optionWord = 0;   // the stored RDP option word (canonical: complement in 31:16)
+    bool optionError = false;       // FLASH_SR OPTVERR: the last option-byte load failed
 };
+
+// STM32 (plan/features/0039, ADR-0279): identification addresses and the flash interface of one
+// STM32 family, data only (ADR-0032). STM32L0 values (Phase 0, ST cmsis_device_l0 /
+// stm32l0xx_hal_driver): IDCODE 0x40015800, F_SIZE 0x1FF8007C, FLASH 0x40022000 with PECR +0x04,
+// PEKEYR +0x0C, OPTKEYR +0x14, SR +0x18, OPTR +0x1C, option bytes 0x1FF80000.
+struct Stm32Protection {
+    std::string_view family;                // "STM32L0" (logs, ChipInfo::family)
+    std::uint32_t idcodeAddress = 0;        // DBGMCU_IDCODE
+    std::uint32_t flashSizeAddress = 0;     // F_SIZE (16 bit, KiB, in the low half of the word)
+    std::uint32_t flashInterface = 0;       // FLASH register base
+    std::uint32_t pecrOffset = 0;           // PECR: PELOCK, OPTLOCK, OBL_LAUNCH
+    std::uint32_t peKeyOffset = 0;          // PEKEYR
+    std::uint32_t optKeyOffset = 0;         // OPTKEYR
+    std::uint32_t srOffset = 0;             // SR: BSY, error flags (write 1 to clear)
+    std::uint32_t optrOffset = 0;           // OPTR: RDP in bits 7:0
+    std::array<std::uint32_t, 2> peKeys{};  // written to PEKEYR in order
+    std::array<std::uint32_t, 2> optKeys{}; // written to OPTKEYR in order
+    std::uint32_t peLockMask = 0;           // PECR.PELOCK
+    std::uint32_t optLockMask = 0;          // PECR.OPTLOCK
+    std::uint32_t oblLaunchMask = 0;        // PECR.OBL_LAUNCH
+    std::uint32_t busyMask = 0;             // SR.BSY
+    std::uint32_t errorMask = 0;            // SR error flags cleared before an option write
+    std::uint32_t optionErrorMask = 0;      // SR.OPTVERR
+    std::uint32_t optionBytes = 0;          // the RDP option word
+    // Where the family's data EEPROM lies (L0: 0x08080000-0x08082000), for the error text of an
+    // image with EEPROM records on a part whose EEPROM is not supported.
+    firmware::AddressRange dataEepromArea{};
+};
+
+// RDP byte values (ST: OB_RDP_LEVEL_0 / OB_RDP_LEVEL_2; anything else is level 1).
+inline constexpr std::uint8_t stm32RdpLevel0 = 0xAA;
+inline constexpr std::uint8_t stm32RdpLevel2 = 0xCC;
+// Attempts of each STM32 identification read (plan 0039 Bounds: ID read retries 3).
+inline constexpr int stm32ReadAttempts = 3;
+
+// The level of an RDP byte.
+[[nodiscard]] constexpr int stm32RdpLevelOf(std::uint8_t rdp) noexcept {
+    return rdp == stm32RdpLevel0 ? 0 : (rdp == stm32RdpLevel2 ? 2 : 1);
+}
+
+// The canonical RDP option word for level 0: `optr` byte 1 kept, RDP 0xAA, complement in 31:16.
+[[nodiscard]] constexpr std::uint32_t stm32Level0OptionWord(std::uint32_t optr) noexcept {
+    const std::uint32_t low = (optr & 0xFF00U) | stm32RdpLevel0;
+    return ((~low & 0xFFFFU) << 16U) | low;
+}
 
 // Where an MCU family keeps its FICR and its CTRL-AP (nRF52: FICR 0x10000100/0x10000104, CTRL-AP
 // index 1; nRF91: FICR 0x00FF0140/0x00FF0144, CTRL-AP index 4 - AP indexes to confirm in
@@ -119,6 +183,9 @@ struct ProgrammerTiming {
     std::chrono::milliseconds eraseAllTimeout{std::chrono::seconds(60)};
     std::chrono::milliseconds recoverTimeout{std::chrono::seconds(60)};
     std::chrono::milliseconds recoverPoll{100};
+    // STM32 option-byte write (programRdpLevel0): BSY must clear within this time.
+    std::chrono::milliseconds optionWriteTimeout{std::chrono::seconds(5)};
+    std::chrono::milliseconds optionWritePoll{10};
     std::size_t writeChunk = 4096;
     std::size_t verifyChunk = 16384;
 };
@@ -128,6 +195,9 @@ struct ProgrammerConfig {
     // by recover() and for the protection check).
     std::vector<ChipFamily> families;
     ProgrammerTiming timing;
+    // Set for an STM32 target (plan/features/0039): identify() reads the STM32 registers instead
+    // of FICR and `families` is unused.
+    std::optional<Stm32Protection> stm32 = std::nullopt;
 };
 
 // Largest readMemory() request (plan/features/0003 Bounds).
@@ -176,6 +246,10 @@ public:
     [[nodiscard]] virtual Status eraseAll() = 0;
     // CTRL-AP ERASEALL. Errors: target.recover_failed, timeout, cancelled (only before it starts).
     [[nodiscard]] virtual Status recover(std::stop_token stop) = 0;
+    // STM32 only (see the header comment). Errors: usage.invalid_argument (not an STM32 target),
+    // target.unlock_failed (locked registers, a write failed, BSY did not clear),
+    // dependency.jlink_function_missing (JLINKARM_WriteU32), cancelled (only before it starts).
+    [[nodiscard]] virtual Status programRdpLevel0(std::stop_token stop) = 0;
     // At most maxReadMemoryBytes, `size` a multiple of the width and `address` aligned to it;
     // 16/32-bit units are returned little-endian. Errors: usage.invalid_argument,
     // target.memory_access_failed (detail: address and the vendor code).
@@ -223,6 +297,7 @@ public:
                                                    std::stop_token stop) override;
     [[nodiscard]] Status eraseAll() override;
     [[nodiscard]] Status recover(std::stop_token stop) override;
+    [[nodiscard]] Status programRdpLevel0(std::stop_token stop) override;
     static constexpr std::uint8_t ctrlApIdr = 3;         // 0x0FC IDR (bank 0xF)
     static constexpr std::uint32_t idrBank = 0xFU << 4U; // DP SELECT APBANKSEL = 0xF
     [[nodiscard]] Result<std::vector<std::byte>> readMemory(std::uint32_t address, std::size_t size,
@@ -246,6 +321,11 @@ public:
     static constexpr std::uint8_t dpSelect = 2; // DP SELECT: APSEL in bits 31:24
 
 private:
+    [[nodiscard]] Result<ChipInfo> identifyStm32(const Stm32Protection& stm32);
+    // One STM32 identification read with retries (0 or a failed read is retried); nullopt when
+    // every attempt failed or read 0.
+    [[nodiscard]] std::optional<std::uint32_t> readStm32Register(std::uint32_t address,
+                                                                 std::string& tried);
     // Selects the CTRL-AP of `family` (bank 0). Returns the vendor code (< 0: error).
     [[nodiscard]] int selectCtrlAp(const ChipFamily& family);
     // nullopt when the CTRL-AP cannot be read.
@@ -263,6 +343,14 @@ private:
                                                   bool programsData, ErrorCode failure,
                                                   const firmware::ProgressFn& progress,
                                                   const std::stop_token& stop);
+    // A 32-bit STM32 write that refuses an RDP level 2 option word (ADR-0276); the vendor code.
+    [[nodiscard]] int writeStm32(std::uint32_t address, std::uint32_t value);
+    // target.unlock_failed with `detail` and the library's last message.
+    [[nodiscard]] Error stm32UnlockFailed(std::string detail);
+    // programRdpLevel0: clears the FLASH_SR error flags and unlocks PECR and the option bytes.
+    [[nodiscard]] Status unlockStm32Flash(const Stm32Protection& stm32);
+    // programRdpLevel0: waits until FLASH_SR BSY clears (optionWriteTimeout).
+    [[nodiscard]] Status awaitStm32OptionWrite(const Stm32Protection& stm32);
     [[nodiscard]] std::string libraryDetail(std::string detail);
     // dependency.jlink_function_missing when `function` is not exported (ADR-0151).
     [[nodiscard]] Status require(OptionalFunction function);

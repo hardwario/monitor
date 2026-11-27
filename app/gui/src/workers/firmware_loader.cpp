@@ -3,6 +3,7 @@
 #include "gui_log.h"
 #include "hwio/core/error.h"
 #include "hwio/core/result.h"
+#include "hwio/firmware/firmware_file.h"
 #include "hwio/firmware/firmware_image.h"
 #include "hwio/firmware/lte_input.h"
 #include "hwio/hw/jlink/library_locator.h"
@@ -48,6 +49,18 @@ std::uint64_t fileSize(const fs::path& path) {
 } // namespace
 
 Result<LoadedSource> loadFirmwareFile(const fs::path& path) {
+    if (firmware::isBinaryFile(path)) {
+        auto image = firmware::readFirmwareFile(path, 0U);
+        if (!image) {
+            return std::unexpected(std::move(image).error());
+        }
+        return LoadedSource{.sourceClass = SourceClass::Binary,
+                            .path = path,
+                            .fileBytes = fileSize(path),
+                            .image =
+                                std::make_shared<const firmware::FirmwareImage>(std::move(*image)),
+                            .bundle = nullptr};
+    }
     auto input = firmware::classifyLteInput(path);
     if (!input) {
         return std::unexpected(std::move(input).error());

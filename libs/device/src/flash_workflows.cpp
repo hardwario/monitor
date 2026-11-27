@@ -140,6 +140,29 @@ Error forTarget(Error error, const DeviceProfile& profile, const TargetProfile& 
                 QT_TRANSLATE_NOOP("hwio::device", "Recovering the %1 MCU failed."), {name});
         break;
     case ErrorCode::TargetProtected:
+        if (target.vendor == ChipVendor::Stm32) {
+            // Plan 0039 (ADR-0276): the GUI offers Unlock…; the CLI names the command.
+            setText(error, ErrorText::Message, "hwio::device",
+                    QT_TRANSLATE_NOOP("hwio::device",
+                                      "The chip is read-out protected (RDP level 1). Unlocking "
+                                      "erases the whole chip, including its data EEPROM."));
+            setText(error, ErrorText::Cause, "hwio::device",
+                    QT_TRANSLATE_NOOP(
+                        "hwio::device",
+                        "Its firmware or a programming tool set the read-out protection."));
+            if (profile.id == "stm32") {
+                setText(error, ErrorText::Suggestion, "hwio::device",
+                        QT_TRANSLATE_NOOP("hwio::device", "Unlock the chip (this erases it): `hwio "
+                                                          "stm32 unlock --chip %1`."),
+                        {toQString(target.id)});
+            } else {
+                setText(error, ErrorText::Suggestion, "hwio::device",
+                        QT_TRANSLATE_NOOP("hwio::device",
+                                          "Unlock the chip (this erases it): `hwio %1 %2 unlock`."),
+                        {toQString(profile.id), toQString(target.id)});
+            }
+            break;
+        }
         setText(error, ErrorText::Message, "hwio::device",
                 QT_TRANSLATE_NOOP("hwio::device", "The %1 MCU is read-back protected."), {name});
         setText(error, ErrorText::Suggestion, "hwio::device",
@@ -239,9 +262,20 @@ Result<jlink::ChipInfo> unreadableChip(WorkflowContext& context, jlink::ChipInfo
 
 } // namespace
 
+const ChipPart* curatedPartOf(const jlink::ChipInfo& chip) noexcept {
+    return chip.devId == 0 ? nullptr : findStm32PartByChip(chip.devId, chip.flashSizeKib);
+}
+
 const TargetProfile* targetOfChip(const DeviceProfile& profile,
                                   const jlink::ChipInfo& chip) noexcept {
     for (const TargetProfile& target : profile.targets) {
+        if (target.vendor == ChipVendor::Stm32 || chip.devId != 0) {
+            if (target.vendor == ChipVendor::Stm32 && chip.devId != 0 &&
+                findStm32Part(target, chip.devId, chip.flashSizeKib) != nullptr) {
+                return &target;
+            }
+            continue;
+        }
         const bool matches = chip.part != 0
                                  ? findPart(target, chip.part) != nullptr
                                  : !chip.family.empty() && chip.family == target.chipFamily.name;
@@ -272,6 +306,94 @@ Error otherConnectorError(const TargetProfile& console, const TargetProfile& fou
     return error;
 }
 
+namespace {
+
+// Plan 0039 (ADR-0275): the chip is not the target's part.
+Error wrongChip(const TargetProfile& target, const jlink::ChipInfo& chip) {
+    const ChipPart* found = curatedPartOf(chip);
+    const QString idText = QStringLiteral("0x%1").arg(chip.devId, 3, 16, QLatin1Char('0'));
+    const std::string foundSource = found != nullptr ? std::string(found->displayName) : "";
+    const LocalizedText foundName =
+        found != nullptr
+            ? LocalizedText{.translated =
+                                QCoreApplication::translate("hwio::device", foundSource.c_str()),
+                            .english = QString::fromStdString(foundSource)}
+            : localizedText("hwio::device", QT_TRANSLATE_NOOP("hwio::device", "an unknown chip"));
+    Error error = makeError(
+        ErrorCode::TargetWrongChip,
+        std::format("DEV_ID 0x{:03X} REV_ID 0x{:04X}, flash {} KiB; expected {}{}", chip.devId,
+                    chip.revId, chip.flashSizeKib,
+                    target.parts.empty() ? std::string_view() : target.parts.front().id,
+                    found != nullptr ? std::format("; found {}", found->id) : std::string()));
+    setText(
+        error, ErrorText::Message, "hwio::device",
+        QT_TRANSLATE_NOOP("hwio::device", "The connected chip is %1 (ID %2), not the selected %3."),
+        {foundName, idText, targetDisplayNameText(target)});
+    if (found != nullptr) {
+        setText(error, ErrorText::Suggestion, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device",
+                                  "Check that the cable is on the right connector, or "
+                                  "choose %1 (%2) as the chip."),
+                {foundName, toQString(found->id)});
+    } else {
+        setText(
+            error, ErrorText::Suggestion, "hwio::device",
+            QT_TRANSLATE_NOOP("hwio::device", "Check that the cable is on the right connector."));
+    }
+    return error;
+}
+
+// Plan 0039: identify of an STM32 target. RDP 2 always fails; RDP 1 unless `allowProtected`.
+Result<jlink::ChipInfo> identifyStm32(WorkflowContext& context, jlink::ChipInfo chip,
+                                      bool allowProtected) {
+    const DeviceProfile& profile = *context.profile;
+    const TargetProfile& target = *context.target;
+    const ChipPart* part = findStm32Part(target, chip.devId, chip.flashSizeKib);
+    if (part == nullptr) {
+        context.foundChip = chip;
+        return std::unexpected(wrongChip(target, chip));
+    }
+    chip.name = std::string(part->displayName);
+    log(context,
+        std::format("Target: {} ({}), DEV_ID 0x{:03X} REV_ID 0x{:04X}, {} KiB, RDP {}", chip.name,
+                    target.id, chip.devId, chip.revId, chip.flashSizeKib, chip.rdpLevel));
+    if (chip.rdpLevel >= 2) {
+        return std::unexpected(makeError(ErrorCode::TargetPermanentlyProtected,
+                                         std::format("{}: RDP level 2", target.id)));
+    }
+    if (chip.rdpLevel == 1 && !allowProtected) {
+        return std::unexpected(forTarget(
+            makeError(ErrorCode::TargetProtected, std::format("{}: RDP level 1", target.id)),
+            profile, target));
+    }
+    return chip;
+}
+
+// Plan 0039 (Phase 0 P0.3): after the halt of flash / erase / unlock, F_SIZE is read again when
+// the first (running) identify could not read it; a wrong size is target.wrong_chip.
+Status confirmStm32Size(WorkflowContext& context, const jlink::ChipInfo& chip) {
+    if (context.target->vendor != ChipVendor::Stm32 || chip.flashSizeKib != 0 ||
+        chip.rdpLevel != 0) {
+        return {};
+    }
+    auto halted = context.programmer->identify();
+    if (!halted) {
+        return std::unexpected(
+            forTarget(std::move(halted).error(), *context.profile, *context.target));
+    }
+    if (halted->flashSizeKib == 0) {
+        log(context, "Flash size still not readable; the DEV_ID decides");
+        return {};
+    }
+    if (findStm32Part(*context.target, halted->devId, halted->flashSizeKib) == nullptr) {
+        context.foundChip = *halted;
+        return std::unexpected(wrongChip(*context.target, *halted));
+    }
+    return {};
+}
+
+} // namespace
+
 Result<jlink::ChipInfo> identifyTarget(WorkflowContext& context, bool allowProtected) {
     const DeviceProfile& profile = *context.profile;
     const TargetProfile& target = *context.target;
@@ -279,6 +401,9 @@ Result<jlink::ChipInfo> identifyTarget(WorkflowContext& context, bool allowProte
     auto chip = context.programmer->identify();
     if (!chip) {
         return std::unexpected(forTarget(std::move(chip).error(), profile, target));
+    }
+    if (target.vendor == ChipVendor::Stm32) {
+        return identifyStm32(context, std::move(*chip), allowProtected);
     }
     if (chip->part == 0) {
         return unreadableChip(context, std::move(*chip), allowProtected);
@@ -319,6 +444,16 @@ Result<jlink::ChipInfo> runFlash(WorkflowContext& context, const FirmwareImage& 
         return std::unexpected(forTarget(std::move(halted).error(), profile, target));
     }
     context.cpuHalted = true;
+    if (Status size = confirmStm32Size(context, *chip); !size) {
+        return std::unexpected(std::move(size).error());
+    }
+    if (options.eraseAll && target.vendor == ChipVendor::Stm32) {
+        report(context, ProgramPhase::Erasing);
+        log(context, "Erasing the whole chip (flash and data EEPROM)");
+        if (Status erased = context.programmer->eraseAll(); !erased) {
+            return std::unexpected(forTarget(std::move(erased).error(), profile, target));
+        }
+    }
     std::optional<FirmwareImage> uicr;
     if (plan->uicr) {
         auto merged = mergedUicr(context, *plan->uicr);
@@ -368,7 +503,18 @@ Result<jlink::ChipInfo> runErase(WorkflowContext& context, EraseScope scope) {
     report(context, ProgramPhase::Erasing);
     context.cpuHalted = true; // the erase halts the CPU; nothing runs afterwards
     Status erased;
-    if (scope == EraseScope::Code) {
+    if (target.vendor == ChipVendor::Stm32) {
+        // Plan 0039 (Phase 0 P0.5): the STM32 erase is JLINK_EraseChip, which erases flash and
+        // data EEPROM (the nRF code-only erase writes 0xFF, which is not the STM32 erased state).
+        if (Status halted = context.programmer->reset(jlink::ResetMode::Halt); !halted) {
+            return std::unexpected(forTarget(std::move(halted).error(), profile, target));
+        }
+        if (Status size = confirmStm32Size(context, *chip); !size) {
+            return std::unexpected(std::move(size).error());
+        }
+        log(context, "Erasing the whole chip (flash and data EEPROM)");
+        erased = context.programmer->eraseAll();
+    } else if (scope == EraseScope::Code) {
         // HIL H7 (2026-11-03): on a running CHESTER the loader's erase failed at 0x0 ("Verification
         // failed", "RAMCode did not respond in time"); reset and halt first, as runFlash() does and
         // as J-Link Commander's loadbin does implicitly. eraseAll() resets itself.
@@ -454,6 +600,12 @@ Result<std::optional<jlink::ChipInfo>> runRecover(WorkflowContext& context,
                                                   const std::function<Status()>& reconnect) {
     const DeviceProfile& profile = *context.profile;
     const TargetProfile& target = *context.target;
+    if (target.vendor == ChipVendor::Stm32) {
+        Error error = makeError(ErrorCode::UsageInvalidArgument, "recover on an STM32 target");
+        setText(error, ErrorText::Message, "hwio::device",
+                QT_TRANSLATE_NOOP("hwio::device", "An STM32 chip is not recovered but unlocked."));
+        return std::unexpected(std::move(error));
+    }
     // A protected chip is what recover is for. Only the expected family's CTRL-AP is recovered
     // (its FICR or its CTRL-AP IDR answered; review R2).
     auto before = identifyTarget(context, true);
@@ -500,6 +652,85 @@ Result<std::optional<jlink::ChipInfo>> runRecover(WorkflowContext& context,
     context.cpuHalted = false;
     log(context, "Recover completed");
     return chip;
+}
+
+namespace {
+
+// ADR-0353: the stored RDP word has its complement in bits 31:16.
+bool canonicalOptionWord(std::uint32_t word) noexcept { return (word >> 16U) == (~word & 0xFFFFU); }
+
+// runUnlock: one option-word write + reload + reconnect + identify; `why` is logged.
+Result<jlink::ChipInfo> writeRdpLevel0(WorkflowContext& context,
+                                       const std::function<Status()>& reconnect,
+                                       std::string_view why) {
+    const DeviceProfile& profile = *context.profile;
+    const TargetProfile& target = *context.target;
+    const auto unlockFailed = [&](std::string detail) {
+        return std::unexpected(forTarget(
+            makeError(ErrorCode::TargetUnlockFailed, std::move(detail)), profile, target));
+    };
+    log(context, std::format("Unlock: writing RDP level 0 ({})", why));
+    context.cpuHalted = true;
+    if (Status written = context.programmer->programRdpLevel0(context.stop); !written) {
+        return std::unexpected(forTarget(std::move(written).error(), profile, target));
+    }
+    if (reconnect) {
+        if (Status connected = reconnect(); !connected) {
+            return unlockFailed("no connection after the option-byte reload: " +
+                                connected.error().detail);
+        }
+    }
+    auto after = context.programmer->identify();
+    if (!after) {
+        return unlockFailed("identify after the option-byte reload: " + after.error().detail);
+    }
+    if (after->rdpLevel != 0 || after->optionError) {
+        return unlockFailed(std::format("RDP level {} after the reload{}", after->rdpLevel,
+                                        after->optionError ? ", OPTVERR set" : ""));
+    }
+    return after;
+}
+
+} // namespace
+
+Result<jlink::ChipInfo> runUnlock(WorkflowContext& context,
+                                  const std::function<Status()>& reconnect) {
+    if (context.target->vendor != ChipVendor::Stm32) {
+        return std::unexpected(
+            makeError(ErrorCode::UsageInvalidArgument, "unlock needs an STM32 target"));
+    }
+    auto before = identifyTarget(context, true); // RDP 2 and another chip stop here
+    if (!before) {
+        return before;
+    }
+    report(context, ProgramPhase::Unlocking);
+    if (before->rdpLevel == 0 && canonicalOptionWord(before->optionWord)) {
+        log(context, "Unlock: the chip is not read-out protected; nothing to do");
+        return before;
+    }
+    auto after = writeRdpLevel0(context, reconnect,
+                                before->rdpLevel == 0 ? "non-canonical option word"
+                                                      : "RDP level 1, the chip mass-erases");
+    if (!after) {
+        return after;
+    }
+    if (!canonicalOptionWord(after->optionWord)) {
+        // ADR-0353: the regression left a non-canonical word (Phase 0: 0x015500AA); rewritten
+        // once at level 0, which erases nothing.
+        log(context,
+            std::format("Unlock: option word 0x{:08X} is not canonical", after->optionWord));
+        after = writeRdpLevel0(context, reconnect, "canonical option word");
+        if (!after) {
+            return after;
+        }
+        if (!canonicalOptionWord(after->optionWord)) {
+            log(context, std::format("WARNING: option word still 0x{:08X} (RDP level 0, usable)",
+                                     after->optionWord));
+        }
+    }
+    after->name = before->name;
+    log(context, "Unlock completed: RDP level 0");
+    return after;
 }
 
 Status runReset(WorkflowContext& context, ResetMode mode) {

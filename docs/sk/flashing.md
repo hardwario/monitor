@@ -20,11 +20,13 @@ zobrazenia](getting-started.md#guides-and-views)); na karte relácie podpory nie
 |---|---|---|
 | **Application firmware** | aplikačný MCU | súbor `.hex` alebo ID firmvéru z katalógu |
 | **LTE firmware** | LTE MCU a jeho modem | LTE firmvér HARDWARIO alebo váš vlastný `.hex` / `.zip` |
+| **LoRaWAN module** | modul Murata Type ABZ (CHESTER s LoRaWAN) | lora-modem pre CHESTER alebo váš vlastný `.hex` / `.bin` |
 
 Karta zobrazuje firmvér, ktorý je teraz v zariadení, ak ho zariadenie hlási.
 
 Karta vždy pracuje s aplikačným MCU. **LTE firmware** sa z tejto stránky nenahráva: spustí sprievodcu [aktualizáciou
-LTE firmvéru](#aktualizácia-lte-firmvéru), ktorý vám povie, kedy prepojiť kábel J-Linku.
+LTE firmvéru](#aktualizácia-lte-firmvéru), ktorý vám povie, kedy prepojiť kábel J-Linku. **LoRaWAN module** funguje
+rovnako: **Flash** otvorí sprievodcu, ktorý vám povie, kedy prepojiť kábel ([Modul LoRaWAN](#lorawan-module)).
 
 ## 2. Firmvér
 
@@ -149,6 +151,7 @@ pokračujú.
 **Erase everything…**, **Recover…** a údržba **LTE MCU** (voľba **Application MCU | LTE MCU** nad tlačidlami) sa
 zobrazia len v [režime](getting-started.md#modes) **Expert** (**Settings › General › Mode**), pretože môžu vymazať
 sériové číslo a konfiguráciu zariadenia. Na LTE MCU potrebujú J-Link na konektore LTE.
+Na CHESTER s LoRaWAN ponúka voľba aj **LoRaWAN module** ([Modul LoRaWAN](#lorawan-module)).
 
 <a id="recover"></a>
 ### Obnovenie
@@ -158,6 +161,109 @@ chybou [target.protected](troubleshooting.md#target.protected). **Recover…** (
 vymazaním MCU vrátane UICR a PIB. Na LTE MCU potom nahrá malý obraz, ktorý ponechá MCU dostupný pre ladenie. Po
 obnovení firmvér znova nahrajte. Obnovenie sa nikdy nespustí samo. Keď vás sprievodca riešením problémov pri chránenom
 MCU pošle na stránku **Flash**, **Recover…** sa tam zobrazí raz, v každom režime.
+
+<a id="lorawan-module"></a>
+## Modul LoRaWAN
+
+CHESTER s LoRaWAN má modul Murata Type ABZ (STM32L072CZ s rádiom LoRa) s vlastným programovacím konektorom
+**LoRaWAN**. Modul má vlastný firmvér, ktorý HARDWARIO Monitor nahráva cez J-Link. Modul nemá v HARDWARIO Monitor
+konzolu: jeho nastavenia LoRaWAN (kľúče, región, …) sa zadávajú príkazmi `lrw config …` v konzole MCU aplikácie.
+
+**Firmvér:** v kroku 1 zvoľte **LoRaWAN module** (modul LoRaWAN):
+
+- **lora-modem for CHESTER 1.4.1 (recommended)** (odporúčané): otvorený firmvér LoRaWAN modemu od HARDWARIO, projekt
+  [hardwario/lora-modem](https://github.com/hardwario/lora-modem), licencia BSD-3-Clause. Nie je súčasťou HARDWARIO
+  Monitor: aplikácia pri prvom použití stiahne súbor vydania z GitHubu, overí jeho kontrolný súčet SHA-256 a uloží ho
+  do vyrovnávacej pamäte.
+- **Use your own file…** (použiť vlastný súbor): súbor `.hex` alebo `.bin`; súbor `.bin` potrebuje **Start address**
+  (počiatočná adresa, predvolene `0x08000000`).
+
+Voľby **Erase the whole chip first** a **Keep data EEPROM** fungujú ako pri [čipoch STM32](#stm32-chips). Keď na karte
+**Application firmware** zvolíte súbor lora-modem, stránka ponúkne **This is LoRaWAN module firmware — switch?** (toto
+je firmvér modulu LoRaWAN — prepnúť?).
+
+**Prečo sa prepája kábel:** MCU aplikácie ovláda napájanie a reset modulu, takže modul na svojom konektore odpovedá
+len vtedy, keď je MCU aplikácie zastavený. **Flash** preto otvorí sprievodcu, podobne ako aktualizácia LTE firmvéru:
+
+1. **APP connector** (konektor APP): pripojte J-Link ku konektoru APP.
+2. **Stop the application** (zastavenie aplikácie): MCU aplikácie sa resetuje a zostane zastavený.
+3. **LoRaWAN connector** (konektor LoRaWAN): prepojte J-Link ku konektoru LoRaWAN. Sprievodca pokračuje sám, hneď ako
+   modul odpovie.
+4. **Flash** (nahratie): firmvér sa zapíše do modulu a overí sa.
+5. **APP connector**: prepojte J-Link späť; MCU aplikácie sa znova spustí a s ním aj modul.
+6. **Done** (hotovo): **LoRaWAN module flashed with lora-modem for CHESTER 1.4.1.**; konzola sa znova pripojí.
+
+Počas sprievodcu je konzola karty pozastavená (**Paused for the LoRaWAN module**). Zrušiť sa dá, kým sprievodca čaká
+na kábel. Po kroku 2 zostane MCU aplikácie zastavený, kým CHESTER neresetujete alebo nevypnete a znova nezapnete.
+
+**Modul z výroby** má pôvodný firmvér Murata a ochranu proti čítaniu (RDP úroveň 1). V kroku 4 sa potom sprievodca
+najprv opýta **Unlock the LoRaWAN module?** (odomknúť modul LoRaWAN?): **Unlock and erase** (odomknúť a vymazať)
+odstráni ochranu a modul sa celý vymaže. Pôvodný firmvér Murata v module sa odstráni; nedá sa vopred zálohovať a
+HARDWARIO Monitor ho nevie zapísať späť. Po odomknutí nahrávanie pokračuje.
+
+**Údržba:** v [režime](getting-started.md#modes) **Expert** ponúka voľba nad tlačidlami
+údržby aj **LoRaWAN module** s akciami **Erase chip…** (vymazať čip: flash pamäť aj dátovú EEPROM) a **Unlock
+(erase)…** (odomknúť a vymazať). Každá z nich spustí rovnakého sprievodcu s prepojením kábla (krok 4 je potom **Erase**
+alebo **Unlock**) a najprv sa opýta. **Reset** modulu sa neponúka: posledný krok sprievodcu znova spustí MCU aplikácie,
+a tým sa reštartuje aj modul.
+
+Na príkazovom riadku: `hwio chester lrw` ([Príkazový riadok](../en/cli.md#lrw)).
+
+<a id="stm32-chips"></a>
+## Nahrávanie firmvéru do čipov STM32
+
+HARDWARIO Monitor cez J-Link nahráva aj čipy STM32L0, napríklad riadiaci čip rozširujúcej dosky CHESTER.
+
+**Pripojenie:** prepojte piny SWD J-Linku s čipom: **SWDIO**, **SWCLK**, **GND** a **VTref** (napájacie napätie čipu,
+podľa ktorého J-Link spozná, že je doska napájaná). Doska potrebuje vlastné napájanie. Na karte **New device** vyberte
+programátor, v časti **Device** zvoľte **STM32 chip** (čip STM32), v časti **Chip** vyberte typ a stlačte **Connect**.
+
+**Chip** ponúka podporované čipy STM32L0 podľa kategórie a veľkosti flash pamäte, napríklad **STM32L0 cat. 3, 64
+KiB**; nápoveda uvádza čipy, ktoré položka pokrýva. Čipy jednej kategórie s rovnakou veľkosťou flash pamäte majú
+rovnaké ID a aplikácia ich nerozlíši, preto ich pokrýva jedna položka. Rad STM32L010 (value line) podporovaný nie je.
+Zoznam vypíše `hwio stm32 chips`.
+
+**Stránka Flash:** krok 1 má jedinú kartu **Firmware for &lt;chip&gt;** (firmvér pre čip), ktorá prijíma **.hex or .bin
+file** (súbor `.hex` alebo `.bin`). Súbor `.bin` neobsahuje adresy: zadajte jeho **Start address** (počiatočná adresa;
+predvolene `0x08000000`, začiatok flash pamäte). Možnosti:
+
+- **Erase the whole chip first** (najprv vymazať celý čip): pred zápisom vymaže flash pamäť aj dátovú EEPROM.
+  Predvolene vypnuté; bežné nahrávanie vymaže len sektory, do ktorých zapisuje.
+- **Keep data EEPROM** (zachovať dátovú EEPROM, predvolene zapnuté): záznamy dátovej EEPROM zo súboru sa nezapíšu.
+  Vypnite ju, keď má firmvér dátovú EEPROM zmeniť.
+- **Halt the CPU after flashing**.
+
+Pred zápisom HARDWARIO Monitor prečíta ID čipu a veľkosť flash pamäte. Keď je pripojený iný čip, než aký ste zvolili,
+nahrávanie skončí chybou [target.wrong_chip](troubleshooting.md#target.wrong_chip); ak je nájdený čip v zozname,
+tlačidlo **Use &lt;found chip&gt;** (použiť nájdený čip) na neho kartu prepne.
+
+**Ochrana proti čítaniu (RDP):** na úrovni 1 J-Link nemôže flash pamäť čítať ani zapisovať a nahrávanie skončí chybou
+[target.protected](troubleshooting.md#target.protected) s tlačidlom **Unlock…** (odomknúť). Odomknutie ochranu
+odstráni a čip sa potom celý vymaže vrátane dátovej EEPROM. To sa nedá vrátiť späť a firmvér chráneného čipu sa nedá
+vopred zálohovať. Po odomknutí spustite nahrávanie znova. Úroveň 2 je trvalá: čip sa už nedá preprogramovať
+([target.permanently_protected](troubleshooting.md#target.permanently_protected)).
+
+Časť **Maintenance — &lt;chip&gt;** ponúka **Reset**, **Reset and halt**, **Erase chip…** (vymazať čip: flash pamäť aj
+dátovú EEPROM) a **Unlock (erase)…** (odomknúť a vymazať); posledné dve akcie sa najprv opýtajú. Stránka **Console**
+karty uvádza, že čip v HARDWARIO Monitor nemá konzolu.
+
+### CHESTER-S1 (Clime IAQ)
+
+Riadiaci čip druhej dosky CHESTER Clime IAQ (CHESTER-S1) je **STM32L0 cat. 3, 64 KiB**. HARDWARIO preň zatiaľ nemá
+pripravený firmvér a senzory bez jeho firmvéru nefungujú: **pred nahrávaním alebo vymazaním ho zálohujte**.
+`hwio stm32 info --chip stm32l0-cat3-64k` ukáže úroveň ochrany proti čítaniu; pri RDP 0 uložte flash pamäť a dátovú
+EEPROM pomocou J-Link Commandera (`JLinkExe`, vo Windows `JLink.exe`):
+
+```text
+JLinkExe -device STM32L053R8 -if SWD -speed 4000 -autoconnect 1
+J-Link> halt
+J-Link> savebin s1-flash.bin 0x08000000 0x10000
+J-Link> savebin s1-eeprom.bin 0x08080000 0x800
+J-Link> exit
+```
+
+Obnovenie: `hwio stm32 flash --chip stm32l0-cat3-64k s1-flash.bin`, potom
+`hwio stm32 flash --chip stm32l0-cat3-64k --address 0x08080000 --allow-eeprom s1-eeprom.bin`.
 
 ## Príkazový riadok
 
@@ -170,6 +276,8 @@ hwio chester lte flash mfw_nrf91x1_2.0.2.zip              # a modem firmware zip
 hwio chester lte flash --guided                           # the guided LTE update (as in the app)
 hwio chester app erase --all
 hwio chester app recover
+hwio chester lrw flash                                    # lora-modem for CHESTER (the LoRaWAN module, guided)
+hwio stm32 flash --chip stm32l0-cat3-64k firmware.hex     # an STM32 chip (hwio stm32 chips)
 ```
 
 Pozrite si [Príkazový riadok](../en/cli.md#flashing).

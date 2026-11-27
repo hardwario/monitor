@@ -1,7 +1,8 @@
 // The Flash page of a device tab (plan/features/0006-m3-flash-settings.md; ADR-0049, ADR-0055):
 // header with "Guide me" (flash wizard, shown only when it is registered, 0010), then 1 kind cards,
 // 2 firmware file, 3 options (application firmware; plan 0033: for LTE firmware a text and
-// [Update LTE firmware…] instead), the maintenance section and the sticky Flash bar. While an operation
+// [Update LTE firmware…] instead; plan 0040: the LoRaWAN module card's Flash opens the LoRaWAN module
+// wizard), the maintenance section and the sticky Flash bar. While an operation
 // runs the cards are replaced by the progress card; afterwards the result card is shown. Files can
 // be dropped anywhere on the page. Gets `tab` and `vm` from the PageHost (page contract, 0004).
 pragma ComponentBehavior: Bound
@@ -159,14 +160,20 @@ Item {
                             SourceCard {
                                 Layout.fillWidth: true
                                 visible: page.model.kind === FirmwareSourceViewModel.AppFirmware
+                                         || page.model.kind === FirmwareSourceViewModel.Stm32Firmware
+                                         || page.model.kind === FirmwareSourceViewModel.LrwFirmware
                                 source: page.model.source
+                                // Plan 0040: the cabling note of the LoRaWAN module (always shown).
+                                cableNote: page.model.kind === FirmwareSourceViewModel.LrwFirmware ? page.model.lrwCableText : ""
                                 onBrowseRequested: page.browse()
                             }
 
                             OptionsCard {
                                 Layout.fillWidth: true
-                                visible: page.model.kind === FirmwareSourceViewModel.AppFirmware
-                                         && (page.model.haltAvailable || page.model.source.hasUicr)
+                                visible: (page.model.kind === FirmwareSourceViewModel.AppFirmware
+                                          && (page.model.haltAvailable || page.model.source.hasUicr))
+                                         || page.model.kind === FirmwareSourceViewModel.Stm32Firmware
+                                         || page.model.kind === FirmwareSourceViewModel.LrwFirmware
                                 vm: page.model
                             }
 
@@ -227,7 +234,9 @@ Item {
         objectName: "flashDropArea"
         anchors.fill: parent
         enabled: !page.running && !page.showResult && page.model !== null
-                 && page.model.kind === FirmwareSourceViewModel.AppFirmware
+                 && (page.model.kind === FirmwareSourceViewModel.AppFirmware
+                     || page.model.kind === FirmwareSourceViewModel.Stm32Firmware
+                     || page.model.kind === FirmwareSourceViewModel.LrwFirmware)
         onDropped: drop => page.model.source.loadFile(drop.urls[0])
     }
 

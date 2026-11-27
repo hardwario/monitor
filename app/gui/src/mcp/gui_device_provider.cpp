@@ -532,7 +532,7 @@ bool GuiDeviceProvider::configureProbeTab(DeviceTabViewModel& tab, const QString
         if (const device::DeviceProfile* profile =
                 device::ProfileRegistry::find(toStdString(profileId));
             profile != nullptr) {
-            target = toQString(device::consoleTargetId(*profile));
+            target = toQString(device::tabTargetId(*profile, toStdString(target)));
         }
     }
     return tab.configure(profileId, target, serial);

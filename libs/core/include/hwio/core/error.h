@@ -130,6 +130,11 @@ enum class ErrorCode : std::uint8_t {
     TargetOtherConnector,
     // rc.3 HIL H5 (plan/features/0033-rc2-feedback.md, ADR-0273)
     TargetResetDuringUpdate,
+    // rc.4 STM32 flashing (plan/features/0039-stm32-flashing.md, ADR-0275, ADR-0276, ADR-0280)
+    TargetWrongChip,
+    TargetPermanentlyProtected,
+    TargetUnlockFailed,
+    FirmwareBinAddressRequired,
     // Remote support session (plan/features/0044-remote-support-session.md, ADR-0334..0336)
     RemoteRelayUnreachable,
     RemoteCodeInvalid,
@@ -161,6 +166,7 @@ enum class WizardId : std::uint8_t {
     Troubleshooting,
     BlePairing,
     LteUpdate, // plan 0033 (ADR-0234): the guided LTE firmware update
+    LrwUpdate, // plan 0040 (ADR-0352): the guided LoRaWAN module operations (GUI)
 };
 
 struct ErrorInfo {
@@ -431,6 +437,18 @@ inline constexpr std::array errorTable{
     ErrorInfo{.code = ErrorCode::TargetResetDuringUpdate,
               .id = "target.reset_during_update",
               .category = ErrorCategory::Target},
+    ErrorInfo{.code = ErrorCode::TargetWrongChip,
+              .id = "target.wrong_chip",
+              .category = ErrorCategory::Target},
+    ErrorInfo{.code = ErrorCode::TargetPermanentlyProtected,
+              .id = "target.permanently_protected",
+              .category = ErrorCategory::Target},
+    ErrorInfo{.code = ErrorCode::TargetUnlockFailed,
+              .id = "target.unlock_failed",
+              .category = ErrorCategory::Target},
+    ErrorInfo{.code = ErrorCode::FirmwareBinAddressRequired,
+              .id = "firmware.bin_address_required",
+              .category = ErrorCategory::Firmware},
     ErrorInfo{.code = ErrorCode::RemoteRelayUnreachable,
               .id = "remote.relay_unreachable",
               .category = ErrorCategory::Network},

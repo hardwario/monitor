@@ -85,9 +85,10 @@ Kódy chýb: [`target.rtt_not_found`](#target.rtt_not_found), [`target.rtt_buffe
 - Skontrolujte káble a napájanie a potom nahrajte firmvér znova.
 - Ak overenie opakovane zlyháva, nastavte nižšiu rýchlosť J-Linku.
 - Ak je MCU chránený proti spätnému čítaniu, obnovte ho. Obnovenie vymaže celý MCU vrátane UICR a bloku informácií o produkte (Product Information Block). Pozrite si [Obnovenie](flashing.md#obnovenie).
+- Pri čipe STM32: ak je čip chránený proti čítaniu (RDP úroveň 1), odomknite ho; odomknutie vymaže celý čip vrátane dátovej EEPROM. Skontrolujte, či ste zvolili správny čip. Pozrite si [Nahrávanie firmvéru do čipov STM32](flashing.md#stm32-chips).
 - Ak firmvér zapisuje aj UICR, povoľte to zámerne: **Allow writing UICR** na stránke **Flash** alebo `--allow-uicr` v CLI. Pozrite si [UICR a blok informácií o produkte](flashing.md#uicr-a-blok-informácií-o-produkte).
 
-Kódy chýb: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed).
+Kódy chýb: [`target.protected`](#target.protected), [`target.program_failed`](#target.program_failed), [`firmware.verify_failed`](#firmware.verify_failed), [`firmware.uicr_in_image`](#firmware.uicr_in_image), [`firmware.out_of_range`](#firmware.out_of_range), [`target.recover_failed`](#target.recover_failed), [`target.wrong_chip`](#target.wrong_chip), [`target.permanently_protected`](#target.permanently_protected), [`target.unlock_failed`](#target.unlock_failed), [`firmware.bin_address_required`](#firmware.bin_address_required).
 
 <a id="the-j-link-is-on-the-lte-connector"></a>
 ### J-Link je na konektore LTE
@@ -515,6 +516,8 @@ nRF Util nahlásil LOW_VOLTAGE pri programovaní firmvéru modemu ("Failed to co
 
 Obnovenie odstráni ochranu, ale úplne vymaže MCU vrátane bloku informácií o produkte (Product Information Block). Pozrite si [Obnovenie](flashing.md#obnovenie). Pre konkrétny MCU odporúčanie znie "Run `hwio <profile> <target> recover` (erases the MCU)."; v desktopovej aplikácii použite **Recover…** v časti **Maintenance** na stránke **Flash** (zobrazí sa v režime Expert, **Settings › General › Mode**, alebo raz, keď vás tam pošle sprievodca riešením problémov).
 
+Pri čipe STM32 (RDP úroveň 1) správa znie "The chip is read-out protected (RDP level 1). Unlocking erases the whole chip, including its data EEPROM." a odporúčanie "Unlock the chip (this erases it): `hwio stm32 unlock --chip <chip>`." V desktopovej aplikácii stlačte **Unlock…** v chybe alebo **Unlock (erase)…** v časti **Maintenance**. Firmvér v čipe sa stratí a vopred sa nedá zálohovať. Pozrite si [Nahrávanie firmvéru do čipov STM32](flashing.md#stm32-chips).
+
 <a id="target.program_failed"></a>
 #### `target.program_failed`
 
@@ -665,6 +668,36 @@ Z príkazov `mem read`, `mem write` a z MCP servera (`hwio mcp`). Príčina mô�
 
 Z príkazov `mem read`, `mem write` a z MCP servera (`hwio mcp`).
 
+<a id="target.wrong_chip"></a>
+#### `target.wrong_chip`
+
+**The connected chip is not the selected one.**
+
+- **Probably:** The probe is connected to another chip, or a different chip was chosen.
+- **What to do:** Check that the cable is on the right connector, or choose the found chip.
+
+Čip STM32: jeho ID alebo veľkosť flash pamäte nezodpovedá zvolenému čipu. Správa uvádza nájdený čip, napríklad "The connected chip is `<found>` (ID `<0x447>`), not the selected `<chip>`.", a odporúčanie uvádza jeho ID pre `--chip`. Keď je nájdený čip v zozname, desktopová aplikácia ponúkne **Use &lt;found chip&gt;**, čo prepne čip karty. Pozrite si [Nahrávanie firmvéru do čipov STM32](flashing.md#stm32-chips).
+
+<a id="target.permanently_protected"></a>
+#### `target.permanently_protected`
+
+**This chip is permanently locked (RDP level 2) and cannot be reprogrammed.**
+
+- **Probably:** Its read-out protection was set to level 2, which cannot be undone.
+- **What to do:** Replace the chip or the module.
+
+RDP úroveň 2 čipu STM32 natrvalo vypne ladiaci prístup; nemôže ju odstrániť HARDWARIO Monitor ani žiadny iný nástroj.
+
+<a id="target.unlock_failed"></a>
+#### `target.unlock_failed`
+
+**Unlocking the chip failed.**
+
+- **Probably:** The read-out protection was not removed in time, or the connection was lost.
+- **What to do:** Power-cycle the board, check the connection and unlock again.
+
+Odomknutie čaká až 60 s, kým sa čip vymaže a ozve sa s RDP úrovňou 0. Použite **Unlock (erase)…** v časti **Maintenance** na stránke **Flash** alebo `hwio stm32 unlock`. Pozrite si [Nahrávanie firmvéru do čipov STM32](flashing.md#stm32-chips).
+
 <a id="category-firmware"></a>
 ### Firmvér (návratový kód 7)
 
@@ -755,6 +788,16 @@ Firmvér LTE modemu zapisuje nRF Util; jeho výstup je v **Details**. Pozrite si
 - **What to do:** Try again; if it repeats, report it to HARDWARIO.
 
 Stiahnutý súbor nezodpovedal kontrolnému súčtu z katalógu, preto sa nepoužil. Desktopová aplikácia môže zobraziť "The downloaded file is damaged. Try again."
+
+<a id="firmware.bin_address_required"></a>
+#### `firmware.bin_address_required`
+
+**A start address is needed for this .bin file.**
+
+- **Probably:** A .bin file contains only bytes, not where they belong.
+- **What to do:** Give the start address (for example 0x08000000).
+
+V desktopovej aplikácii zadajte **Start address** na karte firmvéru; v CLI použite `--address` (`hwio stm32 flash` predvolene používa začiatok flash pamäte, `0x08000000`); cez MCP argument `address`.
 
 <a id="category-network"></a>
 ### Sieť (návratový kód 8)

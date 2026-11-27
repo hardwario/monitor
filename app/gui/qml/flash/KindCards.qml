@@ -1,5 +1,6 @@
 // Flash step 1 (ADR-0055; amended by 0021, ADR-0174): "What do you want to flash?" - two radio
-// cards (application firmware, LTE firmware incl. the modem), stacked below 1000 px window width;
+// cards (application firmware, LTE firmware incl. the modem; plan 0040: a third, LoRaWAN module,
+// where the device has it), stacked below 1000 px window width;
 // prerequisite problems (nRF Util) appear inline below the cards (plan 0033: no connector warning,
 // the LTE kind starts the LTE update wizard).
 pragma ComponentBehavior: Bound
@@ -19,7 +20,7 @@ FlashCard {
 
     GridLayout {
         Layout.fillWidth: true
-        columns: AppViewModel.windowWidth < 1000 ? 1 : 2
+        columns: AppViewModel.windowWidth < 1000 ? 1 : (card.vm && card.vm.kinds.length > 2 ? 3 : 2)
         columnSpacing: Theme.spacingS
         rowSpacing: Theme.spacingS
         Accessible.role: Accessible.Grouping
