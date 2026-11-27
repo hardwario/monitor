@@ -1,6 +1,6 @@
 # ADR-0232 — Symbol archives are named `debug-symbols` and stay on the release
 
-- **Status:** Accepted (amends ADR-0125: the name of the symbol archives)
+- **Status:** Superseded by ADR-0370 (symbols are no longer release assets; the archive names stay)
 - **Date:** 2026-11-04
 - **Decided by:** Matej Strnad (rc.2 feedback)
 

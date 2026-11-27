@@ -2,7 +2,7 @@
 
 - **Status:** Accepted; the job layout (signing inside the build jobs) superseded by ADR-0224; the symbol
   archive name amended by ADR-0232 (`-debug-symbols-<os>.zip`); the generated notes superseded by ADR-0239
-  (notes from `packaging/release-notes/<tag>.md`)
+  (notes from `packaging/release-notes/<tag>.md`); symbol archives taken off the release by ADR-0370
 - **Date:** 2026-10-19
 - **Decided by:** Matej Strnad (M7 planning session)
 
